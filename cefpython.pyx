@@ -1,4 +1,6 @@
-# CURRENTLY there is NO REAL API, just a single main() function exposed.
+# Copyright (c) 2012 CefPython Authors. All rights reserved.
+# License: New BSD License.
+# Website: http://code.google.com/p/cefpython/
 
 import os
 import sys
@@ -10,9 +12,12 @@ import cython
 
 from libcpp cimport bool
 from libc.stdlib cimport malloc, free
+from libcpp.map cimport map
 
-cdef CefRefPtr[CefBrowser] browser
 __debug = False
+
+# browserID == windowID
+cdef map[int, cefrefptr_cefbrowser_t] __browsers = {} # windowID(int): browser
 
 
 def GetLastError():
@@ -31,13 +36,13 @@ def Initialize(settings):
 	cdef CefRefPtr[CefApp] cefapp
 
 	for key in settings:
-		# strings: CefString(&browserDefaults.default_encoding).FromASCII("UTF-8");		
+		# Setting string: CefString(&browserDefaults.default_encoding).FromASCII("UTF-8");		
 		if type(settings[key]) is int or type(settings[key]) is long:
 			cefsettings[key] = <int>settings[key]
 		elif type(settings[key]) is bool:
 			cefsettings[key] = <bool>settings[key]
 		elif type(settings[key]) is string:
-			cdef CefString cefstring = new CefString(&cefsettings[key])
+			cdef CefString cefstring = new CefString(cefsettings[key][0])
 			cefstring.FromASCII(<char*>settings[key])
 		else:
 			raise Exception("Invalid type in settings dict, key: %s" % key)
@@ -56,9 +61,94 @@ def Initialize(settings):
 	else: return False
 
 
-def CreateBrowser(windowID, browserSettings):
+def CreateBrowser(windowID, browserSettings, url):
 	
-	pass
+	if __debug: print "cefpython.CreateBrowser()"
+	classname = cefwindow.GetWindowClassname(windowID)
+	cdef HWND hwnd = FindWindowA(classname, NULL)
+	if __debug:
+		if hwnd == NULL: print "hwnd: NULL"
+		else: print "hwnd: OK"
+		print "GetLastError(): %s" % GetLastError()
+
+	cdef CefWindowInfo info
+	cdef CefBrowserSettings browserSettings
+
+	if __debug: print "win32gui.GetClientRect(windowID)"
+	rect1 = win32gui.GetClientRect(windowID)
+	if __debug: print "GetLastError(): %s" % GetLastError()
+
+	cdef RECT rect2
+	rect2.left = <int>rect1[0]
+	rect2.top = <int>rect1[1]
+	rect2.right = <int>rect1[2]
+	rect2.bottom = <int>rect1[3]
+
+	if __debug: print "CefWindowInfo.SetAsChild(hwnd, rect2)"
+	info.SetAsChild(hwnd2, rect2)
+	if __debug: print "GetLastError(): %s" % GetLastError()
+
+	if __debug:
+		print "CefWindowInfo:"
+		print "m_x(left): %s" % info.m_x
+		print "m_y(top): %s" % info.m_y
+		print "m_nWidth: %s" % info.m_nWidth
+		print "m_nHeight: %s" % info.m_nHeight
+		print ""
+
+	if __debug: print "Creating cefurl: CefString().FromASCII(<char*>url)"
+	cdef CefString *cefurl = new CefString()
+	cefurl.FromASCII(<char*>url)
+
+	if __debug:
+		print "Converting back cefurl to ascii:"
+		cdef wchar_t* urlwide = <wchar_t*> cefurl.c_str()
+		cdef int urlascii_size = WideCharToMultiByte(CP_UTF8, 0, urlwide, -1, NULL, 0, NULL, NULL)
+		print "urlascii_size: %s" % urlascii_size
+		cdef char* urlascii = <char*>malloc(urlascii_size*sizeof(char))
+		WideCharToMultiByte(CP_UTF8, 0, urlwide, -1, urlascii, urlascii_size, NULL, NULL)
+		print "urlascii: %s" % urlascii
+		free(urlascii)
+		print "GetLastError(): %s" % GetLastError()
+
+	if __debug:
+		print ""
+		print "CefCurrentlyOn(UI=0): %s" % <bool>CefCurrentlyOn(<CefThreadId>0)
+		print "CefCurrentlyOn(IO=1): %s" % <bool>CefCurrentlyOn(<CefThreadId>1)
+		print "CefCurrentlyOn(FILE=2): %s" % <bool>CefCurrentlyOn(<CefThreadId>2)
+		print ""
+
+	# <...?> means to throw an error if the cast is not allowed
+	cdef CefRefPtr[CefClient2] cefclient2 = <cefrefptr_cefclient2_t?>new CefClient2()
+	if __debug: print "CefClient2 instantiated"
+
+	# Async createbrowser:
+	# print "CreateBrowser: %s" % <bool>CreateBrowser(info, <cefrefptr_cefclient_t>cefclient2, cefurl, browserSettings)
+
+	cdef CefRefPtr[CefBrowser] browser = CreateBrowserSync(info, <cefrefptr_cefclient_t?>cefclient2, cefurl[0], browserSettings)
+
+	if <void*>browser == NULL: 
+		if __debug: print "CreateBrowserSync(): NULL"
+		if __debug: print "GetLastError(): %s" % GetLastError()
+		return None
+	else: 
+		if __debug: print "CreateBrowserSync(): OK"
+
+	browserID = windowID
+	__browsers[<int>browserID] = browser
+
+	return browserID
+
+
+def CloseBrowser(browserID):
+	
+	cdef CefRefPtr[CefBrowser] browser = __browsers[<int>browserID]
+	if <void*>browser != NULL:
+		if __debug: print "CloseBrowser(): browser != NULL"
+		if __debug: print "CefBrowser.ParentWindowWillClose()"		
+		(<CefBrowser*>(browser.get())).ParentWindowWillClose()
+		if __debug: print "CefBrowser.CloseBrowser()"
+		(<CefBrowser*>(browser.get())).CloseBrowser()	
 
 
 def MessageLoop():
@@ -75,103 +165,19 @@ def Shutdown():
 	if __debug: print "GetLastError(): %s" % GetLastError()
 
 
-def wm_create(hwnd):
-
-	print "wm_create\n"
-
-	# real HWND, "hwnd" passed to wm_create() is an "int"
-	cdef HWND hwnd2 = FindWindowA("testclass", NULL)
-
-	if hwnd2 == NULL: print "hwnd2: NULL"
-	else: print "hwnd2: OK"
-	print "lasterror: %s" % cefwindow.lasterror()
-
-	cdef CefWindowInfo info
-	cdef CefBrowserSettings browserSettings
-
-	print "win32gui.GetClientRect"
-	rect1 = win32gui.GetClientRect(hwnd)
-	print "lasterror: %s" % cefwindow.lasterror()
-
-	cdef RECT rect2
-	rect2.left = <int>rect1[0]
-	rect2.top = <int>rect1[1]
-	rect2.right = <int>rect1[2]
-	rect2.bottom = <int>rect1[3]
-
-	print "CefWindowInfo.SetAsChild(hwnd2, rect2)"
-	info.SetAsChild(hwnd2, rect2)
-	print "lasterror: %s" % cefwindow.lasterror()
-
-	print "CefWindowInfo:"
-	print "m_x(left): %s" % info.m_x
-	print "m_y(top): %s" % info.m_y
-	print "m_nWidth: %s" % info.m_nWidth
-	print "m_nHeight: %s" % info.m_nHeight
-	print ""
-
-	print "Creating url3 - CefString().FromASCII"
-	cdef CefString *url3 = new CefString()
-	htmlfile = "%s/example.html" % os.getcwd()
-	url3.FromASCII(<char*>htmlfile)
-
-	print "Converting back url3(CefString) to ascii:"
-	cdef wchar_t* urlwide = <wchar_t*> url3.c_str()
-	print "converted to: urlwide"
-	cdef int urlascii_size = WideCharToMultiByte(CP_UTF8, 0, urlwide, -1, NULL, 0, NULL, NULL)
-	print "urlascii_size: %s" % urlascii_size
-	cdef char* urlascii = <char*>malloc(urlascii_size*sizeof(char))
-	WideCharToMultiByte(CP_UTF8, 0, urlwide, -1, urlascii, urlascii_size, NULL, NULL)
-	print "urlascii: %s" % urlascii
-	#free(urlascii)
-	print "lasterror: %s" % cefwindow.lasterror()
-
-	print ""
-	print "CefCurrentlyOn(UI): %s" % <bool>CefCurrentlyOn(<CefThreadId>0)
-	print "CefCurrentlyOn(IO): %s" % <bool>CefCurrentlyOn(<CefThreadId>1)
-	print "CefCurrentlyOn(FILE): %s" % <bool>CefCurrentlyOn(<CefThreadId>2)
-	print ""
-
-	cdef CefRefPtr[CefClient2] cefclient2 = <cefrefptr_cefclient2_t?>new CefClient2() # <...?> means to throw an error if the cast is not allowed
-	print "CefClient2 instantiated"
-
-	#print "CreateBrowser: %s" % <bool>CreateBrowser(info, <cefrefptr_cefclient_t>cefclient2, url3, browserSettings)
-
-	global browser
-	browser = CreateBrowserSync(info, <cefrefptr_cefclient_t?>cefclient2, url3[0], browserSettings)
-
-	if <void*>browser == NULL: print "CreateBrowserSync: NULL"
-	else: print "CreateBrowserSync: OK"
-	print "lasterror: %s" % cefwindow.lasterror()
-
-	return 0
-
-
-def CloseBrowser():
-	pass
-
-
 # Note: pywin32 does not send WM_CREATE message.
-
-def WM_CLOSE(hwnd, msg, wparam, lparam):
-	global browser
-	if <void*>browser != NULL:
-		print "wm_close: browser != NULL"
-		print "browser.ParentWindowWillClose()"
-		(<CefBrowser*>(browser.get())).ParentWindowWillClose()
-		(<CefBrowser*>(browser.get())).CloseBrowser()
-	win32gui.PostQuitMessage(0)
-	return 0
-
 
 def WM_PAINT(hwnd, msg, wparam, lparam):
 	pass
 
+
 def WM_SETFOCUS(hwnd, msg, wparam, lparam):
 	pass
 
+
 def WM_SIZE(hwnd, msg, wparam, lparam):
 	pass
+
 
 def WM_ERASEBKGND(hwnd, msg, wparam, lparam):
 	pass

@@ -1,7 +1,12 @@
+# Copyright (c) 2012 CefPython Authors. All rights reserved.
+# License: New BSD License.
+# Website: http://code.google.com/p/cefpython/
+
 import win32gui
 import win32con
 import win32api
 import time
+import math
 
 __debug = False
 
@@ -11,7 +16,8 @@ __debug = False
 
 __windows = {} # windowID(int): classname
 
-def CreateWindow(title, classname, width, height, x=None, y=None, wndproc=None):	
+
+def CreateWindow(title, classname, width, height, xpos=None, ypos=None, wndproc=None):	
 
 	for key in __windows:
 		if __windows[key] == classname:
@@ -19,10 +25,7 @@ def CreateWindow(title, classname, width, height, x=None, y=None, wndproc=None):
 				"Each created window must have an unique classname." % classname)			
 
 	if not wndproc:
-		wndproc = {
-			win32con.WM_CLOSE: WM_CLOSE,
-			win32con.WM_DESTROY: WM_DESTROY
-		}
+		wndproc = {win32con.WM_CLOSE: WM_CLOSE}
 
 	wndclass = win32gui.WNDCLASS()
 	wndclass.hInstance = win32api.GetModuleHandle(None)
@@ -38,9 +41,20 @@ def CreateWindow(title, classname, width, height, x=None, y=None, wndproc=None):
 		print "win32gui.RegisterClass(wndclass)"
 		print "GetLastError(): %s" % GetLastError()
 
+	if xpos is None or ypos is None:
+		# Center window on the screen.
+		if __debug:
+			print "Centering window on the screen."
+		screenx = win32api.GetSystemMetrics(win32con.SM_CXSCREEN)
+		screeny = win32api.GetSystemMetrics(win32con.SM_CYSCREEN)
+		xpos = int(math.floor((screenx - width) / 2))
+		ypos = int(math.floor((screeny - height) / 2))
+		if xpos < 0: xpos = 0
+		if ypos < 0: ypos = 0
+
 	windowID = win32gui.CreateWindow(classname, title,
 			win32con.WS_OVERLAPPEDWINDOW | win32con.WS_CLIPCHILDREN | win32con.WS_VISIBLE,
-			200, 200, 600, 400, # xpos, ypos, width, height
+			xpos, ypos, width, height, # xpos, ypos, width, height
 			0, 0, wndclass.hInstance, None)
 	__windows[windowID] = classname
 	
@@ -49,31 +63,42 @@ def CreateWindow(title, classname, width, height, x=None, y=None, wndproc=None):
 
 	return windowID
 
+
+def DestroyWindow(windowID):
+
+	win32gui.DestroyWindow(windowID)
+	classname = GetWindowClassname(windowID)
+	win32gui.UnregisterClass(classname, None)
+	del __windows[windowID] # Let window with this classname be created again.
+
+
 def GetWindowClassname(windowID):
+
 	for key in __windows:
 		if key == windowID:
 			return __windows[key]
 
 
-def WM_CLOSE(hwnd, msg, wparam, lparam):	
-	win32gui.DestroyWindow(hwnd)
-
-
-def WM_DESTROY(hwnd, msg, wparam, lparam):	
+def WM_CLOSE(windowID, msg, wparam, lparam):
+	
+	DestroyWindow(windowID)
 	win32gui.PostQuitMessage(0)
 
 
 def GetLastError():
+	
 	code = win32api.GetLastError()
 	return "(%d) %s" % (code, win32api.FormatMessage(code))
 
 
 def MessageLoop(classname):
+	
 	while win32gui.PumpWaitingMessages() == 0:
 		time.sleep(0.001)
-	win32gui.UnregisterClass(classname, None)
 
 
 if __name__ == "__main__":
-	hwnd = CreateWindow("Test window", "testwindow")
+	
+	__debug = True
+	hwnd = CreateWindow("Test window", "testwindow", 800, 600)
 	MessageLoop("testwindow")
