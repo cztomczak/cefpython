@@ -1,34 +1,40 @@
+# Copyright (c) 2012 CefPython Authors. All rights reserved.
+# License: New BSD License.
+# Website: http://code.google.com/p/cefpython/
+
 import cefpython # cefpython.pyd
 import cefwindow
 import win32con # pywin32 extension
 import win32gui
+import os
 
 
-def QuitApplication(hwnd, msg, wparam, lparam):
+def QuitApplication(windowID, msg, wparam, lparam):
 	
-	browser = cefpython.GetBrowserByHwnd(hwnd)
-	cefpython.CloseBrowser(browser)
+	browserID = windowID # yes, they are the same!
+	cefpython.CloseBrowser(browserID)
+	cefwindow.DestroyWindow(windowID)
 	win32gui.PostQuitMessage(0)
 
 
 def CefExample():
+
+	# Programming API:
+	# http://code.google.com/p/cefpython/wiki/API
 	
-	# Whether to print debug output to console.
-	cefwindow.__debug = True
+	cefwindow.__debug = True # Whether to print debug output to console.
 	cefpython.__debug = True
 
 	appSettings = {} # See: http://code.google.com/p/cefpython/wiki/AppSettings
-	appSettings["multi_threaded_message_loop"] = False # The UI thread will be the same as the main application thread.
-
+	appSettings["multi_threaded_message_loop"] = False
 	cefpython.Initialize(appSettings)
 
-	# 5th and 6th arguments to CreateWindow() are x/y position, 
-	# if you do not provide them the window will be centered on the screen.
 	wndproc = {win32con.WM_CLOSE: QuitApplication}
 	windowID = cefwindow.CreateWindow("CefExample", "cefexample", 800, 600, None, None, wndproc)
 
 	browserSettings = {} # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
-	browser = cefpython.CreateBrowser(windowID, browserSettings)
+	url = "%s/cefexample.html" % os.getcwd()
+	browserID = cefpython.CreateBrowser(windowID, browserSettings, url)
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
@@ -85,4 +91,5 @@ def LoadContentFromEncryptedZip():
 
 
 if __name__ == "__main__":
+	
 	CefExample()

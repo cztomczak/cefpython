@@ -3,11 +3,11 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
 ext_modules = [Extension(
-	"cefapi",
-	["cefapi.pyx"],
+	"cefpython",
+	["cefpython.pyx"],
 	language='c++',
-	include_dirs=[r'./../'],
-	library_dirs=[r'./', 'd:/winsdk7/Lib/'],
+	include_dirs=[r'./../cefexample/'],
+	library_dirs=[r'./', '"c:/Program Files/Microsoft SDKs/Windows/v7.1/Lib/'],
 	libraries=['libcef', 'libcef_dll_wrapper', 'User32'],
 	extra_compile_args=['/EHsc'],
 	extra_link_args=['/NODEFAULTLIB:libcmt']
@@ -15,7 +15,7 @@ ext_modules = [Extension(
 )]
 
 setup(
-	name = 'cefapi',
+	name = 'cefpython',
 	cmdclass = {'build_ext': build_ext},
 	ext_modules = ext_modules
 )
