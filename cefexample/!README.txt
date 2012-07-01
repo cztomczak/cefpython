@@ -1,6 +1,7 @@
 Example application
-	*cefexample.py* is an example application, run it and view source
-	to see how it works.
+	There are 2 example applications:
+	- cefsimple.py
+	- cefadvanced.py
 
 Files
 	cefpython.pyd - cefpython library compiled using Cython extension,
@@ -10,6 +11,12 @@ Files
 	DLL's and .PAK file are from "cef_binary_1.1025.607_windows.zip"
 	that can be downloaded from the Chromium Embedded Framework
 	project: http://code.google.com/p/chromiumembedded/
+
+	Manifest and msvcr90.dll are dependencies of cefpython.pyd:
+		Microsoft.VC90.CRT.manifest
+		msvcm90.dll (not really required but must be redistributed together)
+		msvcp90.dll (not really required but must be redistributed together)
+		msvcr90.dll
 
 Programming API
 	http://code.google.com/p/cefpython/wiki/API
@@ -24,3 +31,8 @@ Copyright
 	Czarek Tomczak. All rights reserved.
 Website:
 	http://code.google.com/p/cefpython/
+
+
+icon.ico
+	That icon is from "FS Ubuntu Icons" by Frank Souza.
+	Licensed under GNU General Public License.

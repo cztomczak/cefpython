@@ -1,4 +1,4 @@
-#include "include/cef.h"
+#include "include/cef_client.h"
 
 class CefClient2 : public CefClient
 
@@ -24,9 +24,19 @@ public:
       { return NULL; }
   virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() OVERRIDE
       { return NULL; }
+  virtual CefRefPtr<CefMenuHandler> GetMenuHandler() OVERRIDE
+      { return NULL; }  
+  virtual CefRefPtr<CefPermissionHandler> GetPermissionHandler() OVERRIDE
+      { return NULL; }  
   virtual CefRefPtr<CefPrintHandler> GetPrintHandler() OVERRIDE
       { return NULL; }
+  virtual CefRefPtr<CefFindHandler> GetFindHandler() OVERRIDE
+      { return NULL; }
+  virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() OVERRIDE
+      { return NULL; }
   virtual CefRefPtr<CefV8ContextHandler> GetV8ContextHandler() OVERRIDE
+      { return NULL; }
+  virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE
       { return NULL; }
   virtual CefRefPtr<CefDragHandler> GetDragHandler() OVERRIDE
       { return NULL; }

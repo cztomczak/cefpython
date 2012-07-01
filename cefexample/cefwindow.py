@@ -7,6 +7,7 @@ import win32con
 import win32api
 import time
 import math
+import os
 
 __debug = False
 
@@ -17,7 +18,7 @@ __debug = False
 __windows = {} # windowID(int): classname
 
 
-def CreateWindow(title, classname, width, height, xpos=None, ypos=None, wndproc=None):	
+def CreateWindow(title, classname, width, height, xpos=None, ypos=None, icon=None, wndproc=None):
 
 	for key in __windows:
 		if __windows[key] == classname:
@@ -26,6 +27,24 @@ def CreateWindow(title, classname, width, height, xpos=None, ypos=None, wndproc=
 
 	if not wndproc:
 		wndproc = {win32con.WM_CLOSE: WM_CLOSE}
+
+	if icon:
+		if icon.find("/") == -1 and icon.find("\\") == -1:
+			icon = "%s%s%s" % (os.getcwd(), os.sep, icon)
+		
+		# Load small and big icon.
+		# WNDCLASSEX (along with hIconSm) is not supported by pywin32, 
+		# we need to use WM_SETICON message after window creation.
+		
+		# http://stackoverflow.com/questions/2234988/how-to-set-hicon-on-a-window-ico-with-multiple-sizes
+		# http://blog.barthe.ph/2009/07/17/wmseticon/
+		
+		bigX = win32api.GetSystemMetrics(win32con.SM_CXICON)
+		bigY = win32api.GetSystemMetrics(win32con.SM_CYICON)
+		bigIcon = win32gui.LoadImage(0, icon, win32con.IMAGE_ICON, bigX, bigY, win32con.LR_LOADFROMFILE)
+		smallX = win32api.GetSystemMetrics(win32con.SM_CXSMICON)
+		smallY = win32api.GetSystemMetrics(win32con.SM_CYSMICON)
+		smallIcon = win32gui.LoadImage(0, icon, win32con.IMAGE_ICON, smallX, smallY, win32con.LR_LOADFROMFILE)
 
 	wndclass = win32gui.WNDCLASS()
 	wndclass.hInstance = win32api.GetModuleHandle(None)
@@ -57,6 +76,12 @@ def CreateWindow(title, classname, width, height, xpos=None, ypos=None, wndproc=
 			xpos, ypos, width, height, # xpos, ypos, width, height
 			0, 0, wndclass.hInstance, None)
 	__windows[windowID] = classname
+
+	if icon:
+		if bigIcon:
+			win32api.SendMessage(windowID, win32con.WM_SETICON, win32con.ICON_BIG, bigIcon)
+		if smallIcon:
+			win32api.SendMessage(windowID, win32con.WM_SETICON, win32con.ICON_SMALL, smallIcon)
 	
 	if __debug:
 		print "windowID=%s" % windowID
@@ -64,12 +89,15 @@ def CreateWindow(title, classname, width, height, xpos=None, ypos=None, wndproc=
 	return windowID
 
 
+# Memory error when calling win32gui.DestroyWindow()
+# after we called cefpython.CloseBrowser()
 def DestroyWindow(windowID):
-
+	
 	win32gui.DestroyWindow(windowID)
 	classname = GetWindowClassname(windowID)
 	win32gui.UnregisterClass(classname, None)
 	del __windows[windowID] # Let window with this classname be created again.
+
 
 
 def GetWindowClassname(windowID):

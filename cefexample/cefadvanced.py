@@ -11,13 +11,13 @@ import os
 
 def QuitApplication(windowID, msg, wparam, lparam):
 	
-	browserID = windowID # yes, they are the same!
+	browserID = cefpython.GetBrowserByWindowID(windowID)
 	cefpython.CloseBrowser(browserID)
 	cefwindow.DestroyWindow(windowID)
 	win32gui.PostQuitMessage(0)
 
 
-def CefExample():
+def CefAdvanced():
 
 	# Programming API:
 	# http://code.google.com/p/cefpython/wiki/API
@@ -27,14 +27,15 @@ def CefExample():
 
 	appSettings = {} # See: http://code.google.com/p/cefpython/wiki/AppSettings
 	appSettings["multi_threaded_message_loop"] = False
+	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
 	cefpython.Initialize(appSettings)
 
 	wndproc = {win32con.WM_CLOSE: QuitApplication}
-	windowID = cefwindow.CreateWindow("CefExample", "cefexample", 800, 600, None, None, wndproc)
+	windowID = cefwindow.CreateWindow("CefAdvanced", "cefadvanced", 800, 600, None, None, "icon.ico", wndproc)
 
 	browserSettings = {} # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
-	url = "%s/cefexample.html" % os.getcwd()
-	browserID = cefpython.CreateBrowser(windowID, browserSettings, url)
+	browserSettings["history_disabled"] = False
+	browserID = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html")
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
@@ -67,11 +68,6 @@ def MoveWindow():
 	pass
 
 
-def ApplicationIcon():
-	# This is just a reminder, a way to change application's icon should be possible.
-	pass
-
-
 def DeveloperTools():
 	pass
 
@@ -92,4 +88,4 @@ def LoadContentFromEncryptedZip():
 
 if __name__ == "__main__":
 	
-	CefExample()
+	CefAdvanced()
