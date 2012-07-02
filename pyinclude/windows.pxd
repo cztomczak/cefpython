@@ -31,3 +31,8 @@ cdef extern from "Windows.h":
 
 	cdef BOOL GetClientRect(HWND hWnd, LPRECT lpRect)
 
+	ctypedef unsigned int WPARAM
+	ctypedef unsigned int LPARAM
+	cdef int WM_SETFOCUS
+	cdef BOOL PostMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+	

@@ -45,7 +45,7 @@ cdef extern from "include/cef_browser.h":
 		void CloseBrowser()
 		HWND GetWindowHandle()
 
-# Namespace means that these are methods to cppclass CefBrowser.
+# Namespace is also a way to import a static method.
 
 cdef extern from "include/cef_browser.h" namespace "CefBrowser":
 	cdef CefRefPtr[CefBrowser] CreateBrowserSync(CefWindowInfo, CefRefPtr[CefClient], CefString, CefBrowserSettings)

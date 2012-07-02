@@ -6,3 +6,11 @@ Copyright
 	Czarek Tomczak. All rights reserved.
 Website:
 	http://code.google.com/p/cefpython/
+
+--
+
+There are a few ways to make bindings to CEF:
+1) ctypes (only C api from DLLs)
+2) cython
+3) Boost.Python
+4) others: http://wiki.cython.org/WrappingCorCpp

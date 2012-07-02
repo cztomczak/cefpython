@@ -10,8 +10,9 @@ import win32gui
 
 def QuitApplication(windowID, msg, wparam, lparam):
 	
-	browserID = cefpython.GetBrowserByWindowID(windowID)
-	cefpython.CloseBrowser(browserID)
+	browser = cefpython.GetBrowserByWindowID(windowID)
+	browser.CloseBrowser()
+	print "after CloseBrowser, browser = %s" % browser
 	cefwindow.DestroyWindow(windowID)
 	win32gui.PostQuitMessage(0)
 
@@ -29,12 +30,17 @@ def CefAdvanced():
 	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
 	cefpython.Initialize(appSettings)
 
-	wndproc = {win32con.WM_CLOSE: QuitApplication, win32con.WM_SIZE: cefpython.WM_SIZE}
+	wndproc = {
+		win32con.WM_CLOSE: QuitApplication, 
+		win32con.WM_SIZE: cefpython.wm_Size,
+		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
+		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
+	}
 	windowID = cefwindow.CreateWindow("CefAdvanced", "cefadvanced", 800, 600, None, None, "icon.ico", wndproc)
 
 	browserSettings = {} # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings["history_disabled"] = False
-	browserID = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html")
+	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html")
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()

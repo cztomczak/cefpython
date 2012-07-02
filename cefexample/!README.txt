@@ -41,6 +41,11 @@ icon.ico
 
 CHANGELOG.
 
+Version 0.22
+ * Object oriented model for the Browser api
+ * Removed cefwindow as a dependency of cefpython module.
+ * Fixed bug: browser's client area did not get keyboard focus.
+
 Version 0.21 released on 2012-07-02.
  * Fixed bug: browser's client area wasn't resized when window size changed.
 

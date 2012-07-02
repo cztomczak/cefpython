@@ -10,11 +10,6 @@ import math
 import os
 
 __debug = False
-
-# We need to keep track of windows classname as when creating browser we need
-# to get real HWND and win32gui does not provide a way to get this, so we're using
-# FindWindowA(classname) to fetch HWND.
-
 __windows = {} # windowID(int): classname
 
 
@@ -91,13 +86,13 @@ def CreateWindow(title, classname, width, height, xpos=None, ypos=None, icon=Non
 
 # Memory error when calling win32gui.DestroyWindow()
 # after we called cefpython.CloseBrowser()
+
 def DestroyWindow(windowID):
 	
 	win32gui.DestroyWindow(windowID)
 	classname = GetWindowClassname(windowID)
 	win32gui.UnregisterClass(classname, None)
 	del __windows[windowID] # Let window with this classname be created again.
-
 
 
 def GetWindowClassname(windowID):
