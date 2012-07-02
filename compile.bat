@@ -4,15 +4,11 @@ del "setup\cefpython.pyd"
 del "setup\cefpython.cpp"
 rmdir /S /Q "setup/build"
 
-
-copy "cefpython.pyx" "setup/cefpython.pyx"
-copy "bindings.pyx" "setup/bindings.pyx"
-
 REM for /R %~dp0\pyinclude\ %%f in (*.pxd) do copy %%f %~dp0\setup\
 
 cd "setup"
 
-REM call python "combine.py"
+call python "mergepyxfiles.py"
 call python "setup.py" build_ext --inplace
 
 @if %ERRORLEVEL% neq 0 pause

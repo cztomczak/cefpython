@@ -8,16 +8,22 @@ import win32gui
 
 def QuitApplication(windowID, msg, wparam, lparam):
 	
-	cefpython.CloseBrowser(cefpython.GetBrowserByWindowID(windowID))
+	browser = cefpython.GetBrowserByWindowID(windowID)
+	browser.CloseBrowser()
 	cefwindow.DestroyWindow(windowID)
 	win32gui.PostQuitMessage(0)
 
 def CefSimple():
 
 	cefpython.Initialize({"multi_threaded_message_loop": False})
-	wndproc = {win32con.WM_CLOSE: QuitApplication, win32con.WM_SIZE: cefpython.WM_SIZE}
+	wndproc = {
+		win32con.WM_CLOSE: QuitApplication, 
+		win32con.WM_SIZE: cefpython.wm_Size,
+		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
+		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
+	}
 	windowID = cefwindow.CreateWindow("CefSimple", "cefsimple", 800, 600, None, None, "icon.ico", wndproc)
-	browserID = cefpython.CreateBrowser(windowID, {}, "cefsimple.html")
+	browser = cefpython.CreateBrowser(windowID, {}, "cefsimple.html")
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
