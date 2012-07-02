@@ -43,6 +43,7 @@ cdef extern from "include/cef_browser.h":
 	cdef cppclass CefBrowser:
 		void ParentWindowWillClose()
 		void CloseBrowser()
+		HWND GetWindowHandle()
 
 # Namespace means that these are methods to cppclass CefBrowser.
 

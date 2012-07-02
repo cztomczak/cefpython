@@ -41,6 +41,7 @@ DESKTOP_IN_PROCESS_COMMAND_BUFFER = int(<int>cef_types_win.DESKTOP_IN_PROCESS_CO
 
 
 cdef map[int, cefrefptr_cefbrowser_t] __browsers # windowID(int): browser 
+cdef CefRefPtr[CefClient2] __cefclient2 = <cefrefptr_cefclient2_t?>new CefClient2() # <...?> means to throw an error if the cast is not allowed
 
 
 def GetLastError():
@@ -314,14 +315,10 @@ def CreateBrowser(windowID, browserSettings, url):
 		print "CefCurrentlyOn(FILE=2): %s" % <cbool>CefCurrentlyOn(<CefThreadId>2)
 		print ""
 
-	# <...?> means to throw an error if the cast is not allowed
-	cdef CefRefPtr[CefClient2] cefclient2 = <cefrefptr_cefclient2_t?>new CefClient2()
-	if __debug: print "CefClient2 instantiated"
-
 	# Async createbrowser:
 	# print "CreateBrowser: %s" % <cbool>CreateBrowser(info, <cefrefptr_cefclient_t>cefclient2, cefUrl, cefBrowserSettings)
 
-	cdef CefRefPtr[CefBrowser] browser = CreateBrowserSync(info, <cefrefptr_cefclient_t?>cefclient2, cefUrl[0], cefBrowserSettings)
+	cdef CefRefPtr[CefBrowser] browser = CreateBrowserSync(info, <cefrefptr_cefclient_t?>__cefclient2, cefUrl[0], cefBrowserSettings)
 
 	if <void*>browser == NULL: 
 		if __debug: print "CreateBrowserSync(): NULL"
@@ -375,18 +372,39 @@ def Shutdown():
 
 # Note: pywin32 does not send WM_CREATE message.
 
-def WM_PAINT(hwnd, msg, wparam, lparam):
+def WM_PAINT(windowID, msg, wparam, lparam):
 	pass
 
 
-def WM_SETFOCUS(hwnd, msg, wparam, lparam):
+def WM_SETFOCUS(windowID, msg, wparam, lparam):
 	pass
 
 
-def WM_SIZE(hwnd, msg, wparam, lparam):
-	pass
+def WM_SIZE(windowID, msg, wparam, lparam):
 
+	if __debug: print "WM_SIZE"
+	
+	classname = cefwindow.GetWindowClassname(windowID)
+	cdef HWND hwnd = FindWindowA(classname, NULL)
 
-def WM_ERASEBKGND(hwnd, msg, wparam, lparam):
+	browserID = GetBrowserByWindowID(windowID)
+	cdef CefRefPtr[CefBrowser] browser = __browsers[browserID]
+	cdef HWND innerHwnd = (<CefBrowser*>(browser.get())).GetWindowHandle()
+
+	cdef RECT* rect2 = <RECT*>malloc(sizeof(RECT))
+	GetClientRect(hwnd, rect2)
+
+	if __debug: print "rect2: %d %d %d %d" % (rect2.left, rect2.top, rect2.right, rect2.bottom)
+	
+	cdef HDWP hdwp = BeginDeferWindowPos(<int>1)
+	hdwp = DeferWindowPos(hdwp, innerHwnd, NULL, rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top, SWP_NOZORDER);
+	EndDeferWindowPos(hdwp);
+
+	free(rect2)
+	
+	if __debug: print "GetLastError(): %s" % GetLastError()	
+	
+
+def WM_ERASEBKGND(windowID, msg, wparam, lparam):
 	pass
 
