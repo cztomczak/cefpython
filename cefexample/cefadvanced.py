@@ -6,7 +6,6 @@ import cefpython # cefpython.pyd
 import cefwindow
 import win32con # pywin32 extension
 import win32gui
-import os
 
 
 def QuitApplication(windowID, msg, wparam, lparam):
@@ -30,7 +29,7 @@ def CefAdvanced():
 	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
 	cefpython.Initialize(appSettings)
 
-	wndproc = {win32con.WM_CLOSE: QuitApplication}
+	wndproc = {win32con.WM_CLOSE: QuitApplication, win32con.WM_SIZE: cefpython.WM_SIZE}
 	windowID = cefwindow.CreateWindow("CefAdvanced", "cefadvanced", 800, 600, None, None, "icon.ico", wndproc)
 
 	browserSettings = {} # See: http://code.google.com/p/cefpython/wiki/BrowserSettings

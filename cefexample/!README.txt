@@ -36,3 +36,13 @@ Website:
 icon.ico
 	That icon is from "FS Ubuntu Icons" by Frank Souza.
 	Licensed under GNU General Public License.
+
+------------------------------------------------------------------------------------------------
+
+CHANGELOG.
+
+Version 0.21 released on 2012-07-02.
+ * Fixed bug: browser's client area wasn't resized when window size changed.
+
+Version 0.20 released on 2012-07-01.
+ * First release that comes with real API.
