@@ -4,19 +4,19 @@
 
 cimport cef_types
 
-LOGSEVERITY_VERBOSE = int(<int>cef_types.LOGSEVERITY_VERBOSE)
-LOGSEVERITY_INFO = int(<int>cef_types.LOGSEVERITY_INFO)
-LOGSEVERITY_WARNING = int(<int>cef_types.LOGSEVERITY_WARNING)
-LOGSEVERITY_ERROR = int(<int>cef_types.LOGSEVERITY_ERROR)
-LOGSEVERITY_ERROR_REPORT = int(<int>cef_types.LOGSEVERITY_ERROR_REPORT)
-LOGSEVERITY_DISABLE = int(<int>cef_types.LOGSEVERITY_DISABLE)
+LOGSEVERITY_VERBOSE = <int>cef_types.LOGSEVERITY_VERBOSE
+LOGSEVERITY_INFO = <int>cef_types.LOGSEVERITY_INFO
+LOGSEVERITY_WARNING = <int>cef_types.LOGSEVERITY_WARNING
+LOGSEVERITY_ERROR = <int>cef_types.LOGSEVERITY_ERROR
+LOGSEVERITY_ERROR_REPORT = <int>cef_types.LOGSEVERITY_ERROR_REPORT
+LOGSEVERITY_DISABLE = <int>cef_types.LOGSEVERITY_DISABLE
 
 cimport cef_types_win
 
-ANGLE_IN_PROCESS = int(<int>cef_types_win.ANGLE_IN_PROCESS)
-ANGLE_IN_PROCESS_COMMAND_BUFFER = int(<int>cef_types_win.ANGLE_IN_PROCESS_COMMAND_BUFFER)
-DESKTOP_IN_PROCESS = int(<int>cef_types_win.DESKTOP_IN_PROCESS)
-DESKTOP_IN_PROCESS_COMMAND_BUFFER = int(<int>cef_types_win.DESKTOP_IN_PROCESS_COMMAND_BUFFER)
+ANGLE_IN_PROCESS = <int>cef_types_win.ANGLE_IN_PROCESS
+ANGLE_IN_PROCESS_COMMAND_BUFFER = <int>cef_types_win.ANGLE_IN_PROCESS_COMMAND_BUFFER
+DESKTOP_IN_PROCESS = <int>cef_types_win.DESKTOP_IN_PROCESS
+DESKTOP_IN_PROCESS_COMMAND_BUFFER = <int>cef_types_win.DESKTOP_IN_PROCESS_COMMAND_BUFFER
 
 
 cdef SetAppSettings(appSettings, CefSettings* cefAppSettings):
@@ -55,7 +55,7 @@ cdef SetAppSettings(appSettings, CefSettings* cefAppSettings):
 		elif key == "log_severity":
 			cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
 		elif key == "graphics_implementation":
-			cefAppSettings.graphics_implementation = <cef_types_win.cef_graphics_implementation_t><int>int(appSettings[key])
+			cefAppSettings.graphics_implementation = <cef_types_win.cef_graphics_implementation_t?><int>int(appSettings[key])
 		elif key == "local_storage_quota":
 			cefAppSettings.local_storage_quota = <int>int(appSettings[key])
 		elif key == "session_storage_quota":

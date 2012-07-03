@@ -101,6 +101,34 @@ def GetWindowClassname(windowID):
 		if key == windowID:
 			return __windows[key]
 
+def MoveWindow(windowID, xpos=None, ypos=None, width=None, height=None, center=None):
+
+	(left, top, right, bottom) = win32gui.GetWindowRect(windowID)
+	if xpos == None and ypos == None:
+		xpos = left
+		ypos = top
+	if width == None and height == None:
+		width = right - left
+		height = bottom - top
+	# Case: only ypos provided
+	if not xpos:
+		xpos = left
+	if not ypos:
+		ypos = top
+	# Case: only height provided
+	if not width:
+		width = right - left
+	if not height:
+		height = bottom - top
+	if center:
+		screenx = win32api.GetSystemMetrics(win32con.SM_CXSCREEN)
+		screeny = win32api.GetSystemMetrics(win32con.SM_CYSCREEN)
+		xpos = int(math.floor((screenx - width) / 2))
+		ypos = int(math.floor((screeny - height) / 2))
+		if xpos < 0: xpos = 0
+		if ypos < 0: ypos = 0
+	win32gui.MoveWindow(windowID, xpos, ypos, width, height, 1)
+
 
 def WM_CLOSE(windowID, msg, wparam, lparam):
 	

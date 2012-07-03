@@ -6,12 +6,12 @@ class Browser:
 	
 	windowID = 0
 	
-	# This is required for weakref.ref() to work.
-	__slots__ = ["GetWindowID", "CloseBrowser"]
-	
-	def __init__(self, inWindowID):
+	def __init__(self, windowID):
 		
-		self.windowID = inWindowID
+		self.windowID = windowID
+		assert win32gui.IsWindow(windowID), "Invalid window handle (windowID)"
+		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByWindowID(self.windowID)
+		assert <void*>cefBrowser != NULL, "CefBrowser not found for this window handle (windowID)"
 
 	def GetWindowID(self):
 
@@ -20,13 +20,9 @@ class Browser:
 
 	def CloseBrowser(self):
 
-		# weakref.proxy() or checks like this in every method?
-		if not self.windowID:
-			raise Exception("Browser.CloseBrowser(): browser is already closed")
-
+		assert self.windowID, "Browser was destroyed earlier"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByWindowID(self.windowID)
-		if <void*>cefBrowser == NULL:
-			return
+		assert <void*>cefBrowser != NULL, "CefBrowser not found, destroyed?"
 
 		if __debug: print "CefBrowser.ParentWindowWillClose()"
 		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose()
@@ -37,3 +33,20 @@ class Browser:
 		__cefBrowsers.erase(<int>self.windowID)
 		del __pyBrowsers[self.windowID]
 		self.windowID = 0
+
+	def ShowDevTools(self):
+
+		assert self.windowID, "Browser was destroyed earlier"
+		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByWindowID(self.windowID)
+		assert <void*>cefBrowser != NULL, "CefBrowser not found, destroyed?"
+		
+		(<CefBrowser*>(cefBrowser.get())).ShowDevTools()
+
+	def CloseDevTools(self):
+		
+		assert self.windowID, "Browser was destroyed earlier"
+		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByWindowID(self.windowID)
+		assert <void*>cefBrowser != NULL, "CefBrowser not found, destroyed?"
+
+		(<CefBrowser*>(cefBrowser.get())).CloseDevTools()
+

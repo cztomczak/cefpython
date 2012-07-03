@@ -1,3 +1,5 @@
+CEF Python provides bindings for the Chromium Embedded Framework (CEF). 
+
 Example application
 	There are 2 example applications:
 	- cefsimple.py
@@ -41,7 +43,10 @@ icon.ico
 
 CHANGELOG.
 
-Version 0.22
+Version xx released on xx.
+ * More api for the Browser object, developer tools and others.
+
+Version 0.22 released on 2012-07-02.
  * Object oriented model for the Browser api
  * Removed cefwindow as a dependency of cefpython module.
  * Fixed bug: browser's client area did not get keyboard focus.

@@ -6,13 +6,16 @@ import cefpython # cefpython.pyd
 import cefwindow
 import win32con # pywin32 extension
 import win32gui
+import os
+import sys
+import traceback
+import time
 
 
 def QuitApplication(windowID, msg, wparam, lparam):
 	
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
-	print "after CloseBrowser, browser = %s" % browser
 	cefwindow.DestroyWindow(windowID)
 	win32gui.PostQuitMessage(0)
 
@@ -21,7 +24,8 @@ def CefAdvanced():
 
 	# Programming API:
 	# http://code.google.com/p/cefpython/wiki/API
-	
+
+	sys.excepthook = cefpython.ExceptHook # In case of exception display it, write to error.log, shutdown CEF and exit application.
 	cefwindow.__debug = True # Whether to print debug output to console.
 	cefpython.__debug = True
 
