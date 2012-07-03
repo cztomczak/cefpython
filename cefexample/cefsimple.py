@@ -15,6 +15,7 @@ def QuitApplication(windowID, msg, wparam, lparam):
 
 def CefSimple():
 
+	sys.excepthook = cefpython.ExceptHook # In case of exception display it, write to error.log, shutdown CEF and exit application.
 	cefpython.Initialize({"multi_threaded_message_loop": False})
 	wndproc = {
 		win32con.WM_CLOSE: QuitApplication, 
