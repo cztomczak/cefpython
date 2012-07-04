@@ -2,9 +2,10 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from cef_client cimport CefClient
+from cef_base cimport CefBase
 
 cdef extern from "cef_client2.h":
 	
-	cdef cppclass CefClient2(CefClient):
+	cdef cppclass CefLifeSpanHandler(CefBase):
+		
 		pass

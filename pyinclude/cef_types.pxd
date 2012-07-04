@@ -17,3 +17,4 @@ cdef extern from "include/internal/cef_types.h":
 		TID_IO = 1,
 		TID_FILE = 2,
 	
+	ctypedef long long int64

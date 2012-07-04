@@ -10,6 +10,7 @@ import os
 import sys
 import traceback
 import time
+import threading
 
 
 def QuitApplication(windowID, msg, wparam, lparam):
@@ -44,10 +45,20 @@ def CefAdvanced():
 
 	browserSettings = {} # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings["history_disabled"] = False
+	browserSettings["universal_access_from_file_urls_allowed"] = True
+	browserSettings["file_access_from_file_urls_allowed"] = True
 	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html")
+
+	#browser.GetMainFrame().ExecuteJavascript("alert(1)")
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
+
+def DocumentReady(browser):
+
+	browser.GetFocusedFrame().ExecuteJavascript("alert(1)")
+	print "focused frame: %s" % browser.GetFocusedFrame()
+	print "frame names: %s" % browser.GetFrameNames()
 
 
 def JavascriptBindings():

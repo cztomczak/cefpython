@@ -1,0 +1,98 @@
+[0704/160411:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/160548:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/160821:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/160842:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/161036:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/161048:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/161130:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/161459:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/162241:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/162823:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/170503:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/170613:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/173748:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/173900:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/173933:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/173940:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/174033:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/174203:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/174341:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/174553:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/174609:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/174706:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/175359:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/175716:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/180511:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/180528:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/180741:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/180929:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/180937:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181038:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181038:INFO:CONSOLE(0)] "Uncaught TypeError: Cannot read property 'simple' of undefined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181058:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181058:INFO:CONSOLE(0)] "Uncaught TypeError: Cannot read property 'simple' of undefined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181111:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181111:INFO:CONSOLE(0)] "Uncaught TypeError: Cannot read property 'simple' of undefined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181124:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181124:INFO:CONSOLE(0)] "Uncaught TypeError: Cannot read property 'simple' of undefined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181132:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181132:INFO:CONSOLE(0)] "Uncaught TypeError: Cannot read property 'simple' of undefined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181137:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181137:INFO:CONSOLE(0)] "Uncaught TypeError: Cannot read property 'simple' of undefined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181146:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181146:INFO:CONSOLE(0)] "Uncaught TypeError: Cannot read property 'simple' of undefined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181232:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181232:INFO:CONSOLE(0)] "Uncaught TypeError: Cannot read property 'simple' of undefined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181236:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181236:INFO:CONSOLE(0)] "Uncaught TypeError: Cannot read property 'simple' of undefined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181725:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181759:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181843:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/181843:INFO:CONSOLE(0)] "Uncaught SyntaxError: Unexpected token }," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(33)
+[0704/181903:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182013:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182041:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182056:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182113:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182124:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182247:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182323:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182337:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182405:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182425:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182431:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182431:INFO:CONSOLE(0)] "Uncaught TypeError: Object [object HTMLDocument] has no method 'focus'," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(36)
+[0704/182437:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182512:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/182524:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/191322:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/192637:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/192714:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/193014:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/193312:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/193606:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/194156:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/194636:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/194747:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/195304:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/200952:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/201052:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/201114:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/201248:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/201321:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/201714:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/201745:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/201904:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/202422:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/203119:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/203155:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/203236:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/203353:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/203404:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/203413:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/203426:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/203824:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/204542:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/204610:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/211128:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0704/211143:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
