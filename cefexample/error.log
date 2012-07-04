@@ -1,0 +1,116 @@
+
+[2012-07-04 19:13:22] Traceback (most recent call last):
+
+  File "cefadvanced.py", line 105, in <module>
+    CefAdvanced()
+
+  File "cefadvanced.py", line 51, in CefAdvanced
+    print "focused frame: %s" % browser.GetFocusedFrame()
+
+  File "cefpython.pyx", line 327, in cefpython.Browser.GetFocusedFrame (cefpython.cpp:4833)
+
+  File "cefpython.pyx", line 372, in cefpython.Frame.__init__ (cefpython.cpp:5224)
+
+TypeError: __init__() takes exactly 2 positional arguments (1 given)
+
+
+[2012-07-04 19:26:37] Traceback (most recent call last):
+
+  File "cefadvanced.py", line 105, in <module>
+    CefAdvanced()
+
+  File "cefadvanced.py", line 51, in CefAdvanced
+    print "focused frame: %s" % browser.GetFocusedFrame()
+
+  File "cefpython.pyx", line 328, in cefpython.Browser.GetFocusedFrame (cefpython.cpp:4861)
+
+NameError: __pyFrames
+
+
+[2012-07-04 20:10:52] Traceback (most recent call last):
+
+  File "cefadvanced.py", line 106, in <module>
+    CefAdvanced()
+
+  File "cefadvanced.py", line 51, in CefAdvanced
+    browser.GetMainFrame().ExecuteJavascript("alert(1)")
+
+  File "cefpython.pyx", line 415, in cefpython.Frame.ExecuteJavascript (cefpython.cpp:5813)
+
+AttributeError: Frame instance has no attribute 'windowID'
+
+
+[2012-07-04 20:24:22] Traceback (most recent call last):
+
+  File "cefadvanced.py", line 106, in <module>
+    CefAdvanced()
+
+  File "cefadvanced.py", line 51, in CefAdvanced
+    browser.GetMainFrame().ExecuteJavascript("alert(1)")
+
+  File "cefpython.pyx", line 430, in cefpython.Frame.ExecuteJavascript (cefpython.cpp:6001)
+
+  File "cefpython.pyx", line 160, in cefpython.CheckFrameID (cefpython.cpp:2930)
+
+Exception: Frame was destroyed (frameID empty)
+
+
+[2012-07-04 20:31:19] Traceback (most recent call last):
+
+  File "cefadvanced.py", line 106, in <module>
+    CefAdvanced()
+
+  File "cefadvanced.py", line 51, in CefAdvanced
+    browser.GetMainFrame().ExecuteJavascript("alert(1)")
+
+  File "cefpython.pyx", line 444, in cefpython.Frame.ExecuteJavascript (cefpython.cpp:6373)
+
+  File "cefpython.pyx", line 173, in cefpython.CheckFrameID (cefpython.cpp:3090)
+
+Exception: Frame was destroyed (frameID empty)
+
+
+[2012-07-04 20:33:53] Traceback (most recent call last):
+
+  File "cefadvanced.py", line 106, in <module>
+    CefAdvanced()
+
+  File "cefadvanced.py", line 51, in CefAdvanced
+    browser.GetMainFrame().ExecuteJavascript("alert(1)")
+
+  File "cefpython.pyx", line 444, in cefpython.Frame.ExecuteJavascript (cefpython.cpp:6393)
+
+  File "cefpython.pyx", line 173, in cefpython.CheckFrameID (cefpython.cpp:3090)
+
+Exception: Frame was destroyed (frameID empty)
+
+
+[2012-07-04 20:46:10] Traceback (most recent call last):
+
+  File "cefadvanced.py", line 111, in <module>
+    CefAdvanced()
+
+  File "cefadvanced.py", line 52, in CefAdvanced
+    browser.GetMainFrame().ExecuteJavascript("alert(1)")
+
+  File "cefpython.pyx", line 444, in cefpython.Frame.ExecuteJavascript (cefpython.cpp:6373)
+
+  File "cefpython.pyx", line 173, in cefpython.CheckFrameID (cefpython.cpp:3090)
+
+Exception: Frame was destroyed (frameID empty)
+
+
+[2012-07-04 21:11:28] Traceback (most recent call last):
+
+  File "cefadvanced.py", line 111, in <module>
+    CefAdvanced()
+
+  File "cefadvanced.py", line 52, in CefAdvanced
+    browser.GetMainFrame().ExecuteJavascript("alert(1)")
+
+  File "cefpython.pyx", line 444, in cefpython.Frame.ExecuteJavascript (cefpython.cpp:6373)
+
+  File "cefpython.pyx", line 173, in cefpython.CheckFrameID (cefpython.cpp:3090)
+
+Exception: Frame was destroyed (frameID empty)
+

@@ -13,6 +13,9 @@ import time
 
 from libcpp cimport bool as cbool
 from libcpp.map cimport map
+from libcpp.vector cimport vector
+from cython.operator cimport preincrement as preinc, dereference as deref # must be "as" otherwise not seen.
+from libc.stdlib cimport malloc, free
 
 # When pyx file cimports * from a pxd file and that cimports * from another pxd
 # then these another names will be visible in pyx file.
@@ -31,6 +34,8 @@ from cef_app cimport *
 from cef_browser cimport *
 from cef_client cimport *
 from cef_client2 cimport *
+from cef_frame cimport *
+cimport cef_types
 
 # Global variables.
 
@@ -116,11 +121,11 @@ def CreateBrowser(windowID, browserSettings, url):
 	if url.find("/") == -1 and url.find("\\") == -1:
 		url = "%s%s%s" % (os.getcwd(), os.sep, url)
 	if __debug: print "url: %s" % url	
-	if __debug: print "Creating cefUrl: CefString().FromASCII(<char*>url)"
-	cdef CefString *cefUrl = new CefString()
-	cefUrl.FromASCII(<char*>url)
+	if __debug: print "Creating cefURL: CefString().FromASCII(<char*>url)"
+	cdef CefString cefURL
+	cefURL.FromASCII(<char*>url)
 
-	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>__cefclient2, cefUrl[0], cefBrowserSettings)
+	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>__cefclient2, cefURL, cefBrowserSettings)
 
 	if <void*>cefBrowser == NULL: 
 		if __debug: print "CreateBrowserSync(): NULL"
@@ -134,14 +139,54 @@ def CreateBrowser(windowID, browserSettings, url):
 
 	return __pyBrowsers[windowID]
 
+def CheckWindowID(windowID):
+	
+	# If an exception is raised in cdef function then there is no stack trace,
+	# that's why you should call this func before calling GetCefBrowserByWindowID(),
+	# if there is an error user will see backtrace in his application.
+	if not windowID:
+		raise Exception("Browser was destroyed (windowID empty)")
+	if __cefBrowsers.find(windowID) == __cefBrowsers.end():
+		raise Exception("Browser was destroyed (__cefBrowsers.find() failed)")
+	if not (<CefBrowser*>(__cefBrowsers[<int>windowID]).get()):
+		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
+	return windowID
 
 cdef CefRefPtr[CefBrowser] GetCefBrowserByWindowID(windowID):
 	
 	# Map key exists: http://stackoverflow.com/questions/1939953/how-to-find-if-a-given-key-exists-in-a-c-stdmap
-	assert windowID, "Browser was destroyed"
+	if not windowID:
+		raise Exception("Browser was destroyed (windowID empty)")
 	if __cefBrowsers.find(windowID) == __cefBrowsers.end():
-		raise Exception("Browser for this window handle (windowID) does not exist")
-	return __cefBrowsers[<int>windowID]
+		raise Exception("Browser was destroyed (__cefBrowsers.find() failed)")
+	if <CefBrowser*>(__cefBrowsers[<int>windowID]).get():
+		return __cefBrowsers[<int>windowID]
+	else:
+		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
+
+def CheckFrameID(frameID):
+
+	# If an exception is raised in cdef function then there is no stack trace,
+	# that's why you should call this func before calling GetCefFrameByFrameID(),
+	# if there is an error user will see backtrace in his application.
+	if not frameID:
+		raise Exception("Frame was destroyed (frameID empty)")
+	if __cefFrames.find(<cef_types.int64>frameID) == __cefFrames.end():
+		raise Exception("Frame was destroyed (__cefFrames.find() failed)")
+	if not (<CefFrame*>(__cefFrames[<cef_types.int64>frameID]).get()):
+		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")
+	return frameID
+
+cdef CefRefPtr[CefFrame] GetCefFrameByFrameID(frameID):
+	
+	if not frameID:
+		raise Exception("Frame was destroyed (frameID empty)")
+	if __cefFrames.find(<cef_types.int64>frameID) == __cefFrames.end():
+		raise Exception("Frame was destroyed (__cefFrames.find() failed)")
+	if <CefFrame*>(__cefFrames[<cef_types.int64>frameID]).get():
+		return __cefFrames[<cef_types.int64>frameID]
+	else:
+		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")
 
 
 def GetBrowserByWindowID(windowID):
@@ -183,3 +228,15 @@ def CurrentlyOn(threadID):
 
 	threadID = <int>int(threadID)
 	return CefCurrentlyOn(<CefThreadId>threadID)
+
+# -------------------
+
+cdef CefStringToPyString(CefString& cefString):
+
+	cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
+	cdef int charstr_size = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, NULL, 0, NULL, NULL)
+	cdef char* charstr = <char*>malloc(charstr_size*sizeof(char))
+	WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, charstr, charstr_size, NULL, NULL)
+	pystring = charstr
+	free(charstr)
+	return pystring
