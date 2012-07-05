@@ -114,3 +114,11 @@ Exception: Frame was destroyed (frameID empty)
 
 Exception: Frame was destroyed (frameID empty)
 
+
+[2012-07-05 23:13:09] Traceback (most recent call last):
+
+  File "cefadvanced.py", line 19, in QuitApplication
+    browser.CloseBrowser()
+
+AttributeError: 'NoneType' object has no attribute 'CloseBrowser'
+

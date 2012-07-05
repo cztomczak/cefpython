@@ -10,4 +10,5 @@ cdef extern from "include/cef_client.h":
 	# https://groups.google.com/forum/?fromgroups#!topic/cython-users/p-PMDKsvfik
 
 	cdef cppclass CefClient(CefBase):
-		pass
+		
+		void GetLifeSpanHandler()

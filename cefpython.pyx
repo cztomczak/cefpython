@@ -24,6 +24,8 @@ from libc.stdlib cimport malloc, free
 # but won't work if you do "from ... cimport *", this
 # is important to know in pxd files.
 
+# <CefRefPtr[ClientHandler]?>new ClientHandler() # <...?> means to throw an error if the cast is not allowed
+
 from windows cimport *
 from cef_string cimport *
 from cef_type_wrappers cimport *
@@ -33,7 +35,7 @@ from cef_ptr cimport *
 from cef_app cimport *
 from cef_browser cimport *
 from cef_client cimport *
-from cef_client2 cimport *
+from clienthandler cimport *
 from cef_frame cimport *
 cimport cef_types
 
@@ -42,7 +44,7 @@ cimport cef_types
 __debug = False
 cdef map[int, CefRefPtr[CefBrowser]] __cefBrowsers # windowID(int): browser 
 __pyBrowsers = {}
-cdef CefRefPtr[CefClient2] __cefclient2 = <CefRefPtr[CefClient2]?>new CefClient2() # <...?> means to throw an error if the cast is not allowed
+cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]?>new ClientHandler()
 
 
 def ExceptHook(type, value, traceobject):
@@ -64,8 +66,13 @@ def GetLastError():
 	code = win32api.GetLastError()
 	return "(%d) %s" % (code, win32api.FormatMessage(code))
 
+def InitClientHandler():
+
+	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadEnd(<OnLoadEnd_Type>LoadHandler_OnLoadEnd)
 
 def Initialize(appSettings):
+
+	InitClientHandler()
 
 	if __debug:
 		print "\n%s" % ("--------" * 8)
@@ -125,7 +132,7 @@ def CreateBrowser(windowID, browserSettings, url):
 	cdef CefString cefURL
 	cefURL.FromASCII(<char*>url)
 
-	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>__cefclient2, cefURL, cefBrowserSettings)
+	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>__clientHandler, cefURL, cefBrowserSettings)
 
 	if <void*>cefBrowser == NULL: 
 		if __debug: print "CreateBrowserSync(): NULL"
@@ -237,6 +244,6 @@ cdef CefStringToPyString(CefString& cefString):
 	cdef int charstr_size = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, NULL, 0, NULL, NULL)
 	cdef char* charstr = <char*>malloc(charstr_size*sizeof(char))
 	WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, charstr, charstr_size, NULL, NULL)
-	pystring = charstr
+	pystring = "" + charstr # "" is required to make a copy of char* otherwise you will get a pointer that will be freed on next line.
 	free(charstr)
 	return pystring
