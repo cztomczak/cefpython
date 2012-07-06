@@ -12,7 +12,7 @@
   #endif
 #endif
 
-__PYX_EXTERN_C DL_IMPORT(void) __stdcall LoadHandler_OnLoadEnd(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, int);
+__PYX_EXTERN_C DL_IMPORT(int) LoadHandler_OnLoadEnd(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, int);
 
 #endif /* !__PYX_HAVE_API__cefpython */
 

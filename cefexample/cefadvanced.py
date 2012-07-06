@@ -13,12 +13,18 @@ import time
 import threading
 
 
-def QuitApplication(windowID, msg, wparam, lparam):
+def CloseApplication(windowID, msg, wparam, lparam):
 	
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
 	cefwindow.DestroyWindow(windowID)
+
+def QuitApplication(windowID, msg, wparam, lparam):
+
+	# If you put PostQuitMessage() in WM_CLOSE event (CloseApplication) 
+	# you will get memory errors when closing application.
 	win32gui.PostQuitMessage(0)
+	return 0
 
 
 def CefAdvanced():
@@ -36,7 +42,8 @@ def CefAdvanced():
 	cefpython.Initialize(appSettings)
 
 	wndproc = {
-		win32con.WM_CLOSE: QuitApplication, 
+		win32con.WM_CLOSE: CloseApplication, 
+		win32con.WM_DESTROY: QuitApplication,
 		win32con.WM_SIZE: cefpython.wm_Size,
 		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
 		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
@@ -47,18 +54,28 @@ def CefAdvanced():
 	browserSettings["history_disabled"] = False
 	browserSettings["universal_access_from_file_urls_allowed"] = True
 	browserSettings["file_access_from_file_urls_allowed"] = True
-	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html")
+	
+	handlers = {}
+	handlers["OnLoadStart"] = DocumentReady
+	handlers["OnLoadError"] = OnLoadError
 
-	#browser.GetMainFrame().ExecuteJavascript("alert(1)")
+	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers)
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
-def DocumentReady(browser):
 
-	browser.GetFocusedFrame().ExecuteJavascript("alert(1)")
-	print "focused frame: %s" % browser.GetFocusedFrame()
-	print "frame names: %s" % browser.GetFrameNames()
+def DocumentReady(browser, frame):
+	
+	print "OnLoadStart(): frame URL: %s" % frame.GetURL()
+	if frame.IsMain():
+		return	
+	browser.GetMainFrame().ExecuteJavascript("window.open('about:blank', '', 'width=500,height=500')")
+	#print "HidePopup(): %s" % browser.HidePopup()
+
+def OnLoadError(browser, frame, errorCode, failedURL, errorText):
+
+	print "OnLoadError() failedURL: %s, frame = %s" % (failedURL, frame)
 
 
 def JavascriptBindings():
