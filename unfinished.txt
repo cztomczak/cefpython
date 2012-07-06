@@ -1,0 +1,9 @@
+
+utils.pyx > GetPyBrowserByCefBrowser() > Popups:
+
+	# Should we pass handlers from the parent? {} - empty right now.
+	# Add a new parameter in CreateBrowser() called "popupsInheritHandlers"?
+	# Or maybe just an another dict "popupHandlers"? User could pass the same
+	# handlers dictionary to both parameters.
+
+	# What about popups created by popups? How do we do the inheritance in this case?

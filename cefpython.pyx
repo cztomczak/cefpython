@@ -42,9 +42,11 @@ cimport cef_types
 # Global variables.
 
 __debug = False
-cdef map[int, CefRefPtr[CefBrowser]] __cefBrowsers # windowID(int): browser 
-__pyBrowsers = {}
+
+
+# Client handler.
 cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]?>new ClientHandler()
+__handlers = {}
 
 
 def ExceptHook(type, value, traceobject):
@@ -66,13 +68,13 @@ def GetLastError():
 	code = win32api.GetLastError()
 	return "(%d) %s" % (code, win32api.FormatMessage(code))
 
-def InitClientHandler():
+def __InitializeClientHandler():
 
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadEnd(<OnLoadEnd_Type>LoadHandler_OnLoadEnd)
+	InitializeLoadHandler()
 
 def Initialize(appSettings):
 
-	InitClientHandler()
+	__InitializeClientHandler()
 
 	if __debug:
 		print "\n%s" % ("--------" * 8)
@@ -96,8 +98,11 @@ def Initialize(appSettings):
 		print "GetLastError(): %s" % GetLastError()	
 
 
-def CreateBrowser(windowID, browserSettings, url):
+def CreateBrowser(windowID, browserSettings, navigateURL, handlers=None):
 	
+	if not handlers:
+		handlers = {}
+
 	if __debug: print "cefpython.CreateBrowser()"
 
 	# Later in the code we do a dangerous cast: <HWND><int>windowID,
@@ -125,14 +130,14 @@ def CreateBrowser(windowID, browserSettings, url):
 	info.SetAsChild(<HWND><int>windowID, rect2)	
 	if __debug: print "GetLastError(): %s" % GetLastError()
 
-	if url.find("/") == -1 and url.find("\\") == -1:
-		url = "%s%s%s" % (os.getcwd(), os.sep, url)
-	if __debug: print "url: %s" % url	
-	if __debug: print "Creating cefURL: CefString().FromASCII(<char*>url)"
-	cdef CefString cefURL
-	cefURL.FromASCII(<char*>url)
+	if navigateURL.find("/") == -1 and navigateURL.find("\\") == -1:
+		navigateURL = "%s%s%s" % (os.getcwd(), os.sep, navigateURL)
+	if __debug: print "navigateURL: %s" % navigateURL	
+	if __debug: print "Creating cefNavigateURL: CefString().FromASCII(<char*>navigateURL)"
+	cdef CefString cefNavigateURL
+	cefNavigateURL.FromASCII(<char*>navigateURL)
 
-	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>__clientHandler, cefURL, cefBrowserSettings)
+	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>__clientHandler, cefNavigateURL, cefBrowserSettings)
 
 	if <void*>cefBrowser == NULL: 
 		if __debug: print "CreateBrowserSync(): NULL"
@@ -141,65 +146,23 @@ def CreateBrowser(windowID, browserSettings, url):
 	else: 
 		if __debug: print "CreateBrowserSync(): OK"
 
-	__cefBrowsers[<int>windowID] = cefBrowser
-	__pyBrowsers[windowID] = Browser(windowID)
+	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
+	__cefBrowsers[innerWindowID] = cefBrowser
+	__pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, handlers)	
+	__browserInnerWindows[windowID] = innerWindowID
 
-	return __pyBrowsers[windowID]
-
-def CheckWindowID(windowID):
-	
-	# If an exception is raised in cdef function then there is no stack trace,
-	# that's why you should call this func before calling GetCefBrowserByWindowID(),
-	# if there is an error user will see backtrace in his application.
-	if not windowID:
-		raise Exception("Browser was destroyed (windowID empty)")
-	if __cefBrowsers.find(windowID) == __cefBrowsers.end():
-		raise Exception("Browser was destroyed (__cefBrowsers.find() failed)")
-	if not (<CefBrowser*>(__cefBrowsers[<int>windowID]).get()):
-		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
-	return windowID
-
-cdef CefRefPtr[CefBrowser] GetCefBrowserByWindowID(windowID):
-	
-	# Map key exists: http://stackoverflow.com/questions/1939953/how-to-find-if-a-given-key-exists-in-a-c-stdmap
-	if not windowID:
-		raise Exception("Browser was destroyed (windowID empty)")
-	if __cefBrowsers.find(windowID) == __cefBrowsers.end():
-		raise Exception("Browser was destroyed (__cefBrowsers.find() failed)")
-	if <CefBrowser*>(__cefBrowsers[<int>windowID]).get():
-		return __cefBrowsers[<int>windowID]
-	else:
-		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
-
-def CheckFrameID(frameID):
-
-	# If an exception is raised in cdef function then there is no stack trace,
-	# that's why you should call this func before calling GetCefFrameByFrameID(),
-	# if there is an error user will see backtrace in his application.
-	if not frameID:
-		raise Exception("Frame was destroyed (frameID empty)")
-	if __cefFrames.find(<cef_types.int64>frameID) == __cefFrames.end():
-		raise Exception("Frame was destroyed (__cefFrames.find() failed)")
-	if not (<CefFrame*>(__cefFrames[<cef_types.int64>frameID]).get()):
-		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")
-	return frameID
-
-cdef CefRefPtr[CefFrame] GetCefFrameByFrameID(frameID):
-	
-	if not frameID:
-		raise Exception("Frame was destroyed (frameID empty)")
-	if __cefFrames.find(<cef_types.int64>frameID) == __cefFrames.end():
-		raise Exception("Frame was destroyed (__cefFrames.find() failed)")
-	if <CefFrame*>(__cefFrames[<cef_types.int64>frameID]).get():
-		return __cefFrames[<cef_types.int64>frameID]
-	else:
-		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")
+	return __pyBrowsers[innerWindowID]
 
 
 def GetBrowserByWindowID(windowID):
 
-	if windowID in __pyBrowsers:
-		return __pyBrowsers[windowID]
+	# This is: ByTopWindowID.
+	if windowID in __browserInnerWindows:
+		innerWindowID = __browserInnerWindows[windowID]
+		if innerWindowID in __pyBrowsers:
+			return __pyBrowsers[innerWindowID]
+		else:
+			return None
 	else:
 		return None
 
@@ -236,14 +199,3 @@ def CurrentlyOn(threadID):
 	threadID = <int>int(threadID)
 	return CefCurrentlyOn(<CefThreadId>threadID)
 
-# -------------------
-
-cdef CefStringToPyString(CefString& cefString):
-
-	cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
-	cdef int charstr_size = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, NULL, 0, NULL, NULL)
-	cdef char* charstr = <char*>malloc(charstr_size*sizeof(char))
-	WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, charstr, charstr_size, NULL, NULL)
-	pystring = "" + charstr # "" is required to make a copy of char* otherwise you will get a pointer that will be freed on next line.
-	free(charstr)
-	return pystring

@@ -9,7 +9,7 @@
 
 def wm_SetFocus(windowID, msg, wparam, lparam):
 	
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByWindowID(windowID)
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID)
 	if <void*>cefBrowser == NULL:
 		return
 
@@ -22,7 +22,7 @@ def wm_Size(windowID, msg, wparam, lparam):
 
 	if __debug: print "WM_SIZE"
 	
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByWindowID(windowID)
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID)
 	if <void*>cefBrowser == NULL:
 		return
 
@@ -43,7 +43,7 @@ def wm_Size(windowID, msg, wparam, lparam):
 
 def wm_EraseBkgnd(windowID, msg, wparam, lparam):
 	
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByWindowID(windowID)
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID)
 	if <void*>cefBrowser == NULL:
 		return
 

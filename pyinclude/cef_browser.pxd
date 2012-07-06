@@ -2,49 +2,60 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cimport windows
-cimport cef_ptr
+from windows cimport HWND
+from cef_ptr cimport CefRefPtr
 cimport cef_win
-cimport cef_string
+from cef_string cimport CefString
 cimport cef_client
-cimport cef_type_wrappers
+from cef_type_wrappers cimport CefSettings, CefBrowserSettings
 from libcpp cimport bool as cbool
 from libcpp.vector cimport vector
-cimport cef_frame
+from cef_frame cimport CefFrame
 
 cdef extern from "include/cef_browser.h":
 	
 	cdef cppclass CefBrowser:
+
+		cbool CanGoBack()
+		cbool CanGoForward()
+		void ClearHistory()
+		void CloseBrowser()
+		void CloseDevTools()
+		void Find(int identifier, CefString& searchText, cbool forward, cbool matchCase, cbool findNext)
+		CefRefPtr[CefFrame] GetFocusedFrame()
+		CefRefPtr[CefFrame] GetFrame(CefString& name)
+		void GetFrameNames(vector[CefString]& names)
+		# bool GetImage( CefBrowser::PaintElementType type, int width, int height, void* buffer )
+		CefRefPtr[CefFrame] GetMainFrame()
+		HWND GetOpenerWindowHandle()
+		# bool GetSize( CefBrowser::PaintElementType type, int& width, int& height )
+		HWND GetWindowHandle()
+		double GetZoomLevel()
+		void GoBack()
+		void GoForward()
+		cbool HasDocument()
+		void HidePopup()
+
+		# ----------------------
 		
 		void ParentWindowWillClose()
-		void CloseBrowser()
-		windows.HWND GetWindowHandle()
-		windows.HWND GetOpenerWindowHandle()
+		
+		void SetZoomLevel(double zoomLevel)
 		
 		void ShowDevTools()
-		void CloseDevTools()
 		
-		cbool CanGoBack()
-		void GoBack()
-		cbool CanGoForward()
-		void GoForward()
 		void Reload()
 		void ReloadIgnoreCache()
 		void StopLoad()
 
 		cbool IsPopup()
-		cbool HasDocument()
-		cef_ptr.CefRefPtr[cef_frame.CefFrame] GetMainFrame()
-		cef_ptr.CefRefPtr[cef_frame.CefFrame] GetFocusedFrame()
-		cef_ptr.CefRefPtr[cef_frame.CefFrame] GetFrame(cef_string.CefString& name)
-		void GetFrameNames(vector[cef_string.CefString]& names)
 
 
 cdef extern from "include/cef_browser.h" namespace "CefBrowser":
 	
 	# Namespace is also a way to import a static method.	
-	cdef cef_ptr.CefRefPtr[CefBrowser] CreateBrowserSync(
+	cdef CefRefPtr[CefBrowser] CreateBrowserSync(
 		cef_win.CefWindowInfo, 
-		cef_ptr.CefRefPtr[cef_client.CefClient], 
-		cef_string.CefString,
-		cef_type_wrappers.CefBrowserSettings)
+		CefRefPtr[cef_client.CefClient], 
+		CefString,
+		CefBrowserSettings)

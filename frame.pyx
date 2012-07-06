@@ -10,7 +10,7 @@
 cdef map[cef_types.int64, CefRefPtr[CefFrame]] __cefFrames
 __pyFrames = {}
 
-class Frame:
+class PyFrame:
 
 	frameID = 0
 
@@ -34,4 +34,15 @@ class Frame:
 			startLine = -1
 
 		(<CefFrame*>(cefFrame.get())).ExecuteJavaScript(cefJsCode, cefScriptURL, <int>startLine)
+
+	def GetURL(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		cdef CefString cefURL = (<CefFrame*>(cefFrame.get())).GetURL()
+		return CefStringToPyString(cefURL)
 		
+	def IsMain(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		return (<CefFrame*>(cefFrame.get())).IsMain()
+
