@@ -35,6 +35,7 @@ cdef extern from "include/cef_browser.h":
 		void GoForward()
 		cbool HasDocument()
 		void HidePopup()
+		# void Invalidate( const CefRect& dirtyRect )
 
 		# ----------------------
 		

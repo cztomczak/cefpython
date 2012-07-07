@@ -105,14 +105,16 @@ class PyBrowser:
 		self.topWindowID = 0
 		self.innerWindowID = 0
 		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose()
-		(<CefBrowser*>(cefBrowser.get())).CloseBrowser()		
+
+		# This is probably not needed, turning it off, maybe it will fix memory read errors when closing app?
+		#(<CefBrowser*>(cefBrowser.get())).CloseBrowser()
 
 	def CloseDevTools(self):
 		
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.innerWindowID))
 		(<CefBrowser*>(cefBrowser.get())).CloseDevTools()
 
-	def Find(self, identifier, searchText, forward, matchCase, findNext):
+	def Find(self, searchID, searchText, forward, matchCase, findNext):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.innerWindowID))
 
@@ -120,7 +122,7 @@ class PyBrowser:
 		cefSearchText.FromASCII(<char*>searchText)
 
 		(<CefBrowser*>(cefBrowser.get())).Find(
-			<int>identifier, cefSearchText, <cbool>bool(forward), <cbool>bool(matchCase), <cbool>bool(findNext))
+			<int>searchID, cefSearchText, <cbool>bool(forward), <cbool>bool(matchCase), <cbool>bool(findNext))
 
 	def GetFocusedFrame(self):
 

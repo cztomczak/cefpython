@@ -93,7 +93,7 @@ def DestroyWindow(windowID):
 	classname = GetWindowClassname(windowID)
 	win32gui.UnregisterClass(classname, None)
 	del __windows[windowID] # Let window with this classname be created again.
-
+	
 
 def GetWindowClassname(windowID):
 

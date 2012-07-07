@@ -18,6 +18,7 @@ def CloseApplication(windowID, msg, wparam, lparam):
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
 	cefwindow.DestroyWindow(windowID)
+	return 0 # If an application processes this message, it should return zero.
 
 def QuitApplication(windowID, msg, wparam, lparam):
 
@@ -68,10 +69,10 @@ def CefAdvanced():
 def DocumentReady(browser, frame):
 	
 	print "OnLoadStart(): frame URL: %s" % frame.GetURL()
-	if frame.IsMain():
-		return	
 	browser.GetMainFrame().ExecuteJavascript("window.open('about:blank', '', 'width=500,height=500')")
-	#print "HidePopup(): %s" % browser.HidePopup()
+	if frame.IsMain():
+		return
+	print "HidePopup(): %s" % browser.HidePopup()
 
 def OnLoadError(browser, frame, errorCode, failedURL, errorText):
 
@@ -96,16 +97,17 @@ def ModalWindow():
 
 
 def ResizeWindow():
-	# main window, popup and modal
+	cefwindow.MoveWindow(windowID, width=500, height=500)
 	pass
 
 
 def MoveWindow():
-	# main window, popup and modal
+	cefwindow.MoveWindow(windowID, xpos=0, ypos=0)
 	pass
 
 
 def DeveloperTools():
+	browser.ShowDevTools()
 	pass
 
 

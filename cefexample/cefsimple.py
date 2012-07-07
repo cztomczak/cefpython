@@ -5,20 +5,26 @@ import cefpython
 import cefwindow
 import win32con
 import win32gui
+import sys
 
-def QuitApplication(windowID, msg, wparam, lparam):
+def CloseApplication(windowID, msg, wparam, lparam):
 	
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
 	cefwindow.DestroyWindow(windowID)
+
+def QuitApplication(windowID, msg, wparam, lparam):
+
 	win32gui.PostQuitMessage(0)
+	return 0
 
 def CefSimple():
 
-	sys.excepthook = cefpython.ExceptHook # In case of exception display it, write to error.log, shutdown CEF and exit application.
+	sys.excepthook = cefpython.ExceptHook
 	cefpython.Initialize({"multi_threaded_message_loop": False})
 	wndproc = {
-		win32con.WM_CLOSE: QuitApplication, 
+		win32con.WM_CLOSE: CloseApplication, 
+		win32con.WM_DESTROY: QuitApplication,
 		win32con.WM_SIZE: cefpython.wm_Size,
 		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
 		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd

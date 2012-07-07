@@ -43,9 +43,10 @@ icon.ico
 
 CHANGELOG.
 
-Version xx released on xx.
- * More api for the Browser object, developer tools and others.
-
+Version 0.25 released on 2012-07-07.
+ * Browser object is almost ready, Frame still needs some work.
+ * Client handlers are starting to work, implemented LoadHandler.
+ 
 Version 0.22 released on 2012-07-02.
  * Object oriented model for the Browser api
  * Removed cefwindow as a dependency of cefpython module.
