@@ -46,7 +46,6 @@ __debug = False
 
 # Client handler.
 cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]?>new ClientHandler()
-__handlers = {}
 
 
 def ExceptHook(type, value, traceobject):
