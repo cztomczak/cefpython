@@ -2,8 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from cef_ptr cimport *
-from cef_browser cimport *
+include "imports.pyx"
+include "utils.pyx"
 
 # Global variables.
 
@@ -95,6 +95,10 @@ class PyBrowser:
 		(<CefBrowser*>(cefBrowser.get())).ClearHistory()
 
 	def CloseBrowser(self):
+
+		global __cefBrowsers
+		global __pyBrowsers
+		global __browserInnerWindows
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.innerWindowID))
 		__cefBrowsers.erase(<int>self.innerWindowID)		

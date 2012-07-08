@@ -2,70 +2,35 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-import os
-import sys
-import win32con
-import win32gui
-import win32api
-import cython
-import traceback
-import time
-
-from libcpp cimport bool as cbool
-from libcpp.map cimport map
-from libcpp.vector cimport vector
-from cython.operator cimport preincrement as preinc, dereference as deref # must be "as" otherwise not seen.
-from libc.stdlib cimport malloc, free
-
-# When pyx file cimports * from a pxd file and that cimports * from another pxd
-# then these another names will be visible in pyx file.
-
-# Circular imports are allowed in form "cimport ...",
-# but won't work if you do "from ... cimport *", this
-# is important to know in pxd files.
-
-# <CefRefPtr[ClientHandler]?>new ClientHandler() # <...?> means to throw an error if the cast is not allowed
-
-from windows cimport *
-from cef_string cimport *
-from cef_type_wrappers cimport *
-from cef_task cimport *
-from cef_win cimport *
-from cef_ptr cimport *
-from cef_app cimport *
-from cef_browser cimport *
-from cef_client cimport *
-from clienthandler cimport *
-from cef_frame cimport *
-cimport cef_types
+# All .pyx files need to be included here for Cython compiler.
+include "imports.pyx"
+include "browser.pyx"
+include "frame.pyx"
+include "javascriptbindings.pyx"
+include "loadhandler.pyx"
+include "settings.pyx"
+include "utils.pyx"
+include "wndproc.pyx"
 
 # Global variables.
-
 __debug = False
 
-
 # Client handler.
-cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]?>new ClientHandler()
+cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()
 
 
 def ExceptHook(type, value, traceobject):
-	
+
 	error = "\n".join(traceback.format_exception(type, value, traceobject))
 	if hasattr(sys, "frozen"): path = os.path.dirname(sys.executable)
 	elif "__file__" in locals(): path = os.path.dirname(os.path.realpath(__file__))
 	else: path = os.getcwd()
-	with open(path+"/error.log", "a") as file: 
+	with open("%s/error.log" % path, "a") as file:
 		file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
 	print "\n"+error+"\n"
 	CefQuitMessageLoop()
 	CefShutdown()
 	os._exit(1) # so that "finally" does not execute
-
-
-def GetLastError():
-	
-	code = win32api.GetLastError()
-	return "(%d) %s" % (code, win32api.FormatMessage(code))
 
 def __InitializeClientHandler():
 
@@ -183,18 +148,4 @@ def Shutdown():
 	if __debug: print "CefShutdown()"
 	CefShutdown()
 	if __debug: print "GetLastError(): %s" % GetLastError()	
-
-
-# ------------------
-
-cimport cef_types
-
-TID_UI = cef_types.TID_UI
-TID_IO = cef_types.TID_IO
-TID_FILE = cef_types.TID_FILE
-
-def CurrentlyOn(threadID):
-
-	threadID = <int>int(threadID)
-	return CefCurrentlyOn(<CefThreadId>threadID)
 

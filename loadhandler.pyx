@@ -1,6 +1,10 @@
 # Copyright (c) 2012 CefPython Authors. All rights reserved.
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
+from Cython.Shadow import gil
+
+include "imports.pyx"
+include "utils.pyx"
 
 def InitializeLoadHandler():
 
@@ -9,6 +13,7 @@ def InitializeLoadHandler():
 	# in function arguments.
 
 	# CefLoadHandler callbacks.
+	global __clientHandler
 	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadEnd(<OnLoadEnd_type>LoadHandler_OnLoadEnd)
 	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadStart(<OnLoadStart_type>LoadHandler_OnLoadStart)
 	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadError(<OnLoadError_type>LoadHandler_OnLoadError)
@@ -55,6 +60,10 @@ cdef cbool LoadHandler_OnLoadError(CefRefPtr[CefBrowser] cefBrowser,
 			cef_types.cef_handler_errorcode_t errorCode,
 			CefString& failedURL,
 			CefString& errorText) with gil:
+
+	# These & in "CefString& failedURL" are very important, otherwise you get memory
+	# errors and win32 exception. Pycharm suggests that "statement has no effect",
+	# but he is so wrong.
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)

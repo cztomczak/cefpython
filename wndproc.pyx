@@ -2,6 +2,9 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "imports.pyx"
+include "utils.pyx"
+
 # Note: pywin32 does not send WM_CREATE message.
 
 # WM_SETFOCUS and others must be in lower or camel case as we import
@@ -20,6 +23,7 @@ def wm_SetFocus(windowID, msg, wparam, lparam):
 
 def wm_Size(windowID, msg, wparam, lparam):
 
+	global __debug
 	if __debug: print "WM_SIZE"
 	
 	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID)
@@ -35,8 +39,8 @@ def wm_Size(windowID, msg, wparam, lparam):
 	if __debug: print "rect2: %d %d %d %d" % (rect2.left, rect2.top, rect2.right, rect2.bottom)
 	
 	cdef HDWP hdwp = BeginDeferWindowPos(<int>1)
-	hdwp = DeferWindowPos(hdwp, innerHwnd, NULL, rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top, SWP_NOZORDER);
-	EndDeferWindowPos(hdwp);
+	hdwp = DeferWindowPos(hdwp, innerHwnd, NULL, rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top, SWP_NOZORDER)
+	EndDeferWindowPos(hdwp)
 
 	if __debug: print "GetLastError(): %s" % GetLastError()	
 	

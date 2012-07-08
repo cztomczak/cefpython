@@ -7,12 +7,14 @@ import win32con
 import win32gui
 import sys
 
+#noinspection PyUnusedLocal
 def CloseApplication(windowID, msg, wparam, lparam):
 	
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
 	cefwindow.DestroyWindow(windowID)
 
+#noinspection PyUnusedLocal
 def QuitApplication(windowID, msg, wparam, lparam):
 
 	win32gui.PostQuitMessage(0)

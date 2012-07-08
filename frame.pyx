@@ -2,6 +2,9 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "imports.pyx"
+include "utils.pyx"
+
 # id: (int64 = long in python) CefFrame.GetIdentifier() - globally unique identifier.
 # In Python 2 there is: int (32 bit) long (64 bit).
 # In Python 3 there will be only int (64 bit).
@@ -17,6 +20,10 @@ class PyFrame:
 	def __init__(self, frameID):
 
 		self.frameID = frameID
+
+	def CallJavascript(self, funcName):
+
+		pass
 
 	def ExecuteJavascript(self, jsCode, scriptURL=None, startLine=None):
 

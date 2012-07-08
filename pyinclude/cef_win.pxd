@@ -3,6 +3,7 @@
 # Website: http://code.google.com/p/cefpython/
 
 from windows cimport HWND, RECT
+from Cython.Shadow import void
 
 cdef extern from "include/internal/cef_win.h":
 	ctypedef void* CefWindowHandle

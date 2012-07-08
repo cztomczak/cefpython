@@ -2,7 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cimport cef_types
+include "imports.pyx"
+
 
 LOGSEVERITY_VERBOSE = <int>cef_types.LOGSEVERITY_VERBOSE
 LOGSEVERITY_INFO = <int>cef_types.LOGSEVERITY_INFO
@@ -11,7 +12,6 @@ LOGSEVERITY_ERROR = <int>cef_types.LOGSEVERITY_ERROR
 LOGSEVERITY_ERROR_REPORT = <int>cef_types.LOGSEVERITY_ERROR_REPORT
 LOGSEVERITY_DISABLE = <int>cef_types.LOGSEVERITY_DISABLE
 
-cimport cef_types_win
 
 ANGLE_IN_PROCESS = <int>cef_types_win.ANGLE_IN_PROCESS
 ANGLE_IN_PROCESS_COMMAND_BUFFER = <int>cef_types_win.ANGLE_IN_PROCESS_COMMAND_BUFFER

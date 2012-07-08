@@ -23,6 +23,9 @@ def CreateWindow(title, classname, width, height, xpos=None, ypos=None, icon=Non
 	if not wndproc:
 		wndproc = {win32con.WM_CLOSE: WM_CLOSE}
 
+	bigIcon = ""
+	smallIcon = ""
+
 	if icon:
 		if icon.find("/") == -1 and icon.find("\\") == -1:
 			icon = "%s%s%s" % (os.getcwd(), os.sep, icon)
@@ -49,6 +52,7 @@ def CreateWindow(title, classname, width, height, xpos=None, ypos=None, icon=Non
 	wndclass.hCursor = win32gui.LoadCursor(0, win32con.IDC_ARROW)
 	wndclass.lpfnWndProc = wndproc
 
+	#noinspection PyUnusedLocal
 	atomclass = win32gui.RegisterClass(wndclass)
 
 	if __debug:
@@ -104,10 +108,10 @@ def GetWindowClassname(windowID):
 def MoveWindow(windowID, xpos=None, ypos=None, width=None, height=None, center=None):
 
 	(left, top, right, bottom) = win32gui.GetWindowRect(windowID)
-	if xpos == None and ypos == None:
+	if xpos is None and ypos is None:
 		xpos = left
 		ypos = top
-	if width == None and height == None:
+	if width is None and height is None:
 		width = right - left
 		height = bottom - top
 	# Case: only ypos provided
@@ -130,6 +134,7 @@ def MoveWindow(windowID, xpos=None, ypos=None, width=None, height=None, center=N
 	win32gui.MoveWindow(windowID, xpos, ypos, width, height, 1)
 
 
+#noinspection PyUnusedLocal
 def WM_CLOSE(windowID, msg, wparam, lparam):
 	
 	DestroyWindow(windowID)
@@ -141,10 +146,10 @@ def GetLastError():
 	code = win32api.GetLastError()
 	return "(%d) %s" % (code, win32api.FormatMessage(code))
 
-
+#noinspection PyUnusedLocal
 def MessageLoop(classname):
 	
-	while win32gui.PumpWaitingMessages() == 0:
+	while not win32gui.PumpWaitingMessages():
 		time.sleep(0.001)
 
 
