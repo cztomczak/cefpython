@@ -1,16 +1,22 @@
 del "cefexample\cefpython.pyd"
-del "setup\cefpython.pyx"
 del "setup\cefpython.pyd"
-del "setup\cefpython.cpp"
-rmdir /S /Q "setup/build"
 
-REM copy all src\*.pyx to src\setup\:
-for /R %~dp0\ %%f in (*.pyx) do copy %%f %~dp0\setup\
+for /R %~dp0setup\ %%f in (*.pyx) do del "%%f"
+
+rmdir /S /Q "%dp0setup\build\"
+
+REM copy all src\*.pyx to src\setup\ - commentint out, as it copies recursively from all subdirectories.
+REM for /R %~dp0 %%f in (*.pyx) do del "%%f"
 
 cd "setup"
 
-call python "mergepyxfiles.py"
+call python "fixincludes.py"
 call python "setup.py" build_ext --inplace
+
+for /R %~dp0setup\ %%f in (*.pyx) do del "%%f"
+
+REM %~dp0 doesn't work with rmdir.
+rmdir /S /Q "build\"
 
 @if %ERRORLEVEL% neq 0 pause
 @if %ERRORLEVEL% neq 0 exit

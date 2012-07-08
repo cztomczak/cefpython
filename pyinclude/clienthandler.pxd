@@ -7,8 +7,9 @@ from cef_ptr cimport CefRefPtr
 from cef_browser cimport CefBrowser
 from cef_frame cimport CefFrame
 cimport cef_types
-from libcpp cimport bool as cbool
 from cef_string cimport CefString
+from Cython.Shadow import void
+from libcpp cimport bool as cbool
 
 cdef extern from "clienthandler.h":
 

@@ -6,13 +6,10 @@ import cefpython # cefpython.pyd
 import cefwindow
 import win32con # pywin32 extension
 import win32gui
-import os
 import sys
-import traceback
-import time
-import threading
 
 
+#noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
 def CloseApplication(windowID, msg, wparam, lparam):
 	
 	browser = cefpython.GetBrowserByWindowID(windowID)
@@ -20,6 +17,8 @@ def CloseApplication(windowID, msg, wparam, lparam):
 	cefwindow.DestroyWindow(windowID)
 	return 0 # If an application processes this message, it should return zero.
 
+
+#noinspection PyUnusedLocal
 def QuitApplication(windowID, msg, wparam, lparam):
 
 	# If you put PostQuitMessage() in WM_CLOSE event (CloseApplication) 
@@ -37,7 +36,7 @@ def CefAdvanced():
 	cefwindow.__debug = True # Whether to print debug output to console.
 	cefpython.__debug = True
 
-	appSettings = {} # See: http://code.google.com/p/cefpython/wiki/AppSettings
+	appSettings = dict() # See: http://code.google.com/p/cefpython/wiki/AppSettings
 	appSettings["multi_threaded_message_loop"] = False
 	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
 	cefpython.Initialize(appSettings)
@@ -51,12 +50,12 @@ def CefAdvanced():
 	}
 	windowID = cefwindow.CreateWindow("CefAdvanced", "cefadvanced", 800, 600, None, None, "icon.ico", wndproc)
 
-	browserSettings = {} # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
+	browserSettings = dict() # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings["history_disabled"] = False
 	browserSettings["universal_access_from_file_urls_allowed"] = True
 	browserSettings["file_access_from_file_urls_allowed"] = True
 	
-	handlers = {}
+	handlers = dict()
 	handlers["OnLoadStart"] = DocumentReady
 	handlers["OnLoadError"] = OnLoadError
 
@@ -97,17 +96,17 @@ def ModalWindow():
 
 
 def ResizeWindow():
-	cefwindow.MoveWindow(windowID, width=500, height=500)
+	#cefwindow.MoveWindow(windowID, width=500, height=500)
 	pass
 
 
 def MoveWindow():
-	cefwindow.MoveWindow(windowID, xpos=0, ypos=0)
+	#cefwindow.MoveWindow(windowID, xpos=0, ypos=0)
 	pass
 
 
 def DeveloperTools():
-	browser.ShowDevTools()
+	#browser.ShowDevTools()
 	pass
 
 

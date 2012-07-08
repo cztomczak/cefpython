@@ -1,3 +1,13 @@
+# Copyright (c) 2012 CefPython Authors. All rights reserved.
+# License: New BSD License.
+# Website: http://code.google.com/p/cefpython/
+
+# THIS FILE IS NO MORE USED, we have refactored the code and
+# now using includes, see "fixincludes.py" for a new solution.
+
+print "mergepyxfiles.pyx: OFF, not used anymore."
+exit()
+
 # Merges many .pyx files from the upper directory into one big .pyx file.
 
 mainfile = "cefpython.pyx"

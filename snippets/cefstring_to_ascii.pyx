@@ -1,4 +1,3 @@
-
 print "Converting back cefUrl to ascii:"
 cdef wchar_t* urlwide = <wchar_t*> cefUrl.c_str()
 cdef int urlascii_size = WideCharToMultiByte(CP_UTF8, 0, urlwide, -1, NULL, 0, NULL, NULL)
