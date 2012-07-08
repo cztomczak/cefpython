@@ -1,3 +1,7 @@
-build/
-setup/build/
+/build/
+/setup/build/
 *.pyc
+
+# If you want to ignore an already commited directory run:
+# git rm --cached -r .idea
+/.idea/

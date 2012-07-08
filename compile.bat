@@ -4,7 +4,8 @@ del "setup\cefpython.pyd"
 del "setup\cefpython.cpp"
 rmdir /S /Q "setup/build"
 
-REM for /R %~dp0\pyinclude\ %%f in (*.pxd) do copy %%f %~dp0\setup\
+REM copy all src\*.pyx to src\setup\:
+for /R %~dp0\ %%f in (*.pyx) do copy %%f %~dp0\setup\
 
 cd "setup"
 
