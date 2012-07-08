@@ -69,10 +69,10 @@ def CefAdvanced():
 def DocumentReady(browser, frame):
 	
 	print "OnLoadStart(): frame URL: %s" % frame.GetURL()
-	browser.GetMainFrame().ExecuteJavascript("window.open('about:blank', '', 'width=500,height=500')")
+	#browser.GetMainFrame().ExecuteJavascript("window.open('about:blank', '', 'width=500,height=500')")
 	if frame.IsMain():
 		return
-	print "HidePopup(): %s" % browser.HidePopup()
+	#print "HidePopup(): %s" % browser.HidePopup()
 
 def OnLoadError(browser, frame, errorCode, failedURL, errorText):
 

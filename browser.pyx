@@ -2,6 +2,9 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+from cef_ptr cimport *
+from cef_browser cimport *
+
 # Global variables.
 
 cdef map[int, CefRefPtr[CefBrowser]] __cefBrowsers # innerWindowID : browser
@@ -25,7 +28,7 @@ class PyBrowser:
 	handlers = {}
 	
 	def __init__(self, topWindowID, innerWindowID, handlers):
-		
+
 		self.topWindowID = topWindowID
 		self.innerWindowID = innerWindowID
 		

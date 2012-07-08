@@ -21,7 +21,7 @@ class JavascriptBindings:
 	def SetProperty(self, name, value):
 
 		allowed = self.__IsTypeAllowed(value) # returns True or string.
-		if allowed != True:
+		if allowed is not True:
 			raise Exception("JavascriptBindings.SetProperty(): not allowed type: %s" % allowed)
 		self.__properties[name] = value
 	
@@ -39,13 +39,13 @@ class JavascriptBindings:
 		valueType = type(value) 
 		if valueType == types.ListType:
 			for val in value:
-				valueType2 = self.__IsTypeAllowed(val):
-				if valueType2 != True:
+				valueType2 = self.__IsTypeAllowed(val)
+				if valueType2 is not True:
 					return valueType2.__name__
 			return True
-		elif valueType == types.BoolType:
+		elif valueType == types.BooleanType:
 			return True
-		elif valueType == types.DoubleType:
+		elif valueType == types.FloatType:
 			return True
 		elif valueType == types.IntType:
 			return True
@@ -53,12 +53,11 @@ class JavascriptBindings:
 			return True
 		elif valueType == types.DictType:
 			for key in value:
-				valueType2 = self.__IsTypeAllowed(value[key]):
-				if valueType2 != True:
+				valueType2 = self.__IsTypeAllowed(value[key])
+				if valueType2 is not True:
 					return valueType2.__name__
 			return True
 		elif valueType == types.StringType:
 			return True
 		else:
 			return valueType.__name__
-		return valueType.__name__
