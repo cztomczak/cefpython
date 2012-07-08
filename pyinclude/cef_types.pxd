@@ -19,6 +19,7 @@ cdef extern from "include/internal/cef_types.h":
 	
 	ctypedef long long int64
 
+	# LoadHandler > OnLoadError - ErrorCode.
 	cdef enum cef_handler_errorcode_t:
 		ERR_FAILED = -2,
 		ERR_ABORTED = -3,
@@ -68,3 +69,10 @@ cdef extern from "include/internal/cef_types.h":
 		ERR_RESPONSE_HEADERS_TOO_BIG = -325,
 		ERR_CACHE_MISS = -400,
 		ERR_INSECURE_RESPONSE = -501,
+
+	# KeyboardHandler > OnKeyEvent - KeyEventType.
+	enum cef_handler_keyevent_type_t:
+		KEYEVENT_RAWKEYDOWN = 0,
+		KEYEVENT_KEYDOWN,
+		KEYEVENT_KEYUP,
+		KEYEVENT_CHAR

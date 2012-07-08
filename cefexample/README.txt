@@ -43,6 +43,10 @@ icon.ico
 
 CHANGELOG.
 
+Version 0.26 released on 2012-07-08.
+ * Implemented KeyboardHandler
+ * cefadvanced.py: example of binding F12 key to open Developer tools, and F5 to refresh page.
+
 Version 0.25 released on 2012-07-07.
  * Browser object is almost ready, Frame still needs some work.
  * Client handlers are starting to work, implemented LoadHandler.

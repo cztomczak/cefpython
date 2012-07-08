@@ -17,18 +17,32 @@ cdef extern from "clienthandler.h":
 
 	# CefLoadHandler types.
 
-	ctypedef void (*OnLoadEnd_type)(CefRefPtr[CefBrowser] browser,
-			 CefRefPtr[CefFrame] frame,
-			 int httpStatusCode)
+	ctypedef void (*OnLoadEnd_type)(
+			CefRefPtr[CefBrowser] browser,
+			CefRefPtr[CefFrame] frame,
+			int httpStatusCode)
 
-	ctypedef void (*OnLoadStart_type)(CefRefPtr[CefBrowser] browser,
+	ctypedef void (*OnLoadStart_type)(
+			CefRefPtr[CefBrowser] browser,
 			CefRefPtr[CefFrame] frame)
 	
-	ctypedef cbool (*OnLoadError_type)(CefRefPtr[CefBrowser] browser,
+	ctypedef cbool (*OnLoadError_type)(
+			CefRefPtr[CefBrowser] browser,
 			CefRefPtr[CefFrame] frame,
 			cef_types.cef_handler_errorcode_t errorCode,
 			CefString& failedUrl,
 			CefString& errorText)
+
+	# CefKeyboardHandler types.
+
+	ctypedef cbool (*OnKeyEvent_type)(
+			CefRefPtr[CefBrowser] browser,
+			cef_types.cef_handler_keyevent_type_t eventType,
+			int keyCode,
+			int modifiers,
+			cbool isSystemKey,
+			cbool isAfterJavascript)
+
 	
 	# ClientHandler class.
 	
@@ -39,5 +53,9 @@ cdef extern from "clienthandler.h":
 		void SetCallback_OnLoadEnd(OnLoadEnd_type)
 		void SetCallback_OnLoadStart(OnLoadStart_type)
 		void SetCallback_OnLoadError(OnLoadError_type)
+
+		# CefKeyboardHandler callbacks.
+
+		void SetCallback_OnKeyEvent(OnKeyEvent_type)
 
 	

@@ -8,9 +8,11 @@ include "browser.pyx"
 include "frame.pyx"
 include "javascriptbindings.pyx"
 include "loadhandler.pyx"
+include "keyboardhandler.pyx"
 include "settings.pyx"
 include "utils.pyx"
 include "wndproc.pyx"
+include "virtualkeys.pyx"
 
 # Global variables.
 __debug = False
@@ -35,6 +37,7 @@ def ExceptHook(type, value, traceobject):
 def __InitializeClientHandler():
 
 	InitializeLoadHandler()
+	InitializeKeyboardHandler()
 
 def Initialize(appSettings):
 

@@ -43,5 +43,5 @@ from cef_browser cimport *
 from cef_client cimport *
 from clienthandler cimport *
 from cef_frame cimport *
-cimport cef_types
-cimport cef_types_win
+cimport cef_types # cannot cimport *, that would cause name conflicts with constants.
+cimport cef_types_win # same as cef_types.

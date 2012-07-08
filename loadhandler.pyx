@@ -1,7 +1,6 @@
 # Copyright (c) 2012 CefPython Authors. All rights reserved.
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
-from Cython.Shadow import gil
 
 include "imports.pyx"
 include "utils.pyx"
@@ -18,9 +17,10 @@ def InitializeLoadHandler():
 	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadStart(<OnLoadStart_type>LoadHandler_OnLoadStart)
 	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadError(<OnLoadError_type>LoadHandler_OnLoadError)
 
-cdef void LoadHandler_OnLoadEnd(CefRefPtr[CefBrowser] cefBrowser,
-			 CefRefPtr[CefFrame] cefFrame,
-			 int httpStatusCode) with gil:
+cdef void LoadHandler_OnLoadEnd(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefRefPtr[CefFrame] cefFrame,
+		int httpStatusCode) with gil:
 	
 	# Need try..except otherwise the error will be ignored and only printed to output console,
 	# this is the default behavior of Cython, you need to add "except -1" or "except *" in
@@ -42,7 +42,8 @@ cdef void LoadHandler_OnLoadEnd(CefRefPtr[CefBrowser] cefBrowser,
 		sys.excepthook(type, value, traceobject)
 
 
-cdef void LoadHandler_OnLoadStart(CefRefPtr[CefBrowser] cefBrowser,
+cdef void LoadHandler_OnLoadStart(
+		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame) with gil:
 
 	try:
@@ -55,11 +56,13 @@ cdef void LoadHandler_OnLoadStart(CefRefPtr[CefBrowser] cefBrowser,
 		(type, value, traceobject) = sys.exc_info()
 		sys.excepthook(type, value, traceobject)
 
-cdef cbool LoadHandler_OnLoadError(CefRefPtr[CefBrowser] cefBrowser,
-			CefRefPtr[CefFrame] cefFrame,
-			cef_types.cef_handler_errorcode_t errorCode,
-			CefString& failedURL,
-			CefString& errorText) with gil:
+
+cdef cbool LoadHandler_OnLoadError(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefRefPtr[CefFrame] cefFrame,
+		cef_types.cef_handler_errorcode_t errorCode,
+		CefString& failedURL,
+		CefString& errorText) with gil:
 
 	# These & in "CefString& failedURL" are very important, otherwise you get memory
 	# errors and win32 exception. Pycharm suggests that "statement has no effect",
@@ -70,7 +73,9 @@ cdef cbool LoadHandler_OnLoadError(CefRefPtr[CefBrowser] cefBrowser,
 		pyFrame = GetPyFrameByCefFrame(cefFrame)	
 		handler = pyBrowser.GetHandler("OnLoadError")
 		if handler:
-			handler(pyBrowser, pyFrame, errorCode, CefStringToPyString(failedURL), CefStringToPyString(errorText))
+			return <cbool>bool(handler(pyBrowser, pyFrame, errorCode, CefStringToPyString(failedURL), CefStringToPyString(errorText)))
+		else:
+			return <cbool>False
 	except:
 		(type, value, traceobject) = sys.exc_info()
 		sys.excepthook(type, value, traceobject)
