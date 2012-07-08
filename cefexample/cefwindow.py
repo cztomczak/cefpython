@@ -10,18 +10,18 @@ import math
 import os
 
 __debug = False
-__windows = {} # windowID(int): classname
+__windows = {} # windowID(int): className
 
 
-def CreateWindow(title, classname, width, height, xpos=None, ypos=None, icon=None, wndproc=None):
+def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=None, windowProc=None):
 
 	for key in __windows:
-		if __windows[key] == classname:
-			raise Exception("There was already created a window with that classname: %s."
-				"Each created window must have an unique classname." % classname)			
+		if __windows[key] == className:
+			raise Exception("There was already created a window with that className: %s."
+				"Each created window must have an unique className." % className)			
 
-	if not wndproc:
-		wndproc = {win32con.WM_CLOSE: WM_CLOSE}
+	if not windowProc:
+		windowProc = {win32con.WM_CLOSE: WM_CLOSE}
 
 	bigIcon = ""
 	smallIcon = ""
@@ -46,11 +46,11 @@ def CreateWindow(title, classname, width, height, xpos=None, ypos=None, icon=Non
 
 	wndclass = win32gui.WNDCLASS()
 	wndclass.hInstance = win32api.GetModuleHandle(None)
-	wndclass.lpszClassName = classname
+	wndclass.lpszClassName = className
 	wndclass.style = win32con.CS_GLOBALCLASS | win32con.CS_VREDRAW | win32con.CS_HREDRAW
 	wndclass.hbrBackground = win32con.COLOR_WINDOW
 	wndclass.hCursor = win32gui.LoadCursor(0, win32con.IDC_ARROW)
-	wndclass.lpfnWndProc = wndproc
+	wndclass.lpfnWndProc = windowProc
 
 	#noinspection PyUnusedLocal
 	atomclass = win32gui.RegisterClass(wndclass)
@@ -70,11 +70,11 @@ def CreateWindow(title, classname, width, height, xpos=None, ypos=None, icon=Non
 		if xpos < 0: xpos = 0
 		if ypos < 0: ypos = 0
 
-	windowID = win32gui.CreateWindow(classname, title,
+	windowID = win32gui.CreateWindow(className, title,
 			win32con.WS_OVERLAPPEDWINDOW | win32con.WS_CLIPCHILDREN | win32con.WS_VISIBLE,
 			xpos, ypos, width, height, # xpos, ypos, width, height
 			0, 0, wndclass.hInstance, None)
-	__windows[windowID] = classname
+	__windows[windowID] = className
 
 	if icon:
 		if bigIcon:
@@ -94,12 +94,12 @@ def CreateWindow(title, classname, width, height, xpos=None, ypos=None, icon=Non
 def DestroyWindow(windowID):
 	
 	win32gui.DestroyWindow(windowID)
-	classname = GetWindowClassname(windowID)
-	win32gui.UnregisterClass(classname, None)
-	del __windows[windowID] # Let window with this classname be created again.
+	className = GetWindowClassName(windowID)
+	win32gui.UnregisterClass(className, None)
+	del __windows[windowID] # Let window with this className be created again.
 	
 
-def GetWindowClassname(windowID):
+def GetWindowClassName(windowID):
 
 	for key in __windows:
 		if key == windowID:
@@ -147,7 +147,7 @@ def GetLastError():
 	return "(%d) %s" % (code, win32api.FormatMessage(code))
 
 #noinspection PyUnusedLocal
-def MessageLoop(classname):
+def MessageLoop(className):
 	
 	while not win32gui.PumpWaitingMessages():
 		time.sleep(0.001)

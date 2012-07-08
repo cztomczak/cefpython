@@ -5,24 +5,38 @@
 
 // CefLoadHandler types.
 
-typedef void (*OnLoadEnd_type)(CefRefPtr<CefBrowser> browser,
-			 CefRefPtr<CefFrame> frame,
-			 int httpStatusCode);
+typedef void (*OnLoadEnd_type)(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		int httpStatusCode);
 
-typedef void (*OnLoadStart_type)(CefRefPtr<CefBrowser> browser,
-			   CefRefPtr<CefFrame> frame);
+typedef void (*OnLoadStart_type)(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame);
 	
-typedef bool (*OnLoadError_type)(CefRefPtr<CefBrowser> browser,
-		   CefRefPtr<CefFrame> frame,
-		   cef_handler_errorcode_t errorCode,
-		   const CefString& failedUrl,
-		   CefString& errorText);
+typedef bool (*OnLoadError_type)(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		cef_handler_errorcode_t errorCode,
+		const CefString& failedUrl,
+		CefString& errorText);
+
+// CefKeyboardHandler types.
+
+typedef bool (*OnKeyEvent_type)(
+		CefRefPtr<CefBrowser> browser,
+		cef_handler_keyevent_type_t eventType,
+		int keyCode,
+		int modifiers,
+		bool isSystemKey,
+		bool isAfterJavascript);
 
 // end of types.
-			
+
 
 class ClientHandler : public CefClient,
-				public CefLoadHandler
+				public CefLoadHandler,
+				public CefKeyboardHandler
 {
 public:
 	ClientHandler(){}
@@ -45,7 +59,7 @@ public:
 	{ return NULL; }
 	
 	virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() OVERRIDE
-	{ return NULL; }
+	{ return this; }
 	
 	virtual CefRefPtr<CefMenuHandler> GetMenuHandler() OVERRIDE
 	{ return NULL; }  
@@ -74,49 +88,69 @@ public:
 	// CefLoadHandler methods.
 
 	// OnLoadEnd.
-
 	OnLoadEnd_type OnLoadEnd_callback;
 	void SetCallback_OnLoadEnd(OnLoadEnd_type callback) 
 	{
 		this->OnLoadEnd_callback = callback; 
 	}
-	virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser,
-			 CefRefPtr<CefFrame> frame,
-			 int httpStatusCode) OVERRIDE
+	virtual void OnLoadEnd(
+			CefRefPtr<CefBrowser> browser,
+			CefRefPtr<CefFrame> frame,
+			int httpStatusCode) OVERRIDE
 	{
 		REQUIRE_UI_THREAD();
 		this->OnLoadEnd_callback(browser, frame, httpStatusCode);
 	}
 	
 	// OnLoadStart.
-
 	OnLoadStart_type OnLoadStart_callback;
 	void SetCallback_OnLoadStart(OnLoadStart_type callback)
 	{
 		this->OnLoadStart_callback = callback;
 	}
-	virtual void OnLoadStart(CefRefPtr<CefBrowser> browser,
-			   CefRefPtr<CefFrame> frame) OVERRIDE
+	virtual void OnLoadStart(
+			CefRefPtr<CefBrowser> browser,
+			CefRefPtr<CefFrame> frame) OVERRIDE
 	{
 		REQUIRE_UI_THREAD();
 		this->OnLoadStart_callback(browser, frame);
 	}
 	
 	// OnLoadError.
-
 	OnLoadError_type OnLoadError_callback;
 	void SetCallback_OnLoadError(OnLoadError_type callback)
 	{
 		this->OnLoadError_callback = callback;
 	}
-	virtual bool OnLoadError(CefRefPtr<CefBrowser> browser,
-			   CefRefPtr<CefFrame> frame,
-			   cef_handler_errorcode_t errorCode,
-			   const CefString& failedUrl,
-			   CefString& errorText) OVERRIDE
+	virtual bool OnLoadError(
+			CefRefPtr<CefBrowser> browser,
+			CefRefPtr<CefFrame> frame,
+			cef_handler_errorcode_t errorCode,
+			const CefString& failedUrl,
+			CefString& errorText) OVERRIDE
 	{
 		REQUIRE_UI_THREAD();
 		return this->OnLoadError_callback(browser, frame, errorCode, failedUrl, errorText);
+	}
+
+
+	// CefKeyboardHandler methods.
+
+	OnKeyEvent_type OnKeyEvent_callback;
+	void SetCallback_OnKeyEvent(OnKeyEvent_type callback)
+	{
+		this->OnKeyEvent_callback = callback;
+	}
+	virtual bool OnKeyEvent(
+			CefRefPtr<CefBrowser> browser,
+			cef_handler_keyevent_type_t eventType,
+			int keyCode,
+			int modifiers,
+			bool isSystemKey,
+			bool isAfterJavascript) OVERRIDE
+	{
+		REQUIRE_UI_THREAD();
+		return this->OnKeyEvent_callback(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript);
 	}
 
 	

@@ -5,3 +5,7 @@
 # If you want to ignore an already commited directory run:
 # git rm --cached -r .idea
 /.idea/
+
+# WingIDE project files
+/wingide.wpr
+/wingide.wpu

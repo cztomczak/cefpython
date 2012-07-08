@@ -8,30 +8,20 @@ import win32con # pywin32 extension
 import win32gui
 import sys
 
-
-#noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
 def CloseApplication(windowID, msg, wparam, lparam):
-	
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
 	cefwindow.DestroyWindow(windowID)
 	return 0 # If an application processes this message, it should return zero.
 
-
-#noinspection PyUnusedLocal
 def QuitApplication(windowID, msg, wparam, lparam):
-
 	# If you put PostQuitMessage() in WM_CLOSE event (CloseApplication) 
 	# you will get memory errors when closing application.
 	win32gui.PostQuitMessage(0)
 	return 0
 
-
 def CefAdvanced():
-
-	# Programming API:
-	# http://code.google.com/p/cefpython/wiki/API
-
+	# Programming API: http://code.google.com/p/cefpython/wiki/API
 	sys.excepthook = cefpython.ExceptHook # In case of exception display it, write to error.log, shutdown CEF and exit application.
 	cefwindow.__debug = True # Whether to print debug output to console.
 	cefpython.__debug = True
@@ -51,13 +41,14 @@ def CefAdvanced():
 	windowID = cefwindow.CreateWindow("CefAdvanced", "cefadvanced", 800, 600, None, None, "icon.ico", wndproc)
 
 	browserSettings = dict() # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
-	browserSettings["history_disabled"] = False
+	browserSettings["history_disabled"] = False # Backspace key will act as "History back" action in browser.
 	browserSettings["universal_access_from_file_urls_allowed"] = True
 	browserSettings["file_access_from_file_urls_allowed"] = True
 	
 	handlers = dict()
 	handlers["OnLoadStart"] = DocumentReady
 	handlers["OnLoadError"] = OnLoadError
+	handlers["OnKeyEvent"] = OnKeyEvent
 
 	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers)
 
@@ -66,55 +57,55 @@ def CefAdvanced():
 
 
 def DocumentReady(browser, frame):
-	
 	print "OnLoadStart(): frame URL: %s" % frame.GetURL()
-	#browser.GetMainFrame().ExecuteJavascript("window.open('about:blank', '', 'width=500,height=500')")
 	if frame.IsMain():
 		return
+	#browser.GetMainFrame().ExecuteJavascript("window.open('about:blank', '', 'width=500,height=500')")
 	#print "HidePopup(): %s" % browser.HidePopup()
 
 def OnLoadError(browser, frame, errorCode, failedURL, errorText):
-
 	print "OnLoadError() failedURL: %s, frame = %s" % (failedURL, frame)
 
+def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
+	# Let's bind developer tools to F12 key.
+	if cefpython.VK_F12 == keyCode and 0 == eventType and 1024 == modifiers and not isSystemKey:
+		browser.ShowDevTools()
+		return True
+	# Bind F5 to refresh browser window.
+	elif cefpython.VK_F5 == keyCode and 0 == eventType and 1024 == modifiers and not isSystemKey:
+		browser.ReloadIgnoreCache()
+		return True
+	return False
 
 def JavascriptBindings():
 	# http://code.google.com/p/chromiumembedded/wiki/JavaScriptIntegration
 	pass
 
-
 def JavascriptCallbacks():
 	pass
-
 
 def PopupWindow():
 	pass
 
-
 def ModalWindow():
 	pass
-
 
 def ResizeWindow():
 	#cefwindow.MoveWindow(windowID, width=500, height=500)
 	pass
 
-
 def MoveWindow():
 	#cefwindow.MoveWindow(windowID, xpos=0, ypos=0)
 	pass
-
 
 def DeveloperTools():
 	#browser.ShowDevTools()
 	pass
 
-
 def LoadContentFromZip():
 	# Allow to pack html/css/images to a zip and run content from this file.
 	# Optionally allow to password protect this zip file.
 	pass
-
 
 def LoadContentFromEncryptedZip():
 	# This will be useful only if you protect your python sources by compiling them
@@ -123,7 +114,5 @@ def LoadContentFromEncryptedZip():
 	# See WBEA for implementation.
 	pass
 
-
 if __name__ == "__main__":
-	
 	CefAdvanced()

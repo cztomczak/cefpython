@@ -64,6 +64,8 @@ class PyBrowser:
 		
 		# CefLoadHandler.
 		allowedHandlers += ["OnLoadEnd", "OnLoadError", "OnLoadStart"]
+		# CefKeyboardHandler.
+		allowedHandlers += ["OnKeyEvent"]
 
 		for key in handlers:
 			if key not in allowedHandlers:
