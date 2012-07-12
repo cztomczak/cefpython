@@ -7,12 +7,15 @@ include "imports.pyx"
 include "browser.pyx"
 include "frame.pyx"
 include "javascriptbindings.pyx"
-include "loadhandler.pyx"
-include "keyboardhandler.pyx"
 include "settings.pyx"
 include "utils.pyx"
 include "wndproc.pyx"
+
+include "loadhandler.pyx"
+include "keyboardhandler.pyx"
 include "virtualkeys.pyx"
+include "v8contexthandler.pyx"
+include "functionhandler.pyx"
 
 # Global variables.
 __debug = False
@@ -38,8 +41,9 @@ def __InitializeClientHandler():
 
 	InitializeLoadHandler()
 	InitializeKeyboardHandler()
+	InitializeV8ContextHandler()
 
-def Initialize(appSettings):
+def Initialize(applicationSettings):
 
 	__InitializeClientHandler()
 
@@ -48,16 +52,16 @@ def Initialize(appSettings):
 		print "Welcome to CEF Python bindings!"
 		print "%s\n" % ("--------" * 8)	
 
-	cdef CefSettings cefAppSettings
+	cdef CefSettings cefApplicationSettings
 	cdef CefRefPtr[CefApp] cefApp
 	cdef CefString *cefString
 
-	SetAppSettings(appSettings, &cefAppSettings)
+	SetApplicationSettings(applicationSettings, &cefApplicationSettings)
 
 	if __debug:
-		print "CefInitialize(cefAppSettings, cefApp)"
+		print "CefInitialize(cefApplicationSettings, cefApp)"
 
-	cdef cbool ret = CefInitialize(cefAppSettings, cefApp)
+	cdef cbool ret = CefInitialize(cefApplicationSettings, cefApp)
 
 	if __debug:
 		if ret: print "OK"
@@ -65,10 +69,10 @@ def Initialize(appSettings):
 		print "GetLastError(): %s" % GetLastError()	
 
 
-def CreateBrowser(windowID, browserSettings, navigateURL, handlers=None):
+def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, javascriptBindings=None):
 	
-	if not handlers:
-		handlers = {}
+	if not clientHandlers:
+		clientHandlers = {}
 
 	if __debug: print "cefpython.CreateBrowser()"
 
@@ -115,7 +119,7 @@ def CreateBrowser(windowID, browserSettings, navigateURL, handlers=None):
 
 	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
 	__cefBrowsers[innerWindowID] = cefBrowser
-	__pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, handlers)	
+	__pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, clientHandlers, javascriptBindings)
 	__browserInnerWindows[windowID] = innerWindowID
 
 	return __pyBrowsers[innerWindowID]

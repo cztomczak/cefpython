@@ -18,15 +18,35 @@ class JavascriptBindings:
 		self.__bindToFrames = bindToFrames
 		self.__bindToPopups = bindToPopups
 
+	def GetBindToFrames(self):
+
+		return self.__bindToFrames
+
+	def GetBindToPopups(self):
+
+		return self.__bindToPopups
+
 	def SetFunction(self, name, func):
-		
-		self.__functions[name] = func
+
+		if type(func) == types.FunctionType or type(func) == types.MethodType:
+			self.__functions[name] = func
+		else:
+			raise Exception("JavascriptBindings.SetFunction() failed: not allowed type: %s" % type(func).__name__)
+
+	def GetFunction(self, name):
+
+		if name in self.__functions:
+			return self.__functions[name]
+
+	def GetFunctions(self):
+
+		return self.__functions
 
 	def SetProperty(self, name, value):
 
 		allowed = self.__IsTypeAllowed(value) # returns True or string.
 		if allowed is not True:
-			raise Exception("JavascriptBindings.SetProperty(): not allowed type: %s" % allowed)
+			raise Exception("JavascriptBindings.SetProperty() failed: not allowed type: %s" % allowed)
 		self.__properties[name] = value
 	
 	def GetProperty(self, name):

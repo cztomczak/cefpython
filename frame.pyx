@@ -53,3 +53,7 @@ class PyFrame:
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		return (<CefFrame*>(cefFrame.get())).IsMain()
 
+	def GetIdentifier(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		return <long long>((<CefFrame*>(cefFrame.get())).GetIdentifier())

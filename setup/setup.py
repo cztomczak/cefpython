@@ -4,7 +4,7 @@ from Cython.Distutils import build_ext
 
 ext_modules = [Extension(
 	"cefpython",
-	["cefpython.pyx", "../clienthandler.cpp"],
+	["cefpython.pyx", "../clienthandler.cpp", "../v8functionhandler.cpp"],
 	language='c++',
 	include_dirs=[r'./../', r'./../pyinclude/'],
 	library_dirs=[r'./', 'c:/Program Files/Microsoft SDKs/Windows/v7.1/Lib/'],

@@ -21,14 +21,18 @@ cdef cbool KeyboardHandler_OnKeyEvent(
 	# See LoadHandler_OnLoadEnd() for the try..except explanation.
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
-		handler = pyBrowser.GetHandler("OnKeyEvent")
+		handler = pyBrowser.GetClientHandler("OnKeyEvent")
+		inheritFrames = False
+		if type(handler) is types.TupleType:
+			# Not handler[2], because in popups handler[2] is already assigned to handler[0] in GetPyBrowserByCefBrowser()
+			handler = handler[0]
 		if handler:
 			return <cbool>bool(handler(pyBrowser, eventType, code, modifiers, isSystemKey, isAfterJavascript))
 		else:
 			return <cbool>False
 	except:
-		(type, value, traceobject) = sys.exc_info()
-		sys.excepthook(type, value, traceobject)
+		(exc_type, exc_value, exc_trace) = sys.exc_info()
+		sys.excepthook(exc_type, exc_value, exc_trace)
 
 KEYEVENT_RAWKEYDOWN = <int>cef_types.KEYEVENT_RAWKEYDOWN
 KEYEVENT_KEYDOWN = <int>cef_types.KEYEVENT_KEYDOWN

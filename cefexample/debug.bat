@@ -1,1 +1,1 @@
-python -m pdb cefadvanced.py
+python -m pdb cefsimple.py

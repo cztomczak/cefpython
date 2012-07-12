@@ -31,19 +31,49 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser):
 	if innerWindowID in __pyBrowsers:
 		return __pyBrowsers[innerWindowID]
 	else:
+
 		# This might be a popup.
+
+		# This will also be called for the Developer Tools popup window!
+
 		openerInnerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetOpenerWindowHandle()
+
 		if openerInnerWindowID in __pyBrowsers:
-			# This is a popup.
-			if not (innerWindowID in __popupPyBrowsers):
-				# Should we pass handlers from the parent? {} - empty right now.
-				# Add a new parameter in CreateBrowser() called "popupsInheritHandlers"?
-				# Or maybe just an another dict "popupHandlers"? User could pass the same
-				# handlers dictionary to both parameters.
-				__popupPyBrowsers[innerWindowID] = PyBrowser(-1, innerWindowID, {})
-			return __popupPyBrowsers[innerWindowID]				
+			parentPyBrowser = __pyBrowsers[openerInnerWindowID]
+		elif openerInnerWindowID in __popupPyBrowsers:
+			parentPyBrowser = __popupPyBrowsers[openerInnerWindowID]
 		else:
 			raise Exception("Browser not found in __pyBrowsers, searched by innerWindowID = %s" % innerWindowID)
+
+		# TODO: this currently is never cleanup up, implement LifeSpanHandler.DoClose() and clean __cefBrowsers map.
+		__cefBrowsers[innerWindowID] = cefBrowser
+
+		if not (innerWindowID in __popupPyBrowsers):
+
+			# Inheriting clientHandlers and javascriptBindings works only for 1 level of nesting.
+			# handler[0] = whether to call for main frame
+			# handler[1] = whether to call by inner frames
+			# handler[2] = whether to call by popups
+
+			# Client handlers.
+			clientHandlers = parentPyBrowser.GetClientHandlers()
+			newHandlers = {}
+			for key in clientHandlers:
+				handler = clientHandlers[key]
+				if type(handler) == types.TupleType and handler[2]:
+					newHandler = (handler[2], None, handler[2])
+					newHandlers[key] = newHandler
+
+			# Javascript bindings.
+			newBindings = None
+			javascriptBindings = parentPyBrowser.GetJavascriptBindings()
+			if javascriptBindings and javascriptBindings.GetBindToPopups():
+				newBindings = javascriptBindings
+
+			# Create new popup PyBrowser.
+			__popupPyBrowsers[innerWindowID] = PyBrowser(-1, innerWindowID, newHandlers, newBindings)
+
+		return __popupPyBrowsers[innerWindowID]
 
 cdef object GetPyFrameByCefFrame(CefRefPtr[CefFrame] cefFrame):
 
