@@ -19,7 +19,7 @@ DESKTOP_IN_PROCESS = <int>cef_types_win.DESKTOP_IN_PROCESS
 DESKTOP_IN_PROCESS_COMMAND_BUFFER = <int>cef_types_win.DESKTOP_IN_PROCESS_COMMAND_BUFFER
 
 
-cdef SetAppSettings(appSettings, CefSettings* cefAppSettings):
+cdef SetApplicationSettings(appSettings, CefSettings* cefAppSettings):
 
 	for key in appSettings:
 		

@@ -15,10 +15,12 @@ __windows = {} # windowID(int): className
 
 def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=None, windowProc=None):
 
+	"""
 	for key in __windows:
 		if __windows[key] == className:
 			raise Exception("There was already created a window with that className: %s."
 				"Each created window must have an unique className." % className)			
+	"""
 
 	if not windowProc:
 		windowProc = {win32con.WM_CLOSE: WM_CLOSE}
@@ -94,9 +96,9 @@ def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=Non
 def DestroyWindow(windowID):
 	
 	win32gui.DestroyWindow(windowID)
-	className = GetWindowClassName(windowID)
-	win32gui.UnregisterClass(className, None)
-	del __windows[windowID] # Let window with this className be created again.
+	#className = GetWindowClassName(windowID)
+	#win32gui.UnregisterClass(className, None)
+	#del __windows[windowID] # Let window with this className be created again.
 	
 
 def GetWindowClassName(windowID):

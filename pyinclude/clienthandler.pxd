@@ -8,8 +8,8 @@ from cef_browser cimport CefBrowser
 from cef_frame cimport CefFrame
 cimport cef_types
 from cef_string cimport CefString
-from Cython.Shadow import void
 from libcpp cimport bool as cbool
+from cef_v8 cimport CefV8Context
 
 cdef extern from "clienthandler.h":
 
@@ -43,19 +43,28 @@ cdef extern from "clienthandler.h":
 			cbool isSystemKey,
 			cbool isAfterJavascript)
 
+	# CefV8ContextHandler types.
+
+	ctypedef void (*OnContextCreated_type)(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefRefPtr[CefFrame] cefFrame,
+		CefRefPtr[CefV8Context] cefContext)
+
 	
 	# ClientHandler class.
 	
 	cdef cppclass ClientHandler(CefClient):
 		
 		# CefLoadHandler callbacks.
-
 		void SetCallback_OnLoadEnd(OnLoadEnd_type)
 		void SetCallback_OnLoadStart(OnLoadStart_type)
 		void SetCallback_OnLoadError(OnLoadError_type)
 
 		# CefKeyboardHandler callbacks.
-
 		void SetCallback_OnKeyEvent(OnKeyEvent_type)
+
+		# CefV8ContextHandler callbacks.
+		void SetCallback_OnContextCreated(OnContextCreated_type)
+
 
 	

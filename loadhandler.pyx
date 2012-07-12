@@ -4,6 +4,7 @@
 
 include "imports.pyx"
 include "utils.pyx"
+import types
 
 def InitializeLoadHandler():
 
@@ -31,15 +32,20 @@ cdef void LoadHandler_OnLoadEnd(
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyFrame = GetPyFrameByCefFrame(cefFrame)	
-		handler = pyBrowser.GetHandler("OnLoadEnd")
+		handler = pyBrowser.GetClientHandler("OnLoadEnd")
+		if type(handler) == types.TupleType:
+			if pyFrame.IsMain():
+				handler = handler[0]
+			else:
+				handler = handler[1]
 		if handler:
 			# We could inspect arguments for the given handler,
 			# if number of arguments is valid, or their names:
 			# http://docs.python.org/library/inspect.html#classes-and-functions
 			handler(pyBrowser, pyFrame, httpStatusCode)
 	except:
-		(type, value, traceobject) = sys.exc_info()
-		sys.excepthook(type, value, traceobject)
+		(exc_type, exc_value, exc_trace) = sys.exc_info()
+		sys.excepthook(exc_type, exc_value, exc_trace)
 
 
 cdef void LoadHandler_OnLoadStart(
@@ -49,12 +55,17 @@ cdef void LoadHandler_OnLoadStart(
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyFrame = GetPyFrameByCefFrame(cefFrame)	
-		handler = pyBrowser.GetHandler("OnLoadStart")
+		handler = pyBrowser.GetClientHandler("OnLoadStart")
+		if type(handler) is types.TupleType:
+			if pyFrame.IsMain():
+				handler = handler[0]
+			else:
+				handler = handler[1]
 		if handler:
 			handler(pyBrowser, pyFrame)
 	except:
-		(type, value, traceobject) = sys.exc_info()
-		sys.excepthook(type, value, traceobject)
+		(exc_type, exc_value, exc_trace) = sys.exc_info()
+		sys.excepthook(exc_type, exc_value, exc_trace)
 
 
 cdef cbool LoadHandler_OnLoadError(
@@ -71,14 +82,19 @@ cdef cbool LoadHandler_OnLoadError(
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyFrame = GetPyFrameByCefFrame(cefFrame)	
-		handler = pyBrowser.GetHandler("OnLoadError")
+		handler = pyBrowser.GetClientHandler("OnLoadError")
+		if type(handler) is types.TupleType:
+			if pyFrame.IsMain():
+				handler = handler[0]
+			else:
+				handler = handler[1]
 		if handler:
 			return <cbool>bool(handler(pyBrowser, pyFrame, errorCode, CefStringToPyString(failedURL), CefStringToPyString(errorText)))
 		else:
 			return <cbool>False
 	except:
-		(type, value, traceobject) = sys.exc_info()
-		sys.excepthook(type, value, traceobject)
+		(exc_type, exc_value, exc_trace) = sys.exc_info()
+		sys.excepthook(exc_type, exc_value, exc_trace)
 
 # Network error constants.
 

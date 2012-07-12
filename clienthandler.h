@@ -1,7 +1,10 @@
+// Copyright (c) 2012 CefPython Authors. All rights reserved.
+// License: New BSD License.
+// Website: http://code.google.com/p/cefpython/
+
 #include "include/cef_client.h"
-#include "setup/cefpython_api.h"
-#include <stdio.h>
 #include "util.h"
+#include "setup/cefpython_api.h"
 
 // CefLoadHandler types.
 
@@ -31,12 +34,30 @@ typedef bool (*OnKeyEvent_type)(
 		bool isSystemKey,
 		bool isAfterJavascript);
 
+// CefV8ContextHandler types.
+
+typedef void (*OnContextCreated_type)(
+		CefRefPtr<CefBrowser> cefBrowser,
+		CefRefPtr<CefFrame> cefFrame,
+		CefRefPtr<CefV8Context> cefContext);
+
 // end of types.
 
 
 class ClientHandler : public CefClient,
 				public CefLoadHandler,
-				public CefKeyboardHandler
+				public CefKeyboardHandler,
+				public CefV8ContextHandler
+/*
+				public CefLifeSpanHandler,
+				public CefRequestHandler,
+				public CefDisplayHandler,
+				public CefFocusHandler,
+				public CefPrintHandler,
+				public CefDragHandler,
+				public CefPermissionHandler,
+				public DownloadListener{
+*/
 {
 public:
 	ClientHandler(){}
@@ -47,7 +68,7 @@ public:
 	{ return NULL; }
 	
 	virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE
-	{ return this; }
+		{ return this; }
 	
 	virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE
 	{ return NULL; }
@@ -59,7 +80,7 @@ public:
 	{ return NULL; }
 	
 	virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() OVERRIDE
-	{ return this; }
+		{ return this; }
 	
 	virtual CefRefPtr<CefMenuHandler> GetMenuHandler() OVERRIDE
 	{ return NULL; }  
@@ -77,7 +98,7 @@ public:
 	{ return NULL; }
 	
 	virtual CefRefPtr<CefV8ContextHandler> GetV8ContextHandler() OVERRIDE
-	{ return NULL; }
+		{ return this; }
 	
 	virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE
 	{ return NULL; }
@@ -136,6 +157,7 @@ public:
 
 	// CefKeyboardHandler methods.
 
+	// OnKeyEvent.
 	OnKeyEvent_type OnKeyEvent_callback;
 	void SetCallback_OnKeyEvent(OnKeyEvent_type callback)
 	{
@@ -152,6 +174,26 @@ public:
 		REQUIRE_UI_THREAD();
 		return this->OnKeyEvent_callback(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript);
 	}
+
+	// CefV8ContextHandler methods.
+
+	// OnContextCreated.
+	OnContextCreated_type OnContextCreated_callback;
+	void SetCallback_OnContextCreated(OnContextCreated_type callback)
+	{
+		this->OnContextCreated_callback = callback;
+	}
+	virtual void OnContextCreated(
+			CefRefPtr<CefBrowser> cefBrowser,
+			CefRefPtr<CefFrame> cefFrame,
+			CefRefPtr<CefV8Context> cefContext) OVERRIDE
+	{
+		REQUIRE_UI_THREAD();
+		this->OnContextCreated_callback(cefBrowser, cefFrame, cefContext);
+	}
+
+	// OnContextReleased.
+	// Not implementing.
 
 	
 	

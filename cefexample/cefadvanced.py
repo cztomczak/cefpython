@@ -6,22 +6,18 @@ import cefpython # cefpython.pyd
 import cefwindow
 import win32con # pywin32 extension
 import win32gui
+import win32api
 import sys
 
 def CloseApplication(windowID, msg, wparam, lparam):
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
-	cefwindow.DestroyWindow(windowID)
-	return 0 # If an application processes this message, it should return zero.
+	win32api.PostMessage(windowID, win32con.WM_DESTROY, 0, 0)	
 
 def QuitApplication(windowID, msg, wparam, lparam):
-	# If you put PostQuitMessage() in WM_CLOSE event (CloseApplication) 
-	# you will get memory errors when closing application.
 	win32gui.PostQuitMessage(0)
-	return 0
 
 def CefAdvanced():
-	# Programming API: http://code.google.com/p/cefpython/wiki/API
 	sys.excepthook = cefpython.ExceptHook # In case of exception display it, write to error.log, shutdown CEF and exit application.
 	cefwindow.__debug = True # Whether to print debug output to console.
 	cefpython.__debug = True
@@ -46,20 +42,28 @@ def CefAdvanced():
 	browserSettings["file_access_from_file_urls_allowed"] = True
 	
 	handlers = dict()
-	handlers["OnLoadStart"] = DocumentReady
+	handlers["OnLoadStart"] = (None, None, OnLoadStart) # Document is ready. Developer tools window is also a popup, this handler may be called.
 	handlers["OnLoadError"] = OnLoadError
-	handlers["OnKeyEvent"] = OnKeyEvent
+	handlers["OnKeyEvent"] = (OnKeyEvent, None, OnKeyEvent)
 
-	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers)
+	bindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
+	bindings.SetFunction("PyTest1", PyTest1)
+	bindings.SetFunction("PyTest2", PyTest2)
+
+	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
+def PyTest1():
+	print "PyTest1() called"
 
-def DocumentReady(browser, frame):
+def PyTest2():
+	print "PyTest2() called"
+
+def OnLoadStart(browser, frame):
 	print "OnLoadStart(): frame URL: %s" % frame.GetURL()
-	if frame.IsMain():
-		return
+	#if frame.IsMain(): return
 	#browser.GetMainFrame().ExecuteJavascript("window.open('about:blank', '', 'width=500,height=500')")
 	#print "HidePopup(): %s" % browser.HidePopup()
 
@@ -67,12 +71,13 @@ def OnLoadError(browser, frame, errorCode, failedURL, errorText):
 	print "OnLoadError() failedURL: %s, frame = %s" % (failedURL, frame)
 
 def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
+	# print "keyCode=%s, modifiers=%s, isSystemKey=%s" % (keyCode, modifiers, isSystemKey)
 	# Let's bind developer tools to F12 key.
-	if cefpython.VK_F12 == keyCode and 0 == eventType and 1024 == modifiers and not isSystemKey:
+	if keyCode == cefpython.VK_F12 and eventType == cefpython.KEYEVENT_RAWKEYDOWN and modifiers == 1024 and not isSystemKey:
 		browser.ShowDevTools()
 		return True
 	# Bind F5 to refresh browser window.
-	elif cefpython.VK_F5 == keyCode and 0 == eventType and 1024 == modifiers and not isSystemKey:
+	if keyCode == cefpython.VK_F5 and eventType == cefpython.KEYEVENT_RAWKEYDOWN and modifiers == 1024 and not isSystemKey:
 		browser.ReloadIgnoreCache()
 		return True
 	return False

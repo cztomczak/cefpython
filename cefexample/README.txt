@@ -43,6 +43,10 @@ icon.ico
 
 CHANGELOG.
 
+Version 0.30 released on ????.
+ * Implemented JavascriptBindings.
+ * Fixed application error when closing main window (Issue 2).
+
 Version 0.26 released on 2012-07-08.
  * Implemented KeyboardHandler
  * cefadvanced.py: example of binding F12 key to open Developer tools, and F5 to refresh page.
@@ -61,3 +65,9 @@ Version 0.21 released on 2012-07-02.
 
 Version 0.20 released on 2012-07-01.
  * First release that comes with real API.
+
+Version 0.11 released on 2012-02-14.
+ * Fixed hardcoded path to cefexample.html
+
+Version 0.10 released on 2012-02-14.
+ * This is just a proof of concept that python bindings to C++ api of CEF can be done with Cython.
