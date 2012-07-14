@@ -631,3 +631,19 @@
 [0712/205256:INFO:CONSOLE(0)] "Uncaught ReferenceError: PyTest1 is not defined," source: file:///D:/cefpython/src/cefexample/cefadvanced.html(1)
 [0712/205300:VERBOSE1:cookie_monster.cc(2122)] WARNING: Unsupported cookie scheme: chrome-devtools
 [0712/205300:VERBOSE1:cookie_monster.cc(2122)] WARNING: Unsupported cookie scheme: chrome-devtools
+[0713/052122:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0713/052235:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0713/053104:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0713/053137:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0713/053656:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0713/053718:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0713/053740:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0714/130502:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0714/144619:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0714/145131:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0714/145236:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0714/145429:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0714/145532:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0714/145623:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0714/145702:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091
+[0714/145823:ERROR:network_change_notifier_win.cc(111)] WSALookupServiceBegin failed with: 10091

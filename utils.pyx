@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+# This file has nothing to do with util.h
+
 include "imports.pyx"
 include "browser.pyx"
 include "frame.pyx"
