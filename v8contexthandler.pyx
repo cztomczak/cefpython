@@ -61,7 +61,7 @@ cdef void V8ContextHandler_OnContextCreated(
 		for funcName in jsBindings:
 			cefFuncName = CefString()
 			cefFuncName.FromASCII(<char*>funcName)
-			func = CreateFunction(cefFuncName, v8Handler)
+			func = cef_v8_static.CreateFunction(cefFuncName, v8Handler)
 			(<CefV8Value*>(window.get())).SetValue(cefFuncName, func, V8_PROPERTY_ATTRIBUTE_NONE)
 
 		# return void

@@ -7,7 +7,7 @@ include "utils.pyx"
 
 # Global variables.
 
-cdef map[int, CefRefPtr[CefBrowser]] __cefBrowsers # innerWindowID : browser
+cdef map[int, CefRefPtr[CefBrowser]] __cefBrowsers # innerWindowID : browser # a pointer would be: new map[int, CefRefPtr[CefBrowser]]()
 __pyBrowsers = {}
 
 # This dictionary list of popup browsers is never cleaned, it may contain old inner

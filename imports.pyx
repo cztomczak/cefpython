@@ -46,4 +46,5 @@ from cef_frame cimport *
 cimport cef_types # cannot cimport *, that would cause name conflicts with constants.
 cimport cef_types_win # same as cef_types.
 from cef_v8 cimport *
+cimport cef_v8_static
 from v8functionhandler cimport *

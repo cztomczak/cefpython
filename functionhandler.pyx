@@ -4,14 +4,18 @@
 
 include "imports.pyx"
 include "utils.pyx"
+include "v8utils.pyx"
 
 cdef cbool FunctionHandler_Execute(
 		CefRefPtr[CefV8Context] cefContext,
 		CefString& cefFuncName,
-		CefRefPtr[CefV8Value] cefObject,
+		CefRefPtr[CefV8Value] cefObject, # receiver ('this' object) of the function.
 		CefV8ValueList& cefArguments,
 		CefRefPtr[CefV8Value]& cefRetval,
 		CefString& cefException) with gil:
+
+	cdef vector[CefRefPtr[CefV8Value]].iterator iterator
+	cdef CefRefPtr[CefV8Value] cefValue
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser((<CefV8Context*>(cefContext.get())).GetBrowser())
@@ -37,13 +41,19 @@ cdef cbool FunctionHandler_Execute(
 		if pyBrowser.IsPopup() and not javascriptBindings.GetBindToPopups():
 			return <cbool>False
 
-		print "FunctionHandler.Execute(name=%s)" % funcName
-		print "pyFrame.GetIdentifier(): %s" % pyFrame.GetIdentifier()
+		arguments = []
 
-		#jsBindings = pyBrowser.GetJavascriptBindings()
-		#if jsBindings:
+		# cefArguments.
+		iterator = cefArguments.begin()
+		while iterator != cefArguments.end():
+			cefValue = deref(iterator)
+			arguments.append(V8ValueToPyValue(cefValue))
+			preinc(iterator)
 
-		return <cbool>False
+		retval = func(*arguments)
+		cefRetval = PyValueToV8Value(retval)
+
+		return <cbool>True
 
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()

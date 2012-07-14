@@ -8,6 +8,7 @@ from cef_browser cimport CefBrowser
 from cef_frame cimport CefFrame
 from cef_string cimport CefString
 from libcpp cimport bool as cbool
+from libcpp.vector cimport vector
 cimport cef_types
 
 cdef extern from "include/cef_v8.h":
@@ -19,10 +20,34 @@ cdef extern from "include/cef_v8.h":
 
 	ctypedef vector[CefRefPtr[CefV8Value]] CefV8ValueList
 
+	cdef cppclass CefV8Accessor:
+		pass
+
 	cdef cppclass CefV8Handler:
 		pass
 
 	cdef cppclass CefV8Value:
+		int GetArrayLength()
+		cbool GetBoolValue()
+		double GetDoubleValue()
+		CefString GetFunctionName()
+		int GetIntValue()
+		cbool GetKeys(vector[CefString]& keys)
+		CefString GetStringValue()
+		CefRefPtr[CefV8Value] GetValue(CefString& key) # object's property by key
+		CefRefPtr[CefV8Value] GetValue(int index) # arrays index value
+		cbool HasValue(CefString& key)
+		cbool HasValue(int index)
+		cbool IsArray()
+		cbool IsBool()
+		cbool IsDate()
+		cbool IsDouble()
+		cbool IsFunction()
+		cbool IsInt()
+		cbool IsNull()
+		cbool IsObject()
+		cbool IsString()
+		cbool IsUndefined()
 		cbool SetValue(
 			CefString& key,
 			CefRefPtr[CefV8Value] value,
@@ -30,8 +55,3 @@ cdef extern from "include/cef_v8.h":
 		)
 
 
-cdef extern from "include/cef_v8.h" namespace "CefV8Value":
-
-	cdef CefRefPtr[CefV8Value] CreateFunction(
-			CefString& name,
-	                CefRefPtr[CefV8Handler] handler)

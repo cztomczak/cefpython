@@ -17,6 +17,8 @@ include "virtualkeys.pyx"
 include "v8contexthandler.pyx"
 include "functionhandler.pyx"
 
+include "v8utils.pyx"
+
 # Global variables.
 __debug = False
 

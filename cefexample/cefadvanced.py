@@ -55,11 +55,13 @@ def CefAdvanced():
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
-def PyTest1():
-	print "PyTest1() called"
+def PyTest1(arg1):
+	print "PyTest1(%s) called" % arg1
+	return 123
 
-def PyTest2():
-	print "PyTest2() called"
+def PyTest2(arg1, arg2):
+	print "PyTest2(%s, %s) called" % (arg1, arg2)
+	return "This string was returned from Python function PyTest2()"
 
 def OnLoadStart(browser, frame):
 	print "OnLoadStart(): frame URL: %s" % frame.GetURL()
@@ -82,10 +84,6 @@ def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavas
 		return True
 	return False
 
-def JavascriptBindings():
-	# http://code.google.com/p/chromiumembedded/wiki/JavaScriptIntegration
-	pass
-
 def JavascriptCallbacks():
 	pass
 
@@ -101,10 +99,6 @@ def ResizeWindow():
 
 def MoveWindow():
 	#cefwindow.MoveWindow(windowID, xpos=0, ypos=0)
-	pass
-
-def DeveloperTools():
-	#browser.ShowDevTools()
 	pass
 
 def LoadContentFromZip():
