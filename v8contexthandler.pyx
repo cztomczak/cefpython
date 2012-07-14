@@ -5,6 +5,7 @@
 include "imports.pyx"
 include "utils.pyx"
 include "functionhandler.pyx"
+include "v8utils.pyx"
 
 def InitializeV8ContextHandler():
 	# Callbacks - make sure event names are
@@ -15,13 +16,14 @@ def InitializeV8ContextHandler():
 cdef void V8ContextHandler_OnContextCreated(
 			CefRefPtr[CefBrowser] cefBrowser,
 			CefRefPtr[CefFrame] cefFrame,
-			CefRefPtr[CefV8Context] cefContext) with gil:
+			CefRefPtr[CefV8Context] cefContext) except * with gil:
 
 	cdef CefRefPtr[V8FunctionHandler] functionHandler
 	cdef CefRefPtr[CefV8Handler] v8Handler
 	cdef CefRefPtr[CefV8Value] window
 	cdef CefRefPtr[CefV8Value] func
 	cdef CefString cefFuncName
+	cdef CefString cefPropertyName
 
 	# See LoadHandler_OnLoadEnd() for the try..except explanation.
 	try:
@@ -35,7 +37,9 @@ cdef void V8ContextHandler_OnContextCreated(
 
 		# jsBindings is a dict.
 		jsBindings = javascriptBindings.GetFunctions()
-		if not jsBindings:
+		jsProperties = javascriptBindings.GetProperties()
+
+		if not jsBindings and not jsProperties:
 			return
 
 		# This checks GetBind..() must be also made in OnContextCreated(), so that calling
@@ -49,24 +53,31 @@ cdef void V8ContextHandler_OnContextCreated(
 		if pyBrowser.IsPopup() and not javascriptBindings.GetBindToPopups():
 			return
 
-		print "V8ContextHandler_OnContextCreated()"
-
-		# CefRefPtr are smart pointers and should release memory automatically for V8FunctionHandler().
-		functionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
-		(<V8FunctionHandler*>(functionHandler.get())).SetContext(cefContext)
-		(<V8FunctionHandler*>(functionHandler.get())).SetCallback_V8Execute(<V8Execute_type>FunctionHandler_Execute)
-		v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(functionHandler.get()))
 		window = (<CefV8Context*>(cefContext.get())).GetGlobal()
 
-		for funcName in jsBindings:
-			cefFuncName = CefString()
-			cefFuncName.FromASCII(<char*>funcName)
-			func = cef_v8_static.CreateFunction(cefFuncName, v8Handler)
-			(<CefV8Value*>(window.get())).SetValue(cefFuncName, func, V8_PROPERTY_ATTRIBUTE_NONE)
+		if jsProperties:
+			for key,val in jsProperties.items():
+				key = str(key)
+				cefPropertyName.FromASCII(<char*>key)
+				(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(val), V8_PROPERTY_ATTRIBUTE_NONE)
+
+		if jsBindings:
+			# CefRefPtr are smart pointers and should release memory automatically for V8FunctionHandler().
+			functionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
+			(<V8FunctionHandler*>(functionHandler.get())).SetContext(cefContext)
+			(<V8FunctionHandler*>(functionHandler.get())).SetCallback_V8Execute(<V8Execute_type>FunctionHandler_Execute)
+			v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(functionHandler.get()))
+
+			for funcName in jsBindings:
+				cefFuncName = CefString()
+				cefFuncName.FromASCII(<char*>funcName)
+				func = cef_v8_static.CreateFunction(cefFuncName, v8Handler)
+				(<CefV8Value*>(window.get())).SetValue(cefFuncName, func, V8_PROPERTY_ATTRIBUTE_NONE)
 
 		# return void
 
 	except:
+
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 

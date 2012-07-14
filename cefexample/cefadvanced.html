@@ -23,14 +23,12 @@ navigator.userAgent: <span style="background:#eee"><script>document.write(naviga
 
 Features coming next:
 <ul>
-<li>javascript bindings
-<li>javascript callbacks
 <li>popup and modal windows
 <li>loading content from zip (optionally encrypted)
 </ul>
 
 <iframe src="cefadvanced.html"></iframe>
-<!--<iframe src="cefsimple_onloaderror.html"></iframe>-->
+<iframe src="cefsimple_onloaderror.html"></iframe>
 
 <script>
 //frames["simple"].focus()
@@ -38,12 +36,37 @@ Features coming next:
 
 <h3>Javascript bindings</h3>
 
-<a href="javascript:alert('Return value from PyTest1: '+PyTest1(100))">window.PyTest1(100)</a><br>
-<a href="javascript:alert('Return value from PyTest2: '+PyTest2(100, 'This string was passed from javascript'))">window.PyTest2(100, 'This string was passed from javascript')</a>
+	See output in console for these tests. (Note: "window." is optional, you can just call "PyTest1()")<br><br>
+
+	<a href="javascript:alert('Return value from PyTest1: '+PyTest1(100))">window.PyTest1(100)</a><br>
+	<a href="javascript:alert('Return value from PyTest2: '+JSON.stringify(PyTest2(100, 'This string was passed from javascript')))">window.PyTest2(100, 'This string was passed from javascript')</a> - python PyTest2() should return: [1,2, [2.1, {'3': 3, '4': [5,6]}]]
+	<br><br>
+
+	<script>var array = [1]; array[100] = 100.01;</script>
+	<a href="javascript:PyTest1(array)">window.PyTest1(array)</a> (var array = [1]; array[100] = 100.01;) - the gap is filled with None values.<br>
+
+	<script>var object = {a: 1, '3': 33};</script>
+	<a href="javascript:PyTest1(object)">window.PyTest1(object)</a> (var object = {a: 1, '3': 33};)<br>
+
+	<br>
+	<script>var nested = [1,2, [3, 4, [5,6, [{7:7, 8: [9,10]}, 11]]]];</script>
+	<a href="javascript:PyTest1(nested)">window.PyTest1(nested)</a> (var nested = [1,2, [3, 4, [5,6, [{7:7, 8: [9,10]}, 11]]]];) - dictionary keys will be in a different order in Python.<br>
+
+	<br>
+	window.PyConfig = 
+	<script>document.write(JSON.stringify(window.PyConfig));</script>
+	<br>
+	Now change PyConfig: <a href="javascript:window.PyConfig={'option1': false, 'option2': 40}">window.PyConfig={'option1': False, 'option2': 40}</a><br>
+	Call __browser.GetMainFrame().GetProperty("PyConfig"): <a href="javascript:PrintPyConfig()">PrintPyConfig()</a><br>
+	Try setting PyConfig during runtime using __browser.GetMainFrame().SetProperty(): <a href="javascript:ChangePyConfig()">ChangePyConfig()</a> (then call PrintPyConfig())
+
+	<br><br>
+	Test infinite recursion: <a href="javascript:PyTest1(window)">PyTest1(window)</a> - you will see a python exception in console (also in error.log), data structures can have maximum 10 levels of nesting.
+
 
 <h3>Popups</h3>
 
-<a href="javascript:window.open('cefadvanced.html', '', 'width=600,height=400')">window.open('cefadvanced.html')</a>
+	<a href="javascript:window.open('cefadvanced.html', '', 'width=600,height=400')">window.open('cefadvanced.html')</a>
 
 </body>
 </html>
