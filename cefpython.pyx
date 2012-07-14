@@ -2,6 +2,20 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+# IMPORTANT notes:
+#
+# - cdef functions that are called from c++ need to embrace whole function's
+#   code inside try..except, otherwise exceptions are ignored.
+#
+# - additionally all cdef functions that are returning types other than "object"
+#   (a python object) should have in its declaration "except *", otherwise
+#   exceptions may be ignored. Those cdef that return "object" have "except *"
+#   by default.
+#
+# - you should try running Cython code after all even small changes, otherwise
+#   you will get into big trouble, error messages are so much obfuscated and info
+#   is missing that you will have no idea which chunk of code caused that error.
+
 # All .pyx files need to be included here for Cython compiler.
 include "imports.pyx"
 include "browser.pyx"
@@ -122,6 +136,7 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
 	__cefBrowsers[innerWindowID] = cefBrowser
 	__pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, clientHandlers, javascriptBindings)
+	javascriptBindings.SetBrowserCreated(True)
 	__browserInnerWindows[windowID] = innerWindowID
 
 	return __pyBrowsers[innerWindowID]

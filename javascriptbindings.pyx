@@ -11,12 +11,17 @@ class JavascriptBindings:
 	__bindToPopups = False
 	__functions = {}
 	__properties = {}
-	__v8properties = {}
+	__browserCreated = False # After browser is created you are not allowed to call SetFunction() or SetProperty().
 
 	def __init__(self, bindToFrames=False, bindToPopups=False):
 
 		self.__bindToFrames = bindToFrames
 		self.__bindToPopups = bindToPopups
+
+	# Internal.
+	def SetBrowserCreated(self, browserCreated):
+
+		self.__browserCreated = browserCreated
 
 	def GetBindToFrames(self):
 
@@ -27,6 +32,10 @@ class JavascriptBindings:
 		return self.__bindToPopups
 
 	def SetFunction(self, name, func):
+
+		if self.__browserCreated:
+			raise Exception("JavascriptBindings.SetFunction() failed: browser was already created, you are not"
+					" allowed to call this function now.")
 
 		if type(func) == types.FunctionType or type(func) == types.MethodType:
 			self.__functions[name] = func
@@ -44,20 +53,24 @@ class JavascriptBindings:
 
 	def SetProperty(self, name, value):
 
+		if self.__browserCreated:
+			raise Exception("JavascriptBindings.SetProperty() failed: you cannot call this method after the browser"
+			                " was created, you should call instead: Browser.GetMainFrame().SetProperty().")
+
 		allowed = self.__IsTypeAllowed(value) # returns True or string.
 		if allowed is not True:
 			raise Exception("JavascriptBindings.SetProperty() failed: not allowed type: %s" % allowed)
+
 		self.__properties[name] = value
 	
-	def GetProperty(self, name):
+	def GetProperties(self):
 
-		# We must query CefV8Value for the real current value of property,
-		# it could have been changed in javascript, use self.__v8properties.
-		pass
+		return self.__properties
 
 	def __IsTypeAllowed(self, value):
 
 		# Return value: True - allowed, string - not allowed
+		# Function is not allowed here.
 
 		# Not using type().__name__ here as it is not consistent, for int it is "int" but for None it is "NoneType".
 		valueType = type(value) 

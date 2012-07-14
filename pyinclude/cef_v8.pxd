@@ -48,10 +48,7 @@ cdef extern from "include/cef_v8.h":
 		cbool IsObject()
 		cbool IsString()
 		cbool IsUndefined()
-		cbool SetValue(
-			CefString& key,
-			CefRefPtr[CefV8Value] value,
-		        cef_types.cef_v8_propertyattribute_t attribute
-		)
+		cbool SetValue(CefString& key, CefRefPtr[CefV8Value] value, cef_types.cef_v8_propertyattribute_t attribute)
+		cbool SetValue(int index, CefRefPtr[CefV8Value] value)
 
 

@@ -16,7 +16,7 @@ cdef cbool KeyboardHandler_OnKeyEvent(
 		int code,
 		int modifiers,
 		cbool isSystemKey,
-		cbool isAfterJavascript) with gil:
+		cbool isAfterJavascript) except * with gil:
 
 	# See LoadHandler_OnLoadEnd() for the try..except explanation.
 	try:

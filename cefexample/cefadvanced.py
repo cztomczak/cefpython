@@ -9,6 +9,8 @@ import win32gui
 import win32api
 import sys
 
+__browser = None
+
 def CloseApplication(windowID, msg, wparam, lparam):
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
@@ -49,19 +51,30 @@ def CefAdvanced():
 	bindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
 	bindings.SetFunction("PyTest1", PyTest1)
 	bindings.SetFunction("PyTest2", PyTest2)
+	
+	bindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
+	bindings.SetFunction("PrintPyConfig", PrintPyConfig)
+	bindings.SetFunction("ChangePyConfig", ChangePyConfig)
 
-	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
+	global __browser
+	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
 def PyTest1(arg1):
 	print "PyTest1(%s) called" % arg1
-	return 123
+	return "This string was returned from Python function PyTest1()"
 
 def PyTest2(arg1, arg2):
 	print "PyTest2(%s, %s) called" % (arg1, arg2)
-	return "This string was returned from Python function PyTest2()"
+	return [1,2, [2.1, {'3': 3, '4': [5,6]}]] # testing nested return values.
+
+def PrintPyConfig():
+	print "PrintPyConfig(): %s" % __browser.GetMainFrame().GetProperty("PyConfig")
+
+def ChangePyConfig():
+	__browser.GetMainFrame().SetProperty("PyConfig", "Changed in python during runtime in ChangePyConfig()")
 
 def OnLoadStart(browser, frame):
 	print "OnLoadStart(): frame URL: %s" % frame.GetURL()

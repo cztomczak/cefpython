@@ -21,7 +21,7 @@ def InitializeLoadHandler():
 cdef void LoadHandler_OnLoadEnd(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
-		int httpStatusCode) with gil:
+		int httpStatusCode) except * with gil:
 	
 	# Need try..except otherwise the error will be ignored and only printed to output console,
 	# this is the default behavior of Cython, you need to add "except -1" or "except *" in
@@ -50,7 +50,7 @@ cdef void LoadHandler_OnLoadEnd(
 
 cdef void LoadHandler_OnLoadStart(
 		CefRefPtr[CefBrowser] cefBrowser,
-		CefRefPtr[CefFrame] cefFrame) with gil:
+		CefRefPtr[CefFrame] cefFrame) except * with gil:
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
@@ -73,7 +73,7 @@ cdef cbool LoadHandler_OnLoadError(
 		CefRefPtr[CefFrame] cefFrame,
 		cef_types.cef_handler_errorcode_t errorCode,
 		CefString& failedURL,
-		CefString& errorText) with gil:
+		CefString& errorText) except * with gil:
 
 	# These & in "CefString& failedURL" are very important, otherwise you get memory
 	# errors and win32 exception. Pycharm suggests that "statement has no effect",

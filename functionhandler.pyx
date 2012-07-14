@@ -12,7 +12,7 @@ cdef cbool FunctionHandler_Execute(
 		CefRefPtr[CefV8Value] cefObject, # receiver ('this' object) of the function.
 		CefV8ValueList& cefArguments,
 		CefRefPtr[CefV8Value]& cefRetval,
-		CefString& cefException) with gil:
+		CefString& cefException) except * with gil:
 
 	cdef vector[CefRefPtr[CefV8Value]].iterator iterator
 	cdef CefRefPtr[CefV8Value] cefValue

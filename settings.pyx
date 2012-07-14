@@ -19,7 +19,7 @@ DESKTOP_IN_PROCESS = <int>cef_types_win.DESKTOP_IN_PROCESS
 DESKTOP_IN_PROCESS_COMMAND_BUFFER = <int>cef_types_win.DESKTOP_IN_PROCESS_COMMAND_BUFFER
 
 
-cdef SetApplicationSettings(appSettings, CefSettings* cefAppSettings):
+cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) except *:
 
 	for key in appSettings:
 		
@@ -76,7 +76,7 @@ cdef SetApplicationSettings(appSettings, CefSettings* cefAppSettings):
 			raise Exception("Invalid appSettings key: %s" % key)
 
 
-cdef SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSettings):
+cdef void SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSettings) except *:
 	
 	for key in browserSettings:
 		
