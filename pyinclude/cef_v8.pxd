@@ -26,7 +26,20 @@ cdef extern from "include/cef_v8.h":
 	cdef cppclass CefV8Handler:
 		pass
 
+	cdef cppclass CefV8Exception:
+		int GetLineNumber()
+		CefString GetMessage()
+		CefString GetScriptResourceName()
+		CefString GetSourceLine()
+
 	cdef cppclass CefV8Value:
+		cbool ExecuteFunctionWithContext(
+			CefRefPtr[CefV8Context] context,
+		        CefRefPtr[CefV8Value] object,
+		        CefV8ValueList& arguments,
+			CefRefPtr[CefV8Value]& retval,
+			CefRefPtr[CefV8Exception]& exception,
+			cbool rethrow_exception)
 		int GetArrayLength()
 		cbool GetBoolValue()
 		double GetDoubleValue()

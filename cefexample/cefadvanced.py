@@ -14,7 +14,7 @@ __browser = None
 def CloseApplication(windowID, msg, wparam, lparam):
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
-	win32api.PostMessage(windowID, win32con.WM_DESTROY, 0, 0)	
+	win32api.PostMessage(windowID, win32con.WM_DESTROY, 0, 0) # Do not call DestroyWindow() as it causes app error, use PostMessage() instead.
 
 def QuitApplication(windowID, msg, wparam, lparam):
 	win32gui.PostQuitMessage(0)
@@ -44,7 +44,7 @@ def CefAdvanced():
 	browserSettings["file_access_from_file_urls_allowed"] = True
 	
 	handlers = dict()
-	handlers["OnLoadStart"] = (None, None, OnLoadStart) # Document is ready. Developer tools window is also a popup, this handler may be called.
+	handlers["OnLoadStart"] = (OnLoadStart, None, OnLoadStart) # Document is ready. Developer tools window is also a popup, this handler may be called.
 	handlers["OnLoadError"] = OnLoadError
 	handlers["OnKeyEvent"] = (OnKeyEvent, None, OnKeyEvent)
 
@@ -55,6 +55,16 @@ def CefAdvanced():
 	bindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
 	bindings.SetFunction("PrintPyConfig", PrintPyConfig)
 	bindings.SetFunction("ChangePyConfig", ChangePyConfig)
+
+	bindings.SetFunction("TestJavascriptCallback", TestJavascriptCallback)
+	bindings.SetFunction("TestPythonCallbackThroughReturn", TestPythonCallbackThroughReturn)
+	bindings.SetFunction("TestPythonCallbackThroughJavascriptCallback", TestPythonCallbackThroughJavascriptCallback)
+
+	bindings.SetFunction("PyResizeWindow", PyResizeWindow)
+	bindings.SetFunction("PyMoveWindow", PyMoveWindow)
+
+	bindings.SetFunction("alert", PyAlert) # same as: bindings.SetProperty("alert", PyAlert)
+	bindings.SetFunction("ChangeAlertDuringRuntime", ChangeAlertDuringRuntime)
 
 	global __browser
 	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
@@ -76,6 +86,37 @@ def PrintPyConfig():
 def ChangePyConfig():
 	__browser.GetMainFrame().SetProperty("PyConfig", "Changed in python during runtime in ChangePyConfig()")
 
+def TestJavascriptCallback(jsCallback):
+	if isinstance(jsCallback, cefpython.JavascriptCallback):
+		print "TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName()
+		print "jsCallback.Call(1, [2,3])"
+		jsCallback.Call(1, [2,3])
+	else:
+		raise Exception("TestJavascriptCallback() failed: given argument is not a javascript callback function")
+
+def TestPythonCallbackThroughReturn():
+	print "TestPythonCallbackThroughReturn() called, returning PyCallback."
+	return PyCallback
+
+def PyCallback(*args):
+	print "PyCallback() called, args: %s" % str(args)
+
+def TestPythonCallbackThroughJavascriptCallback(jsCallback):
+	print "TestPythonCallbackThroughJavascriptCallback(jsCallback) called"
+	print "jsCallback.Call(PyCallback)"
+	jsCallback.Call(PyCallback)
+
+def PyAlert(msg):
+	print "PyAlert() called instead of window.alert()"
+	win32gui.MessageBox(__browser.GetWindowID(), msg, "PyAlert()", win32con.MB_ICONQUESTION)
+
+def ChangeAlertDuringRuntime():
+	__browser.GetMainFrame().SetProperty("alert", PyAlert2)
+
+def PyAlert2(msg):
+	print "PyAlert2() called instead of window.alert()"
+	win32gui.MessageBox(__browser.GetWindowID(), msg, "PyAlert2()", win32con.MB_ICONWARNING)
+
 def OnLoadStart(browser, frame):
 	print "OnLoadStart(): frame URL: %s" % frame.GetURL()
 	#if frame.IsMain(): return
@@ -83,7 +124,7 @@ def OnLoadStart(browser, frame):
 	#print "HidePopup(): %s" % browser.HidePopup()
 
 def OnLoadError(browser, frame, errorCode, failedURL, errorText):
-	print "OnLoadError() failedURL: %s, frame = %s" % (failedURL, frame)
+	print "OnLoadError() failedURL: %s" % (failedURL)
 
 def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
 	# print "keyCode=%s, modifiers=%s, isSystemKey=%s" % (keyCode, modifiers, isSystemKey)
@@ -97,30 +138,27 @@ def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavas
 		return True
 	return False
 
-def JavascriptCallbacks():
-	pass
+def PyResizeWindow():
+	cefwindow.MoveWindow(__browser.GetWindowID(), width=500, height=500)
+
+def PyMoveWindow():
+	cefwindow.MoveWindow(__browser.GetWindowID(), xpos=0, ypos=0)
 
 def PopupWindow():
+	# TODO: creating popup windows through python.
 	pass
 
 def ModalWindow():
-	pass
-
-def ResizeWindow():
-	#cefwindow.MoveWindow(windowID, width=500, height=500)
-	pass
-
-def MoveWindow():
-	#cefwindow.MoveWindow(windowID, xpos=0, ypos=0)
+	# TODO: creating modal windows throught python.
 	pass
 
 def LoadContentFromZip():
-	# Allow to pack html/css/images to a zip and run content from this file.
+	# TODO. Allow to pack html/css/images to a zip and run content from this file.
 	# Optionally allow to password protect this zip file.
 	pass
 
 def LoadContentFromEncryptedZip():
-	# This will be useful only if you protect your python sources by compiling them
+	# TODO. This will be useful only if you protect your python sources by compiling them
 	# to exe by using for example "pyinstaller", or even better you could compile sources
 	# to a dll-like file called "pyd" by using cython extension, or you could combine them both.
 	# See WBEA for implementation.

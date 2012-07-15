@@ -32,6 +32,8 @@ include "v8contexthandler.pyx"
 include "functionhandler.pyx"
 
 include "v8utils.pyx"
+include "javascriptcallback.pyx"
+include "pythoncallback.pyx"
 
 # Global variables.
 __debug = False
@@ -59,7 +61,10 @@ def __InitializeClientHandler():
 	InitializeKeyboardHandler()
 	InitializeV8ContextHandler()
 
-def Initialize(applicationSettings):
+def Initialize(applicationSettings={}):
+
+	if not "multi_threaded_message_loop" in applicationSettings:
+		applicationSettings["multi_threaded_message_loop"] = False
 
 	__InitializeClientHandler()
 
@@ -136,7 +141,8 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
 	__cefBrowsers[innerWindowID] = cefBrowser
 	__pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, clientHandlers, javascriptBindings)
-	javascriptBindings.SetBrowserCreated(True)
+	if javascriptBindings:
+		javascriptBindings.SetBrowserCreated(True)
 	__browserInnerWindows[windowID] = innerWindowID
 
 	return __pyBrowsers[innerWindowID]

@@ -117,9 +117,9 @@ def MoveWindow(windowID, xpos=None, ypos=None, width=None, height=None, center=N
 		width = right - left
 		height = bottom - top
 	# Case: only ypos provided
-	if not xpos:
+	if xpos is None and ypos is not None:
 		xpos = left
-	if not ypos:
+	if ypos is None and xpos is not None:
 		ypos = top
 	# Case: only height provided
 	if not width:

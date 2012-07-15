@@ -39,7 +39,7 @@ typedef bool (*OnKeyEvent_type)(
 typedef void (*OnContextCreated_type)(
 		CefRefPtr<CefBrowser> cefBrowser,
 		CefRefPtr<CefFrame> cefFrame,
-		CefRefPtr<CefV8Context> cefContext);
+		CefRefPtr<CefV8Context> v8Context);
 
 // end of types.
 
@@ -186,10 +186,10 @@ public:
 	virtual void OnContextCreated(
 			CefRefPtr<CefBrowser> cefBrowser,
 			CefRefPtr<CefFrame> cefFrame,
-			CefRefPtr<CefV8Context> cefContext) OVERRIDE
+			CefRefPtr<CefV8Context> v8Context) OVERRIDE
 	{
 		REQUIRE_UI_THREAD();
-		this->OnContextCreated_callback(cefBrowser, cefFrame, cefContext);
+		this->OnContextCreated_callback(cefBrowser, cefFrame, v8Context);
 	}
 
 	// OnContextReleased.

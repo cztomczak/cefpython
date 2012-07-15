@@ -63,10 +63,50 @@ Features coming next:
 	<br><br>
 	Test infinite recursion: <a href="javascript:PyTest1(window)">PyTest1(window)</a> - you will see a python exception in console (also in error.log), data structures can have maximum 10 levels of nesting.
 
+<h3>Javasript callbacks</h3>
+
+<script>
+function MyJSCallback(arg1, arg2)
+{
+	alert("MyJSCallback() called\narg1="+JSON.stringify(arg1)+"\narg2="+JSON.stringify(arg2))
+}
+</script>
+
+<a href="javascript:window.TestJavascriptCallback(MyJSCallback)">window.TestJavascriptCallback(MyJSCallback)</a>
+
+
+<h3>Python callbacks</h3>
+
+<script>
+function JSCallbackForPythonCallback(pycallback)
+{
+	pycallback("Calling pycallback via javascript's callback")
+}
+</script>
+
+<a href="javascript:window.TestPythonCallbackThroughReturn()('some')">window.TestPythonCallbackThroughReturn()('some')</a><br>
+<a href="javascript:window.TestPythonCallbackThroughJavascriptCallback(JSCallbackForPythonCallback)">window.TestPythonCallbackThroughJavascriptCallback(JSCallbackForPythonCallback)</a>
+
+<h3>Moving and resizing window</h3>
+
+<a href="javascript:PyResizeWindow()">PyResizeWindow()</a> - cefwindow.MoveWindow(__browser.GetWindowID(), width=500, height=500)<br>
+<a href="javascript:PyMoveWindow()">PyMoveWindow()</a> - cefwindow.MoveWindow(__browser.GetWindowID(), xpos=0, ypos=0)
 
 <h3>Popups</h3>
 
 	<a href="javascript:window.open('cefadvanced.html', '', 'width=600,height=400')">window.open('cefadvanced.html')</a>
+
+<h3>Overwriting window.alert()</h3>
+
+<pre>def PyAlert(msg):
+	print "PyAlert() called instead of window.alert()"
+	win32gui.MessageBox(__browser.GetWindowID(), msg, "PyAlert()")</pre>
+
+<a href="javascript:window.alert('SOME ALERT!')">window.alert('SOME ALERT!')</a>
+<br><br>
+<pre>def ChangeAlertDuringRuntime():
+    __browser.GetMainFrame().SetProperty("alert", PyAlert2)</pre>
+<a href="javascript:window.ChangeAlertDuringRuntime()">window.ChangeAlertDuringRuntime()</a> - now check window.alert() above, the messagebox style should be changed.
 
 </body>
 </html>
