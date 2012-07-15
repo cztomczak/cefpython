@@ -67,8 +67,8 @@ class PyFrame:
 		# GetV8Context() requires UI thread.
 		assert CurrentlyOn(TID_UI), "Frame.SetProperty() should only be called on the UI thread"
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cdef CefRefPtr[CefV8Context] cefContext = (<CefFrame*>(cefFrame.get())).GetV8Context()
-		window = (<CefV8Context*>(cefContext.get())).GetGlobal()
+		cdef CefRefPtr[CefV8Context] v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
+		window = (<CefV8Context*>(v8Context.get())).GetGlobal()
 
 		cdef CefString cefPropertyName
 		name = str(name)
@@ -76,7 +76,7 @@ class PyFrame:
 		cdef CefRefPtr[CefV8Value] v8Value
 		v8Value = (<CefV8Value*>(window.get())).GetValue(cefPropertyName)
 
-		return V8ValueToPyValue(v8Value)
+		return V8ValueToPyValue(v8Value, v8Context)
 
 	def IsMain(self):
 
@@ -88,12 +88,12 @@ class PyFrame:
 		# GetV8Context() requires UI thread.
 		assert CurrentlyOn(TID_UI), "Frame.SetProperty() should only be called on the UI thread"
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cdef CefRefPtr[CefV8Context] cefContext = (<CefFrame*>(cefFrame.get())).GetV8Context()
+		cdef CefRefPtr[CefV8Context] v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
 
-		window = (<CefV8Context*>(cefContext.get())).GetGlobal()
+		window = (<CefV8Context*>(v8Context.get())).GetGlobal()
 
 		cdef CefString cefPropertyName
 		name = str(name)
 		cefPropertyName.FromASCII(<char*>name)
-		(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(value), V8_PROPERTY_ATTRIBUTE_NONE)
+		(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(value, v8Context), V8_PROPERTY_ATTRIBUTE_NONE)
 

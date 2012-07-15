@@ -43,8 +43,11 @@ icon.ico
 
 CHANGELOG.
 
-Version 0.30 released on ????.
+Version 0.30 released on 2012-07-15.
  * Implemented JavascriptBindings.
+ * Implemented JavascriptCallback.
+ * Implemented Python callbacks as arguments/return value to javascript functions.
+ * Frame.!GetProperty()/!SetProperty().
  * Fixed application error when closing main window (Issue 2).
 
 Version 0.26 released on 2012-07-08.

@@ -16,7 +16,7 @@ def InitializeV8ContextHandler():
 cdef void V8ContextHandler_OnContextCreated(
 			CefRefPtr[CefBrowser] cefBrowser,
 			CefRefPtr[CefFrame] cefFrame,
-			CefRefPtr[CefV8Context] cefContext) except * with gil:
+			CefRefPtr[CefV8Context] v8Context) except * with gil:
 
 	cdef CefRefPtr[V8FunctionHandler] functionHandler
 	cdef CefRefPtr[CefV8Handler] v8Handler
@@ -53,18 +53,18 @@ cdef void V8ContextHandler_OnContextCreated(
 		if pyBrowser.IsPopup() and not javascriptBindings.GetBindToPopups():
 			return
 
-		window = (<CefV8Context*>(cefContext.get())).GetGlobal()
+		window = (<CefV8Context*>(v8Context.get())).GetGlobal()
 
 		if jsProperties:
 			for key,val in jsProperties.items():
 				key = str(key)
 				cefPropertyName.FromASCII(<char*>key)
-				(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(val), V8_PROPERTY_ATTRIBUTE_NONE)
+				(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(val, v8Context), V8_PROPERTY_ATTRIBUTE_NONE)
 
 		if jsBindings:
 			# CefRefPtr are smart pointers and should release memory automatically for V8FunctionHandler().
 			functionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
-			(<V8FunctionHandler*>(functionHandler.get())).SetContext(cefContext)
+			(<V8FunctionHandler*>(functionHandler.get())).SetContext(v8Context)
 			(<V8FunctionHandler*>(functionHandler.get())).SetCallback_V8Execute(<V8Execute_type>FunctionHandler_Execute)
 			v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(functionHandler.get()))
 

@@ -88,6 +88,8 @@ class JavascriptBindings:
 			return True
 		elif valueType == types.NoneType:
 			return True
+		elif valueType == types.FunctionType or valueType == types.MethodType:
+			return True
 		elif valueType == types.DictType:
 			for key in value:
 				valueType2 = self.__IsTypeAllowed(value[key])

@@ -18,7 +18,7 @@ def QuitApplication(windowID, message, wparam, lparam):
 
 def CefSimple():
 	sys.excepthook = cefpython.ExceptHook
-	cefpython.Initialize(applicationSettings={"multi_threaded_message_loop": False})
+	cefpython.Initialize()
 	wndproc = {
 		win32con.WM_CLOSE: CloseApplication, 
 		win32con.WM_DESTROY: QuitApplication,

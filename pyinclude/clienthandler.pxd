@@ -48,7 +48,7 @@ cdef extern from "clienthandler.h":
 	ctypedef void (*OnContextCreated_type)(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
-		CefRefPtr[CefV8Context] cefContext)
+		CefRefPtr[CefV8Context] v8Context)
 
 	
 	# ClientHandler class.
