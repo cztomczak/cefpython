@@ -3,6 +3,7 @@
 <head>
 	<style>
 	body { font: 13px Arial; }
+	pre { background: #ddd; }
 	</style>
 </head>
 <body>
@@ -21,12 +22,6 @@ navigator.userAgent: <span style="background:#eee"><script>document.write(naviga
 
 <br>
 
-Features coming next:
-<ul>
-<li>popup and modal windows
-<li>loading content from zip (optionally encrypted)
-</ul>
-
 <iframe src="cefadvanced.html"></iframe>
 <iframe src="cefsimple_onloaderror.html"></iframe>
 
@@ -36,7 +31,15 @@ Features coming next:
 
 <h3>Javascript bindings</h3>
 
-	See output in console for these tests. (Note: "window." is optional, you can just call "PyTest1()")<br><br>
+	See output in console for these tests. (Note: "window." is optional, you can just call "PyTest1()")<br>
+
+	<h4>Python version</h4>
+
+	<pre>&lt;script&gt;document.write(window.PyVersion())&lt;/script&gt;</pre>
+	<script>document.write(window.PyVersion())</script>	
+	<br><br>
+
+	<h4>Passing arguments</h4>
 
 	<a href="javascript:alert('Return value from PyTest1: '+PyTest1(100))">window.PyTest1(100)</a><br>
 	<a href="javascript:alert('Return value from PyTest2: '+JSON.stringify(PyTest2(100, 'This string was passed from javascript')))">window.PyTest2(100, 'This string was passed from javascript')</a> - python PyTest2() should return: [1,2, [2.1, {'3': 3, '4': [5,6]}]]
@@ -107,6 +110,13 @@ function JSCallbackForPythonCallback(pycallback)
 <pre>def ChangeAlertDuringRuntime():
     __browser.GetMainFrame().SetProperty("alert", PyAlert2)</pre>
 <a href="javascript:window.ChangeAlertDuringRuntime()">window.ChangeAlertDuringRuntime()</a> - now check window.alert() above, the messagebox style should be changed.
+
+<h3>Find text on this page</h3>
+
+<pre>def PyFind(searchText, findNext=False):
+	__browser.Find(1, searchText, forward=True, matchCase=False, findNext=findNext)</pre>
+
+<input type=text id=searchText value="python"> <input type=button value="window.PyFind()" onclick="window.PyFind(document.getElementById('searchText').value)">
 
 </body>
 </html>

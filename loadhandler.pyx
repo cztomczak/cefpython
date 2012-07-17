@@ -4,7 +4,6 @@
 
 include "imports.pyx"
 include "utils.pyx"
-import types
 
 def InitializeLoadHandler():
 
@@ -33,7 +32,7 @@ cdef void LoadHandler_OnLoadEnd(
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyFrame = GetPyFrameByCefFrame(cefFrame)	
 		handler = pyBrowser.GetClientHandler("OnLoadEnd")
-		if type(handler) == types.TupleType:
+		if type(handler) == tuple:
 			if pyFrame.IsMain():
 				handler = handler[0]
 			else:
@@ -56,7 +55,7 @@ cdef void LoadHandler_OnLoadStart(
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyFrame = GetPyFrameByCefFrame(cefFrame)	
 		handler = pyBrowser.GetClientHandler("OnLoadStart")
-		if type(handler) is types.TupleType:
+		if type(handler) is tuple:
 			if pyFrame.IsMain():
 				handler = handler[0]
 			else:
@@ -71,9 +70,9 @@ cdef void LoadHandler_OnLoadStart(
 cdef cbool LoadHandler_OnLoadError(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
-		cef_types.cef_handler_errorcode_t errorCode,
-		CefString& failedURL,
-		CefString& errorText) except * with gil:
+		cef_types.cef_handler_errorcode_t cefErrorCode,
+		CefString& cefFailedURL,
+		CefString& cefErrorText) except * with gil:
 
 	# These & in "CefString& failedURL" are very important, otherwise you get memory
 	# errors and win32 exception. Pycharm suggests that "statement has no effect",
@@ -83,13 +82,17 @@ cdef cbool LoadHandler_OnLoadError(
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyFrame = GetPyFrameByCefFrame(cefFrame)	
 		handler = pyBrowser.GetClientHandler("OnLoadError")
-		if type(handler) is types.TupleType:
+		if type(handler) is tuple:
 			if pyFrame.IsMain():
 				handler = handler[0]
 			else:
 				handler = handler[1]
 		if handler:
-			return <cbool>bool(handler(pyBrowser, pyFrame, errorCode, CefStringToPyString(failedURL), CefStringToPyString(errorText)))
+			errorText = [""] # errorText[0] is out
+			ret = handler(pyBrowser, pyFrame, cefErrorCode, CefStringToPyString(cefFailedURL), errorText)
+			if ret:
+				PyStringToCefString(errorText[0], cefErrorText)
+			return <cbool>bool(ret)
 		else:
 			return <cbool>False
 	except:

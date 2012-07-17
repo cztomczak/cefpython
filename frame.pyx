@@ -39,12 +39,13 @@ class PyFrame:
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		
 		cdef CefString cefJsCode
-		cefJsCode.FromASCII(<char*>jsCode)
+		bytesJsCode = jsCode.endode("utf-8") # Python 3 requires bytes when converting to char*
+		cefJsCode.FromASCII(<char*>bytesJsCode)
 		
 		if not scriptURL:
 			scriptURL = ""
 		cdef CefString cefScriptURL
-		cefScriptURL.FromASCII(<char*>scriptURL)
+		PyStringToCefString(scriptURL, cefScriptURL)
 
 		if not startLine:
 			startLine = -1
@@ -72,7 +73,8 @@ class PyFrame:
 
 		cdef CefString cefPropertyName
 		name = str(name)
-		cefPropertyName.FromASCII(<char*>name)
+		PyStringToCefString(name, cefPropertyName)
+		
 		cdef CefRefPtr[CefV8Value] v8Value
 		v8Value = (<CefV8Value*>(window.get())).GetValue(cefPropertyName)
 
@@ -94,6 +96,7 @@ class PyFrame:
 
 		cdef CefString cefPropertyName
 		name = str(name)
-		cefPropertyName.FromASCII(<char*>name)
+		PyStringToCefString(name, cefPropertyName)
+		
 		(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(value, v8Context), V8_PROPERTY_ATTRIBUTE_NONE)
 

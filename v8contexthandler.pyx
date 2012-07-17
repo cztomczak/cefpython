@@ -58,7 +58,7 @@ cdef void V8ContextHandler_OnContextCreated(
 		if jsProperties:
 			for key,val in jsProperties.items():
 				key = str(key)
-				cefPropertyName.FromASCII(<char*>key)
+				PyStringToCefString(key, cefPropertyName)
 				(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(val, v8Context), V8_PROPERTY_ATTRIBUTE_NONE)
 
 		if jsBindings:
@@ -69,8 +69,8 @@ cdef void V8ContextHandler_OnContextCreated(
 			v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(functionHandler.get()))
 
 			for funcName in jsBindings:
-				cefFuncName = CefString()
-				cefFuncName.FromASCII(<char*>funcName)
+				funcName = str(funcName)
+				PyStringToCefString(funcName, cefFuncName)
 				func = cef_v8_static.CreateFunction(cefFuncName, v8Handler)
 				(<CefV8Value*>(window.get())).SetValue(cefFuncName, func, V8_PROPERTY_ATTRIBUTE_NONE)
 

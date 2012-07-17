@@ -74,29 +74,29 @@ class JavascriptBindings:
 
 		# Not using type().__name__ here as it is not consistent, for int it is "int" but for None it is "NoneType".
 		valueType = type(value) 
-		if valueType == types.ListType:
+		if valueType == list:
 			for val in value:
 				valueType2 = self.__IsTypeAllowed(val)
 				if valueType2 is not True:
 					return valueType2.__name__
 			return True
-		elif valueType == types.BooleanType:
+		elif valueType == bool:
 			return True
-		elif valueType == types.FloatType:
+		elif valueType == float:
 			return True
-		elif valueType == types.IntType:
+		elif valueType == int:
 			return True
-		elif valueType == types.NoneType:
+		elif valueType == type(None):
 			return True
 		elif valueType == types.FunctionType or valueType == types.MethodType:
 			return True
-		elif valueType == types.DictType:
+		elif valueType == dict:
 			for key in value:
 				valueType2 = self.__IsTypeAllowed(value[key])
 				if valueType2 is not True:
 					return valueType2.__name__
 			return True
-		elif valueType == types.StringType:
+		elif valueType == str:
 			return True
 		else:
 			return valueType.__name__

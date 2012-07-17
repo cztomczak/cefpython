@@ -58,13 +58,13 @@ def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=Non
 	atomclass = win32gui.RegisterClass(wndclass)
 
 	if __debug:
-		print "win32gui.RegisterClass(wndclass)"
-		print "GetLastError(): %s" % GetLastError()
+		print("win32gui.RegisterClass(wndclass)")
+		print("GetLastError(): %s" % GetLastError())
 
 	if xpos is None or ypos is None:
 		# Center window on the screen.
 		if __debug:
-			print "Centering window on the screen."
+			print("Centering window on the screen.")
 		screenx = win32api.GetSystemMetrics(win32con.SM_CXSCREEN)
 		screeny = win32api.GetSystemMetrics(win32con.SM_CYSCREEN)
 		xpos = int(math.floor((screenx - width) / 2))
@@ -85,7 +85,7 @@ def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=Non
 			win32api.SendMessage(windowID, win32con.WM_SETICON, win32con.ICON_SMALL, smallIcon)
 	
 	if __debug:
-		print "windowID=%s" % windowID
+		print("windowID=%s" % windowID)
 
 	return windowID
 
