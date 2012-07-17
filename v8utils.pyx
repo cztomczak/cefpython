@@ -14,9 +14,14 @@ include "pythoncallback.pyx"
 
 cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Context] v8Context, nestingLevel=0):
 
-	if nestingLevel > 10:
+	# With nestingLevel > 10 we get win32 exceptions.
+
+	if nestingLevel > 8:
+		print("raising exception...")
 		raise Exception("V8ValueToPyValue() failed: data passed from Javascript to Python has"
-				" more than 10 levels of nesting, this is probably an infinite recursion, stopping.")
+				" more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
+
+	print("V8ValueToPyValue nestingLevel: %s" % nestingLevel)
 
 	cdef CefV8Value* v8ValuePtr = <CefV8Value*>(v8Value.get())
 	cdef CefString cefString
@@ -70,14 +75,19 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 	elif v8ValuePtr.IsUndefined():
 		return None
 	else:
+		print("unknown type...")
 		raise Exception("V8ValueToPyValue() failed: unknown type of CefV8Value.")
 
 
 cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Context] v8Context, nestingLevel=0) except *:
 
-	if nestingLevel > 10:
+	# With nestingLevel > 10 we get win32 exceptions.
+
+	if nestingLevel > 8:
 		raise Exception("PyValueToV8Value() failed: data passed from Python to Javascript has"
-				" more than 10 levels of nesting, this is probably an infinite recursion, stopping.")
+				" more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
+
+	print("PyValueToV8Value nestingLevel: %s" % nestingLevel)
 
 	cdef CefString cefString
 	cdef CefRefPtr[CefV8Value] v8Value
