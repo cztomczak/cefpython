@@ -24,7 +24,7 @@ def wm_SetFocus(windowID, msg, wparam, lparam):
 def wm_Size(windowID, msg, wparam, lparam):
 
 	global __debug
-	if __debug: print "WM_SIZE"
+	if __debug: print("WM_SIZE")
 	
 	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID)
 	if <void*>cefBrowser == NULL:
@@ -36,13 +36,13 @@ def wm_Size(windowID, msg, wparam, lparam):
 	# A dangerous cast but this func is called from a trusted place.
 	GetClientRect(<HWND><int>windowID, &rect2)
 
-	if __debug: print "rect2: %d %d %d %d" % (rect2.left, rect2.top, rect2.right, rect2.bottom)
+	if __debug: print("rect2: %d %d %d %d" % (rect2.left, rect2.top, rect2.right, rect2.bottom))
 	
 	cdef HDWP hdwp = BeginDeferWindowPos(<int>1)
 	hdwp = DeferWindowPos(hdwp, innerHwnd, NULL, rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top, SWP_NOZORDER)
 	EndDeferWindowPos(hdwp)
 
-	if __debug: print "GetLastError(): %s" % GetLastError()	
+	if __debug: print("GetLastError(): %s" % GetLastError())
 	
 
 def wm_EraseBkgnd(windowID, msg, wparam, lparam):

@@ -27,6 +27,6 @@ cdef void DelPythonCallback(int callbackID) except * with gil:
 	global __PythonCallbacks
 	global __debug
 	if __debug:
-		print "del __PythonCallbacks[%s]" % callbackID
+		print("del __PythonCallbacks[%s]" % callbackID)
 	del __PythonCallbacks[callbackID]
 

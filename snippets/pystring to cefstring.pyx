@@ -1,2 +1,3 @@
 cdef CefString cefURL
-cefURL.FromASCII(<char*>url)
+bytesURL = URL.enode("utf-8")
+cefURL.FromASCII(<char*>bytesURL)

@@ -21,7 +21,7 @@ import os
 import re
 import shutil
 
-print "\n"
+print("\n")
 mainfile = "cefpython.pyx"
 
 pyxfiles = glob.glob("../*.pyx")
@@ -31,23 +31,23 @@ pyxfiles = [file for file in pyxfiles if file.find(mainfile) == -1]
 
 # So that this is the right directory we're in.
 if os.path.exists("setup"):
-	print "Wrong directory, we should be inside setup!"
+	print("Wrong directory, we should be inside setup!")
 	exit()
 
 # Remove old pyx files in setup directory.
 oldpyxfiles = glob.glob("./*.pyx")
-print "Removing old pyx files in /setup/: %s" % oldpyxfiles
+print("Removing old pyx files in /setup/: %s" % oldpyxfiles)
 for pyxfile in oldpyxfiles:
 	if os.path.exists(pyxfile):
 		os.remove(pyxfile)
 
 # Copying pyxfiles and reading its contents.
 
-print "Copying .pyx files to /setup/: %s" % pyxfiles
+print("Copying .pyx files to /setup/: %s" % pyxfiles)
 shutil.copy("../%s" % mainfile, "./%s" % mainfile)
 # Rest of the files will be copied in for loop below.
 
-print "Fixing includes in .pyx files:"
+print("Fixing includes in .pyx files:")
 for pyxfile in pyxfiles:
 	newfile = "./%s" % os.path.basename(pyxfile)
 	shutil.copy(pyxfile, newfile)
@@ -56,11 +56,11 @@ for pyxfile in pyxfiles:
 		content = pyxfileopened.read()
 		# Do not remove the newline - so that line numbers are exact with originals.
 		(content, subs) = re.subn(r"^include[\t ]+[\"'][^\"'\n\r]+[\"'][\t ]*", "", content, flags=re.MULTILINE)
-		print "%s includes removed in: %s" % (subs, os.path.basename(pyxfile))
+		print("%s includes removed in: %s" % (subs, os.path.basename(pyxfile)))
 	# Reading and writing with the same handle using "r+" mode doesn't work,
 	# you need to seek(0) and write the same amount of bytes that was in the
 	# file, otherwise old data from the end of file stays.
 	with open(pyxfile, "w") as pyxfileopened:
 		pyxfileopened.write(content)
 
-print "\n"
+print("\n")

@@ -4,6 +4,7 @@
 
 include "imports.pyx"
 include "utils.pyx"
+include "javascriptbindings.pyx"
 
 # Global variables.
 
@@ -89,7 +90,7 @@ class PyBrowser:
 
 		for key in handlers:
 			handler = handlers[key]
-			if type(handler) == types.TupleType and len(handler) != 3:
+			if type(handler) == tuple and len(handler) != 3:
 				raise Exception("PyBrowser.__init__() failed: invalid client handler, tuple's length must be 3. Key=%s", key)
 			if key not in allowedHandlers:
 				raise Exception("Unknown handler: %s, mistyped?" % key)
@@ -167,7 +168,7 @@ class PyBrowser:
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 
 		cdef CefString cefSearchText
-		cefSearchText.FromASCII(<char*>searchText)
+		PyStringToCefString(searchText, cefSearchText)
 
 		(<CefBrowser*>(cefBrowser.get())).Find(
 			<int>searchID, cefSearchText, <cbool>bool(forward), <cbool>bool(matchCase), <cbool>bool(findNext))
@@ -186,7 +187,7 @@ class PyBrowser:
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		
 		cdef CefString cefName
-		cefName.FromASCII(<char*>name)
+		PyStringToCefString(name, cefName)
 		cdef CefRefPtr[CefFrame] cefFrame = (<CefBrowser*>(cefBrowser.get())).GetFrame(cefName)
 		
 		return GetPyFrameByCefFrame(cefFrame) # may return None.

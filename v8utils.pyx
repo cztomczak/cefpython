@@ -33,7 +33,7 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 		# Remember about increasing the nestingLevel.
 		arrayLength = v8ValuePtr.GetArrayLength()
 		pyarray = []
-		for key in xrange(0, arrayLength):
+		for key in range(0, arrayLength):
 			pyarray.append(V8ValueToPyValue(v8ValuePtr.GetValue(<int>int(key)), v8Context, nestingLevel+1))
 		return pyarray
 	elif v8ValuePtr.IsBool():
@@ -85,43 +85,43 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 
 	pyValueType = type(pyValue)
 
-	if pyValueType == types.ListType:
+	if pyValueType == list:
 		# Remember about increasing nestingLevel.
 		v8Value = cef_v8_static.CreateArray()
 		for index,value in enumerate(pyValue):
 			(<CefV8Value*>(v8Value.get())).SetValue(int(index), PyValueToV8Value(value, v8Context, nestingLevel+1))
 		return v8Value
-	elif pyValueType == types.BooleanType:
+	elif pyValueType == bool:
 		return cef_v8_static.CreateBool(bool(pyValue))
-	elif pyValueType == types.IntType:
+	elif pyValueType == int:
 		return cef_v8_static.CreateInt(int(pyValue))
-	elif pyValueType == types.FloatType:
+	elif pyValueType == float:
 		return cef_v8_static.CreateDouble(float(pyValue))
 	elif pyValueType == types.FunctionType or pyValueType == types.MethodType:
 		v8FunctionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
 		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetContext(v8Context)
 		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetCallback_V8Execute(<V8Execute_type>FunctionHandler_Execute)
 		v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(v8FunctionHandler.get()))
-		cefFuncName.FromASCII(<char*>pyValue.__name__)
+		PyStringToCefString(pyValue.__name__, cefFuncName)
 		v8Value = cef_v8_static.CreateFunction(cefFuncName, v8Handler) # v8PythonCallback
 		callbackID = PutPythonCallback(pyValue)
 		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetCallback_DelPythonCallback(<DelPythonCallback_type>DelPythonCallback)
 		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetPythonCallbackID(callbackID)
 		return v8Value
-	elif pyValueType == types.NoneType:
+	elif pyValueType == type(None):
 		return cef_v8_static.CreateNull()
-	elif pyValueType == types.DictType:
+	elif pyValueType == dict:
 		v8Value = cef_v8_static.CreateObject(<CefRefPtr[CefBase]>NULL, <CefRefPtr[CefV8Accessor]>NULL)
 		for key, value in pyValue.items():
 			# A dict may have an int key, a string key or even a tuple key:
 			# {0: 12, '0': 12, (0, 1): 123}
 			# Remember about increasing nestingLevel.
 			key = str(key)
-			cefString.FromASCII(<char*>key)
+			PyStringToCefString(key, cefString)
 			(<CefV8Value*>(v8Value.get())).SetValue(cefString, PyValueToV8Value(value, v8Context, nestingLevel+1), V8_PROPERTY_ATTRIBUTE_NONE)
 		return v8Value
-	elif pyValueType == types.StringType:
-		cefString.FromASCII(<char*>pyValue)
+	elif pyValueType == str:
+		PyStringToCefString(pyValue, cefString)
 		return cef_v8_static.CreateString(cefString)
 	else:
 		raise Exception("PyValueToV8Value() failed: an unsupported python type was passed from"

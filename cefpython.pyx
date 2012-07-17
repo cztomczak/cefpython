@@ -50,7 +50,7 @@ def ExceptHook(type, value, traceobject):
 	else: path = os.getcwd()
 	with open("%s/error.log" % path, "a") as file:
 		file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
-	print "\n"+error+"\n"
+	print("\n"+error+"\n")
 	CefQuitMessageLoop()
 	CefShutdown()
 	os._exit(1) # so that "finally" does not execute
@@ -69,9 +69,9 @@ def Initialize(applicationSettings={}):
 	__InitializeClientHandler()
 
 	if __debug:
-		print "\n%s" % ("--------" * 8)
-		print "Welcome to CEF Python bindings!"
-		print "%s\n" % ("--------" * 8)	
+		print("\n%s" % ("--------" * 8))
+		print("Welcome to CEF Python bindings!")
+		print("%s\n" % ("--------" * 8))
 
 	cdef CefSettings cefApplicationSettings
 	cdef CefRefPtr[CefApp] cefApp
@@ -80,14 +80,14 @@ def Initialize(applicationSettings={}):
 	SetApplicationSettings(applicationSettings, &cefApplicationSettings)
 
 	if __debug:
-		print "CefInitialize(cefApplicationSettings, cefApp)"
+		print("CefInitialize(cefApplicationSettings, cefApp)")
 
 	cdef cbool ret = CefInitialize(cefApplicationSettings, cefApp)
 
 	if __debug:
-		if ret: print "OK"
-		else: print "ERROR"
-		print "GetLastError(): %s" % GetLastError()	
+		if ret: print("OK")
+		else: print("ERROR")
+		print("GetLastError(): %s" % GetLastError())
 
 
 def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, javascriptBindings=None):
@@ -95,7 +95,7 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	if not clientHandlers:
 		clientHandlers = {}
 
-	if __debug: print "cefpython.CreateBrowser()"
+	if __debug: print("cefpython.CreateBrowser()")
 
 	# Later in the code we do a dangerous cast: <HWND><int>windowID,
 	# so let's make sure that this is a valid window.
@@ -108,9 +108,9 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 
 	SetBrowserSettings(browserSettings, &cefBrowserSettings)	
 
-	if __debug: print "win32gui.GetClientRect(windowID)"
+	if __debug: print("win32gui.GetClientRect(windowID)")
 	rect1 = win32gui.GetClientRect(windowID)
-	if __debug: print "GetLastError(): %s" % GetLastError()
+	if __debug: print("GetLastError(): %s" % GetLastError())
 
 	cdef RECT rect2
 	rect2.left = <int>rect1[0]
@@ -118,25 +118,26 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	rect2.right = <int>rect1[2]
 	rect2.bottom = <int>rect1[3]
 
-	if __debug: print "CefWindowInfo.SetAsChild(<HWND><int>windowID, rect2)"
+	if __debug: print("CefWindowInfo.SetAsChild(<HWND><int>windowID, rect2)")
 	info.SetAsChild(<HWND><int>windowID, rect2)	
-	if __debug: print "GetLastError(): %s" % GetLastError()
+	if __debug: print("GetLastError(): %s" % GetLastError())
 
 	if navigateURL.find("/") == -1 and navigateURL.find("\\") == -1:
 		navigateURL = "%s%s%s" % (os.getcwd(), os.sep, navigateURL)
-	if __debug: print "navigateURL: %s" % navigateURL	
-	if __debug: print "Creating cefNavigateURL: CefString().FromASCII(<char*>navigateURL)"
+	if __debug: print("navigateURL: %s" % navigateURL)
+	if __debug: print("Creating cefNavigateURL: CefString().FromASCII(<char*>navigateURL)")
+	
 	cdef CefString cefNavigateURL
-	cefNavigateURL.FromASCII(<char*>navigateURL)
+	PyStringToCefString(navigateURL, cefNavigateURL)
 
 	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>__clientHandler, cefNavigateURL, cefBrowserSettings)
 
 	if <void*>cefBrowser == NULL: 
-		if __debug: print "CreateBrowserSync(): NULL"
-		if __debug: print "GetLastError(): %s" % GetLastError()
+		if __debug: print("CreateBrowserSync(): NULL")
+		if __debug: print("GetLastError(): %s" % GetLastError())
 		return None
 	else: 
-		if __debug: print "CreateBrowserSync(): OK"
+		if __debug: print("CreateBrowserSync(): OK")
 
 	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
 	__cefBrowsers[innerWindowID] = cefBrowser
@@ -163,19 +164,19 @@ def GetBrowserByWindowID(windowID):
 
 def MessageLoop():
 	
-	if __debug: print "CefRunMessageLoop()\n"
+	if __debug: print("CefRunMessageLoop()\n")
 	CefRunMessageLoop()
 
 
 def QuitMessageLoop():
 
-	if __debug: print "QuitMessageLoop()"
+	if __debug: print("QuitMessageLoop()")
 	CefQuitMessageLoop()
 
 
 def Shutdown():
 	
-	if __debug: print "CefShutdown()"
+	if __debug: print("CefShutdown()")
 	CefShutdown()
-	if __debug: print "GetLastError(): %s" % GetLastError()	
+	if __debug: print("GetLastError(): %s" % GetLastError())
 

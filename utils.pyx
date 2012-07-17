@@ -62,7 +62,7 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser):
 			newHandlers = {}
 			for key in clientHandlers:
 				handler = clientHandlers[key]
-				if type(handler) == types.TupleType and handler[2]:
+				if type(handler) == tuple and handler[2]:
 					newHandler = (handler[2], None, handler[2])
 					newHandlers[key] = newHandler
 
@@ -178,6 +178,41 @@ cdef object CefStringToPyString(CefString& cefString):
 	cdef int charstr_size = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, NULL, 0, NULL, NULL)
 	cdef char* charstr = <char*>malloc(charstr_size*sizeof(char))
 	WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, charstr, charstr_size, NULL, NULL)
-	pystring = "" + charstr # "" is required to make a copy of char* otherwise you will get a pointer that will be freed on next line.
+	# "" is required to make a copy of char* otherwise you will get a pointer that will be freed on next line.
+	# Python 3 requires bytes from/to char*
+	if bytes == str:
+		pystring = "" + charstr # Python 2.7
+	else:
+		# In python 3 bytes and str are different types.
+		pystring = (b"" + charstr).decode("utf-8", "ignore") # Python 3
+		"""
+		try:
+			pystring = (b"" + charstr).decode("utf-8") # Python 3
+		except:
+			# Must be "ignore". In OnLoadError() errorText may contain trash data,
+			# as it is an out string used only if you return true in function, c++
+			# does not fill strings with zero for performance reasons, so they may contain trash.
+			pystring = (b"" + charstr).decode("utf-8", "replace")
+			pystring = pystring.replace("\ufffd", "?")
+			print("Decoding failed: %s" % pystring)
+		"""
 	free(charstr)
 	return pystring
+
+cdef void PyStringToCefString(pyString, CefString& cefString) except *:
+	
+	if bytes == str:
+		cefString.FromASCII(<char*>pyString) # Python 2.7
+	else:
+		# In python 3 bytes and str are different types.
+		bytesString = pyString.encode("utf-8") # Python 3 requires bytes before converting to char*
+		cefString.FromASCII(<char*>bytesString)
+
+cdef void PyStringToCefStringPtr(pyString, CefString* cefString) except *:
+	
+	if bytes == str:
+		cefString.FromASCII(<char*>pyString) # Python 2.7
+	else:
+		# In python 3 bytes and str are different types.
+		bytesString = pyString.encode("utf-8") # Python 3 requires bytes before converting to char*
+		cefString.FromASCII(<char*>bytesString)

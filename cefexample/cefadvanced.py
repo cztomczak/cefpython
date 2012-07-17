@@ -25,6 +25,7 @@ def CefAdvanced():
 	cefpython.__debug = True
 
 	appSettings = dict() # See: http://code.google.com/p/cefpython/wiki/AppSettings
+	#appSettings["user_agent"] = "MYAGENT 0.10"
 	appSettings["multi_threaded_message_loop"] = False
 	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
 	cefpython.Initialize(appSettings)
@@ -49,6 +50,8 @@ def CefAdvanced():
 	handlers["OnKeyEvent"] = (OnKeyEvent, None, OnKeyEvent)
 
 	bindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
+
+	bindings.SetFunction("PyVersion", PyVersion)
 	bindings.SetFunction("PyTest1", PyTest1)
 	bindings.SetFunction("PyTest2", PyTest2)
 	
@@ -65,6 +68,7 @@ def CefAdvanced():
 
 	bindings.SetFunction("alert", PyAlert) # same as: bindings.SetProperty("alert", PyAlert)
 	bindings.SetFunction("ChangeAlertDuringRuntime", ChangeAlertDuringRuntime)
+	bindings.SetFunction("PyFind", PyFind)
 
 	global __browser
 	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
@@ -72,62 +76,67 @@ def CefAdvanced():
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
+def PyVersion():
+	return sys.version
+
 def PyTest1(arg1):
-	print "PyTest1(%s) called" % arg1
+	print("PyTest1(%s) called" % arg1)
 	return "This string was returned from Python function PyTest1()"
 
 def PyTest2(arg1, arg2):
-	print "PyTest2(%s, %s) called" % (arg1, arg2)
+	print("PyTest2(%s, %s) called" % (arg1, arg2))
 	return [1,2, [2.1, {'3': 3, '4': [5,6]}]] # testing nested return values.
 
 def PrintPyConfig():
-	print "PrintPyConfig(): %s" % __browser.GetMainFrame().GetProperty("PyConfig")
+	print("PrintPyConfig(): %s" % __browser.GetMainFrame().GetProperty("PyConfig"))
 
 def ChangePyConfig():
 	__browser.GetMainFrame().SetProperty("PyConfig", "Changed in python during runtime in ChangePyConfig()")
 
 def TestJavascriptCallback(jsCallback):
 	if isinstance(jsCallback, cefpython.JavascriptCallback):
-		print "TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName()
-		print "jsCallback.Call(1, [2,3])"
+		print("TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName())
+		print("jsCallback.Call(1, [2,3])")
 		jsCallback.Call(1, [2,3])
 	else:
 		raise Exception("TestJavascriptCallback() failed: given argument is not a javascript callback function")
 
 def TestPythonCallbackThroughReturn():
-	print "TestPythonCallbackThroughReturn() called, returning PyCallback."
+	print("TestPythonCallbackThroughReturn() called, returning PyCallback.")
 	return PyCallback
 
 def PyCallback(*args):
-	print "PyCallback() called, args: %s" % str(args)
+	print("PyCallback() called, args: %s" % str(args))
 
 def TestPythonCallbackThroughJavascriptCallback(jsCallback):
-	print "TestPythonCallbackThroughJavascriptCallback(jsCallback) called"
-	print "jsCallback.Call(PyCallback)"
+	print("TestPythonCallbackThroughJavascriptCallback(jsCallback) called")
+	print("jsCallback.Call(PyCallback)")
 	jsCallback.Call(PyCallback)
 
 def PyAlert(msg):
-	print "PyAlert() called instead of window.alert()"
+	print("PyAlert() called instead of window.alert()")
 	win32gui.MessageBox(__browser.GetWindowID(), msg, "PyAlert()", win32con.MB_ICONQUESTION)
 
 def ChangeAlertDuringRuntime():
 	__browser.GetMainFrame().SetProperty("alert", PyAlert2)
 
 def PyAlert2(msg):
-	print "PyAlert2() called instead of window.alert()"
+	print("PyAlert2() called instead of window.alert()")
 	win32gui.MessageBox(__browser.GetWindowID(), msg, "PyAlert2()", win32con.MB_ICONWARNING)
 
+def PyFind(searchText, findNext=False):
+	__browser.Find(1, searchText, forward=True, matchCase=False, findNext=findNext)
+
 def OnLoadStart(browser, frame):
-	print "OnLoadStart(): frame URL: %s" % frame.GetURL()
-	#if frame.IsMain(): return
-	#browser.GetMainFrame().ExecuteJavascript("window.open('about:blank', '', 'width=500,height=500')")
-	#print "HidePopup(): %s" % browser.HidePopup()
+	print("OnLoadStart(): frame URL: %s" % frame.GetURL())
 
 def OnLoadError(browser, frame, errorCode, failedURL, errorText):
-	print "OnLoadError() failedURL: %s" % (failedURL)
+	print("OnLoadError() failedURL: %s" % (failedURL))
+	errorText[0] = "Custom error message when loading URL fails, see: def OnLoadError()"
+	return True
 
 def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
-	# print "keyCode=%s, modifiers=%s, isSystemKey=%s" % (keyCode, modifiers, isSystemKey)
+	# print("keyCode=%s, modifiers=%s, isSystemKey=%s" % (keyCode, modifiers, isSystemKey))
 	# Let's bind developer tools to F12 key.
 	if keyCode == cefpython.VK_F12 and eventType == cefpython.KEYEVENT_RAWKEYDOWN and modifiers == 1024 and not isSystemKey:
 		browser.ShowDevTools()

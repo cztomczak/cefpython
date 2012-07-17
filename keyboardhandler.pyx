@@ -23,7 +23,7 @@ cdef cbool KeyboardHandler_OnKeyEvent(
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		handler = pyBrowser.GetClientHandler("OnKeyEvent")
 		inheritFrames = False
-		if type(handler) is types.TupleType:
+		if type(handler) is tuple:
 			# Not handler[2], because in popups handler[2] is already assigned to handler[0] in GetPyBrowserByCefBrowser()
 			handler = handler[0]
 		if handler:
