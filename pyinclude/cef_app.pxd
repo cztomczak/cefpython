@@ -15,6 +15,7 @@ cdef extern from "include/cef_app.h":
 
 	cdef int CefInitialize(cef_type_wrappers.CefSettings, cef_ptr.CefRefPtr[CefApp])
 	cdef void CefRunMessageLoop()
+	cdef void CefDoMessageLoopWork()
 	cdef void CefQuitMessageLoop()
 	cdef void CefShutdown()
 	

@@ -8,10 +8,24 @@ import win32api
 import time
 import math
 import os
+import sys
+import re
 
 __debug = False
 __windows = {} # windowID(int): className
 
+def GetRealPath(file=None):
+	# If file is None return current directory, without trailing slash.
+	if file is None: file = ""
+	if file.find("/") != 0 and file.find("\\") != 0 and not re.search(r"^[a-zA-Z]:[/\\]", file):
+		if hasattr(sys, "frozen"): path = os.path.dirname(sys.executable)
+		elif "__file__" in globals(): path = os.path.dirname(os.path.realpath(__file__))
+		else: path = os.getcwd()
+		path = path + os.sep + file
+		path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+		path = re.sub(r"[/\\]+$", "", path)
+		return path
+	return file
 
 def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=None, windowProc=None):
 
@@ -29,8 +43,7 @@ def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=Non
 	smallIcon = ""
 
 	if icon:
-		if icon.find("/") == -1 and icon.find("\\") == -1:
-			icon = "%s%s%s" % (os.getcwd(), os.sep, icon)
+		icon = GetRealPath(icon)
 		
 		# Load small and big icon.
 		# WNDCLASSEX (along with hIconSm) is not supported by pywin32, 

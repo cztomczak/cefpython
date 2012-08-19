@@ -23,7 +23,7 @@ __browserInnerWindows = {} # topWindowID : innerWindowID (CefBrowser.GetWindowHa
 # PyBrowser.
 
 class PyBrowser:
-	
+
 	__topWindowID = 0
 	__innerWindowID = 0
 	__clientHandlers = {} # Dictionary.
@@ -33,15 +33,12 @@ class PyBrowser:
 
 		self.__topWindowID = topWindowID
 		self.__innerWindowID = innerWindowID
-
 		clientHandlers = clientHandlers if clientHandlers else {}
 		javascriptBindings = javascriptBindings if javascriptBindings else None
-
 		assert win32gui.IsWindow(innerWindowID), "Invalid window handle (innerWindowID)"
 
 		cdef CefRefPtr[CefBrowser] cefBrowser
 		if -1 != self.__topWindowID:
-			
 			# We do this check only for non-popup windows.
 			
 			# Functions in this class can be called only if topWindowID is set, as they call

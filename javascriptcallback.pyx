@@ -11,6 +11,7 @@ cdef map[int, CefRefPtr[CefV8Context]] __v8JavascriptCallbackContexts
 cdef int __v8JavascriptCallbackCount = 0 # next callbackID
 
 cdef int PutV8JavascriptCallback(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Context] v8Context) except *:
+
 	global __v8JavascriptCallbacks
 	global __v8JavascriptCallbackContexts
 	global __v8JavascriptCallbackCount
@@ -21,18 +22,21 @@ cdef int PutV8JavascriptCallback(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8C
 	return callbackID
 
 cdef CefRefPtr[CefV8Value] GetV8JavascriptCallback(int callbackID) except *:
+
 	global __v8JavascriptCallbacks
 	if __v8JavascriptCallbacks.find(callbackID) == __v8JavascriptCallbacks.end():
 		raise Exception("GetV8JavascriptCallback() failed: invalid callbackID: %s" % callbackID)
 	return __v8JavascriptCallbacks[callbackID]
 
 cdef CefRefPtr[CefV8Context] GetV8JavascriptCallbackContext(int callbackID) except *:
+
 	global __v8JavascriptCallbackContexts
 	if __v8JavascriptCallbackContexts.find(callbackID) == __v8JavascriptCallbackContexts.end():
 		raise Exception("GetV8JavascriptCallbackContext() failed: invalid callbackID: %s" % callbackID)
 	return __v8JavascriptCallbackContexts[callbackID]
 
 cdef void DelV8JavascriptCallback(int callbackID) except *:
+
 	global __v8JavascriptCallbacks
 	global __v8JavascriptCallbackContexts
 	__v8JavascriptCallbacks.erase(callbackID)
@@ -43,13 +47,16 @@ class JavascriptCallback:
 	__callbackID = None # an int
 
 	def __init__(self, callbackID):
+
 		assert callbackID, "JavascriptCallback.__init__() failed: callbackID is empty"
 		self.__callbackID = callbackID
 
 	def __del__(self):
+
 		DelV8JavascriptCallback(self.__callbackID)
 
 	def Call(self, *args):
+
 		cdef CefRefPtr[CefV8Value] v8Value = GetV8JavascriptCallback(self.__callbackID)
 		cdef CefRefPtr[CefV8Context] v8Context = GetV8JavascriptCallbackContext(self.__callbackID)
 		cdef CefV8ValueList v8Arguments
@@ -78,6 +85,7 @@ class JavascriptCallback:
 		return V8ValueToPyValue(v8Retval, v8Context)
 
 	def GetName(self):
+
 		cdef CefRefPtr[CefV8Value] v8Value = GetV8JavascriptCallback(self.__callbackID)
 		cdef CefString cefFuncName
 		cefFuncName = (<CefV8Value*>(v8Value.get())).GetFunctionName()

@@ -41,14 +41,24 @@ __debug = False
 # Client handler.
 cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()
 
+def GetRealPath(file=None):
+
+	# If file is None return current directory, without trailing slash.
+	if file is None: file = ""
+	if file.find("/") != 0 and file.find("\\") != 0 and not re.search(r"^[a-zA-Z]:[/\\]", file):
+		if hasattr(sys, "frozen"): path = os.path.dirname(sys.executable)
+		elif "__file__" in globals(): path = os.path.dirname(os.path.realpath(__file__))
+		else: path = os.getcwd()
+		path = path + os.sep + file
+		path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+		path = re.sub(r"[/\\]+$", "", path)
+		return path
+	return file
 
 def ExceptHook(type, value, traceobject):
 
 	error = "\n".join(traceback.format_exception(type, value, traceobject))
-	if hasattr(sys, "frozen"): path = os.path.dirname(sys.executable)
-	elif "__file__" in locals(): path = os.path.dirname(os.path.realpath(__file__))
-	else: path = os.getcwd()
-	with open("%s/error.log" % path, "a") as file:
+	with open(GetRealPath("error.log"), "a") as file:
 		file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
 	print("\n"+error+"\n")
 	CefQuitMessageLoop()
@@ -91,7 +101,7 @@ def Initialize(applicationSettings={}):
 
 
 def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, javascriptBindings=None):
-	
+
 	if not clientHandlers:
 		clientHandlers = {}
 
@@ -122,8 +132,7 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	info.SetAsChild(<HWND><int>windowID, rect2)	
 	if __debug: print("GetLastError(): %s" % GetLastError())
 
-	if navigateURL.find("/") == -1 and navigateURL.find("\\") == -1:
-		navigateURL = "%s%s%s" % (os.getcwd(), os.sep, navigateURL)
+	navigateURL = GetRealPath(navigateURL)
 	if __debug: print("navigateURL: %s" % navigateURL)
 	if __debug: print("Creating cefNavigateURL: CefString().FromASCII(<char*>navigateURL)")
 	
@@ -163,10 +172,18 @@ def GetBrowserByWindowID(windowID):
 
 
 def MessageLoop():
-	
+
 	if __debug: print("CefRunMessageLoop()\n")
 	CefRunMessageLoop()
 
+def SingleMessageLoop():
+
+	# Perform a single iteration of CEF message loop processing. This function is
+	# used to integrate the CEF message loop into an existing application message
+	# loop. 
+
+	if __debug: print("CefDoMessageLoopWork()\n")
+	CefDoMessageLoopWork();
 
 def QuitMessageLoop():
 
@@ -175,7 +192,7 @@ def QuitMessageLoop():
 
 
 def Shutdown():
-	
+
 	if __debug: print("CefShutdown()")
 	CefShutdown()
 	if __debug: print("GetLastError(): %s" % GetLastError())

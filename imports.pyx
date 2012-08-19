@@ -15,6 +15,7 @@ import cython
 import traceback
 import time
 import types
+import re
 
 from libcpp cimport bool as cbool
 from libcpp.map cimport map
