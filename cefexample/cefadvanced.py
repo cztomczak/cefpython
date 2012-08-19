@@ -80,12 +80,21 @@ def CefAdvanced():
 
 	bindings.SetFunction("PyLoadURL", PyLoadURL)
 	bindings.SetFunction("PyExecuteJavascript", PyExecuteJavascript)
+	bindings.SetFunction("PyBug", PyBug)
 
 	global __browser
 	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
+
+def PyBug(s1, s2, s3, JsBug):
+
+	print "PyBug()"
+	print "s1=%s" % s1;
+	print "s2=%s" % s2;
+	print "s3=%s" % s3;
+	JsBug.Call(s1, s2, s3, "lorem ipsum dolor sit amet ")
 
 def PyExecuteJavascript(jsCode):
 

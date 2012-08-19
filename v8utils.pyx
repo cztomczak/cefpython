@@ -21,7 +21,8 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 		raise Exception("V8ValueToPyValue() failed: data passed from Javascript to Python has"
 				" more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
 
-	print("V8ValueToPyValue nestingLevel: %s" % nestingLevel)
+	if __debug:
+		print("V8ValueToPyValue nestingLevel: %s" % nestingLevel)
 
 	cdef CefV8Value* v8ValuePtr = <CefV8Value*>(v8Value.get())
 	cdef CefString cefString
@@ -87,10 +88,11 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 		raise Exception("PyValueToV8Value() failed: data passed from Python to Javascript has"
 				" more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
 
-	print("PyValueToV8Value nestingLevel: %s" % nestingLevel)
+	if __debug:
+		print("PyValueToV8Value nestingLevel: %s" % nestingLevel)
 
 	cdef CefString cefString
-	cdef CefRefPtr[CefV8Value] v8Value
+	cdef CefRefPtr[CefV8Value] v8Value # not initialized, later we assign using "cef_v8_static.Create...()"
 	cdef CefString cefFuncName
 
 	pyValueType = type(pyValue)
