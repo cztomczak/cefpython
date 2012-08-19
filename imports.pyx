@@ -22,7 +22,7 @@ from libcpp.map cimport map
 from libcpp.vector cimport vector
 from cython.operator cimport preincrement as preinc, dereference as deref # must be "as" otherwise not seen.
 # from cython.operator cimport address as addr # Address of an c++ object?
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport calloc, malloc, free
 from libc.stdlib cimport atoi
 
 # When pyx file cimports * from a pxd file and that cimports * from another pxd

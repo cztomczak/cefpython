@@ -175,9 +175,13 @@ cdef object CefStringToPyString(CefString& cefString):
 	# errors and win32 exception. Pycharm suggests that "statement has no effect",
 	# but he is so wrong.
 	cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
-	cdef int charstr_size = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, NULL, 0, NULL, NULL)
-	cdef char* charstr = <char*>malloc(charstr_size*sizeof(char))
-	WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, charstr, charstr_size, NULL, NULL)
+	cdef int charstr_bytes = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, NULL, 0, NULL, NULL)
+
+	# Fixing issue 7: http://code.google.com/p/cefpython/issues/detail?id=7
+	# Getting garbage data when CefString is empty string, use calloc instead of malloc.
+	cdef char* charstr = <char*>calloc(charstr_bytes, sizeof(char))
+
+	WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, charstr, charstr_bytes, NULL, NULL)
 	# "" is required to make a copy of char* otherwise you will get a pointer that will be freed on next line.
 	# Python 3 requires bytes from/to char*
 	if bytes == str:
