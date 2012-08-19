@@ -273,7 +273,7 @@ class DealsphereApp():
         #__browser.ShowDevTools()
         #SingleMessageLoop    MessageLoop
 
-        timeout=100
+        timeout=10
         self.counter=0
         gobject.timeout_add(timeout, self.callback)
         
