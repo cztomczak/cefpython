@@ -8,18 +8,23 @@ import win32con # pywin32 extension
 import win32gui
 import win32api
 import sys
+import re
+import os
 
 __browser = None
 
 def CloseApplication(windowID, msg, wparam, lparam):
+
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
 	win32api.PostMessage(windowID, win32con.WM_DESTROY, 0, 0) # Do not call DestroyWindow() as it causes app error, use PostMessage() instead.
 
 def QuitApplication(windowID, msg, wparam, lparam):
+
 	win32gui.PostQuitMessage(0)
 
 def CefAdvanced():
+
 	sys.excepthook = cefpython.ExceptHook # In case of exception display it, write to error.log, shutdown CEF and exit application.
 	cefwindow.__debug = True # Whether to print debug output to console.
 	cefpython.__debug = True
@@ -27,8 +32,9 @@ def CefAdvanced():
 	appSettings = dict() # See: http://code.google.com/p/cefpython/wiki/AppSettings
 	#appSettings["user_agent"] = "MYAGENT 0.10"
 	appSettings["multi_threaded_message_loop"] = False
+	appSettings["log_file"] = cefpython.GetRealPath("debug.log") # better to use real current path
 	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
-	cefpython.Initialize(appSettings)
+	cefpython.Initialize(applicationSettings=appSettings)
 
 	wndproc = {
 		win32con.WM_CLOSE: CloseApplication, 
@@ -50,6 +56,8 @@ def CefAdvanced():
 	handlers["OnKeyEvent"] = (OnKeyEvent, None, OnKeyEvent)
 
 	bindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
+
+	bindings.SetFunction("PyJavascriptError", PyJavascriptError)
 
 	bindings.SetFunction("PyVersion", PyVersion)
 	bindings.SetFunction("PyTest1", PyTest1)
@@ -76,24 +84,40 @@ def CefAdvanced():
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
+def PyJavascriptError(errorMessage, url, lineNumber):
+
+	if re.match(r"file:/+", url):
+		# Get a relative path of the html/js file, get rid of the "file://d:/.../cefpython/".
+		url = re.sub(r"^file:/+", "", url)
+		url = re.sub(r"[/\\]+", re.escape(os.sep), url)
+		url = re.sub(r"%s" % re.escape(cefpython.GetRealPath()), "", url, flags=re.IGNORECASE)
+		url = re.sub(r"^%s" % re.escape(os.sep), "", url)
+	raise Exception("%s\n  in %s on line %s" % (errorMessage, url, lineNumber))
+
 def PyVersion():
+
 	return sys.version
 
 def PyTest1(arg1):
+
 	print("PyTest1(%s) called" % arg1)
 	return "This string was returned from Python function PyTest1()"
 
 def PyTest2(arg1, arg2):
+
 	print("PyTest2(%s, %s) called" % (arg1, arg2))
 	return [1,2, [2.1, {'3': 3, '4': [5,6]}]] # testing nested return values.
 
 def PrintPyConfig():
+
 	print("PrintPyConfig(): %s" % __browser.GetMainFrame().GetProperty("PyConfig"))
 
 def ChangePyConfig():
+
 	__browser.GetMainFrame().SetProperty("PyConfig", "Changed in python during runtime in ChangePyConfig()")
 
 def TestJavascriptCallback(jsCallback):
+
 	if isinstance(jsCallback, cefpython.JavascriptCallback):
 		print("TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName())
 		print("jsCallback.Call(1, [2,3])")
@@ -102,40 +126,50 @@ def TestJavascriptCallback(jsCallback):
 		raise Exception("TestJavascriptCallback() failed: given argument is not a javascript callback function")
 
 def TestPythonCallbackThroughReturn():
+
 	print("TestPythonCallbackThroughReturn() called, returning PyCallback.")
 	return PyCallback
 
 def PyCallback(*args):
+
 	print("PyCallback() called, args: %s" % str(args))
 
 def TestPythonCallbackThroughJavascriptCallback(jsCallback):
+
 	print("TestPythonCallbackThroughJavascriptCallback(jsCallback) called")
 	print("jsCallback.Call(PyCallback)")
 	jsCallback.Call(PyCallback)
 
 def PyAlert(msg):
+
 	print("PyAlert() called instead of window.alert()")
 	win32gui.MessageBox(__browser.GetWindowID(), msg, "PyAlert()", win32con.MB_ICONQUESTION)
 
 def ChangeAlertDuringRuntime():
+
 	__browser.GetMainFrame().SetProperty("alert", PyAlert2)
 
 def PyAlert2(msg):
+
 	print("PyAlert2() called instead of window.alert()")
 	win32gui.MessageBox(__browser.GetWindowID(), msg, "PyAlert2()", win32con.MB_ICONWARNING)
 
 def PyFind(searchText, findNext=False):
+
 	__browser.Find(1, searchText, forward=True, matchCase=False, findNext=findNext)
 
 def OnLoadStart(browser, frame):
+
 	print("OnLoadStart(): frame URL: %s" % frame.GetURL())
 
 def OnLoadError(browser, frame, errorCode, failedURL, errorText):
+
 	print("OnLoadError() failedURL: %s" % (failedURL))
 	errorText[0] = "Custom error message when loading URL fails, see: def OnLoadError()"
 	return True
 
 def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
+
 	# print("keyCode=%s, modifiers=%s, isSystemKey=%s" % (keyCode, modifiers, isSystemKey))
 	# Let's bind developer tools to F12 key.
 	if keyCode == cefpython.VK_F12 and eventType == cefpython.KEYEVENT_RAWKEYDOWN and modifiers == 1024 and not isSystemKey:
@@ -148,25 +182,31 @@ def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavas
 	return False
 
 def PyResizeWindow():
+
 	cefwindow.MoveWindow(__browser.GetWindowID(), width=500, height=500)
 
 def PyMoveWindow():
+
 	cefwindow.MoveWindow(__browser.GetWindowID(), xpos=0, ypos=0)
 
 def PopupWindow():
+
 	# TODO: creating popup windows through python.
 	pass
 
 def ModalWindow():
+
 	# TODO: creating modal windows throught python.
 	pass
 
 def LoadContentFromZip():
+
 	# TODO. Allow to pack html/css/images to a zip and run content from this file.
 	# Optionally allow to password protect this zip file.
 	pass
 
 def LoadContentFromEncryptedZip():
+
 	# TODO. This will be useful only if you protect your python sources by compiling them
 	# to exe by using for example "pyinstaller", or even better you could compile sources
 	# to a dll-like file called "pyd" by using cython extension, or you could combine them both.

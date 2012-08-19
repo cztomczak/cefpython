@@ -47,7 +47,7 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser):
 		else:
 			raise Exception("Browser not found in __pyBrowsers, searched by innerWindowID = %s" % innerWindowID)
 
-		# TODO: this currently is never cleanup up, implement LifeSpanHandler.DoClose() and clean __cefBrowsers map.
+		# TODO: this currently is never cleaned up, implement LifeSpanHandler.DoClose() and clean __cefBrowsers map.
 		__cefBrowsers[innerWindowID] = cefBrowser
 
 		if not (innerWindowID in __popupPyBrowsers):

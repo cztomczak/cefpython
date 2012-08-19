@@ -36,7 +36,6 @@ class JavascriptBindings:
 		if self.__browserCreated:
 			raise Exception("JavascriptBindings.SetFunction() failed: browser was already created, you are not"
 					" allowed to call this function now.")
-
 		if type(func) == types.FunctionType or type(func) == types.MethodType:
 			self.__functions[name] = func
 		else:
@@ -56,11 +55,9 @@ class JavascriptBindings:
 		if self.__browserCreated:
 			raise Exception("JavascriptBindings.SetProperty() failed: you cannot call this method after the browser"
 			                " was created, you should call instead: Browser.GetMainFrame().SetProperty().")
-
 		allowed = self.__IsTypeAllowed(value) # returns True or string.
 		if allowed is not True:
 			raise Exception("JavascriptBindings.SetProperty() failed: not allowed type: %s" % allowed)
-
 		self.__properties[name] = value
 	
 	def GetProperties(self):
@@ -73,6 +70,7 @@ class JavascriptBindings:
 		# Function is not allowed here.
 
 		# Not using type().__name__ here as it is not consistent, for int it is "int" but for None it is "NoneType".
+
 		valueType = type(value) 
 		if valueType == list:
 			for val in value:

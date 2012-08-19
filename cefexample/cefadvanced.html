@@ -5,6 +5,7 @@
 	body { font: 13px Arial; }
 	pre { background: #ddd; }
 	</style>
+	<script src=ceferror.js></script>
 </head>
 <body>
 
@@ -63,7 +64,7 @@ navigator.userAgent: <span style="background:#eee"><script>document.write(naviga
 	Call __browser.GetMainFrame().GetProperty("PyConfig"): <a href="javascript:PrintPyConfig()">PrintPyConfig()</a><br>
 	Try setting PyConfig during runtime using __browser.GetMainFrame().SetProperty(): <a href="javascript:ChangePyConfig()">ChangePyConfig()</a> (then call PrintPyConfig())
 
-	<br><br>
+	<h4>Infinite recursion</h4>
 	Test infinite recursion: <a href="javascript:PyTest1(window)">PyTest1(window)</a> - you will see a python exception in console (also in error.log), data structures can have maximum 8 levels of nesting.
 
 <h3>Javasript callbacks</h3>
@@ -89,6 +90,29 @@ function JSCallbackForPythonCallback(pycallback)
 
 <a href="javascript:window.TestPythonCallbackThroughReturn()('some')">window.TestPythonCallbackThroughReturn()('some')</a><br>
 <a href="javascript:window.TestPythonCallbackThroughJavascriptCallback(JSCallbackForPythonCallback)">window.TestPythonCallbackThroughJavascriptCallback(JSCallbackForPythonCallback)</a>
+
+<h3>Catching javascript errors programmatically</h3>
+
+<p>Typically when you browse a webpage your javascript errors appear in javascript console in developer tools (in cefadvanced.py there is a binding to F12 key for developer tools).</p>
+
+<p>To catch errors programmatically follow the steps below:</p>
+
+Include "ceferror.js" at the top of your page:
+<pre>window.onerror = function(errorMessage, url, lineNumber)
+{
+	window.PyJavascriptError(errorMessage, url, lineNumber);
+	return false;
+};</pre>
+
+Also in python create a javascript binding:
+<pre>def PyJavascriptError(errorMessage, url, lineNumber):
+	raise Exception("%s (in %s on line %s)" % (errorMessage, url, lineNumber))</pre>
+
+<p>Test javascript error: <a href="javascript:Undefined()">Undefined()</a></p>
+
+After clicking application should exit and you should see in the console:
+<pre>Exception: Uncaught ReferenceError: Undefined is not defined (in file:///.../cefadvanced.html on
+ line 1)</pre>
 
 <h3>Moving and resizing window</h3>
 

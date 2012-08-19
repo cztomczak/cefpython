@@ -9,6 +9,7 @@ __PythonCallbacks = {}
 __PythonCallbackCount = 0 # next callbackID
 
 def PutPythonCallback(pythonCallback):
+
 	global __PythonCallbacks
 	global __PythonCallbackCount
 	__PythonCallbackCount += 1
@@ -17,6 +18,7 @@ def PutPythonCallback(pythonCallback):
 	return callbackID
 
 def GetPythonCallback(callbackID):
+
 	global __PythonCallbacks
 	if callbackID not in __PythonCallbacks:
 		raise Exception("GetPythonCallback() failed: invalid callbackID: %s" % callbackID)
@@ -24,6 +26,7 @@ def GetPythonCallback(callbackID):
 
 # We call it through V8FunctionHandler's detructor, see v8functionhandler.h > ~V8FunctionHandler().
 cdef void DelPythonCallback(int callbackID) except * with gil:
+
 	global __PythonCallbacks
 	global __debug
 	if __debug:

@@ -6,6 +6,7 @@ include "imports.pyx"
 include "utils.pyx"
 
 def InitializeKeyboardHandler():
+
 	# Callbacks - make sure event names are
 	global __clientHandler
 	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnKeyEvent(<OnKeyEvent_type>KeyboardHandler_OnKeyEvent)
