@@ -43,16 +43,14 @@ icon.ico
 
 CHANGELOG.
 
-Version 0.33?? released on ????-??-??:
-* New function exposed: Frame.LoadURL()
-* Fixed bug in: Frame.ExecuteJavascript()
-
-Version 0.32 released on 2012-08-19
-* Javascript error handling example
-* New function exposed: cefpython.SingleMessageLoop(),
+Version 0.33 released on 2012-08-19
+ * New function exposed: Frame.LoadURL()
+ * Fixed bug in: Frame.ExecuteJavascript()
+ * Javascript error handling example
+ * New function exposed: cefpython.SingleMessageLoop(),
 	allows to integrate with existing application's message loop.
-* Fix to detection of infinite recursion in javascript bindings.
-* Improved detection of current directory when passing path to html file or icon,
+ * Fix to detection of infinite recursion in javascript bindings.
+ * Improved detection of current directory when passing path to html file or icon,
 	try cefpython.GetRealPath(file) or cefpython.GetRealPath() to get current dir.
 
 Version 0.30 released on 2012-07-15.
