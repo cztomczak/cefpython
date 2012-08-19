@@ -39,7 +39,7 @@ class PyFrame:
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		
 		cdef CefString cefJsCode
-		bytesJsCode = jsCode.endode("utf-8") # Python 3 requires bytes when converting to char*
+		bytesJsCode = jsCode.encode("utf-8") # Python 3 requires bytes when converting to char*
 		cefJsCode.FromASCII(<char*>bytesJsCode)
 		
 		if not scriptURL:
