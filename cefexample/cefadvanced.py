@@ -78,11 +78,17 @@ def CefAdvanced():
 	bindings.SetFunction("ChangeAlertDuringRuntime", ChangeAlertDuringRuntime)
 	bindings.SetFunction("PyFind", PyFind)
 
+	bindings.SetFunction("PyLoadURL", PyLoadURL)
+
 	global __browser
 	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
+
+def PyLoadURL():
+
+	__browser.GetMainFrame().LoadURL(cefpython.GetRealPath("cefsimple.html"))
 
 def PyJavascriptError(errorMessage, url, lineNumber):
 

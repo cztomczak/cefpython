@@ -18,4 +18,5 @@ cdef extern from "include/cef_frame.h":
 		CefString GetSource()
 		CefRefPtr[CefV8Context] GetV8Context()
 		cbool IsMain()
+		void LoadURL(CefString& url)
 		void SelectAll()
