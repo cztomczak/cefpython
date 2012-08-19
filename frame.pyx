@@ -85,6 +85,13 @@ class PyFrame:
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		return (<CefFrame*>(cefFrame.get())).IsMain()
 
+	def LoadURL(self, URL):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		cdef CefString cefURL
+		PyStringToCefString(URL, cefURL)
+		(<CefFrame*>(cefFrame.get())).LoadURL(cefURL)
+
 	def SetProperty(self, name, value):
 
 		# GetV8Context() requires UI thread.

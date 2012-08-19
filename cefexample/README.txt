@@ -43,6 +43,9 @@ icon.ico
 
 CHANGELOG.
 
+Version 0.33?? released on ????-??-??:
+* New function exposed: Frame.LoadURL()
+
 Version 0.32 released on 2012-08-19
 * Javascript error handling example
 * New function exposed: cefpython.SingleMessageLoop(),
