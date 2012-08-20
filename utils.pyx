@@ -173,15 +173,27 @@ cdef object CefStringToPyString(CefString& cefString):
 
 	# This & in "CefString& cefString" is very important, otherwise you get memory
 	# errors and win32 exception. Pycharm suggests that "statement has no effect",
-	# but he is so wrong.
+	# but it is so wrong.
+
 	cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
 	cdef int charstr_bytes = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, NULL, 0, NULL, NULL)
+	
+	#print "charstr_bytes: %s" % charstr_bytes
 
 	# Fixing issue 7: http://code.google.com/p/cefpython/issues/detail?id=7
 	# Getting garbage data when CefString is empty string, use calloc instead of malloc.
-	cdef char* charstr = <char*>calloc(charstr_bytes, sizeof(char))
+	
+	# When CefString is an empty string, WideCharToMultiByte returns 0 bytes,
+	# it does not even include the NUL character, so that's why when we used
+	# malloc we got garbage data, because next call to WideCharToMultiByte
+	# did not copy any of the bytes, not even the NUL char. When string is not empty
+	# the first call to WideCharToMultiByte returns the bytes with NUL character being counted.
 
-	WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, charstr, charstr_bytes, NULL, NULL)
+	cdef char* charstr = <char*>calloc(charstr_bytes, sizeof(char))
+	cdef int copied_bytes = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, charstr, charstr_bytes, NULL, NULL)
+	
+	#print "copied_bytes: %s" % copied_bytes
+
 	# "" is required to make a copy of char* otherwise you will get a pointer that will be freed on next line.
 	# Python 3 requires bytes from/to char*
 	if bytes == str:

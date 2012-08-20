@@ -43,6 +43,10 @@ icon.ico
 
 CHANGELOG.
 
+Version 0.34 released on 2012-08-20
+ * Fixed a bug that caused retrieving garbage data when passing an empty string
+from JS to Python (Issue 7).
+
 Version 0.33 released on 2012-08-19
  * New function exposed: Frame.LoadURL()
  * Fixed bug in: Frame.ExecuteJavascript()
