@@ -46,6 +46,8 @@ CHANGELOG.
 Version 0.34 released on 2012-08-20
  * Fixed a bug that caused retrieving garbage data when passing an empty string
 from JS to Python (Issue 7).
+ * Fixed windows 2003 error when closing window, LoadHandler_OnLoadEnd was
+still called, but browser was already destroyed.
 
 Version 0.33 released on 2012-08-19
  * New function exposed: Frame.LoadURL()

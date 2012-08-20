@@ -151,9 +151,7 @@ class PyBrowser:
 		self.__topWindowID = 0
 		self.__innerWindowID = 0
 		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose()
-
-		# This is probably not needed, turning it off, maybe it will fix memory read errors when closing app?
-		#(<CefBrowser*>(cefBrowser.get())).CloseBrowser()
+		(<CefBrowser*>(cefBrowser.get())).CloseBrowser()
 
 	def CloseDevTools(self):
 		

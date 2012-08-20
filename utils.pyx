@@ -123,7 +123,7 @@ cdef CefRefPtr[CefBrowser] GetCefBrowserByInnerWindowID(innerWindowID) except *:
 	else:
 		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
 
-cdef CefRefPtr[CefBrowser] GetCefBrowserByTopWindowID(windowID) except *:
+cdef CefRefPtr[CefBrowser] GetCefBrowserByTopWindowID(windowID, ignoreError=False) except *:
 
 	global __browserInnerWindows
 	global __cefBrowsers
@@ -131,13 +131,19 @@ cdef CefRefPtr[CefBrowser] GetCefBrowserByTopWindowID(windowID) except *:
 	if not windowID:
 		raise Exception("Browser was destroyed (windowID empty)")
 	if not (windowID in __browserInnerWindows):
+		if ignoreError:
+			return <CefRefPtr[CefBrowser]>NULL
 		raise Exception("windowID not found in __browserInnerWindows, windowID = %s" % windowID)
 	innerWindowID = __browserInnerWindows[windowID]
 	if __cefBrowsers.find(<int>innerWindowID) == __cefBrowsers.end():
+		if ignoreError:
+			return <CefRefPtr[CefBrowser]>NULL
 		raise Exception("Browser was destroyed (__cefBrowsers.find() failed)")
 	if <CefBrowser*>((__cefBrowsers[<int>innerWindowID]).get()):
 		return __cefBrowsers[<int>innerWindowID]
 	else:
+		if ignoreError:
+			return <CefRefPtr[CefBrowser]>NULL
 		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
 
 def CheckFrameID(frameID):
