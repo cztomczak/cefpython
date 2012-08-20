@@ -12,7 +12,11 @@ include "utils.pyx"
 
 def wm_SetFocus(windowID, msg, wparam, lparam):
 	
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID)
+	# Browser may already be closed hence the second parameter ignoreError=True,
+	# this is happening because we called Browser.CloseBrowser() first and WM_DESTROY
+	# to the window later, WM messages are still coming before we send WM_DESTROY.
+
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True)
 	if <void*>cefBrowser == NULL:
 		return
 
@@ -26,7 +30,11 @@ def wm_Size(windowID, msg, wparam, lparam):
 	global __debug
 	if __debug: print("WM_SIZE")
 	
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID)
+	# Browser may already be closed hence the second parameter ignoreError=True,
+	# this is happening because we called Browser.CloseBrowser() first and WM_DESTROY
+	# to the window later, WM messages are still coming before we send WM_DESTROY.
+
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True)
 	if <void*>cefBrowser == NULL:
 		return
 
@@ -47,7 +55,11 @@ def wm_Size(windowID, msg, wparam, lparam):
 
 def wm_EraseBkgnd(windowID, msg, wparam, lparam):
 	
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID)
+	# Browser may already be closed hence the second parameter ignoreError=True,
+	# this is happening because we called Browser.CloseBrowser() first and WM_DESTROY
+	# to the window later, WM messages are still coming before we send WM_DESTROY.
+
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True)
 	if <void*>cefBrowser == NULL:
 		return
 
