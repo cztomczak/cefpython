@@ -199,7 +199,7 @@ class PyBrowser:
 		# is only ParentWindowWillClose() called. CloseBrowser() is called only for popups.
 		
 		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose()
-		#(<CefBrowser*>(cefBrowser.get())).CloseBrowser() 
+		(<CefBrowser*>(cefBrowser.get())).CloseBrowser() 
 
 	def CloseDevTools(self):
 		
