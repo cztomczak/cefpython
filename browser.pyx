@@ -92,6 +92,10 @@ class PyBrowser:
 			if key not in allowedHandlers:
 				raise Exception("Unknown handler: %s, mistyped?" % key)
 
+	def GetInnerWindowID(self):
+
+		return self.__innerWindowID
+
 	# Internal.
 	def IsPopup(self):
 
@@ -150,8 +154,52 @@ class PyBrowser:
 
 		self.__topWindowID = 0
 		self.__innerWindowID = 0
+
+		# Comments below are outdated, the solution to these problems is to add:
+		# >return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
+		# in CloseApplication().
+
+		# ------------- outdated block start
+
+		# Calling CloseBrowser() is not required (in cefclient it is called only for popup browsers),
+		# but if we don't call it then there will be still coming messages like: WM_SETFOCUS,
+		# WM_ERASEBKGND (see wndproc.pyx), the solution is to call CloseBrowser() or call
+		# GetCefBrowserByTopWindowID() with second parameter ignoreError=True in these procedures.
+
+		# After we call CloseBrowser() the CEF Browser window is still not destroyed,
+		# on windows 2003 we get error similar to issue 2 (http://code.google.com/p/cefpython/issues/detail?id=2),
+		# that "memory cannot be read". Our solution to this is to send WM_DESTROY message synchronously
+		# (using SendMessage) so that so that window is destroyed immediately.
+
+		# Calling CloseBrowser() fixes also an another error on windows 2003: when closing browser
+		# you get an error like this:
+		#	Traceback (most recent call last):
+		#	File "loadhandler.pyx", line 32, in cefpython.LoadHandler_OnLoadEnd (cefpython.cpp:13518)
+		#	File "utils.pyx", line 48, in cefpython.GetPyBrowserByCefBrowser (cefpython.cpp:11265)
+		#	Exception: Browser not found in __pyBrowsers, searched by innerWindowID = 2294004
+		# It occurs because PyBrowser.CloseBrowser() destroys any references to CefBrowser and PyBrowser.
+
+		"""
+		Outdated code from CloseApplication():
+			# innerWindowID = browser.GetInnerWindowID()
+		
+			# On windows 2003 there is an error when closing window, "memory cannot be read",
+			# it is similar to Issue 2 (http://code.google.com/p/cefpython/issues/detail?id=2),
+			# the solution is to destroy CefBrowserWindow explicitly by sending WM_DESTROY message.	
+			#win32api.SendMessage(innerWindowID, win32con.WM_DESTROY, 0, 0)
+
+			# Do not call DestroyWindow() for windowID as it causes app error, use PostMessage() instead.
+			#win32api.PostMessage(windowID, win32con.WM_DESTROY, 0, 0)
+		"""
+
+		# ------------- outdated block end
+
+		# You do not need to call both, call ParentWindowWillClose for the main application window,
+		# and CloseBrowser() for popup windows created by CEF. In cefclient/cefclient_win.cpp there
+		# is only ParentWindowWillClose() called. CloseBrowser() is called only for popups.
+		
 		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose()
-		(<CefBrowser*>(cefBrowser.get())).CloseBrowser()
+		#(<CefBrowser*>(cefBrowser.get())).CloseBrowser() 
 
 	def CloseDevTools(self):
 		

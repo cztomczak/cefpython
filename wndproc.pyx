@@ -12,11 +12,17 @@ include "utils.pyx"
 
 def wm_SetFocus(windowID, msg, wparam, lparam):
 	
+
 	# Browser may already be closed hence the second parameter ignoreError=True,
 	# this is happening because we called Browser.CloseBrowser() first and WM_DESTROY
 	# to the window later, WM messages are still coming before we send WM_DESTROY.
+	
+	# Temporarily chaning ignoreError to False, as we call CefBrowser->CloseBrowser() 
+	# in PyBrowser->CloseBrowser() and the outcome is that procedures in this file are not called anymore.
 
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True)
+	# Problem solved by adding "return win32gui.DefWindowProc()" in CloseApplication().
+
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, False)
 	if <void*>cefBrowser == NULL:
 		return
 
@@ -34,7 +40,12 @@ def wm_Size(windowID, msg, wparam, lparam):
 	# this is happening because we called Browser.CloseBrowser() first and WM_DESTROY
 	# to the window later, WM messages are still coming before we send WM_DESTROY.
 
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True)
+	# Temporarily chaning ignoreError to False, as we call CefBrowser->CloseBrowser() 
+	# in PyBrowser->CloseBrowser() and the outcome is that procedures in this file are not called anymore.
+
+	# Problem solved by adding "return win32gui.DefWindowProc()" in CloseApplication().
+
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, False)
 	if <void*>cefBrowser == NULL:
 		return
 
@@ -59,7 +70,12 @@ def wm_EraseBkgnd(windowID, msg, wparam, lparam):
 	# this is happening because we called Browser.CloseBrowser() first and WM_DESTROY
 	# to the window later, WM messages are still coming before we send WM_DESTROY.
 
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True)
+	# Temporarily chaning ignoreError to False, as we call CefBrowser->CloseBrowser() 
+	# in PyBrowser->CloseBrowser() and the outcome is that procedures in this file are not called anymore.
+
+	# Problem solved by adding "return win32gui.DefWindowProc()" in CloseApplication().
+
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, False)
 	if <void*>cefBrowser == NULL:
 		return
 
