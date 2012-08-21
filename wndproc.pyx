@@ -24,12 +24,13 @@ def wm_SetFocus(windowID, msg, wparam, lparam):
 
 	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, False)
 	if <void*>cefBrowser == NULL:
-		return
+		return 0
 
 	cdef HWND innerHwnd = (<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
 	# wparam,lparam from pywin32 seems to be always 0,0
 	PostMessage(innerHwnd, WM_SETFOCUS, 0, 0)
-	
+
+	return 0	
 
 def wm_Size(windowID, msg, wparam, lparam):
 
@@ -47,7 +48,7 @@ def wm_Size(windowID, msg, wparam, lparam):
 
 	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, False)
 	if <void*>cefBrowser == NULL:
-		return
+		return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
 
 	cdef HWND innerHwnd = (<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
 
@@ -62,6 +63,8 @@ def wm_Size(windowID, msg, wparam, lparam):
 	EndDeferWindowPos(hdwp)
 
 	if __debug: print("GetLastError(): %s" % GetLastError())
+
+	return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
 	
 
 def wm_EraseBkgnd(windowID, msg, wparam, lparam):
@@ -77,8 +80,10 @@ def wm_EraseBkgnd(windowID, msg, wparam, lparam):
 
 	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, False)
 	if <void*>cefBrowser == NULL:
-		return
+		return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
 
 	cdef HWND innerHwnd = (<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
 	if innerHwnd:
 		return 0 # Dont erase the background if the browser window has been loaded (this avoids flashing)
+
+	return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
