@@ -198,8 +198,8 @@ class PyBrowser:
 		# and CloseBrowser() for popup windows created by CEF. In cefclient/cefclient_win.cpp there
 		# is only ParentWindowWillClose() called. CloseBrowser() is called only for popups.
 		
-		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose()
-		(<CefBrowser*>(cefBrowser.get())).CloseBrowser() 
+		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose() # main window
+		# (<CefBrowser*>(cefBrowser.get())).CloseBrowser() # only popup
 
 	def CloseDevTools(self):
 		

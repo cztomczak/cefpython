@@ -11,10 +11,11 @@ import sys
 def CloseApplication(windowID, message, wparam, lparam):
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
-	win32api.PostMessage(windowID, win32con.WM_DESTROY, 0, 0)	
+	return win32gui.DefWindowProc(windowID, message, wparam, lparam)
 
 def QuitApplication(windowID, message, wparam, lparam):
 	win32gui.PostQuitMessage(0)
+	return 0
 
 def CefSimple():
 	sys.excepthook = cefpython.ExceptHook
