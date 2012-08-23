@@ -42,10 +42,13 @@ __debug = False
 cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()
 
 def GetRealPath(file=None):
-
+	
+	# This function is defined in 2 files: cefpython.pyx and cefwindow.py, if you make changes edit both files.
 	# If file is None return current directory, without trailing slash.
 	if file is None: file = ""
-	if file.find("/") != 0 and file.find("\\") != 0 and not re.search(r"^[a-zA-Z]:[/\\]", file):
+	if file.find("/") != 0 and file.find("\\") != 0 and not re.search(r"^[a-zA-Z]+:[/\\]", file):
+		# not re.search(r"^[a-zA-Z]+:[/\\]", file)
+		# == not (D:\\ or D:/ or http:// or ftp:// or file://)
 		if hasattr(sys, "frozen"): path = os.path.dirname(sys.executable)
 		elif "__file__" in globals(): path = os.path.dirname(os.path.realpath(__file__))
 		else: path = os.getcwd()

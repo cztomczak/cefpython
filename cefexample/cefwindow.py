@@ -15,9 +15,13 @@ __debug = False
 __windows = {} # windowID(int): className
 
 def GetRealPath(file=None):
+	
+	# This function is defined in 2 files: cefpython.pyx and cefwindow.py, if you make changes edit both files.
 	# If file is None return current directory, without trailing slash.
 	if file is None: file = ""
-	if file.find("/") != 0 and file.find("\\") != 0 and not re.search(r"^[a-zA-Z]:[/\\]", file):
+	if file.find("/") != 0 and file.find("\\") != 0 and not re.search(r"^[a-zA-Z]+:[/\\]", file):
+		# not re.search(r"^[a-zA-Z]+:[/\\]", file)
+		# == not (D:\\ or D:/ or http:// or ftp:// or file://)
 		if hasattr(sys, "frozen"): path = os.path.dirname(sys.executable)
 		elif "__file__" in globals(): path = os.path.dirname(os.path.realpath(__file__))
 		else: path = os.getcwd()
@@ -62,7 +66,8 @@ def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=Non
 	wndclass = win32gui.WNDCLASS()
 	wndclass.hInstance = win32api.GetModuleHandle(None)
 	wndclass.lpszClassName = className
-	wndclass.style = win32con.CS_GLOBALCLASS | win32con.CS_VREDRAW | win32con.CS_HREDRAW
+	wndclass.style = win32con.CS_VREDRAW | win32con.CS_HREDRAW
+	# win32con.CS_GLOBALCLASS
 	wndclass.hbrBackground = win32con.COLOR_WINDOW
 	wndclass.hCursor = win32gui.LoadCursor(0, win32con.IDC_ARROW)
 	wndclass.lpfnWndProc = windowProc

@@ -43,13 +43,15 @@ icon.ico
 
 CHANGELOG.
 
-Version 0.34 released on 2012-08-20
+Version 0.35 released on 2012-08-23.
  * Fixed a bug that caused retrieving garbage data when passing an empty string
 from JS to Python (Issue 7).
  * Fixed windows 2003 error when closing window, LoadHandler_OnLoadEnd was
 still called, but browser was already destroyed.
-
-Version 0.33 released on 2012-08-19
+ * !CreateBrowser() did not work for http:// urls, this was a bug in GetRealPath()
+introduced in version 0.33.
+ 
+Version 0.33 released on 2012-08-19.
  * New function exposed: Frame.LoadURL()
  * Fixed bug in: Frame.ExecuteJavascript()
  * Javascript error handling example

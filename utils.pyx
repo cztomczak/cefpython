@@ -184,7 +184,7 @@ cdef object CefStringToPyString(CefString& cefString):
 	cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
 	cdef int charstr_bytes = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, NULL, 0, NULL, NULL)
 	
-	#print "charstr_bytes: %s" % charstr_bytes
+	#print("charstr_bytes: %s" % charstr_bytes)
 
 	# Fixing issue 7: http://code.google.com/p/cefpython/issues/detail?id=7
 	# Getting garbage data when CefString is empty string, use calloc instead of malloc.
@@ -198,7 +198,7 @@ cdef object CefStringToPyString(CefString& cefString):
 	cdef char* charstr = <char*>calloc(charstr_bytes, sizeof(char))
 	cdef int copied_bytes = WideCharToMultiByte(CP_UTF8, 0, wcharstr, -1, charstr, charstr_bytes, NULL, NULL)
 	
-	#print "copied_bytes: %s" % copied_bytes
+	#print("copied_bytes: %s" % copied_bytes)
 
 	# "" is required to make a copy of char* otherwise you will get a pointer that will be freed on next line.
 	# Python 3 requires bytes from/to char*

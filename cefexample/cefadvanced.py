@@ -83,10 +83,12 @@ def CefAdvanced():
 	bindings.SetFunction("PyExecuteJavascript", PyExecuteJavascript)
 
 	global __browser
+	# http://127.0.0.1/cefpython/src/tests/httpauthentication.php
 	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
+	# sys.exit(0)
 
 def PyExecuteJavascript(jsCode):
 
