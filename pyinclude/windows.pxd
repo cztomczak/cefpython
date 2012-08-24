@@ -35,4 +35,11 @@ cdef extern from "Windows.h":
 	ctypedef unsigned int LPARAM
 	cdef int WM_SETFOCUS
 	cdef BOOL PostMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+
+	ctypedef unsigned int UINT_PTR
+	ctypedef unsigned int UINT
+	ctypedef struct TIMERPROC:
+		pass
+	cdef UINT_PTR SetTimer(HWND hwnd, UINT_PTR nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc)
+	cdef int USER_TIMER_MINIMUM
 	

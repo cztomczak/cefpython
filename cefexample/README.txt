@@ -44,22 +44,18 @@ icon.ico
 CHANGELOG.
 
 Version 0.35 released on 2012-08-23.
- * Fixed a bug that caused retrieving garbage data when passing an empty string
-from JS to Python (Issue 7).
- * Fixed windows 2003 error when closing window, LoadHandler_OnLoadEnd was
-still called, but browser was already destroyed.
- * !CreateBrowser() did not work for http:// urls, this was a bug in GetRealPath()
-introduced in version 0.33.
+ * Fixed a bug that caused retrieving garbage data when passing an empty string from JS to Python (Issue 7).
+ * Fixed windows 2003 error when closing window, LoadHandler_OnLoadEnd was still called, but browser was already destroyed.
+ * !CreateBrowser() did not work for http:// urls, this was a bug in GetRealPath() introduced in version 0.33.
+ * Changes in !CloseApplication() in cefadvanced.py and cefsimple.py - must return win32gui.!DefWindowProc().
  
 Version 0.33 released on 2012-08-19.
  * New function exposed: Frame.LoadURL()
  * Fixed bug in: Frame.ExecuteJavascript()
  * Javascript error handling example
- * New function exposed: cefpython.SingleMessageLoop(),
-allows to integrate with existing application's message loop, see [PyGTK] example.
+ * New function exposed: cefpython.SingleMessageLoop(), allows to integrate with existing application's message loop, see [PyGTK] example.
  * Fix to detection of infinite recursion in javascript bindings.
- * Improved detection of current directory when passing path to html file or icon,
-try cefpython.GetRealPath(file) or cefpython.GetRealPath() to get current dir.
+ * Improved detection of current directory when passing path to html file or icon, try cefpython.GetRealPath(file) or cefpython.GetRealPath() to get current dir.
 
 Version 0.30 released on 2012-07-15.
  * Implemented JavascriptBindings.

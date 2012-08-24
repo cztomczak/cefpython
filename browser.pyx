@@ -82,8 +82,13 @@ class PyBrowser:
 		
 		# CefLoadHandler.
 		allowedHandlers += ["OnLoadEnd", "OnLoadError", "OnLoadStart"]
+		
 		# CefKeyboardHandler.
 		allowedHandlers += ["OnKeyEvent"]
+		
+		# CefRequestHandler.
+		allowedHandlers += ["OnBeforeBrowse", "OnBeforeResourceLoad", "OnResourceRedirect", "OnResourceResponse",
+						"OnProtocolExecution", "GetDownloadHandler", "GetAuthCredentials", "GetCookieManager"]
 
 		for key in handlers:
 			handler = handlers[key]
@@ -192,14 +197,15 @@ class PyBrowser:
 			#win32api.PostMessage(windowID, win32con.WM_DESTROY, 0, 0)
 		"""
 
-		# ------------- outdated block end
 
 		# You do not need to call both, call ParentWindowWillClose for the main application window,
 		# and CloseBrowser() for popup windows created by CEF. In cefclient/cefclient_win.cpp there
 		# is only ParentWindowWillClose() called. CloseBrowser() is called only for popups.
+
+		# ------------- outdated block end		
 		
-		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose() # main window
-		# (<CefBrowser*>(cefBrowser.get())).CloseBrowser() # only popup
+		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose() # only main window created explicitily
+		# (<CefBrowser*>(cefBrowser.get())).CloseBrowser()
 
 	def CloseDevTools(self):
 		

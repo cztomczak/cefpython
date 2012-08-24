@@ -24,6 +24,11 @@ def QuitApplication(windowID, msg, wparam, lparam):
 	win32gui.PostQuitMessage(0)
 	return 0
 
+def WMTIMER(windowID, msg, wparam, lparam):
+
+	# do nothing.
+	return 0
+
 def CefAdvanced():
 
 	sys.excepthook = cefpython.ExceptHook # In case of exception display it, write to error.log, shutdown CEF and exit application.
@@ -40,11 +45,14 @@ def CefAdvanced():
 	wndproc = {
 		win32con.WM_CLOSE: CloseApplication, 
 		win32con.WM_DESTROY: QuitApplication,
+		win32con.WM_TIMER: WMTIMER,
 		win32con.WM_SIZE: cefpython.wm_Size,
 		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
 		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
 	}
 	windowID = cefwindow.CreateWindow("CefAdvanced", "cefadvanced", 800, 600, None, None, "icon.ico", wndproc)
+
+	cefpython.FixUIThreadResponsiveness(windowID)
 
 	browserSettings = dict() # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings["history_disabled"] = False # Backspace key will act as "History back" action in browser.

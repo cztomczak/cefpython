@@ -10,6 +10,12 @@ cimport cef_types
 from cef_string cimport CefString
 from libcpp cimport bool as cbool
 from cef_v8 cimport CefV8Context
+from cef_request cimport CefRequest
+from cef_response cimport CefResponse
+from cef_content_filter cimport CefContentFilter
+from cef_cookie cimport CefCookieManager
+from cef_stream cimport CefStreamReader
+from cef_download_handler cimport CefDownloadHandler
 
 cdef extern from "clienthandler.h":
 
@@ -20,18 +26,21 @@ cdef extern from "clienthandler.h":
 	ctypedef void (*OnLoadEnd_type)(
 			CefRefPtr[CefBrowser] browser,
 			CefRefPtr[CefFrame] frame,
-			int httpStatusCode)
+			int httpStatusCode
+	)
 
 	ctypedef void (*OnLoadStart_type)(
 			CefRefPtr[CefBrowser] browser,
-			CefRefPtr[CefFrame] frame)
+			CefRefPtr[CefFrame] frame
+	)
 	
 	ctypedef cbool (*OnLoadError_type)(
 			CefRefPtr[CefBrowser] browser,
 			CefRefPtr[CefFrame] frame,
 			cef_types.cef_handler_errorcode_t errorCode,
 			CefString& failedUrl,
-			CefString& errorText)
+			CefString& errorText
+	)
 
 	# CefKeyboardHandler types.
 
@@ -41,15 +50,78 @@ cdef extern from "clienthandler.h":
 			int keyCode,
 			int modifiers,
 			cbool isSystemKey,
-			cbool isAfterJavascript)
+			cbool isAfterJavascript
+	)
 
 	# CefV8ContextHandler types.
 
 	ctypedef void (*OnContextCreated_type)(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
-		CefRefPtr[CefV8Context] v8Context)
+		CefRefPtr[CefV8Context] v8Context
+	)
 
+	# CefRequestHandler types.
+
+	ctypedef cbool (*OnBeforeBrowse_type)(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefRefPtr[CefFrame] cefFrame,
+		CefRefPtr[CefRequest] cefRequest,
+		cef_types.cef_handler_navtype_t navType,
+		cbool isRedirect
+	)
+
+	ctypedef cbool (*OnBeforeResourceLoad_type)(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefRefPtr[CefRequest] cefRequest,
+		CefString& cefRedirectURL,
+		CefRefPtr[CefStreamReader]& cefResourceStream,
+		CefRefPtr[CefResponse] cefResponse,
+		int loadFlags
+	)
+
+	ctypedef void (*OnResourceRedirect_type)(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefString& cefOldURL,
+		CefString& cefNewURL
+	)
+
+	ctypedef void (*OnResourceResponse_type)(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefString& cefURL,
+		CefRefPtr[CefResponse] cefResponse,
+		CefRefPtr[CefContentFilter]& cefFilter
+	)
+
+	ctypedef cbool (*OnProtocolExecution_type)(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefString& cefURL,
+		cbool& cefAllowOSExecution
+	)
+
+	ctypedef cbool (*GetDownloadHandler_type)(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefString& cefMimeType,
+		CefString& cefFilename,
+		cef_types.int64 cefContentLength,
+		CefRefPtr[CefDownloadHandler]& cefDownloadHandler
+	)
+
+	ctypedef cbool (*GetAuthCredentials_type)(
+		CefRefPtr[CefBrowser] cefBrowser,
+		cbool cefIsProxy,
+		CefString& cefHost,
+		int cefPort,
+		CefString& cefRealm,
+		CefString& cefScheme,
+		CefString& cefUsername,
+		CefString& cefPassword
+	)
+
+	ctypedef CefRefPtr[CefCookieManager] (*GetCookieManager_type)(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefString& mainURL
+	)
 	
 	# ClientHandler class.
 	
@@ -66,5 +138,13 @@ cdef extern from "clienthandler.h":
 		# CefV8ContextHandler callbacks.
 		void SetCallback_OnContextCreated(OnContextCreated_type)
 
-
+		# CefRequestHandler callbacks.
+		void SetCallback_OnBeforeBrowse(OnBeforeBrowse_type)
+		void SetCallback_OnBeforeResourceLoad(OnBeforeResourceLoad_type)
+		void SetCallback_OnResourceRedirect(OnResourceRedirect_type)
+		void SetCallback_OnResourceResponse(OnResourceResponse_type)
+		void SetCallback_OnProtocolExecution(OnProtocolExecution_type)
+		void SetCallback_GetDownloadHandler(GetDownloadHandler_type)
+		void SetCallback_GetAuthCredentials(GetAuthCredentials_type)
+		void SetCallback_GetCookieManager(GetCookieManager_type)
 	

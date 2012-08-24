@@ -84,3 +84,14 @@ cdef extern from "include/internal/cef_types.h":
 		V8_PROPERTY_ATTRIBUTE_DONTENUM = 1 << 1,  # Not enumerable
 		V8_PROPERTY_ATTRIBUTE_DONTDELETE = 1 << 2   # Not configurable
 
+	# CefRequestHandler > OnBeforeBrowse > NavType
+
+	enum cef_handler_navtype_t:
+		NAVTYPE_LINKCLICKED = 0,
+		NAVTYPE_FORMSUBMITTED,
+		NAVTYPE_BACKFORWARD,
+		NAVTYPE_RELOAD,
+		NAVTYPE_FORMRESUBMITTED,
+		NAVTYPE_OTHER,
+		NAVTYPE_LINKDROPPED
+
