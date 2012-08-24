@@ -22,7 +22,7 @@ def CurrentlyOn(threadID):
 	threadID = <int>int(threadID)
 	return CefCurrentlyOn(<CefThreadId>threadID)
 
-cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser):
+cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreError=False):
 
 	global __popupPyBrowsers
 	global __pyBrowsers
@@ -45,6 +45,8 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser):
 		elif openerInnerWindowID in __popupPyBrowsers:
 			parentPyBrowser = __popupPyBrowsers[openerInnerWindowID]
 		else:
+			if ignoreError:
+				return None
 			raise Exception("Browser not found in __pyBrowsers, searched by innerWindowID = %s" % innerWindowID)
 
 		# TODO: this currently is never cleaned up, implement LifeSpanHandler.DoClose() and clean __cefBrowsers map.
@@ -93,6 +95,26 @@ cdef object GetPyFrameByCefFrame(CefRefPtr[CefFrame] cefFrame):
 		return __pyFrames[pyFrameID]
 	else:
 		return None
+
+cdef object GetPyRequestByCefRequest(CefRefPtr[CefRequest] cefRequest):
+
+	# TODO: not yet implemented.
+	return None
+
+cdef object GetPyStreamReaderByCefStreamReader(CefRefPtr[CefStreamReader] cefStreamReader):
+
+	# TODO: not yet implemented.
+	return None
+
+cdef object GetPyResponseByCefResponse(CefRefPtr[CefResponse] cefResponse):
+
+	# TODO: not yet implemented.
+	return None
+
+cdef object GetPyContentFilterByCefContentFilter(CefRefPtr[CefContentFilter] cefContentFilter):
+
+	# TODO: not yet implemented.
+	return None
 
 def CheckInnerWindowID(innerWindowID):
 

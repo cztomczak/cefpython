@@ -34,12 +34,20 @@ include "functionhandler.pyx"
 include "v8utils.pyx"
 include "javascriptcallback.pyx"
 include "pythoncallback.pyx"
+include "requesthandler.pyx"
 
 # Global variables.
 __debug = False
 
 # Client handler.
 cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()
+
+def FixUIThreadResponsiveness(windowID):
+	
+	# OnBeforeResourceLoad is called on IO thread, when we acquire gil lock and execute
+	# python code then the UI thread is not executing unless you do some UI action (minimize/restore window).
+	cdef HWND hwnd = <HWND><int>windowID
+	SetTimer(hwnd, 1, 10, <TIMERPROC>NULL)
 
 def GetRealPath(file=None):
 	
@@ -73,6 +81,7 @@ def __InitializeClientHandler():
 	InitializeLoadHandler()
 	InitializeKeyboardHandler()
 	InitializeV8ContextHandler()
+	InitializeRequestHandler()
 
 def Initialize(applicationSettings={}):
 
@@ -141,6 +150,8 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	
 	cdef CefString cefNavigateURL
 	PyStringToCefString(navigateURL, cefNavigateURL)
+
+	if __debug: print("CreateBrowserSync()")
 
 	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>__clientHandler, cefNavigateURL, cefBrowserSettings)
 

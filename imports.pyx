@@ -25,6 +25,9 @@ from cython.operator cimport preincrement as preinc, dereference as deref # must
 from libc.stdlib cimport calloc, malloc, free
 from libc.stdlib cimport atoi
 
+cimport cython.parallel # import it so that threads are initiated.
+#from cpython.pystate cimport *
+
 # When pyx file cimports * from a pxd file and that cimports * from another pxd
 # then these another names will be visible in pyx file.
 
@@ -50,3 +53,9 @@ cimport cef_types_win # same as cef_types.
 from cef_v8 cimport *
 cimport cef_v8_static
 from v8functionhandler cimport *
+from cef_request cimport *
+from cef_response cimport *
+from cef_stream cimport *
+from cef_content_filter cimport *
+from cef_download_handler cimport *
+from cef_cookie cimport *

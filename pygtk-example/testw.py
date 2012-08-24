@@ -214,7 +214,7 @@ class DealsphereApp():
 
         #self.window1.maximize() 
         self.window1.show()
-        mid= self.scrolledwindow1.window.handle
+        #mid= self.scrolledwindow1.window.handle
         '''
         print self.window1.window.handle
         #hWnd = gdk_win32_drawable_get_handle(self.window1);
@@ -261,7 +261,7 @@ class DealsphereApp():
             win32con.WM_SETFOCUS: cefpython.wm_SetFocus
        }
         windowID=0
-        windowID = cefwindow.CreateWindow("Test window", "testwindow", 100,100, 1 , 1,None,wndproc,mid)#mid   
+        windowID = cefwindow.CreateWindow("Test window", "testwindow", 100,100, 1 , 1,None,wndproc)
         print windowID
         self.BID  =windowID
         global __browser

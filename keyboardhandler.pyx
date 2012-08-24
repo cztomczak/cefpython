@@ -5,9 +5,15 @@
 include "imports.pyx"
 include "utils.pyx"
 
+KEYEVENT_RAWKEYDOWN = <int>cef_types.KEYEVENT_RAWKEYDOWN
+KEYEVENT_KEYDOWN = <int>cef_types.KEYEVENT_KEYDOWN
+KEYEVENT_KEYUP = <int>cef_types.KEYEVENT_KEYUP
+KEYEVENT_CHAR = <int>cef_types.KEYEVENT_CHAR
+
 def InitializeKeyboardHandler():
 
-	# Callbacks - make sure event names are
+	# Callbacks - make sure event names are proper - hard to detect error.
+	# Call it in cefpython.pyx > __InitializeClientHandler().
 	global __clientHandler
 	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnKeyEvent(<OnKeyEvent_type>KeyboardHandler_OnKeyEvent)
 
@@ -28,14 +34,10 @@ cdef cbool KeyboardHandler_OnKeyEvent(
 			# Not handler[2], because in popups handler[2] is already assigned to handler[0] in GetPyBrowserByCefBrowser()
 			handler = handler[0]
 		if handler:
-			return <cbool>bool(handler(pyBrowser, eventType, code, modifiers, isSystemKey, isAfterJavascript))
+			return <cbool>bool(handler(pyBrowser, <int>eventType, code, modifiers, isSystemKey, isAfterJavascript))
 		else:
 			return <cbool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-KEYEVENT_RAWKEYDOWN = <int>cef_types.KEYEVENT_RAWKEYDOWN
-KEYEVENT_KEYDOWN = <int>cef_types.KEYEVENT_KEYDOWN
-KEYEVENT_KEYUP = <int>cef_types.KEYEVENT_KEYUP
-KEYEVENT_CHAR = <int>cef_types.KEYEVENT_CHAR
