@@ -36,11 +36,14 @@ class PyFrame:
 
 	def ExecuteJavascript(self, jsCode, scriptURL=None, startLine=None):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))		
 		cdef CefString cefJsCode
-		bytesJsCode = jsCode.encode("utf-8") # Python 3 requires bytes when converting to char*
-		cefJsCode.FromASCII(<char*>bytesJsCode)
+
+		if bytes == str:
+			cefJsCode.FromASCII(<char*>jsCode) # Python 2.7
+		else:
+			bytesJsCode = jsCode.encode("utf-8") # Python 3 requires bytes when converting to char*
+			cefJsCode.FromASCII(<char*>bytesJsCode)
 		
 		if not scriptURL:
 			scriptURL = ""
