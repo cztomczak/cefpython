@@ -2,7 +2,6 @@ import wx
 import sys
 import time
 import cefpython
-import cefwindow
 
 class MainFrame(wx.Frame):
 
@@ -12,7 +11,7 @@ class MainFrame(wx.Frame):
 		
 		wx.Frame.__init__(self, parent=None, id=wx.ID_ANY, title='wxPython example', size=(600,400))
 		self.CreateMenu()
-		self.browser = cefpython.CreateBrowser(self.GetHandle(), browserSettings={}, navigateURL="cefadvanced.html")		
+		self.browser = cefpython.CreateBrowser(self.GetHandle(), browserSettings={}, navigateURL="cefsimple.html")		
 		
 		self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
 		self.Bind(wx.EVT_SIZE, self.OnSize)
