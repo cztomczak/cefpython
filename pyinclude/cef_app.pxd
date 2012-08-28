@@ -14,8 +14,8 @@ cdef extern from "include/cef_app.h":
 		pass
 
 	cdef int CefInitialize(cef_type_wrappers.CefSettings, cef_ptr.CefRefPtr[CefApp])
-	cdef void CefRunMessageLoop()
-	cdef void CefDoMessageLoopWork()
+	cdef void CefRunMessageLoop() nogil
+	cdef void CefDoMessageLoopWork() nogil
 	cdef void CefQuitMessageLoop()
 	cdef void CefShutdown()
 	

@@ -3,6 +3,9 @@ import sys
 import time
 import cefpython
 
+# TODO: currently we use wx.Timer to imitate message loop, but
+# it would probably be better to use wx.CallLater() and wx.lib.pubsub.
+
 class MainFrame(wx.Frame):
 
 	browser = None

@@ -61,68 +61,6 @@ cdef extern from "clienthandler.h":
 		CefRefPtr[CefV8Context] v8Context
 	)
 
-	# CefRequestHandler types.
-
-	ctypedef cbool (*OnBeforeBrowse_type)(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefRefPtr[CefFrame] cefFrame,
-		CefRefPtr[CefRequest] cefRequest,
-		cef_types.cef_handler_navtype_t navType,
-		cbool isRedirect
-	)
-
-	ctypedef cbool (*OnBeforeResourceLoad_type)(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefRefPtr[CefRequest] cefRequest,
-		CefString& cefRedirectURL,
-		CefRefPtr[CefStreamReader]& cefResourceStream,
-		CefRefPtr[CefResponse] cefResponse,
-		int loadFlags
-	)
-
-	ctypedef void (*OnResourceRedirect_type)(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefString& cefOldURL,
-		CefString& cefNewURL
-	)
-
-	ctypedef void (*OnResourceResponse_type)(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefString& cefURL,
-		CefRefPtr[CefResponse] cefResponse,
-		CefRefPtr[CefContentFilter]& cefFilter
-	)
-
-	ctypedef cbool (*OnProtocolExecution_type)(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefString& cefURL,
-		cbool& cefAllowOSExecution
-	)
-
-	ctypedef cbool (*GetDownloadHandler_type)(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefString& cefMimeType,
-		CefString& cefFilename,
-		cef_types.int64 cefContentLength,
-		CefRefPtr[CefDownloadHandler]& cefDownloadHandler
-	)
-
-	ctypedef cbool (*GetAuthCredentials_type)(
-		CefRefPtr[CefBrowser] cefBrowser,
-		cbool cefIsProxy,
-		CefString& cefHost,
-		int cefPort,
-		CefString& cefRealm,
-		CefString& cefScheme,
-		CefString& cefUsername,
-		CefString& cefPassword
-	)
-
-	ctypedef CefRefPtr[CefCookieManager] (*GetCookieManager_type)(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefString& mainURL
-	)
-	
 	# ClientHandler class.
 	
 	cdef cppclass ClientHandler(CefClient):
@@ -138,13 +76,3 @@ cdef extern from "clienthandler.h":
 		# CefV8ContextHandler callbacks.
 		void SetCallback_OnContextCreated(OnContextCreated_type)
 
-		# CefRequestHandler callbacks.
-		void SetCallback_OnBeforeBrowse(OnBeforeBrowse_type)
-		void SetCallback_OnBeforeResourceLoad(OnBeforeResourceLoad_type)
-		void SetCallback_OnResourceRedirect(OnResourceRedirect_type)
-		void SetCallback_OnResourceResponse(OnResourceResponse_type)
-		void SetCallback_OnProtocolExecution(OnProtocolExecution_type)
-		void SetCallback_GetDownloadHandler(GetDownloadHandler_type)
-		void SetCallback_GetAuthCredentials(GetAuthCredentials_type)
-		void SetCallback_GetCookieManager(GetCookieManager_type)
-	

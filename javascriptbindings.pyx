@@ -96,5 +96,9 @@ class JavascriptBindings:
 			return True
 		elif valueType == str:
 			return True
+		elif valueType == unicode:
+			return True
+		elif valueType == tuple:
+			return True
 		else:
 			return valueType.__name__

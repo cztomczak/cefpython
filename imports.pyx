@@ -16,6 +16,7 @@ import traceback
 import time
 import types
 import re
+import copy
 
 from libcpp cimport bool as cbool
 from libcpp.map cimport map

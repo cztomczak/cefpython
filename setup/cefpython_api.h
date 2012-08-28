@@ -2,8 +2,12 @@
 #define __PYX_HAVE_API__cefpython
 #include "Python.h"
 
-static void (*__pyx_f_9cefpython_LoadHandler_OnLoadEnd)(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, int) = 0;
-#define LoadHandler_OnLoadEnd __pyx_f_9cefpython_LoadHandler_OnLoadEnd
+static bool (*__pyx_f_9cefpython_RequestHandler_OnBeforeResourceLoad2)(void) = 0;
+#define RequestHandler_OnBeforeResourceLoad2 __pyx_f_9cefpython_RequestHandler_OnBeforeResourceLoad2
+static bool (*__pyx_f_9cefpython_RequestHandler_OnBeforeResourceLoad)(CefRefPtr<CefBrowser>, CefRefPtr<CefRequest>, CefString &, CefRefPtr<CefStreamReader> &, CefRefPtr<CefResponse>, int) = 0;
+#define RequestHandler_OnBeforeResourceLoad __pyx_f_9cefpython_RequestHandler_OnBeforeResourceLoad
+
+
 
 
 
@@ -888,6 +892,8 @@ static void (*__pyx_f_9cefpython_LoadHandler_OnLoadEnd)(CefRefPtr<CefBrowser>, C
 
 
 
+
+
 #ifndef __PYX_HAVE_RT_ImportModule
 #define __PYX_HAVE_RT_ImportModule
 static PyObject *__Pyx_ImportModule(const char *name) {
@@ -964,7 +970,8 @@ static int import_cefpython(void) {
   PyObject *module = 0;
   module = __Pyx_ImportModule("cefpython");
   if (!module) goto bad;
-  if (__Pyx_ImportFunction(module, "LoadHandler_OnLoadEnd", (void (**)(void))&__pyx_f_9cefpython_LoadHandler_OnLoadEnd, "void (CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, int)") < 0) goto bad;
+  if (__Pyx_ImportFunction(module, "RequestHandler_OnBeforeResourceLoad2", (void (**)(void))&__pyx_f_9cefpython_RequestHandler_OnBeforeResourceLoad2, "bool (void)") < 0) goto bad;
+  if (__Pyx_ImportFunction(module, "RequestHandler_OnBeforeResourceLoad", (void (**)(void))&__pyx_f_9cefpython_RequestHandler_OnBeforeResourceLoad, "bool (CefRefPtr<CefBrowser>, CefRefPtr<CefRequest>, CefString &, CefRefPtr<CefStreamReader> &, CefRefPtr<CefResponse>, int)") < 0) goto bad;
   Py_DECREF(module); module = 0;
   return 0;
   bad:

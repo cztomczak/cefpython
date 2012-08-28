@@ -24,11 +24,6 @@ def QuitApplication(windowID, msg, wparam, lparam):
 	win32gui.PostQuitMessage(0)
 	return 0
 
-def WMTIMER(windowID, msg, wparam, lparam):
-
-	# do nothing.
-	return 0
-
 def CefAdvanced():
 
 	sys.excepthook = cefpython.ExceptHook # In case of exception display it, write to error.log, shutdown CEF and exit application.
@@ -51,8 +46,6 @@ def CefAdvanced():
 		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
 	}
 	windowID = cefwindow.CreateWindow("CefAdvanced", "cefadvanced", 800, 600, None, None, "icon.ico", wndproc)
-
-	cefpython.FixUIThreadResponsiveness(windowID)
 
 	browserSettings = dict() # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings["history_disabled"] = False # Backspace key will act as "History back" action in browser.
@@ -93,6 +86,8 @@ def CefAdvanced():
 	global __browser
 	# http://127.0.0.1/cefpython/src/tests/httpauthentication.php
 	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
+
+	print "CefAdvanced(): browser created"
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
@@ -142,8 +137,8 @@ def TestJavascriptCallback(jsCallback):
 
 	if isinstance(jsCallback, cefpython.JavascriptCallback):
 		print("TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName())
-		print("jsCallback.Call(1, [2,3])")
-		jsCallback.Call(1, [2,3])
+		print("jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'unicode string')")
+		jsCallback.Call(1, [2,3], ('tuple', 'tuple'), unicode('unicode string'))
 	else:
 		raise Exception("TestJavascriptCallback() failed: given argument is not a javascript callback function")
 
