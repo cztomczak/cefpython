@@ -13,8 +13,9 @@ ext_modules = [Extension(
 	# 1) compile '/clr' + link '/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt' (CLR will probably require .NET framework? YES)
 	# 2) compile '/EHsc' + link '/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt'], '/ignore:4217'
 	extra_compile_args=['/EHsc'], # '/EHsc', '/clr'
+	# extra_objects=[],
 	extra_link_args=['/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt', '/ignore:4217'] # '/ignore:4217'
-	#extra_link_args=['/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:libcpmt', '/NODEFAULTLIB:msvcrt', '/NODEFAULTLIB:msvcprt']
+	#extra_link_args=['/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:libcpmt', '/NODEFAULTLIB:msvcrt', '/NODEFAULTLIB:msvcprt']	
 
 	# libcmt - C, libcpmt - C++ (CP = C Plus)
 	# libcef_dll_wrapper.lib directives: libcmt, libcpmt, oldnames.

@@ -22,7 +22,8 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 				" more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
 
 	if __debug:
-		print("V8ValueToPyValue nestingLevel: %s" % nestingLevel)
+		# print("V8ValueToPyValue nestingLevel: %s" % nestingLevel)
+		pass
 
 	cdef CefV8Value* v8ValuePtr = <CefV8Value*>(v8Value.get())
 	cdef CefString cefString
@@ -76,7 +77,6 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 	elif v8ValuePtr.IsUndefined():
 		return None
 	else:
-		print("unknown type...")
 		raise Exception("V8ValueToPyValue() failed: unknown type of CefV8Value.")
 
 
@@ -89,12 +89,24 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 				" more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
 
 	if __debug:
-		print("PyValueToV8Value nestingLevel: %s" % nestingLevel)
+		# print("PyValueToV8Value nestingLevel: %s" % nestingLevel)
+		pass
 
 	cdef CefString cefString
 	cdef CefRefPtr[CefV8Value] v8Value # not initialized, later we assign using "cef_v8_static.Create...()"
 	cdef CefString cefFuncName
 
+	pyValueType = type(pyValue)
+
+	# Issue 10: support for unicode and tuple.
+	# http://code.google.com/p/cefpython/issues/detail?id=10
+
+	if pyValueType == unicode:
+		pyValue = pyValue.encode(__applicationSettings["unicode_to_bytes_encoding"])
+	elif pyValueType == tuple:
+		pyValue = list(pyValue)
+
+	# Check type again, as code above might have changed it.
 	pyValueType = type(pyValue)
 
 	if pyValueType == list:

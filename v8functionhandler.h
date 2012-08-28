@@ -9,7 +9,6 @@
 #include "include/cef_v8context_handler.h"
 #include <vector>
 #include "util.h"
-#include "setup/cefpython_api.h"
 
 // CefV8Handler.Execute() type.
 typedef bool (*V8Execute_type)(

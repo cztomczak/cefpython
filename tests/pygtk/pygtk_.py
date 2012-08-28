@@ -4,8 +4,6 @@ pygtk.require('2.0')
 import gtk
 import sys
 import gobject
-import win32gui
-import win32con
 
 class PyGTKExample:
 

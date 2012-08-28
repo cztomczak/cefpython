@@ -13,31 +13,17 @@ NAVTYPE_FORMRESUBMITTED = <int>cef_types.NAVTYPE_FORMRESUBMITTED
 NAVTYPE_OTHER = <int>cef_types.NAVTYPE_OTHER
 NAVTYPE_LINKDROPPED = <int>cef_types.NAVTYPE_LINKDROPPED
 
-def InitializeRequestHandler():
-
-	# Callbacks - make sure event names are proper - hard to detect error.
-	# Call it in cefpython.pyx > __InitializeClientHandler().
-	global __clientHandler
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnBeforeBrowse(<OnBeforeBrowse_type>RequestHandler_OnBeforeBrowse)
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnBeforeResourceLoad(<OnBeforeResourceLoad_type>RequestHandler_OnBeforeResourceLoad)
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnResourceRedirect(<OnResourceRedirect_type>RequestHandler_OnResourceRedirect)
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnResourceResponse(<OnResourceResponse_type>RequestHandler_OnResourceResponse)
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnProtocolExecution(<OnProtocolExecution_type>RequestHandler_OnProtocolExecution)
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_GetDownloadHandler(<GetDownloadHandler_type>RequestHandler_GetDownloadHandler)
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_GetAuthCredentials(<GetAuthCredentials_type>RequestHandler_GetAuthCredentials)
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_GetCookieManager(<GetCookieManager_type>RequestHandler_GetCookieManager)
-
-cdef cbool RequestHandler_OnBeforeBrowse	(
+cdef public cbool RequestHandler_OnBeforeBrowse(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
 		CefRefPtr[CefRequest] cefRequest,
 		cef_types.cef_handler_navtype_t navType,
-		cbool isRedirect
-	) except * with gil:
+		cbool isRedirect) except * with gil:
+	
+	# TODO: not yet implemented.
+	return <cbool>False
 
 	try:
-		return <cbool>False
-
 		# ignoreError=True - when creating browser window there is no browser yet added to the __pyBrowsers,
 		# it's happening because CreateBrowser() does the initial navigation.
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
@@ -59,25 +45,23 @@ cdef cbool RequestHandler_OnBeforeBrowse	(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef cbool RequestHandler_OnBeforeResourceLoad(
+cdef public cbool RequestHandler_OnBeforeResourceLoad(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefRequest] cefRequest,
 		CefString& cefRedirectURL,
 		CefRefPtr[CefStreamReader]& cefResourceStream,
 		CefRefPtr[CefResponse] cefResponse,
-		int loadFlags
-	) except * with gil: # "with gil" - removed. CEF calls this function on IO thread, if you try to acquire GIL lock then app hangs up.
-	print "OnBeforeResourceLoad"
+		int loadFlags) except * with gil:
+
+	# TODO: not yet implemented.
+	return <cbool>False
+
 	try:
-		print "try"
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
-		print "pyBrowser"
 		pyRequest = GetPyRequestByCefRequest(cefRequest)
-		print "pyRequest"
 		pyRedirectURL = [""]
 		pyResourceStream = GetPyStreamReaderByCefStreamReader(cefResourceStream)
 		pyResponse = GetPyResponseByCefResponse(cefResponse)
-		print "pyResponse"
 
 		handler = pyBrowser.GetClientHandler("OnBeforeResourceLoad")
 		inheritFrames = False
@@ -96,11 +80,12 @@ cdef cbool RequestHandler_OnBeforeResourceLoad(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef void RequestHandler_OnResourceRedirect(
+cdef public void RequestHandler_OnResourceRedirect(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefString& cefOldURL,
-		CefString& cefNewURL
-	) except * with gil:
+		CefString& cefNewURL) except * with gil:
+
+	# TODO: needs testing.
 
 	try:
 		return
@@ -120,16 +105,16 @@ cdef void RequestHandler_OnResourceRedirect(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef void RequestHandler_OnResourceResponse(
+cdef public void RequestHandler_OnResourceResponse(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefString& cefURL,
 		CefRefPtr[CefResponse] cefResponse,
-		CefRefPtr[CefContentFilter]& cefFilter
-	) except * with gil:
+		CefRefPtr[CefContentFilter]& cefFilter) except * with gil:
+
+	# TODO: not yet implemented.
+	return
 
 	try:
-		return
-
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyURL = CefStringToPyString(cefURL)
 		pyResponse = GetPyResponseByCefResponse(cefResponse)
@@ -145,11 +130,12 @@ cdef void RequestHandler_OnResourceResponse(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef cbool RequestHandler_OnProtocolExecution(
+cdef public cbool RequestHandler_OnProtocolExecution(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefString& cefURL,
-		cbool& cefAllowOSExecution
-	) except * with gil:
+		cbool& cefAllowOSExecution) except * with gil:
+
+	# TODO: needs testing.
 
 	try:
 		return <cbool>False
@@ -172,17 +158,17 @@ cdef cbool RequestHandler_OnProtocolExecution(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef cbool RequestHandler_GetDownloadHandler(
+cdef public cbool RequestHandler_GetDownloadHandler(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefString& cefMimeType,
 		CefString& cefFilename,
 		cef_types.int64 cefContentLength,
-		CefRefPtr[CefDownloadHandler]& cefDownloadHandler
-	) except * with gil:
+		CefRefPtr[CefDownloadHandler]& cefDownloadHandler) except * with gil:
+
+	# TODO: not yet implemented.
+	return <cbool>False
 
 	try:
-		return <cbool>False
-
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyMimeType = CefStringToPyString(cefMimeType)
 		pyFilename = CefStringToPyString(cefFilename)
@@ -201,7 +187,7 @@ cdef cbool RequestHandler_GetDownloadHandler(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef cbool RequestHandler_GetAuthCredentials(
+cdef public cbool RequestHandler_GetAuthCredentials(
 		CefRefPtr[CefBrowser] cefBrowser,
 		cbool cefIsProxy,
 		CefString& cefHost,
@@ -209,12 +195,12 @@ cdef cbool RequestHandler_GetAuthCredentials(
 		CefString& cefRealm,
 		CefString& cefScheme,
 		CefString& cefUsername,
-		CefString& cefPassword
-	) except * with gil:
+		CefString& cefPassword) except * with gil:
+
+	# TODO: must implement.
+	return <cbool>False
 
 	try:
-		return <cbool>False
-
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyIsProxy = bool(cefIsProxy)
 		pyHost = CefStringToPyString(cefHost)
@@ -240,10 +226,12 @@ cdef cbool RequestHandler_GetAuthCredentials(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
+cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
 		CefRefPtr[CefBrowser] cefBrowser,
-		CefString& mainURL
-	) except * with gil:
+		CefString& mainURL) except * with gil:
+
+	# TODO: not yet implemented.
+	return <CefRefPtr[CefCookieManager]>NULL
 
 	try:
 		return <CefRefPtr[CefCookieManager]>NULL

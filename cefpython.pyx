@@ -16,7 +16,19 @@
 #   you will get into big trouble, error messages are so much obfuscated and info
 #   is missing that you will have no idea which chunk of code caused that error.
 
-# All .pyx files need to be included here for Cython compiler.
+# About acquiring/releasing GIL lock, see discussion here:
+# https://groups.google.com/forum/?fromgroups=#!topic/cython-users/jcvjpSOZPp0
+
+# Global variables.
+
+global __debug
+__debug = False
+
+global __applicationSettings
+__applicationSettings = None
+
+# All .pyx files need to be included here.
+
 include "imports.pyx"
 include "browser.pyx"
 include "frame.pyx"
@@ -36,18 +48,8 @@ include "javascriptcallback.pyx"
 include "pythoncallback.pyx"
 include "requesthandler.pyx"
 
-# Global variables.
-__debug = False
-
 # Client handler.
 cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()
-
-def FixUIThreadResponsiveness(windowID):
-	
-	# OnBeforeResourceLoad is called on IO thread, when we acquire gil lock and execute
-	# python code then the UI thread is not executing unless you do some UI action (minimize/restore window).
-	cdef HWND hwnd = <HWND><int>windowID
-	SetTimer(hwnd, 1, 10, <TIMERPROC>NULL)
 
 def GetRealPath(file=None):
 	
@@ -81,12 +83,19 @@ def __InitializeClientHandler():
 	InitializeLoadHandler()
 	InitializeKeyboardHandler()
 	InitializeV8ContextHandler()
-	InitializeRequestHandler()
 
 def Initialize(applicationSettings={}):
 
 	if not "multi_threaded_message_loop" in applicationSettings:
 		applicationSettings["multi_threaded_message_loop"] = False
+
+	# Issue 10: support for unicode when passing to javascript.
+	if not "unicode_to_bytes_encoding" in applicationSettings:
+		applicationSettings["unicode_to_bytes_encoding"] = "utf-8"
+
+	# We must make a copy as applicationSettings is a reference only that might get destroyed.
+	global __applicationSettings
+	__applicationSettings = copy.deepcopy(applicationSettings)
 
 	__InitializeClientHandler()
 
@@ -184,11 +193,11 @@ def GetBrowserByWindowID(windowID):
 	else:
 		return None
 
-
 def MessageLoop():
 
 	if __debug: print("CefRunMessageLoop()\n")
-	CefRunMessageLoop()
+	with nogil:
+		CefRunMessageLoop()
 
 def SingleMessageLoop():
 
@@ -196,8 +205,13 @@ def SingleMessageLoop():
 	# used to integrate the CEF message loop into an existing application message
 	# loop. 
 
-	if __debug: print("CefDoMessageLoopWork()\n")
-	CefDoMessageLoopWork();
+	# Message loop dooes significant amount of work so releasing GIL is worth it.
+	
+	# anything that (1) can block for a significant amount of time and (2) is thread-safe should release the GIL:
+	# https://groups.google.com/d/msg/cython-users/jcvjpSOZPp0/KHpUEX8IhnAJ
+
+	with nogil:
+		CefDoMessageLoopWork();
 
 def QuitMessageLoop():
 
