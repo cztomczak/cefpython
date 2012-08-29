@@ -4,11 +4,17 @@ from Cython.Distutils import build_ext
 
 ext_modules = [Extension(
 	"cefpython",
-	["cefpython.pyx", "../clienthandler.cpp", "../v8functionhandler.cpp"],
+	["cefpython.pyx"],
 	language='c++',
 	include_dirs=[r'./../', r'./../pyinclude/'],
-	library_dirs=[r'./', 'c:/Program Files/Microsoft SDKs/Windows/v7.1/Lib/'],
-	libraries=['libcef', 'libcef_dll_wrapper', 'User32'],
+	library_dirs=[
+		r'./',
+		'c:/Program Files/Microsoft SDKs/Windows/v7.1/Lib/',
+		r'./../httpauth/Release/',
+		r'./../v8functionhandler/Release/',
+		r'./../clienthandler/Release/'
+	],
+	libraries=['libcef', 'libcef_dll_wrapper', 'User32', 'httpauth', 'v8functionhandler', 'clienthandler'],
 	# To get rid of errors there are 2 options:
 	# 1) compile '/clr' + link '/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt' (CLR will probably require .NET framework? YES)
 	# 2) compile '/EHsc' + link '/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt'], '/ignore:4217'
@@ -16,6 +22,13 @@ ext_modules = [Extension(
 	# extra_objects=[],
 	extra_link_args=['/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt', '/ignore:4217'] # '/ignore:4217'
 	#extra_link_args=['/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:libcpmt', '/NODEFAULTLIB:msvcrt', '/NODEFAULTLIB:msvcprt']	
+
+	# /ignore:4049 - DialogTemplate.cpp includes <string> and linker generates warnings:
+	#>Creating library build\temp.win32-2.7\Release\cefpython.lib and object build\temp.win32-2.7\Release\cefpython.exp
+	#>DialogTemplate.obj : warning LNK4049: locally defined symbol ??0?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@
+	#>std@@QAE@ABV01@@Z (public: __thiscall std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >:
+	#>:basic_string<char,struct std::char_traits<char>,class std::allocator<char> >(class std::basic_string<char,struct std::c
+	#>har_traits<char>,class std::allocator<char> > const &)) imported
 
 	# libcmt - C, libcpmt - C++ (CP = C Plus)
 	# libcef_dll_wrapper.lib directives: libcmt, libcpmt, oldnames.

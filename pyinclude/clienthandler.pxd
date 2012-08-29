@@ -17,7 +17,7 @@ from cef_cookie cimport CefCookieManager
 from cef_stream cimport CefStreamReader
 from cef_download_handler cimport CefDownloadHandler
 
-cdef extern from "clienthandler.h":
+cdef extern from "clienthandler/clienthandler.h":
 
 	# Types for casting callbacks.
 

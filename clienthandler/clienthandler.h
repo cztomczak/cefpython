@@ -2,14 +2,10 @@
 // License: New BSD License.
 // Website: http://code.google.com/p/cefpython/
 
+#pragma once
+
 // d:\cefpython\src\setup/cefpython.h(22) : warning C4190: 'RequestHandler_GetCookieManager' 
 // has C-linkage specified, but returns UDT 'CefRefPtr<T>' which is incompatible with C
-
-// A function or pointer to function has a UDT (user-defined type, which is a class, structure, enum, 
-// union, or __value type) as return type and extern "C" linkage. This is legal if:
-// - All calls to this function occur from C++.
-// - The definition of the function is in C++.
-
 #pragma warning(disable:4190)
 
 #include "include/cef_client.h"

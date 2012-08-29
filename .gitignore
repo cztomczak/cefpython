@@ -11,3 +11,12 @@
 # WingIDE project files
 /wingide.wpr
 /wingide.wpu
+
+*.ncb
+*.suo
+*.user
+*.aps
+*.sdf
+
+Debug/
+Release/
