@@ -10,7 +10,7 @@ from cef_v8 cimport CefV8ValueList
 from cef_ptr cimport CefRefPtr
 from cef_v8 cimport CefV8Context
 
-cdef extern from "v8functionhandler.h":
+cdef extern from "v8functionhandler/v8functionhandler.h":
 
 	# CefV8Handler.Execute() type.
 	ctypedef cbool (*V8Execute_type)(

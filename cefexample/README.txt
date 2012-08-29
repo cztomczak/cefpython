@@ -43,6 +43,11 @@ icon.ico
 
 CHANGELOG.
 
+Version 0.36 released on 2012-08-29.
+ * Support for Http Authentication (Issue 8).
+ * [RequestHandler] is now partially implemented.
+ * Support for unicode strings and tuples when passing data to javascript (Issue 10). There is a new option in [ApplicationSettings] "unicode_to_bytes_string" that is used when converting unicode string to bytes string. 
+
 Version 0.35 released on 2012-08-23.
  * Fixed a bug that caused retrieving garbage data when passing an empty string from JS to Python (Issue 7).
  * Fixed windows 2003 error when closing window, LoadHandler_OnLoadEnd was still called, but browser was already destroyed.

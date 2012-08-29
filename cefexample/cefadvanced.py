@@ -40,7 +40,6 @@ def CefAdvanced():
 	wndproc = {
 		win32con.WM_CLOSE: CloseApplication, 
 		win32con.WM_DESTROY: QuitApplication,
-		win32con.WM_TIMER: WMTIMER,
 		win32con.WM_SIZE: cefpython.wm_Size,
 		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
 		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
@@ -87,7 +86,7 @@ def CefAdvanced():
 	# http://127.0.0.1/cefpython/src/tests/httpauthentication.php
 	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
 
-	print "CefAdvanced(): browser created"
+	print("CefAdvanced(): browser created")
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
@@ -138,7 +137,12 @@ def TestJavascriptCallback(jsCallback):
 	if isinstance(jsCallback, cefpython.JavascriptCallback):
 		print("TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName())
 		print("jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'unicode string')")
-		jsCallback.Call(1, [2,3], ('tuple', 'tuple'), unicode('unicode string'))
+		if bytes == str:
+			# Python 2.7
+			jsCallback.Call(1, [2,3], ('tuple', 'tuple'), unicode('unicode string'))
+		else:
+			# Python 3.2 - there is no "unicode()" in python 3
+			jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'bytes string'.encode('utf-8'))
 	else:
 		raise Exception("TestJavascriptCallback() failed: given argument is not a javascript callback function")
 

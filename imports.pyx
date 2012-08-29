@@ -21,6 +21,8 @@ import copy
 from libcpp cimport bool as cbool
 from libcpp.map cimport map
 from libcpp.vector cimport vector
+from libcpp.string cimport string
+
 from cython.operator cimport preincrement as preinc, dereference as deref # must be "as" otherwise not seen.
 # from cython.operator cimport address as addr # Address of an c++ object?
 from libc.stdlib cimport calloc, malloc, free
@@ -60,3 +62,4 @@ from cef_stream cimport *
 from cef_content_filter cimport *
 from cef_download_handler cimport *
 from cef_cookie cimport *
+from AuthDialog cimport *

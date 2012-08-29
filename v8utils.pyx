@@ -101,9 +101,16 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 	# Issue 10: support for unicode and tuple.
 	# http://code.google.com/p/cefpython/issues/detail?id=10
 
-	if pyValueType == unicode:
-		pyValue = pyValue.encode(__applicationSettings["unicode_to_bytes_encoding"])
-	elif pyValueType == tuple:
+	if bytes == str: 
+		# Python 2.7
+		if pyValueType == unicode: # unicode string to bytes string
+			pyValue = pyValue.encode(__applicationSettings["unicode_to_bytes_encoding"])
+	else:
+		# Python 3.2
+		if pyValueType == bytes: # bytes to string
+			pyValue = pyValue.decode(__applicationSettings["unicode_to_bytes_encoding"])
+	
+	if pyValueType == tuple:
 		pyValue = list(pyValue)
 
 	# Check type again, as code above might have changed it.
@@ -149,4 +156,4 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 		return cef_v8_static.CreateString(cefString)
 	else:
 		raise Exception("PyValueToV8Value() failed: an unsupported python type was passed from"
-				" python to javascript: %s" % pyValueType.__name__)
+				" python to javascript: %s, value: %s" % (pyValueType.__name__, pyValue))

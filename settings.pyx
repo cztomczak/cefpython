@@ -33,7 +33,7 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 		# >cefpython.cpp(1140) : warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
 
 		if key == "unicode_to_bytes_encoding":
-			continue # internal cefpython setting
+			continue # cefpython only setting
 		elif key == "multi_threaded_message_loop":
 			cefAppSettings.multi_threaded_message_loop = <cbool>bool(appSettings[key])
 		elif key == "cache_path":

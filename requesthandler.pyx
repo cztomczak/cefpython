@@ -197,9 +197,6 @@ cdef public cbool RequestHandler_GetAuthCredentials(
 		CefString& cefUsername,
 		CefString& cefPassword) except * with gil:
 
-	# TODO: must implement.
-	return <cbool>False
-
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyIsProxy = bool(cefIsProxy)
@@ -221,10 +218,37 @@ cdef public cbool RequestHandler_GetAuthCredentials(
 				PyStringToCefString(pyPassword[0], cefPassword)
 			return <cbool>bool(ret)
 		else:
-			return <cbool>False
+			# Default implementation.
+			ret = bool(Requesthandler_GetAuthCredentials_Default(pyBrowser, pyIsProxy, pyHost, pyPort, pyRealm, pyScheme, pyUsername, pyPassword))
+			if ret:
+				PyStringToCefString(pyUsername[0], cefUsername)
+				PyStringToCefString(pyPassword[0], cefPassword)
+			return <cbool>bool(ret)
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef cbool Requesthandler_GetAuthCredentials_Default(browser, isProxy, host, port, realm, scheme, username, password):
+	
+	cdef AuthCredentialsData* credentialsData
+	innerWindowID = browser.GetInnerWindowID() # innerWindowID is a top window for a popup
+	cdef HWND handle = <HWND><int>innerWindowID
+	with nogil:
+		credentialsData = AuthDialog(handle)
+	if credentialsData == NULL:
+		return <cbool>False
+	else:
+		# In Python 2.7 c_str returns a string.
+		username[0] = credentialsData.username.c_str()
+		password[0] = credentialsData.password.c_str()
+		# Python 3
+		if str != bytes:
+			# c_str() returned bytes.
+			if type(username[0]) == bytes:
+				username[0] = username[0].decode(__applicationSettings["unicode_to_bytes_encoding"])
+			if type(password[0]) == bytes:
+				password[0] = password[0].decode(__applicationSettings["unicode_to_bytes_encoding"])
+		return <cbool>True
 
 cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
 		CefRefPtr[CefBrowser] cefBrowser,

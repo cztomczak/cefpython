@@ -2,6 +2,8 @@
 // License: New BSD License.
 // Website: http://code.google.com/p/cefpython/
 
+#pragma once
+
 #include "include/cef_base.h"
 #include "include/cef_browser.h"
 #include "include/cef_frame.h"
