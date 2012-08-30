@@ -1,6 +1,7 @@
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
+import sys
 
 ext_modules = [Extension(
 	"cefpython",
@@ -12,9 +13,16 @@ ext_modules = [Extension(
 		'c:/Program Files/Microsoft SDKs/Windows/v7.1/Lib/',
 		r'./../httpauth/Release/',
 		r'./../v8functionhandler/Release/',
-		r'./../clienthandler/Release/'
+		r'./../clienthandler/Release_py%s%s/' % (sys.version_info.major, sys.version_info.minor)
 	],
-	libraries=['libcef', 'libcef_dll_wrapper', 'User32', 'httpauth', 'v8functionhandler', 'clienthandler'],
+	libraries=[
+		'libcef',
+		'libcef_dll_wrapper',
+		'User32',
+		'httpauth',
+		'v8functionhandler',
+		'clienthandler_py%s%s' % (sys.version_info.major, sys.version_info.minor)
+	],
 	# To get rid of errors there are 2 options:
 	# 1) compile '/clr' + link '/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt' (CLR will probably require .NET framework? YES)
 	# 2) compile '/EHsc' + link '/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt'], '/ignore:4217'
