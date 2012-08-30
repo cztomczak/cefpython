@@ -59,10 +59,10 @@ class ClientHandler : public CefClient,
 				public CefLoadHandler,
 				public CefKeyboardHandler,
 				public CefV8ContextHandler,
-				public CefRequestHandler
+				public CefRequestHandler,
+				public CefDisplayHandler
 /*
 				public CefLifeSpanHandler,				
-				public CefDisplayHandler,
 				public CefFocusHandler,
 				public CefPrintHandler,
 				public CefDragHandler,
@@ -74,24 +74,30 @@ public:
 	ClientHandler(){}
 	virtual ~ClientHandler(){}
 
-	// CefClient methods
-	virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE
-	{ return NULL; }
+	// Implemented handlers:
 	
 	virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE
-		{ return this; }
+	{ return this; }
 	
 	virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE
-		{ return this; }
+	{ return this; }
 	
 	virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE
-	{ return NULL; }
-	
-	virtual CefRefPtr<CefFocusHandler> GetFocusHandler() OVERRIDE
-	{ return NULL; }
+	{ return this; }
 	
 	virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() OVERRIDE
-		{ return this; }
+	{ return this; }
+
+	virtual CefRefPtr<CefV8ContextHandler> GetV8ContextHandler() OVERRIDE
+	{ return this; }
+
+	// Still NOT implemented handlers:
+
+	virtual CefRefPtr<CefFocusHandler> GetFocusHandler() OVERRIDE
+	{ return NULL; }
+
+	virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE
+	{ return NULL; }
 	
 	virtual CefRefPtr<CefMenuHandler> GetMenuHandler() OVERRIDE
 	{ return NULL; }  
@@ -106,10 +112,7 @@ public:
 	{ return NULL; }
 	
 	virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() OVERRIDE
-	{ return NULL; }
-	
-	virtual CefRefPtr<CefV8ContextHandler> GetV8ContextHandler() OVERRIDE
-		{ return this; }
+	{ return NULL; }	
 	
 	virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE
 	{ return NULL; }
@@ -219,7 +222,6 @@ public:
 	}
 
 	// OnContextReleased.
-	
 	// Not implementing.
 
 	//
@@ -277,6 +279,40 @@ public:
 	virtual CefRefPtr<CefCookieManager> GetCookieManager(
 			CefRefPtr<CefBrowser> browser,
 			const CefString& main_url) OVERRIDE;
+
+	//
+	// CefDisplayHandler
+	//
+
+	virtual void OnAddressChange(CefRefPtr<CefBrowser> browser,
+                               CefRefPtr<CefFrame> frame,
+                               const CefString& url) OVERRIDE;
+
+	virtual bool OnConsoleMessage(CefRefPtr<CefBrowser> browser,
+                                const CefString& message,
+                                const CefString& source,
+                                int line) OVERRIDE;
+
+	virtual void OnContentsSizeChange(CefRefPtr<CefBrowser> browser,
+                                    CefRefPtr<CefFrame> frame,
+                                    int width,
+                                    int height) OVERRIDE;
+
+	virtual void OnNavStateChange(CefRefPtr<CefBrowser> browser,
+                                bool canGoBack,
+                                bool canGoForward) OVERRIDE;
+
+	virtual void OnStatusMessage(CefRefPtr<CefBrowser> browser,
+                               const CefString& value,
+                               StatusType type) OVERRIDE;
+
+	virtual void OnTitleChange(CefRefPtr<CefBrowser> browser,
+                             const CefString& title) OVERRIDE;
+
+	virtual bool OnTooltip(CefRefPtr<CefBrowser> browser,
+                         CefString& text) OVERRIDE;	
+
+	
 	
 protected:
 	 

@@ -47,6 +47,11 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreErr
 		else:
 			if ignoreError:
 				return None
+			if len(__pyBrowsers) == 0:
+				# No browser yet created, this function is probably called by some handler that
+				# gets executed before any browser is created.
+				return None
+
 			raise Exception("Browser not found in __pyBrowsers, searched by innerWindowID = %s" % innerWindowID)
 
 		# TODO: this currently is never cleaned up, implement LifeSpanHandler.DoClose() and clean __cefBrowsers map.

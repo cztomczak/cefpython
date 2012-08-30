@@ -85,7 +85,7 @@ cdef void LoadHandler_OnLoadEnd(
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyFrame = GetPyFrameByCefFrame(cefFrame)	
 		handler = pyBrowser.GetClientHandler("OnLoadEnd")
-		if type(handler) == tuple:
+		if type(handler) is tuple:
 			if pyFrame.IsMain():
 				handler = handler[0]
 			else:

@@ -52,6 +52,10 @@ def CefAdvanced():
 	browserSettings["file_access_from_file_urls_allowed"] = True
 	
 	handlers = dict()
+	# Handler function may be a tuple. Tuple is currently allowed only for LoadHandler.
+	# tuple[0] - the handler to call for the main frame.
+	# tuple[1] - the handler to call for the inner frames (not in popups).
+	# tuple[2] - the handler to call for the popups (only main frame).
 	handlers["OnLoadStart"] = (OnLoadStart, None, OnLoadStart) # Document is ready. Developer tools window is also a popup, this handler may be called.
 	handlers["OnLoadError"] = OnLoadError
 	handlers["OnKeyEvent"] = (OnKeyEvent, None, OnKeyEvent)

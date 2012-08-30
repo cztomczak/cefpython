@@ -95,3 +95,9 @@ cdef extern from "include/internal/cef_types.h":
 		NAVTYPE_OTHER,
 		NAVTYPE_LINKDROPPED
 
+	# CefDisplayHandler > StatusType
+
+	enum cef_handler_statustype_t:
+		STATUSTYPE_TEXT = 0,
+		STATUSTYPE_MOUSEOVER_URL,
+		STATUSTYPE_KEYBOARD_FOCUS_URL,

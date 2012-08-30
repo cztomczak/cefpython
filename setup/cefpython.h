@@ -20,6 +20,13 @@ __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnProtocolExecution(CefRefPtr<CefB
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_GetDownloadHandler(CefRefPtr<CefBrowser>, CefString &, CefString &, int64, CefRefPtr<CefDownloadHandler> &);
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_GetAuthCredentials(CefRefPtr<CefBrowser>, bool, CefString &, int, CefString &, CefString &, CefString &, CefString &);
 __PYX_EXTERN_C DL_IMPORT(CefRefPtr<CefCookieManager>) RequestHandler_GetCookieManager(CefRefPtr<CefBrowser>, CefString &);
+__PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnAddressChange(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString &);
+__PYX_EXTERN_C DL_IMPORT(bool) DisplayHandler_OnConsoleMessage(CefRefPtr<CefBrowser>, CefString &, CefString &, int);
+__PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnContentsSizeChange(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, int, int);
+__PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnNavStateChange(CefRefPtr<CefBrowser>, bool, bool);
+__PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnStatusMessage(CefRefPtr<CefBrowser>, CefString &, enum cef_handler_statustype_t);
+__PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnTitleChange(CefRefPtr<CefBrowser>, CefString &);
+__PYX_EXTERN_C DL_IMPORT(bool) DisplayHandler_OnTooltip(CefRefPtr<CefBrowser>, CefString &);
 
 #endif /* !__PYX_HAVE_API__cefpython */
 
