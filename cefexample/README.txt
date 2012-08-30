@@ -43,6 +43,10 @@ icon.ico
 
 CHANGELOG.
 
+Version 0.37 released on 2012-08-30.
+ * [DisplayHandler] implemented.
+ * Popups have window titles set, also icons are inherited from parent window (Issue 3).
+
 Version 0.36 released on 2012-08-29.
  * Support for Http Authentication (Issue 8).
  * [RequestHandler] is now partially implemented.
