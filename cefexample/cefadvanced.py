@@ -30,6 +30,8 @@ def CefAdvanced():
 	cefwindow.__debug = True # Whether to print debug output to console.
 	cefpython.__debug = True
 
+	print("cefpython.EnforceWindowTitle: %s" % cefpython.EnforceWindowTitle)
+
 	appSettings = dict() # See: http://code.google.com/p/cefpython/wiki/AppSettings
 	#appSettings["user_agent"] = "MYAGENT 0.10"
 	appSettings["multi_threaded_message_loop"] = False

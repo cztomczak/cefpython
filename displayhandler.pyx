@@ -97,17 +97,19 @@ cdef public void DisplayHandler_OnTitleChange(CefRefPtr[CefBrowser] cefBrowser,
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)	
 		pyTitle = CefStringToPyString(cefTitle)
-		EnforceWindowTitle(pyBrowser, pyTitle)		
-		EnforceWindowIcon(pyBrowser)
 		handler = pyBrowser.GetClientHandler("OnTitleChange")
 		if handler:
 			handler(pyBrowser, pyTitle)
-		return
+			return
+		else:
+			EnforceWindowTitle(pyBrowser, pyTitle)		
+			EnforceWindowIcon(pyBrowser)
+			return
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef void EnforceWindowTitle(pyBrowser, pyTitle):
+def EnforceWindowTitle(pyBrowser, pyTitle):
 
 	# Each browser window should have a title (Issue 3).	
 	# When popup is created, the window that sits in taskbar has no title.
@@ -132,7 +134,7 @@ cdef void EnforceWindowTitle(pyBrowser, pyTitle):
 		if not currentTitle:
 			win32gui.SetWindowText(windowID, pyTitle)
 
-cdef void EnforceWindowIcon(pyBrowser):
+def EnforceWindowIcon(pyBrowser):
 
 	# Each popup window should inherit icon from the main window.
 
