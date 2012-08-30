@@ -198,7 +198,7 @@ cdef public cbool RequestHandler_GetAuthCredentials(
 			return <cbool>bool(ret)
 		else:
 			# Default implementation.
-			ret = bool(Requesthandler_GetAuthCredentials_Default(pyBrowser, pyIsProxy, pyHost, pyPort, pyRealm, pyScheme, pyUsername, pyPassword))
+			ret = Requesthandler_GetAuthCredentials_Default(pyBrowser, pyIsProxy, pyHost, pyPort, pyRealm, pyScheme, pyUsername, pyPassword)
 			if ret:
 				PyStringToCefString(pyUsername[0], cefUsername)
 				PyStringToCefString(pyPassword[0], cefPassword)

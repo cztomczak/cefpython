@@ -13,6 +13,16 @@
 
 // To be able to use 'public' declarations you need to include Python.h and cefpython.h.
 #include "Python.h"
+
+// Python 3.2 fix - DL_IMPORT is not defined in Python.h
+
+#ifndef DL_IMPORT	/* declarations for DLL import/export */
+#define DL_IMPORT(RTYPE) RTYPE
+#endif
+#ifndef DL_EXPORT	/* declarations for DLL import/export */
+#define DL_EXPORT(RTYPE) RTYPE
+#endif
+
 #include "setup/cefpython.h"
 
 // CefLoadHandler types.

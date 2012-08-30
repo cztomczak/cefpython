@@ -18,5 +18,5 @@
 *.aps
 *.sdf
 
-Debug/
-Release/
+Debug*/
+Release*/
