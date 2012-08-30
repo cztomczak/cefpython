@@ -34,9 +34,6 @@ cdef public cbool RequestHandler_OnBeforeBrowse(
 		pyRequest = GetPyRequestByCefRequest(cefRequest)
 
 		handler = pyBrowser.GetClientHandler("OnBeforeBrowse")
-		inheritFrames = False
-		if type(handler) is tuple:
-			handler = handler[0]
 		if handler:
 			return <cbool>bool(handler(pyBrowser, pyFrame, pyRequest, <int>navType, isRedirect))
 		else:
@@ -64,9 +61,6 @@ cdef public cbool RequestHandler_OnBeforeResourceLoad(
 		pyResponse = GetPyResponseByCefResponse(cefResponse)
 
 		handler = pyBrowser.GetClientHandler("OnBeforeResourceLoad")
-		inheritFrames = False
-		if type(handler) is tuple:
-			handler = handler[0]
 		if handler:
 			ret = handler(pyBrowser, pyRequest, pyRedirectURL, pyResourceStream, pyResponse)
 			assert type(pyRedirectURL) == list
@@ -95,9 +89,6 @@ cdef public void RequestHandler_OnResourceRedirect(
 		pyNewURL = [CefStringToPyString(cefNewURL)] # [""] - string by reference by passing in a list
 
 		handler = pyBrowser.GetClientHandler("OnResourceRedirect")
-		inheritFrames = False
-		if type(handler) is tuple:
-			handler = handler[0]
 		if handler:
 			handler(pyBrowser, pyOldURL, pyNewURL)
 			PyStringToCefString(pyNewURL[0], cefNewURL) # we should call it only when pyNewURL[0] changed.
@@ -121,9 +112,6 @@ cdef public void RequestHandler_OnResourceResponse(
 		pyFilter = None # TODO.
 
 		handler = pyBrowser.GetClientHandler("OnResourceResponse")
-		inheritFrames = False
-		if type(handler) is tuple:
-			handler = handler[0]
 		if handler:
 			handler(pyBrowser, pyURL, pyResponse, pyFilter)
 	except:
@@ -145,9 +133,6 @@ cdef public cbool RequestHandler_OnProtocolExecution(
 		pyAllowOSExecution = [bool(cefAllowOSExecution)] # [True]
 
 		handler = pyBrowser.GetClientHandler("OnProtocolExecution")
-		inheritFrames = False
-		if type(handler) is tuple:
-			handler = handler[0]
 		if handler:
 			ret = handler(pyBrowser, pyURL, pyAllowOSExecution)
 			cefAllowOSExecution = <cbool>bool(pyAllowOSExecution[0])
@@ -176,9 +161,6 @@ cdef public cbool RequestHandler_GetDownloadHandler(
 		pyDownloadHandler = None # TODO.
 
 		handler = pyBrowser.GetClientHandler("GetDownloadHandler")
-		inheritFrames = False
-		if type(handler) is tuple:
-			handler = handler[0]
 		if handler:
 			return <cbool>bool(handler(pyBrowser, pyMimeType, pyFilename, pyContentLength, pyDownloadHandler))
 		else:
@@ -208,9 +190,6 @@ cdef public cbool RequestHandler_GetAuthCredentials(
 		pyPassword = [""]
 
 		handler = pyBrowser.GetClientHandler("GetAuthCredentials")
-		inheritFrames = False
-		if type(handler) is tuple:
-			handler = handler[0]
 		if handler:
 			ret = handler(pyBrowser, pyIsProxy, pyHost, pyPort, pyRealm, pyScheme, pyUsername, pyPassword)
 			if ret:
@@ -264,9 +243,6 @@ cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
 		pyMainURL = CefStringToPyString(mainURL)
 
 		handler = pyBrowser.GetClientHandler("GetCookieManager")
-		inheritFrames = False
-		if type(handler) is tuple:
-			handler = handler[0]
 		if handler:
 			ret = handler(pyBrowser, pyMainURL)
 			if ret:

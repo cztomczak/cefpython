@@ -24,7 +24,7 @@ AuthCredentialsData* AuthDialog(HWND parent)
 			HWND tryParent = GetParent(parent);
 			if (!tryParent) {
 				// GetParent() works fine, calling GW_OWNER just in case.
-				// Yes, the order is the reversed to what is in AuthDialogProc().
+				// Yes, the order is the reversed compared to what is in AuthDialogProc().
 				tryParent = GetWindow(parent, GW_OWNER);
 			}
 			credentialsData = AuthCredentials::GetData(tryParent);
@@ -56,7 +56,7 @@ INT_PTR CALLBACK AuthDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			parent = GetWindow(hDlg, GW_OWNER);
 			if (!parent) {
 				// GW_OWNER works fine, calling GetParent just in case.
-				// Yes, the order is reversed to what is in AuthDialog().
+				// Yes, the order is reversed compared to what is in AuthDialog().
 				parent = GetParent(hDlg);
 			}
 

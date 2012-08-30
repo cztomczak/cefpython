@@ -90,6 +90,10 @@ class PyBrowser:
 		allowedHandlers += ["OnBeforeBrowse", "OnBeforeResourceLoad", "OnResourceRedirect", "OnResourceResponse",
 						"OnProtocolExecution", "GetDownloadHandler", "GetAuthCredentials", "GetCookieManager"]
 
+		# CefDisplayHandler.
+		allowedHandlers += ["OnAddressChange", "OnConsoleMessage", "OnContentsSizeChange", "OnNavStateChange",
+						"OnStatusMessage", "OnTitleChange", "OnTooltip"]
+
 		for key in handlers:
 			handler = handlers[key]
 			if type(handler) == tuple and len(handler) != 3:
@@ -104,8 +108,8 @@ class PyBrowser:
 	# Internal.
 	def IsPopup(self):
 
-		# TODO: implement LifeSpanHandler.OnBeforePopup() to detect popups.
-		return self.__topWindowID == -1
+		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
+		return (<CefBrowser*>(cefBrowser.get())).IsPopup()
 
 	# Internal.
 	def GetJavascriptBindings(self):
@@ -353,9 +357,6 @@ class PyBrowser:
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		(<CefBrowser*>(cefBrowser.get())).StopLoad()
 
-	def IsPopup(self):
-
-		pass
 
 
 	
