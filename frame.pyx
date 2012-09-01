@@ -77,7 +77,7 @@ class PyFrame:
 		cdef CefString cefPropertyName
 		name = str(name)
 		PyStringToCefString(name, cefPropertyName)
-		
+
 		cdef CefRefPtr[CefV8Value] v8Value
 		v8Value = (<CefV8Value*>(window.get())).GetValue(cefPropertyName)
 

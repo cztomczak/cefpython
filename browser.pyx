@@ -20,6 +20,24 @@ __popupPyBrowsers = {} # Just a cache.
 
 __browserInnerWindows = {} # topWindowID : innerWindowID (CefBrowser.GetWindowHandle)
 
+'''
+No need for global variables, code below works.
+
+cdef class MyBrowser:
+	
+	cdef CefRefPtr[CefBrowser] cefBrowser
+	
+	def __cinit__(self):
+		pass
+
+	def SetCefBrowser(self):
+		pass
+
+cdef MyBrowser m = MyBrowser()
+m.cefBrowser = __cefBrowsers[1]
+
+'''
+
 # PyBrowser.
 
 class PyBrowser:

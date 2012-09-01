@@ -1,0 +1,88 @@
+CEF building steps.
+http://code.google.com/p/chromiumembedded/wiki/BranchesAndBuilding
+
+0. Environment strings:
+
+	GYP_DEFINES=windows_sdk_path="c:\Program Files\Microsoft SDKs\Windows\v7.1"
+	GYP_MSVS_VERSION=2010
+
+1. Install cygwin
+
+	Instructions:
+	http://www.chromium.org/developers/how-tos/cygwin
+
+	Cygwin modules to install:
+	http://trac.webkit.org/browser/trunk/Tools/CygwinDownloader/cygwin-downloader.py
+	http://trac.webkit.org/wiki/CygwinInstallerPackages
+
+	Install also SSL certs in cygwin, search by "cert".
+	Otherwise you will have errors when trying to clone git https:// repository.
+
+	Add depot_tools to PATH, edit file C:\cygwin\etc\bash.bashrc and add:
+	export PATH="$PATH":/cygdrive/d/chromium/depot_tools
+
+2. Edit file:
+	"c:\Documents and Settings\Admin\.gyp\include.gypi"
+
+	Errors will be thrown because it is empty, to fix it add curly braces block:
+
+	{
+	}
+
+	
+
+3. Configure gclient
+
+	View: http://code.google.com/p/chromiumembedded/source/browse/branches/1025/CHROMIUM_BUILD_COMPATIBILITY.txt
+	>> http://src.chromium.org/svn/releases/18.0.1025.166
+
+	gclient config http://src.chromium.org/svn/releases/18.0.1025.166
+
+4. There are some files that are not required to compile Chromium,
+	modify .gclient file and add - this will save you MANY GIGABYTES
+	of disk space and time of course:
+
+    "custom_deps" : {
+      "src/third_party/WebKit/LayoutTests": None,
+      "src/chrome/tools/test/reference_build/chrome_win": None,
+      "src/chrome_frame/tools/test/reference_build/chrome_win": None,
+      "src/chrome/tools/test/reference_build/chrome_linux": None,
+      "src/chrome/tools/test/reference_build/chrome_mac": None,
+      "src/third_party/hunspell_dictionaries": None
+    },    
+
+5. Download chromium source code:
+
+	cd /cygdrive/d/chromium/
+	gclient sync --jobs 8 --force
+
+6. (can be ignored...) If you get this error.
+
+	Warning: Missing input file src\chrome\browser\protector\internal\keys_internal.cc pwd=D:\chromium
+
+	Add this file:
+		d:\chromium\src\chrome\browser\protector\internal\keys_internal.cc 
+	Make it empty, you will need to create directory first:
+		d:\chromium\src\chrome\browser\protector\internal\
+
+6. Download CEF sources:
+
+	cd /cygdrive/d/chromium/src/
+	svn co http://chromiumembedded.googlecode.com/svn/branches/1025/ cef
+
+	Branches examples:
+	http://chromiumembedded.googlecode.com/svn/branches/1025/
+	http://chromiumembedded.googlecode.com/svn/branches/1084/cef1/
+
+7. Run the cef_create_projects script.
+
+	cd /cygdrive/d/chromium/src/cef
+	./cef_create_projects.sh
+
+	Ignore warnings.
+
+8. After building both Debug and Release configurations you can use the make_distrib tool (.bat on Windows, .sh on OS-X and Linux) to create a binary distribution.
+
+cd /path/to/chromium/src/cef/tools
+make_distrib.sh
+If the process succeeds a binary distribution package will be created in the /path/to/chromium/src/cef/binary_distrib directory.
