@@ -26,16 +26,17 @@ def QuitApplication(windowID, msg, wparam, lparam):
 
 def CefAdvanced():
 
-	sys.excepthook = cefpython.ExceptHook # In case of exception display it, write to error.log, shutdown CEF and exit application.
-	cefwindow.__debug = True # Whether to print debug output to console.
+	# This hook does the following: in case of exception display it, write to error.log, shutdown CEF and exit application.
+	sys.excepthook = cefpython.ExceptHook 
+	
+	# Whether to print debug output to console.
 	cefpython.__debug = True
+	cefwindow.__debug = True 	
 
-	print("cefpython.EnforceWindowTitle: %s" % cefpython.EnforceWindowTitle)
-
-	appSettings = dict() # See: http://code.google.com/p/cefpython/wiki/AppSettings
-	#appSettings["user_agent"] = "MYAGENT 0.10"
+	# ApplicationSettings, see: http://code.google.com/p/cefpython/wiki/ApplicationSettings
+	appSettings = dict()
 	appSettings["multi_threaded_message_loop"] = False
-	appSettings["log_file"] = cefpython.GetRealPath("debug.log") # better to use real current path
+	appSettings["log_file"] = cefpython.GetRealPath("debug.log")
 	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
 	cefpython.Initialize(applicationSettings=appSettings)
 
@@ -48,17 +49,18 @@ def CefAdvanced():
 	}
 	windowID = cefwindow.CreateWindow("CefAdvanced", "cefadvanced", 800, 600, None, None, "icon.ico", wndproc)
 
-	browserSettings = dict() # See: http://code.google.com/p/cefpython/wiki/BrowserSettings
+	# BrowserSettings, see: http://code.google.com/p/cefpython/wiki/BrowserSettings
+	browserSettings = dict() 
 	browserSettings["history_disabled"] = False # Backspace key will act as "History back" action in browser.
 	browserSettings["universal_access_from_file_urls_allowed"] = True
 	browserSettings["file_access_from_file_urls_allowed"] = True
 	
 	handlers = dict()
-	# Handler function may be a tuple. Tuple is currently allowed only for LoadHandler.
+	# Handler function for LoadHandler may be a tuple.
 	# tuple[0] - the handler to call for the main frame.
 	# tuple[1] - the handler to call for the inner frames (not in popups).
 	# tuple[2] - the handler to call for the popups (only main frame).
-	handlers["OnLoadStart"] = (OnLoadStart, None, OnLoadStart) # Document is ready. Developer tools window is also a popup, this handler may be called.
+	handlers["OnLoadStart"] = (OnLoadStart, None, OnLoadStart) # Document is ready. Developer tools window is also a popup, so this handler may be called.
 	handlers["OnLoadError"] = OnLoadError
 	handlers["OnKeyEvent"] = (OnKeyEvent, None, OnKeyEvent)
 
@@ -89,9 +91,7 @@ def CefAdvanced():
 	bindings.SetFunction("PyExecuteJavascript", PyExecuteJavascript)
 
 	global __browser
-	# http://127.0.0.1/cefpython/src/tests/httpauthentication.php
 	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
-
 	print("CefAdvanced(): browser created")
 
 	cefpython.MessageLoop()
@@ -241,4 +241,5 @@ def LoadContentFromEncryptedZip():
 	pass
 
 if __name__ == "__main__":
+	
 	CefAdvanced()
