@@ -23,6 +23,7 @@ cdef extern from "include/internal/cef_types_wrappers.h":
 		cef_string_t locales_dir_path
 
 	ctypedef struct CefBrowserSettings:
+		int animation_frame_rate
 		cbool drag_drop_disabled
 		cbool load_drops_disabled
 		cbool history_disabled
@@ -66,7 +67,6 @@ cdef extern from "include/internal/cef_types_wrappers.h":
 		cbool application_cache_disabled
 		cbool webgl_disabled
 		cbool accelerated_compositing_enabled
-		cbool threaded_compositing_enabled
 		cbool accelerated_layers_disabled
 		cbool accelerated_video_disabled
 		cbool accelerated_2d_canvas_disabled

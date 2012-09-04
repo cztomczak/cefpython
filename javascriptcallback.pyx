@@ -15,7 +15,7 @@ cdef int PutV8JavascriptCallback(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8C
 	global __v8JavascriptCallbacks
 	global __v8JavascriptCallbackContexts
 	global __v8JavascriptCallbackCount
-	__v8JavascriptCallbackCount = __v8JavascriptCallbackCount + 1
+	__v8JavascriptCallbackCount += 1
 	cdef int callbackID = __v8JavascriptCallbackCount
 	__v8JavascriptCallbacks[callbackID] = v8Value
 	__v8JavascriptCallbackContexts[callbackID] = v8Context
@@ -62,24 +62,35 @@ class JavascriptCallback:
 		cdef CefV8ValueList v8Arguments
 		cdef CefRefPtr[CefV8Value] v8Retval
 		cdef CefRefPtr[CefV8Exception] v8Exception
+		cdef CefV8Exception* v8ExceptionPtr
 
 		for i in range(0, len(args)):
 			v8Arguments.push_back(PyValueToV8Value(args[i], v8Context))
 
-		cdef cbool success = (<CefV8Value*>(v8Value.get())).ExecuteFunctionWithContext(v8Context, <CefRefPtr[CefV8Value]>NULL,
-				v8Arguments, v8Retval, v8Exception, <cbool>False)
+		v8Retval = (<CefV8Value*>(v8Value.get())).ExecuteFunctionWithContext(v8Context, <CefRefPtr[CefV8Value]>NULL, v8Arguments)
 
-		cdef CefV8Exception* v8ExceptionPtr
-		if <CefV8Exception*>(v8Exception.get()):
+		if (<CefV8Value*>(v8Value.get())).HasException():
+			
+			v8Exception = (<CefV8Value*>(v8Value.get())).GetException()
 			v8ExceptionPtr = <CefV8Exception*>(v8Exception.get())
 			lineNumber = v8ExceptionPtr.GetLineNumber()
 			message = CefStringToPyString(v8ExceptionPtr.GetMessage())
 			scriptResourceName = CefStringToPyString(v8ExceptionPtr.GetScriptResourceName())
 			sourceLine = CefStringToPyString(v8ExceptionPtr.GetSourceLine())
-			raise Exception("JavascriptCallback.Call() failed: javascript exception:\n\n %s.\n\n On line %s in %s.\n\n"
+			
+			# TODO: throw exceptions according to execution context (Issue 11),
+			
+			# TODO: should we call v8ExceptionPtr.ClearException()? What if python code does try: except:
+			# to catch the exception below, if it's catched then js should execute further, like it never happened,
+			# and is ClearException() for that?
+
+			# TODO: implement CefV8StackTrace and CefV8StackFrame - display the stack trace
+			# of javascript exception.
+
+			raise Exception("JavascriptCallback.Call() failed: javascript exception:\n%s.\nOn line %s in %s.\n"
 			                "Source of that line: %s" % (message, lineNumber, scriptResourceName, sourceLine))
 
-		if not success:
+		if <void*>v8Retval == NULL:
 			raise Exception("JavascriptCallback.Call() failed: ExecuteFunctionWithContext() called incorrectly")
 
 		return V8ValueToPyValue(v8Retval, v8Context)

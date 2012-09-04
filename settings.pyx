@@ -86,7 +86,9 @@ cdef void SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSett
 	
 	for key in browserSettings:
 		
-		if key == "drag_drop_disabled":
+		if key == "animation_frame_rate":
+			cefBrowserSettings.animation_frame_rate = <cbool>bool(browserSettings[key])
+		elif key == "drag_drop_disabled":
 			cefBrowserSettings.drag_drop_disabled = <cbool>bool(browserSettings[key])
 		elif key == "load_drops_disabled":
 			cefBrowserSettings.load_drops_disabled = <cbool>bool(browserSettings[key])
@@ -188,8 +190,6 @@ cdef void SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSett
 			cefBrowserSettings.webgl_disabled = <cbool>bool(browserSettings[key])
 		elif key == "accelerated_compositing_enabled":
 			cefBrowserSettings.accelerated_compositing_enabled = <cbool>bool(browserSettings[key])
-		elif key == "threaded_compositing_enabled":
-			cefBrowserSettings.threaded_compositing_enabled = <cbool>bool(browserSettings[key])
 		elif key == "accelerated_layers_disabled":
 			cefBrowserSettings.accelerated_layers_disabled = <cbool>bool(browserSettings[key])
 		elif key == "accelerated_video_disabled":

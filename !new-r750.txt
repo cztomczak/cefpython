@@ -1,0 +1,37 @@
+JavascriptCallback.Call() - when there is a javascript exception you are
+able to cancel it using ClearException(), use it in a case someone puts
+.Call() inside try: catch:.
+
+JavascriptCallback.Call() - we are able get get stack trace of exception,
+see CefV8StackTrace and CefV8StackFrame.
+
+- Make user data an attribute for all CefV8Value object types and not just
+CreateObject ( issue #547 ).
+
+Move exception handling from an ExecuteFunction argument to a CefV8Value
+attribute ( issue #546 ).
+
+Add CefV8Context::Eval method for synchronous JavaScript execution that
+returns a value or exception ( issue #444 ).
+
+- Add CefV8Value::CreateUInt method and indicate that integer types are 32bit
+via usage of int32 and uint32 types ( issue #331 ).
+
+Fix to mouse scrolling on second monitor.
+
+- Windows: Delay destroying the browser window until pending drag operations
+have completed ( issue #610 ).
+
+Fix misspelling of the Referer HTTP header ( issue #619 ).
+
+Make the |target_domain| parameter to CefAddCrossOriginWhitelistEntry and
+CefRemoveCrossOriginWhitelistEntry optional.
+
+- Add persistent HTML5 application cache support ( issue #543 ).
+
+Windows: Add dialog for input type="file" ( issue #632 ).
+
+Add new CefV8StackTrace and CefV8StackFrame interfaces to support retrieval of
+the JavaScript stack trace for the currently active V8 context ( issue #682 ).
+
+Add the ability to customize the animation frame rate ( issue #697 ).

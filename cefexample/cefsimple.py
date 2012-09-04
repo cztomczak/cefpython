@@ -33,7 +33,6 @@ def CefSimple():
 	browser = cefpython.CreateBrowser(windowID, browserSettings={}, navigateURL="cefsimple.html")
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
-	os.kill(os.getpid(), 9) # A temporary fix for Issue 2.
 
 if __name__ == "__main__":
 	CefSimple()

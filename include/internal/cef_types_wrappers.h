@@ -331,6 +331,7 @@ struct CefBrowserSettingsTraits {
     target->drag_drop_disabled = src->drag_drop_disabled;
     target->load_drops_disabled = src->load_drops_disabled;
     target->history_disabled = src->history_disabled;
+    target->animation_frame_rate = src->animation_frame_rate;
 
     cef_string_set(src->standard_font_family.str,
         src->standard_font_family.length, &target->standard_font_family, copy);
@@ -395,7 +396,6 @@ struct CefBrowserSettingsTraits {
     target->webgl_disabled = src->webgl_disabled;
     target->accelerated_compositing_enabled =
         src->accelerated_compositing_enabled;
-    target->threaded_compositing_enabled = src->threaded_compositing_enabled;
     target->accelerated_layers_disabled = src->accelerated_layers_disabled;
     target->accelerated_video_disabled = src->accelerated_video_disabled;
     target->accelerated_2d_canvas_disabled =

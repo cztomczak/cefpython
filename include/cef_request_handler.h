@@ -115,8 +115,8 @@ class CefRequestHandler : public virtual CefBase {
   // handler, if any. If false is returned and either |allow_os_execution|
   // is false or OS protocol handler execution fails then the request will fail
   // with an error condition.
-  // SECURITY WARNING: you should use this method to enforce restrictions based
-  // on scheme, host or other url analysis before allowing os execution.
+  // SECURITY WARNING: YOU SHOULD USE THIS METHOD TO ENFORCE RESTRICTIONS BASED
+  // ON SCHEME, HOST OR OTHER URL ANALYSIS BEFORE ALLOWING OS EXECUTION.
   ///
   /*--cef()--*/
   virtual bool OnProtocolExecution(CefRefPtr<CefBrowser> browser,

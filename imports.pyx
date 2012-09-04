@@ -18,6 +18,11 @@ import types
 import re
 import copy
 
+if sys.version_info.major == 2:
+	from urllib import pathname2url as urllib_pathname2url
+else:
+	from urllib.request import pathname2url as urllib_pathname2url
+
 from libcpp cimport bool as cbool
 from libcpp.map cimport map
 from libcpp.vector cimport vector

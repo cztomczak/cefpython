@@ -19,7 +19,7 @@ from libcpp cimport bool as cbool
 
 cdef extern from "include/cef_v8.h" namespace "CefV8Value":
 
-		cdef CefRefPtr[CefV8Value] CreateArray()
+		cdef CefRefPtr[CefV8Value] CreateArray(int length)
 		cdef CefRefPtr[CefV8Value] CreateBool(cbool value)
 		cdef CefRefPtr[CefV8Value] CreateDouble(double value)
 		cdef CefRefPtr[CefV8Value] CreateFunction(
@@ -27,6 +27,6 @@ cdef extern from "include/cef_v8.h" namespace "CefV8Value":
 	                CefRefPtr[CefV8Handler] handler)
 		cdef CefRefPtr[CefV8Value] CreateInt(int value)
 		cdef CefRefPtr[CefV8Value] CreateNull()
-		cdef CefRefPtr[CefV8Value] CreateObject(CefRefPtr[CefBase] user_data, CefRefPtr[CefV8Accessor] accessor)
+		cdef CefRefPtr[CefV8Value] CreateObject(CefRefPtr[CefV8Accessor] accessor)
 		cdef CefRefPtr[CefV8Value] CreateString(CefString& value)
 		# cdef CefRefPtr[CefV8Value] CreateUndefined()

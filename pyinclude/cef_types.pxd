@@ -77,6 +77,13 @@ cdef extern from "include/internal/cef_types.h":
 		KEYEVENT_KEYUP,
 		KEYEVENT_CHAR
 
+	enum cef_handler_keyevent_modifiers_t:
+		KEY_SHIFT = 1 << 0,
+		KEY_CTRL = 1 << 1,
+		KEY_ALT = 1 << 2,
+		KEY_META  = 1 << 3,
+		KEY_KEYPAD = 1 << 4,  # Only used on Mac OS-X
+
 	enum cef_v8_propertyattribute_t:
 		V8_PROPERTY_ATTRIBUTE_NONE = 0,       # Writeable, Enumerable,
 		#  Configurable
