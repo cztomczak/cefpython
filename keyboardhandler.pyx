@@ -10,6 +10,12 @@ KEYEVENT_KEYDOWN = <int>cef_types.KEYEVENT_KEYDOWN
 KEYEVENT_KEYUP = <int>cef_types.KEYEVENT_KEYUP
 KEYEVENT_CHAR = <int>cef_types.KEYEVENT_CHAR
 
+KEY_SHIFT = <int>cef_types.KEY_SHIFT
+KEY_CTRL = <int>cef_types.KEY_CTRL
+KEY_ALT = <int>cef_types.KEY_ALT
+KEY_META  = <int>cef_types.KEY_META
+KEY_KEYPAD = <int>cef_types.KEY_KEYPAD
+
 def InitializeKeyboardHandler():
 
 	# Callbacks - make sure event names are proper - hard to detect error.

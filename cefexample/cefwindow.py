@@ -11,24 +11,42 @@ import os
 import sys
 import re
 
+if sys.version_info.major == 2:
+	from urllib import pathname2url as urllib_pathname2url
+else:
+	from urllib.request import pathname2url as urllib_pathname2url
+
 __debug = False
 __windows = {} # windowID(int): className
 
-def GetRealPath(file=None):
+def GetRealPath(file=None, encodeURL=False):
 	
 	# This function is defined in 2 files: cefpython.pyx and cefwindow.py, if you make changes edit both files.
 	# If file is None return current directory, without trailing slash.
+	
+	# encodeURL param - will call urllib.pathname2url(), only when file is empty (current dir) 
+	# or is relative path ("test.html", "some/test.html"), we need to encode it before passing
+	# to CreateBrowser(), otherwise it is encoded by CEF internally and becomes (chinese characters):
+	# >> %EF%BF%97%EF%BF%80%EF%BF%83%EF%BF%A6
+	# but should be:
+	# >> %E6%A1%8C%E9%9D%A2
+
 	if file is None: file = ""
-	if file.find("/") != 0 and file.find("\\") != 0 and not re.search(r"^[a-zA-Z]+:[/\\]", file):
-		# not re.search(r"^[a-zA-Z]+:[/\\]", file)
-		# == not (D:\\ or D:/ or http:// or ftp:// or file://)
+	if file.find("/") != 0 and file.find("\\") != 0 and not re.search(r"^[a-zA-Z]+:[/\\]?", file):
+		# Execute this block only when relative path ("test.html", "some\test.html") or file is empty (current dir).
+		# 1. find != 0 >> not starting with / or \ (/ - linux absolute path, \ - just to be sure)
+		# 2. not re.search >> not (D:\\ or D:/ or D: or http:// or ftp:// or file://), 
+		#     "D:" is also valid absolute path ("D:cefpython" in chrome becomes "file:///D:/cefpython/")		
 		if hasattr(sys, "frozen"): path = os.path.dirname(sys.executable)
 		elif "__file__" in globals(): path = os.path.dirname(os.path.realpath(__file__))
 		else: path = os.getcwd()
 		path = path + os.sep + file
 		path = re.sub(r"[/\\]+", re.escape(os.sep), path)
-		path = re.sub(r"[/\\]+$", "", path)
-		return path
+		path = re.sub(r"[/\\]+$", "", path) # directory without trailing slash.
+		if encodeURL:
+			return urllib_pathname2url(path)
+		else:
+			return path
 	return file
 
 def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=None, windowProc=None):

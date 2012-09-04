@@ -1,4 +1,4 @@
-// Copyright (c) 2009 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2010 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -28,14 +28,14 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#ifndef CEF_INCLUDE_INTERNAL_CEF_TYPES_WIN_H_
-#define CEF_INCLUDE_INTERNAL_CEF_TYPES_WIN_H_
+#ifndef CEF_INCLUDE_INTERNAL_CEF_TYPES_LINUX_H_
+#define CEF_INCLUDE_INTERNAL_CEF_TYPES_LINUX_H_
 #pragma once
 
 #include "include/internal/cef_build.h"
 
-#if defined(OS_WIN)
-#include <windows.h>
+#if defined(OS_LINUX)
+#include <gtk/gtk.h>
 #include "include/internal/cef_string.h"
 
 #ifdef __cplusplus
@@ -43,16 +43,14 @@ extern "C" {
 #endif
 
 // Window handle.
-#define cef_window_handle_t HWND
-#define cef_cursor_handle_t HCURSOR
+#define cef_window_handle_t GtkWidget*
+#define cef_cursor_handle_t void*
 
 ///
 // Supported graphics implementations.
 ///
 enum cef_graphics_implementation_t {
-  ANGLE_IN_PROCESS = 0,
-  ANGLE_IN_PROCESS_COMMAND_BUFFER,
-  DESKTOP_IN_PROCESS,
+  DESKTOP_IN_PROCESS = 0,
   DESKTOP_IN_PROCESS_COMMAND_BUFFER,
 };
 
@@ -60,35 +58,17 @@ enum cef_graphics_implementation_t {
 // Class representing window information.
 ///
 typedef struct _cef_window_info_t {
-  // Standard parameters required by CreateWindowEx()
-  DWORD m_dwExStyle;
-  cef_string_t m_windowName;
-  DWORD m_dwStyle;
-  int m_x;
-  int m_y;
-  int m_nWidth;
-  int m_nHeight;
-  cef_window_handle_t m_hWndParent;
-  HMENU m_hMenu;
+  // Pointer for the parent GtkBox widget.
+  cef_window_handle_t m_ParentWidget;
 
-  // If window rendering is disabled no browser window will be created. Set
-  // |m_hWndParent| to the window that will act as the parent for popup menus,
-  // dialog boxes, etc.
-  BOOL m_bWindowRenderingDisabled;
-
-  // Set to true to enable transparent painting.
-  BOOL m_bTransparentPainting;
-
-  // Handle for the new browser window.
-  cef_window_handle_t m_hWnd;
+  // Pointer for the new browser widget.
+  cef_window_handle_t m_Widget;
 } cef_window_info_t;
 
 ///
 // Class representing print context information.
 ///
 typedef struct _cef_print_info_t {
-  HDC m_hDC;
-  RECT m_Rect;
   double m_Scale;
 } cef_print_info_t;
 
@@ -97,14 +77,12 @@ typedef struct _cef_print_info_t {
 ///
 typedef struct _cef_key_info_t {
   int key;
-  BOOL sysChar;
-  BOOL imeChar;
 } cef_key_info_t;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // OS_WIN
+#endif  // OS_LINUX
 
-#endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WIN_H_
+#endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_LINUX_H_

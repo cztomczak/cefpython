@@ -96,7 +96,6 @@ def CefAdvanced():
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
-	os.kill(os.getpid(), 9) # A temporary fix for Issue 2.
 
 def PyExecuteJavascript(jsCode):
 

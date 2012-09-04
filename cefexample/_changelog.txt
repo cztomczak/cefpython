@@ -1,47 +1,10 @@
-CEF Python provides bindings for the Chromium Embedded Framework (CEF). 
-
-Example application
-	There are 2 example applications:
-	- cefsimple.py
-	- cefadvanced.py
-
-Files
-	cefpython.pyd - cefpython library compiled using Cython extension,
-				this is a dll-like file in python world.
-	cefwindow.py - functions to create window using pywin32 extension.
-
-	DLL's and .PAK file are from "cef_binary_1.1025.607_windows.zip"
-	that can be downloaded from the Chromium Embedded Framework
-	project: http://code.google.com/p/chromiumembedded/
-
-	Manifest and msvcr90.dll are dependencies of cefpython.pyd:
-		Microsoft.VC90.CRT.manifest
-		msvcm90.dll (not really required but must be redistributed together)
-		msvcp90.dll (not really required but must be redistributed together)
-		msvcr90.dll
-
-Programming API
-	http://code.google.com/p/cefpython/wiki/API
-
-Having issues?
-	Report bugs or wanted features here:
-	http://code.google.com/p/cefpython/issues/list
-
-License
-	New BSD License
-Copyright
-	Czarek Tomczak. All rights reserved.
-Website:
-	http://code.google.com/p/cefpython/
-
-
-icon.ico
-	That icon is from "FS Ubuntu Icons" by Frank Souza.
-	Licensed under GNU General Public License.
-
-------------------------------------------------------------------------------------------------
-
-CHANGELOG.
+Version 0.38 released on 2012-09-04.
+ * Fixed crash when exiting app (Issue 2), you can now remove the call to os.kill() after cefpython.Shutdown().
+ * Fixed url error when application path contained chinese characters, see the updated documentation for [cefpython].!GetRealPath().
+ * CEF updated to `revision 750`.
+ * Included Chrome version 21.
+ * BrowserSettings: new option "animation_frame_rate", removed option "threaded_compositing_enabled".
+ * KeyboardHandler: added constants cefpython.KEY_SHIFT (KEY_ALT and others) to check against |modifiers| parameter.
 
 Version 0.37 released on 2012-08-30.
  * [DisplayHandler] implemented.

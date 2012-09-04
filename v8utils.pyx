@@ -48,6 +48,9 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 	elif v8ValuePtr.IsDate():
 		raise Exception("V8ValueToPyValue() failed: Date object is not supported, you are not allowed"
 				"to pass it from Javascript to Python.")
+	elif v8ValuePtr.IsUInt():
+		# Check against uint must be done before IsInt().
+		return v8ValuePtr.GetUIntValue()
 	elif v8ValuePtr.IsInt():
 		# A check against IsInt() must be done before IsDouble(), as any js integer
 		# returns true when calling IsDouble().
@@ -118,7 +121,7 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 
 	if pyValueType == list:
 		# Remember about increasing nestingLevel.
-		v8Value = cef_v8_static.CreateArray()
+		v8Value = cef_v8_static.CreateArray(len(pyValue))
 		for index,value in enumerate(pyValue):
 			(<CefV8Value*>(v8Value.get())).SetValue(int(index), PyValueToV8Value(value, v8Context, nestingLevel+1))
 		return v8Value
@@ -142,7 +145,7 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 	elif pyValueType == type(None):
 		return cef_v8_static.CreateNull()
 	elif pyValueType == dict:
-		v8Value = cef_v8_static.CreateObject(<CefRefPtr[CefBase]>NULL, <CefRefPtr[CefV8Accessor]>NULL)
+		v8Value = cef_v8_static.CreateObject(<CefRefPtr[CefV8Accessor]>NULL)
 		for key, value in pyValue.items():
 			# A dict may have an int key, a string key or even a tuple key:
 			# {0: 12, '0': 12, (0, 1): 123}

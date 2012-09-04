@@ -75,7 +75,7 @@ navigator.userAgent: <span style="background:#eee"><script>document.write(naviga
 	<a href="javascript:PyTest1(object)">window.PyTest1(object)</a> (var object = {a: 1, '3': 33};)<br>
 
 	<br>
-	<script>var nested = [1,2, [3, 4, [5,6, [{7:7, 8: [9,10]}, 11]]]];</script>
+	<script>var nested = [1,2, [3, -4, [5,6, [{7:7, 8: [9,10]}, 11]]]];</script>
 	<a href="javascript:PyTest1(nested)">window.PyTest1(nested)</a> (var nested = [1,2, [3, 4, [5,6, [{7:7, 8: [9,10]}, 11]]]];) - dictionary keys will be in a different order in Python.<br>
 
 	<br>
@@ -96,9 +96,15 @@ function MyJSCallback(arg1, arg2, arg3, arg4)
 {
 	alert("MyJSCallback() called\narg1="+JSON.stringify(arg1)+"\narg2="+JSON.stringify(arg2)+"\narg3="+JSON.stringify(arg3)+"\narg4="+JSON.stringify(arg4))
 }
+function MyJSCallback2()
+{
+	throw new Error("asd")
+}
 </script>
 
-<a href="javascript:window.TestJavascriptCallback(MyJSCallback)">window.TestJavascriptCallback(MyJSCallback)</a>
+<a href="javascript:window.TestJavascriptCallback(MyJSCallback)">window.TestJavascriptCallback(MyJSCallback)</a> - MyJSCallback alerts arguments
+<br>
+<a href="javascript:window.TestJavascriptCallback(MyJSCallback2)">window.TestJavascriptCallback(MyJSCallback2)</a> - MyJSCallback2 throws new Error("asd")
 
 
 <h3>Python callbacks</h3>

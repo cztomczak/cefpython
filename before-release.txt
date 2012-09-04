@@ -1,0 +1,10 @@
+1. Issue 2 fix:
+
+chromium/src/base/file_util_win.cc
+line 87, function Delete, add:
+
+  if (path.value().length() >= MAX_PATH)
+    return false;
+
+  if (recursive && RemoveDirectory(path.value().c_str()) != 0)
+    return true;
