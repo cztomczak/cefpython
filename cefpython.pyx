@@ -239,3 +239,8 @@ def Shutdown():
 	CefShutdown()
 	if __debug: print("GetLastError(): %s" % GetLastError())
 
+def IsKeyModifier(key, modifiers):
+
+	if key == KEY_NONE:
+		return modifiers == KEY_NONE
+	return (key & modifiers) == key

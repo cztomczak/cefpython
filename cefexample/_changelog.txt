@@ -1,9 +1,10 @@
-Version 0.39 released on ????.
- * New methods to [Browser] object: !SetZoomLevel(), !GetJavascriptBindings(), !GetClientHandlers(), !GetClientHandler(), !GetInnerWindowID(), !StopFinding(), !IsWindowRenderingDisabled().
+Version 0.39 released on 2012-09-10.
+ * New methods to [Browser] object: !SetZoomLevel(), !GetJavascriptBindings(), !GetClientHandlers(), !GetClientHandler(), GetInnerWindowID(), !StopFinding(), !IsWindowRenderingDisabled().
  * New methods to [Frame] object: Undo(), Redo(), Cut(), Copy(), Paste(), Delete(), !SelectAll(), Print(), !ViewSource(), !GetSource(), !GetText(), !LoadString(), !IsFocused(), !GetName().
+ * New function added: [cefpython].!IsKeyModifier(), for use with [KeyboardHandler] (thanks to rich770 for explaining how modifiers work).
 
 Version 0.38 released on 2012-09-04.
- * Fixed crash when exiting app (Issue 2), you can now remove the call to os.kill() after cefpython.Shutdown().
+ * Fixed crash when exiting app (Issue 2), you can now remove the call to os.kill() after cefpython.Shutdown() (thanks to Cjjer for help on debugging this bug).
  * Fixed url error when application path contained chinese characters, see the updated documentation for [cefpython].!GetRealPath().
  * CEF updated to `revision 750`.
  * Included Chrome version 21.
