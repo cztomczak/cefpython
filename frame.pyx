@@ -32,7 +32,26 @@ class PyFrame:
 
 		# You must enter CefV8Context before calling PyValueToV8Value().
 
+		'''TODO: call Frame->GetV8Context?()->GetGlobal?() you get a window object, 
+		now iterate through its all properties and compare to funcName, you get a real javascript 
+		object which you can call and be able to get return value, also you can pass python callbacks this way.'''
+
 		pass
+
+	def Copy(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		(<CefFrame*>(cefFrame.get())).Copy()
+
+	def Cut(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		(<CefFrame*>(cefFrame.get())).Cut()
+
+	def Delete(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		(<CefFrame*>(cefFrame.get())).Delete()
 
 	def ExecuteJavascript(self, jsCode, scriptURL=None, startLine=None):
 
@@ -55,21 +74,26 @@ class PyFrame:
 
 		(<CefFrame*>(cefFrame.get())).ExecuteJavaScript(cefJsCode, cefScriptURL, <int>startLine)
 
-	def GetURL(self):
+	def EvalJavascript(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cdef CefString cefURL = (<CefFrame*>(cefFrame.get())).GetURL()
-		return CefStringToPyString(cefURL)
-		
+		# TODO: CefV8Context > Eval
+		pass
+
 	def GetIdentifier(self):
 
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		return <long long>((<CefFrame*>(cefFrame.get())).GetIdentifier())
 
+	def GetName(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		cdef CefString cefName = ((<CefFrame*>(cefFrame.get())).GetName())
+		return CefStringToPyString(cefName)
+
 	def GetProperty(self, name):
 
 		# GetV8Context() requires UI thread.
-		assert CurrentlyOn(TID_UI), "Frame.SetProperty() should only be called on the UI thread"
+		assert CurrentlyOn(TID_UI), "Frame.SetProperty() may only be called on the UI thread"
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefRefPtr[CefV8Context] v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
 		window = (<CefV8Context*>(v8Context.get())).GetGlobal()
@@ -83,22 +107,81 @@ class PyFrame:
 
 		return V8ValueToPyValue(v8Value, v8Context)
 
+	def GetSource(self):
+		
+		assert CurrentlyOn(TID_UI), "Frame.GetSource() may only be called on the UI thread"
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		cdef CefString cefSource = (<CefFrame*>(cefFrame.get())).GetSource()
+		return CefStringToPyString(cefSource)
+
+	def GetText(self):
+		
+		assert CurrentlyOn(TID_UI), "Frame.GetText() may only be called on the UI thread"
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		cdef CefString cefSource = (<CefFrame*>(cefFrame.get())).GetText()
+		return CefStringToPyString(cefSource)
+
+	def GetURL(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		cdef CefString cefURL = (<CefFrame*>(cefFrame.get())).GetURL()
+		return CefStringToPyString(cefURL)
+
+	def IsFocused(self):
+
+		assert CurrentlyOn(TID_UI), "Frame.IsFocused() may only be called on the UI thread"
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		return (<CefFrame*>(cefFrame.get())).IsFocused()
+
 	def IsMain(self):
 
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		return (<CefFrame*>(cefFrame.get())).IsMain()
 
-	def LoadURL(self, URL):
+	def LoadRequest(self):
+
+		pass
+
+	def LoadString(self, value, url):
+		
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		cdef CefString cefValue
+		cdef CefString cefURL
+		PyStringToCefString(value, cefValue)
+		PyStringToCefString(url, cefURL)		
+		(<CefFrame*>(cefFrame.get())).LoadString(cefValue, cefURL)
+
+	def LoadURL(self, url):
 
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefString cefURL
-		PyStringToCefString(URL, cefURL)
+		PyStringToCefString(url, cefURL)
 		(<CefFrame*>(cefFrame.get())).LoadURL(cefURL)
+
+	def Paste(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		(<CefFrame*>(cefFrame.get())).Paste()
+
+	def Print(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		(<CefFrame*>(cefFrame.get())).Print()
+
+	def Redo(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		(<CefFrame*>(cefFrame.get())).Redo()
+
+	def SelectAll(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		(<CefFrame*>(cefFrame.get())).SelectAll()
 
 	def SetProperty(self, name, value):
 
 		# GetV8Context() requires UI thread.
-		assert CurrentlyOn(TID_UI), "Frame.SetProperty() should only be called on the UI thread"
+		assert CurrentlyOn(TID_UI), "Frame.SetProperty() may only be called on the UI thread"
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefRefPtr[CefV8Context] v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
 
@@ -110,3 +193,12 @@ class PyFrame:
 		
 		(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(value, v8Context), V8_PROPERTY_ATTRIBUTE_NONE)
 
+	def Undo(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		(<CefFrame*>(cefFrame.get())).Undo()
+
+	def ViewSource(self):
+
+		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
+		(<CefFrame*>(cefFrame.get())).ViewSource()
