@@ -64,6 +64,10 @@ def CefAdvanced():
 	handlers["OnLoadError"] = OnLoadError
 	handlers["OnKeyEvent"] = (OnKeyEvent, None, OnKeyEvent)
 
+	# If you want a way to rebind javascript functions later, for example combined with use of Python's reload()
+	# on module, so that you can make changes to app without re-launching application, then see Issue 12
+	# for an example on how to do this: http://code.google.com/p/cefpython/issues/detail?id=12 (test_noreload2.zip).
+
 	bindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
 
 	bindings.SetFunction("PyJavascriptError", PyJavascriptError)
@@ -196,15 +200,31 @@ def OnLoadError(browser, frame, errorCode, failedURL, errorText):
 
 def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
 
-	# print("keyCode=%s, modifiers=%s, isSystemKey=%s" % (keyCode, modifiers, isSystemKey))
+	print("eventType = %s, keyCode=%s, modifiers=%s, isSystemKey=%s" % (eventType, keyCode, modifiers, isSystemKey))
+
+	if eventType != cefpython.KEYEVENT_RAWKEYDOWN or isSystemKey:
+		return False
+	
 	# Let's bind developer tools to F12 key.
-	if keyCode == cefpython.VK_F12 and eventType == cefpython.KEYEVENT_RAWKEYDOWN and modifiers == 1024 and not isSystemKey:
+	if keyCode == cefpython.VK_F12 and modifiers == 1024:
 		browser.ShowDevTools()
 		return True
+	
 	# Bind F5 to refresh browser window.
-	if keyCode == cefpython.VK_F5 and eventType == cefpython.KEYEVENT_RAWKEYDOWN and modifiers == 1024 and not isSystemKey:
+	if keyCode == cefpython.VK_F5 and modifiers == 1024:
 		browser.ReloadIgnoreCache()
 		return True
+
+	# Bind Ctrl(+) to increase zoom level
+        if keyCode == 187 and modifiers == 1026:
+                browser.SetZoomLevel(browser.GetZoomLevel() +1)
+                return True
+        
+	# Bind Ctrl(-) to reduce zoom level
+        if keyCode == 189 and modifiers == 1026:
+                browser.SetZoomLevel(browser.GetZoomLevel() -1)
+                return True
+
 	return False
 
 def PyResizeWindow():
