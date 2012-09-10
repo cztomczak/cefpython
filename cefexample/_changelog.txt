@@ -1,3 +1,6 @@
+Version 0.40 released on ????.
+ * Bug in [cefpython].!IsKeyModifier(), problem with NumLock.
+
 Version 0.39 released on 2012-09-10.
  * New methods to [Browser] object: !SetZoomLevel(), !GetJavascriptBindings(), !GetClientHandlers(), !GetClientHandler(), GetInnerWindowID(), !StopFinding(), !IsWindowRenderingDisabled().
  * New methods to [Frame] object: Undo(), Redo(), Cut(), Copy(), Paste(), Delete(), !SelectAll(), Print(), !ViewSource(), !GetSource(), !GetText(), !LoadString(), !IsFocused(), !GetName().

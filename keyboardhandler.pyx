@@ -10,7 +10,7 @@ KEYEVENT_KEYDOWN = <int>cef_types.KEYEVENT_KEYDOWN
 KEYEVENT_KEYUP = <int>cef_types.KEYEVENT_KEYUP
 KEYEVENT_CHAR = <int>cef_types.KEYEVENT_CHAR
 
-KEY_NONE = 1024
+KEY_NONE = 0
 KEY_SHIFT = <int>cef_types.KEY_SHIFT
 KEY_CTRL = <int>cef_types.KEY_CTRL
 KEY_ALT = <int>cef_types.KEY_ALT
