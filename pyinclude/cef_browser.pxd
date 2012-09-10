@@ -25,32 +25,25 @@ cdef extern from "include/cef_browser.h":
 		CefRefPtr[CefFrame] GetFocusedFrame()
 		CefRefPtr[CefFrame] GetFrame(CefString& name)
 		void GetFrameNames(vector[CefString]& names)
-		# bool GetImage( CefBrowser::PaintElementType type, int width, int height, void* buffer )
 		CefRefPtr[CefFrame] GetMainFrame()
 		HWND GetOpenerWindowHandle()
-		# bool GetSize( CefBrowser::PaintElementType type, int& width, int& height )
 		HWND GetWindowHandle()
 		double GetZoomLevel()
 		void GoBack()
 		void GoForward()
 		cbool HasDocument()
 		void HidePopup()
-		# void Invalidate( const CefRect& dirtyRect )
-
-		# ----------------------
-		
+		cbool IsPopup()
 		void ParentWindowWillClose()
-		
-		void SetZoomLevel(double zoomLevel)
-		
-		void ShowDevTools()
-		
 		void Reload()
 		void ReloadIgnoreCache()
+		void SetFocus(cbool enable)
+		void SetZoomLevel(double zoomLevel)
+		void ShowDevTools()		
 		void StopLoad()
-
-		cbool IsPopup()
-
+		void StopFinding(cbool clearSelection)
+		cbool IsWindowRenderingDisabled()
+		cbool IsPopupVisible()
 
 cdef extern from "include/cef_browser.h" namespace "CefBrowser":
 	

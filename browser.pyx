@@ -119,33 +119,24 @@ class PyBrowser:
 			if key not in allowedHandlers:
 				raise Exception("Unknown handler: %s, mistyped?" % key)
 
-	def GetInnerWindowID(self):
+	# Helper functions, also public:	
 
-		return self.__innerWindowID
-
-	# Internal.
-	def IsPopup(self):
-
-		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
-		return (<CefBrowser*>(cefBrowser.get())).IsPopup()
-
-	# Internal.
 	def GetJavascriptBindings(self):
 
 		return self.__javascriptBindings
 
-	# Internal.
 	def GetClientHandler(self, name):
 
 		if name in self.__clientHandlers:
 			return self.__clientHandlers[name]
 
-	# Internal.
 	def GetClientHandlers(self):
 
 		return self.__clientHandlers
 
+	# --------------
 	# PUBLIC API.
+	# --------------
 
 	def CanGoBack(self):
 
@@ -182,52 +173,12 @@ class PyBrowser:
 		self.__topWindowID = 0
 		self.__innerWindowID = 0
 
-		# Comments below are outdated, the solution to these problems is to add:
-		# >return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
-		# in CloseApplication().
-
-		# ------------- outdated block start
-
-		# Calling CloseBrowser() is not required (in cefclient it is called only for popup browsers),
-		# but if we don't call it then there will be still coming messages like: WM_SETFOCUS,
-		# WM_ERASEBKGND (see wndproc.pyx), the solution is to call CloseBrowser() or call
-		# GetCefBrowserByTopWindowID() with second parameter ignoreError=True in these procedures.
-
-		# After we call CloseBrowser() the CEF Browser window is still not destroyed,
-		# on windows 2003 we get error similar to issue 2 (http://code.google.com/p/cefpython/issues/detail?id=2),
-		# that "memory cannot be read". Our solution to this is to send WM_DESTROY message synchronously
-		# (using SendMessage) so that so that window is destroyed immediately.
-
-		# Calling CloseBrowser() fixes also an another error on windows 2003: when closing browser
-		# you get an error like this:
-		#	Traceback (most recent call last):
-		#	File "loadhandler.pyx", line 32, in cefpython.LoadHandler_OnLoadEnd (cefpython.cpp:13518)
-		#	File "utils.pyx", line 48, in cefpython.GetPyBrowserByCefBrowser (cefpython.cpp:11265)
-		#	Exception: Browser not found in __pyBrowsers, searched by innerWindowID = 2294004
-		# It occurs because PyBrowser.CloseBrowser() destroys any references to CefBrowser and PyBrowser.
-
-		"""
-		Outdated code from CloseApplication():
-			# innerWindowID = browser.GetInnerWindowID()
-		
-			# On windows 2003 there is an error when closing window, "memory cannot be read",
-			# it is similar to Issue 2 (http://code.google.com/p/cefpython/issues/detail?id=2),
-			# the solution is to destroy CefBrowserWindow explicitly by sending WM_DESTROY message.	
-			#win32api.SendMessage(innerWindowID, win32con.WM_DESTROY, 0, 0)
-
-			# Do not call DestroyWindow() for windowID as it causes app error, use PostMessage() instead.
-			#win32api.PostMessage(windowID, win32con.WM_DESTROY, 0, 0)
-		"""
-
-
 		# You do not need to call both, call ParentWindowWillClose for the main application window,
 		# and CloseBrowser() for popup windows created by CEF. In cefclient/cefclient_win.cpp there
 		# is only ParentWindowWillClose() called. CloseBrowser() is called only for popups.
 
-		# ------------- outdated block end		
-		
-		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose() # only main window created explicitily
-		# (<CefBrowser*>(cefBrowser.get())).CloseBrowser()
+		(<CefBrowser*>(cefBrowser.get())).ParentWindowWillClose() # only for main window that was created explicitily
+		# (<CefBrowser*>(cefBrowser.get())).CloseBrowser() # call this only for popups.
 
 	def CloseDevTools(self):
 		
@@ -246,7 +197,7 @@ class PyBrowser:
 
 	def GetFocusedFrame(self):
 
-		assert CurrentlyOn(TID_UI), "Browser.GetFocusedFrame() should only be called on the UI thread"
+		assert CurrentlyOn(TID_UI), "Browser.GetFocusedFrame() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		cdef CefRefPtr[CefFrame] cefFrame = (<CefBrowser*>(cefBrowser.get())).GetFocusedFrame()
 		
@@ -254,7 +205,7 @@ class PyBrowser:
 
 	def GetFrame(self, name):
 
-		assert CurrentlyOn(TID_UI), "Browser.GetFrame() should only be called on the UI thread"
+		assert CurrentlyOn(TID_UI), "Browser.GetFrame() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		
 		cdef CefString cefName
@@ -265,7 +216,7 @@ class PyBrowser:
 
 	def GetFrameNames(self):
 
-		assert CurrentlyOn(TID_UI), "Browser.GetFrameNames() should only be called on the UI thread"
+		assert CurrentlyOn(TID_UI), "Browser.GetFrameNames() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 
 		cdef vector[CefString] cefNames
@@ -302,11 +253,28 @@ class PyBrowser:
 
 	def GetWindowID(self):
 
+		# TODO: This function may be removed or modified in the future as its acting is confusing at the moment.
+
+		# Returns `windowID` that was passed to [cefpython].`CreateBrowser()`. 
+		# Call this method to see whether Browser object still exists, if windowID == 0 
+		# then browser was closed. If this is a popup browser the returned value may be 0 or -1.		
+
 		# Call this function to see whether Browser object is still valid, if topWindowID == 0 then invalid.
+
 		return self.__topWindowID
+
+	def GetInnerWindowID(self):
+
+		# TODO: This function may be removed or modified in the future as its acting is confusing at the moment.
+
+		# Returns internal CEF window handle. For a popup this is an outer window.
+		# For main window this an inner window contained in top window that you can get by calling !GetWindowID().		
+
+		return self.__innerWindowID
 
 	def GetZoomLevel(self):
 
+		assert CurrentlyOn(TID_UI), "Browser.GetZoomLevel() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		cdef double zoomLevel = (<CefBrowser*>(cefBrowser.get())).GetZoomLevel()
 		return zoomLevel
@@ -326,39 +294,26 @@ class PyBrowser:
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		return (<CefBrowser*>(cefBrowser.get())).HasDocument()
 
-
 	def HidePopup(self):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		(<CefBrowser*>(cefBrowser.get())).HidePopup()
 
-
-
-	# ----------------------
-
-	
-
-	
-	def SetZoomLevel(self, zoomLevel):
+	def IsPopup(self):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
-		(<CefBrowser*>(cefBrowser.get())).SetZoomLevel(<double>float(zoomLevel))
-	
+		return (<CefBrowser*>(cefBrowser.get())).IsPopup()
 
-	def ShowDevTools(self):
+	def IsPopupVisible(self):
+
+		assert CurrentlyOn(TID_UI), "Browser.IsPopupVisible() may only be called on the UI thread"
+		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
+		return (<CefBrowser*>(cefBrowser.get())).IsPopupVisible()
+
+	def IsWindowRenderingDisabled(self):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
-		(<CefBrowser*>(cefBrowser.get())).ShowDevTools()
-
-	
-
-	
-
-	
-
-	
-
-	
+		return (<CefBrowser*>(cefBrowser.get())).IsWindowRenderingDisabled()
 
 	def Reload(self):
 
@@ -370,10 +325,31 @@ class PyBrowser:
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		(<CefBrowser*>(cefBrowser.get())).ReloadIgnoreCache()
 
+	def SetFocus(self, enable):
+
+		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
+		(<CefBrowser*>(cefBrowser.get())).SetFocus(<cbool>bool(enable))
+
+	def SetZoomLevel(self, zoomLevel):
+
+		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
+		(<CefBrowser*>(cefBrowser.get())).SetZoomLevel(<double>float(zoomLevel))
+	
+
+	def ShowDevTools(self):
+
+		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
+		(<CefBrowser*>(cefBrowser.get())).ShowDevTools()
+
 	def StopLoad(self):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		(<CefBrowser*>(cefBrowser.get())).StopLoad()
+
+	def StopFinding(self, clearSelection):
+
+		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
+		(<CefBrowser*>(cefBrowser.get())).StopFinding(<cbool>bool(clearSelection))
 
 
 
