@@ -1,5 +1,6 @@
 Version 0.39 released on ????.
  * New methods to [Browser] object: !SetZoomLevel(), !GetJavascriptBindings(), !GetClientHandlers(), !GetClientHandler(), !GetInnerWindowID(), !StopFinding(), !IsWindowRenderingDisabled().
+ * New methods to [Frame] object: Undo(), Redo(), Cut(), Copy(), Paste(), Delete(), !SelectAll(), Print(), !ViewSource(), !GetSource(), !GetText(), !LoadString(), !IsFocused(), !GetName().
 
 Version 0.38 released on 2012-09-04.
  * Fixed crash when exiting app (Issue 2), you can now remove the call to os.kill() after cefpython.Shutdown().
