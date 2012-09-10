@@ -241,6 +241,19 @@ def Shutdown():
 
 def IsKeyModifier(key, modifiers):
 
+	'''
+	cefpython.KEYEVENT_RAWKEYDOWN=0
+	cefpython.KEYEVENT_KEYDOWN=1
+	cefpython.KEYEVENT_KEYUP=2
+	cefpython.KEYEVENT_CHAR=3
+	cefpython.KEY_SHIFT=1
+	cefpython.KEY_CTRL=2
+	cefpython.KEY_ALT=4
+	cefpython.KEY_META=8
+	cefpython.KEY_KEYPAD=16
+	NumLock=1024
+	'''
+
 	if key == KEY_NONE:
-		return modifiers == KEY_NONE
+		return (KEY_CTRL & modifiers) != KEY_CTRL  and (KEY_ALT & modifiers) != KEY_ALT and (KEY_SHIFT & modifiers) != KEY_SHIFT
 	return (key & modifiers) == key

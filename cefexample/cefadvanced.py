@@ -200,12 +200,12 @@ def OnLoadError(browser, frame, errorCode, failedURL, errorText):
 
 def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
 
+	# print("eventType = %s, keyCode=%s, modifiers=%s, isSystemKey=%s" % (eventType, keyCode, modifiers, isSystemKey))
+	
 	if eventType != cefpython.KEYEVENT_RAWKEYDOWN or isSystemKey:
 		return False
 
-	# print("eventType = %s, keyCode=%s, modifiers=%s, isSystemKey=%s" % (eventType, keyCode, modifiers, isSystemKey))
-
-	# Let's bind developer tools to F12 key.
+	# Bind F12 to developer tools.
 	if keyCode == cefpython.VK_F12 and cefpython.IsKeyModifier(cefpython.KEY_NONE, modifiers):
 		browser.ShowDevTools()
 		return True
