@@ -200,30 +200,30 @@ def OnLoadError(browser, frame, errorCode, failedURL, errorText):
 
 def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
 
-	print("eventType = %s, keyCode=%s, modifiers=%s, isSystemKey=%s" % (eventType, keyCode, modifiers, isSystemKey))
-
 	if eventType != cefpython.KEYEVENT_RAWKEYDOWN or isSystemKey:
 		return False
-	
+
+	# print("eventType = %s, keyCode=%s, modifiers=%s, isSystemKey=%s" % (eventType, keyCode, modifiers, isSystemKey))
+
 	# Let's bind developer tools to F12 key.
-	if keyCode == cefpython.VK_F12 and modifiers == 1024:
+	if keyCode == cefpython.VK_F12 and cefpython.IsKeyModifier(cefpython.KEY_NONE, modifiers):
 		browser.ShowDevTools()
 		return True
-	
+
 	# Bind F5 to refresh browser window.
-	if keyCode == cefpython.VK_F5 and modifiers == 1024:
+	if keyCode == cefpython.VK_F5 and cefpython.IsKeyModifier(cefpython.KEY_NONE, modifiers):
 		browser.ReloadIgnoreCache()
 		return True
 
 	# Bind Ctrl(+) to increase zoom level
-        if keyCode == 187 and modifiers == 1026:
-                browser.SetZoomLevel(browser.GetZoomLevel() +1)
-                return True
-        
+	if keyCode in (187, 107) and cefpython.IsKeyModifier(cefpython.KEY_CTRL, modifiers):
+		browser.SetZoomLevel(browser.GetZoomLevel() +1)
+		return True
+
 	# Bind Ctrl(-) to reduce zoom level
-        if keyCode == 189 and modifiers == 1026:
-                browser.SetZoomLevel(browser.GetZoomLevel() -1)
-                return True
+	if keyCode in (189, 109) and cefpython.IsKeyModifier(cefpython.KEY_CTRL, modifiers):
+		browser.SetZoomLevel(browser.GetZoomLevel() -1)
+		return True
 
 	return False
 
