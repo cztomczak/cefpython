@@ -8,9 +8,13 @@ possible thanks to Cython which allows to use c++ libraries directly in Python.
 EXAMPLES
 ---------------------
 
-	There are 2 example applications:
+	Run example applications:
 	- cefsimple.py
 	- cefadvanced.py
+
+	Embedding CEF in GUI frameworks:
+	- pygtk_.py
+	- wxpython.py
 
 ---------------------
 HELP?
