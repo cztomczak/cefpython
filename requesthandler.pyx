@@ -207,7 +207,8 @@ cdef public cbool RequestHandler_GetAuthCredentials(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef cbool Requesthandler_GetAuthCredentials_Default(browser, isProxy, host, port, realm, scheme, username, password):
+# Using "with nogil" in this function, so this needs to be a "cdef function".
+cdef cbool Requesthandler_GetAuthCredentials_Default(browser, isProxy, host, port, realm, scheme, username, password) except *:
 	
 	cdef AuthCredentialsData* credentialsData
 	innerWindowID = browser.GetInnerWindowID() # innerWindowID is a top window for a popup

@@ -22,7 +22,7 @@ def CurrentlyOn(threadID):
 	threadID = <int>int(threadID)
 	return CefCurrentlyOn(<CefThreadId>threadID)
 
-cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreError=False):
+cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreError=False) except *:
 
 	global __popupPyBrowsers
 	global __pyBrowsers
@@ -84,7 +84,7 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreErr
 
 		return __popupPyBrowsers[innerWindowID]
 
-cdef object GetPyFrameByCefFrame(CefRefPtr[CefFrame] cefFrame):
+cdef object GetPyFrameByCefFrame(CefRefPtr[CefFrame] cefFrame) except *:
 
 	global __pyFrames
 	global __cefFrames
@@ -101,22 +101,22 @@ cdef object GetPyFrameByCefFrame(CefRefPtr[CefFrame] cefFrame):
 	else:
 		return None
 
-cdef object GetPyRequestByCefRequest(CefRefPtr[CefRequest] cefRequest):
+cdef object GetPyRequestByCefRequest(CefRefPtr[CefRequest] cefRequest) except *:
 
 	# TODO: not yet implemented.
 	return None
 
-cdef object GetPyStreamReaderByCefStreamReader(CefRefPtr[CefStreamReader] cefStreamReader):
+cdef object GetPyStreamReaderByCefStreamReader(CefRefPtr[CefStreamReader] cefStreamReader) except *:
 
 	# TODO: not yet implemented.
 	return None
 
-cdef object GetPyResponseByCefResponse(CefRefPtr[CefResponse] cefResponse):
+cdef object GetPyResponseByCefResponse(CefRefPtr[CefResponse] cefResponse) except *:
 
 	# TODO: not yet implemented.
 	return None
 
-cdef object GetPyContentFilterByCefContentFilter(CefRefPtr[CefContentFilter] cefContentFilter):
+cdef object GetPyContentFilterByCefContentFilter(CefRefPtr[CefContentFilter] cefContentFilter) except *:
 
 	# TODO: not yet implemented.
 	return None
@@ -202,7 +202,7 @@ cdef CefRefPtr[CefFrame] GetCefFrameByFrameID(frameID) except *:
 		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")
 
 #noinspection CefStringToPyString
-cdef object CefStringToPyString(CefString& cefString):
+cdef object CefStringToPyString(CefString& cefString) except *:
 
 	# This & in "CefString& cefString" is very important, otherwise you get memory
 	# errors and win32 exception. Pycharm suggests that "statement has no effect",
