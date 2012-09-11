@@ -1,3 +1,5 @@
+# An example of embedding CEF in wxPython application.
+
 import wx
 import sys
 import time
