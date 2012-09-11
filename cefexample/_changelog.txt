@@ -1,5 +1,6 @@
-Version 0.40 released on ????.
- * Bug in [cefpython].!IsKeyModifier(), problem with NumLock.
+Version 0.40 released on 2012-09-11.
+ * Problem with F12 keyboard binding, bug in [cefpython].!IsKeyModifier() (thanks to rich770 for help on this).
+ * Created dummy script with full API: "cefpython.py" - use it as a quick reference or for code completion in your IDE.
 
 Version 0.39 released on 2012-09-10.
  * New methods to [Browser] object: !SetZoomLevel(), !GetJavascriptBindings(), !GetClientHandlers(), !GetClientHandler(), GetInnerWindowID(), !StopFinding(), !IsWindowRenderingDisabled().

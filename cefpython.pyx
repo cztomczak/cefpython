@@ -252,8 +252,10 @@ def IsKeyModifier(key, modifiers):
 	cefpython.KEY_META=8
 	cefpython.KEY_KEYPAD=16
 	NumLock=1024
+	WindowsKey=16 (KEY_KEYPAD?)
 	'''
 
 	if key == KEY_NONE:
-		return (KEY_CTRL & modifiers) != KEY_CTRL  and (KEY_ALT & modifiers) != KEY_ALT and (KEY_SHIFT & modifiers) != KEY_SHIFT
+		return ((KEY_SHIFT  | KEY_CTRL | KEY_ALT) & modifiers) == 0
+		# Same as: return (KEY_CTRL & modifiers) != KEY_CTRL and (KEY_ALT & modifiers) != KEY_ALT and (KEY_SHIFT & modifiers) != KEY_SHIFT
 	return (key & modifiers) == key
