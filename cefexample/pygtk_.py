@@ -1,3 +1,5 @@
+# An example of embedding CEF in PyGTK application.
+
 import cefpython
 import pygtk
 pygtk.require('2.0')
