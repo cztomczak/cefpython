@@ -1,3 +1,6 @@
+Version 0.41 released on ????.
+ * New options in [ApplicationSettings]: auto_detect_proxy_settings_enabled, pack_loading_disabled.
+
 Version 0.40 released on 2012-09-11.
  * Problem with F12 keyboard binding, bug in [cefpython].!IsKeyModifier() (thanks to rich770 for help on this).
  * Created dummy script with full API: "cefpython.py" - use it as a quick reference or for code completion in your IDE.
