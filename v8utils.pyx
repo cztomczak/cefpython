@@ -12,7 +12,7 @@ include "pythoncallback.pyx"
 # http://code.google.com/p/chromiumembedded/issues/detail?id=203
 # Entering context should be done for Frame::CallFunction().
 
-cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Context] v8Context, nestingLevel=0) except *:
+cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Context] v8Context, nestingLevel=0):
 
 	# With nestingLevel > 10 we get win32 exceptions.
 
