@@ -64,8 +64,20 @@ class JavascriptCallback:
 		cdef CefRefPtr[CefV8Exception] v8Exception
 		cdef CefV8Exception* v8ExceptionPtr
 
+		# Javascript callback may be kept somewhere and later called from a different v8 frame context.
+		# Need to enter js v8 context before calling PyValueToV8Value().
+
+		cdef cbool sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
+		
+		if not sameContext:
+			if __debug: print("JavascriptCallback.Call(): different context, calling v8Context.Enter()")
+			assert (<CefV8Context*>(v8Context.get())).Enter(), "v8Context.Enter() failed"
+
 		for i in range(0, len(args)):
 			v8Arguments.push_back(PyValueToV8Value(args[i], v8Context))
+
+		if not sameContext:
+			assert (<CefV8Context*>(v8Context.get())).Exit(), "v8Context.Exit() failed"
 
 		v8Retval = (<CefV8Value*>(v8Value.get())).ExecuteFunctionWithContext(v8Context, <CefRefPtr[CefV8Value]>NULL, v8Arguments)
 
@@ -93,7 +105,9 @@ class JavascriptCallback:
 		if <void*>v8Retval == NULL:
 			raise Exception("JavascriptCallback.Call() failed: ExecuteFunctionWithContext() called incorrectly")
 
-		return V8ValueToPyValue(v8Retval, v8Context)
+		pyRet = V8ValueToPyValue(v8Retval, v8Context)
+
+		return pyRet
 
 	def GetName(self):
 

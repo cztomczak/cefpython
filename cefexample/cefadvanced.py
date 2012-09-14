@@ -31,7 +31,10 @@ def CefAdvanced():
 	# This hook does the following: in case of exception display it, write to error.log, shutdown CEF and exit application.
 	sys.excepthook = cefpython.ExceptHook 
 	
-	# Whether to print debug output to console.
+	# Whether to print debug output to console. It is advised to set this to True while developing application,
+	# it is not only printing to output console, it also makes some additional error checking that may go 
+	# unnoticed otherwise, for example in debug mode it always checks whether V8 objects are created in
+	# proper context, if created in wrong context it could result in application crash.
 	cefpython.__debug = True
 	cefwindow.__debug = True 	
 

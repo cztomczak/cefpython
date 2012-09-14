@@ -7,6 +7,7 @@ from cef_v8 cimport CefV8Value
 from cef_string cimport CefString
 from cef_v8 cimport CefV8Handler
 from cef_v8 cimport CefV8Accessor
+from cef_v8 cimport CefV8Context
 from cef_base cimport CefBase
 from libcpp cimport bool as cbool
 
@@ -19,14 +20,19 @@ from libcpp cimport bool as cbool
 
 cdef extern from "include/cef_v8.h" namespace "CefV8Value":
 
-		cdef CefRefPtr[CefV8Value] CreateArray(int length)
-		cdef CefRefPtr[CefV8Value] CreateBool(cbool value)
-		cdef CefRefPtr[CefV8Value] CreateDouble(double value)
-		cdef CefRefPtr[CefV8Value] CreateFunction(
-			CefString& name,
-	                CefRefPtr[CefV8Handler] handler)
-		cdef CefRefPtr[CefV8Value] CreateInt(int value)
-		cdef CefRefPtr[CefV8Value] CreateNull()
-		cdef CefRefPtr[CefV8Value] CreateObject(CefRefPtr[CefV8Accessor] accessor)
-		cdef CefRefPtr[CefV8Value] CreateString(CefString& value)
-		# cdef CefRefPtr[CefV8Value] CreateUndefined()
+	cdef CefRefPtr[CefV8Value] CreateArray(int length)
+	cdef CefRefPtr[CefV8Value] CreateBool(cbool value)
+	cdef CefRefPtr[CefV8Value] CreateDouble(double value)
+	cdef CefRefPtr[CefV8Value] CreateFunction(
+		CefString& name,
+		CefRefPtr[CefV8Handler] handler)
+	cdef CefRefPtr[CefV8Value] CreateInt(int value)
+	cdef CefRefPtr[CefV8Value] CreateNull()
+	cdef CefRefPtr[CefV8Value] CreateObject(CefRefPtr[CefV8Accessor] accessor)
+	cdef CefRefPtr[CefV8Value] CreateString(CefString& value)
+	# cdef CefRefPtr[CefV8Value] CreateUndefined()
+		
+cdef extern from "include/cef_v8.h" namespace "CefV8Context":
+
+	cdef CefRefPtr[CefV8Context] GetCurrentContext()
+

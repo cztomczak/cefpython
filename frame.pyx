@@ -30,7 +30,7 @@ class PyFrame:
 		# http://code.google.com/p/chromiumembedded/issues/detail?id=203
 		# Entering context should be done for Frame::CallFunction().
 
-		# You must enter CefV8Context before calling PyValueToV8Value().
+		# You must check current context and Enter it if not same, before calling PyValueToV8Value().
 
 		'''TODO: call Frame->GetV8Context?()->GetGlobal?() you get a window object, 
 		now iterate through its all properties and compare to funcName, you get a real javascript 
@@ -192,14 +192,23 @@ class PyFrame:
 
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefRefPtr[CefV8Context] v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
-
+		
 		window = (<CefV8Context*>(v8Context.get())).GetGlobal()
 
 		cdef CefString cefPropertyName
 		name = str(name)
 		PyStringToCefString(name, cefPropertyName)
+
+		cdef cbool sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
 		
+		if not sameContext:
+			if __debug: print("Frame.SetProperty(): different context, calling v8Context.Enter()")
+			assert (<CefV8Context*>(v8Context.get())).Enter(), "v8Context.Enter() failed"
+
 		(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(value, v8Context), V8_PROPERTY_ATTRIBUTE_NONE)
+		
+		if not sameContext:
+			assert (<CefV8Context*>(v8Context.get())).Exit(), "v8Context.Exit() failed"
 
 	def Undo(self):
 

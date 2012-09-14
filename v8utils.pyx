@@ -12,6 +12,8 @@ include "pythoncallback.pyx"
 # http://code.google.com/p/chromiumembedded/issues/detail?id=203
 # Entering context should be done for Frame::CallFunction().
 
+# Arrays, objects and functions may only be created, modified and, in the case of functions, executed, if V8 is inside a context.
+
 cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Context] v8Context, nestingLevel=0):
 
 	# With nestingLevel > 10 we get win32 exceptions.
@@ -82,6 +84,9 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 	else:
 		raise Exception("V8ValueToPyValue() failed: unknown type of CefV8Value.")
 
+# Any function calling PyValueToV8Value must be inside that v8Context,
+# check current context and call Enter if required otherwise exception is 
+# thrown while trying to create an array, object or function.
 
 cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Context] v8Context, nestingLevel=0) except *:
 
@@ -91,9 +96,14 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 		raise Exception("PyValueToV8Value() failed: data passed from Python to Javascript has"
 				" more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
 
+	cdef cbool sameContext
+
 	if __debug:
 		# print("PyValueToV8Value nestingLevel: %s" % nestingLevel)
-		pass
+		sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
+		if not sameContext:
+			raise Exception("PyValueToV8Value() called in wrong v8 context")
+		
 
 	cdef CefString cefString
 	cdef CefRefPtr[CefV8Value] v8Value # not initialized, later we assign using "cef_v8_static.Create...()"

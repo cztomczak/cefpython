@@ -19,6 +19,9 @@ cdef extern from "include/cef_v8.h":
 		CefRefPtr[CefV8Value] GetGlobal()
 		CefRefPtr[CefBrowser] GetBrowser()
 		CefRefPtr[CefFrame] GetFrame()
+		cbool Enter()
+		cbool Exit()
+		cbool IsSame(CefRefPtr[CefV8Context] that)
 
 	ctypedef vector[CefRefPtr[CefV8Value]] CefV8ValueList
 
