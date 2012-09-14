@@ -23,35 +23,41 @@ cdef void V8ContextHandler_OnContextCreated(
 	cdef CefRefPtr[CefV8Handler] v8Handler
 	cdef CefRefPtr[CefV8Value] window
 	cdef CefRefPtr[CefV8Value] func
+	cdef CefRefPtr[CefV8Value] v8Object
 	cdef CefString cefFuncName
 	cdef CefString cefPropertyName
+	cdef CefString cefMethodName
+	cdef CefString cefObjectName
 
 	# See LoadHandler_OnLoadEnd() for the try..except explanation.
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyFrame = GetPyFrameByCefFrame(cefFrame)
 
-		# javascriptBindings is a JavascriptBindings class.
-		javascriptBindings = pyBrowser.GetJavascriptBindings()
-		if not javascriptBindings:
+		# bindings is a JavascriptBindings class.
+		bindings = pyBrowser.GetJavascriptBindings()
+		if not bindings:
 			return
 
-		# jsBindings is a dict.
-		jsBindings = javascriptBindings.GetFunctions()
-		jsProperties = javascriptBindings.GetProperties()
+		# jsFunctions is a dict.
+		jsFunctions = bindings.GetFunctions()
+		jsProperties = bindings.GetProperties()
+		jsObjects = bindings.GetObjects()
 
-		if not jsBindings and not jsProperties:
+		if not jsFunctions and not jsProperties and not jsObjects:
 			return
 
-		# This checks GetBind..() must be also made in OnContextCreated(), so that calling
-		# a non-existent property on window object throws an error.
+		# This checks GetBindToFrames/GetBindToPopups must also be made in both:
+		# FunctionHandler_Execute() and OnContextCreated(), so that calling 
+		# a non-existent  property on window object throws an error.
 
-		if not pyFrame.IsMain() and not javascriptBindings.GetBindToFrames():
+		if not pyFrame.IsMain() and not bindings.GetBindToFrames():
 			return
 
-		# This check is probably not needed, as GetPyBrowserByCefBrowser() will already pass javascriptBindings=None,
+		# This check is probably not needed, as GetPyBrowserByCefBrowser() will already pass bindings=None,
 		# if this is a popup window and bindToPopups is False.
-		if pyBrowser.IsPopup() and not javascriptBindings.GetBindToPopups():
+
+		if pyBrowser.IsPopup() and not bindings.GetBindToPopups():
 			return
 
 		window = (<CefV8Context*>(v8Context.get())).GetGlobal()
@@ -62,18 +68,44 @@ cdef void V8ContextHandler_OnContextCreated(
 				PyStringToCefString(key, cefPropertyName)
 				(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(val, v8Context), V8_PROPERTY_ATTRIBUTE_NONE)
 
-		if jsBindings:
+		if jsFunctions or jsObjects:
+			
 			# CefRefPtr are smart pointers and should release memory automatically for V8FunctionHandler().
 			functionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
 			(<V8FunctionHandler*>(functionHandler.get())).SetContext(v8Context)
 			(<V8FunctionHandler*>(functionHandler.get())).SetCallback_V8Execute(<V8Execute_type>FunctionHandler_Execute)
 			v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(functionHandler.get()))
 
-			for funcName in jsBindings:
+		if jsFunctions:
+
+			for funcName in jsFunctions:
+				
 				funcName = str(funcName)
 				PyStringToCefString(funcName, cefFuncName)
 				func = cef_v8_static.CreateFunction(cefFuncName, v8Handler)
 				(<CefV8Value*>(window.get())).SetValue(cefFuncName, func, V8_PROPERTY_ATTRIBUTE_NONE)
+
+		if jsObjects:
+
+			for objectName in jsObjects:
+
+				# Create V8Value object.
+				v8Object = cef_v8_static.CreateObject(<CefRefPtr[CefV8Accessor]>NULL)
+
+				# Bind that object to window.
+				PyStringToCefString(objectName, cefObjectName)
+				(<CefV8Value*>(window.get())).SetValue(cefObjectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE)
+
+				for methodName in jsObjects[objectName]:
+					
+					# Bind methods to that V8 object.
+					methodName = str(methodName) # methodName = "someMethod"
+					
+					PyStringToCefString(objectName+"."+methodName, cefMethodName) # cefMethodName = "myobject.someMethod"
+					method = cef_v8_static.CreateFunction(cefMethodName, v8Handler)
+
+					PyStringToCefString(methodName, cefMethodName) # cefMethodName = "someMethod"
+					(<CefV8Value*>(v8Object.get())).SetValue(cefMethodName, method, V8_PROPERTY_ATTRIBUTE_NONE)
 
 		# return void
 

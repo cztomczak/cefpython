@@ -1,5 +1,8 @@
 Version 0.41 released on ????.
  * New options in [ApplicationSettings]: auto_detect_proxy_settings_enabled, pack_loading_disabled.
+ * You are allowed to bind all of object methods using [JavascriptBindings].!SetObject() (Issue 4).
+ * You are allowed to rebind javascript bindings using [JavascriptBindings].Rebind() (Issue 12).
+ * New methods to [JavascriptBindings]: !IsValueAllowed(), Rebind(), !SetObject().
 
 Version 0.40 released on 2012-09-11.
  * Problem with F12 keyboard binding, bug in [cefpython].!IsKeyModifier() (thanks to rich770 for help on this).
