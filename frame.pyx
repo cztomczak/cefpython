@@ -191,9 +191,6 @@ class PyFrame:
 			valueType = JavascriptBindings.__IsValueAllowed(value)
 			raise Exception("Frame.SetProperty() failed: name=%s, not allowed type: %s (this may be a type of a nested value)" % (name, valueType))
 		
-		if type(value) == types.InstanceType:
-			raise Exception("Frame.SetProperty() failed: name=%s, you cannot bind instance, to bind this type use JavascriptBindnigs.SetProperty()" % (name))
-
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefRefPtr[CefV8Context] v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
 		
