@@ -48,13 +48,13 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 	elif v8ValuePtr.IsDate():
 		raise Exception("V8ValueToPyValue() failed: Date object is not supported, you are not allowed"
 				"to pass it from Javascript to Python.")
-	elif v8ValuePtr.IsUInt():
-		# Check against uint must be done before IsInt().
-		return v8ValuePtr.GetUIntValue()
 	elif v8ValuePtr.IsInt():
 		# A check against IsInt() must be done before IsDouble(), as any js integer
 		# returns true when calling IsDouble().
 		return v8ValuePtr.GetIntValue()
+	elif v8ValuePtr.IsUInt():
+		# Should be after IsInt() or should be before?
+		return v8ValuePtr.GetUIntValue()
 	elif v8ValuePtr.IsDouble():
 		return v8ValuePtr.GetDoubleValue()
 	elif v8ValuePtr.IsFunction():
@@ -129,6 +129,14 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 		return cef_v8_static.CreateBool(bool(pyValue))
 	elif pyValueType == int:
 		return cef_v8_static.CreateInt(int(pyValue))
+	elif pyValueType == long:
+		# If should probably be "-2147483648"? But when changing to -2147483648 then I'm getting
+		# a C++ warning from Cython: "unary minus operator applied to unsigned type, result still unsigned"
+		if pyValue <= 2147483647 and pyValue >= -2147483647: # int32 in CEF
+			return cef_v8_static.CreateInt(int(pyValue))
+		else:
+			PyStringToCefString(str(pyValue), cefString)
+			return cef_v8_static.CreateString(cefString)
 	elif pyValueType == float:
 		return cef_v8_static.CreateDouble(float(pyValue))
 	elif pyValueType == types.FunctionType or pyValueType == types.MethodType:

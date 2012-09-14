@@ -93,7 +93,7 @@ class PyFrame:
 	def GetProperty(self, name):
 
 		# GetV8Context() requires UI thread.
-		assert CurrentlyOn(TID_UI), "Frame.SetProperty() may only be called on the UI thread"
+		assert CurrentlyOn(TID_UI), "Frame.GetProperty() may only be called on the UI thread"
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefRefPtr[CefV8Context] v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
 		window = (<CefV8Context*>(v8Context.get())).GetGlobal()
@@ -182,6 +182,14 @@ class PyFrame:
 
 		# GetV8Context() requires UI thread.
 		assert CurrentlyOn(TID_UI), "Frame.SetProperty() may only be called on the UI thread"
+		
+		if not JavascriptBindings.IsValueAllowed(value):
+			valueType = JavascriptBindings.__IsValueAllowed(value)
+			raise Exception("Frame.SetProperty() failed: name=%s, not allowed type: %s (this may be a type of a nested value)" % (name, valueType))
+		
+		if type(value) == types.InstanceType:
+			raise Exception("Frame.SetProperty() failed: name=%s, you cannot bind instance, to bind this type use JavascriptBindnigs.SetProperty()" % (name))
+
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefRefPtr[CefV8Context] v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
 

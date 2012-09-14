@@ -17,6 +17,7 @@ import time
 import types
 import re
 import copy
+import inspect # used by JavascriptBindings.__SetObjectMethods()
 
 if sys.version_info.major == 2:
 	from urllib import pathname2url as urllib_pathname2url

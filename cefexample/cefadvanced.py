@@ -11,7 +11,9 @@ import sys
 import re
 import os
 
-__browser = None
+# TODO: creating popup windows from python.
+# TODO: creating modal windows from python.
+# TODO: allow to pack html/css/images to a zip and run content from this file, optionally allow to password protect this zip file (see WBEA implementation).
 
 def CloseApplication(windowID, msg, wparam, lparam):
 
@@ -56,60 +58,36 @@ def CefAdvanced():
 	browserSettings["file_access_from_file_urls_allowed"] = True
 	
 	handlers = dict()
+	
 	# Handler function for LoadHandler may be a tuple.
 	# tuple[0] - the handler to call for the main frame.
 	# tuple[1] - the handler to call for the inner frames (not in popups).
 	# tuple[2] - the handler to call for the popups (only main frame).
-	handlers["OnLoadStart"] = (OnLoadStart, None, OnLoadStart) # Document is ready. Developer tools window is also a popup, so this handler may be called.
-	handlers["OnLoadError"] = OnLoadError
-	handlers["OnKeyEvent"] = (OnKeyEvent, None, OnKeyEvent)
+
+	clientHandler = ClientHandler()
+	handlers["OnLoadStart"] = clientHandler.OnLoadStart
+	handlers["OnLoadEnd"] = (clientHandler.OnLoadEnd, None, clientHandler.OnLoadEnd) # OnLoadEnd = document is ready.
+	handlers["OnLoadError"] = clientHandler.OnLoadError
+	handlers["OnKeyEvent"] = (clientHandler.OnKeyEvent, None, clientHandler.OnKeyEvent)
 
 	# If you want a way to rebind javascript functions later, for example combined with use of Python's reload()
 	# on module, so that you can make changes to app without re-launching application, then see Issue 12
 	# for an example on how to do this: http://code.google.com/p/cefpython/issues/detail?id=12 (test_noreload2.zip).
 
-	bindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
-
-	bindings.SetFunction("PyJavascriptError", PyJavascriptError)
-
-	bindings.SetFunction("PyVersion", PyVersion)
-	bindings.SetFunction("PyTest1", PyTest1)
-	bindings.SetFunction("PyTest2", PyTest2)
-	
+	python = Python()
+	bindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)	
+	bindings.SetFunction("HandleJavascriptError", HandleJavascriptError)
+	bindings.SetFunction("alert", python.Alert) # overwrite "window.alert"
+	bindings.SetObject("python", python)
 	bindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
-	bindings.SetFunction("PrintPyConfig", PrintPyConfig)
-	bindings.SetFunction("ChangePyConfig", ChangePyConfig)
 
-	bindings.SetFunction("TestJavascriptCallback", TestJavascriptCallback)
-	bindings.SetFunction("TestPythonCallbackThroughReturn", TestPythonCallbackThroughReturn)
-	bindings.SetFunction("TestPythonCallbackThroughJavascriptCallback", TestPythonCallbackThroughJavascriptCallback)
-
-	bindings.SetFunction("PyResizeWindow", PyResizeWindow)
-	bindings.SetFunction("PyMoveWindow", PyMoveWindow)
-
-	bindings.SetFunction("alert", PyAlert) # same as: bindings.SetProperty("alert", PyAlert)
-	bindings.SetFunction("ChangeAlertDuringRuntime", ChangeAlertDuringRuntime)
-	bindings.SetFunction("PyFind", PyFind)
-
-	bindings.SetFunction("PyLoadURL", PyLoadURL)
-	bindings.SetFunction("PyExecuteJavascript", PyExecuteJavascript)
-
-	global __browser
-	__browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
+	python.browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
 	print("CefAdvanced(): browser created")
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
-def PyExecuteJavascript(jsCode):
-
-	__browser.GetMainFrame().ExecuteJavascript(jsCode)
-
-def PyLoadURL():
-
-	__browser.GetMainFrame().LoadURL(cefpython.GetRealPath("cefsimple.html"))
-
-def PyJavascriptError(errorMessage, url, lineNumber):
+def HandleJavascriptError(errorMessage, url, lineNumber):
 
 	if re.match(r"file:/+", url):
 		# Get a relative path of the html/js file, get rid of the "file://d:/.../cefpython/".
@@ -119,145 +97,144 @@ def PyJavascriptError(errorMessage, url, lineNumber):
 		url = re.sub(r"^%s" % re.escape(os.sep), "", url)
 	raise Exception("%s\n  in %s on line %s" % (errorMessage, url, lineNumber))
 
-def PyVersion():
+class Python:
 
-	return sys.version
+	browser = None
 
-def PyTest1(arg1):
+	def ExecuteJavascript(self, jsCode):
 
-	print("PyTest1(%s) called" % arg1)
-	return "This string was returned from Python function PyTest1()"
+		self.browser.GetMainFrame().ExecuteJavascript(jsCode)
 
-def PyTest2(arg1, arg2):
+	def LoadURL(self):
 
-	print("PyTest2(%s, %s) called" % (arg1, arg2))
-	return [1,2, [2.1, {'3': 3, '4': [5,6]}]] # testing nested return values.
+		self.browser.GetMainFrame().LoadURL(cefpython.GetRealPath("cefsimple.html"))
 
-def PrintPyConfig():
+	def Version(self):
 
-	print("PrintPyConfig(): %s" % __browser.GetMainFrame().GetProperty("PyConfig"))
+		return sys.version
 
-def ChangePyConfig():
+	def Test1(self, arg1):
 
-	__browser.GetMainFrame().SetProperty("PyConfig", "Changed in python during runtime in ChangePyConfig()")
+		print("python.Test1(%s) called" % arg1)
+		return "This string was returned from python function python.Test1()"
 
-def TestJavascriptCallback(jsCallback):
+	def Test2(self, arg1, arg2):
 
-	if isinstance(jsCallback, cefpython.JavascriptCallback):
-		print("TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName())
-		print("jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'unicode string')")
-		if bytes == str:
-			# Python 2.7
-			jsCallback.Call(1, [2,3], ('tuple', 'tuple'), unicode('unicode string'))
+		print("python.Test2(%s, %s) called" % (arg1, arg2))
+		return [1,2, [2.1, {'3': 3, '4': [5,6]}]] # testing nested return values.
+
+	def PrintPyConfig(self):
+
+		print("python.PrintPyConfig(): %s" % self.browser.GetMainFrame().GetProperty("PyConfig"))
+
+	def ChangePyConfig(self):
+
+		self.browser.GetMainFrame().SetProperty("PyConfig", "Changed in python during runtime in python.ChangePyConfig()")
+
+	def TestJavascriptCallback(self, jsCallback):
+
+		if isinstance(jsCallback, cefpython.JavascriptCallback):
+			print("python.TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName())
+			print("jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'unicode string')")
+			if bytes == str:
+				# Python 2.7
+				jsCallback.Call(1, [2,3], ('tuple', 'tuple'), unicode('unicode string'))
+			else:
+				# Python 3.2 - there is no "unicode()" in python 3
+				jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'bytes string'.encode('utf-8'))
 		else:
-			# Python 3.2 - there is no "unicode()" in python 3
-			jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'bytes string'.encode('utf-8'))
-	else:
-		raise Exception("TestJavascriptCallback() failed: given argument is not a javascript callback function")
+			raise Exception("python.TestJavascriptCallback() failed: given argument is not a javascript callback function")
 
-def TestPythonCallbackThroughReturn():
+	def TestPythonCallbackThroughReturn(self):
 
-	print("TestPythonCallbackThroughReturn() called, returning PyCallback.")
-	return PyCallback
+		print("python.TestPythonCallbackThroughReturn() called, returning PyCallback.")
+		return self.PyCallback
 
-def PyCallback(*args):
+	def PyCallback(self, *args):
 
-	print("PyCallback() called, args: %s" % str(args))
+		print("python.PyCallback() called, args: %s" % str(args))
 
-def TestPythonCallbackThroughJavascriptCallback(jsCallback):
+	def TestPythonCallbackThroughJavascriptCallback(self, jsCallback):
 
-	print("TestPythonCallbackThroughJavascriptCallback(jsCallback) called")
-	print("jsCallback.Call(PyCallback)")
-	jsCallback.Call(PyCallback)
+		print("python.TestPythonCallbackThroughJavascriptCallback(jsCallback) called")
+		print("jsCallback.Call(PyCallback)")
+		jsCallback.Call(self.PyCallback)
 
-def PyAlert(msg):
+	def Alert(self, msg):
 
-	print("PyAlert() called instead of window.alert()")
-	win32gui.MessageBox(__browser.GetWindowID(), msg, "PyAlert()", win32con.MB_ICONQUESTION)
+		print("python.Alert() called instead of window.alert()")
+		win32gui.MessageBox(self.browser.GetWindowID(), msg, "python.Alert()", win32con.MB_ICONQUESTION)
 
-def ChangeAlertDuringRuntime():
+	def ChangeAlertDuringRuntime(self):
 
-	__browser.GetMainFrame().SetProperty("alert", PyAlert2)
+		self.browser.GetMainFrame().SetProperty("alert", self.Alert2)
 
-def PyAlert2(msg):
+	def Alert2(self, msg):
 
-	print("PyAlert2() called instead of window.alert()")
-	win32gui.MessageBox(__browser.GetWindowID(), msg, "PyAlert2()", win32con.MB_ICONWARNING)
+		print("python.Alert2() called instead of window.alert()")
+		win32gui.MessageBox(self.browser.GetWindowID(), msg, "python.Alert2()", win32con.MB_ICONWARNING)
 
-def PyFind(searchText, findNext=False):
+	def Find(self, searchText, findNext=False):
 
-	__browser.Find(1, searchText, forward=True, matchCase=False, findNext=findNext)
+		self.browser.Find(1, searchText, forward=True, matchCase=False, findNext=findNext)
 
-def OnLoadStart(browser, frame):
+	def ResizeWindow(self):
 
-	print("OnLoadStart(): frame URL: %s" % frame.GetURL())
+		cefwindow.MoveWindow(self.browser.GetWindowID(), width=500, height=500)
 
-def OnLoadError(browser, frame, errorCode, failedURL, errorText):
+	def MoveWindow(self):
 
-	print("OnLoadError() failedURL: %s" % (failedURL))
-	errorText[0] = "Custom error message when loading URL fails, see: def OnLoadError()"
-	return True
+		cefwindow.MoveWindow(self.browser.GetWindowID(), xpos=0, ypos=0)
 
-def OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
+	def GetType(self, arg1):
 
-	# print("eventType = %s, keyCode=%s, modifiers=%s, isSystemKey=%s" % (eventType, keyCode, modifiers, isSystemKey))
-	
-	if eventType != cefpython.KEYEVENT_RAWKEYDOWN or isSystemKey:
+		return "arg1=%s, type=%s" % (arg1, type(arg1).__name__)
+
+class ClientHandler:
+
+	def OnLoadStart(self, browser, frame):
+
+		print("OnLoadStart(): frame URL: %s" % frame.GetURL())
+
+	def OnLoadEnd(self, browser, frame, httpStatusCode):
+
+		print("OnLoadEnd(): frame URL: %s" % frame.GetURL())
+
+	def OnLoadError(self, browser, frame, errorCode, failedURL, errorText):
+
+		print("OnLoadError() failedURL: %s" % (failedURL))
+		errorText[0] = "Custom error message when loading URL fails, see: def OnLoadError()"
+		return True
+
+	def OnKeyEvent(self, browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
+
+		# print("eventType = %s, keyCode=%s, modifiers=%s, isSystemKey=%s" % (eventType, keyCode, modifiers, isSystemKey))
+		
+		if eventType != cefpython.KEYEVENT_RAWKEYDOWN or isSystemKey:
+			return False
+
+		# Bind F12 to developer tools.
+		if keyCode == cefpython.VK_F12 and cefpython.IsKeyModifier(cefpython.KEY_NONE, modifiers):
+			browser.ShowDevTools()
+			return True
+
+		# Bind F5 to refresh browser window.
+		if keyCode == cefpython.VK_F5 and cefpython.IsKeyModifier(cefpython.KEY_NONE, modifiers):
+			browser.ReloadIgnoreCache()
+			return True
+
+		# Bind Ctrl(+) to increase zoom level
+		if keyCode in (187, 107) and cefpython.IsKeyModifier(cefpython.KEY_CTRL, modifiers):
+			browser.SetZoomLevel(browser.GetZoomLevel() +1)
+			return True
+
+		# Bind Ctrl(-) to reduce zoom level
+		if keyCode in (189, 109) and cefpython.IsKeyModifier(cefpython.KEY_CTRL, modifiers):
+			browser.SetZoomLevel(browser.GetZoomLevel() -1)
+			return True
+
 		return False
 
-	# Bind F12 to developer tools.
-	if keyCode == cefpython.VK_F12 and cefpython.IsKeyModifier(cefpython.KEY_NONE, modifiers):
-		browser.ShowDevTools()
-		return True
-
-	# Bind F5 to refresh browser window.
-	if keyCode == cefpython.VK_F5 and cefpython.IsKeyModifier(cefpython.KEY_NONE, modifiers):
-		browser.ReloadIgnoreCache()
-		return True
-
-	# Bind Ctrl(+) to increase zoom level
-	if keyCode in (187, 107) and cefpython.IsKeyModifier(cefpython.KEY_CTRL, modifiers):
-		browser.SetZoomLevel(browser.GetZoomLevel() +1)
-		return True
-
-	# Bind Ctrl(-) to reduce zoom level
-	if keyCode in (189, 109) and cefpython.IsKeyModifier(cefpython.KEY_CTRL, modifiers):
-		browser.SetZoomLevel(browser.GetZoomLevel() -1)
-		return True
-
-	return False
-
-def PyResizeWindow():
-
-	cefwindow.MoveWindow(__browser.GetWindowID(), width=500, height=500)
-
-def PyMoveWindow():
-
-	cefwindow.MoveWindow(__browser.GetWindowID(), xpos=0, ypos=0)
-
-def PopupWindow():
-
-	# TODO: creating popup windows through python.
-	pass
-
-def ModalWindow():
-
-	# TODO: creating modal windows throught python.
-	pass
-
-def LoadContentFromZip():
-
-	# TODO. Allow to pack html/css/images to a zip and run content from this file.
-	# Optionally allow to password protect this zip file.
-	pass
-
-def LoadContentFromEncryptedZip():
-
-	# TODO. This will be useful only if you protect your python sources by compiling them
-	# to exe by using for example "pyinstaller", or even better you could compile sources
-	# to a dll-like file called "pyd" by using cython extension, or you could combine them both.
-	# See WBEA for implementation.
-	pass
 
 if __name__ == "__main__":
 	

@@ -46,23 +46,31 @@ cdef cbool FunctionHandler_Execute(
 			pyFrame = GetPyFrameByCefFrame((<CefV8Context*>(v8Context.get())).GetFrame())
 			funcName = CefStringToPyString(cefFuncName)
 
-			javascriptBindings = pyBrowser.GetJavascriptBindings()
-			if not javascriptBindings:
+			bindings = pyBrowser.GetJavascriptBindings()
+			if not bindings:
 				return <cbool>False
 
-			func = javascriptBindings.GetFunction(funcName)
-			if not func:
+			if funcName.find(".") == -1:
+				func = bindings.GetFunction(funcName)
+				if not func:
+					return <cbool>False
+			else:
+				method = funcName.split(".") # "myobject.someMethod"
+				func = bindings.GetObjectMethod(method[0], method[1]) # "myobject", "someMethod"
+				if not func:
+					return <cbool>False
+
+			# This checks GetBindToFrames/GetBindToPopups must also be made in both:
+			# FunctionHandler_Execute() and OnContextCreated(), so that calling 
+			# a non-existent  property on window object throws an error.
+
+			if not pyFrame.IsMain() and not bindings.GetBindToFrames():
 				return <cbool>False
 
-			# This checks GetBind..() must be also made in OnContextCreated(), so that calling
-			# a non-existent property on window object throws an error.
-
-			if not pyFrame.IsMain() and not javascriptBindings.GetBindToFrames():
-				return <cbool>False
-
-			# This check is probably not needed, as GetPyBrowserByCefBrowser() will already pass javascriptBindings=None,
+			# This check is probably not needed, as GetPyBrowserByCefBrowser() will already pass bindings=None,
 			# if this is a popup window and bindToPopups is False.
-			if pyBrowser.IsPopup() and not javascriptBindings.GetBindToPopups():
+
+			if pyBrowser.IsPopup() and not bindings.GetBindToPopups():
 				return <cbool>False
 
 			arguments = []

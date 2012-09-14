@@ -2,11 +2,11 @@
 
 /*global window*/
 
-// Handling javascript errors, calling PyJavascriptError which
+// Handling javascript errors, calling HandleJavascriptError which
 // was binded using javascript bindings, see cefadvanced.py.
 
 window.onerror = function (errorMessage, url, lineNumber)
 {
-	window.PyJavascriptError(errorMessage, url, lineNumber);
+	window.HandleJavascriptError(errorMessage, url, lineNumber);
 	return false;
 };
