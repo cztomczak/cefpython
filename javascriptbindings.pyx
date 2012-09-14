@@ -13,22 +13,18 @@ class JavascriptBindings:
 	__properties = {}
 	__objects = {}
 	
-	# This is the top browser, bindings may be inherited by popups, 
-	# so this JavasvriptBindings instance may be set for other Browser() objects too.
-	__browser = False 
+	# Many browsers may have the same JavascriptBindings object.
+	# __browsers = [] # currently not used, no browser is inserted here.
 	
-	__inheritedPopups = [] # put all popups here as they are created, we need this for rebinding
-	__inheritedFrames = [] # put all frames here as they are created, we need this for rebinding
+	# V8ContextHandler_OnContextCreated inserts frames here that should have javascript bindings,
+	# it is later needed to do rebinding using Rebind() method. All frames are here, the main too,
+	# frames may be from different Browser objects.
+	__frames = {} # frameIdentifier(int64) : tuple(PyBrowser, PyFrame())
 
 	def __init__(self, bindToFrames=False, bindToPopups=False):
 
 		self.__bindToFrames = bindToFrames
 		self.__bindToPopups = bindToPopups
-
-	# Internal.
-	def SetBrowser(self, browser):
-
-		self.__browser = browser
 
 	def GetBindToFrames(self):
 
@@ -67,11 +63,6 @@ class JavascriptBindings:
 
 	def SetProperty(self, name, value):
 
-		if self.__browser:
-			# Rebinding would require doing the same stuff as in V8ContextHandler_OnContextCreated().
-			raise Exception("JavascriptBindings.SetProperty() failed: you cannot call this method after the browser"
-			                " was created, you should call instead: Browser.GetMainFrame().SetProperty().")
-
 		allowed = self.__IsValueAllowed(value) # returns True or string.
 		if allowed is not True:
 			raise Exception("JavascriptBindings.SetProperty() failed: name=%s, not allowed type: %s (this may be a type of a nested value)" % (name, allowed))
@@ -93,13 +84,40 @@ class JavascriptBindings:
 			methods[key] = method
 		self.__objects[name] = methods
 
+	def AddFrame(self, pyBrowser, pyFrame):
+
+		if pyFrame.GetIdentifier() not in self.__frames:
+			self.__frames[pyFrame.GetIdentifier()] = (pyBrowser, pyFrame)
+
 	def Rebind(self):
 		
-		# TODO: call OnContextCreated().
-		# TODO: handle rebinding in all frames and popups.
 		assert CurrentlyOn(TID_UI), "JavascriptBindings.Rebind() may only be called on the UI thread"
-		pass
-	
+
+		cdef CefRefPtr[CefBrowser] cefBrowser
+		cdef CefRefPtr[CefFrame] cefFrame
+		cdef CefRefPtr[CefV8Context] v8Context
+		cdef cbool sameContext
+
+		for frameID in self.__frames:
+			
+			pyBrowser = self.__frames[frameID][0]
+			pyFrame = self.__frames[frameID][1]
+			
+			cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(pyBrowser.GetInnerWindowID()))
+			cefFrame = GetCefFrameByFrameID(CheckFrameID(pyFrame.GetIdentifier()))
+			v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
+
+			sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
+
+			if not sameContext:
+				if __debug: print("JavascriptBindings.Rebind(): different context, calling v8Context.Enter()")
+				assert (<CefV8Context*>(v8Context.get())).Enter(), "v8Context.Enter() failed"
+
+			V8ContextHandler_OnContextCreated(cefBrowser, cefFrame, v8Context)
+
+			if not sameContext:
+				assert (<CefV8Context*>(v8Context.get())).Exit(), "v8Context.Exit() failed"
+
 	def GetProperties(self):
 
 		return self.__properties

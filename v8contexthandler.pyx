@@ -19,6 +19,9 @@ cdef void V8ContextHandler_OnContextCreated(
 			CefRefPtr[CefFrame] cefFrame,
 			CefRefPtr[CefV8Context] v8Context) except * with gil:
 
+	# This handler may also be called by JavascriptBindings.Rebind().
+	# This handler may be called multiple times for the same frame - rebinding.
+
 	cdef CefRefPtr[V8FunctionHandler] functionHandler
 	cdef CefRefPtr[CefV8Handler] v8Handler
 	cdef CefRefPtr[CefV8Value] window
@@ -38,6 +41,12 @@ cdef void V8ContextHandler_OnContextCreated(
 		bindings = pyBrowser.GetJavascriptBindings()
 		if not bindings:
 			return
+
+		if pyFrame.IsMain():
+			bindings.AddFrame(pyBrowser, pyFrame)
+		else:
+			if bindings.GetBindToFrames():
+				bindings.AddFrame(pyBrowser, pyFrame)
 
 		# jsFunctions is a dict.
 		jsFunctions = bindings.GetFunctions()

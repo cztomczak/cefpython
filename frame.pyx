@@ -81,8 +81,12 @@ class PyFrame:
 
 	def GetIdentifier(self):
 
+		return self.frameID
+
+		"""
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		return <long long>((<CefFrame*>(cefFrame.get())).GetIdentifier())
+		"""
 
 	def GetName(self):
 

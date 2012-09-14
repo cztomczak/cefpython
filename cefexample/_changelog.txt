@@ -1,4 +1,4 @@
-Version 0.41 released on ????.
+Version 0.41 released on 2012-09-14.
  * New options in [ApplicationSettings]: auto_detect_proxy_settings_enabled, pack_loading_disabled.
  * You are allowed to bind all of object methods using [JavascriptBindings].!SetObject() (Issue 4).
  * You are allowed to rebind javascript bindings using [JavascriptBindings].Rebind() (Issue 12).

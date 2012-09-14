@@ -188,8 +188,7 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
 	__cefBrowsers[innerWindowID] = cefBrowser
 	__pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, clientHandlers, javascriptBindings)
-	if javascriptBindings:
-		javascriptBindings.SetBrowser(__pyBrowsers[innerWindowID])
+	#if javascriptBindings: javascriptBindings.SetBrowser(__pyBrowsers[innerWindowID])
 	__browserInnerWindows[windowID] = innerWindowID
 
 	return __pyBrowsers[innerWindowID]
