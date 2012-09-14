@@ -452,8 +452,17 @@ class JavascriptBindings:
 	
 	def __init__(self, bindToFrames=False, bindToPopups=False):
 		return None
+
+	def IsValueAllowed(self, value):
+		return False
+
+	def Rebind(self):
+		return None
 	
 	def SetFunction(self, name, func):
+		return None
+
+	def SetObject(self, name, obj):
 		return None
 
 	def SetProperty(self, name, value):
