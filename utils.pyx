@@ -24,6 +24,11 @@ def CurrentlyOn(threadID):
 
 cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreError=False):
 
+	# This function is immediately called after frame or popup are created,
+	# as we implemented V8ContextHandler_OnContextCreated() which calls it,
+	# same for GetPyFrameByCefFrame(). This way PyBrowser() and PyFrame()
+	# are automatically being created.
+
 	global __popupPyBrowsers
 	global __pyBrowsers
 
