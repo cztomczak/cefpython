@@ -38,9 +38,17 @@ class JavascriptBindings:
 
 		self.SetProperty(name, func)
 
-	def SetObject(self, name, object):
+	def SetObject(self, name, obj):
 
-		self.SetProperty(name, object)
+		if not hasattr(obj, "__class__"):
+			raise Exception("JavascriptBindings.SetObject() failed: name=%s, __class__ attribute missing, this is not an object" % name)
+		
+		methods = {}
+		for value in inspect.getmembers(obj, predicate=inspect.ismethod):
+			key = value[0]
+			method = value[1]
+			methods[key] = method
+		self.__objects[name] = methods
 
 	def GetFunction(self, name):
 
@@ -70,19 +78,8 @@ class JavascriptBindings:
 		valueType = type(value)
 		if valueType == types.FunctionType or valueType == types.MethodType:
 			self.__functions[name] = value
-		elif valueType == types.InstanceType:
-			self.__SetObjectMethods(name, value)
 		else:
-			self.__properties[name] = value
-
-	def __SetObjectMethods(self, name, obj):
-
-		methods = {}
-		for value in inspect.getmembers(obj, predicate=inspect.ismethod):
-			key = value[0]
-			method = value[1]
-			methods[key] = method
-		self.__objects[name] = methods
+			self.__properties[name] = value	
 
 	def AddFrame(self, pyBrowser, pyFrame):
 
@@ -131,7 +128,7 @@ class JavascriptBindings:
 	def __IsValueAllowed(value, recursion=False) :
 
 		# !! When making changes here also check: Frame.SetProperty() 
-		#    as it checks for FunctionType, MethodType and InstanceType.
+		#    as it checks for FunctionType, MethodType.
 		
 		# - Return value: True - allowed, string - not allowed
 		# - Not using type().__name__ here as it is not consistent, for int it is "int" but for None it is "NoneType".
@@ -152,11 +149,6 @@ class JavascriptBindings:
 		elif valueType == type(None):
 			return True
 		elif valueType == types.FunctionType or valueType == types.MethodType:
-			if recursion:
-				return valueType.__name__
-			else:
-				return True
-		elif valueType == types.InstanceType: # binding object (its methods and properties)
 			if recursion:
 				return valueType.__name__
 			else:
