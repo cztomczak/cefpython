@@ -6,25 +6,14 @@ import cefpython # cefpython.pyd
 import cefwindow
 import win32con # pywin32 extension
 import win32gui
-import win32api
 import sys
 import re
 import os
+import imp
 
 # TODO: creating popup windows from python.
 # TODO: creating modal windows from python.
 # TODO: allow to pack html/css/images to a zip and run content from this file, optionally allow to password protect this zip file (see WBEA implementation).
-
-def CloseApplication(windowID, msg, wparam, lparam):
-
-	browser = cefpython.GetBrowserByWindowID(windowID)
-	browser.CloseBrowser()
-	return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
-
-def QuitApplication(windowID, msg, wparam, lparam):
-
-	win32gui.PostQuitMessage(0)
-	return 0
 
 def CefAdvanced():
 
@@ -40,7 +29,6 @@ def CefAdvanced():
 
 	# ApplicationSettings, see: http://code.google.com/p/cefpython/wiki/ApplicationSettings
 	appSettings = dict()
-	appSettings["multi_threaded_message_loop"] = False
 	appSettings["log_file"] = cefpython.GetRealPath("debug.log")
 	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
 	cefpython.Initialize(applicationSettings=appSettings)
@@ -52,7 +40,8 @@ def CefAdvanced():
 		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
 		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
 	}
-	windowID = cefwindow.CreateWindow("CefAdvanced", "cefadvanced", 800, 600, None, None, "icon.ico", wndproc)
+	windowID = cefwindow.CreateWindow(title="CefAdvanced", className="cefadvanced", 
+		width=800, height=600, icon="icon.ico", windowProc=wndproc)
 
 	# BrowserSettings, see: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings = dict() 
@@ -77,18 +66,65 @@ def CefAdvanced():
 	# on module, so that you can make changes to app without re-launching application, then see Issue 12
 	# for an example on how to do this: http://code.google.com/p/cefpython/issues/detail?id=12 (test_noreload2.zip).
 
-	python = Python()
-	bindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)	
-	bindings.SetFunction("HandleJavascriptError", HandleJavascriptError)
-	bindings.SetFunction("alert", python.Alert) # overwrite "window.alert"
-	bindings.SetObject("python", python)
-	bindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
-
-	python.browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, bindings)
-	print("CefAdvanced(): browser created")
+	cefBindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
+	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, cefBindings)
+	
+	jsBindings = JSBindings(cefBindings, browser)
+	jsBindings.Bind()
+	browser.jsBindings = jsBindings
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
+
+def CloseApplication(windowID, msg, wparam, lparam):
+
+	browser = cefpython.GetBrowserByWindowID(windowID)
+	browser.CloseBrowser()
+	return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
+
+def QuitApplication(windowID, msg, wparam, lparam):
+
+	win32gui.PostQuitMessage(0)
+	return 0
+
+class JSBindings:
+
+	cefBindings = None
+	browser = None
+
+	def __init__(self, cefBindings, browser):
+
+		self.cefBindings = cefBindings
+		self.browser = browser
+
+	def Bind(self):
+
+		# These bindings are rebinded when pressing F5 (this is not useful for the main module as it can't be reloaded).
+
+		python = Python()
+		python.browser = self.browser
+
+		self.cefBindings.SetFunction("HandleJavascriptError", HandleJavascriptError)
+		self.cefBindings.SetFunction("alert", python.Alert) # overwrite "window.alert"
+		self.cefBindings.SetObject("python", python)
+		self.cefBindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
+
+	def Rebind(self):
+
+		# Reload all modules, next rebind javascript bindings.
+		# Called from: OnKeyEvent > F5.
+
+		for mod in sys.modules.values():
+			if mod and mod.__name__ != "__main__": 
+				try:
+					imp.reload(mod)
+				except:
+					print("WARNING: reloading module failed: %s" % mod.__name__)
+
+		sys.excepthook = cefpython.ExceptHook # sys module was reloaded, need to set exception handler again.
+		self.Bind()
+		self.cefBindings.Rebind()
+		# print("cefwindow.test=%s" % cefwindow.test)
 
 def HandleJavascriptError(errorMessage, url, lineNumber):
 
@@ -222,8 +258,10 @@ class ClientHandler:
 			return True
 
 		# Bind F5 to refresh browser window.
+		# Also reload all modules and rebind javascript bindings.
 		if keyCode == cefpython.VK_F5 and cefpython.IsKeyModifier(cefpython.KEY_NONE, modifiers):
-			browser.ReloadIgnoreCache()
+			browser.jsBindings.Rebind()
+			browser.ReloadIgnoreCache() # this is not required, rebinding will work without refreshing page.
 			return True
 
 		# Bind Ctrl(+) to increase zoom level
