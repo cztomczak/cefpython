@@ -11,6 +11,8 @@ import re
 import os
 import imp
 
+DEBUG = True
+
 # TODO: creating popup windows from python.
 # TODO: creating modal windows from python.
 # TODO: allow to pack html/css/images to a zip and run content from this file, optionally allow to password protect this zip file (see WBEA implementation).
@@ -20,12 +22,10 @@ def CefAdvanced():
 	# This hook does the following: in case of exception display it, write to error.log, shutdown CEF and exit application.
 	sys.excepthook = cefpython.ExceptHook 
 	
-	# Whether to print debug output to console. It is advised to set this to True while developing application,
-	# it is not only printing to output console, it also makes some additional error checking that may go 
-	# unnoticed otherwise, for example in debug mode it always checks whether V8 objects are created in
-	# proper context, if created in wrong context it could result in application crash.
-	cefpython.__debug = True
-	cefwindow.__debug = True 	
+	# Whether to print debug output to console.
+	if DEBUG:
+		cefpython.__debug = True
+		cefwindow.__debug = True 	
 
 	# ApplicationSettings, see: http://code.google.com/p/cefpython/wiki/ApplicationSettings
 	appSettings = dict()
@@ -61,10 +61,6 @@ def CefAdvanced():
 	handlers["OnLoadEnd"] = (clientHandler.OnLoadEnd, None, clientHandler.OnLoadEnd) # OnLoadEnd = document is ready.
 	handlers["OnLoadError"] = clientHandler.OnLoadError
 	handlers["OnKeyEvent"] = (clientHandler.OnKeyEvent, None, clientHandler.OnKeyEvent)
-
-	# If you want a way to rebind javascript functions later, for example combined with use of Python's reload()
-	# on module, so that you can make changes to app without re-launching application, then see Issue 12
-	# for an example on how to do this: http://code.google.com/p/cefpython/issues/detail?id=12 (test_noreload2.zip).
 
 	cefBindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
 	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, cefBindings)
@@ -111,17 +107,26 @@ class JSBindings:
 
 	def Rebind(self):
 
-		# Reload all modules, next rebind javascript bindings.
+		# Reload all application modules, next rebind javascript bindings.
 		# Called from: OnKeyEvent > F5.
+
+		currentDir = cefpython.GetRealPath()
 
 		for mod in sys.modules.values():
 			if mod and mod.__name__ != "__main__": 
-				try:
-					imp.reload(mod)
-				except:
-					print("WARNING: reloading module failed: %s" % mod.__name__)
+				if hasattr(mod, "__file__") and mod.__file__.find(currentDir) != -1: # this module resides in app's directory.
+					try:
+						imp.reload(mod)
+						if DEBUG:
+							print("Reloaded module: %s" % mod.__name__)
+					except Exception, exc:
+						print("WARNING: reloading module failed: %s. Exception: %s" % (mod.__name__, exc))
 
-		sys.excepthook = cefpython.ExceptHook # sys module was reloaded, need to set exception handler again.
+		if DEBUG:
+			# These modules have been reloaded, we need to set debug variables again.
+			cefpython.__debug = True
+			cefwindow.__debug = True
+
 		self.Bind()
 		self.cefBindings.Rebind()
 		# print("cefwindow.test=%s" % cefwindow.test)
@@ -233,15 +238,17 @@ class ClientHandler:
 
 	def OnLoadStart(self, browser, frame):
 
-		print("OnLoadStart(): frame URL: %s" % frame.GetURL())
+		# print("OnLoadStart(): frame URL: %s" % frame.GetURL())
+		pass
 
 	def OnLoadEnd(self, browser, frame, httpStatusCode):
 
-		print("OnLoadEnd(): frame URL: %s" % frame.GetURL())
+		# print("OnLoadEnd(): frame URL: %s" % frame.GetURL())
+		pass
 
 	def OnLoadError(self, browser, frame, errorCode, failedURL, errorText):
 
-		print("OnLoadError() failedURL: %s" % (failedURL))
+		# print("OnLoadError() failedURL: %s" % (failedURL))
 		errorText[0] = "Custom error message when loading URL fails, see: def OnLoadError()"
 		return True
 
