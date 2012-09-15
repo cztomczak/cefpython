@@ -5,18 +5,7 @@ import cefpython
 import cefwindow
 import win32con
 import win32gui
-import win32api
 import sys
-import os
-
-def CloseApplication(windowID, message, wparam, lparam):
-	browser = cefpython.GetBrowserByWindowID(windowID)
-	browser.CloseBrowser()
-	return win32gui.DefWindowProc(windowID, message, wparam, lparam)
-
-def QuitApplication(windowID, message, wparam, lparam):
-	win32gui.PostQuitMessage(0)
-	return 0
 
 def CefSimple():
 	sys.excepthook = cefpython.ExceptHook
@@ -33,6 +22,15 @@ def CefSimple():
 	browser = cefpython.CreateBrowser(windowID, browserSettings={}, navigateURL="cefsimple.html")
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
+
+def CloseApplication(windowID, message, wparam, lparam):
+	browser = cefpython.GetBrowserByWindowID(windowID)
+	browser.CloseBrowser()
+	return win32gui.DefWindowProc(windowID, message, wparam, lparam)
+
+def QuitApplication(windowID, message, wparam, lparam):
+	win32gui.PostQuitMessage(0)
+	return 0
 
 if __name__ == "__main__":
 	CefSimple()
