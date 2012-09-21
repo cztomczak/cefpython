@@ -20,6 +20,10 @@ cdef extern from "include/internal/cef_types.h":
 	ctypedef long long int64
 
 	# LoadHandler > OnLoadError - ErrorCode.
+	
+	# Some of the constants are missing, for an up to date list see:
+	# http://src.chromium.org/viewvc/chrome/trunk/src/net/base/net_error_list.h?view=markup
+
 	cdef enum cef_handler_errorcode_t:
 		ERR_FAILED = -2,
 		ERR_ABORTED = -3,
