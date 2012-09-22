@@ -61,6 +61,7 @@ def CefAdvanced():
 	handlers["OnLoadEnd"] = (clientHandler.OnLoadEnd, None, clientHandler.OnLoadEnd) # OnLoadEnd = document is ready.
 	handlers["OnLoadError"] = clientHandler.OnLoadError
 	handlers["OnKeyEvent"] = (clientHandler.OnKeyEvent, None, clientHandler.OnKeyEvent)
+	handlers["OnConsoleMessage"] = clientHandler.OnConsoleMessage
 
 	cefBindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
 	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, cefBindings)
@@ -281,6 +282,16 @@ class ClientHandler:
 			browser.SetZoomLevel(browser.GetZoomLevel() -1)
 			return True
 
+		return False
+
+	def OnConsoleMessage(self, browser, message, source, line):
+
+		appdir = cefpython.GetRealPath().replace("\\", "/")
+		if appdir[1] == ":": 
+			appdir = appdir[0].upper() + appdir[1:]
+		source = source.replace("file:///", "")
+		source = source.replace(appdir, "")
+		print("Console message: %s (%s:%s)\n" % (message, source, line));
 		return False
 
 
