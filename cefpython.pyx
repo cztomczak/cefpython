@@ -261,6 +261,8 @@ def IsKeyModifier(key, modifiers):
 
 def GetJavascriptStackTrace(frameLimit=100):
 
+	assert CurrentlyOn(TID_UI), "cefpython.GetJavascriptStackTrace() may only be called on the UI thread"
+
 	cdef CefRefPtr[CefV8StackTrace] cefTrace = cef_v8_stack.GetCurrent(int(frameLimit))
 	cdef int frameCount = (<CefV8StackTrace*>(cefTrace.get())).GetFrameCount()
 	cdef CefRefPtr[CefV8StackFrame] cefFrame
