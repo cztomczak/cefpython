@@ -17,6 +17,12 @@ def ExceptHook(type, value, traceObject):
 def GetBrowserByWindowID(windowID):
 	return Browser()
 
+def GetJavascriptStackTrace(frameLimit=100):
+	return []
+
+def GetJavascriptStackTraceFormatted(frameLimit=100):
+	return ""
+
 def GetRealPath(file=None, encodeURL=False):
 	return ""
 
