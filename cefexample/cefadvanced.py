@@ -140,7 +140,8 @@ def HandleJavascriptError(errorMessage, url, lineNumber):
 		url = re.sub(r"[/\\]+", re.escape(os.sep), url)
 		url = re.sub(r"%s" % re.escape(cefpython.GetRealPath()), "", url, flags=re.IGNORECASE)
 		url = re.sub(r"^%s" % re.escape(os.sep), "", url)
-	raise Exception("%s\n  in %s on line %s" % (errorMessage, url, lineNumber))
+	stackTrace = cefpython.GetJavascriptStackTraceFormatted()
+	raise Exception("%s\n in %s on line %s\n\n%s" % (errorMessage, url, lineNumber, stackTrace))
 
 class Python:
 
@@ -291,6 +292,9 @@ class ClientHandler:
 			appdir = appdir[0].upper() + appdir[1:]
 		source = source.replace("file:///", "")
 		source = source.replace(appdir, "")
+		#if (message.lower().find("error") != -1): # DOESN'T WORK, stack trace is empty in this context.
+			#stackTrace = cefpython.GetJavascriptStackTraceFormatted()
+			#raise Exception("%s\n in %s on line %s\n\n%s" % (message, source, line, stackTrace))
 		print("Console message: %s (%s:%s)\n" % (message, source, line));
 		return False
 

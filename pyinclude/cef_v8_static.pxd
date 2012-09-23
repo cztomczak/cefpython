@@ -11,12 +11,10 @@ from cef_v8 cimport CefV8Context
 from cef_base cimport CefBase
 from libcpp cimport bool as cbool
 
-# Importing static methods.
-# This is in a separate file as we do not want these names to be imported
-# into global namespace, you will be using them like this:
-#
-# cimport cef_v8_static
-# cef_v8_static.CreateArray()
+# Importing static methods only in this file. This is in a separate file as we do not want 
+# these names to be imported into global namespace, you will be using them like this:
+# > cimport cef_v8_static
+# > cef_v8_static.CreateArray()
 
 cdef extern from "include/cef_v8.h" namespace "CefV8Value":
 
