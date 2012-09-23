@@ -258,3 +258,34 @@ def IsKeyModifier(key, modifiers):
 		return ((KEY_SHIFT  | KEY_CTRL | KEY_ALT) & modifiers) == 0
 		# Same as: return (KEY_CTRL & modifiers) != KEY_CTRL and (KEY_ALT & modifiers) != KEY_ALT and (KEY_SHIFT & modifiers) != KEY_SHIFT
 	return (key & modifiers) == key
+
+def GetJavascriptStackTrace(frameLimit=100):
+
+	cdef CefRefPtr[CefV8StackTrace] cefTrace = cef_v8_stack.GetCurrent(int(frameLimit))
+	cdef int frameCount = (<CefV8StackTrace*>(cefTrace.get())).GetFrameCount()
+	cdef CefRefPtr[CefV8StackFrame] cefFrame
+	cdef CefV8StackFrame* framePtr
+	pyTrace = []
+
+	for frameNo in range(0, frameCount):
+		cefFrame = (<CefV8StackTrace*>(cefTrace.get())).GetFrame(frameNo)
+		framePtr = <CefV8StackFrame*>(cefFrame.get())
+		pyFrame = {}		
+		pyFrame["script"] = CefStringToPyString(framePtr.GetScriptName())
+		pyFrame["scriptOrSourceURL"] = CefStringToPyString(framePtr.GetScriptNameOrSourceURL())
+		pyFrame["function"] = CefStringToPyString(framePtr.GetFunctionName())
+		pyFrame["line"] = framePtr.GetLineNumber()
+		pyFrame["column"] = framePtr.GetColumn()
+		pyFrame["isEval"] = framePtr.IsEval()
+		pyFrame["isConstructor"] = framePtr.IsConstructor()
+		pyTrace.append(pyFrame)
+	
+	return pyTrace
+
+def GetJavascriptStackTraceFormatted(frameLimit=100):
+
+	trace = GetJavascriptStackTrace(frameLimit)
+	formatted = "Stack trace:\n"
+	for frameNo, frame in enumerate(trace):
+		formatted += "\t[%s] %s() in %s on line %s (col:%s)\n" % (frameNo, frame["function"], frame["scriptOrSourceURL"], frame["line"], frame["column"])
+	return formatted

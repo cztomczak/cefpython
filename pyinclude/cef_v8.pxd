@@ -79,12 +79,18 @@ cdef extern from "include/cef_v8.h":
 		CefRefPtr[CefV8Exception] GetException()
 		cbool ClearException()
 
-	cdef cppclass CefV8StackTrace(CefBase):		
-		pass
+	cdef cppclass CefV8StackTrace(CefBase):
+		
+		int GetFrameCount()
+		CefRefPtr[CefV8StackFrame] GetFrame(int index)
 
 	cdef cppclass CefV8StackFrame(CefBase):
-		pass
-
-
-
+		
+		CefString GetScriptName()
+		CefString GetScriptNameOrSourceURL()
+		CefString GetFunctionName()
+		int GetLineNumber()
+		int GetColumn()
+		cbool IsEval()
+		cbool IsConstructor()
 

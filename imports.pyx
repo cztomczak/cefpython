@@ -61,6 +61,7 @@ cimport cef_types # cannot cimport *, that would cause name conflicts with const
 cimport cef_types_win # same as cef_types.
 from cef_v8 cimport *
 cimport cef_v8_static
+cimport cef_v8_stack
 from v8functionhandler cimport *
 from cef_request cimport *
 from cef_response cimport *
