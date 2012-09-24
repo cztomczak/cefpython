@@ -62,6 +62,7 @@ def CefAdvanced():
 	handlers["OnLoadError"] = clientHandler.OnLoadError
 	handlers["OnKeyEvent"] = (clientHandler.OnKeyEvent, None, clientHandler.OnKeyEvent)
 	handlers["OnConsoleMessage"] = clientHandler.OnConsoleMessage
+	handlers["OnResourceResponse"] = clientHandler.OnResourceResponse
 
 	cefBindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
 	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, cefBindings)
@@ -140,8 +141,8 @@ def HandleJavascriptError(errorMessage, url, lineNumber):
 		url = re.sub(r"[/\\]+", re.escape(os.sep), url)
 		url = re.sub(r"%s" % re.escape(cefpython.GetRealPath()), "", url, flags=re.IGNORECASE)
 		url = re.sub(r"^%s" % re.escape(os.sep), "", url)
-	stackTrace = cefpython.GetJavascriptStackTraceFormatted()
-	raise Exception("%s\n in %s on line %s\n\n%s" % (errorMessage, url, lineNumber, stackTrace))
+	# stackTrace = cefpython.GetJavascriptStackTraceFormatted() # Getting stack trace from window.onerror context doesn't work.
+	raise Exception("%s\n in %s on line %s\n\n" % (errorMessage, url, lineNumber))
 
 class Python:
 
@@ -292,11 +293,16 @@ class ClientHandler:
 			appdir = appdir[0].upper() + appdir[1:]
 		source = source.replace("file:///", "")
 		source = source.replace(appdir, "")
-		#if (message.lower().find("error") != -1): # DOESN'T WORK, stack trace is empty in this context.
+		#if (message.lower().find("error") != -1): # Doesn't work, stack trace is empty in this context.
 			#stackTrace = cefpython.GetJavascriptStackTraceFormatted()
 			#raise Exception("%s\n in %s on line %s\n\n%s" % (message, source, line, stackTrace))
 		print("Console message: %s (%s:%s)\n" % (message, source, line));
 		return False
+
+	def OnResourceResponse(self, browser, url, response, filter):
+
+		# This function does not get called for local disk sources (file:///).
+		print("Resource: %s (status=%s)" % (url, response.GetStatus()))
 
 
 if __name__ == "__main__":

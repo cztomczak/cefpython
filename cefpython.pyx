@@ -47,6 +47,7 @@ include "v8utils.pyx"
 include "javascriptcallback.pyx"
 include "pythoncallback.pyx"
 include "requesthandler.pyx"
+include "response.pyx"
 include "displayhandler.pyx"
 
 # Client handler.
