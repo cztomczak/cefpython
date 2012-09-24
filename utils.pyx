@@ -116,11 +116,6 @@ cdef object GetPyStreamReaderByCefStreamReader(CefRefPtr[CefStreamReader] cefStr
 	# TODO: not yet implemented.
 	return None
 
-cdef object GetPyResponseByCefResponse(CefRefPtr[CefResponse] cefResponse):
-
-	# TODO: not yet implemented.
-	return None
-
 cdef object GetPyContentFilterByCefContentFilter(CefRefPtr[CefContentFilter] cefContentFilter):
 
 	# TODO: not yet implemented.
@@ -255,18 +250,32 @@ cdef object CefStringToPyString(CefString& cefString):
 
 cdef void PyStringToCefString(pyString, CefString& cefString) except *:
 	
-	if bytes == str:
+	if bytes == str: 
+		# Python 2.7
+		if pyString == unicode:
+			pyString = pyString.encode(__applicationSettings["unicode_to_bytes_encoding"])
 		cefString.FromASCII(<char*>pyString) # Python 2.7
-	else:
-		# In python 3 bytes and str are different types.
-		bytesString = pyString.encode("utf-8") # Python 3 requires bytes before converting to char*
+	else: 
+		# Python 3
+		# Python 3 requires bytes before converting to char*
+		if pyString == bytes:
+			bytesString = pyString
+		else:
+			bytesString = pyString.encode("utf-8")	
 		cefString.FromASCII(<char*>bytesString)
 
 cdef void PyStringToCefStringPtr(pyString, CefString* cefString) except *:
 	
 	if bytes == str:
-		cefString.FromASCII(<char*>pyString) # Python 2.7
+		# Python 2.7
+		if pyString == unicode:
+			pyString = pyString.encode(__applicationSettings["unicode_to_bytes_encoding"])
+		cefString.FromASCII(<char*>pyString)
 	else:
-		# In python 3 bytes and str are different types.
-		bytesString = pyString.encode("utf-8") # Python 3 requires bytes before converting to char*
+		# Python 3
+		# Python 3 requires bytes before converting to char*
+		if pyString == bytes:
+			bytesString = pyString
+		else:
+			bytesString = pyString.encode("utf-8")	
 		cefString.FromASCII(<char*>bytesString)

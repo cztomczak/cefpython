@@ -705,3 +705,33 @@ class Frame:
 		return None
 	"""
 
+class Response:
+
+	def GetStatus(self):
+		return 0
+
+	def SetStatus(self, status):
+		return None
+
+	def GetStatusText(self):
+		return ""
+
+	def SetStatusText(self, statusText):
+		return None
+
+	def GetMimeType(self):
+		return ""
+
+	def SetMimeType(self, mimeType):
+		return None
+
+	def GetHeader(self, name):
+		return ""
+
+	"""
+	def GetHeaderMap(self):
+		return [("","")]
+
+	def SetHeaderMap(self, headerMap):
+		return None
+	"""

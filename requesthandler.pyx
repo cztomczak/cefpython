@@ -58,7 +58,7 @@ cdef public cbool RequestHandler_OnBeforeResourceLoad(
 		pyRequest = GetPyRequestByCefRequest(cefRequest)
 		pyRedirectURL = [""]
 		pyResourceStream = GetPyStreamReaderByCefStreamReader(cefResourceStream)
-		pyResponse = GetPyResponseByCefResponse(cefResponse)
+		pyResponse = None
 
 		handler = pyBrowser.GetClientHandler("OnBeforeResourceLoad")
 		if handler:
@@ -102,13 +102,10 @@ cdef public void RequestHandler_OnResourceResponse(
 		CefRefPtr[CefResponse] cefResponse,
 		CefRefPtr[CefContentFilter]& cefFilter) except * with gil:
 
-	# TODO: not yet implemented.
-	return
-
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyURL = CefStringToPyString(cefURL)
-		pyResponse = GetPyResponseByCefResponse(cefResponse)
+		pyResponse = CreatePyResponse(cefResponse)
 		pyFilter = None # TODO.
 
 		handler = pyBrowser.GetClientHandler("OnResourceResponse")

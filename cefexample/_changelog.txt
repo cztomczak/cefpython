@@ -3,6 +3,7 @@ Version 0.42 not yet released.
  * en-US locale was outdated, came from revision `607`, locales/ directory contains all locales now, the default one is "en-US", others are optional and do not need to be distributed.
  * !OnConsoleMessage example added to cefadvanced.py
  * You can now get javascript stack trace, see: [cefpython].!GetJavascriptStackTrace() and [cefpython].!GetJavascriptStackTraceFormatted().
+ * Implemented [RequestHandler].OnResourceResponse(), example added to cefadvanced.py
 
 Version 0.41 released on 2012-09-14.
  * New options in [ApplicationSettings]: auto_detect_proxy_settings_enabled, pack_loading_disabled.
