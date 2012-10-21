@@ -1,0 +1,8 @@
+- Get rid of mutable arguments:
+	PyBrowser.__init__
+	Initialize()
+
+- Global variables should not use "__" prefix, as it is not
+	allowed to use such variables from inside classes.
+	Use g_ prefix or capitalize, so that "__applicationSettings"
+	becomes "ApplicationSettings" or "g_applicationSettings".
