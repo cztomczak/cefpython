@@ -1,0 +1,15 @@
+
+utils.pyx > GetPyBrowserByCefBrowser() > Popups:
+
+	# Should we pass handlers from the parent? {} - empty right now.
+	# Add a new parameter in CreateBrowser() called "popupsInheritHandlers"?
+	# Or maybe just an another dict "popupHandlers"? User could pass the same
+	# handlers dictionary to both parameters.
+
+	# What about popups created by popups? How do we do the inheritance in this case?
+
+browser.pyx > CloseBrowser()
+
+	Commented out CefBrowser.CloseBrowser()  to fix (maybe?) the memory read errors
+	when closing application window. But CefBrowser.CloseBrowser() needs to be called
+	for popup windows...?

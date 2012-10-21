@@ -1,0 +1,84 @@
+Version 0.42 not yet released.
+ * Rebind/reload example added to cefadvanced.py.
+ * en-US locale was outdated, came from revision `607`, locales/ directory contains all locales now, the default one is "en-US", others are optional and do not need to be distributed.
+ * !OnConsoleMessage example added to cefadvanced.py
+ * You can now get javascript stack trace, see: [cefpython].!GetJavascriptStackTrace() and [cefpython].!GetJavascriptStackTraceFormatted().
+ * Implemented [RequestHandler].!OnResourceResponse(), example added to cefadvanced.py
+
+Version 0.41 released on 2012-09-14.
+ * New options in [ApplicationSettings]: auto_detect_proxy_settings_enabled, pack_loading_disabled.
+ * You are allowed to bind all of object methods using [JavascriptBindings].!SetObject() (Issue 4).
+ * You are allowed to rebind javascript bindings using [JavascriptBindings].Rebind() (Issue 12).
+ * New methods to [JavascriptBindings]: !IsValueAllowed(), Rebind(), !SetObject().
+
+Version 0.40 released on 2012-09-11.
+ * Problem with F12 keyboard binding, bug in [cefpython].!IsKeyModifier() (thanks to rich770 for help on this).
+ * Created dummy script with full API: "cefpython.py" - use it as a quick reference or for code completion in your IDE.
+
+Version 0.39 released on 2012-09-10.
+ * New methods to [Browser] object: !SetZoomLevel(), !GetJavascriptBindings(), !GetClientHandlers(), !GetClientHandler(), GetInnerWindowID(), !StopFinding(), !IsWindowRenderingDisabled().
+ * New methods to [Frame] object: Undo(), Redo(), Cut(), Copy(), Paste(), Delete(), !SelectAll(), Print(), !ViewSource(), !GetSource(), !GetText(), !LoadString(), !IsFocused(), !GetName().
+ * New function added: [cefpython].!IsKeyModifier(), for use with [KeyboardHandler] (thanks to rich770 for explaining how modifiers work).
+
+Version 0.38 released on 2012-09-04.
+ * Fixed crash when exiting app (Issue 2), you can now remove the call to os.kill() after cefpython.Shutdown() (thanks to Cjjer for help on debugging this bug).
+ * Fixed url error when application path contained chinese characters, see the updated documentation for [cefpython].!GetRealPath().
+ * CEF updated to `revision 750`.
+ * Included Chrome version 21.
+ * BrowserSettings: new option "animation_frame_rate", removed option "threaded_compositing_enabled".
+ * KeyboardHandler: added constants cefpython.KEY_SHIFT (KEY_ALT and others) to check against |modifiers| parameter.
+
+Version 0.37 released on 2012-08-30.
+ * [DisplayHandler] implemented.
+ * Popups have window titles set, also icons are inherited from parent window (Issue 3).
+
+Version 0.36 released on 2012-08-29.
+ * Support for Http Authentication (Issue 8).
+ * [RequestHandler] is now partially implemented.
+ * Support for unicode strings and tuples when passing data to javascript (Issue 10). There is a new option in [ApplicationSettings] "unicode_to_bytes_string" that is used when converting unicode string to bytes string. 
+
+Version 0.35 released on 2012-08-23.
+ * Fixed a bug that caused retrieving garbage data when passing an empty string from JS to Python (Issue 7).
+ * Fixed windows 2003 error when closing window, LoadHandler_OnLoadEnd was still called, but browser was already destroyed.
+ * !CreateBrowser() did not work for http:// urls, this was a bug in GetRealPath() introduced in version 0.33.
+ * Changes in !CloseApplication() in cefadvanced.py and cefsimple.py - must return win32gui.!DefWindowProc().
+ 
+Version 0.33 released on 2012-08-19.
+ * New function exposed: Frame.LoadURL()
+ * Fixed bug in: Frame.ExecuteJavascript()
+ * Javascript error handling example
+ * New function exposed: cefpython.SingleMessageLoop(), allows to integrate with existing application's message loop, see [PyGTK] example.
+ * Fix to detection of infinite recursion in javascript bindings.
+ * Improved detection of current directory when passing path to html file or icon, try cefpython.GetRealPath(file) or cefpython.GetRealPath() to get current dir.
+
+Version 0.30 released on 2012-07-15.
+ * Implemented JavascriptBindings.
+ * Implemented JavascriptCallback.
+ * Implemented Python callbacks as arguments/return value to javascript functions.
+ * Frame.!GetProperty()/!SetProperty().
+ * Fixed application error when closing main window (Issue 2).
+
+Version 0.26 released on 2012-07-08.
+ * Implemented KeyboardHandler
+ * cefadvanced.py: example of binding F12 key to open Developer tools, and F5 to refresh page.
+
+Version 0.25 released on 2012-07-07.
+ * Browser object is almost ready, Frame still needs some work.
+ * Client handlers are starting to work, implemented LoadHandler.
+ 
+Version 0.22 released on 2012-07-02.
+ * Object oriented model for the Browser api
+ * Removed cefwindow as a dependency of cefpython module.
+ * Fixed bug: browser's client area did not get keyboard focus.
+
+Version 0.21 released on 2012-07-02.
+ * Fixed bug: browser's client area wasn't resized when window size changed.
+
+Version 0.20 released on 2012-07-01.
+ * First release that comes with real API.
+
+Version 0.11 released on 2012-02-14.
+ * Fixed hardcoded path to cefexample.html
+
+Version 0.10 released on 2012-02-14.
+ * This is just a proof of concept that python bindings to C++ api of CEF can be done with Cython.

@@ -1,0 +1,24 @@
+/build/
+/setup/build/
+*.pyc
+
+# If you want to ignore an already commited directory run:
+# git rm --cached -r .idea
+/.idea/
+/cefexample/debug.log
+/cefexample/error.log
+
+# WingIDE project files
+/wingide.wpr
+/wingide.wpu
+
+*.ncb
+*.suo
+*.user
+*.aps
+*.sdf
+
+Debug*/
+Release*/
+
+*.pdb
