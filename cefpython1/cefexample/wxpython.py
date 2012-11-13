@@ -5,8 +5,10 @@ import sys
 import time
 import cefpython
 
-# TODO: currently we use wx.Timer to imitate message loop, but
-# it would probably be better to use wx.CallLater() and wx.lib.pubsub.
+# Notes:
+# - currently using wx.Timer to imitate message loop, but it would probably be better
+# to use wx.CallLater() and wx.lib.pubsub.
+# - would using OnIdle() (wx.EVT_IDLE) be better than OnTimer()?
 
 class MainFrame(wx.Frame):
 
@@ -20,6 +22,7 @@ class MainFrame(wx.Frame):
 		
 		self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
 		self.Bind(wx.EVT_SIZE, self.OnSize)
+    self.Bind(wx.EVT_CLOSE, self.OnClose)
 		
 	def CreateMenu(self):
 
@@ -43,6 +46,11 @@ class MainFrame(wx.Frame):
 	def OnSize(self, event):
 
 		cefpython.wm_Size(self.GetHandle(), 0, 0, 0)
+      
+	def OnClose(self, event):
+
+		self.browser.CloseBrowser()
+    self.Destroy()
 
 class MyApp(wx.App):
 
