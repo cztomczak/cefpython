@@ -279,3 +279,89 @@ cdef void PyStringToCefStringPtr(pyString, CefString* cefString) except *:
 		else:
 			bytesString = pyString.encode("utf-8")	
 		cefString.FromASCII(<char*>bytesString)
+      
+"""
+Mac & Win compatible - char size differs
+
++PyObject *CefStringToPyString(const CefString &cefString) {
+ 	 119	
++  const CefString::char_type *chars = cefString.c_str();
+ 	 120	
++  size_t width = sizeof(CefString::char_type);
+ 	 121	
++  size_t byte_len = cefString.length() * width;
+ 	 122	
++  if (width == 4) {
+ 	 123	
++    return PyUnicode_DecodeUTF32(reinterpret_cast<const char*>(chars), byte_len, "strict", NULL);
+ 	 124	
++
+ 	 125	
++  } else if (width == 2) {
+ 	 126	
++    return PyUnicode_DecodeUTF16(reinterpret_cast<const char*>(chars), byte_len, "strict", NULL);
+ 	 127	
++
+ 	 128	
++  } else {
+ 	 129	
++    throw std::runtime_error("Unsupported character width.");
+ 	 130	
++  }
+ 	 131	
++}
+ 	 132	
++
+ 	 133	
++void PyStringToCefStringPtr_impl(PyObject *pystr, CefString *target) {
+ 	 134	
++  if (!PyObject_TypeCheck(pystr, &PyUnicode_Type)) {
+ 	 135	
++    throw std::runtime_error("The first parameter to PyStringToCefStringPtr_impl must be an unicode object.");
+ 	 136	
++  }
+ 	 137	
++
+ 	 138	
++  size_t width = sizeof(CefString::char_type);
+ 	 139	
++  Py_UNICODE *chars = PyUnicode_AS_UNICODE(pystr);
+ 	 140	
++  size_t char_len = PyUnicode_GET_SIZE(pystr);
+ 	 141	
++  PyObject *encoded = NULL;
+ 	 142	
++
+ 	 143	
++  if (width == 4) {
+ 	 144	
++    encoded = PyUnicode_EncodeUTF32(chars, char_len, NULL, -1);
+ 	 145	
++  } else if (width == 2) {
+ 	 146	
++    encoded = PyUnicode_EncodeUTF16(chars, char_len, NULL, -1);
+ 	 147	
++  } else {
+ 	 148	
++    throw std::runtime_error("Unsupported character width.");
+ 	 149	
++  }
+ 	 150	
++
+ 	 151	
++  char *encoded_buf = PyBytes_AsString(encoded);
+ 	 152	
++  target->FromString(reinterpret_cast<CefString::char_type*>(encoded_buf), char_len, true);
+ 	 153	
++
+ 	 154	
++  // cleanup
+ 	 155	
++  Py_DECREF(encoded);
+ 	 156	
++  encoded = NULL;
+ 	 157	
++  encoded_buf = NULL;
+ 	 158	
++}
+"""
