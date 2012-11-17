@@ -33,14 +33,14 @@ class PyGTKExample:
 		self.searchEntry = gtk.Entry()
 		# By default, clicking a GTK widget doesn't grab the focus away from a native Win32 control (browser).
 		self.searchEntry.connect('button-press-event', self.OnWidgetClick)
-                self.searchEntry.show()
-		
-                table = gtk.Table(3, 1, homogeneous=False)
-                self.mainWindow.add(table)		
-                table.attach(self.CreateMenu(), 0, 1, 0, 1, yoptions=gtk.SHRINK)
-                table.attach(self.searchEntry, 0, 1, 1, 2, yoptions=gtk.SHRINK)
-                table.attach(self.container, 0, 1, 2, 3)
-                table.show()
+		self.searchEntry.show()
+
+		table = gtk.Table(3, 1, homogeneous=False)
+		self.mainWindow.add(table)		
+		table.attach(self.CreateMenu(), 0, 1, 0, 1, yoptions=gtk.SHRINK)
+		table.attach(self.searchEntry, 0, 1, 1, 2, yoptions=gtk.SHRINK)
+		table.attach(self.container, 0, 1, 2, 3)
+		table.show()
 
 		windowID = self.container.get_window().handle
 		self.browser = cefpython.CreateBrowser(windowID, browserSettings={}, navigateURL='cefsimple.html')
@@ -94,7 +94,7 @@ class PyGTKExample:
 
 	def OnSize(self, widget, sizeAlloc):
 
-		cefpython.wm_Size(self.container.get_window().handle, 0, 0, 0)	
+		cefpython.wm_Size(self.container.get_window().handle, 0, 0, 0)
 
 	def OnExit(self, widget, data=None):
 

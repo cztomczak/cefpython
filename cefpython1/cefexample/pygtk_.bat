@@ -1,5 +1,5 @@
 @echo off
 setlocal
-set PATH=d:\gtk\bin;d:\python27;%PATH%
-CALL d:\python27\python.exe %~dp0pygtk_.py
+set PATH=c:\gtk_2.24.10_32bit\bin;c:\python27_32bit;%PATH%
+CALL c:\python27_32bit\python.exe %~dp0pygtk_.py
 pause

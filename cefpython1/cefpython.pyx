@@ -12,12 +12,12 @@
 #   exceptions may be ignored. Those cdef that return "object" have "except *"
 #   by default.
 #
-# - you should try running Cython code after all even small changes, otherwise
-#   you will get into big trouble, error messages are so much obfuscated and info
-#   is missing that you will have no idea which chunk of code caused that error.
-
-# About acquiring/releasing GIL lock, see discussion here:
-# https://groups.google.com/forum/?fromgroups=#!topic/cython-users/jcvjpSOZPp0
+# - you should try running Cython code after even small changes, otherwise
+#   you might get into big trouble, error messages are often obfuscated and info
+#   is missing, so you will have no idea which chunk of code caused that error.
+#
+# - about acquiring/releasing GIL lock, see discussion here:
+#   https://groups.google.com/forum/?fromgroups=#!topic/cython-users/jcvjpSOZPp0
 
 # Global variables.
 
