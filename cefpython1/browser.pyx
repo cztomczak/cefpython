@@ -46,6 +46,7 @@ class PyBrowser:
 	__innerWindowID = 0
 	__clientHandlers = {} # Dictionary.
 	__javascriptBindings = None # JavascriptBindings class.
+	__userData = {}
 	
 	def __init__(self, topWindowID, innerWindowID, clientHandlers={}, javascriptBindings=None):
 
@@ -137,6 +138,16 @@ class PyBrowser:
 	# --------------
 	# PUBLIC API.
 	# --------------
+
+	def GetUserData(self, key):
+
+		if key in self.__userData:
+			return self.__userData[key]
+		return None
+
+	def SetUserData(self, key, value):
+
+		self.__userData[key] = value
 
 	def CanGoBack(self):
 
