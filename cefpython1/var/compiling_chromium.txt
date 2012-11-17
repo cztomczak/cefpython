@@ -1,0 +1,5 @@
+1. Enable dchecks in release mode:
+	http://code.google.com/p/chromiumembedded/issues/detail?id=790
+	cef_process_ui_thread.cc >> CefProcessUIThread::Init():
+		logging_dest = logging::LOG_TO_BOTH_FILE_AND_SYSTEM_DEBUG_LOG
+		logging::ENABLE_DCHECK_FOR_NON_OFFICIAL_RELEASE_BUILDS
