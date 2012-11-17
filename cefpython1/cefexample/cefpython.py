@@ -531,6 +531,9 @@ class Browser:
 
 	def GetOpenerWindowID(self):
 		return windowID
+
+	def GetUserData(self, key):
+		return None
 	
 	def GetWindowID(self):
 		return windowID
@@ -592,6 +595,9 @@ class Browser:
 		return None
 
 	def SetZoomLevel(self, zoomLevel):
+		return None
+
+	def SetUserData(self, key, value):
 		return None
 
 	def ShowDevTools(self):
