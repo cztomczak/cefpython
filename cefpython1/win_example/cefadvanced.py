@@ -313,9 +313,6 @@ class ClientHandler:
 			appdir = appdir[0].upper() + appdir[1:]
 		source = source.replace("file:///", "")
 		source = source.replace(appdir, "")
-		#if (message.lower().find("error") != -1): # Doesn't work, stack trace is empty in this context.
-			#stackTrace = cefpython.GetJavascriptStackTraceFormatted()
-			#raise Exception("%s\n in %s on line %s\n\n%s" % (message, source, line, stackTrace))
 		print("Console message: %s (%s:%s)\n" % (message, source, line));
 		return False
 

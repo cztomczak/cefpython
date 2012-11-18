@@ -69,8 +69,8 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 			del cefString
 		elif key == "auto_detect_proxy_settings_enabled":
 			cefAppSettings.auto_detect_proxy_settings_enabled = <cbool>bool(appSettings[key])
-		elif key == "pack_file_path":
-			cefString = new CefString(&cefAppSettings.pack_file_path)
+		elif key == "resources_dir_path":
+			cefString = new CefString(&cefAppSettings.resources_dir_path)
 			PyStringToCefStringPtr(appSettings[key], cefString)
 			del cefString
 		elif key == "locales_dir_path":
@@ -79,6 +79,8 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 			del cefString
 		elif key == "pack_loading_disabled":
 			cefAppSettings.pack_loading_disabled = <cbool>bool(appSettings[key])
+		elif key == "uncaught_exception_stack_size":
+			cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
 		else:
 			raise Exception("Invalid appSettings key: %s" % key)
 
