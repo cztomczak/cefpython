@@ -48,7 +48,7 @@ class PyBrowser:
 	__javascriptBindings = None # JavascriptBindings class.
 	__userData = {}
 	
-	def __init__(self, topWindowID, innerWindowID, clientHandlers={}, javascriptBindings=None):
+	def __init__(self, topWindowID, innerWindowID, clientHandlers=None, javascriptBindings=None):
 
 		self.__topWindowID = topWindowID
 		self.__innerWindowID = innerWindowID

@@ -7,9 +7,3 @@ utils.pyx > GetPyBrowserByCefBrowser() > Popups:
 	# handlers dictionary to both parameters.
 
 	# What about popups created by popups? How do we do the inheritance in this case?
-
-browser.pyx > CloseBrowser()
-
-	Commented out CefBrowser.CloseBrowser()  to fix (maybe?) the memory read errors
-	when closing application window. But CefBrowser.CloseBrowser() needs to be called
-	for popup windows...?

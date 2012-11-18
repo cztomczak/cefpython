@@ -104,7 +104,10 @@ def InitializeClientHandler():
 	InitializeKeyboardHandler()
 	InitializeV8ContextHandler()
 
-def Initialize(applicationSettings={}):
+def Initialize(applicationSettings=None):
+
+	if not applicationSettings:
+		applicationSettings = {}
 
 	if not "multi_threaded_message_loop" in applicationSettings:
 		applicationSettings["multi_threaded_message_loop"] = False
