@@ -1,4 +1,4 @@
-// Copyright (c) 2011 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2012 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,52 +34,61 @@
 // tools directory for more information.
 //
 
-#ifndef CEF_INCLUDE_CEF_V8CONTEXT_HANDLER_H_
-#define CEF_INCLUDE_CEF_V8CONTEXT_HANDLER_H_
+#ifndef CEF_INCLUDE_CEF_GEOLOCATION_HANDLER_H_
+#define CEF_INCLUDE_CEF_GEOLOCATION_HANDLER_H_
 #pragma once
 
 #include "include/cef_base.h"
 #include "include/cef_browser.h"
-#include "include/cef_frame.h"
-#include "include/cef_v8.h"
 
 ///
-// Implement this interface to handle V8 context events. The methods of this
-// class will be called on the UI thread.
+// Callback interface used for asynchronous continuation of geolocation
+// permission requests.
 ///
-/*--cef(source=client)--*/
-class CefV8ContextHandler : public virtual CefBase {
+/*--cef(source=library)--*/
+class CefGeolocationCallback : public virtual CefBase {
  public:
   ///
-  // Called immediately after the V8 context for a frame has been created. To
-  // retrieve the JavaScript 'window' object use the CefV8Context::GetGlobal()
-  // method.
+  // Call to allow or deny geolocation access.
   ///
-  /*--cef()--*/
-  virtual void OnContextCreated(CefRefPtr<CefBrowser> browser,
-                                CefRefPtr<CefFrame> frame,
-                                CefRefPtr<CefV8Context> context) {}
-
-  ///
-  // Called immediately before the V8 context for a frame is released. No
-  // references to the context should be kept after this method is called.
-  ///
-  /*--cef()--*/
-  virtual void OnContextReleased(CefRefPtr<CefBrowser> browser,
-                                 CefRefPtr<CefFrame> frame,
-                                 CefRefPtr<CefV8Context> context) {}
-
-  ///
-  // Called for global uncaught exceptions. Execution of this callback is
-  // disabled by default. To enable set
-  // CefSettings.uncaught_exception_stack_size > 0.
-  ///
-  /*--cef()--*/
-  virtual void OnUncaughtException(CefRefPtr<CefBrowser> browser,
-                                   CefRefPtr<CefFrame> frame,
-                                   CefRefPtr<CefV8Context> context,
-                                   CefRefPtr<CefV8Exception> exception,
-                                   CefRefPtr<CefV8StackTrace> stackTrace) {}
+  /*--cef(capi_name=cont)--*/
+  virtual void Continue(bool allow) =0;
 };
 
-#endif  // CEF_INCLUDE_CEF_V8CONTEXT_HANDLER_H_
+
+///
+// Implement this interface to handle events related to geolocation permission
+// requests. The methods of this class will be called on the browser process UI
+// thread.
+///
+/*--cef(source=client)--*/
+class CefGeolocationHandler : public virtual CefBase {
+ public:
+  ///
+  // Called when a page requests permission to access geolocation information.
+  // |requesting_url| is the URL requesting permission and |request_id| is the
+  // unique ID for the permission request. Call CefGeolocationCallback::Continue
+  // to allow or deny the permission request.
+  ///
+  /*--cef()--*/
+  virtual void OnRequestGeolocationPermission(
+      CefRefPtr<CefBrowser> browser,
+      const CefString& requesting_url,
+      int request_id,
+      CefRefPtr<CefGeolocationCallback> callback) {
+  }
+
+  ///
+  // Called when a geolocation access request is canceled. |requesting_url| is
+  // the URL that originally requested permission and |request_id| is the unique
+  // ID for the permission request.
+  ///
+  /*--cef()--*/
+  virtual void OnCancelGeolocationPermission(
+      CefRefPtr<CefBrowser> browser,
+      const CefString& requesting_url,
+      int request_id) {
+  }
+};
+
+#endif  // CEF_INCLUDE_CEF_GEOLOCATION_HANDLER_H_

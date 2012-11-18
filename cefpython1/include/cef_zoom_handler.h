@@ -1,4 +1,4 @@
-// Copyright (c) 2011 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2012 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,52 +34,39 @@
 // tools directory for more information.
 //
 
-#ifndef CEF_INCLUDE_CEF_V8CONTEXT_HANDLER_H_
-#define CEF_INCLUDE_CEF_V8CONTEXT_HANDLER_H_
+#ifndef CEF_INCLUDE_CEF_ZOOM_HANDLER_H_
+#define CEF_INCLUDE_CEF_ZOOM_HANDLER_H_
 #pragma once
 
 #include "include/cef_base.h"
 #include "include/cef_browser.h"
-#include "include/cef_frame.h"
-#include "include/cef_v8.h"
 
 ///
-// Implement this interface to handle V8 context events. The methods of this
+// Implement this interface to customize zoom handling. The methods of this
 // class will be called on the UI thread.
 ///
 /*--cef(source=client)--*/
-class CefV8ContextHandler : public virtual CefBase {
+class CefZoomHandler : public virtual CefBase {
  public:
   ///
-  // Called immediately after the V8 context for a frame has been created. To
-  // retrieve the JavaScript 'window' object use the CefV8Context::GetGlobal()
-  // method.
+  // Called when the browser wants to retrieve the zoom level for the given
+  // |url|. Return true if |zoomLevel| has been set to the custom zoom level.
+  // Return false for the browser's default zoom handling behavior.
   ///
   /*--cef()--*/
-  virtual void OnContextCreated(CefRefPtr<CefBrowser> browser,
-                                CefRefPtr<CefFrame> frame,
-                                CefRefPtr<CefV8Context> context) {}
+  virtual bool OnGetZoomLevel(CefRefPtr<CefBrowser> browser,
+                              const CefString& url,
+                              double& zoomLevel) { return false; }
 
   ///
-  // Called immediately before the V8 context for a frame is released. No
-  // references to the context should be kept after this method is called.
+  // Called when the browser's zoom level has been set to |zoomLevel| for the
+  // given |url|. Return true to indicate that the new setting has been handled.
+  // Return false to use the browser's default zoom handling behavior.
   ///
   /*--cef()--*/
-  virtual void OnContextReleased(CefRefPtr<CefBrowser> browser,
-                                 CefRefPtr<CefFrame> frame,
-                                 CefRefPtr<CefV8Context> context) {}
-
-  ///
-  // Called for global uncaught exceptions. Execution of this callback is
-  // disabled by default. To enable set
-  // CefSettings.uncaught_exception_stack_size > 0.
-  ///
-  /*--cef()--*/
-  virtual void OnUncaughtException(CefRefPtr<CefBrowser> browser,
-                                   CefRefPtr<CefFrame> frame,
-                                   CefRefPtr<CefV8Context> context,
-                                   CefRefPtr<CefV8Exception> exception,
-                                   CefRefPtr<CefV8StackTrace> stackTrace) {}
+  virtual bool OnSetZoomLevel(CefRefPtr<CefBrowser> browser,
+                              const CefString& url,
+                              double zoomLevel) { return false; }
 };
 
-#endif  // CEF_INCLUDE_CEF_V8CONTEXT_HANDLER_H_
+#endif  // CEF_INCLUDE_CEF_ZOOM_HANDLER_H_

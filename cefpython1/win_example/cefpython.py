@@ -73,7 +73,7 @@ ApplicationSettings = {
 	"session_storage_quota": 5*1024*1024,
 	"javascript_flags": "",
 	"auto_detect_proxy_settings_enabled": False,
-	"pack_file_path": "",
+	"resources_dir_path": "",
 	"locales_dir_path": "",
 	"pack_loading_disabled": False,
 	"unicode_to_bytes_encoding": "utf-8",

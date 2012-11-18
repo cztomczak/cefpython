@@ -20,9 +20,10 @@ cdef extern from "include/internal/cef_types_wrappers.h":
 		unsigned int session_storage_quota
 		cef_string_t javascript_flags
 		cbool auto_detect_proxy_settings_enabled
-		cef_string_t pack_file_path
+		cef_string_t resources_dir_path
 		cef_string_t locales_dir_path
 		cbool pack_loading_disabled
+		int uncaught_exception_stack_size
 
 	ctypedef struct CefBrowserSettings:
 		int animation_frame_rate

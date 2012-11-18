@@ -259,7 +259,7 @@ struct CefSettingsTraits {
       cef_string_list_free(s->extra_plugin_paths);
     cef_string_clear(&s->log_file);
     cef_string_clear(&s->javascript_flags);
-    cef_string_clear(&s->pack_file_path);
+    cef_string_clear(&s->resources_dir_path);
     cef_string_clear(&s->locales_dir_path);
   }
 
@@ -294,11 +294,13 @@ struct CefSettingsTraits {
         src->auto_detect_proxy_settings_enabled;
 #endif
 
-    cef_string_set(src->pack_file_path.str, src->pack_file_path.length,
-        &target->pack_file_path, copy);
+    cef_string_set(src->resources_dir_path.str, src->resources_dir_path.length,
+        &target->resources_dir_path, copy);
     cef_string_set(src->locales_dir_path.str, src->locales_dir_path.length,
         &target->locales_dir_path, copy);
     target->pack_loading_disabled = src->pack_loading_disabled;
+    target->uncaught_exception_stack_size = src->uncaught_exception_stack_size;
+    target->context_safety_implementation = src->context_safety_implementation;
   }
 };
 
@@ -498,6 +500,18 @@ class CefTime : public CefStructBase<CefTimeTraits> {
     cef_time_to_doublet(this, &time);
     return time;
   }
+
+  // Set this object to now.
+  void Now() {
+    cef_time_now(this);
+  }
+
+  // Return the delta between this object and |other| in milliseconds.
+  long long Delta(const CefTime& other) {
+    long long delta = 0;
+    cef_time_delta(this, &other, &delta);
+    return delta;
+  }
 };
 
 
@@ -606,7 +620,7 @@ class CefProxyInfo : public CefStructBase<CefProxyInfoTraits> {
   // Use a direction connection instead of a proxy.
   ///
   void UseDirect() {
-    proxyType = PROXY_TYPE_DIRECT;
+    proxyType = CEF_PROXY_TYPE_DIRECT;
   }
 
   ///
@@ -619,7 +633,7 @@ class CefProxyInfo : public CefStructBase<CefProxyInfoTraits> {
   // "foo1:80;foo2:80".
   ///
   void UseNamedProxy(const CefString& proxy_uri_list) {
-    proxyType = PROXY_TYPE_NAMED;
+    proxyType = CEF_PROXY_TYPE_NAMED;
     (CefString(&proxyList)) = proxy_uri_list;
   }
 
@@ -628,15 +642,46 @@ class CefProxyInfo : public CefStructBase<CefProxyInfoTraits> {
   // example, "PROXY foobar:99; SOCKS fml:2; DIRECT".
   ///
   void UsePacString(const CefString& pac_string) {
-    proxyType = PROXY_TYPE_PAC_STRING;
+    proxyType = CEF_PROXY_TYPE_PAC_STRING;
     (CefString(&proxyList)) = pac_string;
   }
 
-  bool IsDirect() const { return proxyType == PROXY_TYPE_DIRECT; }
-  bool IsNamedProxy() const { return proxyType == PROXY_TYPE_NAMED; }
-  bool IsPacString() const { return proxyType == PROXY_TYPE_PAC_STRING; }
+  bool IsDirect() const { return proxyType == CEF_PROXY_TYPE_DIRECT; }
+  bool IsNamedProxy() const { return proxyType == CEF_PROXY_TYPE_NAMED; }
+  bool IsPacString() const { return proxyType == CEF_PROXY_TYPE_PAC_STRING; }
 
   CefString ProxyList() const { return CefString(&proxyList); }
 };
+
+
+struct CefGeopositionTraits {
+  typedef cef_geoposition_t struct_type;
+
+  static inline void init(struct_type* s) {}
+
+  static inline void clear(struct_type* s) {
+    cef_string_clear(&s->error_message);
+  }
+
+  static inline void set(const struct_type* src, struct_type* target,
+      bool copy) {
+    target->latitude = src->latitude;
+    target->longitude = src->longitude;
+    target->altitude = src->altitude;
+    target->accuracy = src->accuracy;
+    target->altitude_accuracy = src->altitude_accuracy;
+    target->heading = src->heading;
+    target->speed = src->speed;
+    target->timestamp = src->timestamp;
+    target->error_code = src->error_code;
+    cef_string_set(src->error_message.str, src->error_message.length,
+        &target->error_message, copy);
+  }
+};
+
+///
+// Class representing a geoposition.
+///
+typedef CefStructBase<CefGeopositionTraits> CefGeoposition;
 
 #endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WRAPPERS_H_

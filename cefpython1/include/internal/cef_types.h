@@ -188,18 +188,18 @@ typedef struct _cef_settings_t {
 #endif
 
   ///
-  // The fully qualified path for the cef.pak file. If this value is empty
-  // the cef.pak file must be located in the module directory. This value is
-  // ignored on Mac OS X where pack files are always loaded from the app bundle
-  // resource directory.
+  // The fully qualified path for the resources directory. If this value is
+  // empty the chrome.pak and/or devtools_resources.pak files must be located in
+  // the module directory on Windows/Linux or the app bundle Resources directory
+  // on Mac OS X.
   ///
-  cef_string_t pack_file_path;
+  cef_string_t resources_dir_path;
 
   ///
   // The fully qualified path for the locales directory. If this value is empty
   // the locales directory must be located in the module directory. This value
   // is ignored on Mac OS X where pack files are always loaded from the app
-  // bundle resource directory.
+  // bundle Resources directory.
   ///
   cef_string_t locales_dir_path;
 
@@ -210,6 +210,33 @@ typedef struct _cef_settings_t {
   // is disabled.
   ///
   bool pack_loading_disabled;
+
+  ///
+  // The number of stack trace frames to capture for uncaught exceptions.
+  // Specify a positive value to enable the CefV8ContextHandler::
+  // OnUncaughtException() callback. Specify 0 (default value) and
+  // OnUncaughtException() will not be called.
+  ///
+  int uncaught_exception_stack_size;
+
+  ///
+  // By default CEF V8 references will be invalidated (the IsValid() method will
+  // return false) after the owning context has been released. This reduces the
+  // need for external record keeping and avoids crashes due to the use of V8
+  // references after the associated context has been released.
+  //
+  // CEF currently offers two context safety implementations with different
+  // performance characteristics. The default implementation (value of 0) uses a
+  // map of hash values and should provide better performance in situations with
+  // a small number contexts. The alternate implementation (value of 1) uses a
+  // hidden value attached to each context and should provide better performance
+  // in situations with a large number of contexts.
+  //
+  // If you need better performance in the creation of V8 references and you
+  // plan to manually track context lifespan you can disable context safety by
+  // specifying a value of -1.
+  ///
+  int context_safety_implementation;
 } cef_settings_t;
 
 ///
@@ -1097,9 +1124,9 @@ enum cef_dom_node_type_t {
 // Proxy types.
 ///
 enum cef_proxy_type_t {
-  PROXY_TYPE_DIRECT = 0,
-  PROXY_TYPE_NAMED,
-  PROXY_TYPE_PAC_STRING,
+  CEF_PROXY_TYPE_DIRECT = 0,
+  CEF_PROXY_TYPE_NAMED,
+  CEF_PROXY_TYPE_PAC_STRING,
 };
 
 ///
@@ -1109,6 +1136,74 @@ typedef struct _cef_proxy_info_t {
   enum cef_proxy_type_t proxyType;
   cef_string_t proxyList;
 } cef_proxy_info_t;
+
+///
+// Geoposition error codes.
+///
+enum cef_geoposition_error_code_t {
+  GEOPOSITON_ERROR_NONE = 0,
+  GEOPOSITON_ERROR_PERMISSION_DENIED,
+  GEOPOSITON_ERROR_POSITION_UNAVAILABLE,
+  GEOPOSITON_ERROR_TIMEOUT,
+};
+
+///
+// Structure representing geoposition information. The properties of this
+// structure correspond to those of the JavaScript Position object although
+// their types may differ.
+///
+typedef struct _cef_geoposition_t {
+  ///
+  // Latitude in decimal degrees north (WGS84 coordinate frame).
+  ///
+  double latitude;
+
+  ///
+  // Longitude in decimal degrees west (WGS84 coordinate frame).
+  ///
+  double longitude;
+
+  ///
+  // Altitude in meters (above WGS84 datum).
+  ///
+  double altitude;
+
+  ///
+  // Accuracy of horizontal position in meters.
+  ///
+  double accuracy;
+
+  ///
+  // Accuracy of altitude in meters.
+  ///
+  double altitude_accuracy;
+
+  ///
+  // Heading in decimal degrees clockwise from true north.
+  ///
+  double heading;
+
+  ///
+  // Horizontal component of device velocity in meters per second.
+  ///
+  double speed;
+
+  ///
+  // Time of position measurement in miliseconds since Epoch in UTC time. This
+  // is taken from the host computer's system clock.
+  ///
+  cef_time_t timestamp;
+
+  ///
+  // Error code, see enum above.
+  ///
+  cef_geoposition_error_code_t error_code;
+
+  ///
+  // Human-readable error message.
+  ///
+  cef_string_t error_message;
+} cef_geoposition_t;
 
 #ifdef __cplusplus
 }
