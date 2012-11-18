@@ -29,14 +29,15 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreErr
 	# same for GetPyFrameByCefFrame(). This way PyBrowser() and PyFrame()
 	# are automatically being created.
 
-	global __popupPyBrowsers
-	global __pyBrowsers
+	global g_popupPyBrowsers
+	global g_pyBrowsers
+	global g_cefBrowsers
 
 	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
 	cdef int openerInnerWindowID # Popup is a separate window and separate browser, but we can get parent browser.
 
-	if innerWindowID in __pyBrowsers:
-		return __pyBrowsers[innerWindowID]
+	if innerWindowID in g_pyBrowsers:
+		return g_pyBrowsers[innerWindowID]
 	else:
 
 		# This might be a popup.
@@ -45,24 +46,24 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreErr
 
 		openerInnerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetOpenerWindowHandle()
 
-		if openerInnerWindowID in __pyBrowsers:
-			parentPyBrowser = __pyBrowsers[openerInnerWindowID]
-		elif openerInnerWindowID in __popupPyBrowsers:
-			parentPyBrowser = __popupPyBrowsers[openerInnerWindowID]
+		if openerInnerWindowID in g_pyBrowsers:
+			parentPyBrowser = g_pyBrowsers[openerInnerWindowID]
+		elif openerInnerWindowID in g_popupPyBrowsers:
+			parentPyBrowser = g_popupPyBrowsers[openerInnerWindowID]
 		else:
 			if ignoreError:
 				return None
-			if len(__pyBrowsers) == 0:
+			if len(g_pyBrowsers) == 0:
 				# No browser yet created, this function is probably called by some handler that
 				# gets executed before any browser is created.
 				return None
 
-			raise Exception("Browser not found in __pyBrowsers, searched by innerWindowID = %s" % innerWindowID)
+			raise Exception("Browser not found in g_pyBrowsers, searched by innerWindowID = %s" % innerWindowID)
 
-		# TODO: this currently is never cleaned up, implement LifeSpanHandler.DoClose() and clean __cefBrowsers map.
-		__cefBrowsers[innerWindowID] = cefBrowser
+		# TODO: this currently is never cleaned up, implement LifeSpanHandler.DoClose() and clean g_cefBrowsers map.
+		g_cefBrowsers[innerWindowID] = cefBrowser
 
-		if not (innerWindowID in __popupPyBrowsers):
+		if not (innerWindowID in g_popupPyBrowsers):
 
 			# Inheriting clientHandlers and javascriptBindings works only for 1 level of nesting.
 			# handler[0] = whether to call for main frame
@@ -85,24 +86,24 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreErr
 				newBindings = javascriptBindings
 
 			# Create new popup PyBrowser.
-			__popupPyBrowsers[innerWindowID] = PyBrowser(-1, innerWindowID, newHandlers, newBindings)
+			g_popupPyBrowsers[innerWindowID] = PyBrowser(-1, innerWindowID, newHandlers, newBindings)
 
-		return __popupPyBrowsers[innerWindowID]
+		return g_popupPyBrowsers[innerWindowID]
 
 cdef object GetPyFrameByCefFrame(CefRefPtr[CefFrame] cefFrame):
 
-	global __pyFrames
-	global __cefFrames
+	global g_pyFrames
+	global g_cefFrames
 
 	cdef long long frameID # cef_types.int64
 	if <void*>cefFrame != NULL and <CefFrame*>(cefFrame.get()):
 		frameID = (<CefFrame*>(cefFrame.get())).GetIdentifier()
-		__cefFrames[frameID] = cefFrame
+		g_cefFrames[frameID] = cefFrame
 		pyFrameID = long(frameID)
-		if pyFrameID in __pyFrames:
-			return __pyFrames[pyFrameID]
-		__pyFrames[pyFrameID] = PyFrame(pyFrameID)
-		return __pyFrames[pyFrameID]
+		if pyFrameID in g_pyFrames:
+			return g_pyFrames[pyFrameID]
+		g_pyFrames[pyFrameID] = PyFrame(pyFrameID)
+		return g_pyFrames[pyFrameID]
 	else:
 		return None
 
@@ -123,51 +124,51 @@ cdef object GetPyContentFilterByCefContentFilter(CefRefPtr[CefContentFilter] cef
 
 def CheckInnerWindowID(innerWindowID):
 
-	global __cefBrowsers
+	global g_cefBrowsers
 
 	# If an exception is raised in cdef function then there is no stack trace,
 	# that's why you should call this func before calling GetCefBrowserByWindowID(),
 	# if there is an error user will see backtrace in his application.
 	if not innerWindowID:
 		raise Exception("Browser was destroyed (innerWindowID empty)")
-	if __cefBrowsers.find(<int>innerWindowID) == __cefBrowsers.end():
-		raise Exception("Browser was destroyed (__cefBrowsers.find() failed)")
-	if not (<CefBrowser*>(__cefBrowsers[<int>innerWindowID]).get()):
+	if g_cefBrowsers.find(<int>innerWindowID) == g_cefBrowsers.end():
+		raise Exception("Browser was destroyed (g_cefBrowsers.find() failed)")
+	if not (<CefBrowser*>(g_cefBrowsers[<int>innerWindowID]).get()):
 		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
 	return innerWindowID
 
 cdef CefRefPtr[CefBrowser] GetCefBrowserByInnerWindowID(innerWindowID) except *:
 
-	global __cefBrowsers
+	global g_cefBrowsers
 
 	# Map key exists: http://stackoverflow.com/questions/1939953/how-to-find-if-a-given-key-exists-in-a-c-stdmap
 	if not innerWindowID:
 		raise Exception("Browser was destroyed (innerWindowID empty)")
-	if __cefBrowsers.find(<int>innerWindowID) == __cefBrowsers.end():
-		raise Exception("Browser was destroyed (__cefBrowsers.find() failed)")
-	if <CefBrowser*>((__cefBrowsers[<int>innerWindowID]).get()):
-		return __cefBrowsers[<int>innerWindowID]
+	if g_cefBrowsers.find(<int>innerWindowID) == g_cefBrowsers.end():
+		raise Exception("Browser was destroyed (g_cefBrowsers.find() failed)")
+	if <CefBrowser*>((g_cefBrowsers[<int>innerWindowID]).get()):
+		return g_cefBrowsers[<int>innerWindowID]
 	else:
 		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
 
 cdef CefRefPtr[CefBrowser] GetCefBrowserByTopWindowID(windowID, ignoreError=False) except *:
 
-	global __browserInnerWindows
-	global __cefBrowsers
+	global g_browserInnerWindows
+	global g_cefBrowsers
 
 	if not windowID:
 		raise Exception("Browser was destroyed (windowID empty)")
-	if not (windowID in __browserInnerWindows):
+	if not (windowID in g_browserInnerWindows):
 		if ignoreError:
 			return <CefRefPtr[CefBrowser]>NULL
-		raise Exception("windowID not found in __browserInnerWindows, windowID = %s" % windowID)
-	innerWindowID = __browserInnerWindows[windowID]
-	if __cefBrowsers.find(<int>innerWindowID) == __cefBrowsers.end():
+		raise Exception("windowID not found in g_browserInnerWindows, windowID = %s" % windowID)
+	innerWindowID = g_browserInnerWindows[windowID]
+	if g_cefBrowsers.find(<int>innerWindowID) == g_cefBrowsers.end():
 		if ignoreError:
 			return <CefRefPtr[CefBrowser]>NULL
-		raise Exception("Browser was destroyed (__cefBrowsers.find() failed)")
-	if <CefBrowser*>((__cefBrowsers[<int>innerWindowID]).get()):
-		return __cefBrowsers[<int>innerWindowID]
+		raise Exception("Browser was destroyed (g_cefBrowsers.find() failed)")
+	if <CefBrowser*>((g_cefBrowsers[<int>innerWindowID]).get()):
+		return g_cefBrowsers[<int>innerWindowID]
 	else:
 		if ignoreError:
 			return <CefRefPtr[CefBrowser]>NULL
@@ -175,29 +176,29 @@ cdef CefRefPtr[CefBrowser] GetCefBrowserByTopWindowID(windowID, ignoreError=Fals
 
 def CheckFrameID(frameID):
 
-	global __cefFrames
+	global g_cefFrames
 
 	# If an exception is raised in cdef function then there is no stack trace,
 	# that's why you should call this func before calling GetCefFrameByFrameID(),
 	# if there is an error user will see backtrace in his application.
 	if not frameID:
 		raise Exception("Frame was destroyed (frameID empty)")
-	if __cefFrames.find(<cef_types.int64>frameID) == __cefFrames.end():
-		raise Exception("Frame was destroyed (__cefFrames.find() failed)")
-	if not (<CefFrame*>(__cefFrames[<cef_types.int64>frameID]).get()):
+	if g_cefFrames.find(<cef_types.int64>frameID) == g_cefFrames.end():
+		raise Exception("Frame was destroyed (g_cefFrames.find() failed)")
+	if not (<CefFrame*>(g_cefFrames[<cef_types.int64>frameID]).get()):
 		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")
 	return frameID
 
 cdef CefRefPtr[CefFrame] GetCefFrameByFrameID(frameID) except *:
 
-	global __cefFrames
+	global g_cefFrames
 
 	if not frameID:
 		raise Exception("Frame was destroyed (frameID empty)")
-	if __cefFrames.find(<cef_types.int64>frameID) == __cefFrames.end():
-		raise Exception("Frame was destroyed (__cefFrames.find() failed)")
-	if <CefFrame*>(__cefFrames[<cef_types.int64>frameID]).get():
-		return __cefFrames[<cef_types.int64>frameID]
+	if g_cefFrames.find(<cef_types.int64>frameID) == g_cefFrames.end():
+		raise Exception("Frame was destroyed (g_cefFrames.find() failed)")
+	if <CefFrame*>(g_cefFrames[<cef_types.int64>frameID]).get():
+		return g_cefFrames[<cef_types.int64>frameID]
 	else:
 		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")
 
@@ -253,7 +254,7 @@ cdef void PyStringToCefString(pyString, CefString& cefString) except *:
 	if bytes == str: 
 		# Python 2.7
 		if pyString == unicode:
-			pyString = pyString.encode(__applicationSettings["unicode_to_bytes_encoding"])
+			pyString = pyString.encode(g_applicationSettings["unicode_to_bytes_encoding"])
 		cefString.FromASCII(<char*>pyString) # Python 2.7
 	else: 
 		# Python 3
@@ -269,7 +270,7 @@ cdef void PyStringToCefStringPtr(pyString, CefString* cefString) except *:
 	if bytes == str:
 		# Python 2.7
 		if pyString == unicode:
-			pyString = pyString.encode(__applicationSettings["unicode_to_bytes_encoding"])
+			pyString = pyString.encode(g_applicationSettings["unicode_to_bytes_encoding"])
 		cefString.FromASCII(<char*>pyString)
 	else:
 		# Python 3

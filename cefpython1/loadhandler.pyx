@@ -62,13 +62,13 @@ def InitializeLoadHandler():
 	# it won't be detected by the compiler, neither during runtime, you will get some strange values
 	# in function arguments.
 
-	# Call it in cefpython.pyx > __InitializeClientHandler().
+	# Call it in cefpython.pyx > InitializeClientHandler().
 
 	# CefLoadHandler callbacks.
-	global __clientHandler
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadEnd(<OnLoadEnd_type>LoadHandler_OnLoadEnd)
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadStart(<OnLoadStart_type>LoadHandler_OnLoadStart)
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnLoadError(<OnLoadError_type>LoadHandler_OnLoadError)
+	global g_clientHandler
+	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnLoadEnd(<OnLoadEnd_type>LoadHandler_OnLoadEnd)
+	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnLoadStart(<OnLoadStart_type>LoadHandler_OnLoadStart)
+	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnLoadError(<OnLoadError_type>LoadHandler_OnLoadError)
 
 cdef void LoadHandler_OnLoadEnd(
 		CefRefPtr[CefBrowser] cefBrowser,

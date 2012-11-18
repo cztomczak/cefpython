@@ -6,41 +6,41 @@ include "imports.pyx"
 include "utils.pyx"
 include "v8utils.pyx"
 
-cdef map[int, CefRefPtr[CefV8Value]] __v8JavascriptCallbacks
-cdef map[int, CefRefPtr[CefV8Context]] __v8JavascriptCallbackContexts
-cdef int __v8JavascriptCallbackCount = 0 # next callbackID
+cdef map[int, CefRefPtr[CefV8Value]] g_v8JavascriptCallbacks
+cdef map[int, CefRefPtr[CefV8Context]] g_v8JavascriptCallbackContexts
+cdef int g_v8JavascriptCallbackCount = 0 # next callbackID
 
 cdef int PutV8JavascriptCallback(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Context] v8Context) except *:
 
-	global __v8JavascriptCallbacks
-	global __v8JavascriptCallbackContexts
-	global __v8JavascriptCallbackCount
-	__v8JavascriptCallbackCount += 1
-	cdef int callbackID = __v8JavascriptCallbackCount
-	__v8JavascriptCallbacks[callbackID] = v8Value
-	__v8JavascriptCallbackContexts[callbackID] = v8Context
+	global g_v8JavascriptCallbacks
+	global g_v8JavascriptCallbackContexts
+	global g_v8JavascriptCallbackCount
+	g_v8JavascriptCallbackCount += 1
+	cdef int callbackID = g_v8JavascriptCallbackCount
+	g_v8JavascriptCallbacks[callbackID] = v8Value
+	g_v8JavascriptCallbackContexts[callbackID] = v8Context
 	return callbackID
 
 cdef CefRefPtr[CefV8Value] GetV8JavascriptCallback(int callbackID) except *:
 
-	global __v8JavascriptCallbacks
-	if __v8JavascriptCallbacks.find(callbackID) == __v8JavascriptCallbacks.end():
+	global g_v8JavascriptCallbacks
+	if g_v8JavascriptCallbacks.find(callbackID) == g_v8JavascriptCallbacks.end():
 		raise Exception("GetV8JavascriptCallback() failed: invalid callbackID: %s" % callbackID)
-	return __v8JavascriptCallbacks[callbackID]
+	return g_v8JavascriptCallbacks[callbackID]
 
 cdef CefRefPtr[CefV8Context] GetV8JavascriptCallbackContext(int callbackID) except *:
 
-	global __v8JavascriptCallbackContexts
-	if __v8JavascriptCallbackContexts.find(callbackID) == __v8JavascriptCallbackContexts.end():
+	global g_v8JavascriptCallbackContexts
+	if g_v8JavascriptCallbackContexts.find(callbackID) == g_v8JavascriptCallbackContexts.end():
 		raise Exception("GetV8JavascriptCallbackContext() failed: invalid callbackID: %s" % callbackID)
-	return __v8JavascriptCallbackContexts[callbackID]
+	return g_v8JavascriptCallbackContexts[callbackID]
 
 cdef void DelV8JavascriptCallback(int callbackID) except *:
 
-	global __v8JavascriptCallbacks
-	global __v8JavascriptCallbackContexts
-	__v8JavascriptCallbacks.erase(callbackID)
-	__v8JavascriptCallbackContexts.erase(callbackID)
+	global g_v8JavascriptCallbacks
+	global g_v8JavascriptCallbackContexts
+	g_v8JavascriptCallbacks.erase(callbackID)
+	g_v8JavascriptCallbackContexts.erase(callbackID)
 
 class JavascriptCallback:
 
@@ -70,7 +70,7 @@ class JavascriptCallback:
 		cdef cbool sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
 		
 		if not sameContext:
-			if __debug: print("JavascriptCallback.Call(): different context, calling v8Context.Enter()")
+			if g_debug: print("JavascriptCallback.Call(): different context, calling v8Context.Enter()")
 			assert (<CefV8Context*>(v8Context.get())).Enter(), "v8Context.Enter() failed"
 
 		for i in range(0, len(args)):

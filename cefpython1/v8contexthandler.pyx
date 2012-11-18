@@ -10,8 +10,8 @@ include "v8utils.pyx"
 def InitializeV8ContextHandler():
 
 	# Callbacks - make sure event names are
-	global __clientHandler
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnContextCreated(
+	global g_clientHandler
+	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnContextCreated(
 		<OnContextCreated_type>V8ContextHandler_OnContextCreated)
 
 cdef void V8ContextHandler_OnContextCreated(

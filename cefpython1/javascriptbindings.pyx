@@ -107,7 +107,7 @@ class JavascriptBindings:
 			sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
 
 			if not sameContext:
-				if __debug: print("JavascriptBindings.Rebind(): different context, calling v8Context.Enter()")
+				if g_debug: print("JavascriptBindings.Rebind(): different context, calling v8Context.Enter()")
 				assert (<CefV8Context*>(v8Context.get())).Enter(), "v8Context.Enter() failed"
 
 			V8ContextHandler_OnContextCreated(cefBrowser, cefFrame, v8Context)

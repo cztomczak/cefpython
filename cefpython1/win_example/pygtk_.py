@@ -1,10 +1,17 @@
 # An example of embedding CEF in PyGTK application.
 
+import platform
+if platform.architecture()[0] != "32bit":
+	raise Exception("Architecture not supported: %s" % platform.architecture()[0])
+
+import sys
+if not sys.hexversion >= 0x020700F0:
+	raise Exception("Python version not supported: %s" % sys.version)
+
 import cefpython
 import pygtk
 pygtk.require('2.0')
 import gtk
-import sys
 import gobject
 
 class PyGTKExample:

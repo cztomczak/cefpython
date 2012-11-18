@@ -20,9 +20,9 @@ KEY_KEYPAD = <int>cef_types.KEY_KEYPAD
 def InitializeKeyboardHandler():
 
 	# Callbacks - make sure event names are proper - hard to detect error.
-	# Call it in cefpython.pyx > __InitializeClientHandler().
-	global __clientHandler
-	(<ClientHandler*>(__clientHandler.get())).SetCallback_OnKeyEvent(<OnKeyEvent_type>KeyboardHandler_OnKeyEvent)
+	# Call it in cefpython.pyx > InitializeClientHandler().
+	global g_clientHandler
+	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnKeyEvent(<OnKeyEvent_type>KeyboardHandler_OnKeyEvent)
 
 cdef cbool KeyboardHandler_OnKeyEvent(
 		CefRefPtr[CefBrowser] cefBrowser,

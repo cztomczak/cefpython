@@ -6,7 +6,7 @@ from windows cimport HWND, RECT
 from Cython.Shadow import void
 
 cdef extern from "include/internal/cef_win.h":
-	ctypedef void* CefWindowHandle
+	ctypedef HWND CefWindowHandle
 	cdef cppclass CefWindowInfo:
 		void SetAsChild(HWND, RECT)
 		void SetAsOffScreen(HWND)
