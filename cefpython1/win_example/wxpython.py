@@ -1,7 +1,14 @@
 # An example of embedding CEF in wxPython application.
 
-import wx
+import platform
+if platform.architecture()[0] != "32bit":
+	raise Exception("Architecture not supported: %s" % platform.architecture()[0])
+
 import sys
+if not sys.hexversion >= 0x020700F0:
+	raise Exception("Python version not supported: %s" % sys.version)
+
+import wx
 import time
 import cefpython
 
@@ -22,7 +29,7 @@ class MainFrame(wx.Frame):
 		
 		self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
 		self.Bind(wx.EVT_SIZE, self.OnSize)
-    self.Bind(wx.EVT_CLOSE, self.OnClose)
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
 		
 	def CreateMenu(self):
 
@@ -50,7 +57,7 @@ class MainFrame(wx.Frame):
 	def OnClose(self, event):
 
 		self.browser.CloseBrowser()
-    self.Destroy()
+		self.Destroy()
 
 class MyApp(wx.App):
 

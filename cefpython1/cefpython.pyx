@@ -18,14 +18,17 @@
 #
 # - about acquiring/releasing GIL lock, see discussion here:
 #   https://groups.google.com/forum/?fromgroups=#!topic/cython-users/jcvjpSOZPp0
+#
+# - <CefRefPtr[ClientHandler]?>new ClientHandler() 
+#   <...?> means to throw an error if the cast is not allowed
 
 # Global variables.
 
-global __debug
-__debug = False
+global g_debug
+g_debug = False
 
-global __applicationSettings
-__applicationSettings = None
+global g_applicationSettings
+g_applicationSettings = None
 
 # All .pyx files need to be included here.
 
@@ -35,7 +38,9 @@ include "frame.pyx"
 include "javascriptbindings.pyx"
 include "settings.pyx"
 include "utils.pyx"
-include "wndproc.pyx"
+
+IF UNAME_SYSNAME == "Windows":
+	include "wndproc.pyx"
 
 include "loadhandler.pyx"
 include "keyboardhandler.pyx"
@@ -51,7 +56,7 @@ include "response.pyx"
 include "displayhandler.pyx"
 
 # Client handler.
-cdef CefRefPtr[ClientHandler] __clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()
+cdef CefRefPtr[ClientHandler] g_clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()
 
 def GetRealPath(file=None, encodeURL=False):
 	
@@ -93,7 +98,7 @@ def ExceptHook(type, value, traceobject):
 	CefShutdown()
 	os._exit(1) # so that "finally" does not execute
 
-def __InitializeClientHandler():
+def InitializeClientHandler():
 
 	InitializeLoadHandler()
 	InitializeKeyboardHandler()
@@ -109,12 +114,12 @@ def Initialize(applicationSettings={}):
 		applicationSettings["unicode_to_bytes_encoding"] = "utf-8"
 
 	# We must make a copy as applicationSettings is a reference only that might get destroyed.
-	global __applicationSettings
-	__applicationSettings = copy.deepcopy(applicationSettings)
+	global g_applicationSettings
+	g_applicationSettings = copy.deepcopy(applicationSettings)
 
-	__InitializeClientHandler()
+	InitializeClientHandler()
 
-	if __debug:
+	if g_debug:
 		print("\n%s" % ("--------" * 8))
 		print("Welcome to CEF Python bindings!")
 		print("%s\n" % ("--------" * 8))
@@ -125,12 +130,12 @@ def Initialize(applicationSettings={}):
 
 	SetApplicationSettings(applicationSettings, &cefApplicationSettings)
 
-	if __debug:
+	if g_debug:
 		print("CefInitialize(cefApplicationSettings, cefApp)")
 
 	cdef cbool ret = CefInitialize(cefApplicationSettings, cefApp)
 
-	if __debug:
+	if g_debug:
 		if ret: print("OK")
 		else: print("ERROR")
 		print("GetLastError(): %s" % GetLastError())
@@ -141,10 +146,8 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	if not clientHandlers:
 		clientHandlers = {}
 
-	if __debug: print("cefpython.CreateBrowser()")
+	if g_debug: print("cefpython.CreateBrowser()")
 
-	# Later in the code we do a dangerous cast: <HWND><int>windowID,
-	# so let's make sure that this is a valid window.
 	if not win32gui.IsWindow(windowID):
 		raise Exception("CreateBrowser() failed: invalid windowID")
 
@@ -154,9 +157,9 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 
 	SetBrowserSettings(browserSettings, &cefBrowserSettings)	
 
-	if __debug: print("win32gui.GetClientRect(windowID)")
+	if g_debug: print("win32gui.GetClientRect(windowID)")
 	rect1 = win32gui.GetClientRect(windowID)
-	if __debug: print("GetLastError(): %s" % GetLastError())
+	if g_debug: print("GetLastError(): %s" % GetLastError())
 
 	cdef RECT rect2
 	rect2.left = <int>rect1[0]
@@ -164,44 +167,43 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	rect2.right = <int>rect1[2]
 	rect2.bottom = <int>rect1[3]
 
-	if __debug: print("CefWindowInfo.SetAsChild(<HWND><int>windowID, rect2)")
-	info.SetAsChild(<HWND><int>windowID, rect2)	
-	if __debug: print("GetLastError(): %s" % GetLastError())
+	if g_debug: print("CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect2)")
+	info.SetAsChild(<CefWindowHandle><int>windowID, rect2)	
+	if g_debug: print("GetLastError(): %s" % GetLastError())
 
 	navigateURL = GetRealPath(file=navigateURL, encodeURL=True)
-	if __debug: print("navigateURL: %s" % navigateURL)
-	if __debug: print("Creating cefNavigateURL: CefString().FromASCII(<char*>navigateURL)")
+	if g_debug: print("navigateURL: %s" % navigateURL)
+	if g_debug: print("Creating cefNavigateURL: CefString().FromASCII(<char*>navigateURL)")
 	
 	cdef CefString cefNavigateURL
 	PyStringToCefString(navigateURL, cefNavigateURL)
 
-	if __debug: print("CreateBrowserSync in a moment ...")
+	if g_debug: print("CreateBrowserSync in a moment ...")
 
-	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>__clientHandler, cefNavigateURL, cefBrowserSettings)
+	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>g_clientHandler, cefNavigateURL, cefBrowserSettings)
 
 	if <void*>cefBrowser == NULL: 
-		if __debug: print("CreateBrowserSync(): NULL")
-		if __debug: print("GetLastError(): %s" % GetLastError())
+		if g_debug: print("CreateBrowserSync(): NULL")
+		if g_debug: print("GetLastError(): %s" % GetLastError())
 		return None
 	else: 
-		if __debug: print("CreateBrowserSync(): OK")
+		if g_debug: print("CreateBrowserSync(): OK")
 
 	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
-	__cefBrowsers[innerWindowID] = cefBrowser
-	__pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, clientHandlers, javascriptBindings)
-	#if javascriptBindings: javascriptBindings.SetBrowser(__pyBrowsers[innerWindowID])
-	__browserInnerWindows[windowID] = innerWindowID
+	g_cefBrowsers[innerWindowID] = cefBrowser
+	g_pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, clientHandlers, javascriptBindings)
+	g_browserInnerWindows[windowID] = innerWindowID
 
-	return __pyBrowsers[innerWindowID]
+	return g_pyBrowsers[innerWindowID]
 
 
 def GetBrowserByWindowID(windowID):
 
 	# This is: ByTopWindowID.
-	if windowID in __browserInnerWindows:
-		innerWindowID = __browserInnerWindows[windowID]
-		if innerWindowID in __pyBrowsers:
-			return __pyBrowsers[innerWindowID]
+	if windowID in g_browserInnerWindows:
+		innerWindowID = g_browserInnerWindows[windowID]
+		if innerWindowID in g_pyBrowsers:
+			return g_pyBrowsers[innerWindowID]
 		else:
 			return None
 	else:
@@ -209,7 +211,7 @@ def GetBrowserByWindowID(windowID):
 
 def MessageLoop():
 
-	if __debug: print("CefRunMessageLoop()\n")
+	if g_debug: print("CefRunMessageLoop()\n")
 	with nogil:
 		CefRunMessageLoop()
 
@@ -229,15 +231,15 @@ def SingleMessageLoop():
 
 def QuitMessageLoop():
 
-	if __debug: print("QuitMessageLoop()")
+	if g_debug: print("QuitMessageLoop()")
 	CefQuitMessageLoop()
 
 
 def Shutdown():
 
-	if __debug: print("CefShutdown()")
+	if g_debug: print("CefShutdown()")
 	CefShutdown()
-	if __debug: print("GetLastError(): %s" % GetLastError())
+	if g_debug: print("GetLastError(): %s" % GetLastError())
 
 def IsKeyModifier(key, modifiers):
 

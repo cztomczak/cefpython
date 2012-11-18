@@ -24,7 +24,7 @@ cdef public cbool RequestHandler_OnBeforeBrowse(
 	return <cbool>False
 
 	try:
-		# ignoreError=True - when creating browser window there is no browser yet added to the __pyBrowsers,
+		# ignoreError=True - when creating browser window there is no browser yet added to the g_pyBrowsers,
 		# it's happening because CreateBrowser() does the initial navigation.
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
 		if not pyBrowser:
@@ -195,17 +195,19 @@ cdef public cbool RequestHandler_GetAuthCredentials(
 			return <cbool>bool(ret)
 		else:
 			# Default implementation.
-			ret = Requesthandler_GetAuthCredentials_Default(pyBrowser, pyIsProxy, pyHost, pyPort, pyRealm, pyScheme, pyUsername, pyPassword)
-			if ret:
-				PyStringToCefString(pyUsername[0], cefUsername)
-				PyStringToCefString(pyPassword[0], cefPassword)
-			return <cbool>bool(ret)
+			IF UNAME_SYSNAME == "Windows":
+				ret = Requesthandler_GetAuthCredentials_Windows(pyBrowser, pyIsProxy, pyHost, pyPort, pyRealm, pyScheme, pyUsername, pyPassword)
+				if ret:
+					PyStringToCefString(pyUsername[0], cefUsername)
+					PyStringToCefString(pyPassword[0], cefPassword)
+				return <cbool>bool(ret)
+			return <cbool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
 # Using "with nogil" in this function, so this needs to be a "cdef function".
-cdef cbool Requesthandler_GetAuthCredentials_Default(browser, isProxy, host, port, realm, scheme, username, password) except *:
+cdef cbool Requesthandler_GetAuthCredentials_Windows(browser, isProxy, host, port, realm, scheme, username, password) except *:
 	
 	cdef AuthCredentialsData* credentialsData
 	innerWindowID = browser.GetInnerWindowID() # innerWindowID is a top window for a popup
@@ -222,9 +224,9 @@ cdef cbool Requesthandler_GetAuthCredentials_Default(browser, isProxy, host, por
 		if str != bytes:
 			# c_str() returned bytes.
 			if type(username[0]) == bytes:
-				username[0] = username[0].decode(__applicationSettings["unicode_to_bytes_encoding"])
+				username[0] = username[0].decode(g_applicationSettings["unicode_to_bytes_encoding"])
 			if type(password[0]) == bytes:
-				password[0] = password[0].decode(__applicationSettings["unicode_to_bytes_encoding"])
+				password[0] = password[0].decode(g_applicationSettings["unicode_to_bytes_encoding"])
 		return <cbool>True
 
 cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(

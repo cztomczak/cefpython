@@ -16,8 +16,8 @@ if sys.version_info.major == 2:
 else:
 	from urllib.request import pathname2url as urllib_pathname2url
 
-__debug = False
-__windows = {} # windowID(int): className
+g_debug = False
+g_windows = {} # windowID(int): className
 
 def GetRealPath(file=None, encodeURL=False):
 	
@@ -52,8 +52,8 @@ def GetRealPath(file=None, encodeURL=False):
 def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=None, windowProc=None):
 
 	"""
-	for key in __windows:
-		if __windows[key] == className:
+	for key in g_windows:
+		if g_windows[key] == className:
 			raise Exception("There was already created a window with that className: %s."
 				"Each created window must have an unique className." % className)			
 	"""
@@ -93,13 +93,13 @@ def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=Non
 	#noinspection PyUnusedLocal
 	atomclass = win32gui.RegisterClass(wndclass)
 
-	if __debug:
+	if g_debug:
 		print("win32gui.RegisterClass(wndclass)")
 		print("GetLastError(): %s" % GetLastError())
 
 	if xpos is None or ypos is None:
 		# Center window on the screen.
-		if __debug:
+		if g_debug:
 			print("Centering window on the screen.")
 		screenx = win32api.GetSystemMetrics(win32con.SM_CXSCREEN)
 		screeny = win32api.GetSystemMetrics(win32con.SM_CYSCREEN)
@@ -112,7 +112,7 @@ def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=Non
 			win32con.WS_OVERLAPPEDWINDOW | win32con.WS_CLIPCHILDREN | win32con.WS_VISIBLE,
 			xpos, ypos, width, height, # xpos, ypos, width, height
 			0, 0, wndclass.hInstance, None)
-	__windows[windowID] = className
+	g_windows[windowID] = className
 
 	if icon:
 		if bigIcon:
@@ -120,7 +120,7 @@ def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=Non
 		if smallIcon:
 			win32api.SendMessage(windowID, win32con.WM_SETICON, win32con.ICON_SMALL, smallIcon)
 	
-	if __debug:
+	if g_debug:
 		print("windowID=%s" % windowID)
 
 	return windowID
@@ -134,14 +134,14 @@ def DestroyWindow(windowID):
 	win32gui.DestroyWindow(windowID)
 	#className = GetWindowClassName(windowID)
 	#win32gui.UnregisterClass(className, None)
-	#del __windows[windowID] # Let window with this className be created again.
+	#del g_windows[windowID] # Let window with this className be created again.
 	
 
 def GetWindowClassName(windowID):
 
-	for key in __windows:
+	for key in g_windows:
 		if key == windowID:
-			return __windows[key]
+			return g_windows[key]
 
 def MoveWindow(windowID, xpos=None, ypos=None, width=None, height=None, center=None):
 
@@ -193,6 +193,6 @@ def MessageLoop(className):
 
 if __name__ == "__main__":
 	
-	__debug = True
+	g_debug = True
 	hwnd = CreateWindow("Test window", "testwindow", 800, 600)
 	MessageLoop("testwindow")

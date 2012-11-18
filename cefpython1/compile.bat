@@ -1,4 +1,4 @@
-del "cefexample\cefpython.pyd"
+del "win_example\cefpython.pyd"
 del "setup\cefpython.pyd"
 
 for /R %~dp0setup\ %%f in (*.pyx) do del "%%f"
@@ -23,10 +23,10 @@ rmdir /S /Q "build\"
 
 call "C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\mt.exe" -nologo -manifest %~dp0\cefpython.pyd.manifest -outputresource:%~dp0\setup\cefpython.pyd;2
 
-move "cefpython.pyd" "../cefexample/cefpython.pyd"
+move "cefpython.pyd" "../win_example/cefpython.pyd"
 
 cd ..
-cd cefexample
+cd win_example
 
 call python "cefadvanced.py"
 

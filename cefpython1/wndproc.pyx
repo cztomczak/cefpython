@@ -5,10 +5,10 @@
 include "imports.pyx"
 include "utils.pyx"
 
-# Note: pywin32 does not send WM_CREATE message.
-
-# WM_SETFOCUS and others must be in lower or camel case as we import
-# declarations from windows.h and "already declared" errors appear.
+# Notes:
+# - pywin32 does not send WM_CREATE message.
+# - WM_SETFOCUS and others must be in lower or camel case as we import
+#   declarations from windows.h and "already declared" errors appear.
 
 def wm_SetFocus(windowID, msg, wparam, lparam):
 	

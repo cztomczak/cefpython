@@ -23,7 +23,7 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 		raise Exception("V8ValueToPyValue() failed: data passed from Javascript to Python has"
 				" more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
 
-	if __debug:
+	if g_debug:
 		# print("V8ValueToPyValue nestingLevel: %s" % nestingLevel)
 		pass
 
@@ -98,7 +98,7 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 
 	cdef cbool sameContext
 
-	if __debug:
+	if g_debug:
 		# print("PyValueToV8Value nestingLevel: %s" % nestingLevel)
 		sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
 		if not sameContext:
@@ -117,11 +117,11 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 	if bytes == str: 
 		# Python 2.7
 		if pyValueType == unicode: # unicode string to bytes string
-			pyValue = pyValue.encode(__applicationSettings["unicode_to_bytes_encoding"])
+			pyValue = pyValue.encode(g_applicationSettings["unicode_to_bytes_encoding"])
 	else:
 		# Python 3.2
 		if pyValueType == bytes: # bytes to string
-			pyValue = pyValue.decode(__applicationSettings["unicode_to_bytes_encoding"])
+			pyValue = pyValue.decode(g_applicationSettings["unicode_to_bytes_encoding"])
 	
 	if pyValueType == tuple:
 		pyValue = list(pyValue)

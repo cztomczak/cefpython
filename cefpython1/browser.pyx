@@ -8,17 +8,17 @@ include "javascriptbindings.pyx"
 
 # Global variables.
 
-cdef map[int, CefRefPtr[CefBrowser]] __cefBrowsers # innerWindowID : browser # a pointer would be: new map[int, CefRefPtr[CefBrowser]]()
-__pyBrowsers = {}
+cdef map[int, CefRefPtr[CefBrowser]] g_cefBrowsers # innerWindowID : browser # a pointer would be: new map[int, CefRefPtr[CefBrowser]]()
+g_pyBrowsers = {}
 
 # This dictionary list of popup browsers is never cleaned, it may contain old inner
 # window ID's as keys. Popup window might be created via window.open() and
 # we have no control over it. This list of popup browsers is for GetPyBrowserByCefBrowser()
 # so that we cache PyBrowser() objects, as there might a lot of LoadHandler events
 # that call this function and instantiating a new class for each of these events is too much overhead.
-__popupPyBrowsers = {} # Just a cache.
+g_popupPyBrowsers = {} # Just a cache.
 
-__browserInnerWindows = {} # topWindowID : innerWindowID (CefBrowser.GetWindowHandle)
+g_browserInnerWindows = {} # topWindowID : innerWindowID (CefBrowser.GetWindowHandle)
 
 '''
 No need for global variables, code below works.
@@ -34,7 +34,7 @@ cdef class MyBrowser:
 		pass
 
 cdef MyBrowser m = MyBrowser()
-m.cefBrowser = __cefBrowsers[1]
+m.cefBrowser = g_cefBrowsers[1]
 
 '''
 
@@ -61,7 +61,7 @@ class PyBrowser:
 			# We do this check only for non-popup windows.
 			
 			# Functions in this class can be called only if topWindowID is set, as they call
-			# GetCefBrowserByInnerWindowID() and this one uses __cefBrowsers[] which
+			# GetCefBrowserByInnerWindowID() and this one uses g_cefBrowsers[] which
 			# are set only when creating Browser objects explicitily and topWindowID's are
 			# provided.
 			
@@ -168,18 +168,18 @@ class PyBrowser:
 
 	def CloseBrowser(self):
 
-		global __cefBrowsers
-		global __pyBrowsers
-		global __browserInnerWindows
+		global g_cefBrowsers
+		global g_pyBrowsers
+		global g_browserInnerWindows
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
-		__cefBrowsers.erase(<int>self.__innerWindowID)
-		del __pyBrowsers[self.__innerWindowID]
+		g_cefBrowsers.erase(<int>self.__innerWindowID)
+		del g_pyBrowsers[self.__innerWindowID]
 		
 		# -1 == Popup, the window wasn't created by us, so we don't have the topWindowID.
 		# See -1 value in GetPyBrowserByCefBrowser().
 		if -1 != self.__topWindowID:
-			del __browserInnerWindows[self.__topWindowID]
+			del g_browserInnerWindows[self.__topWindowID]
 
 		self.__topWindowID = 0
 		self.__innerWindowID = 0

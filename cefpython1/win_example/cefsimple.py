@@ -1,11 +1,18 @@
 # Simple CEF Python application, 
 # for more advanced features see "cefadvanced.py"
 
+import platform
+if platform.architecture()[0] != "32bit":
+	raise Exception("Architecture not supported: %s" % platform.architecture()[0])
+
+import sys
+if not sys.hexversion >= 0x020700F0:
+	raise Exception("Python version not supported: %s" % sys.version)
+
 import cefpython
 import cefwindow
 import win32con
 import win32gui
-import sys
 
 def CefSimple():
 	sys.excepthook = cefpython.ExceptHook

@@ -2,11 +2,11 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from windows cimport HWND
 from cef_ptr cimport CefRefPtr
-cimport cef_win
+IF UNAME_SYSNAME == "Windows":
+	from cef_win cimport CefWindowHandle, CefWindowInfo
 from cef_string cimport CefString
-cimport cef_client
+from cef_client cimport CefClient
 from cef_type_wrappers cimport CefSettings, CefBrowserSettings
 from libcpp cimport bool as cbool
 from libcpp.vector cimport vector
@@ -26,8 +26,8 @@ cdef extern from "include/cef_browser.h":
 		CefRefPtr[CefFrame] GetFrame(CefString& name)
 		void GetFrameNames(vector[CefString]& names)
 		CefRefPtr[CefFrame] GetMainFrame()
-		HWND GetOpenerWindowHandle()
-		HWND GetWindowHandle()
+		CefWindowHandle GetOpenerWindowHandle()
+		CefWindowHandle GetWindowHandle()
 		double GetZoomLevel()
 		void GoBack()
 		void GoForward()
@@ -49,7 +49,7 @@ cdef extern from "include/cef_browser.h" namespace "CefBrowser":
 	
 	# Namespace is also a way to import a static method.	
 	cdef CefRefPtr[CefBrowser] CreateBrowserSync(
-		cef_win.CefWindowInfo, 
-		CefRefPtr[cef_client.CefClient], 
+		CefWindowInfo, 
+		CefRefPtr[CefClient], 
 		CefString,
 		CefBrowserSettings)

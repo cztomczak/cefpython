@@ -150,7 +150,7 @@ def EnforceWindowIcon(pyBrowser):
 
 	if not iconBig and not iconSmall:
 
-		if __debug:
+		if g_debug:
 			print("EnforceWindowIcon(): setting icon for a popup, inheriting icon from parent")
 
 		parentWindowID = pyBrowser.GetOpenerWindowID()
