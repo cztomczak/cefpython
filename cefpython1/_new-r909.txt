@@ -1,0 +1,14 @@
+Add a new CefGetGeolocation function for retrieving geolocation information via
+an API callback ( issue #764 ).
+
+- Expose tracing functionality via new cef_trace.h and cef_trace_event.h headers
+( issue #711 ).
+
+Add CefV8ContextHandler::OnUncaughtException callback ( issue #736 ).
+
+Eliminate use of scoped directories ( issue #670 ).
+- related to cefpython Issue 2 - app error on exit
+
+Create a temporary cache_path directory if none is specified ( issue #735 ).
+
+Add CefZoomHandler interface to support custom zoom handling ( issue #733 ).

@@ -1,4 +1,0 @@
-- Get rid of mutable arguments:
-	PyBrowser.__init__
-	Initialize()
-
