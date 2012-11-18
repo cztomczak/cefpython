@@ -556,6 +556,9 @@ class Browser:
 	def HidePopup(self):
 		return None
 
+	def IsFullscreen(self):
+		return False
+
 	def IsPopup(self):
 		return False
 
@@ -607,6 +610,9 @@ class Browser:
 		return None
 
 	def StopFinding(self, clearSelection):
+		return None
+
+	def ToggleFullscreen(self):
 		return None
 
 #

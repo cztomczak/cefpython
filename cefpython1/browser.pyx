@@ -48,6 +48,12 @@ class PyBrowser:
 	__javascriptBindings = None # JavascriptBindings class.
 	__userData = {}
 	
+	# Properties used by ToggleFullscreen().
+	__isFullscreen = False
+	__gwlStyle = 0
+	__gwlExStyle = 0
+	__windowRect = None
+	
 	def __init__(self, topWindowID, innerWindowID, clientHandlers=None, javascriptBindings=None):
 
 		self.__topWindowID = topWindowID
@@ -310,6 +316,10 @@ class PyBrowser:
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		(<CefBrowser*>(cefBrowser.get())).HidePopup()
 
+	def IsFullscreen(self):
+
+		return self.__isFullscreen
+
 	def IsPopup(self):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
@@ -362,6 +372,51 @@ class PyBrowser:
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		(<CefBrowser*>(cefBrowser.get())).StopFinding(<cbool>bool(clearSelection))
 
+	def ToggleFullscreen(self):
 
+		IF UNAME_SYSNAME == "Windows":
+			cdef HWND hwnd = <HWND><int>self.GetWindowID()
+			cdef RECT rect
+			cdef HMONITOR monitor
+			cdef MONITORINFO monitorInfo
+			monitorInfo.cbSize = sizeof(monitorInfo)
 
-	
+			# Logic copied from chromium > fullscreen_handler.cc > FullscreenHandler::SetFullscreenImpl:
+			# http://src.chromium.org/viewvc/chrome/trunk/src/ui/views/win/fullscreen_handler.cc
+			for_metro = False
+			if not self.__isFullscreen:
+				self.__maximized = IsZoomed(hwnd)
+				if self.__maximized:
+					SendMessage(hwnd, WM_SYSCOMMAND, SC_RESTORE, 0)
+				self.__gwlStyle = GetWindowLong(hwnd, GWL_STYLE)
+				self.__gwlExStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
+				GetWindowRect(hwnd, &rect)
+				self.__windowRect = (rect.left, rect.top, rect.right, rect.bottom)
+				
+			if not self.__isFullscreen:
+				remove_style = WS_CAPTION | WS_THICKFRAME
+				remove_exstyle = WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE
+				SetWindowLong(hwnd, GWL_STYLE, self.__gwlStyle & ~(remove_style))
+				SetWindowLong(hwnd, GWL_EXSTYLE, self.__gwlExStyle & ~(remove_exstyle))
+				if not for_metro:
+					# MONITOR_DEFAULTTONULL, MONITOR_DEFAULTTOPRIMARY, MONITOR_DEFAULTTONEAREST
+					monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+					GetMonitorInfo(monitor, &monitorInfo)
+					left = monitorInfo.rcMonitor.left
+					top = monitorInfo.rcMonitor.top
+					right = monitorInfo.rcMonitor.right
+					bottom = monitorInfo.rcMonitor.bottom
+					SetWindowPos(hwnd, NULL, left, top, right-left, bottom-top,
+							SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
+			else:
+				SetWindowLong(hwnd, GWL_STYLE, int(self.__gwlStyle))
+				SetWindowLong(hwnd, GWL_EXSTYLE, int(self.__gwlExStyle))
+				if not for_metro:
+					(left, top, right, bottom) = self.__windowRect
+					SetWindowPos(hwnd, NULL, int(left), int(top), int(right-left), int(bottom-top),
+							SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
+				if self.__maximized:
+					SendMessage(hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0)
+
+			self.__isFullscreen = not self.__isFullscreen
+
