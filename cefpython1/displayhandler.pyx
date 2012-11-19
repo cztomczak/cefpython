@@ -49,9 +49,9 @@ cdef public void DisplayHandler_OnContentsSizeChange(CefRefPtr[CefBrowser] cefBr
                                     int height) except * with gil:
 
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
+		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True) # 2nd param = ignoreError
+		# This is while first browser is being created, PyBrowser() has not yet been created.
 		if not pyBrowser:
-			# This is while first browser is created, PyBrowser() has not yet been created.
 			return
 		pyFrame = GetPyFrameByCefFrame(cefFrame)
 		handler = pyBrowser.GetClientHandler("OnContentsSizeChange")

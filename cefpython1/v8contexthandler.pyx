@@ -128,7 +128,7 @@ cdef public void V8ContextHandler_OnContextReleased(
 			CefRefPtr[CefV8Context] cefContext) except * with gil:
 	
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
+		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True) # 2nd param = ignoreError
 		if not pyBrowser:
 			return
 		pyFrame = GetPyFrameByCefFrame(cefFrame)

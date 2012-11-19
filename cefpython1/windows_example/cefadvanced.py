@@ -48,15 +48,27 @@ def CefAdvanced():
 	appSettings["uncaught_exception_stack_size"] = 100 # Must be set so that OnUncaughtException() is called.
 	cefpython.Initialize(applicationSettings=appSettings)
 
+	# Closing main window quits the application as we define WM_DESTOROY message.
 	wndproc = {
-		win32con.WM_CLOSE: CloseApplication, 
+		win32con.WM_CLOSE: CloseWindow, 
 		win32con.WM_DESTROY: QuitApplication,
 		win32con.WM_SIZE: cefpython.wm_Size,
 		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
 		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
 	}
+	"""
+	# Closing second window won't quit application, WM_DESTROY not defined here.
+	wndproc2 = {
+		win32con.WM_CLOSE: CloseWindow, 
+		win32con.WM_SIZE: cefpython.wm_Size,
+		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
+		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
+	}
+	"""
 	windowID = cefwindow.CreateWindow(title="CefAdvanced", className="cefadvanced", 
 		width=800, height=600, icon="icon.ico", windowProc=wndproc)
+	"""windowID2 = cefwindow.CreateWindow(title="CefAdvanced2", className="cefadvanced2", 
+		width=800, height=600, icon="icon.ico", windowProc=wndproc2)"""
 
 	# BrowserSettings, see: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings = dict() 
@@ -82,6 +94,7 @@ def CefAdvanced():
 
 	cefBindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
 	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, cefBindings)
+	"""browser2 = cefpython.CreateBrowser(windowID2, browserSettings, "cefadvanced.html", handlers, cefBindings)"""
 	
 	jsBindings = JSBindings(cefBindings, browser)
 	jsBindings.Bind()
@@ -90,7 +103,7 @@ def CefAdvanced():
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
-def CloseApplication(windowID, msg, wparam, lparam):
+def CloseWindow(windowID, msg, wparam, lparam):
 
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
@@ -324,10 +337,10 @@ class ClientHandler:
 			url = re.sub(r"%s" % re.escape(cefpython.GetRealPath()), "", url, flags=re.IGNORECASE)
 			url = re.sub(r"^%s" % re.escape(os.sep), "", url)
 		raise Exception("%s.\n"
-						"On line %s in %s.\n"
-						"Source of that line: %s\nStack trace:\n%s" % (
-						exception["message"], exception["lineNumber"], 
-						url, exception["sourceLine"], stackTrace))
+		                "On line %s in %s.\n"
+		                "Source of that line: %s\nStack trace:\n%s" % (
+		                exception["message"], exception["lineNumber"], 
+		                url, exception["sourceLine"], stackTrace))
 
 if __name__ == "__main__":
 	
