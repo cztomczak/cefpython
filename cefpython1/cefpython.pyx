@@ -98,12 +98,6 @@ def ExceptHook(type, value, traceobject):
 	CefShutdown()
 	os._exit(1) # so that "finally" does not execute
 
-def InitializeClientHandler():
-
-	InitializeLoadHandler()
-	InitializeKeyboardHandler()
-	InitializeV8ContextHandler()
-
 def Initialize(applicationSettings=None):
 
 	if not applicationSettings:
@@ -119,8 +113,6 @@ def Initialize(applicationSettings=None):
 	# We must make a copy as applicationSettings is a reference only that might get destroyed.
 	global g_applicationSettings
 	g_applicationSettings = copy.deepcopy(applicationSettings)
-
-	InitializeClientHandler()
 
 	if g_debug:
 		print("\n%s" % ("--------" * 8))

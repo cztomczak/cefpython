@@ -18,7 +18,6 @@ import cefwindow
 import win32api # pywin32 extension
 import win32con
 import win32gui
-import ctypes
 import re
 import os
 import imp

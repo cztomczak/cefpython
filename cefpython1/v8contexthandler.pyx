@@ -7,14 +7,13 @@ include "utils.pyx"
 include "functionhandler.pyx"
 include "v8utils.pyx"
 
-def InitializeV8ContextHandler():
+# enum cef_v8_propertyattribute_t.
+V8_PROPERTY_ATTRIBUTE_NONE = <int>cef_types.V8_PROPERTY_ATTRIBUTE_NONE
+V8_PROPERTY_ATTRIBUTE_READONLY = <int>cef_types.V8_PROPERTY_ATTRIBUTE_READONLY
+V8_PROPERTY_ATTRIBUTE_DONTENUM = <int>cef_types.V8_PROPERTY_ATTRIBUTE_DONTENUM
+V8_PROPERTY_ATTRIBUTE_DONTDELETE = <int>cef_types.V8_PROPERTY_ATTRIBUTE_DONTDELETE
 
-	# Callbacks - make sure event names are
-	global g_clientHandler
-	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnContextCreated(
-		<OnContextCreated_type>V8ContextHandler_OnContextCreated)
-
-cdef void V8ContextHandler_OnContextCreated(
+cdef public void V8ContextHandler_OnContextCreated(
 			CefRefPtr[CefBrowser] cefBrowser,
 			CefRefPtr[CefFrame] cefFrame,
 			CefRefPtr[CefV8Context] v8Context) except * with gil:
@@ -123,8 +122,13 @@ cdef void V8ContextHandler_OnContextCreated(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-# enum cef_v8_propertyattribute_t.
-V8_PROPERTY_ATTRIBUTE_NONE = <int>cef_types.V8_PROPERTY_ATTRIBUTE_NONE
-V8_PROPERTY_ATTRIBUTE_READONLY = <int>cef_types.V8_PROPERTY_ATTRIBUTE_READONLY
-V8_PROPERTY_ATTRIBUTE_DONTENUM = <int>cef_types.V8_PROPERTY_ATTRIBUTE_DONTENUM
-V8_PROPERTY_ATTRIBUTE_DONTDELETE = <int>cef_types.V8_PROPERTY_ATTRIBUTE_DONTDELETE
+cdef public void V8ContextHandler_OnContextReleased(
+			CefRefPtr[CefBrowser] cefBrowser,
+			CefRefPtr[CefFrame] cefFrame,
+			CefRefPtr[CefV8Context] v8Context) except * with gil:
+	
+	try:
+		pass
+	except:
+		(exc_type, exc_value, exc_trace) = sys.exc_info()
+		sys.excepthook(exc_type, exc_value, exc_trace)
