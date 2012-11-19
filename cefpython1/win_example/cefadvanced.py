@@ -42,6 +42,7 @@ def CefAdvanced():
 	appSettings = dict()
 	appSettings["log_file"] = cefpython.GetRealPath("debug.log")
 	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
+	appSettings["uncaught_exception_stack_size"] = 100 # Must be set so that OnUncaughtException() is called.
 	cefpython.Initialize(applicationSettings=appSettings)
 
 	wndproc = {
@@ -74,6 +75,7 @@ def CefAdvanced():
 	handlers["OnKeyEvent"] = (clientHandler.OnKeyEvent, None, clientHandler.OnKeyEvent)
 	handlers["OnConsoleMessage"] = clientHandler.OnConsoleMessage
 	handlers["OnResourceResponse"] = clientHandler.OnResourceResponse
+	handlers["OnUncaughtException"] = clientHandler.OnUncaughtException
 
 	cefBindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
 	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, cefBindings)
@@ -113,7 +115,6 @@ class JSBindings:
 		python = Python()
 		python.browser = self.browser
 
-		self.cefBindings.SetFunction("HandleJavascriptError", HandleJavascriptError)
 		self.cefBindings.SetFunction("alert", python.Alert) # overwrite "window.alert"
 		self.cefBindings.SetObject("python", python)
 		self.cefBindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
@@ -143,17 +144,6 @@ class JSBindings:
 		self.Bind()
 		self.cefBindings.Rebind()
 		# print("cefwindow.test=%s" % cefwindow.test)
-
-def HandleJavascriptError(errorMessage, url, lineNumber):
-
-	if re.match(r"file:/+", url):
-		# Get a relative path of the html/js file, get rid of the "file://d:/.../cefpython/".
-		url = re.sub(r"^file:/+", "", url)
-		url = re.sub(r"[/\\]+", re.escape(os.sep), url)
-		url = re.sub(r"%s" % re.escape(cefpython.GetRealPath()), "", url, flags=re.IGNORECASE)
-		url = re.sub(r"^%s" % re.escape(os.sep), "", url)
-	# stackTrace = cefpython.GetJavascriptStackTraceFormatted() # Getting stack trace from window.onerror context doesn't work.
-	raise Exception("%s\n in %s on line %s\n\n" % (errorMessage, url, lineNumber))
 
 class Python:
 
@@ -320,6 +310,21 @@ class ClientHandler:
 		# This function does not get called for local disk sources (file:///).
 		print("Resource: %s (status=%s)" % (url, response.GetStatus()))
 
+	def OnUncaughtException(self, browser, frame, exception, stackTrace):
+
+		url = exception["scriptResourceName"]
+		stackTrace = cefpython.FormatJavascriptStackTrace(stackTrace)
+		if re.match(r"file:/+", url):
+			# Get a relative path of the html/js file, get rid of the "file://d:/.../cefpython/".
+			url = re.sub(r"^file:/+", "", url)
+			url = re.sub(r"[/\\]+", re.escape(os.sep), url)
+			url = re.sub(r"%s" % re.escape(cefpython.GetRealPath()), "", url, flags=re.IGNORECASE)
+			url = re.sub(r"^%s" % re.escape(os.sep), "", url)
+		raise Exception("%s.\n"
+						"On line %s in %s.\n"
+						"Source of that line: %s\nStack trace:\n%s" % (
+						exception["message"], exception["lineNumber"], 
+						url, exception["sourceLine"], stackTrace))
 
 if __name__ == "__main__":
 	

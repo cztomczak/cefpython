@@ -14,14 +14,14 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 def ExceptHook(type, value, traceObject):
 	return None
 
+def FormatJavascriptStackTrace(stackTrace):
+	return ""
+
 def GetBrowserByWindowID(windowID):
 	return Browser()
 
 def GetJavascriptStackTrace(frameLimit=100):
 	return []
-
-def GetJavascriptStackTraceFormatted(frameLimit=100):
-	return ""
 
 def GetRealPath(file=None, encodeURL=False):
 	return ""
@@ -60,79 +60,80 @@ DESKTOP_IN_PROCESS_COMMAND_BUFFER = 0
 
 # Values are dummy, these are NOT the defaults.
 ApplicationSettings = {
-	"multi_threaded_message_loop": False,
+	"auto_detect_proxy_settings_enabled": False,
 	"cache_path": "",
-	"user_agent": "",
-	"product_version": "",
-	"locale": "",
 	"extra_plugin_paths": [""],
+	"graphics_implementation": ANGLE_IN_PROCESS,
+	"javascript_flags": "",
+	"local_storage_quota": 5*1024*1024,
+	"locale": "",
+	"locales_dir_path": "",
 	"log_file": "",
 	"log_severity": LOGSEVERITY_VERBOSE,
-	"graphics_implementation": ANGLE_IN_PROCESS,
-	"local_storage_quota": 5*1024*1024,
-	"session_storage_quota": 5*1024*1024,
-	"javascript_flags": "",
-	"auto_detect_proxy_settings_enabled": False,
-	"resources_dir_path": "",
-	"locales_dir_path": "",
+	"multi_threaded_message_loop": False,
 	"pack_loading_disabled": False,
+	"product_version": "",
+	"resources_dir_path": "",
+	"session_storage_quota": 5*1024*1024,
 	"unicode_to_bytes_encoding": "utf-8",
+	"uncaught_exception_stack_size": 0,
+	"user_agent": "",
 }
 
 # Values are dummy, these are NOT the defaults.
 BrowserSettings = {
+	"accelerated_2d_canvas_disabled": False,
+	"accelerated_compositing_enabled": False,
+	"accelerated_filters_disabled": False,
+	"accelerated_layers_disabled": False,
+	"accelerated_painting_disabled": False,
+	"accelerated_plugins_disabled": False,
+	"accelerated_video_disabled": False,
 	"animation_frame_rate": 0,
-	"drag_drop_disabled": False,
-	"load_drops_disabled": False,
-	"history_disabled": False,
-	"standard_font_family": "",
-	"fixed_font_family": "",
-	"serif_font_family": "",
-	"sans_serif_font_family": "",
+	"application_cache_disabled": False,
+	"author_and_user_styles_disabled": False,
+	"caret_browsing_enabled": False,
 	"cursive_font_family": "",
-	"fantasy_font_family": "",
-	"default_font_size": 0,
-	"default_fixed_font_size": 0,
-	"minimum_font_size": 0,
-	"minimum_logical_font_size": 0,
-	"remote_fonts_disabled": False,
+	"databases_disabled": False,
 	"default_encoding": "iso-8859-1",
+	"default_fixed_font_size": 0,
+	"default_font_size": 0,
+	"developer_tools_disabled": False,
+	"dom_paste_disabled": False,
+	"drag_drop_disabled": False,
 	"encoding_detector_enabled": False,
+	"fantasy_font_family": "",
+	"file_access_from_file_urls_allowed": False,
+	"fixed_font_family": "",
+	"fullscreen_enabled": False,
+	"history_disabled": False,
+	"hyperlink_auditing_disabled": False,
+	"image_load_disabled": False,
+	"java_disabled": False,
+	"javascript_access_clipboard_disallowed": False,
+	"javascript_close_windows_disallowed": False,
 	"javascript_disabled": False,
 	"javascript_open_windows_disallowed": False,
-	"javascript_close_windows_disallowed": False,
-	"javascript_access_clipboard_disallowed": False,
-	"dom_paste_disabled": False,
-	"caret_browsing_enabled": False,
-	"java_disabled": False,
+	"load_drops_disabled": False,
+	"local_storage_disabled": False,
+	"minimum_font_size": 0,
+	"minimum_logical_font_size": 0,
+	"page_cache_disabled": False,
 	"plugins_disabled": False,
-	"universal_access_from_file_urls_allowed": False,
-	"file_access_from_file_urls_allowed": False,
-	"web_security_disabled": False,
-	"xss_auditor_enabled": False,
-	"image_load_disabled": False,
+	"remote_fonts_disabled": False,
+	"sans_serif_font_family": "",
+	"serif_font_family": "",
 	"shrink_standalone_images_to_fit": False,
 	"site_specific_quirks_disabled": False,
-	"text_area_resize_disabled": False,
-	"page_cache_disabled": False,
+	"standard_font_family": "",
 	"tab_to_links_disabled": False,
-	"hyperlink_auditing_disabled": False,
+	"text_area_resize_disabled": False,
+	"universal_access_from_file_urls_allowed": False,
 	"user_style_sheet_enabled": False,
 	"user_style_sheet_location": "",
-	"author_and_user_styles_disabled": False,
-	"local_storage_disabled": False,
-	"databases_disabled": False,
-	"application_cache_disabled": False,
+	"web_security_disabled": False,
 	"webgl_disabled": False,
-	"accelerated_compositing_enabled": False,
-	"accelerated_layers_disabled": False,
-	"accelerated_video_disabled": False,
-	"accelerated_2d_canvas_disabled": False,
-	"accelerated_painting_disabled": False,
-	"accelerated_filters_disabled": False,
-	"accelerated_plugins_disabled": False,
-	"developer_tools_disabled": False,
-	"fullscreen_enabled": False,
+	"xss_auditor_enabled": False,
 }
 
 #
@@ -396,13 +397,13 @@ ERR_RESPONSE_HEADERS_TOO_BIG = 0
 ERR_CACHE_MISS = 0
 ERR_INSECURE_RESPONSE = 0
 
-def OnLoadEnd(browser, frame, httpStatusCode): 
+def LoadHandler_OnLoadEnd(browser, frame, httpStatusCode): 
 	return None
 
-def OnLoadError(browser, frame, errorCode, failedURL, errorText_out=[""]): 
+def LoadHandler_OnLoadError(browser, frame, errorCode, failedURL, errorText_out=[""]): 
 	return False
 
-def OnLoadStart(browser, frame): 
+def LoadHandler_OnLoadStart(browser, frame): 
 	return None
 
 #
@@ -447,6 +448,13 @@ def RequestHandler_GetAuthCredentials(browser, isProxy, host, port, realm, schem
 def RequestHandler_GetCookieManager(browser, mainURL):
 	return cookieManager
 """
+
+#
+# JavascriptContextHandler
+#
+
+def JavascriptContextHandler_OnUncaughtException(browser, frame, exception, stackTrace):
+	return None
 
 #
 # JavascriptBindings class.

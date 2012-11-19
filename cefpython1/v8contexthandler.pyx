@@ -16,7 +16,7 @@ V8_PROPERTY_ATTRIBUTE_DONTDELETE = <int>cef_types.V8_PROPERTY_ATTRIBUTE_DONTDELE
 cdef public void V8ContextHandler_OnContextCreated(
 			CefRefPtr[CefBrowser] cefBrowser,
 			CefRefPtr[CefFrame] cefFrame,
-			CefRefPtr[CefV8Context] v8Context) except * with gil:
+			CefRefPtr[CefV8Context] cefContext) except * with gil:
 
 	# This handler may also be called by JavascriptBindings.Rebind().
 	# This handler may be called multiple times for the same frame - rebinding.
@@ -68,19 +68,19 @@ cdef public void V8ContextHandler_OnContextCreated(
 		if pyBrowser.IsPopup() and not bindings.GetBindToPopups():
 			return
 
-		window = (<CefV8Context*>(v8Context.get())).GetGlobal()
+		window = (<CefV8Context*>(cefContext.get())).GetGlobal()
 
 		if jsProperties:
 			for key,val in jsProperties.items():
 				key = str(key)
 				PyStringToCefString(key, cefPropertyName)
-				(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(val, v8Context), V8_PROPERTY_ATTRIBUTE_NONE)
+				(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(val, cefContext), V8_PROPERTY_ATTRIBUTE_NONE)
 
 		if jsFunctions or jsObjects:
 			
 			# CefRefPtr are smart pointers and should release memory automatically for V8FunctionHandler().
 			functionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
-			(<V8FunctionHandler*>(functionHandler.get())).SetContext(v8Context)
+			(<V8FunctionHandler*>(functionHandler.get())).SetContext(cefContext)
 			(<V8FunctionHandler*>(functionHandler.get())).SetCallback_V8Execute(<V8Execute_type>FunctionHandler_Execute)
 			v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(functionHandler.get()))
 
@@ -125,7 +125,7 @@ cdef public void V8ContextHandler_OnContextCreated(
 cdef public void V8ContextHandler_OnContextReleased(
 			CefRefPtr[CefBrowser] cefBrowser,
 			CefRefPtr[CefFrame] cefFrame,
-			CefRefPtr[CefV8Context] v8Context) except * with gil:
+			CefRefPtr[CefV8Context] cefContext) except * with gil:
 	
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
@@ -146,3 +146,34 @@ cdef public void V8ContextHandler_OnContextReleased(
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public void V8ContextHandler_OnUncaughtException(
+		CefRefPtr[CefBrowser] cefBrowser,
+		CefRefPtr[CefFrame] cefFrame,
+		CefRefPtr[CefV8Context] cefContext,
+		CefRefPtr[CefV8Exception] cefException,
+		CefRefPtr[CefV8StackTrace] cefStackTrace) except * with gil:
+
+	cdef CefRefPtr[CefV8Exception] v8Exception
+	cdef CefV8Exception* v8ExceptionPtr
+
+	try:
+		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
+		pyFrame = GetPyFrameByCefFrame(cefFrame)
+		
+		v8ExceptionPtr = <CefV8Exception*>(cefException.get())
+		pyException = {}
+		pyException["lineNumber"] = v8ExceptionPtr.GetLineNumber()
+		pyException["message"] = CefStringToPyString(v8ExceptionPtr.GetMessage())
+		pyException["scriptResourceName"] = CefStringToPyString(v8ExceptionPtr.GetScriptResourceName())
+		pyException["sourceLine"] = CefStringToPyString(v8ExceptionPtr.GetSourceLine())
+		
+		pyStackTrace = CefV8StackTraceToPython(cefStackTrace)
+		
+		handler = pyBrowser.GetClientHandler("OnUncaughtException")
+		if handler:
+			handler(pyBrowser, pyFrame, pyException, pyStackTrace)
+	except:
+		(exc_type, exc_value, exc_trace) = sys.exc_info()
+		sys.excepthook(exc_type, exc_value, exc_trace)
+
