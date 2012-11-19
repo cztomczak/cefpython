@@ -128,7 +128,21 @@ cdef public void V8ContextHandler_OnContextReleased(
 			CefRefPtr[CefV8Context] v8Context) except * with gil:
 	
 	try:
-		pass
+		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
+		if not pyBrowser:
+			return
+		pyFrame = GetPyFrameByCefFrame(cefFrame)
+		isMainFrame = pyFrame.IsMain()
+		
+		if g_debug: print("V8ContextHandler_OnContextReleased: frame id=%s" % pyFrame.GetIdentifier())
+		
+		bindings = pyBrowser.GetJavascriptBindings()
+		if bindings:
+			bindings.RemoveFrame(pyBrowser, pyFrame)
+		
+		g_cefFrames.erase(<cef_types.int64>pyFrame.GetIdentifier())
+		del g_pyFrames[pyFrame.GetIdentifier()]
+		
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)

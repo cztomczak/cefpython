@@ -178,6 +178,9 @@ class PyBrowser:
 		global g_pyBrowsers
 		global g_browserInnerWindows
 
+		if g_debug:
+			print("Browser.CloseBrowser(): topWindowID=%s, innerWindowID=%s" % (self.__topWindowID, self.__innerWindowID))
+
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		g_cefBrowsers.erase(<int>self.__innerWindowID)
 		del g_pyBrowsers[self.__innerWindowID]
