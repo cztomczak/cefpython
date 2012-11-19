@@ -1,5 +1,7 @@
-del "win_example\cefpython.pyd"
-del "setup\cefpython.pyd"
+for /f %%i in ('python -c "import sys; print(str(sys.version_info[0])+str(sys.version_info[1]));"') do set PYVERSION=%%i
+
+del "windows_example\cefpython_py%PYVERSION%.pyd"
+del "setup\cefpython_py%PYVERSION%.pyd"
 
 for /R %~dp0setup\ %%f in (*.pyx) do del "%%f"
 
@@ -21,12 +23,12 @@ rmdir /S /Q "build\"
 @if %ERRORLEVEL% neq 0 pause
 @if %ERRORLEVEL% neq 0 exit
 
-call "C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\mt.exe" -nologo -manifest %~dp0\cefpython.pyd.manifest -outputresource:%~dp0\setup\cefpython.pyd;2
+call "C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\mt.exe" -nologo -manifest %~dp0\cefpython.pyd.manifest -outputresource:%~dp0\setup\cefpython_py%PYVERSION%.pyd;2
 
-move "cefpython.pyd" "../win_example/cefpython.pyd"
+move "cefpython_py%PYVERSION%.pyd" "../windows_example/cefpython_py%PYVERSION%.pyd"
 
 cd ..
-cd win_example
+cd windows_example
 
 call python "cefadvanced.py"
 

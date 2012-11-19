@@ -32,6 +32,8 @@ g_applicationSettings = None
 
 # All .pyx files need to be included here.
 
+include "pyinclude/platform.pxi"
+
 include "imports.pyx"
 include "browser.pyx"
 include "frame.pyx"

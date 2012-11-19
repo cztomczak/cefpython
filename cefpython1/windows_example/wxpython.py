@@ -5,12 +5,15 @@ if platform.architecture()[0] != "32bit":
 	raise Exception("Architecture not supported: %s" % platform.architecture()[0])
 
 import sys
-if not sys.hexversion >= 0x020700F0:
-	raise Exception("Python version not supported: %s" % sys.version)
+if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
+	import cefpython_py27 as cefpython
+elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
+	import cefpython_py32 as cefpython
+else:
+	raise Exception("Unsupported python version: %s" % sys.version)
 
 import wx
 import time
-import cefpython
 
 # Notes:
 # - currently using wx.Timer to imitate message loop, but it would probably be better
