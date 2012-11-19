@@ -84,7 +84,14 @@ class JavascriptBindings:
 	def AddFrame(self, pyBrowser, pyFrame):
 
 		if pyFrame.GetIdentifier() not in self.__frames:
+			if g_debug: print("JavascriptBindings.AddFrame(id=%s)" % pyFrame.GetIdentifier())
 			self.__frames[pyFrame.GetIdentifier()] = (pyBrowser, pyFrame)
+
+	def RemoveFrame(self, pyBrowser, pyFrame):
+
+		if pyFrame.GetIdentifier() in self.__frames:
+			if g_debug: print("JavascriptBindings.RemoveFrame(id=%s)" % pyFrame.GetIdentifier())
+			del self.__frames[pyFrame.GetIdentifier()]
 
 	def Rebind(self):
 		
