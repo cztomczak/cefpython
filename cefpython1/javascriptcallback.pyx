@@ -97,7 +97,7 @@ class JavascriptCallback:
 			# and is ClearException() for that?
 
 			# TODO: call CefV8Exception->GetStackTrace() when it's implemented.
-			stackTrace = GetJavascriptStackTraceFormatted()
+			stackTrace = FormatJavascriptStackTrace(GetJavascriptStackTrace(100))
 
 			raise Exception("JavascriptCallback.Call() failed: javascript exception:\n%s.\nOn line %s in %s.\n"
 			                "Source of that line: %s\n\n%s" % (message, lineNumber, scriptResourceName, sourceLine, stackTrace))

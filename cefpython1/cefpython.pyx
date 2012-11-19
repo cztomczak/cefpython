@@ -257,11 +257,8 @@ def IsKeyModifier(key, modifiers):
 		# Same as: return (KEY_CTRL & modifiers) != KEY_CTRL and (KEY_ALT & modifiers) != KEY_ALT and (KEY_SHIFT & modifiers) != KEY_SHIFT
 	return (key & modifiers) == key
 
-def GetJavascriptStackTrace(frameLimit=100):
+cdef object CefV8StackTraceToPython(CefRefPtr[CefV8StackTrace] cefTrace):
 
-	assert CurrentlyOn(TID_UI), "cefpython.GetJavascriptStackTrace() may only be called on the UI thread"
-
-	cdef CefRefPtr[CefV8StackTrace] cefTrace = cef_v8_stack.GetCurrent(int(frameLimit))
 	cdef int frameCount = (<CefV8StackTrace*>(cefTrace.get())).GetFrameCount()
 	cdef CefRefPtr[CefV8StackFrame] cefFrame
 	cdef CefV8StackFrame* framePtr
@@ -282,10 +279,16 @@ def GetJavascriptStackTrace(frameLimit=100):
 	
 	return pyTrace
 
-def GetJavascriptStackTraceFormatted(frameLimit=100):
+def GetJavascriptStackTrace(frameLimit=100):
 
-	trace = GetJavascriptStackTrace(frameLimit)
-	formatted = "Stack trace:\n"
-	for frameNo, frame in enumerate(trace):
-		formatted += "\t[%s] %s() in %s on line %s (col:%s)\n" % (frameNo, frame["function"], frame["scriptOrSourceURL"], frame["line"], frame["column"])
+	assert CurrentlyOn(TID_UI), "cefpython.GetJavascriptStackTrace() may only be called on the UI thread"
+	cdef CefRefPtr[CefV8StackTrace] cefTrace = cef_v8_stack.GetCurrent(int(frameLimit))
+	return CefV8StackTraceToPython(cefTrace)
+
+def FormatJavascriptStackTrace(stackTrace):
+
+	formatted = ""
+	for frameNo, frame in enumerate(stackTrace):
+		formatted += "\t[%s] %s() in %s on line %s (col:%s)\n" % (
+				frameNo, frame["function"], frame["scriptOrSourceURL"], frame["line"], frame["column"])
 	return formatted

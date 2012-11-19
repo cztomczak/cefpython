@@ -69,6 +69,16 @@ void ClientHandler::OnContextReleased(
   V8ContextHandler_OnContextReleased(cefBrowser, cefFrame, v8Context);
 }
 
+void ClientHandler::OnUncaughtException(
+      CefRefPtr<CefBrowser> browser,
+      CefRefPtr<CefFrame> frame,
+      CefRefPtr<CefV8Context> context,
+      CefRefPtr<CefV8Exception> exception,
+      CefRefPtr<CefV8StackTrace> stackTrace) {
+  REQUIRE_UI_THREAD();
+  V8ContextHandler_OnUncaughtException(browser, frame, context, exception, stackTrace);
+}
+
 // 
 // CefRequestHandler
 //

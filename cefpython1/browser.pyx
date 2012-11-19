@@ -110,6 +110,9 @@ class PyBrowser:
 		
 		# CefKeyboardHandler.
 		allowedHandlers += ["OnKeyEvent"]
+
+		# CefV8ContextHandler.
+		allowedHandlers += ["OnUncaughtException"]
 		
 		# CefRequestHandler.
 		allowedHandlers += ["OnBeforeBrowse", "OnBeforeResourceLoad", "OnResourceRedirect", "OnResourceResponse",
