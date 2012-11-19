@@ -13,7 +13,7 @@ include "utils.pyx"
 def wm_SetFocus(windowID, msg, wparam, lparam):
 	
 
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, False)
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True) # 2nd param = ignoreError
 	if <void*>cefBrowser == NULL:
 		return 0
 
@@ -25,7 +25,7 @@ def wm_SetFocus(windowID, msg, wparam, lparam):
 
 def wm_Size(windowID, msg, wparam, lparam):
 
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, False)
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True) # 2nd param = ignoreError
 	if <void*>cefBrowser == NULL:
 		return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
 
@@ -43,7 +43,7 @@ def wm_Size(windowID, msg, wparam, lparam):
 
 def wm_EraseBkgnd(windowID, msg, wparam, lparam):
 	
-	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, False)
+	cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True) # 2nd param = ignoreError
 	if <void*>cefBrowser == NULL:
 		return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
 
