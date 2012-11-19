@@ -1,8 +1,8 @@
-#ifndef __PYX_HAVE__cefpython
-#define __PYX_HAVE__cefpython
+#ifndef __PYX_HAVE__cefpython_py32
+#define __PYX_HAVE__cefpython_py32
 
 
-#ifndef __PYX_HAVE_API__cefpython
+#ifndef __PYX_HAVE_API__cefpython_py32
 
 #ifndef __PYX_EXTERN_C
   #ifdef __cplusplus
@@ -35,12 +35,12 @@ __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnStatusMessage(CefRefPtr<CefBrows
 __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnTitleChange(CefRefPtr<CefBrowser>, CefString &);
 __PYX_EXTERN_C DL_IMPORT(bool) DisplayHandler_OnTooltip(CefRefPtr<CefBrowser>, CefString &);
 
-#endif /* !__PYX_HAVE_API__cefpython */
+#endif /* !__PYX_HAVE_API__cefpython_py32 */
 
 #if PY_MAJOR_VERSION < 3
-PyMODINIT_FUNC initcefpython(void);
+PyMODINIT_FUNC initcefpython_py32(void);
 #else
-PyMODINIT_FUNC PyInit_cefpython(void);
+PyMODINIT_FUNC PyInit_cefpython_py32(void);
 #endif
 
-#endif /* !__PYX_HAVE__cefpython */
+#endif /* !__PYX_HAVE__cefpython_py32 */

@@ -4,13 +4,16 @@ CEF Python binary distribution
 EXAMPLES
 --------
 
-Run example applications:
+Examples using pywin32 extension:
 - cefsimple.py
 - cefadvanced.py
 
 Embedding CEF in GUI frameworks:
 - pygtk_.py
 - wxpython.py
+
+Browser for testing:
+- cefclient.exe
 
 HELP
 ----
@@ -80,6 +83,11 @@ implementation for HTML5 accelerated content like 2D canvas, 3D CSS and
 WebGL will not function. To use the desktop GL graphics implementation which
 does not require these components (and does not work on all systems) set
 CefSettings.graphics_implementation to DESKTOP_IN_PROCESS.
+
+Test components:
+
+* cefclient application that does not need to be redistributed.
+cefclient.exe
 
 
 ICON

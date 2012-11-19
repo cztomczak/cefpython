@@ -3,6 +3,8 @@
 # Use it for code completion in your IDE.
 # This file does NOT need to be distribitued along with binaries.
 
+raise Exception("A dummy file was imported instead of the PYD module.")
+
 """
 Detailed documentation with examples can be found on wiki pages:
 http://code.google.com/p/cefpython/w/list

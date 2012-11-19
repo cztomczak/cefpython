@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "pyinclude/platform.pxi"
+
 import os
 import sys
 import win32con

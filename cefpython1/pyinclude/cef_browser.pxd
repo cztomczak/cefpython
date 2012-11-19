@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "platform.pxi"
+
 from cef_ptr cimport CefRefPtr
 IF UNAME_SYSNAME == "Windows":
 	from cef_win cimport CefWindowHandle, CefWindowInfo
