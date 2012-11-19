@@ -17,14 +17,7 @@ KEY_ALT = <int>cef_types.KEY_ALT
 KEY_META  = <int>cef_types.KEY_META
 KEY_KEYPAD = <int>cef_types.KEY_KEYPAD
 
-def InitializeKeyboardHandler():
-
-	# Callbacks - make sure event names are proper - hard to detect error.
-	# Call it in cefpython.pyx > InitializeClientHandler().
-	global g_clientHandler
-	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnKeyEvent(<OnKeyEvent_type>KeyboardHandler_OnKeyEvent)
-
-cdef cbool KeyboardHandler_OnKeyEvent(
+cdef public cbool KeyboardHandler_OnKeyEvent(
 		CefRefPtr[CefBrowser] cefBrowser,
 		cef_types.cef_handler_keyevent_type_t eventType,
 		int code,

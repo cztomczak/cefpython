@@ -56,21 +56,7 @@ ERR_RESPONSE_HEADERS_TOO_BIG = <int>cef_types.ERR_RESPONSE_HEADERS_TOO_BIG
 ERR_CACHE_MISS = <int>cef_types.ERR_CACHE_MISS
 ERR_INSECURE_RESPONSE = <int>cef_types.ERR_INSECURE_RESPONSE
 
-def InitializeLoadHandler():
-
-	# Be careful here. If you make a mistake here and set a wrong callback, with wrong parameters,
-	# it won't be detected by the compiler, neither during runtime, you will get some strange values
-	# in function arguments.
-
-	# Call it in cefpython.pyx > InitializeClientHandler().
-
-	# CefLoadHandler callbacks.
-	global g_clientHandler
-	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnLoadEnd(<OnLoadEnd_type>LoadHandler_OnLoadEnd)
-	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnLoadStart(<OnLoadStart_type>LoadHandler_OnLoadStart)
-	(<ClientHandler*>(g_clientHandler.get())).SetCallback_OnLoadError(<OnLoadError_type>LoadHandler_OnLoadError)
-
-cdef void LoadHandler_OnLoadEnd(
+cdef public void LoadHandler_OnLoadEnd(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
 		int httpStatusCode) except * with gil:
@@ -100,7 +86,7 @@ cdef void LoadHandler_OnLoadEnd(
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
 
-cdef void LoadHandler_OnLoadStart(
+cdef public void LoadHandler_OnLoadStart(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame) except * with gil:
 
@@ -120,7 +106,7 @@ cdef void LoadHandler_OnLoadStart(
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
 
-cdef cbool LoadHandler_OnLoadError(
+cdef public cbool LoadHandler_OnLoadError(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
 		cef_types.cef_handler_errorcode_t cefErrorCode,
