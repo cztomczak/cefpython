@@ -13,12 +13,6 @@ else:
 	raise Exception("Unsupported python version: %s" % sys.version)
 
 import wx
-import time
-
-# Notes:
-# - currently using wx.Timer to imitate message loop, but it would probably be better
-# to use wx.CallLater() and wx.lib.pubsub.
-# - would using OnIdle() (wx.EVT_IDLE) be better than OnTimer()?
 
 class MainFrame(wx.Frame):
 
@@ -33,6 +27,7 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
+		"""self.Bind(wx.EVT_IDLE, self.OnIdle)"""
 		
 	def CreateMenu(self):
 
@@ -62,6 +57,9 @@ class MainFrame(wx.Frame):
 		self.browser.CloseBrowser()
 		self.Destroy()
 
+	"""def OnIdle(self, event):
+		cefpython.SingleMessageLoop()"""
+
 class MyApp(wx.App):
 
 	timer = None
@@ -69,30 +67,34 @@ class MyApp(wx.App):
 
 	def OnInit(self):
 
-		cefpython.Initialize()
-		sys.excepthook = cefpython.ExceptHook
-
-		self.timer = wx.Timer(self, self.timerID)
-		self.timer.Start(10) # 10ms
-		wx.EVT_TIMER(self, self.timerID, self.OnTimer)
-		
+		self.CreateTimer()
 		frame = MainFrame()
 		self.SetTopWindow(frame)
 		frame.Show()
-		
 		return True
 
-	def OnExit(self):
+	def CreateTimer(self):
 
-		self.timer.Stop()
-		cefpython.Shutdown()
+		# See "Making a render loop": http://wiki.wxwidgets.org/Making_a_render_loop
+		# Another approach is to use EVT_IDLE in MainFrame, see which fits you better.
+		self.timer = wx.Timer(self, self.timerID)
+		self.timer.Start(10) # 10ms
+		wx.EVT_TIMER(self, self.timerID, self.OnTimer)
 
 	def OnTimer(self, event):
 
 		cefpython.SingleMessageLoop()
 
+	def OnExit(self):
+
+		# When app.MainLoop() returns, SingleMessageLoop() should not be called anymore.
+		self.timer.Stop()
+
 if __name__ == '__main__':
 	
+	cefpython.Initialize() # Initialize cefpython before wx.
+	sys.excepthook = cefpython.ExceptHook
 	print('wx.version=%s' % wx.version())
 	app = MyApp(False)
 	app.MainLoop()
+	cefpython.Shutdown()
