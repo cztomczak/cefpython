@@ -29,7 +29,8 @@ DEBUG = True
 
 # TODO: creating popup windows from python.
 # TODO: creating modal windows from python.
-# TODO: allow to pack html/css/images to a zip and run content from this file, optionally allow to password protect this zip file (see WBEA implementation).
+# TODO: allow to pack html/css/images to a zip and run content from this file, 
+#       optionally allow to password protect this zip file (see WBEA implementation).
 
 def CefAdvanced():
 
