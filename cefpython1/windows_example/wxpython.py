@@ -76,7 +76,7 @@ class MyApp(wx.App):
 	def CreateTimer(self):
 
 		# See "Making a render loop": http://wiki.wxwidgets.org/Making_a_render_loop
-		# Another approach is to use EVT_IDLE in MainFrame, see which fits you better.
+		# Another approach is to use EVT_IDLE in MainFrame, see which one fits you better.
 		self.timer = wx.Timer(self, self.timerID)
 		self.timer.Start(10) # 10ms
 		wx.EVT_TIMER(self, self.timerID, self.OnTimer)
