@@ -28,7 +28,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.mainFrame = MainFrame(self)
 		self.setCentralWidget(self.mainFrame)
 		self.resize(600, 480)
-		self.setWindowTitle('PyQT example')
+		self.setWindowTitle('PySide example')
 		self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
 	def createMenu(self):
