@@ -1,4 +1,4 @@
-#include "clienthandler.h"
+#include "client_handler.h"
 #include <stdio.h>
 
 // Cython doesn't know nothing about 'const' so we need to remove it,
@@ -205,5 +205,35 @@ void ClientHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
 bool ClientHandler::OnTooltip(CefRefPtr<CefBrowser> browser,
                          CefString& text) {
   return DisplayHandler_OnTooltip(browser, text); 
+}
+
+//
+// CefLifeSpanHandler
+//
+
+bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
+  return LifeSpanHandler_DoClose(browser);
+}
+
+void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
+  LifeSpanHandler_OnAfterCreated(browser);
+}
+
+void ClientHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
+  LifeSpanHandler_OnBeforeClose(browser);
+}
+
+bool ClientHandler::OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
+                           const CefPopupFeatures& popupFeatures,
+                           CefWindowInfo& windowInfo,
+                           const CefString& url,
+                           CefRefPtr<CefClient>& client,
+                           CefBrowserSettings& settings) {
+  // @TODO
+  return false;
+}
+
+bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) {
+  return LifeSpanHandler_RunModal(browser);
 }
 

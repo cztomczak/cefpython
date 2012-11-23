@@ -4,7 +4,7 @@
 
 from cef_client cimport CefClient
 
-cdef extern from "clienthandler/clienthandler.h":
+cdef extern from "client_handler/client_handler.h":
 
 	cdef cppclass ClientHandler(CefClient):
 		pass

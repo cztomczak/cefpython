@@ -5,7 +5,7 @@
 include "imports.pyx"
 include "utils.pyx"
 include "v8utils.pyx"
-include "v8contexthandler.pyx"
+include "v8context_handler.pyx"
 
 # id: (int64 = long in python) CefFrame.GetIdentifier() - globally unique identifier.
 # In Python 2 there is: int (32 bit) long (64 bit).

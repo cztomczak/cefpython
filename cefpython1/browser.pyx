@@ -4,7 +4,7 @@
 
 include "imports.pyx"
 include "utils.pyx"
-include "javascriptbindings.pyx"
+include "javascript_bindings.pyx"
 
 # Global variables.
 
@@ -121,6 +121,9 @@ class PyBrowser:
 		# CefDisplayHandler.
 		allowedHandlers += ["OnAddressChange", "OnConsoleMessage", "OnContentsSizeChange", "OnNavStateChange",
 						"OnStatusMessage", "OnTitleChange", "OnTooltip"]
+
+		# LifeSpanHandler.
+		allowedHandlers += ["DoClose", "OnAfterCreated", "OnBeforeClose", "RunModal"]
 
 		for key in handlers:
 			handler = handlers[key]

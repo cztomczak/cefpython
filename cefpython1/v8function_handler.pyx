@@ -5,9 +5,9 @@
 include "imports.pyx"
 include "utils.pyx"
 include "v8utils.pyx"
-include "pythoncallback.pyx"
+include "python_callback.pyx"
 
-cdef cbool FunctionHandler_Execute(
+cdef public cbool V8FunctionHandler_Execute(
 		CefRefPtr[CefV8Context] v8Context,
 		int pythonCallbackID,
 		CefString& cefFuncName,
@@ -61,7 +61,7 @@ cdef cbool FunctionHandler_Execute(
 					return <cbool>False
 
 			# This checks GetBindToFrames/GetBindToPopups must also be made in both:
-			# FunctionHandler_Execute() and OnContextCreated(), so that calling 
+			# V8FunctionHandler_Execute() and OnContextCreated(), so that calling 
 			# a non-existent  property on window object throws an error.
 
 			if not pyFrame.IsMain() and not bindings.GetBindToFrames():

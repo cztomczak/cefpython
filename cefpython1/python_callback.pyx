@@ -24,9 +24,9 @@ def GetPythonCallback(callbackID):
 		raise Exception("GetPythonCallback() failed: invalid callbackID: %s" % callbackID)
 	return g_PythonCallbacks[callbackID]
 
-# We call it through V8FunctionHandler's detructor, see v8functionhandler.h > ~V8FunctionHandler().
+# We call it through V8FunctionHandler's detructor, see v8function_handler.h > ~V8FunctionHandler().
 # "with gil" must be added as we call it from c++.
-cdef void DelPythonCallback(int callbackID) except * with gil:
+cdef void RemovePythonCallback(int callbackID) except * with gil:
 
 	global g_PythonCallbacks
 	del g_PythonCallbacks[callbackID]

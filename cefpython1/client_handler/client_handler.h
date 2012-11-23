@@ -15,7 +15,6 @@
 #include "Python.h"
 
 // Python 3.2 fix - DL_IMPORT is not defined in Python.h
-
 #ifndef DL_IMPORT /* declarations for DLL import/export */
 #define DL_IMPORT(RTYPE) RTYPE
 #endif
@@ -30,9 +29,9 @@ class ClientHandler : public CefClient,
         public CefKeyboardHandler,
         public CefV8ContextHandler,
         public CefRequestHandler,
-        public CefDisplayHandler
+        public CefDisplayHandler,
+        public CefLifeSpanHandler
 /*
-        public CefLifeSpanHandler,        
         public CefFocusHandler,
         public CefPrintHandler,
         public CefDragHandler,
@@ -61,14 +60,14 @@ public:
   virtual CefRefPtr<CefV8ContextHandler> GetV8ContextHandler() OVERRIDE
   { return this; }
 
-  // Still NOT implemented handlers:
+  virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE
+  { return this; }
+
+  // NOT implemented handlers:
 
   virtual CefRefPtr<CefFocusHandler> GetFocusHandler() OVERRIDE
   { return NULL; }
 
-  virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE
-  { return NULL; }
-  
   virtual CefRefPtr<CefMenuHandler> GetMenuHandler() OVERRIDE
   { return NULL; }  
   
@@ -234,7 +233,26 @@ public:
                              const CefString& title) OVERRIDE;
 
   virtual bool OnTooltip(CefRefPtr<CefBrowser> browser,
-                         CefString& text) OVERRIDE; 
+                         CefString& text) OVERRIDE;
+
+  //
+  // CefLifeSpanHandler
+  //
+
+  virtual bool DoClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
+
+  virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
+
+  virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
+
+  virtual bool OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
+                             const CefPopupFeatures& popupFeatures,
+                             CefWindowInfo& windowInfo,
+                             const CefString& url,
+                             CefRefPtr<CefClient>& client,
+                             CefBrowserSettings& settings) OVERRIDE;
+
+  virtual bool RunModal(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
   
   

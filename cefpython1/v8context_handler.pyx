@@ -4,7 +4,7 @@
 
 include "imports.pyx"
 include "utils.pyx"
-include "functionhandler.pyx"
+include "v8function_handler.pyx"
 include "v8utils.pyx"
 
 # enum cef_v8_propertyattribute_t.
@@ -81,7 +81,6 @@ cdef public void V8ContextHandler_OnContextCreated(
 			# CefRefPtr are smart pointers and should release memory automatically for V8FunctionHandler().
 			functionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
 			(<V8FunctionHandler*>(functionHandler.get())).SetContext(cefContext)
-			(<V8FunctionHandler*>(functionHandler.get())).SetCallback_V8Execute(<V8Execute_type>FunctionHandler_Execute)
 			v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(functionHandler.get()))
 
 		if jsFunctions:
