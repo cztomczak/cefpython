@@ -2,8 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="httpauth"
-	ProjectGUID="{25F1A352-E0AA-4F1A-8134-CB5409953AE9}"
+	Name="client_handler_py27"
+	ProjectGUID="{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}"
+	RootNamespace="client_handler_py27"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -17,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
-			IntermediateDirectory="Debug"
+			OutputDirectory="Debug_py27"
+			IntermediateDirectory="Debug_py27"
 			ConfigurationType="4"
 			>
 			<Tool
@@ -78,10 +79,9 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release"
-			IntermediateDirectory="Release"
+			OutputDirectory="Release_py27"
+			IntermediateDirectory="Release_py27"
 			ConfigurationType="4"
-			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -100,6 +100,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="c:\python27_32bit\include;../"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -145,15 +146,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\AuthCredentials.h"
-				>
-			</File>
-			<File
-				RelativePath=".\AuthDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DialogTemplate.h"
+				RelativePath=".\client_handler.h"
 				>
 			</File>
 		</Filter>
@@ -169,15 +162,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\AuthCredentials.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\AuthDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DialogTemplate.cpp"
+				RelativePath=".\client_handler.cpp"
 				>
 			</File>
 		</Filter>

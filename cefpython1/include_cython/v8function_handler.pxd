@@ -10,21 +10,10 @@ from cef_v8 cimport CefV8ValueList
 from cef_ptr cimport CefRefPtr
 from cef_v8 cimport CefV8Context
 
-cdef extern from "v8functionhandler/v8functionhandler.h":
-
-	# CefV8Handler.Execute() type.
-	ctypedef cbool (*V8Execute_type)(
-			CefRefPtr[CefV8Context] context,
-			int pythonCallbackID,
-			CefString& name,
-			CefRefPtr[CefV8Value] object,
-			CefV8ValueList& arguments,
-			CefRefPtr[CefV8Value]& retval,
-			CefString& exception
-	)
+cdef extern from "v8function_handler/v8function_handler.h":
 
 	# DelPythonCallbac() type.
-	ctypedef void (*DelPythonCallback_type)(
+	ctypedef void (*RemovePythonCallback_type)(
 			int callbackID
 	)
 
@@ -35,7 +24,7 @@ cdef extern from "v8functionhandler/v8functionhandler.h":
 	cdef cppclass V8FunctionHandler(CefV8Handler):
 		# V8FunctionHandler callbacks.
 		void SetCallback_V8Execute(V8Execute_type)
-		void SetCallback_DelPythonCallback(DelPythonCallback_type)
+		void SetCallback_RemovePythonCallback(RemovePythonCallback_type)
 		# Context.
 		void SetContext(CefRefPtr[CefV8Context])
 		void SetPythonCallbackID(int callbackID)

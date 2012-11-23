@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "v8functionhandler", "v8functionhandler.vcproj", "{6CA41D5D-3546-4363-B670-97FFE4B88D4C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "v8function_handler_py27", "v8function_handler_py27.vcproj", "{6CA41D5D-3546-4363-B670-97FFE4B88D4C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "v8function_handler_py32", "v8function_handler_py32.vcproj", "{9E47F572-3024-4C6E-80E5-4C4BF79EEE8E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +15,9 @@ Global
 		{6CA41D5D-3546-4363-B670-97FFE4B88D4C}.Debug|Win32.Build.0 = Debug|Win32
 		{6CA41D5D-3546-4363-B670-97FFE4B88D4C}.Release|Win32.ActiveCfg = Release|Win32
 		{6CA41D5D-3546-4363-B670-97FFE4B88D4C}.Release|Win32.Build.0 = Release|Win32
+		{9E47F572-3024-4C6E-80E5-4C4BF79EEE8E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9E47F572-3024-4C6E-80E5-4C4BF79EEE8E}.Release|Win32.ActiveCfg = Release|Win32
+		{9E47F572-3024-4C6E-80E5-4C4BF79EEE8E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

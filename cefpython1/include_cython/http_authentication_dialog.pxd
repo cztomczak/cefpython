@@ -5,12 +5,12 @@
 from windows cimport HWND
 from libcpp.string cimport string
 
-cdef extern from "httpauth/AuthCredentials.h":
+cdef extern from "http_authentication/AuthCredentials.h":
 
 	ctypedef struct AuthCredentialsData:
 		string username
 		string password
 
-cdef extern from "httpauth/AuthDialog.h":
+cdef extern from "http_authentication/AuthDialog.h":
 	
 	cdef AuthCredentialsData* AuthDialog(HWND parent) nogil

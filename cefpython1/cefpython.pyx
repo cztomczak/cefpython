@@ -32,30 +32,31 @@ g_applicationSettings = None
 
 # All .pyx files need to be included here.
 
-include "pyinclude/platform.pxi"
+include "include_cython/platform.pxi"
 
 include "imports.pyx"
 include "browser.pyx"
 include "frame.pyx"
-include "javascriptbindings.pyx"
+include "javascript_bindings.pyx"
 include "settings.pyx"
 include "utils.pyx"
 
 IF UNAME_SYSNAME == "Windows":
-	include "wndproc.pyx"
+	include "window_procedures.pyx"
 
-include "loadhandler.pyx"
-include "keyboardhandler.pyx"
-include "virtualkeys.pyx"
-include "v8contexthandler.pyx"
-include "functionhandler.pyx"
+include "load_handler.pyx"
+include "keyboard_handler.pyx"
+include "virtual_keys.pyx"
+include "v8context_handler.pyx"
+include "v8function_handler.pyx"
 
 include "v8utils.pyx"
-include "javascriptcallback.pyx"
-include "pythoncallback.pyx"
-include "requesthandler.pyx"
+include "javascript_callback.pyx"
+include "python_callback.pyx"
+include "request_handler.pyx"
 include "response.pyx"
-include "displayhandler.pyx"
+include "display_handler.pyx"
+include "life_span_handler.pyx"
 
 # Client handler.
 cdef CefRefPtr[ClientHandler] g_clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()
@@ -284,7 +285,7 @@ cdef object CefV8StackTraceToPython(CefRefPtr[CefV8StackTrace] cefTrace):
 def GetJavascriptStackTrace(frameLimit=100):
 
 	assert CurrentlyOn(TID_UI), "cefpython.GetJavascriptStackTrace() may only be called on the UI thread"
-	cdef CefRefPtr[CefV8StackTrace] cefTrace = cef_v8_stack.GetCurrent(int(frameLimit))
+	cdef CefRefPtr[CefV8StackTrace] cefTrace = cef_v8_stack_trace.GetCurrent(int(frameLimit))
 	return CefV8StackTraceToPython(cefTrace)
 
 def FormatJavascriptStackTrace(stackTrace):

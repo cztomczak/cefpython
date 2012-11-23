@@ -4,8 +4,8 @@
 
 include "imports.pyx"
 include "utils.pyx"
-include "javascriptcallback.pyx"
-include "pythoncallback.pyx"
+include "javascript_callback.pyx"
+include "python_callback.pyx"
 
 # CefV8 Objects, Arrays and Functions can be created only inside V8 context,
 # you need to call CefV8Context::Enter() and CefV8Context::Exit():
@@ -152,12 +152,12 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 	elif pyValueType == types.FunctionType or pyValueType == types.MethodType:
 		v8FunctionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
 		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetContext(v8Context)
-		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetCallback_V8Execute(<V8Execute_type>FunctionHandler_Execute)
 		v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(v8FunctionHandler.get()))
 		PyStringToCefString(pyValue.__name__, cefFuncName)
 		v8Value = cef_v8_static.CreateFunction(cefFuncName, v8Handler) # v8PythonCallback
 		callbackID = PutPythonCallback(pyValue)
-		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetCallback_DelPythonCallback(<DelPythonCallback_type>DelPythonCallback)
+		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetCallback_RemovePythonCallback(
+				<RemovePythonCallback_type>RemovePythonCallback)
 		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetPythonCallbackID(callbackID)
 		return v8Value
 	elif pyValueType == type(None):

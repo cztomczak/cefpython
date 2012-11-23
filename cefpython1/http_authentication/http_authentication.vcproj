@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="v8functionhandler"
-	ProjectGUID="{6CA41D5D-3546-4363-B670-97FFE4B88D4C}"
+	Name="http_authentication"
+	ProjectGUID="{25F1A352-E0AA-4F1A-8134-CB5409953AE9}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -81,6 +81,7 @@
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="4"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -99,7 +100,6 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -145,7 +145,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\v8functionhandler.h"
+				RelativePath=".\AuthCredentials.h"
+				>
+			</File>
+			<File
+				RelativePath=".\AuthDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DialogTemplate.h"
 				>
 			</File>
 		</Filter>
@@ -161,7 +169,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\v8functionhandler.cpp"
+				RelativePath=".\AuthCredentials.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AuthDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DialogTemplate.cpp"
 				>
 			</File>
 		</Filter>

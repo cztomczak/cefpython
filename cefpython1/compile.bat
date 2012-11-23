@@ -7,12 +7,12 @@ for /R %~dp0setup\ %%f in (*.pyx) do del "%%f"
 
 rmdir /S /Q "%dp0setup\build\"
 
-REM copy all src\*.pyx to src\setup\ - commentint out, as it copies recursively from all subdirectories.
+REM copy all src\*.pyx to src\setup\ - commenting out, as it copies recursively from all subdirectories.
 REM for /R %~dp0 %%f in (*.pyx) do del "%%f"
 
 cd "setup"
 
-call python "fixincludes.py"
+call python "fix_includes.py"
 call python "setup.py" build_ext --inplace
 
 for /R %~dp0setup\ %%f in (*.pyx) do del "%%f"

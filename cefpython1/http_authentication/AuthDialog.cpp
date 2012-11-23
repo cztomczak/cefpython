@@ -9,10 +9,10 @@ AuthCredentialsData* AuthDialog(HWND parent)
 		WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE, 10, 10, 257, 80, "Tahoma", 8);
 	dialogTemplate.AddStatic("Username:", WS_VISIBLE, 0, 2 + 3, 7, 37, 8, -1);
 	dialogTemplate.AddStatic("Password:", WS_VISIBLE, 0, 2 + 3, 24, 37, 8, -1);
-	dialogTemplate.AddEditBox("", WS_VISIBLE | WS_TABSTOP, WS_EX_STATICEDGE, 45 + 3, 7, 80, 10, HTTPAUTH_USERNAME);
-	dialogTemplate.AddEditBox("", WS_VISIBLE | WS_TABSTOP | ES_PASSWORD, WS_EX_STATICEDGE, 45 + 3, 24, 80, 10, HTTPAUTH_PASSWORD);
-	dialogTemplate.AddButton("OK", WS_VISIBLE | WS_TABSTOP, 0, 2 + 3, 41, 48, 13, HTTPAUTH_OK);
-	dialogTemplate.AddButton("Cancel", WS_VISIBLE | WS_TABSTOP, 0, 55 + 3, 41, 48, 13, HTTPAUTH_CANCEL);
+	dialogTemplate.AddEditBox("", WS_VISIBLE | WS_TABSTOP, WS_EX_STATICEDGE, 45 + 3, 7, 80, 10, HTTP_AUTHENTICATION_USERNAME);
+	dialogTemplate.AddEditBox("", WS_VISIBLE | WS_TABSTOP | ES_PASSWORD, WS_EX_STATICEDGE, 45 + 3, 24, 80, 10, HTTP_AUTHENTICATION_PASSWORD);
+	dialogTemplate.AddButton("OK", WS_VISIBLE | WS_TABSTOP, 0, 2 + 3, 41, 48, 13, HTTP_AUTHENTICATION_OK);
+	dialogTemplate.AddButton("Cancel", WS_VISIBLE | WS_TABSTOP, 0, 55 + 3, 41, 48, 13, HTTP_AUTHENTICATION_CANCEL);
 	
 	INT_PTR ret = DialogBoxIndirect(GetModuleHandle(0), dialogTemplate, parent, (DLGPROC)AuthDialogProc);
 	if (1 == ret) {
@@ -50,7 +50,7 @@ INT_PTR CALLBACK AuthDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
-		case HTTPAUTH_OK: // OK button.
+		case HTTP_AUTHENTICATION_OK: // OK button.
 		case IDOK: // Enter.
 			
 			parent = GetWindow(hDlg, GW_OWNER);
@@ -65,10 +65,10 @@ INT_PTR CALLBACK AuthDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 				credentialsData = new AuthCredentialsData();
 			}
 			
-			GetDlgItemText(hDlg, HTTPAUTH_USERNAME, text, 128);
+			GetDlgItemText(hDlg, HTTP_AUTHENTICATION_USERNAME, text, 128);
 			credentialsData->username.assign(text, 128);
 
-			GetDlgItemText(hDlg, HTTPAUTH_PASSWORD, text, 128);
+			GetDlgItemText(hDlg, HTTP_AUTHENTICATION_PASSWORD, text, 128);
 			credentialsData->password.assign(text, 128);
 
 			AuthCredentials::SetData(parent, credentialsData);
@@ -76,7 +76,7 @@ INT_PTR CALLBACK AuthDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			EndDialog(hDlg, 1);
 			return TRUE;
 		
-		case HTTPAUTH_CANCEL: // Cancel button.
+		case HTTP_AUTHENTICATION_CANCEL: // Cancel button.
 		case IDCANCEL: // Close Button or Escape key.
 			EndDialog(hDlg, 2);
 			return TRUE;

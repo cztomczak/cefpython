@@ -1,9 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
-	Name="clienthandler_py32"
-	ProjectGUID="{37AA7CD9-67AD-40B1-ADC0-D62173764BCA}"
+	Version="9.00"
+	Name="v8function_handler_py27"
+	ProjectGUID="{6CA41D5D-3546-4363-B670-97FFE4B88D4C}"
+	RootNamespace="v8function_handler_py27"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -78,8 +79,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release_py32"
-			IntermediateDirectory="Release_py32"
+			OutputDirectory="Release_py27"
+			IntermediateDirectory="Release_py27"
 			ConfigurationType="4"
 			>
 			<Tool
@@ -99,7 +100,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="c:\python32_32bit\include;../"
+				AdditionalIncludeDirectories="../;c:\python27_32bit\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -145,7 +146,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\clienthandler.h"
+				RelativePath=".\v8function_handler.h"
 				>
 			</File>
 		</Filter>
@@ -161,7 +162,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\clienthandler.cpp"
+				RelativePath=".\v8function_handler.cpp"
 				>
 			</File>
 		</Filter>

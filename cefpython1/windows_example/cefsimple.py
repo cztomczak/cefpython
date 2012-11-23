@@ -21,7 +21,7 @@ def CefSimple():
 	sys.excepthook = cefpython.ExceptHook
 	cefpython.Initialize()
 	wndproc = {
-		win32con.WM_CLOSE: CloseApplication, 
+		win32con.WM_CLOSE: CloseWindow, 
 		win32con.WM_DESTROY: QuitApplication,
 		win32con.WM_SIZE: cefpython.wm_Size,
 		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
@@ -33,7 +33,7 @@ def CefSimple():
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
-def CloseApplication(windowID, message, wparam, lparam):
+def CloseWindow(windowID, message, wparam, lparam):
 	browser = cefpython.GetBrowserByWindowID(windowID)
 	browser.CloseBrowser()
 	return win32gui.DefWindowProc(windowID, message, wparam, lparam)

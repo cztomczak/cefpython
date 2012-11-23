@@ -459,6 +459,22 @@ def JavascriptContextHandler_OnUncaughtException(browser, frame, exception, stac
 	return None
 
 #
+# LifeSpanHandler
+#
+
+def LifeSpanHandler_DoClose(browser):
+	return False
+
+def LifeSpanHandler_OnAfterCreated(browser):
+	return None
+
+def LifeSpanHandler_OnBeforeClose(browser):
+	return None
+
+def LifeSpanHandler_RunModal(browser):
+	return False
+
+#
 # JavascriptBindings class.
 #
 

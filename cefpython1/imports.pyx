@@ -2,7 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "pyinclude/platform.pxi"
+include "include_cython/platform.pxi"
 
 import os
 import sys
@@ -56,7 +56,7 @@ from cef_ptr cimport *
 from cef_app cimport *
 from cef_browser cimport *
 from cef_client cimport *
-from clienthandler cimport *
+from client_handler cimport *
 from cef_frame cimport *
 cimport cef_types # cannot cimport *, that would cause name conflicts with constants.
 
@@ -65,8 +65,8 @@ IF UNAME_SYSNAME == "Windows":
 
 from cef_v8 cimport *
 cimport cef_v8_static
-cimport cef_v8_stack
-from v8functionhandler cimport *
+cimport cef_v8_stack_trace
+from v8function_handler cimport *
 from cef_request cimport *
 from cef_response cimport *
 from cef_stream cimport *
@@ -75,4 +75,4 @@ from cef_download_handler cimport *
 from cef_cookie cimport *
 
 IF UNAME_SYSNAME == "Windows":
-	from AuthDialog cimport *
+	from http_authentication_dialog cimport *
