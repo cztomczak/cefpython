@@ -25,10 +25,12 @@ cdef public void LifeSpanHandler_OnAfterCreated(
 		) except * with gil:
 
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
+		# Second parameter = ignoreError
+		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
 		
-		# Called when first browser has not yet been created.
-		# ignoreError=True in GetPyBrowser.. is probably not required.
+		# TODO: temporary limitation in current cefpython implementation,
+		# calling GetPyBrowserByCefBrowser() while cefpython.CreateBrowser()
+		# has not yet finished will return empty.
 		if not pyBrowser:
 			return
 		
@@ -47,10 +49,12 @@ cdef public void LifeSpanHandler_OnBeforeClose(
 		) except * with gil:
 
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
+		# Second parameter = ignoreError
+		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
 		
-		# Called when last browser was destroyed.
-		# ignoreError=True in GetPyBrowser.. is probably not required.
+		# TODO: temporary limitation in current cefpython implementation,
+		# calling GetPyBrowserByCefBrowser() while cefpython.CreateBrowser()
+		# has not yet finished will return empty.
 		if not pyBrowser:
 			return
 

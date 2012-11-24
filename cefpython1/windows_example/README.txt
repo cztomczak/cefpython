@@ -11,6 +11,8 @@ Examples using pywin32 extension:
 Embedding CEF in GUI frameworks:
 - pygtk_.py
 - wxpython.py
+- pyqt.py
+- pyside.py
 
 Browser for testing:
 - cefclient.exe

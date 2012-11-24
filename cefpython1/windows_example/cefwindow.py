@@ -18,6 +18,7 @@ else:
 
 g_debug = False
 g_windows = {} # windowID(int): className
+g_registeredClasses = {}
 
 def GetRealPath(file=None, encodeURL=False):
 	
@@ -91,11 +92,13 @@ def CreateWindow(title, className, width, height, xpos=None, ypos=None, icon=Non
 	wndclass.lpfnWndProc = windowProc
 
 	#noinspection PyUnusedLocal
-	atomclass = win32gui.RegisterClass(wndclass)
-
-	if g_debug:
-		print("win32gui.RegisterClass(wndclass)")
-		print("GetLastError(): %s" % GetLastError())
+	global g_registeredClasses
+	if not className in g_registeredClasses:
+		g_registeredClasses[className] = True
+		atomclass = win32gui.RegisterClass(wndclass)
+		if g_debug:
+			print("win32gui.RegisterClass(%s)" % className)
+			print("GetLastError(): %s" % GetLastError())
 
 	if xpos is None or ypos is None:
 		# Center window on the screen.
