@@ -17,10 +17,13 @@ Welcome to <b>CEF Python</b> - bindings for the Chromium Embedded Framework.<br>
 Project's website: <a href="http://code.google.com/p/cefpython/">http://code.google.com/p/cefpython/</a><br>
 Programming API: <a href="http://code.google.com/p/cefpython/wiki/API">http://code.google.com/p/cefpython/wiki/API</a><br>
 Support forum: <a href="https://groups.google.com/group/cefpython?hl=en">https://groups.google.com/group/cefpython?hl=en</a><br>
-
 <br>
 
-navigator.userAgent: <span style="background:#eee"><script>document.write(navigator.userAgent)</script></span><br>
+navigator.userAgent: <span style="background:#eee"><script>document.write(navigator.userAgent)</script></span>
+<br><br>
+
+Python version: <script>document.write(python.Version())</script>	
+<br>
 
 <br>
 Press F5 to refresh.<br>
@@ -29,6 +32,10 @@ Press Ctrl(+) to zoom in.<br>
 Press Ctrl(-) to zoom out.<br>
 Press F11 to go fullscreen, press F11 again to exit fullscreen.<br>
 <span style="color: red">Press F12 key to show developer tools for the main frame.</span><br>
+
+<h3>Test creation of second browser</h3>
+
+<a href="javascript:python.CreateSecondBrowser()">python.CreateSecondBrowser()</a>
 
 <h3>Test int32, uint, long</h3>
 
@@ -72,12 +79,6 @@ TODO: do these tests the other way, from javascript to python.
 <h3>Javascript bindings</h3>
 
 	See output in console for these tests. (Note: "window." is optional, you can just call "python.Test1()")<br>
-
-	<h4>Python version</h4>
-
-	<pre>&lt;script&gt;document.write(python.Version())&lt;/script&gt;</pre>
-	<script>document.write(python.Version())</script>	
-	<br><br>
 
 	<h4>Passing arguments</h4>
 

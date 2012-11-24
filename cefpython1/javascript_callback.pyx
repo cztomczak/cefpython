@@ -81,6 +81,8 @@ class JavascriptCallback:
 
 		v8Retval = (<CefV8Value*>(v8Value.get())).ExecuteFunctionWithContext(v8Context, <CefRefPtr[CefV8Value]>NULL, v8Arguments)
 
+		# This exception should be first caught by V8ContextHandler::OnUncaughtException().
+
 		if (<CefV8Value*>(v8Value.get())).HasException():
 			
 			v8Exception = (<CefV8Value*>(v8Value.get())).GetException()
@@ -96,7 +98,6 @@ class JavascriptCallback:
 			# to catch the exception below, if it's catched then js should execute further, like it never happened,
 			# and is ClearException() for that?
 
-			# TODO: call CefV8Exception->GetStackTrace() when it's implemented.
 			stackTrace = FormatJavascriptStackTrace(GetJavascriptStackTrace(100))
 
 			raise Exception("JavascriptCallback.Call() failed: javascript exception:\n%s.\nOn line %s in %s.\n"

@@ -57,19 +57,9 @@ def CefAdvanced():
 		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
 		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
 	}
-	"""
-	# Closing second window won't quit application, WM_DESTROY not defined here.
-	wndproc2 = {
-		win32con.WM_CLOSE: CloseWindow, 
-		win32con.WM_SIZE: cefpython.wm_Size,
-		win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
-		win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
-	}
-	"""
+	
 	windowID = cefwindow.CreateWindow(title="CefAdvanced", className="cefadvanced", 
 		width=800, height=600, icon="icon.ico", windowProc=wndproc)
-	"""windowID2 = cefwindow.CreateWindow(title="CefAdvanced2", className="cefadvanced2", 
-		width=800, height=600, icon="icon.ico", windowProc=wndproc2)"""
 
 	# BrowserSettings, see: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings = dict() 
@@ -95,7 +85,6 @@ def CefAdvanced():
 
 	cefBindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
 	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, cefBindings)
-	"""browser2 = cefpython.CreateBrowser(windowID2, browserSettings, "cefadvanced.html", handlers, cefBindings)"""
 	
 	jsBindings = JSBindings(cefBindings, browser)
 	jsBindings.Bind()
@@ -254,6 +243,19 @@ class Python:
 	def GetType(self, arg1):
 
 		return "arg1=%s, type=%s" % (arg1, type(arg1).__name__)
+
+	def CreateSecondBrowser(self):
+
+		# Closing second window won't quit application, WM_DESTROY not defined here.
+		wndproc2 = {
+			win32con.WM_CLOSE: CloseWindow, 
+			win32con.WM_SIZE: cefpython.wm_Size,
+			win32con.WM_SETFOCUS: cefpython.wm_SetFocus,
+			win32con.WM_ERASEBKGND: cefpython.wm_EraseBkgnd
+		}
+		windowID2 = cefwindow.CreateWindow(title="SecondBrowser", className="secondbrowser", 
+				width=800, height=600, xpos=0, ypos=0, icon="icon.ico", windowProc=wndproc2)
+		browser2 = cefpython.CreateBrowser(windowID2, browserSettings={}, navigateURL="cefsimple.html")
 
 class ClientHandler:
 

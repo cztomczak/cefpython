@@ -219,10 +219,11 @@ def SingleMessageLoop():
 	# used to integrate the CEF message loop into an existing application message
 	# loop. 
 
-	# Message loop dooes significant amount of work so releasing GIL is worth it.
-	
 	# anything that (1) can block for a significant amount of time and (2) is thread-safe should release the GIL:
 	# https://groups.google.com/d/msg/cython-users/jcvjpSOZPp0/KHpUEX8IhnAJ
+
+	# We must release the GIL in message loop otherwise we will get dead lock when
+	# calling from c++ to python.
 
 	with nogil:
 		CefDoMessageLoopWork();
