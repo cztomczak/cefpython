@@ -24,11 +24,13 @@
 
 # Global variables.
 
-global g_debug
 g_debug = False
 
-global g_applicationSettings
-g_applicationSettings = None
+# This must be initialized as a dict here, not a None. Later do a deepcopy in a loop,
+# not an assignment, neither update() using local dictionary. If you put here 
+# None and assign a local dictionary to this global variable then later that local 
+# dictionary might get garbage collected and the global settings will become None.
+g_applicationSettings = {}
 
 # All .pyx files need to be included here.
 
@@ -115,7 +117,8 @@ def Initialize(applicationSettings=None):
 
 	# We must make a copy as applicationSettings is a reference only that might get destroyed.
 	global g_applicationSettings
-	g_applicationSettings = copy.deepcopy(applicationSettings)
+	for key in applicationSettings:
+		g_applicationSettings[key] = copy.deepcopy(applicationSettings[key])
 
 	if g_debug:
 		print("\n%s" % ("--------" * 8))
@@ -131,7 +134,7 @@ def Initialize(applicationSettings=None):
 	if g_debug:
 		print("CefInitialize(cefApplicationSettings, cefApp)")
 
-	cdef cbool ret = CefInitialize(cefApplicationSettings, cefApp)
+	cdef c_bool ret = CefInitialize(cefApplicationSettings, cefApp)
 
 	if g_debug:
 		if ret: print("OK")

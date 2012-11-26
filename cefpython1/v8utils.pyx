@@ -30,8 +30,8 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 	cdef CefV8Value* v8ValuePtr = <CefV8Value*>(v8Value.get())
 	cdef CefString cefString
 	cdef CefString cefFuncName
-	cdef vector[CefString] keys
-	cdef vector[CefString].iterator iterator
+	cdef c_vector[CefString] keys
+	cdef c_vector[CefString].iterator iterator
 
 	cdef CefRefPtr[CefV8Value] v8JavascriptCallback
 	cdef CefRefPtr[V8FunctionHandler] v8FunctionHandler # V8FunctionHandler inherits from V8Handler.
@@ -96,7 +96,7 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 		raise Exception("PyValueToV8Value() failed: data passed from Python to Javascript has"
 				" more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
 
-	cdef cbool sameContext
+	cdef c_bool sameContext
 
 	if g_debug:
 		# print("PyValueToV8Value nestingLevel: %s" % nestingLevel)

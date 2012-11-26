@@ -10,42 +10,42 @@ IF UNAME_SYSNAME == "Windows":
 from cef_string cimport CefString
 from cef_client cimport CefClient
 from cef_type_wrappers cimport CefSettings, CefBrowserSettings
-from libcpp cimport bool as cbool
-from libcpp.vector cimport vector
+from libcpp cimport bool as c_bool
+from libcpp.vector cimport vector as c_vector
 from cef_frame cimport CefFrame
 
 cdef extern from "include/cef_browser.h":
 	
 	cdef cppclass CefBrowser:
 
-		cbool CanGoBack()
-		cbool CanGoForward()
+		c_bool CanGoBack()
+		c_bool CanGoForward()
 		void ClearHistory()
 		void CloseBrowser()
 		void CloseDevTools()
-		void Find(int identifier, CefString& searchText, cbool forward, cbool matchCase, cbool findNext)
+		void Find(int identifier, CefString& searchText, c_bool forward, c_bool matchCase, c_bool findNext)
 		CefRefPtr[CefFrame] GetFocusedFrame()
 		CefRefPtr[CefFrame] GetFrame(CefString& name)
-		void GetFrameNames(vector[CefString]& names)
+		void GetFrameNames(c_vector[CefString]& names)
 		CefRefPtr[CefFrame] GetMainFrame()
 		CefWindowHandle GetOpenerWindowHandle()
 		CefWindowHandle GetWindowHandle()
 		double GetZoomLevel()
 		void GoBack()
 		void GoForward()
-		cbool HasDocument()
+		c_bool HasDocument()
 		void HidePopup()
-		cbool IsPopup()
+		c_bool IsPopup()
 		void ParentWindowWillClose()
 		void Reload()
 		void ReloadIgnoreCache()
-		void SetFocus(cbool enable)
+		void SetFocus(c_bool enable)
 		void SetZoomLevel(double zoomLevel)
 		void ShowDevTools()		
 		void StopLoad()
-		void StopFinding(cbool clearSelection)
-		cbool IsWindowRenderingDisabled()
-		cbool IsPopupVisible()
+		void StopFinding(c_bool clearSelection)
+		c_bool IsWindowRenderingDisabled()
+		c_bool IsPopupVisible()
 
 cdef extern from "include/cef_browser.h" namespace "CefBrowser":
 	

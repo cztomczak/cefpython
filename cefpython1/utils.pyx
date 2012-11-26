@@ -253,30 +253,38 @@ cdef void PyStringToCefString(pyString, CefString& cefString) except *:
 	
 	if bytes == str: 
 		# Python 2.7
-		if pyString == unicode:
+		if type(pyString) == unicode:
 			pyString = pyString.encode(g_applicationSettings["unicode_to_bytes_encoding"])
-		cefString.FromASCII(<char*>pyString) # Python 2.7
 	else: 
-		# Python 3
 		# Python 3 requires bytes before converting to char*
-		if pyString == bytes:
-			bytesString = pyString
-		else:
-			bytesString = pyString.encode("utf-8")	
-		cefString.FromASCII(<char*>bytesString)
+		if type(pyString) != bytes:
+			pyString = pyString.encode("utf-8")	
+
+	IF UNAME_SYSNAME == "Windows":
+		cdef c_string cString = pyString
+		cefString.FromString(cString)
+		
+		# Or this way: cefString.FromASCII(<char*>pyString)
+		# But when using FromASCII() DCHECK fails for unicode strings:
+		# ERROR_REPORT:utf_string_conversions.cc(184)] Check failed: IsStringASCII(ascii).
 
 cdef void PyStringToCefStringPtr(pyString, CefString* cefString) except *:
 	
 	if bytes == str:
 		# Python 2.7
-		if pyString == unicode:
+		if type(pyString) == unicode:
 			pyString = pyString.encode(g_applicationSettings["unicode_to_bytes_encoding"])
 		cefString.FromASCII(<char*>pyString)
 	else:
 		# Python 3
 		# Python 3 requires bytes before converting to char*
-		if pyString == bytes:
-			bytesString = pyString
-		else:
-			bytesString = pyString.encode("utf-8")	
-		cefString.FromASCII(<char*>bytesString)
+		if type(pyString) != bytes:
+			pyString = pyString.encode("utf-8")	
+	
+	IF UNAME_SYSNAME == "Windows":
+		cdef c_string cString = pyString
+		cefString.FromString(cString)
+		
+		# Or this way: cefString.FromASCII(<char*>pyString)
+		# But when using FromASCII() DCHECK fails for unicode strings:
+		# ERROR_REPORT:utf_string_conversions.cc(184)] Check failed: IsStringASCII(ascii).

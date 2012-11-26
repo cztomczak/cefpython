@@ -17,13 +17,13 @@ KEY_ALT = <int>cef_types.KEY_ALT
 KEY_META  = <int>cef_types.KEY_META
 KEY_KEYPAD = <int>cef_types.KEY_KEYPAD
 
-cdef public cbool KeyboardHandler_OnKeyEvent(
+cdef public c_bool KeyboardHandler_OnKeyEvent(
 		CefRefPtr[CefBrowser] cefBrowser,
 		cef_types.cef_handler_keyevent_type_t eventType,
 		int code,
 		int modifiers,
-		cbool isSystemKey,
-		cbool isAfterJavascript) except * with gil:
+		c_bool isSystemKey,
+		c_bool isAfterJavascript) except * with gil:
 
 	# See LoadHandler_OnLoadEnd() for the try..except explanation.
 	try:
@@ -33,9 +33,9 @@ cdef public cbool KeyboardHandler_OnKeyEvent(
 			# Not handler[2], because in popups handler[2] is already assigned to handler[0] in GetPyBrowserByCefBrowser()
 			handler = handler[0]
 		if handler:
-			return <cbool>bool(handler(pyBrowser, <int>eventType, code, modifiers, isSystemKey, isAfterJavascript))
+			return <c_bool>bool(handler(pyBrowser, <int>eventType, code, modifiers, isSystemKey, isAfterJavascript))
 		else:
-			return <cbool>False
+			return <c_bool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)

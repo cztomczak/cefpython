@@ -4,6 +4,24 @@ from Cython.Distutils import build_ext
 import sys
 import platform
 
+"""
+Building libcef_dll_wrapper
+---------------------------
+
+libcef_dll_wrapper needs to be compiled with /MD, otherwise you get linker errors
+of type "already defined". When you try to compile using /MD you may get warnings:
+  
+  warning C4275: non dll-interface class 'stdext::exception' used as base for
+  dll-interface class 'std::bad_typeid' see declaration of 'stdext::exception'
+  see declaration of 'std::bad_typeid'
+
+Which results in build errors. To solve it you need to add command line option:
+
+  -D_HAS_EXCEPTIONS=1
+
+Enabling C++ exceptions ("/EHsc") is not required.
+"""
+
 # A way around Python 3.2 bug: UNAME_SYSNAME is not set.
 def GeneratePlatformPXI():
 	print("Generating include_cython/platform.pxi")
@@ -14,10 +32,13 @@ def GeneratePlatformPXI():
 GeneratePlatformPXI()
 
 ext_modules = [Extension(
+	
 	"cefpython_py%s" % (str(sys.version_info[0])+str(sys.version_info[1])),
 	["cefpython.pyx"],
-	language='c++',
+	
+	language='c++',	
 	include_dirs=[r'./../', r'./../include_cython/'],
+	
 	library_dirs=[
 		r'./',
 		r"c:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x86/",
@@ -25,49 +46,22 @@ ext_modules = [Extension(
 		r'./../v8function_handler/Release_py%s%s/' % (sys.version_info.major, sys.version_info.minor),
 		r'./../client_handler/Release_py%s%s/' % (sys.version_info.major, sys.version_info.minor)
 	],
+	
 	libraries=[
 		'libcef',
 		'libcef_dll_wrapper',
 		'User32',
-		'http_authentication',
-		'v8function_handler_py%s%s' % (sys.version_info.major, sys.version_info.minor),
-		'client_handler_py%s%s' % (sys.version_info.major, sys.version_info.minor)
+		'http_authentication', # Build with /MD.
+		'v8function_handler_py%s%s' % (sys.version_info.major, sys.version_info.minor), # Build with /MD.
+		'client_handler_py%s%s' % (sys.version_info.major, sys.version_info.minor) # Build with /MD.
 	],
-	# To get rid of errors there are 2 options:
-	# 1) compile '/clr' + link '/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt' (CLR will probably require .NET framework? YES)
-	# 2) compile '/EHsc' + link '/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt'], '/ignore:4217'
-	extra_compile_args=['/EHsc'], # '/EHsc', '/clr'
-	# extra_objects=[],
-	extra_link_args=['/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:msvcprt', '/ignore:4217'] # '/ignore:4217'
-	#extra_link_args=['/NODEFAULTLIB:libcmt', '/NODEFAULTLIB:libcpmt', '/NODEFAULTLIB:msvcrt', '/NODEFAULTLIB:msvcprt']	
-
-	# /ignore:4049 - DialogTemplate.cpp includes <string> and linker generates warnings:
-	#>Creating library build\temp.win32-2.7\Release\cefpython.lib and object build\temp.win32-2.7\Release\cefpython.exp
-	#>DialogTemplate.obj : warning LNK4049: locally defined symbol ??0?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@
-	#>std@@QAE@ABV01@@Z (public: __thiscall std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >:
-	#>:basic_string<char,struct std::char_traits<char>,class std::allocator<char> >(class std::basic_string<char,struct std::c
-	#>har_traits<char>,class std::allocator<char> > const &)) imported
-
-	# libcmt - C, libcpmt - C++ (CP = C Plus)
-	# libcef_dll_wrapper.lib directives: libcmt, libcpmt, oldnames.
-
-	# When compiling with /clr Dependency Walker shows "mscoree.dll" dependency, and this file is:
-	# "Microsoft .NET Runtime Execution Engine".
-
-	# '/NODEFAULTLIB:libcmt' - otherwise errors "LIBCMT.lib... already defined in MSVCRT.lib(MSVCR90.dll)"
-	# - that is because libcef_dll_wrapper is compiled statically /MT and includes LIBCMT.lib and PYD file is compiled
-	#	using /MD and includes MSVCRT.lib, both of these .lib cannot be used at the same time as there are conflicts.
 	
-	# '/NODEFAULTLIB:msvcprt' - otherwise errors "msvcprt.lib(MSVCP90.dll)... basic_string already defined in libcef_dll_wrapper.lib"	
-	# - msvcprt.lib (msvcp90.dll) is a Standard C++ Library and was already included in libcef_dll_wrapper.
+	# /EHsc - using STL string, multimap and others that use C++ exceptions.
+	extra_compile_args=['/EHsc'],
 	
-	# libcmt.lib - multithreaded, static link
-	# msvcrt.lib - multithreaded, dynamic link
-	# msvcmrt.lib - runtime for managed code
-	# msvcprt.lib - standard c++ library for runtime
-
-	# msvcm90.dll - Runtime for managed code, when using /clr option
-	# msvcp90.dll - Applications that use the Standard C++ Library.
+	# '/ignore:4217' - silence warnings: "locally defined symbol _V8FunctionHandler_Execute
+	#                  imported in function "public: virtual bool __thiscall V8FunctionHandler::Execute"
+	extra_link_args=['/ignore:4217']
 )]
 
 setup(

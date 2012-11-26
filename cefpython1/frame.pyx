@@ -12,7 +12,7 @@ include "v8context_handler.pyx"
 # In Python 3 there will be only int (64 bit).
 # long has no limit in python.
 
-cdef map[cef_types.int64, CefRefPtr[CefFrame]] g_cefFrames
+cdef c_map[cef_types.int64, CefRefPtr[CefFrame]] g_cefFrames
 g_pyFrames = {}
 
 class PyFrame:
@@ -200,7 +200,7 @@ class PyFrame:
 		name = str(name)
 		PyStringToCefString(name, cefPropertyName)
 
-		cdef cbool sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
+		cdef c_bool sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
 		
 		if not sameContext:
 			if g_debug: print("Frame.SetProperty(): different context, calling v8Context.Enter()")

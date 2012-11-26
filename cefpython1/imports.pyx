@@ -23,10 +23,12 @@ if sys.version_info.major == 2:
 else:
 	from urllib.request import pathname2url as urllib_pathname2url
 
-from libcpp cimport bool as cbool
-from libcpp.map cimport map
-from libcpp.vector cimport vector
-from libcpp.string cimport string
+from libcpp cimport bool as c_bool
+from libcpp.map cimport map as c_map
+from multimap cimport multimap as c_multimap
+from libcpp.pair cimport pair as c_pair
+from libcpp.vector cimport vector as c_vector
+from libcpp.string cimport string as c_string
 
 # preincrement and dereference must be "as" otherwise not seen.
 from cython.operator cimport preincrement as preinc, dereference as deref

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="client_handler_py27"
 	ProjectGUID="{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}"
 	RootNamespace="client_handler_py27"
@@ -102,7 +102,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="c:\python27_32bit\include;../"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
-				RuntimeLibrary="0"
+				ExceptionHandling="1"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"

@@ -100,7 +100,7 @@ class JavascriptBindings:
 		cdef CefRefPtr[CefBrowser] cefBrowser
 		cdef CefRefPtr[CefFrame] cefFrame
 		cdef CefRefPtr[CefV8Context] v8Context
-		cdef cbool sameContext
+		cdef c_bool sameContext
 
 		for frameID in self.__frames:
 			

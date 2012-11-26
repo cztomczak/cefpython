@@ -25,7 +25,7 @@ cdef public void DisplayHandler_OnAddressChange(CefRefPtr[CefBrowser] cefBrowser
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public cbool DisplayHandler_OnConsoleMessage(CefRefPtr[CefBrowser] cefBrowser,
+cdef public c_bool DisplayHandler_OnConsoleMessage(CefRefPtr[CefBrowser] cefBrowser,
                                 CefString& cefMessage,
                                 CefString& cefSource,
                                 int line) except * with gil:
@@ -36,9 +36,9 @@ cdef public cbool DisplayHandler_OnConsoleMessage(CefRefPtr[CefBrowser] cefBrows
 		pySource = CefStringToPyString(cefSource)
 		handler = pyBrowser.GetClientHandler("OnConsoleMessage")
 		if handler:
-			return <cbool>bool(handler(pyBrowser, pyMessage, pySource, line))
+			return <c_bool>bool(handler(pyBrowser, pyMessage, pySource, line))
 		else:
-			return <cbool>False
+			return <c_bool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
@@ -63,8 +63,8 @@ cdef public void DisplayHandler_OnContentsSizeChange(CefRefPtr[CefBrowser] cefBr
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void DisplayHandler_OnNavStateChange(CefRefPtr[CefBrowser] cefBrowser,
-                                cbool canGoBack,
-                                cbool canGoForward) except * with gil:
+                                c_bool canGoBack,
+                                c_bool canGoForward) except * with gil:
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)	
@@ -173,7 +173,7 @@ def EnforceWindowIcon(pyBrowser):
 			win32api.SendMessage(windowID, win32con.WM_SETICON, win32con.ICON_SMALL, parentIconSmall)
 
 
-cdef public cbool DisplayHandler_OnTooltip(CefRefPtr[CefBrowser] cefBrowser,
+cdef public c_bool DisplayHandler_OnTooltip(CefRefPtr[CefBrowser] cefBrowser,
                          CefString& cefText) except * with gil:
 
 	try:
@@ -183,9 +183,9 @@ cdef public cbool DisplayHandler_OnTooltip(CefRefPtr[CefBrowser] cefBrowser,
 		if handler:
 			ret = handler(pyBrowser, pyText)
 			PyStringToCefString(pyText[0], cefText);
-			return <cbool>bool(ret)
+			return <c_bool>bool(ret)
 		else:
-			return <cbool>False
+			return <c_bool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)

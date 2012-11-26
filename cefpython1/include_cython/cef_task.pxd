@@ -2,10 +2,10 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from libcpp cimport bool as cbool
+from libcpp cimport bool as c_bool
 cimport cef_types
 
 cdef extern from "include/cef_task.h":
 	ctypedef int CefThreadId
-	cdef cbool CefCurrentlyOn(CefThreadId)
+	cdef c_bool CefCurrentlyOn(CefThreadId)
 	ctypedef cef_types.cef_thread_id_t CefThreadId

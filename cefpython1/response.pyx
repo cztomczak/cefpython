@@ -73,12 +73,55 @@ cdef class PyResponse:
 		PyStringToCefString(name, cefName)
 		return CefStringToPyString((<CefResponse*>(self.cefResponse.get())).GetHeader(cefName))
 
-	"""
 	def GetHeaderMap(self):
 
-		pass # TODO.
+		headerMultimap = self.GetHeaderMultimap()
+		headerMap = {}
+		for headerTuple in headerMultimap:
+			key = headerTuple[0]
+			value = headerTuple[1]
+			headerMap[key] = value
+		return headerMap
+
+	def GetHeaderMultimap(self):
+		
+		self.CheckCefResponse()
+		cdef c_multimap[CefString, CefString] cefHeaderMap
+		(<CefResponse*>(self.cefResponse.get())).GetHeaderMap(cefHeaderMap)
+		pyHeaderMultimap = []
+		cdef c_multimap[CefString, CefString].iterator iterator = cefHeaderMap.begin()
+		cdef CefString cefKey
+		cdef CefString cefValue
+		while iterator != cefHeaderMap.end():
+			cefKey = deref(iterator).first
+			cefValue = deref(iterator).second
+			pyKey = CefStringToPyString(cefKey)
+			pyValue = CefStringToPyString(cefValue)
+			pyHeaderMultimap.append((pyKey, pyValue))
+			preinc(iterator)
+		return pyHeaderMultimap
 
 	def SetHeaderMap(self, headerMap):
 
-		pass # TODO.
-	"""
+		assert type(headerMap) == dict, "headerMap param is not a dictionary"
+		assert len(headerMap) > 0, "headerMap param is an empty dictionary"
+		headerMultimap = []
+		for key in headerMap:
+			headerMultimap.append((str(key), str(headerMap[key])))
+		self.SetHeaderMultimap(headerMultimap)
+
+	def SetHeaderMultimap(self, headerMultimap):
+
+		assert type(headerMultimap) == list, "headerMultimap param is not a list"
+		assert len(headerMultimap) > 0, "headerMultimap param is an empty list"
+		self.CheckCefResponse()
+		cdef c_multimap[CefString, CefString] cefHeaderMap
+		cdef CefString cefKey
+		cdef CefString cefValue
+		cdef c_pair[CefString, CefString] pair
+		for headerTuple in headerMultimap:
+			PyStringToCefString(str(headerTuple[0]), cefKey)
+			PyStringToCefString(str(headerTuple[1]), cefValue)
+			pair.first, pair.second = cefKey, cefValue
+			cefHeaderMap.insert(pair)
+		(<CefResponse*>(self.cefResponse.get())).SetHeaderMap(cefHeaderMap)

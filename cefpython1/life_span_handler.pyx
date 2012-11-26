@@ -5,7 +5,7 @@
 include "imports.pyx"
 include "utils.pyx"
 
-cdef public cbool LifeSpanHandler_DoClose(
+cdef public c_bool LifeSpanHandler_DoClose(
 		CefRefPtr[CefBrowser] cefBrowser
 		) except * with gil:
 
@@ -65,7 +65,7 @@ cdef public void LifeSpanHandler_OnBeforeClose(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public cbool LifeSpanHandler_RunModal(
+cdef public c_bool LifeSpanHandler_RunModal(
 		CefRefPtr[CefBrowser] cefBrowser
 		) except * with gil:
 

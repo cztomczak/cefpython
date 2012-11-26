@@ -2,7 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from libcpp cimport bool as cbool
 from cef_string cimport CefString
 from cef_ptr cimport CefRefPtr
 from cef_v8 cimport CefV8Value

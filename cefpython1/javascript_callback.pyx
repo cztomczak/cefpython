@@ -6,8 +6,8 @@ include "imports.pyx"
 include "utils.pyx"
 include "v8utils.pyx"
 
-cdef map[int, CefRefPtr[CefV8Value]] g_v8JavascriptCallbacks
-cdef map[int, CefRefPtr[CefV8Context]] g_v8JavascriptCallbackContexts
+cdef c_map[int, CefRefPtr[CefV8Value]] g_v8JavascriptCallbacks
+cdef c_map[int, CefRefPtr[CefV8Context]] g_v8JavascriptCallbackContexts
 cdef int g_v8JavascriptCallbackCount = 0 # next callbackID
 
 cdef int PutV8JavascriptCallback(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Context] v8Context) except *:
@@ -67,7 +67,7 @@ class JavascriptCallback:
 		# Javascript callback may be kept somewhere and later called from a different v8 frame context.
 		# Need to enter js v8 context before calling PyValueToV8Value().
 
-		cdef cbool sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
+		cdef c_bool sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
 		
 		if not sameContext:
 			if g_debug: print("JavascriptCallback.Call(): different context, calling v8Context.Enter()")
