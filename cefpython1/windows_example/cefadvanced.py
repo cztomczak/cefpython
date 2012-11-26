@@ -121,7 +121,7 @@ class JSBindings:
 		python = Python()
 		python.browser = self.browser
 
-		self.cefBindings.SetFunction("alert", python.Alert) # overwrite "window.alert"
+		#self.cefBindings.SetFunction("alert", python.Alert) # overwrite "window.alert"
 		self.cefBindings.SetObject("python", python)
 		self.cefBindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
 
@@ -257,6 +257,15 @@ class Python:
 				width=800, height=600, xpos=0, ypos=0, icon="icon.ico", windowProc=wndproc2)
 		browser2 = cefpython.CreateBrowser(windowID2, browserSettings={}, navigateURL="cefsimple.html")
 
+	def GetUnicodeString(self):
+		
+		if bytes == str:
+			# Python 2.7
+			# Can't write u"This is unicode string \u2014" because Python 3 complains.
+			return unicode("This is unicode string \xe2\x80\x94".decode("utf-8"))
+		else:
+			return "Unicode string can be tested only in python 2.x"
+
 class ClientHandler:
 
 	def OnLoadStart(self, browser, frame):
@@ -327,7 +336,12 @@ class ClientHandler:
 	def OnResourceResponse(self, browser, url, response, filter):
 
 		# This function does not get called for local disk sources (file:///).
+		print("")
 		print("Resource: %s (status=%s)" % (url, response.GetStatus()))
+		"""response.SetHeaderMap({"Content-Length": 123, "Content-Type": "none"})"""
+		print("response.GetHeaderMap(): %s" % response.GetHeaderMap())
+		"""print("response.GetHeaderMultimap(): %s" % response.GetHeaderMultimap())"""
+		print("")
 
 	def OnUncaughtException(self, browser, frame, exception, stackTrace):
 

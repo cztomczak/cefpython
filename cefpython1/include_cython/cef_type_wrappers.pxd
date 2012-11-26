@@ -2,13 +2,13 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from libcpp cimport bool as cbool
+from libcpp cimport bool as c_bool
 from cef_string cimport cef_string_t
 
 cdef extern from "include/internal/cef_types_wrappers.h":
 	
 	ctypedef struct CefSettings:
-		cbool multi_threaded_message_loop
+		c_bool multi_threaded_message_loop
 		cef_string_t cache_path
 		cef_string_t user_agent
 		cef_string_t product_version
@@ -19,17 +19,17 @@ cdef extern from "include/internal/cef_types_wrappers.h":
 		unsigned int local_storage_quota
 		unsigned int session_storage_quota
 		cef_string_t javascript_flags
-		cbool auto_detect_proxy_settings_enabled
+		c_bool auto_detect_proxy_settings_enabled
 		cef_string_t resources_dir_path
 		cef_string_t locales_dir_path
-		cbool pack_loading_disabled
+		c_bool pack_loading_disabled
 		int uncaught_exception_stack_size
 
 	ctypedef struct CefBrowserSettings:
 		int animation_frame_rate
-		cbool drag_drop_disabled
-		cbool load_drops_disabled
-		cbool history_disabled
+		c_bool drag_drop_disabled
+		c_bool load_drops_disabled
+		c_bool history_disabled
 		cef_string_t standard_font_family
 		cef_string_t fixed_font_family
 		cef_string_t serif_font_family
@@ -40,41 +40,41 @@ cdef extern from "include/internal/cef_types_wrappers.h":
 		int default_fixed_font_size
 		int minimum_font_size
 		int minimum_logical_font_size
-		cbool remote_fonts_disabled
+		c_bool remote_fonts_disabled
 		cef_string_t default_encoding
-		cbool encoding_detector_enabled
-		cbool javascript_disabled
-		cbool javascript_open_windows_disallowed
-		cbool javascript_close_windows_disallowed
-		cbool javascript_access_clipboard_disallowed
-		cbool dom_paste_disabled
-		cbool caret_browsing_enabled
-		cbool java_disabled
-		cbool plugins_disabled
-		cbool universal_access_from_file_urls_allowed
-		cbool file_access_from_file_urls_allowed
-		cbool web_security_disabled
-		cbool xss_auditor_enabled
-		cbool image_load_disabled
-		cbool shrink_standalone_images_to_fit
-		cbool site_specific_quirks_disabled
-		cbool text_area_resize_disabled
-		cbool page_cache_disabled
-		cbool tab_to_links_disabled
-		cbool hyperlink_auditing_disabled
-		cbool user_style_sheet_enabled
+		c_bool encoding_detector_enabled
+		c_bool javascript_disabled
+		c_bool javascript_open_windows_disallowed
+		c_bool javascript_close_windows_disallowed
+		c_bool javascript_access_clipboard_disallowed
+		c_bool dom_paste_disabled
+		c_bool caret_browsing_enabled
+		c_bool java_disabled
+		c_bool plugins_disabled
+		c_bool universal_access_from_file_urls_allowed
+		c_bool file_access_from_file_urls_allowed
+		c_bool web_security_disabled
+		c_bool xss_auditor_enabled
+		c_bool image_load_disabled
+		c_bool shrink_standalone_images_to_fit
+		c_bool site_specific_quirks_disabled
+		c_bool text_area_resize_disabled
+		c_bool page_cache_disabled
+		c_bool tab_to_links_disabled
+		c_bool hyperlink_auditing_disabled
+		c_bool user_style_sheet_enabled
 		cef_string_t user_style_sheet_location
-		cbool author_and_user_styles_disabled
-		cbool local_storage_disabled
-		cbool databases_disabled
-		cbool application_cache_disabled
-		cbool webgl_disabled
-		cbool accelerated_compositing_enabled
-		cbool accelerated_layers_disabled
-		cbool accelerated_video_disabled
-		cbool accelerated_2d_canvas_disabled
-		cbool accelerated_painting_disabled
-		cbool accelerated_filters_disabled
-		cbool accelerated_plugins_disabled
-		cbool developer_tools_disabled
-		cbool fullscreen_enabled
+		c_bool author_and_user_styles_disabled
+		c_bool local_storage_disabled
+		c_bool databases_disabled
+		c_bool application_cache_disabled
+		c_bool webgl_disabled
+		c_bool accelerated_compositing_enabled
+		c_bool accelerated_layers_disabled
+		c_bool accelerated_video_disabled
+		c_bool accelerated_2d_canvas_disabled
+		c_bool accelerated_painting_disabled
+		c_bool accelerated_filters_disabled
+		c_bool accelerated_plugins_disabled
+		c_bool developer_tools_disabled
+		c_bool fullscreen_enabled

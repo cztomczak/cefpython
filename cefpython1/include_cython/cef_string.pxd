@@ -2,8 +2,9 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from libcpp cimport bool as cbool
+from libcpp cimport bool as c_bool
 from stddef cimport wchar_t
+from libcpp.string cimport string as c_string
 
 cdef extern from "include/internal/cef_string.h":
 	ctypedef struct cef_string_t:
@@ -11,7 +12,8 @@ cdef extern from "include/internal/cef_string.h":
 	cdef cppclass CefString:
 		CefString()
 		CefString(cef_string_t*)
-		cbool FromASCII(char*)
-		cbool FromString(wchar_t*, size_t, cbool)
+		c_bool FromASCII(char*)
+		c_bool FromString(wchar_t*, size_t, c_bool)
+		c_bool FromString(c_string& str)
 		wchar_t* ToWString()
 		char* c_str()

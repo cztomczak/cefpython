@@ -8,7 +8,7 @@ include "javascript_bindings.pyx"
 
 # Global variables.
 
-cdef map[int, CefRefPtr[CefBrowser]] g_cefBrowsers # innerWindowID : browser # a pointer would be: new map[int, CefRefPtr[CefBrowser]]()
+cdef c_map[int, CefRefPtr[CefBrowser]] g_cefBrowsers # innerWindowID : browser # a pointer would be: new map[int, CefRefPtr[CefBrowser]]()
 g_pyBrowsers = {}
 
 # This dictionary list of popup browsers is never cleaned, it may contain old inner
@@ -164,13 +164,13 @@ class PyBrowser:
 	def CanGoBack(self):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
-		cdef cbool canGoBack = (<CefBrowser*>(cefBrowser.get())).CanGoBack()
+		cdef c_bool canGoBack = (<CefBrowser*>(cefBrowser.get())).CanGoBack()
 		return canGoBack
 
 	def CanGoForward(self):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
-		cdef cbool canGoForward = (<CefBrowser*>(cefBrowser.get())).CanGoForward()
+		cdef c_bool canGoForward = (<CefBrowser*>(cefBrowser.get())).CanGoForward()
 		return canGoForward
 
 	def ClearHistory(self):
@@ -219,7 +219,7 @@ class PyBrowser:
 		PyStringToCefString(searchText, cefSearchText)
 
 		(<CefBrowser*>(cefBrowser.get())).Find(
-			<int>searchID, cefSearchText, <cbool>bool(forward), <cbool>bool(matchCase), <cbool>bool(findNext))
+			<int>searchID, cefSearchText, <c_bool>bool(forward), <c_bool>bool(matchCase), <c_bool>bool(findNext))
 
 	def GetFocusedFrame(self):
 
@@ -245,11 +245,11 @@ class PyBrowser:
 		assert CurrentlyOn(TID_UI), "Browser.GetFrameNames() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 
-		cdef vector[CefString] cefNames
+		cdef c_vector[CefString] cefNames
 		(<CefBrowser*>(cefBrowser.get())).GetFrameNames(cefNames)
 
 		names = []
-		cdef vector[CefString].iterator iterator = cefNames.begin()
+		cdef c_vector[CefString].iterator iterator = cefNames.begin()
 		cdef CefString cefString
 		while iterator != cefNames.end():
 			cefString = deref(iterator)
@@ -358,7 +358,7 @@ class PyBrowser:
 	def SetFocus(self, enable):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
-		(<CefBrowser*>(cefBrowser.get())).SetFocus(<cbool>bool(enable))
+		(<CefBrowser*>(cefBrowser.get())).SetFocus(<c_bool>bool(enable))
 
 	def SetZoomLevel(self, zoomLevel):
 
@@ -379,7 +379,7 @@ class PyBrowser:
 	def StopFinding(self, clearSelection):
 
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
-		(<CefBrowser*>(cefBrowser.get())).StopFinding(<cbool>bool(clearSelection))
+		(<CefBrowser*>(cefBrowser.get())).StopFinding(<c_bool>bool(clearSelection))
 
 	def ToggleFullscreen(self):
 

@@ -3,13 +3,13 @@
 # Website: http://code.google.com/p/cefpython/
 
 from windows cimport HWND
-from libcpp.string cimport string
+from libcpp.string cimport string as c_string
 
 cdef extern from "http_authentication/AuthCredentials.h":
 
 	ctypedef struct AuthCredentialsData:
-		string username
-		string password
+		c_string username
+		c_string password
 
 cdef extern from "http_authentication/AuthDialog.h":
 	

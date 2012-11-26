@@ -13,36 +13,36 @@ NAVTYPE_FORMRESUBMITTED = <int>cef_types.NAVTYPE_FORMRESUBMITTED
 NAVTYPE_OTHER = <int>cef_types.NAVTYPE_OTHER
 NAVTYPE_LINKDROPPED = <int>cef_types.NAVTYPE_LINKDROPPED
 
-cdef public cbool RequestHandler_OnBeforeBrowse(
+cdef public c_bool RequestHandler_OnBeforeBrowse(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
 		CefRefPtr[CefRequest] cefRequest,
 		cef_types.cef_handler_navtype_t navType,
-		cbool isRedirect) except * with gil:
+		c_bool isRedirect) except * with gil:
 	
 	# TODO: not yet implemented.
-	return <cbool>False
+	return <c_bool>False
 
 	try:
 		# ignoreError=True - when creating browser window there is no browser yet added to the g_pyBrowsers,
 		# it's happening because CreateBrowser() does the initial navigation.
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
 		if not pyBrowser:
-			return <cbool>False
+			return <c_bool>False
 		
 		pyFrame = GetPyFrameByCefFrame(cefFrame)
 		pyRequest = GetPyRequestByCefRequest(cefRequest)
 
 		handler = pyBrowser.GetClientHandler("OnBeforeBrowse")
 		if handler:
-			return <cbool>bool(handler(pyBrowser, pyFrame, pyRequest, <int>navType, isRedirect))
+			return <c_bool>bool(handler(pyBrowser, pyFrame, pyRequest, <int>navType, isRedirect))
 		else:
-			return <cbool>False
+			return <c_bool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public cbool RequestHandler_OnBeforeResourceLoad(
+cdef public c_bool RequestHandler_OnBeforeResourceLoad(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefRequest] cefRequest,
 		CefString& cefRedirectURL,
@@ -51,7 +51,7 @@ cdef public cbool RequestHandler_OnBeforeResourceLoad(
 		int loadFlags) except * with gil:
 
 	# TODO: not yet implemented.
-	return <cbool>False
+	return <c_bool>False
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
@@ -67,9 +67,9 @@ cdef public cbool RequestHandler_OnBeforeResourceLoad(
 			assert type(pyRedirectURL[0]) == str
 			if pyRedirectURL[0]:
 				PyStringToCefString(pyRedirectURL[0], cefRedirectURL)
-			return <cbool>bool(ret)
+			return <c_bool>bool(ret)
 		else:
-			return <cbool>False
+			return <c_bool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
@@ -115,15 +115,15 @@ cdef public void RequestHandler_OnResourceResponse(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public cbool RequestHandler_OnProtocolExecution(
+cdef public c_bool RequestHandler_OnProtocolExecution(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefString& cefURL,
-		cbool& cefAllowOSExecution) except * with gil:
+		c_bool& cefAllowOSExecution) except * with gil:
 
 	# TODO: needs testing.
 
 	try:
-		return <cbool>False
+		return <c_bool>False
 
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyURL = CefStringToPyString(cefURL)
@@ -132,15 +132,15 @@ cdef public cbool RequestHandler_OnProtocolExecution(
 		handler = pyBrowser.GetClientHandler("OnProtocolExecution")
 		if handler:
 			ret = handler(pyBrowser, pyURL, pyAllowOSExecution)
-			cefAllowOSExecution = <cbool>bool(pyAllowOSExecution[0])
-			return <cbool>bool(ret)
+			cefAllowOSExecution = <c_bool>bool(pyAllowOSExecution[0])
+			return <c_bool>bool(ret)
 		else:
-			return <cbool>False
+			return <c_bool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public cbool RequestHandler_GetDownloadHandler(
+cdef public c_bool RequestHandler_GetDownloadHandler(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefString& cefMimeType,
 		CefString& cefFilename,
@@ -148,7 +148,7 @@ cdef public cbool RequestHandler_GetDownloadHandler(
 		CefRefPtr[CefDownloadHandler]& cefDownloadHandler) except * with gil:
 
 	# TODO: not yet implemented.
-	return <cbool>False
+	return <c_bool>False
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
@@ -159,16 +159,16 @@ cdef public cbool RequestHandler_GetDownloadHandler(
 
 		handler = pyBrowser.GetClientHandler("GetDownloadHandler")
 		if handler:
-			return <cbool>bool(handler(pyBrowser, pyMimeType, pyFilename, pyContentLength, pyDownloadHandler))
+			return <c_bool>bool(handler(pyBrowser, pyMimeType, pyFilename, pyContentLength, pyDownloadHandler))
 		else:
-			return <cbool>False
+			return <c_bool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public cbool RequestHandler_GetAuthCredentials(
+cdef public c_bool RequestHandler_GetAuthCredentials(
 		CefRefPtr[CefBrowser] cefBrowser,
-		cbool cefIsProxy,
+		c_bool cefIsProxy,
 		CefString& cefHost,
 		int cefPort,
 		CefString& cefRealm,
@@ -192,7 +192,7 @@ cdef public cbool RequestHandler_GetAuthCredentials(
 			if ret:
 				PyStringToCefString(pyUsername[0], cefUsername)
 				PyStringToCefString(pyPassword[0], cefPassword)
-			return <cbool>bool(ret)
+			return <c_bool>bool(ret)
 		else:
 			# Default implementation.
 			IF UNAME_SYSNAME == "Windows":
@@ -200,14 +200,14 @@ cdef public cbool RequestHandler_GetAuthCredentials(
 				if ret:
 					PyStringToCefString(pyUsername[0], cefUsername)
 					PyStringToCefString(pyPassword[0], cefPassword)
-				return <cbool>bool(ret)
-			return <cbool>False
+				return <c_bool>bool(ret)
+			return <c_bool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
 # Using "with nogil" in this function, so this needs to be a "cdef function".
-cdef cbool Requesthandler_GetAuthCredentials_Windows(browser, isProxy, host, port, realm, scheme, username, password) except *:
+cdef c_bool Requesthandler_GetAuthCredentials_Windows(browser, isProxy, host, port, realm, scheme, username, password) except *:
 	
 	cdef AuthCredentialsData* credentialsData
 	innerWindowID = browser.GetInnerWindowID() # innerWindowID is a top window for a popup
@@ -215,7 +215,7 @@ cdef cbool Requesthandler_GetAuthCredentials_Windows(browser, isProxy, host, por
 	with nogil:
 		credentialsData = AuthDialog(handle)
 	if credentialsData == NULL:
-		return <cbool>False
+		return <c_bool>False
 	else:
 		# In Python 2.7 c_str returns a string.
 		username[0] = credentialsData.username.c_str()
@@ -227,7 +227,7 @@ cdef cbool Requesthandler_GetAuthCredentials_Windows(browser, isProxy, host, por
 				username[0] = username[0].decode(g_applicationSettings["unicode_to_bytes_encoding"])
 			if type(password[0]) == bytes:
 				password[0] = password[0].decode(g_applicationSettings["unicode_to_bytes_encoding"])
-		return <cbool>True
+		return <c_bool>True
 
 cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
 		CefRefPtr[CefBrowser] cefBrowser,

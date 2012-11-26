@@ -4,7 +4,7 @@
 
 from cef_types cimport int64
 from cef_string cimport CefString
-from libcpp cimport bool as cbool
+from libcpp cimport bool as c_bool
 from cef_ptr cimport CefRefPtr
 from cef_v8 cimport CefV8Context
 
@@ -16,7 +16,7 @@ cdef extern from "include/cef_frame.h":
 		CefString GetURL()
 		int64 GetIdentifier()
 		CefRefPtr[CefV8Context] GetV8Context()
-		cbool IsMain()
+		c_bool IsMain()
 		void LoadURL(CefString& url)
 		void Undo()
 		void Redo()
@@ -30,5 +30,5 @@ cdef extern from "include/cef_frame.h":
 		CefString GetSource()
 		CefString GetText()
 		void LoadString(CefString& string_val, CefString& url)
-		cbool IsFocused()
+		c_bool IsFocused()
 		CefString GetName()

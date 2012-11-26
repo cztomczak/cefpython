@@ -24,6 +24,7 @@ cdef extern from "Windows.h":
 	
 	cdef int CP_UTF8
 	cdef int WideCharToMultiByte(int, int, wchar_t*, int, char*, int, char*, int*)
+	cdef int MultiByteToWideChar(int, int, char*, int, wchar_t*, int)
 	
 	ctypedef void* HDWP
 	cdef int SWP_NOZORDER

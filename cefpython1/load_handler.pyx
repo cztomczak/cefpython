@@ -106,7 +106,7 @@ cdef public void LoadHandler_OnLoadStart(
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
 
-cdef public cbool LoadHandler_OnLoadError(
+cdef public c_bool LoadHandler_OnLoadError(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
 		cef_types.cef_handler_errorcode_t cefErrorCode,
@@ -131,9 +131,9 @@ cdef public cbool LoadHandler_OnLoadError(
 			ret = handler(pyBrowser, pyFrame, cefErrorCode, CefStringToPyString(cefFailedURL), errorText)
 			if ret:
 				PyStringToCefString(errorText[0], cefErrorText)
-			return <cbool>bool(ret)
+			return <c_bool>bool(ret)
 		else:
-			return <cbool>False
+			return <c_bool>False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)

@@ -101,9 +101,7 @@ Licensed under GNU General Public License.
 LICENSING
 ---------
 
-The CEF project is BSD licensed. Please read the LICENSE.txt file included with
-this binary distribution for licensing terms and conditions. Other software
-included in this distribution is provided under other licenses. Please visit the
-below link for complete Chromium and third-party licensing information.
-
-http://code.google.com/chromium/terms.html 
+The CEF Python project is BSD licensed (http://opensource.org/licenses/BSD-3-Clause).
+Other software included in this distribution is provided under other licenses.
+Please visit the below link for complete Chromium and third-party licensing information:
+http://code.google.com/chromium/terms.html
