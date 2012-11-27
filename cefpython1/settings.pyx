@@ -57,6 +57,8 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 			del cefString
 		elif key == "log_severity":
 			cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
+		elif key == "enable_dcheck":
+			cefAppSettings.enable_dcheck = <c_bool>bool(appSettings[key])
 		elif key == "graphics_implementation" and platform.system() == "Windows":
 			cefAppSettings.graphics_implementation = <cef_types_win.cef_graphics_implementation_t?><int>int(appSettings[key])
 		elif key == "local_storage_quota":

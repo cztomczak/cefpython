@@ -9,7 +9,7 @@ IF UNAME_SYSNAME == "Windows":
 	from cef_win cimport CefWindowHandle, CefWindowInfo
 from cef_string cimport CefString
 from cef_client cimport CefClient
-from cef_type_wrappers cimport CefSettings, CefBrowserSettings
+from cef_types_wrappers cimport CefSettings, CefBrowserSettings
 from libcpp cimport bool as c_bool
 from libcpp.vector cimport vector as c_vector
 from cef_frame cimport CefFrame

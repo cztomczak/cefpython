@@ -118,7 +118,8 @@ if __name__ == '__main__':
 	print("PySide version: %s" % PySide.__version__)
 	print("QtCore version: %s" % QtCore.__version__)
 	
-	cefpython.Initialize()
+	settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "enable_dcheck": True}
+	cefpython.Initialize(settings)
 	sys.excepthook = cefpython.ExceptHook
 	
 	app = CefApplication(sys.argv)

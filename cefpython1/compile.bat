@@ -15,6 +15,9 @@ cd "setup"
 call python "fix_includes.py"
 call python "setup.py" build_ext --inplace
 
+@if %ERRORLEVEL% neq 0 pause
+@if %ERRORLEVEL% neq 0 exit
+
 for /R %~dp0setup\ %%f in (*.pyx) do del "%%f"
 
 REM %~dp0 doesn't work with rmdir.

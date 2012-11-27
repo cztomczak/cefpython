@@ -15,6 +15,7 @@ cdef extern from "include/internal/cef_types_wrappers.h":
 		cef_string_t locale
 		cef_string_t log_file
 		int log_severity
+		c_bool enable_dcheck
 		int graphics_implementation
 		unsigned int local_storage_quota
 		unsigned int session_storage_quota

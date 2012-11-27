@@ -97,7 +97,7 @@ class PyFrame:
 	def GetProperty(self, name):
 
 		# GetV8Context() requires UI thread.
-		assert CurrentlyOn(TID_UI), "Frame.GetProperty() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Frame.GetProperty() may only be called on the UI thread"
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefRefPtr[CefV8Context] v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
 		window = (<CefV8Context*>(v8Context.get())).GetGlobal()
@@ -113,14 +113,14 @@ class PyFrame:
 
 	def GetSource(self):
 		
-		assert CurrentlyOn(TID_UI), "Frame.GetSource() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Frame.GetSource() may only be called on the UI thread"
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefString cefSource = (<CefFrame*>(cefFrame.get())).GetSource()
 		return CefStringToPyString(cefSource)
 
 	def GetText(self):
 		
-		assert CurrentlyOn(TID_UI), "Frame.GetText() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Frame.GetText() may only be called on the UI thread"
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefString cefSource = (<CefFrame*>(cefFrame.get())).GetText()
 		return CefStringToPyString(cefSource)
@@ -133,7 +133,7 @@ class PyFrame:
 
 	def IsFocused(self):
 
-		assert CurrentlyOn(TID_UI), "Frame.IsFocused() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Frame.IsFocused() may only be called on the UI thread"
 		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		return (<CefFrame*>(cefFrame.get())).IsFocused()
 
@@ -185,7 +185,7 @@ class PyFrame:
 	def SetProperty(self, name, value):
 
 		# GetV8Context() requires UI thread.
-		assert CurrentlyOn(TID_UI), "Frame.SetProperty() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Frame.SetProperty() may only be called on the UI thread"
 		
 		if not JavascriptBindings.IsValueAllowed(value):
 			valueType = JavascriptBindings.__IsValueAllowed(value)

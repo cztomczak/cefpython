@@ -46,6 +46,7 @@ def CefAdvanced():
 	appSettings = dict()
 	appSettings["log_file"] = cefpython.GetRealPath("debug.log")
 	appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE # LOGSEVERITY_DISABLE - will not create "debug.log" file.
+	appSettings["enable_dcheck"] = True # Enable only when debugging, otherwise performance might hurt.
 	appSettings["uncaught_exception_stack_size"] = 100 # Must be set so that OnUncaughtException() is called.
 	cefpython.Initialize(applicationSettings=appSettings)
 

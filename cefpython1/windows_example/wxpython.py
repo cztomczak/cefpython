@@ -92,9 +92,12 @@ class MyApp(wx.App):
 
 if __name__ == '__main__':
 	
-	cefpython.Initialize() # Initialize cefpython before wx.
+	settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "enable_dcheck": True}
+	cefpython.Initialize(settings) # Initialize cefpython before wx.
 	sys.excepthook = cefpython.ExceptHook
+
 	print('wx.version=%s' % wx.version())
 	app = MyApp(False)
 	app.MainLoop()
+	
 	cefpython.Shutdown()

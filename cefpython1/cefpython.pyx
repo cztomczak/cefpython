@@ -35,8 +35,8 @@ g_applicationSettings = {}
 # All .pyx files need to be included here.
 
 include "include_cython/platform.pxi"
-
 include "imports.pyx"
+
 include "browser.pyx"
 include "frame.pyx"
 include "javascript_bindings.pyx"
@@ -139,7 +139,7 @@ def Initialize(applicationSettings=None):
 	if g_debug:
 		if ret: print("OK")
 		else: print("ERROR")
-		print("GetLastError(): %s" % GetLastError())
+		print("GetSystemError(): %s" % GetSystemError())
 
 
 def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, javascriptBindings=None):
@@ -149,7 +149,7 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 
 	if g_debug: print("cefpython.CreateBrowser()")
 
-	if not win32gui.IsWindow(windowID):
+	if not IsWindowHandle(windowID):
 		raise Exception("CreateBrowser() failed: invalid windowID")
 
 	cdef CefWindowInfo info
@@ -158,19 +158,15 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 
 	SetBrowserSettings(browserSettings, &cefBrowserSettings)	
 
-	if g_debug: print("win32gui.GetClientRect(windowID)")
-	rect1 = win32gui.GetClientRect(windowID)
-	if g_debug: print("GetLastError(): %s" % GetLastError())
+	IF UNAME_SYSNAME == "Windows":
+		if g_debug: print("GetClientRect(windowID)")
+		cdef RECT rect1
+		GetClientRect(<HWND><int>windowID, &rect1)
+		if g_debug: print("GetSystemError(): %s" % GetSystemError())
 
-	cdef RECT rect2
-	rect2.left = <int>rect1[0]
-	rect2.top = <int>rect1[1]
-	rect2.right = <int>rect1[2]
-	rect2.bottom = <int>rect1[3]
-
-	if g_debug: print("CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect2)")
-	info.SetAsChild(<CefWindowHandle><int>windowID, rect2)	
-	if g_debug: print("GetLastError(): %s" % GetLastError())
+	if g_debug: print("CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect1)")
+	info.SetAsChild(<CefWindowHandle><int>windowID, rect1)	
+	if g_debug: print("GetSystemError(): %s" % GetSystemError())
 
 	navigateURL = GetRealPath(file=navigateURL, encodeURL=True)
 	if g_debug: print("navigateURL: %s" % navigateURL)
@@ -185,7 +181,7 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 
 	if <void*>cefBrowser == NULL: 
 		if g_debug: print("CreateBrowserSync(): NULL")
-		if g_debug: print("GetLastError(): %s" % GetLastError())
+		if g_debug: print("GetSystemError(): %s" % GetSystemError())
 		return None
 	else: 
 		if g_debug: print("CreateBrowserSync(): OK")
@@ -241,7 +237,7 @@ def Shutdown():
 
 	if g_debug: print("CefShutdown()")
 	CefShutdown()
-	if g_debug: print("GetLastError(): %s" % GetLastError())
+	if g_debug: print("GetSystemError(): %s" % GetSystemError())
 
 def IsKeyModifier(key, modifiers):
 
@@ -288,7 +284,7 @@ cdef object CefV8StackTraceToPython(CefRefPtr[CefV8StackTrace] cefTrace):
 
 def GetJavascriptStackTrace(frameLimit=100):
 
-	assert CurrentlyOn(TID_UI), "cefpython.GetJavascriptStackTrace() may only be called on the UI thread"
+	assert IsCurrentThread(TID_UI), "cefpython.GetJavascriptStackTrace() may only be called on the UI thread"
 	cdef CefRefPtr[CefV8StackTrace] cefTrace = cef_v8_stack_trace.GetCurrent(int(frameLimit))
 	return CefV8StackTraceToPython(cefTrace)
 

@@ -60,7 +60,7 @@ class PyBrowser:
 		self.__innerWindowID = innerWindowID
 		clientHandlers = clientHandlers if clientHandlers else {}
 		javascriptBindings = javascriptBindings if javascriptBindings else None
-		assert win32gui.IsWindow(innerWindowID), "Invalid window handle (innerWindowID)"
+		assert IsWindowHandle(innerWindowID), "Invalid window handle (innerWindowID)"
 
 		cdef CefRefPtr[CefBrowser] cefBrowser
 		if -1 != self.__topWindowID:
@@ -223,7 +223,7 @@ class PyBrowser:
 
 	def GetFocusedFrame(self):
 
-		assert CurrentlyOn(TID_UI), "Browser.GetFocusedFrame() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Browser.GetFocusedFrame() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		cdef CefRefPtr[CefFrame] cefFrame = (<CefBrowser*>(cefBrowser.get())).GetFocusedFrame()
 		
@@ -231,7 +231,7 @@ class PyBrowser:
 
 	def GetFrame(self, name):
 
-		assert CurrentlyOn(TID_UI), "Browser.GetFrame() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Browser.GetFrame() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		
 		cdef CefString cefName
@@ -242,7 +242,7 @@ class PyBrowser:
 
 	def GetFrameNames(self):
 
-		assert CurrentlyOn(TID_UI), "Browser.GetFrameNames() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Browser.GetFrameNames() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 
 		cdef c_vector[CefString] cefNames
@@ -272,7 +272,7 @@ class PyBrowser:
 		openerID = <int>hwnd
 		
 		if openerID:
-			assert win32gui.IsWindow(openerID), "CefBrowser.GetOpenerWindowHandle() returned invalid handle"
+			assert IsWindowHandle(openerID), "CefBrowser.GetOpenerWindowHandle() returned invalid handle"
 			return openerID
 		
 		return None
@@ -300,7 +300,7 @@ class PyBrowser:
 
 	def GetZoomLevel(self):
 
-		assert CurrentlyOn(TID_UI), "Browser.GetZoomLevel() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Browser.GetZoomLevel() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		cdef double zoomLevel = (<CefBrowser*>(cefBrowser.get())).GetZoomLevel()
 		return zoomLevel
@@ -336,7 +336,7 @@ class PyBrowser:
 
 	def IsPopupVisible(self):
 
-		assert CurrentlyOn(TID_UI), "Browser.IsPopupVisible() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "Browser.IsPopupVisible() may only be called on the UI thread"
 		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(self.__innerWindowID))
 		return (<CefBrowser*>(cefBrowser.get())).IsPopupVisible()
 

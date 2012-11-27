@@ -114,7 +114,7 @@ cdef public c_bool LoadHandler_OnLoadError(
 		CefString& cefErrorText) except * with gil:
 
 	# These & in "CefString& failedURL" are very important, otherwise you get memory
-	# errors and win32 exception. Pycharm suggests that "statement has no effect",
+	# errors and windows exception. Pycharm suggests that "statement has no effect",
 	# but he is so wrong.
 
 	try:
