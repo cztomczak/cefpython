@@ -72,6 +72,7 @@ ApplicationSettings = {
 	"locales_dir_path": "",
 	"log_file": "",
 	"log_severity": LOGSEVERITY_VERBOSE,
+	"enable_dcheck": False,
 	"multi_threaded_message_loop": False,
 	"pack_loading_disabled": False,
 	"product_version": "",

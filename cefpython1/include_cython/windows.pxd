@@ -82,3 +82,6 @@ cdef extern from "Windows.h":
 	cdef int SWP_NOZORDER
 	cdef int SWP_NOACTIVATE
 	cdef int SWP_FRAMECHANGED
+
+	DWORD GetLastError()
+	BOOL IsWindow(HWND hWnd)

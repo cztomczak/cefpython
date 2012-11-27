@@ -6,9 +6,6 @@ include "include_cython/platform.pxi"
 
 import os
 import sys
-import win32con
-import win32gui
-import win32api
 import cython
 import platform
 import traceback
@@ -17,6 +14,13 @@ import types
 import re
 import copy
 import inspect # used by JavascriptBindings.__SetObjectMethods()
+
+# There are still 2 files that require pywin32 extension:
+# - display_handler.pyx: EnforceWindowTitle(), EnforceWindowIcon()
+# - window_procedures.pyx
+import win32api
+import win32gui
+import win32con
 
 if sys.version_info.major == 2:
 	from urllib import pathname2url as urllib_pathname2url
@@ -48,7 +52,7 @@ IF UNAME_SYSNAME == "Windows":
 	from windows cimport *
 
 from cef_string cimport *
-from cef_type_wrappers cimport *
+from cef_types_wrappers cimport *
 from cef_task cimport *
 
 IF UNAME_SYSNAME == "Windows":

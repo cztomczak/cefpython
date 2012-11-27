@@ -95,7 +95,7 @@ class JavascriptBindings:
 
 	def Rebind(self):
 		
-		assert CurrentlyOn(TID_UI), "JavascriptBindings.Rebind() may only be called on the UI thread"
+		assert IsCurrentThread(TID_UI), "JavascriptBindings.Rebind() may only be called on the UI thread"
 
 		cdef CefRefPtr[CefBrowser] cefBrowser
 		cdef CefRefPtr[CefFrame] cefFrame

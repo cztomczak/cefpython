@@ -117,7 +117,8 @@ if __name__ == '__main__':
 	version = '.'.join(map(str, list(gtk.gtk_version)))
 	print('GTK version: %s' % version)
 
-	cefpython.Initialize()
+	settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "enable_dcheck": True}
+	cefpython.Initialize(settings)
 	sys.excepthook = cefpython.ExceptHook	
 	
 	gobject.threads_init() # timer for messageloop

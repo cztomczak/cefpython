@@ -283,6 +283,7 @@ struct CefSettingsTraits {
     cef_string_set(src->log_file.str, src->log_file.length, &target->log_file,
         copy);
     target->log_severity = src->log_severity;
+    target->enable_dcheck = src->enable_dcheck;
     target->graphics_implementation = src->graphics_implementation;
     target->local_storage_quota = src->local_storage_quota;
     target->session_storage_quota = src->session_storage_quota;

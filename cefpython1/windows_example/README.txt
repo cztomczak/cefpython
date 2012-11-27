@@ -14,7 +14,7 @@ Embedding CEF in GUI frameworks:
 - pyqt.py
 - pyside.py
 
-Browser for testing:
+Test browser:
 - cefclient.exe
 
 HELP

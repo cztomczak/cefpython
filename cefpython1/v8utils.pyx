@@ -16,7 +16,7 @@ include "python_callback.pyx"
 
 cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Context] v8Context, nestingLevel=0):
 
-	# With nestingLevel > 10 we get win32 exceptions.
+	# With nestingLevel > 10 we get windows exceptions.
 
 	if nestingLevel > 8:
 		print("raising exception...")
@@ -90,7 +90,7 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 
 cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Context] v8Context, nestingLevel=0) except *:
 
-	# With nestingLevel > 10 we get win32 exceptions.
+	# With nestingLevel > 10 we get windows exceptions.
 
 	if nestingLevel > 8:
 		raise Exception("PyValueToV8Value() failed: data passed from Python to Javascript has"

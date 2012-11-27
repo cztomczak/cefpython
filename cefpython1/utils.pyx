@@ -8,19 +8,27 @@ include "imports.pyx"
 include "browser.pyx"
 include "frame.pyx"
 
-def GetLastError():
-
-	code = win32api.GetLastError()
-	return "(%d) %s" % (code, win32api.FormatMessage(code))
-
 TID_UI = cef_types.TID_UI
 TID_IO = cef_types.TID_IO
 TID_FILE = cef_types.TID_FILE
 
-def CurrentlyOn(threadID):
+def IsCurrentThread(threadID):
 
 	threadID = <int>int(threadID)
 	return CefCurrentlyOn(<CefThreadId>threadID)
+
+def IsWindowHandle(windowID):
+	
+	IF UNAME_SYSNAME == "Windows":
+		return IsWindow(<HWND><int>windowID)
+	return False
+
+def GetSystemError():
+	
+	IF UNAME_SYSNAME == "Windows":
+		cdef DWORD errorCode = GetLastError()
+		return "Error Code = %d" % (errorCode)
+	return ""
 
 cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreError=False):
 
@@ -202,11 +210,10 @@ cdef CefRefPtr[CefFrame] GetCefFrameByFrameID(frameID) except *:
 	else:
 		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")
 
-#noinspection CefStringToPyString
 cdef object CefStringToPyString(CefString& cefString):
 
 	# This & in "CefString& cefString" is very important, otherwise you get memory
-	# errors and win32 exception. Pycharm suggests that "statement has no effect",
+	# errors and windows exception. Pycharm suggests that "statement has no effect",
 	# but it is so wrong.
 
 	cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
@@ -260,13 +267,12 @@ cdef void PyStringToCefString(pyString, CefString& cefString) except *:
 		if type(pyString) != bytes:
 			pyString = pyString.encode("utf-8")	
 
-	IF UNAME_SYSNAME == "Windows":
-		cdef c_string cString = pyString
-		cefString.FromString(cString)
+	cdef c_string cString = pyString
+	cefString.FromString(cString)
 		
-		# Or this way: cefString.FromASCII(<char*>pyString)
-		# But when using FromASCII() DCHECK fails for unicode strings:
-		# ERROR_REPORT:utf_string_conversions.cc(184)] Check failed: IsStringASCII(ascii).
+	# Or this way: cefString.FromASCII(<char*>pyString)
+	# But when using FromASCII() DCHECK fails for unicode strings:
+	# ERROR_REPORT:utf_string_conversions.cc(184)] Check failed: IsStringASCII(ascii).
 
 cdef void PyStringToCefStringPtr(pyString, CefString* cefString) except *:
 	
@@ -281,10 +287,10 @@ cdef void PyStringToCefStringPtr(pyString, CefString* cefString) except *:
 		if type(pyString) != bytes:
 			pyString = pyString.encode("utf-8")	
 	
-	IF UNAME_SYSNAME == "Windows":
-		cdef c_string cString = pyString
-		cefString.FromString(cString)
+	cdef c_string cString = pyString
+	cefString.FromString(cString)
 		
-		# Or this way: cefString.FromASCII(<char*>pyString)
-		# But when using FromASCII() DCHECK fails for unicode strings:
-		# ERROR_REPORT:utf_string_conversions.cc(184)] Check failed: IsStringASCII(ascii).
+	# Or this way: cefString.FromASCII(<char*>pyString)
+	# But when using FromASCII() DCHECK fails for unicode strings:
+	# ERROR_REPORT:utf_string_conversions.cc(184)] Check failed: IsStringASCII(ascii).
+
