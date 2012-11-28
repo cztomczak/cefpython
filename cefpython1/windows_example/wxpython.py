@@ -99,5 +99,7 @@ if __name__ == '__main__':
 	print('wx.version=%s' % wx.version())
 	app = MyApp(False)
 	app.MainLoop()
+	# Let wx.App destructor do the cleanup before calling cefpython.Shutdown().
+	del app
 	
 	cefpython.Shutdown()

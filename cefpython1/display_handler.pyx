@@ -81,7 +81,11 @@ cdef public void DisplayHandler_OnStatusMessage(CefRefPtr[CefBrowser] cefBrowser
                                cef_types.cef_handler_statustype_t statusType) except * with gil:
 
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)	
+		# Second parameter = ignoreError.
+		# Error happened here once when running wxpython example, pyBrowser was empty.
+		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
+		if not pyBrowser:
+			return
 		pyText = CefStringToPyString(cefText)
 		handler = pyBrowser.GetClientHandler("OnStatusMessage")
 		if handler:
@@ -177,7 +181,11 @@ cdef public c_bool DisplayHandler_OnTooltip(CefRefPtr[CefBrowser] cefBrowser,
                          CefString& cefText) except * with gil:
 
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)	
+		# To be safe, OnStatusMessage() needs it, so this callback probasbly also,
+		# adding ignoreError=True.
+		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)	
+		if not pyBrowser:
+			return
 		pyText = [CefStringToPyString(cefText)] # In/Out
 		handler = pyBrowser.GetClientHandler("OnTooltip")
 		if handler:

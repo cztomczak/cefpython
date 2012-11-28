@@ -110,9 +110,9 @@ if __name__ == '__main__':
 	app.exec_()
 	app.stopTimer()
 	
-	# Need to destroy QApplication() by assigning None, otherwise Shutdown() fails.
+	# Need to destroy QApplication(), otherwise Shutdown() fails.
 	# Unset main window also just to be safe.
-	mainWindow = None
-	app = None
+	del mainWindow
+	del app
 	
 	cefpython.Shutdown()
