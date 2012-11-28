@@ -109,7 +109,6 @@ class PyGTKExample:
 	def OnExit(self, widget, data=None):
 
 		self.exiting = True
-		cefpython.Shutdown()
 		gtk.main_quit()
 
 if __name__ == '__main__':
@@ -124,3 +123,4 @@ if __name__ == '__main__':
 	gobject.threads_init() # timer for messageloop
 	PyGTKExample()
 	gtk.main()
+	cefpython.Shutdown()
