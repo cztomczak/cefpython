@@ -185,15 +185,15 @@ cdef public c_bool DisplayHandler_OnTooltip(CefRefPtr[CefBrowser] cefBrowser,
 		# adding ignoreError=True.
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)	
 		if not pyBrowser:
-			return
+			return False
 		pyText = [CefStringToPyString(cefText)] # In/Out
 		handler = pyBrowser.GetClientHandler("OnTooltip")
 		if handler:
 			ret = handler(pyBrowser, pyText)
 			PyStringToCefString(pyText[0], cefText);
-			return <c_bool>bool(ret)
+			return bool(ret)
 		else:
-			return <c_bool>False
+			return False
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)

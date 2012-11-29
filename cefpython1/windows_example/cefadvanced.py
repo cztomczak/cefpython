@@ -337,12 +337,11 @@ class ClientHandler:
 	def OnResourceResponse(self, browser, url, response, filter):
 
 		# This function does not get called for local disk sources (file:///).
-		print("")
-		print("Resource: %s (status=%s)" % (url, response.GetStatus()))
+		pass
+		"""print("Resource: %s (status=%s)" % (url, response.GetStatus()))"""
 		"""response.SetHeaderMap({"Content-Length": 123, "Content-Type": "none"})"""
-		print("response.GetHeaderMap(): %s" % response.GetHeaderMap())
+		"""print("response.GetHeaderMap(): %s" % response.GetHeaderMap())"""
 		"""print("response.GetHeaderMultimap(): %s" % response.GetHeaderMultimap())"""
-		print("")
 
 	def OnUncaughtException(self, browser, frame, exception, stackTrace):
 
