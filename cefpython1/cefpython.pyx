@@ -144,6 +144,8 @@ def Initialize(applicationSettings=None):
 
 def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, javascriptBindings=None):
 
+	assert IsCurrentThread(TID_UI)
+
 	if not clientHandlers:
 		clientHandlers = {}
 

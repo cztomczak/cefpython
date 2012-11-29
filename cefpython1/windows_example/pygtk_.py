@@ -123,4 +123,5 @@ if __name__ == '__main__':
 	gobject.threads_init() # timer for messageloop
 	PyGTKExample()
 	gtk.main()
+	
 	cefpython.Shutdown()
