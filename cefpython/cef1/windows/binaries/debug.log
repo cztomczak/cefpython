@@ -1,0 +1,636 @@
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 3539954
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=3539954, innerWindowID=3605698
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 1901450
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=1901450, innerWindowID=3605486
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 3867708
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=3867708, innerWindowID=2294882
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 3474422
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=3474422, innerWindowID=5243702
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 5505846
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=5505846, innerWindowID=6030446
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 6292626
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=6292626, innerWindowID=3408872
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 3539944
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=3539944, innerWindowID=4719810
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 2950172
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=2950172, innerWindowID=4391722
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 4522794
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=4522794, innerWindowID=4654070
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 4785142
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=4785142, innerWindowID=5506160
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 4653956
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=4653956, innerWindowID=3736360
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 3343466
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows_example/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=3343466, innerWindowID=3408686
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 6620168
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows/binaries/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+cefpython: JavascriptBindings.RemoveFrame(): frame id = 1
+cefpython: JavascriptBindings.AddFrame(): frame id = 1
+[1130/155123:VERBOSE1:ssl_client_socket_nss.cc(2521)] The server www.paypalobjects.com:443 does not support the TLS renegotiation_info extension.
+cefpython: Browser.CloseBrowser() called: topWindowID=6620168, innerWindowID=5506082
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 3670974
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows/binaries/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 2
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 1
+cefpython: JavascriptBindings.RemoveFrame(): frameID = 1
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 4
+[1130/160222:VERBOSE1:ssl_client_socket_nss.cc(2521)] The server www.paypalobjects.com:443 does not support the TLS renegotiation_info extension.
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 4
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 1
+cefpython: JavascriptBindings.RemoveFrame(): frameID = 1
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 1
+cefpython: JavascriptBindings.RemoveFrame(): frameID = 1
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 5
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 5
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 1
+cefpython: JavascriptBindings.RemoveFrame(): frameID = 1
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefwindow: win32gui.RegisterClass(secondbrowser)
+cefwindow: windowID = 5571364
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefwindow: windowID = 918712
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: Browser.CloseBrowser() called: topWindowID=918712, innerWindowID=2819186
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: Browser.CloseBrowser() called: topWindowID=5571364, innerWindowID=1115062
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+cefpython: WindowUtils.SetIcon(): popup inherits icon from parent window: 3670974
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+[1130/160404:VERBOSE1:cookie_monster.cc(2009)] WARNING: Unsupported cookie scheme: chrome-devtools
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 10
+cefpython: Browser.CloseBrowser() called: topWindowID=3670974, innerWindowID=4916280
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 3408810
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows/binaries/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefpython: Browser.CloseBrowser() called: topWindowID=3408810, innerWindowID=1639608
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 3080990
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows/binaries/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefwindow: win32gui.RegisterClass(secondbrowser)
+cefwindow: windowID = 4654188
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefwindow: windowID = 4064266
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython1/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: Browser.CloseBrowser() called: topWindowID=4064266, innerWindowID=3212428
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: Browser.CloseBrowser() called: topWindowID=4654188, innerWindowID=6226838
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: WindowUtils.SetIcon(): popup inherits icon from parent window: 3080990
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 6
+cefpython: WindowUtils.SetIcon(): popup inherits icon from parent window: 3080990
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 7
+cefpython: WindowUtils.SetIcon(): popup inherits icon from parent window: 3080990
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 8
+cefpython: Browser.CloseBrowser() called: topWindowID=3080990, innerWindowID=3539926
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 6423622
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefwindow: win32gui.RegisterClass(secondbrowser)
+cefwindow: windowID = 2229412
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefwindow: windowID = 787176
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: Browser.CloseBrowser() called: topWindowID=787176, innerWindowID=1704768
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: Browser.CloseBrowser() called: topWindowID=2229412, innerWindowID=1705104
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: Browser.CloseBrowser() called: topWindowID=6423622, innerWindowID=5833644
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 1442514
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefwindow: win32gui.RegisterClass(secondbrowser)
+cefwindow: windowID = 2032462
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefwindow: windowID = 2557092
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: Browser.CloseBrowser() called: topWindowID=2557092, innerWindowID=1115374
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: Browser.CloseBrowser() called: topWindowID=2032462, innerWindowID=983784
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: Browser.CloseBrowser() called: topWindowID=1442514, innerWindowID=8717350
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is None
+cefpython: Shutdown()
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 525570
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 2
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 1
+cefpython: JavascriptBindings.RemoveFrame(): frameID = 1
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+[1130/165751:VERBOSE1:ssl_client_socket_nss.cc(2521)] The server www.paypalobjects.com:443 does not support the TLS renegotiation_info extension.
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 4
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 4
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 1
+cefpython: JavascriptBindings.RemoveFrame(): frameID = 1
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefwindow: win32gui.RegisterClass(secondbrowser)
+cefwindow: windowID = 2097998
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: Browser.CloseBrowser() called: topWindowID=525570, innerWindowID=1246048
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: Shutdown()
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 7
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefInitialize(cefApplicationSettings, cefApp)
+cefwindow: win32gui.RegisterClass(cefadvanced)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 1114856
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefadvanced.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is None
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is None
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+cefpython: JavascriptBindings.AddFrame(): frameID = 1
+cefwindow: win32gui.RegisterClass(secondbrowser)
+cefwindow: windowID = 591106
+cefpython: CreateBrowser() called
+cefpython: GetClientRect(<HWND><int>windowID)
+cefpython: GetSystemError(): Error Code = 0
+cefpython: CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef1/windows/binaries/cefsimple.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: DisplayHandler_OnContentsSizeChange() failed: pyBrowser is False
+cefpython: LifeSpanHandler_OnAfterCreated() failed: pyBrowser is False
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: Browser.CloseBrowser() called: topWindowID=1114856, innerWindowID=8848422
+cefpython: LifeSpanHandler_OnBeforeClose() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: V8ContextHandler_OnContextReleased() failed: pyBrowser is False
+cefpython: Shutdown()
+cefpython: V8ContextHandler_OnContextReleased(): frameID = 4

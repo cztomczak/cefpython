@@ -1,0 +1,2 @@
+[1129/202229:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1129/202230:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
