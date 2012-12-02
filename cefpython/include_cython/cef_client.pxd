@@ -6,9 +6,9 @@ from cef_base cimport CefBase
 
 cdef extern from "include/cef_client.h":
 	
-	# When inheriting "cef_base.CefBase" throws an error - Cython is still not perfect (0.16).
+	# When inheriting "cef_base.CefBase" cython compiler throws an error:
 	# https://groups.google.com/forum/?fromgroups#!topic/cython-users/p-PMDKsvfik
 
 	cdef cppclass CefClient(CefBase):
 		
-		void GetLifeSpanHandler()
+		pass

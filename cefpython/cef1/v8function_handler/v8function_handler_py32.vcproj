@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="v8function_handler_py27"
-	ProjectGUID="{6CA41D5D-3546-4363-B670-97FFE4B88D4C}"
-	RootNamespace="v8function_handler_py27"
+	Name="v8function_handler_py32"
+	ProjectGUID="{9E47F572-3024-4c6e-80E5-4C4BF79EEE8E}"
+	RootNamespace="v8function_handler_py32"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug_py27"
-			IntermediateDirectory="Debug_py27"
+			OutputDirectory="Debug_py32"
+			IntermediateDirectory="Debug_py32"
 			ConfigurationType="4"
 			>
 			<Tool
@@ -79,8 +79,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release_py27"
-			IntermediateDirectory="Release_py27"
+			OutputDirectory="Release_py32"
+			IntermediateDirectory="Release_py32"
 			ConfigurationType="4"
 			>
 			<Tool
@@ -100,7 +100,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../;../../;c:\python27_32bit\include"
+				AdditionalIncludeDirectories="../;c:\python32_32bit\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"

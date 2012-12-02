@@ -212,15 +212,15 @@ bool ClientHandler::OnTooltip(CefRefPtr<CefBrowser> browser,
 //
 
 bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
-  return LifeSpanHandler_DoClose(browser);
+  return LifespanHandler_DoClose(browser);
 }
 
 void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
-  LifeSpanHandler_OnAfterCreated(browser);
+  LifespanHandler_OnAfterCreated(browser);
 }
 
 void ClientHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
-  LifeSpanHandler_OnBeforeClose(browser);
+  LifespanHandler_OnBeforeClose(browser);
 }
 
 bool ClientHandler::OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
@@ -234,6 +234,6 @@ bool ClientHandler::OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
 }
 
 bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) {
-  return LifeSpanHandler_RunModal(browser);
+  return LifespanHandler_RunModal(browser);
 }
 

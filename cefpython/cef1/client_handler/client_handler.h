@@ -22,7 +22,9 @@
 #define DL_EXPORT(RTYPE) RTYPE
 #endif
 
-#include "setup/cefpython.h"
+#if defined(OS_WIN) 
+#include "windows/setup/cefpython.h"
+#endif
 
 class ClientHandler : public CefClient,
         public CefLoadHandler,

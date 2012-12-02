@@ -35,10 +35,10 @@ __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnNavStateChange(CefRefPtr<CefBrow
 __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnStatusMessage(CefRefPtr<CefBrowser>, CefString &, enum cef_handler_statustype_t);
 __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnTitleChange(CefRefPtr<CefBrowser>, CefString &);
 __PYX_EXTERN_C DL_IMPORT(bool) DisplayHandler_OnTooltip(CefRefPtr<CefBrowser>, CefString &);
-__PYX_EXTERN_C DL_IMPORT(bool) LifeSpanHandler_DoClose(CefRefPtr<CefBrowser>);
-__PYX_EXTERN_C DL_IMPORT(void) LifeSpanHandler_OnAfterCreated(CefRefPtr<CefBrowser>);
-__PYX_EXTERN_C DL_IMPORT(void) LifeSpanHandler_OnBeforeClose(CefRefPtr<CefBrowser>);
-__PYX_EXTERN_C DL_IMPORT(bool) LifeSpanHandler_RunModal(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_DoClose(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnAfterCreated(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnBeforeClose(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_RunModal(CefRefPtr<CefBrowser>);
 
 #endif /* !__PYX_HAVE_API__cefpython_py32 */
 
