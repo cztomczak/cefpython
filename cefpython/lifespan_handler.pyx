@@ -5,14 +5,14 @@
 include "imports.pyx"
 include "utils.pyx"
 
-cdef public c_bool LifeSpanHandler_DoClose(
+cdef public c_bool LifespanHandler_DoClose(
 		CefRefPtr[CefBrowser] cefBrowser
 		) except * with gil:
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
 		if not pyBrowser:
-			Debug("LifeSpanHandler_DoClose() failed: pyBrowser is %s" % pyBrowser)
+			Debug("LifespanHandler_DoClose() failed: pyBrowser is %s" % pyBrowser)
 			return False
 		handler = pyBrowser.GetClientHandler("DoClose")
 		if handler:
@@ -23,14 +23,14 @@ cdef public c_bool LifeSpanHandler_DoClose(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public void LifeSpanHandler_OnAfterCreated(
+cdef public void LifespanHandler_OnAfterCreated(
 		CefRefPtr[CefBrowser] cefBrowser
 		) except * with gil:
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
 		if not pyBrowser:
-			Debug("LifeSpanHandler_OnAfterCreated() failed: pyBrowser is %s" % pyBrowser)
+			Debug("LifespanHandler_OnAfterCreated() failed: pyBrowser is %s" % pyBrowser)
 			return
 		
 		# Popup windows has no mouse/keyboard focus (Issue 14).
@@ -43,14 +43,14 @@ cdef public void LifeSpanHandler_OnAfterCreated(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public void LifeSpanHandler_OnBeforeClose(
+cdef public void LifespanHandler_OnBeforeClose(
 		CefRefPtr[CefBrowser] cefBrowser
 		) except * with gil:
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
 		if not pyBrowser:
-			Debug("LifeSpanHandler_OnBeforeClose() failed: pyBrowser is %s" % pyBrowser)
+			Debug("LifespanHandler_OnBeforeClose() failed: pyBrowser is %s" % pyBrowser)
 			return
 		handler = pyBrowser.GetClientHandler("OnBeforeClose")
 		if handler:
@@ -59,14 +59,14 @@ cdef public void LifeSpanHandler_OnBeforeClose(
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public c_bool LifeSpanHandler_RunModal(
+cdef public c_bool LifespanHandler_RunModal(
 		CefRefPtr[CefBrowser] cefBrowser
 		) except * with gil:
 
 	try:
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
 		if not pyBrowser:
-			Debug("LifeSpanHandler_RunModal() failed: pyBrowser is %s" % pyBrowser)
+			Debug("LifespanHandler_RunModal() failed: pyBrowser is %s" % pyBrowser)
 			return False
 		handler = pyBrowser.GetClientHandler("RunModal")
 		if handler:

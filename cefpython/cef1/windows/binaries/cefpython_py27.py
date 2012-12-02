@@ -486,19 +486,19 @@ def JavascriptContextHandler_OnUncaughtException(browser, frame, exception, stac
 	return None
 
 #
-# LifeSpanHandler
+# LifespanHandler
 #
 
-def LifeSpanHandler_DoClose(browser):
+def LifespanHandler_DoClose(browser):
 	return False
 
-def LifeSpanHandler_OnAfterCreated(browser):
+def LifespanHandler_OnAfterCreated(browser):
 	return None
 
-def LifeSpanHandler_OnBeforeClose(browser):
+def LifespanHandler_OnBeforeClose(browser):
 	return None
 
-def LifeSpanHandler_RunModal(browser):
+def LifespanHandler_RunModal(browser):
 	return False
 
 #

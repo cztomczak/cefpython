@@ -73,7 +73,7 @@ include "python_callback.pyx"
 include "request_handler.pyx"
 include "response.pyx"
 include "display_handler.pyx"
-include "life_span_handler.pyx"
+include "lifespan_handler.pyx"
 
 # Client handler.
 cdef CefRefPtr[ClientHandler] g_clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()

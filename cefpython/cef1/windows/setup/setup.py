@@ -47,9 +47,9 @@ ext_modules = [Extension(
 	library_dirs=[
 		r'./',
 		r"c:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x86/",
-		r'./../http_authentication/Release/',
-		r'./../v8function_handler/Release_py%s/' % PYTHON_VERSION,
-		r'./../client_handler/Release_py%s/' % PYTHON_VERSION
+		r'./../../http_authentication/Release/',
+		r'./../../v8function_handler/Release_py%s/' % PYTHON_VERSION,
+		r'./../../client_handler/Release_py%s/' % PYTHON_VERSION
 	],
 	
 	libraries=[

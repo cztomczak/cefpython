@@ -122,7 +122,7 @@ class PyBrowser:
 		allowedHandlers += ["OnAddressChange", "OnConsoleMessage", "OnContentsSizeChange", "OnNavStateChange",
 						"OnStatusMessage", "OnTitleChange", "OnTooltip"]
 
-		# LifeSpanHandler.
+		# LifespanHandler.
 		allowedHandlers += ["DoClose", "OnAfterCreated", "OnBeforeClose", "RunModal"]
 
 		for key in handlers:
