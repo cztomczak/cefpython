@@ -136,6 +136,7 @@
 				AdditionalDependencies="libcef.lib libcef_dll_wrapper.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../windows/setup/"
+				GenerateManifest="false"
 				ManifestFile="../windows/cefpython.pyd.manifest"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -148,6 +149,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../windows/cefpython.pyd.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
