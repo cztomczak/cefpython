@@ -20,9 +20,9 @@ class MainFrame(wx.Frame):
 
 	def __init__(self):
 		
-		wx.Frame.__init__(self, parent=None, id=wx.ID_ANY, title='wxPython example', size=(600,400))
+		wx.Frame.__init__(self, parent=None, id=wx.ID_ANY, title='wxPython CEF 3 example', size=(1024,768))
 		self.CreateMenu()
-		self.browser = cefpython.CreateBrowser(self.GetHandle(), browserSettings={}, navigateURL="cefsimple.html")		
+		self.browser = cefpython.CreateBrowser(self.GetHandle(), browserSettings={}, navigateURL="example.html")		
 		
 		self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
 		self.Bind(wx.EVT_SIZE, self.OnSize)
@@ -93,7 +93,11 @@ class MyApp(wx.App):
 if __name__ == '__main__':
 	
 	sys.excepthook = cefpython.ExceptHook
-	settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "release_dcheck_enabled": True}
+	settings = {}
+	settings["log_file"] = cefpython.GetRealPath("debug.log")
+	settings["log_severity"] = cefpython.LOGSEVERITY_INFO
+	settings["release_dcheck_enabled"] = True
+	settings["browser_subprocess_path"] = "subprocess"
 	cefpython.Initialize(settings) # Initialize cefpython before wx.	
 
 	print('wx.version=%s' % wx.version())

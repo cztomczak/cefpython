@@ -22,7 +22,7 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 		raise Exception("V8ValueToPyValue() failed: data passed from Javascript to Python has "
 		                "more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
 
-	cdef CefV8Value* v8ValuePtr = <CefV8Value*>(v8Value.get())
+	cdef CefV8Value* v8ValuePtr = v8Value.get()
 	cdef CefString cefString
 	cdef CefString cefFuncName
 	cdef c_vector[CefString] keys
@@ -94,7 +94,7 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 	cdef c_bool sameContext
 
 	if g_debug:
-		sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
+		sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
 		if not sameContext:
 			raise Exception("PyValueToV8Value() called in wrong v8 context")
 		
@@ -127,7 +127,7 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 		# Remember about increasing nestingLevel.
 		v8Value = cef_v8_static.CreateArray(len(pyValue))
 		for index,value in enumerate(pyValue):
-			(<CefV8Value*>(v8Value.get())).SetValue(int(index), PyValueToV8Value(value, v8Context, nestingLevel+1))
+			v8Value.get().SetValue(int(index), PyValueToV8Value(value, v8Context, nestingLevel+1))
 		return v8Value
 	elif pyValueType == bool:
 		return cef_v8_static.CreateBool(bool(pyValue))
@@ -145,14 +145,14 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 		return cef_v8_static.CreateDouble(float(pyValue))
 	elif pyValueType == types.FunctionType or pyValueType == types.MethodType:
 		v8FunctionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
-		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetContext(v8Context)
-		v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(v8FunctionHandler.get()))
+		v8FunctionHandler.get().SetContext(v8Context)
+		v8Handler = <CefRefPtr[CefV8Handler]><CefV8Handler*>v8FunctionHandler.get()
 		PyStringToCefString(pyValue.__name__, cefFuncName)
 		v8Value = cef_v8_static.CreateFunction(cefFuncName, v8Handler) # v8PythonCallback
 		callbackID = PutPythonCallback(pyValue)
-		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetCallback_RemovePythonCallback(
+		v8FunctionHandler.get().SetCallback_RemovePythonCallback(
 				<RemovePythonCallback_type>RemovePythonCallback)
-		(<V8FunctionHandler*>(v8FunctionHandler.get())).SetPythonCallbackID(callbackID)
+		v8FunctionHandler.get().SetPythonCallbackID(callbackID)
 		return v8Value
 	elif pyValueType == type(None):
 		return cef_v8_static.CreateNull()
@@ -164,7 +164,7 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 			# Remember about increasing nestingLevel.
 			key = str(key)
 			PyStringToCefString(key, cefString)
-			(<CefV8Value*>(v8Value.get())).SetValue(cefString, PyValueToV8Value(value, v8Context, nestingLevel+1), V8_PROPERTY_ATTRIBUTE_NONE)
+			v8Value.get().SetValue(cefString, PyValueToV8Value(value, v8Context, nestingLevel+1), V8_PROPERTY_ATTRIBUTE_NONE)
 		return v8Value
 	elif pyValueType == str:
 		PyStringToCefString(pyValue, cefString)

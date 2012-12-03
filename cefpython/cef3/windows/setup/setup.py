@@ -9,7 +9,7 @@ from Cython.Compiler import Options
 Options.fast_fail = True
 
 # Written to include_cython/compile_time_constants.pxi
-CEF_VERSION = 1
+CEF_VERSION = 3
 
 """
 Building libcef_dll_wrapper
@@ -47,15 +47,13 @@ ext_modules = [Extension(
 	
 	"cefpython_py%s" % PYTHON_VERSION,
 	["cefpython.pyx"],
-	
+
 	language='c++',	
 	include_dirs=[r'./../', r'./../../', r'./../../../', r'./../../../include_cython/'],
 	
 	library_dirs=[
 		r'./',
 		r"c:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x86/",
-		r'./../../http_authentication/Release/',
-		r'./../../v8function_handler/Release_py%s/' % PYTHON_VERSION,
 		r'./../../client_handler/Release_py%s/' % PYTHON_VERSION
 	],
 	
@@ -63,8 +61,6 @@ ext_modules = [Extension(
 		'libcef',
 		'libcef_dll_wrapper',
 		'User32',
-		'http_authentication', # Build with /MD.
-		'v8function_handler_py%s' % PYTHON_VERSION, # Build with /MD.
 		'client_handler_py%s' % PYTHON_VERSION # Build with /MD.
 	],
 	

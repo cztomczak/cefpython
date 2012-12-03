@@ -31,8 +31,8 @@ class PyGTKExample:
 
 		self.mainWindow = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		self.mainWindow.connect('destroy', self.OnExit)
-		self.mainWindow.set_size_request(width=600, height=400)
-		self.mainWindow.set_title('PyGTK CEF example')
+		self.mainWindow.set_size_request(width=1024, height=768)
+		self.mainWindow.set_title('PyGTK CEF 3 example')
 		self.mainWindow.realize()
 
 		self.container = gtk.DrawingArea()
@@ -53,7 +53,7 @@ class PyGTKExample:
 		table.show()
 
 		windowID = self.container.get_window().handle
-		self.browser = cefpython.CreateBrowser(windowID, browserSettings={}, navigateURL='cefsimple.html')
+		self.browser = cefpython.CreateBrowser(windowID, browserSettings={}, navigateURL='example.html')
 		
 		self.mainWindow.show()
 		
@@ -117,7 +117,11 @@ if __name__ == '__main__':
 	print('GTK version: %s' % version)
 
 	sys.excepthook = cefpython.ExceptHook
-	settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "release_dcheck_enabled": True}
+	settings = {}
+	settings["log_file"] = cefpython.GetRealPath("debug.log")
+	settings["log_severity"] = cefpython.LOGSEVERITY_INFO
+	settings["release_dcheck_enabled"] = True
+	settings["browser_subprocess_path"] = "subprocess"
 	cefpython.Initialize(settings)	
 	
 	gobject.threads_init() # timer for messageloop

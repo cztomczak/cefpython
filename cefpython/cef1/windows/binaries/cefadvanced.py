@@ -2,7 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# Check whether python architecture and version are valid, otherwise an obfuscated error
+# Checking whether python architecture and version are valid, otherwise an obfuscated error
 # will be thrown when trying to load cefpython.pyd with a message "DLL load failed".
 
 import platform

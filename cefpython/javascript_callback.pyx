@@ -67,26 +67,26 @@ class JavascriptCallback:
 		# Javascript callback may be kept somewhere and later called from a different v8 frame context.
 		# Need to enter js v8 context before calling PyValueToV8Value().
 
-		cdef c_bool sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
+		cdef c_bool sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
 		
 		if not sameContext:
 			Debug("JavascriptCallback.Call(): inside a different context, calling v8Context.Enter()")
-			assert (<CefV8Context*>(v8Context.get())).Enter(), "v8Context.Enter() failed"
+			assert v8Context.get().Enter(), "v8Context.Enter() failed"
 
 		for i in range(0, len(args)):
 			v8Arguments.push_back(PyValueToV8Value(args[i], v8Context))
 
 		if not sameContext:
-			assert (<CefV8Context*>(v8Context.get())).Exit(), "v8Context.Exit() failed"
+			assert v8Context.get().Exit(), "v8Context.Exit() failed"
 
-		v8Retval = (<CefV8Value*>(v8Value.get())).ExecuteFunctionWithContext(v8Context, <CefRefPtr[CefV8Value]>NULL, v8Arguments)
+		v8Retval = v8Value.get().ExecuteFunctionWithContext(v8Context, <CefRefPtr[CefV8Value]>NULL, v8Arguments)
 
 		# This exception should be first caught by V8ContextHandler::OnUncaughtException().
 
-		if (<CefV8Value*>(v8Value.get())).HasException():
+		if v8Value.get().HasException():
 			
-			v8Exception = (<CefV8Value*>(v8Value.get())).GetException()
-			v8ExceptionPtr = <CefV8Exception*>(v8Exception.get())
+			v8Exception = v8Value.get().GetException()
+			v8ExceptionPtr = v8Exception.get()
 			lineNumber = v8ExceptionPtr.GetLineNumber()
 			message = CefStringToPyString(v8ExceptionPtr.GetMessage())
 			scriptResourceName = CefStringToPyString(v8ExceptionPtr.GetScriptResourceName())
@@ -114,5 +114,5 @@ class JavascriptCallback:
 
 		cdef CefRefPtr[CefV8Value] v8Value = GetV8JavascriptCallback(self.__callbackID)
 		cdef CefString cefFuncName
-		cefFuncName = (<CefV8Value*>(v8Value.get())).GetFunctionName()
+		cefFuncName = v8Value.get().GetFunctionName()
 		return CefStringToPyString(cefFuncName)

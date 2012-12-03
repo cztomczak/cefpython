@@ -15,9 +15,7 @@ import re
 import copy
 import inspect # used by JavascriptBindings.__SetObjectMethods()
 
-# There are still 2 files that require pywin32 extension:
-# - display_handler.pyx: EnforceWindowTitle(), EnforceWindowIcon()
-# - window_procedures.pyx
+# pywin32 extension is required by window_utils_win.pyx
 import win32api
 import win32gui
 import win32con
@@ -69,16 +67,18 @@ cimport cef_types # cannot cimport *, that would cause name conflicts with const
 IF UNAME_SYSNAME == "Windows":
 	cimport cef_types_win # cannot cimport *, name conflicts
 
-from cef_v8 cimport *
-cimport cef_v8_static
-cimport cef_v8_stack_trace
-from v8function_handler cimport *
-from cef_request cimport *
-from cef_response cimport *
-from cef_stream cimport *
-from cef_content_filter cimport *
-from cef_download_handler cimport *
-from cef_cookie cimport *
+IF CEF_VERSION == 1:
+	from cef_v8 cimport *
+	cimport cef_v8_static
+	cimport cef_v8_stack_trace
+	from v8function_handler cimport *
+	from cef_request cimport *
+	from cef_response cimport *
+	from cef_stream cimport *
+	from cef_content_filter cimport *
+	from cef_download_handler cimport *
+	from cef_cookie cimport *
 
 IF UNAME_SYSNAME == "Windows":
-	from http_authentication cimport *
+	IF CEF_VERSION == 1:
+		from http_authentication cimport *

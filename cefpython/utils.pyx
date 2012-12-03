@@ -50,7 +50,13 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreErr
 	global g_pyBrowsers
 	global g_cefBrowsers
 
-	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
+	cdef int innerWindowID
+
+	IF CEF_VERSION == 1:
+		innerWindowID = <int>cefBrowser.get().GetWindowHandle()
+	ELIF CEF_VERSION == 3:
+		innerWindowID = <int>GetCefBrowserHost(cefBrowser).get().GetWindowHandle()
+
 	cdef int openerInnerWindowID # Popup is a separate window and separate browser, but we can get parent browser.
 
 	if innerWindowID in g_pyBrowsers:
@@ -61,7 +67,10 @@ cdef object GetPyBrowserByCefBrowser(CefRefPtr[CefBrowser] cefBrowser, ignoreErr
 
 		# This will also be called for the Developer Tools popup window!
 
-		openerInnerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetOpenerWindowHandle()
+		IF CEF_VERSION == 1:
+			openerInnerWindowID = <int>cefBrowser.get().GetOpenerWindowHandle()
+		ELIF CEF_VERSION == 3:
+			openerInnerWindowID = <int>GetCefBrowserHost(cefBrowser).get().GetOpenerWindowHandle()
 
 		if openerInnerWindowID in g_pyBrowsers:
 			parentPyBrowser = g_pyBrowsers[openerInnerWindowID]
@@ -114,8 +123,8 @@ cdef object GetPyFrameByCefFrame(CefRefPtr[CefFrame] cefFrame):
 	global g_cefFrames
 
 	cdef long long frameID # cef_types.int64
-	if <void*>cefFrame != NULL and <CefFrame*>(cefFrame.get()):
-		frameID = (<CefFrame*>(cefFrame.get())).GetIdentifier()
+	if <void*>cefFrame != NULL and cefFrame.get():
+		frameID = cefFrame.get().GetIdentifier()
 		g_cefFrames[frameID] = cefFrame
 		pyFrameID = long(frameID)
 		if pyFrameID in g_pyFrames:
@@ -125,20 +134,22 @@ cdef object GetPyFrameByCefFrame(CefRefPtr[CefFrame] cefFrame):
 	else:
 		return None
 
-cdef object GetPyRequestByCefRequest(CefRefPtr[CefRequest] cefRequest):
+IF CEF_VERSION == 1:
+	
+	cdef object GetPyRequestByCefRequest(CefRefPtr[CefRequest] cefRequest):
 
-	# TODO: not yet implemented.
-	return None
+		# TODO: not yet implemented.
+		return None
 
-cdef object GetPyStreamReaderByCefStreamReader(CefRefPtr[CefStreamReader] cefStreamReader):
+	cdef object GetPyStreamReaderByCefStreamReader(CefRefPtr[CefStreamReader] cefStreamReader):
 
-	# TODO: not yet implemented.
-	return None
+		# TODO: not yet implemented.
+		return None
 
-cdef object GetPyContentFilterByCefContentFilter(CefRefPtr[CefContentFilter] cefContentFilter):
+	cdef object GetPyContentFilterByCefContentFilter(CefRefPtr[CefContentFilter] cefContentFilter):
 
-	# TODO: not yet implemented.
-	return None
+		# TODO: not yet implemented.
+		return None
 
 def CheckInnerWindowID(innerWindowID):
 
@@ -151,7 +162,7 @@ def CheckInnerWindowID(innerWindowID):
 		raise Exception("Browser was destroyed (innerWindowID empty)")
 	if g_cefBrowsers.find(<int>innerWindowID) == g_cefBrowsers.end():
 		raise Exception("Browser was destroyed (g_cefBrowsers.find() failed)")
-	if not (<CefBrowser*>(g_cefBrowsers[<int>innerWindowID]).get()):
+	if not g_cefBrowsers[<int>innerWindowID].get():
 		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
 	return innerWindowID
 
@@ -164,7 +175,7 @@ cdef CefRefPtr[CefBrowser] GetCefBrowserByInnerWindowID(innerWindowID) except *:
 		raise Exception("Browser was destroyed (innerWindowID empty)")
 	if g_cefBrowsers.find(<int>innerWindowID) == g_cefBrowsers.end():
 		raise Exception("Browser was destroyed (g_cefBrowsers.find() failed)")
-	if <CefBrowser*>((g_cefBrowsers[<int>innerWindowID]).get()):
+	if g_cefBrowsers[<int>innerWindowID].get():
 		return g_cefBrowsers[<int>innerWindowID]
 	else:
 		raise Exception("Browser was destroyed (CefRefPtr.get() failed)")
@@ -185,7 +196,7 @@ cdef CefRefPtr[CefBrowser] GetCefBrowserByTopWindowID(windowID, ignoreError=Fals
 		if ignoreError:
 			return <CefRefPtr[CefBrowser]>NULL
 		raise Exception("Browser was destroyed (g_cefBrowsers.find() failed)")
-	if <CefBrowser*>((g_cefBrowsers[<int>innerWindowID]).get()):
+	if g_cefBrowsers[<int>innerWindowID].get():
 		return g_cefBrowsers[<int>innerWindowID]
 	else:
 		if ignoreError:
@@ -203,7 +214,7 @@ def CheckFrameID(frameID):
 		raise Exception("Frame was destroyed (frameID empty)")
 	if g_cefFrames.find(<cef_types.int64>frameID) == g_cefFrames.end():
 		raise Exception("Frame was destroyed (g_cefFrames.find() failed)")
-	if not (<CefFrame*>(g_cefFrames[<cef_types.int64>frameID]).get()):
+	if not g_cefFrames[<cef_types.int64>frameID].get():
 		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")
 	return frameID
 
@@ -215,7 +226,7 @@ cdef CefRefPtr[CefFrame] GetCefFrameByFrameID(frameID) except *:
 		raise Exception("Frame was destroyed (frameID empty)")
 	if g_cefFrames.find(<cef_types.int64>frameID) == g_cefFrames.end():
 		raise Exception("Frame was destroyed (g_cefFrames.find() failed)")
-	if <CefFrame*>(g_cefFrames[<cef_types.int64>frameID]).get():
+	if g_cefFrames[<cef_types.int64>frameID].get():
 		return g_cefFrames[<cef_types.int64>frameID]
 	else:
 		raise Exception("Frame was destroyed (CefRefPtr.get() failed)")

@@ -53,30 +53,34 @@ include "imports.pyx"
 
 include "browser.pyx"
 include "frame.pyx"
-include "javascript_bindings.pyx"
+
 include "settings.pyx"
 include "utils.pyx"
 
 IF UNAME_SYSNAME == "Windows":
 	include "window_utils_win.pyx"
-	include "http_authentication_win.pyx"
+	IF CEF_VERSION == 1:
+		include "http_authentication_win.pyx"
 
-include "load_handler.pyx"
-include "keyboard_handler.pyx"
-include "virtual_keys.pyx"
-include "v8context_handler.pyx"
-include "v8function_handler.pyx"
+IF CEF_VERSION == 1:
+	include "load_handler.pyx"
+	include "keyboard_handler.pyx"
+	include "virtual_keys.pyx"
+	include "request_handler.pyx"
+	include "response.pyx"
+	include "display_handler.pyx"
+	include "lifespan_handler.pyx"
 
-include "v8utils.pyx"
-include "javascript_callback.pyx"
-include "python_callback.pyx"
-include "request_handler.pyx"
-include "response.pyx"
-include "display_handler.pyx"
-include "lifespan_handler.pyx"
+IF CEF_VERSION == 1:
+	include "v8context_handler.pyx"
+	include "v8function_handler.pyx"
+	include "v8utils.pyx"
+	include "javascript_bindings.pyx"
+	include "javascript_callback.pyx"
+	include "python_callback.pyx"
 
 # Client handler.
-cdef CefRefPtr[ClientHandler] g_clientHandler = <CefRefPtr[ClientHandler]>new ClientHandler()
+cdef CefRefPtr[ClientHandler] g_clientHandler = <CefRefPtr[ClientHandler]?> new ClientHandler()
 
 def GetRealPath(file=None, encodeURL=False):
 	
@@ -120,6 +124,20 @@ def ExceptHook(type, value, traceobject):
 
 def Initialize(applicationSettings=None):
 
+	Debug("-" * 80)
+	Debug("Initialize() called")
+
+	cdef CefRefPtr[CefApp] cefApp
+
+	IF CEF_VERSION == 3:
+		cdef HINSTANCE hInstance = GetModuleHandle(NULL)
+		cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
+		cdef int exitCode
+		exitCode = CefExecuteProcess(cefMainArgs, cefApp)
+		Debug("CefExecuteProcess(): exitCode = %s" % exitCode)
+		if exitCode >= 0:
+			exit(exitCode)
+
 	if not applicationSettings:
 		applicationSettings = {}
 
@@ -130,24 +148,27 @@ def Initialize(applicationSettings=None):
 	if not "unicode_to_bytes_encoding" in applicationSettings:
 		applicationSettings["unicode_to_bytes_encoding"] = "utf-8"
 
+	IF CEF_VERSION == 3:
+		if not "single_process" in applicationSettings:
+			applicationSettings["single_process"] = False
+
 	# We must make a copy as applicationSettings is a reference only that might get destroyed.
 	global g_applicationSettings
 	for key in applicationSettings:
 		g_applicationSettings[key] = copy.deepcopy(applicationSettings[key])
 
-	Debug("-" * 80)
-	Debug("Initialize() called")
-
 	cdef CefSettings cefApplicationSettings
-	cdef CefRefPtr[CefApp] cefApp
-	cdef CefString *cefString
-
 	SetApplicationSettings(applicationSettings, &cefApplicationSettings)
 
-	Debug("CefInitialize(cefApplicationSettings, cefApp)")
-	cdef c_bool ret = CefInitialize(cefApplicationSettings, cefApp)
-	if not ret: Debug("CefInitialize() failed")
+	Debug("CefInitialize()")
+	
+	cdef c_bool ret
+	IF CEF_VERSION == 1:
+		ret = CefInitialize(cefApplicationSettings, cefApp)
+	ELIF CEF_VERSION == 3:
+		ret = CefInitialize(cefMainArgs, cefApplicationSettings, cefApp)
 
+	if not ret: Debug("CefInitialize() failed")
 	return ret
 
 def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, javascriptBindings=None):
@@ -164,17 +185,16 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 
 	cdef CefWindowInfo info
 	cdef CefBrowserSettings cefBrowserSettings
-	cdef CefString *cefString
 
 	SetBrowserSettings(browserSettings, &cefBrowserSettings)	
 
 	IF UNAME_SYSNAME == "Windows":
-		Debug("GetClientRect(<HWND><int>windowID)")
+		Debug("GetClientRect()")
 		cdef RECT rect
 		GetClientRect(<HWND><int>windowID, &rect)
 		Debug("GetSystemError(): %s" % GetSystemError())
 
-	Debug("CefWindowInfo.SetAsChild(<CefWindowHandle><int>windowID, rect)")
+	Debug("CefWindowInfo.SetAsChild()")
 	info.SetAsChild(<CefWindowHandle><int>windowID, rect)	
 
 	navigateURL = GetRealPath(file=navigateURL, encodeURL=True)
@@ -192,7 +212,12 @@ def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, j
 	else: 
 		Debug("CefBrowser::CreateBrowserSync() succeeded")
 
-	cdef int innerWindowID = <int>(<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
+	cdef int innerWindowID
+	IF CEF_VERSION == 1:
+		innerWindowID = <int>cefBrowser.get().GetWindowHandle()
+	ELIF CEF_VERSION == 3:
+		innerWindowID = <int>GetCefBrowserHost(cefBrowser).get().GetWindowHandle()
+
 	g_cefBrowsers[innerWindowID] = cefBrowser
 	g_pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, clientHandlers, javascriptBindings)
 	g_browserInnerWindows[windowID] = innerWindowID
@@ -243,59 +268,64 @@ def Shutdown():
 	Debug("Shutdown()")
 	CefShutdown()
 
-def IsKeyModifier(key, modifiers):
+IF CEF_VERSION == 1:
 
-	'''
-	cefpython.KEYEVENT_RAWKEYDOWN=0
-	cefpython.KEYEVENT_KEYDOWN=1
-	cefpython.KEYEVENT_KEYUP=2
-	cefpython.KEYEVENT_CHAR=3
-	cefpython.KEY_SHIFT=1
-	cefpython.KEY_CTRL=2
-	cefpython.KEY_ALT=4
-	cefpython.KEY_META=8
-	cefpython.KEY_KEYPAD=16
-	NumLock=1024
-	WindowsKey=16 (KEY_KEYPAD?)
-	'''
+	def IsKeyModifier(key, modifiers):
 
-	if key == KEY_NONE:
-		return ((KEY_SHIFT  | KEY_CTRL | KEY_ALT) & modifiers) == 0
-		# Same as: return (KEY_CTRL & modifiers) != KEY_CTRL and (KEY_ALT & modifiers) != KEY_ALT and (KEY_SHIFT & modifiers) != KEY_SHIFT
-	return (key & modifiers) == key
+		'''
+		cefpython.KEYEVENT_RAWKEYDOWN=0
+		cefpython.KEYEVENT_KEYDOWN=1
+		cefpython.KEYEVENT_KEYUP=2
+		cefpython.KEYEVENT_CHAR=3
+		cefpython.KEY_SHIFT=1
+		cefpython.KEY_CTRL=2
+		cefpython.KEY_ALT=4
+		cefpython.KEY_META=8
+		cefpython.KEY_KEYPAD=16
+		NumLock=1024
+		WindowsKey=16 (KEY_KEYPAD?)
+		'''
 
-cdef object CefV8StackTraceToPython(CefRefPtr[CefV8StackTrace] cefTrace):
+		if key == KEY_NONE:
+			return ((KEY_SHIFT  | KEY_CTRL | KEY_ALT) & modifiers) == 0
+			# Same as: return (KEY_CTRL & modifiers) != KEY_CTRL and (KEY_ALT & modifiers) != KEY_ALT and (KEY_SHIFT & modifiers) != KEY_SHIFT
+		return (key & modifiers) == key
 
-	cdef int frameCount = (<CefV8StackTrace*>(cefTrace.get())).GetFrameCount()
-	cdef CefRefPtr[CefV8StackFrame] cefFrame
-	cdef CefV8StackFrame* framePtr
-	pyTrace = []
+IF CEF_VERSION == 1:
 
-	for frameNo in range(0, frameCount):
-		cefFrame = (<CefV8StackTrace*>(cefTrace.get())).GetFrame(frameNo)
-		framePtr = <CefV8StackFrame*>(cefFrame.get())
-		pyFrame = {}		
-		pyFrame["script"] = CefStringToPyString(framePtr.GetScriptName())
-		pyFrame["scriptOrSourceURL"] = CefStringToPyString(framePtr.GetScriptNameOrSourceURL())
-		pyFrame["function"] = CefStringToPyString(framePtr.GetFunctionName())
-		pyFrame["line"] = framePtr.GetLineNumber()
-		pyFrame["column"] = framePtr.GetColumn()
-		pyFrame["isEval"] = framePtr.IsEval()
-		pyFrame["isConstructor"] = framePtr.IsConstructor()
-		pyTrace.append(pyFrame)
-	
-	return pyTrace
+	cdef object CefV8StackTraceToPython(CefRefPtr[CefV8StackTrace] cefTrace):
 
-def GetJavascriptStackTrace(frameLimit=100):
+		cdef int frameCount = cefTrace.get().GetFrameCount()
+		cdef CefRefPtr[CefV8StackFrame] cefFrame
+		cdef CefV8StackFrame* framePtr
+		pyTrace = []
 
-	assert IsCurrentThread(TID_UI), "cefpython.GetJavascriptStackTrace() may only be called on the UI thread"
-	cdef CefRefPtr[CefV8StackTrace] cefTrace = cef_v8_stack_trace.GetCurrent(int(frameLimit))
-	return CefV8StackTraceToPython(cefTrace)
+		for frameNo in range(0, frameCount):
+			cefFrame = cefTrace.get().GetFrame(frameNo)
+			framePtr = cefFrame.get()
+			pyFrame = {}		
+			pyFrame["script"] = CefStringToPyString(framePtr.GetScriptName())
+			pyFrame["scriptOrSourceURL"] = CefStringToPyString(framePtr.GetScriptNameOrSourceURL())
+			pyFrame["function"] = CefStringToPyString(framePtr.GetFunctionName())
+			pyFrame["line"] = framePtr.GetLineNumber()
+			pyFrame["column"] = framePtr.GetColumn()
+			pyFrame["isEval"] = framePtr.IsEval()
+			pyFrame["isConstructor"] = framePtr.IsConstructor()
+			pyTrace.append(pyFrame)
+		
+		return pyTrace
 
-def FormatJavascriptStackTrace(stackTrace):
+	def GetJavascriptStackTrace(frameLimit=100):
 
-	formatted = ""
-	for frameNo, frame in enumerate(stackTrace):
-		formatted += "\t[%s] %s() in %s on line %s (col:%s)\n" % (
-				frameNo, frame["function"], frame["scriptOrSourceURL"], frame["line"], frame["column"])
-	return formatted
+		assert IsCurrentThread(TID_UI), "cefpython.GetJavascriptStackTrace() may only be called on the UI thread"
+		cdef CefRefPtr[CefV8StackTrace] cefTrace = cef_v8_stack_trace.GetCurrent(int(frameLimit))
+		return CefV8StackTraceToPython(cefTrace)
+
+	def FormatJavascriptStackTrace(stackTrace):
+
+		formatted = ""
+		for frameNo, frame in enumerate(stackTrace):
+			formatted += "\t[%s] %s() in %s on line %s (col:%s)\n" % (
+					frameNo, frame["function"], frame["scriptOrSourceURL"], frame["line"], frame["column"])
+		return formatted
+

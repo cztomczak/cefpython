@@ -1,2 +1,100 @@
-[1129/202229:ERROR:renderer_main.cc(214)] Running without renderer sandbox
-[1129/202230:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/170838:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171103:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171106:ERROR:ipc_channel_win.cc(392)] pipe error: 232
+[1202/171106:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171123:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171126:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171135:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171205:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171249:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171259:ERROR:ipc_channel_win.cc(392)] pipe error: 232
+[1202/171259:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefExecuteProcess(): exitCode = -1
+cefpython: CefInitialize()
+cefwindow: win32gui.RegisterClass(cefpython3_example)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 5506228
+cefpython: CreateBrowser() called
+cefpython: GetClientRect()
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild()
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef3/windows/binaries/example.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+[1202/171338:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+cefpython: Browser.CloseBrowser() called: topWindowID=5506228, innerWindowID=5899268
+cefpython: CefBrowserHost.ParentWindowWillClose()
+cefpython: Shutdown()
+[1202/171352:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171443:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171447:ERROR:ipc_channel_win.cc(392)] pipe error: 232
+[1202/171447:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171541:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171603:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171647:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171650:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171700:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171702:ERROR:ipc_channel_win.cc(392)] pipe error: 232
+[1202/171702:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171704:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171711:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171714:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171715:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171717:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171718:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171721:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171722:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171754:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171803:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171805:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171809:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171811:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171816:ERROR:ipc_channel_win.cc(130)] pipe error: 109
+[1202/171816:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171818:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171820:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+[1202/171822:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+[1202/171824:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefExecuteProcess(): exitCode = -1
+cefpython: CefInitialize()
+cefwindow: win32gui.RegisterClass(cefpython3_example)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 2033100
+cefpython: CreateBrowser() called
+cefpython: GetClientRect()
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild()
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef3/windows/binaries/example.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+[1202/171826:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+cefpython: Browser.CloseBrowser() called: topWindowID=2033100, innerWindowID=3408808
+cefpython: CefBrowserHost.ParentWindowWillClose()
+cefpython: Shutdown()
+[1202/171837:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
+cefpython: --------------------------------------------------------------------------------
+cefpython: Initialize() called
+cefpython: CefExecuteProcess(): exitCode = -1
+cefpython: CefInitialize()
+cefwindow: win32gui.RegisterClass(cefpython3_example)
+cefwindow: Centering window on the screen.
+cefwindow: windowID = 2753956
+cefpython: CreateBrowser() called
+cefpython: GetClientRect()
+cefpython: GetSystemError(): Error Code = 183
+cefpython: CefWindowInfo.SetAsChild()
+cefpython: navigateURL: ///C:/cefpython/cefpython/cefpython/cef3/windows/binaries/example.html
+cefpython: CefBrowser::CreateBrowserSync()
+cefpython: CefBrowser::CreateBrowserSync() succeeded
+cefpython: MessageLoop()
+[1202/171853:ERROR:renderer_main.cc(214)] Running without renderer sandbox
+cefpython: Browser.CloseBrowser() called: topWindowID=2753956, innerWindowID=2098636
+cefpython: CefBrowserHost.ParentWindowWillClose()
+cefpython: Shutdown()
+[1202/171854:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412
