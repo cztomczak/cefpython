@@ -111,18 +111,18 @@ class JavascriptBindings:
 			
 			cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(pyBrowser.GetInnerWindowID()))
 			cefFrame = GetCefFrameByFrameID(CheckFrameID(pyFrame.GetIdentifier()))
-			v8Context = (<CefFrame*>(cefFrame.get())).GetV8Context()
+			v8Context = cefFrame.get().GetV8Context()
 
-			sameContext = (<CefV8Context*>(v8Context.get())).IsSame(cef_v8_static.GetCurrentContext())
+			sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
 
 			if not sameContext:
 				Debug("JavascriptBindings.Rebind(): inside a different context, calling v8Context.Enter()")
-				assert (<CefV8Context*>(v8Context.get())).Enter(), "v8Context.Enter() failed"
+				assert v8Context.get().Enter(), "v8Context.Enter() failed"
 
 			V8ContextHandler_OnContextCreated(cefBrowser, cefFrame, v8Context)
 
 			if not sameContext:
-				assert (<CefV8Context*>(v8Context.get())).Exit(), "v8Context.Exit() failed"
+				assert v8Context.get().Exit(), "v8Context.Exit() failed"
 
 	def GetProperties(self):
 

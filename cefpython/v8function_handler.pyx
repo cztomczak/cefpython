@@ -40,8 +40,8 @@ cdef public c_bool V8FunctionHandler_Execute(
 
 			# V8ContextHandler_OnContextCreated() creates V8Functionhandler() - JavascriptBindings.
 
-			pyBrowser = GetPyBrowserByCefBrowser((<CefV8Context*>(v8Context.get())).GetBrowser())
-			pyFrame = GetPyFrameByCefFrame((<CefV8Context*>(v8Context.get())).GetFrame())
+			pyBrowser = GetPyBrowserByCefBrowser(v8Context.get().GetBrowser())
+			pyFrame = GetPyFrameByCefFrame(v8Context.get().GetFrame())
 			funcName = CefStringToPyString(cefFuncName)
 
 			bindings = pyBrowser.GetJavascriptBindings()

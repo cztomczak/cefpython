@@ -1,58 +1,9 @@
-Chromium Embedded Framework (CEF) Binary Distribution
+CEF Python Binary Distribution
 -------------------------------------------------------------------------------
-
-Date:             $DATE$
-
-CEF Version:      $CEF_VER$
-CEF URL:          $CEF_URL$@$CEF_REV$
-
-Chromium Verison: $CHROMIUM_VER$
-Chromium URL:     $CHROMIUM_URL$@$CHROMIUM_REV$
-
 
 This distribution contains all components necessary to build and distribute an
 application using CEF. Please see the LICENSING section of this document for
 licensing terms and conditions.
-
-
-CONTENTS
---------
-
-cefclient   Contains the cefclient sample application configured to build
-            using the files in this distribution.
-
-Debug       Contains libcef.dll and other components required to run the debug
-            version of CEF-based applications. Also acts as the build target for
-            the Debug build of cefclient.
-
-docs        Contains C++ API documentation generated from the CEF header files.
-
-include     Contains all required CEF header files.
-
-lib         Contains Debug and Release versions of the libcef.lib library file
-            that all CEF-based applications must link against.
-
-libcef_dll  Contains the source code for the libcef_dll_wrapper static library
-            that all applications using the CEF C++ API must link against.
-
-Release     Contains libcef.dll and other components required to run the release
-            version of CEF-based applications. Also acts as the build target for
-            the Release build of cefclient.
-
-
-USAGE
------
-
-Visual Studio 2010: Open the cefclient2010.sln solution and build.
-Visual Studio 2008: Open the cefclient2008.sln solution and build.
-  * If using VS2008 Express Edition add atlthunk.lib to the cefclient
-    Configuration Properties > Linker > Input > Additional Dependencies
-Visual Studio 2005: Open the cefclient2005.sln solution and build.
-
-Please visit the CEF Website for additional usage information.
-
-http://code.google.com/p/chromiumembedded
-
 
 REDISTRIBUTION
 --------------
@@ -62,7 +13,8 @@ the "required" section must be redistributed with all applications using CEF.
 Components listed under the "optional" section may be excluded if the related
 features will not be used.
 
-Required components:
+Required components
+-------------------
 
 * CEF core library
     libcef.dll
@@ -70,7 +22,22 @@ Required components:
 * Unicode support
     icudt.dll
 
-Optional components:
+* subprocess.exe - for launching sub-processes, you can change its name
+through ApplicationSettings.browser_subprocess_path.
+
+* cefpython_py27.pyd - cefpython library compiled using Cython extension,
+this is a dll-like file in python world.
+
+* cefwindow.py - functions to create window using pywin32 extension.
+
+* Manifest and msvcr90.dll are dependencies of cefpython.pyd:
+Microsoft.VC90.CRT.manifest
+msvcm90.dll (not really required but must be redistributed together)
+msvcp90.dll (not really required but must be redistributed together)
+msvcr90.dll
+
+Optional components
+-------------------
 
 * Localized resources
     locales/

@@ -1,4 +1,4 @@
-# An example of embedding CEF Python in PySide application.
+# An example of embedding CEF Python in PyQt4 application.
 
 import platform
 if platform.architecture()[0] != "32bit":
@@ -12,10 +12,8 @@ elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
 else:
 	raise Exception("Unsupported python version: %s" % sys.version)
 
-import PySide
-from PySide import QtGui
-from PySide import QtCore
-import ctypes
+from PyQt4 import QtGui
+from PyQt4 import QtCore
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -27,8 +25,8 @@ class MainWindow(QtGui.QMainWindow):
 		self.createMenu()
 		self.mainFrame = MainFrame(self)
 		self.setCentralWidget(self.mainFrame)
-		self.resize(600, 480)
-		self.setWindowTitle('PySide example')
+		self.resize(1024, 768)
+		self.setWindowTitle('PyQT CEF 3 example')
 		self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
 	def createMenu(self):
@@ -41,7 +39,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def focusInEvent(self, event):
 
-		cefpython.WindowUtils.OnSetFocus(int(self.centralWidget().winIdFixed()), 0, 0, 0)
+		cefpython.WindowUtils.OnSetFocus(int(self.centralWidget().winId()), 0, 0, 0)
 
 	def closeEvent(self, event):
 
@@ -54,33 +52,17 @@ class MainFrame(QtGui.QWidget):
 	def __init__(self, parent=None):
 
 		super(MainFrame, self).__init__(parent)
-		self.browser = cefpython.CreateBrowser(int(self.winIdFixed()), browserSettings={}, 
-				navigateURL="cefsimple.html")
+		self.browser = cefpython.CreateBrowser(int(self.winId()), browserSettings={}, 
+				navigateURL="example.html")
 		self.show()
-
-	def winIdFixed(self):
-
-		# PySide bug: QWidget.winId() returns <PyCObject object at 0x02FD8788>,
-		# there is no easy way to convert it to int.
-		try:
-			return int(self.winId())
-		except:
-			if sys.version_info[0] == 2:
-				ctypes.pythonapi.PyCObject_AsVoidPtr.restype = ctypes.c_void_p
-				ctypes.pythonapi.PyCObject_AsVoidPtr.argtypes = [ctypes.py_object]
-				return ctypes.pythonapi.PyCObject_AsVoidPtr(self.winId())
-			elif sys.version_info[0] == 3:
-				ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
-				ctypes.pythonapi.PyCapsule_GetPointer.argtypes = [ctypes.py_object]
-				return ctypes.pythonapi.PyCapsule_GetPointer(self.winId(), None)
 
 	def moveEvent(self, event):
 		
-		cefpython.WindowUtils.OnSize(int(self.winIdFixed()), 0, 0, 0)
+		cefpython.WindowUtils.OnSize(int(self.winId()), 0, 0, 0)
 
 	def resizeEvent(self, event):
 		
-		cefpython.WindowUtils.OnSize(int(self.winIdFixed()), 0, 0, 0)
+		cefpython.WindowUtils.OnSize(int(self.winId()), 0, 0, 0)
 
 class CefApplication(QtGui.QApplication):
 
@@ -115,11 +97,15 @@ class CefApplication(QtGui.QApplication):
 
 if __name__ == '__main__':
 	
-	print("PySide version: %s" % PySide.__version__)
-	print("QtCore version: %s" % QtCore.__version__)
-	
+	print("PyQt version: %s" % QtCore.PYQT_VERSION_STR)
+	print("QtCore version: %s" % QtCore.qVersion())
+
 	sys.excepthook = cefpython.ExceptHook
-	settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "release_dcheck_enabled": True}
+	settings = {}
+	settings["log_file"] = cefpython.GetRealPath("debug.log")
+	settings["log_severity"] = cefpython.LOGSEVERITY_INFO
+	settings["release_dcheck_enabled"] = True
+	settings["browser_subprocess_path"] = "subprocess"
 	cefpython.Initialize(settings)	
 	
 	app = CefApplication(sys.argv)
@@ -127,7 +113,7 @@ if __name__ == '__main__':
 	mainWindow.show()
 	app.exec_()
 	app.stopTimer()
-
+	
 	# Need to destroy QApplication(), otherwise Shutdown() fails.
 	# Unset main window also just to be safe.
 	del mainWindow

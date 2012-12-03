@@ -70,20 +70,20 @@ cdef public void V8ContextHandler_OnContextCreated(
 		if pyBrowser.IsPopup() and not bindings.GetBindToPopups():
 			return
 
-		window = (<CefV8Context*>(cefContext.get())).GetGlobal()
+		window = cefContext.get().GetGlobal()
 
 		if jsProperties:
 			for key,val in jsProperties.items():
 				key = str(key)
 				PyStringToCefString(key, cefPropertyName)
-				(<CefV8Value*>(window.get())).SetValue(cefPropertyName, PyValueToV8Value(val, cefContext), V8_PROPERTY_ATTRIBUTE_NONE)
+				window.get().SetValue(cefPropertyName, PyValueToV8Value(val, cefContext), V8_PROPERTY_ATTRIBUTE_NONE)
 
 		if jsFunctions or jsObjects:
 			
 			# CefRefPtr are smart pointers and should release memory automatically for V8FunctionHandler().
 			functionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
-			(<V8FunctionHandler*>(functionHandler.get())).SetContext(cefContext)
-			v8Handler = <CefRefPtr[CefV8Handler]> <CefV8Handler*>(<V8FunctionHandler*>(functionHandler.get()))
+			functionHandler.get().SetContext(cefContext)
+			v8Handler = <CefRefPtr[CefV8Handler]><CefV8Handler*>functionHandler.get()
 
 		if jsFunctions:
 
@@ -92,7 +92,7 @@ cdef public void V8ContextHandler_OnContextCreated(
 				funcName = str(funcName)
 				PyStringToCefString(funcName, cefFuncName)
 				func = cef_v8_static.CreateFunction(cefFuncName, v8Handler)
-				(<CefV8Value*>(window.get())).SetValue(cefFuncName, func, V8_PROPERTY_ATTRIBUTE_NONE)
+				window.get().SetValue(cefFuncName, func, V8_PROPERTY_ATTRIBUTE_NONE)
 
 		if jsObjects:
 
@@ -103,7 +103,7 @@ cdef public void V8ContextHandler_OnContextCreated(
 
 				# Bind that object to window.
 				PyStringToCefString(objectName, cefObjectName)
-				(<CefV8Value*>(window.get())).SetValue(cefObjectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE)
+				window.get().SetValue(cefObjectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE)
 
 				for methodName in jsObjects[objectName]:
 					
@@ -114,7 +114,7 @@ cdef public void V8ContextHandler_OnContextCreated(
 					method = cef_v8_static.CreateFunction(cefMethodName, v8Handler)
 
 					PyStringToCefString(methodName, cefMethodName) # cefMethodName = "someMethod"
-					(<CefV8Value*>(v8Object.get())).SetValue(cefMethodName, method, V8_PROPERTY_ATTRIBUTE_NONE)
+					v8Object.get().SetValue(cefMethodName, method, V8_PROPERTY_ATTRIBUTE_NONE)
 
 		# return void
 
@@ -166,7 +166,7 @@ cdef public void V8ContextHandler_OnUncaughtException(
 		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser)
 		pyFrame = GetPyFrameByCefFrame(cefFrame)
 		
-		v8ExceptionPtr = <CefV8Exception*>(cefException.get())
+		v8ExceptionPtr = cefException.get()
 		pyException = {}
 		pyException["lineNumber"] = v8ExceptionPtr.GetLineNumber()
 		pyException["message"] = CefStringToPyString(v8ExceptionPtr.GetMessage())

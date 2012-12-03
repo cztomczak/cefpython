@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "client_handler_py27", "client_handler_py27.vcproj", "{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC943}") = "client_handler_py32", "client_handler_py32.vcproj", "{37AA7CD9-67AD-40B1-ADC0-D62173764BCA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}.Debug|Win32.ActiveCfg = Debug|Win32
+		{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}.Debug|Win32.Build.0 = Debug|Win32
+		{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}.Release|Win32.ActiveCfg = Release|Win32
+		{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}.Release|Win32.Build.0 = Release|Win32
+		{37AA7CD9-67AD-40B1-ADC0-D62173764BCA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{37AA7CD9-67AD-40B1-ADC0-D62173764BCA}.Debug|Win32.Build.0 = Debug|Win32
+		{37AA7CD9-67AD-40B1-ADC0-D62173764BCA}.Release|Win32.ActiveCfg = Release|Win32
+		{37AA7CD9-67AD-40B1-ADC0-D62173764BCA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

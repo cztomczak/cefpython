@@ -11,7 +11,12 @@ class WindowUtils:
 		if <void*>cefBrowser == NULL:
 			return 0
 
-		cdef HWND innerHwnd = (<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
+		cdef HWND innerHwnd
+		IF CEF_VERSION == 1:
+			innerHwnd = cefBrowser.get().GetWindowHandle()
+		ELIF CEF_VERSION == 3:
+			innerHwnd = GetCefBrowserHost(cefBrowser).get().GetWindowHandle()
+
 		# wparam,lparam from pywin32 seems to be always 0,0
 		PostMessage(innerHwnd, WM_SETFOCUS, 0, 0)
 
@@ -24,7 +29,11 @@ class WindowUtils:
 		if <void*>cefBrowser == NULL:
 			return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
 
-		cdef HWND innerHwnd = (<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
+		cdef HWND innerHwnd
+		IF CEF_VERSION == 1:
+			innerHwnd = cefBrowser.get().GetWindowHandle()
+		ELIF CEF_VERSION == 3:
+			innerHwnd = GetCefBrowserHost(cefBrowser).get().GetWindowHandle()
 
 		cdef RECT rect2
 		GetClientRect(<HWND><int>windowID, &rect2)
@@ -42,7 +51,12 @@ class WindowUtils:
 		if <void*>cefBrowser == NULL:
 			return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
 
-		cdef HWND innerHwnd = (<CefBrowser*>(cefBrowser.get())).GetWindowHandle()
+		cdef HWND innerHwnd
+		IF CEF_VERSION == 1:
+			innerHwnd = cefBrowser.get().GetWindowHandle()
+		ELIF CEF_VERSION == 3:
+			innerHwnd = GetCefBrowserHost(cefBrowser).get().GetWindowHandle()
+
 		if innerHwnd:
 			return 0 # Dont erase the background if the browser window has been loaded (this avoids flashing)
 

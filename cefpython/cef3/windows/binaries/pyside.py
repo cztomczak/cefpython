@@ -27,7 +27,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.createMenu()
 		self.mainFrame = MainFrame(self)
 		self.setCentralWidget(self.mainFrame)
-		self.resize(600, 480)
+		self.resize(1024, 768)
 		self.setWindowTitle('PySide example')
 		self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
@@ -55,7 +55,7 @@ class MainFrame(QtGui.QWidget):
 
 		super(MainFrame, self).__init__(parent)
 		self.browser = cefpython.CreateBrowser(int(self.winIdFixed()), browserSettings={}, 
-				navigateURL="cefsimple.html")
+				navigateURL="example.html")
 		self.show()
 
 	def winIdFixed(self):
@@ -119,7 +119,11 @@ if __name__ == '__main__':
 	print("QtCore version: %s" % QtCore.__version__)
 	
 	sys.excepthook = cefpython.ExceptHook
-	settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "release_dcheck_enabled": True}
+	settings = {}
+	settings["log_file"] = cefpython.GetRealPath("debug.log")
+	settings["log_severity"] = cefpython.LOGSEVERITY_INFO
+	settings["release_dcheck_enabled"] = True
+	settings["browser_subprocess_path"] = "subprocess"
 	cefpython.Initialize(settings)	
 	
 	app = CefApplication(sys.argv)

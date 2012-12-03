@@ -2,20 +2,43 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "compile_time_constants.pxi"
+
 cdef extern from "include/internal/cef_types.h":
 	
-	cdef enum cef_log_severity_t:
-		LOGSEVERITY_VERBOSE = -1,
-		LOGSEVERITY_INFO,
-		LOGSEVERITY_WARNING,
-		LOGSEVERITY_ERROR,
-		LOGSEVERITY_ERROR_REPORT,
-		LOGSEVERITY_DISABLE = 99,
+	IF CEF_VERSION == 1:
+		enum cef_log_severity_t:
+			LOGSEVERITY_VERBOSE = -1,
+			LOGSEVERITY_INFO,
+			LOGSEVERITY_WARNING,
+			LOGSEVERITY_ERROR,
+			LOGSEVERITY_ERROR_REPORT,
+			LOGSEVERITY_DISABLE = 99,
+	ELIF CEF_VERSION == 3:
+		enum cef_log_severity_t:
+			LOGSEVERITY_DEFAULT,
+			LOGSEVERITY_VERBOSE,
+			LOGSEVERITY_INFO,
+			LOGSEVERITY_WARNING,
+			LOGSEVERITY_ERROR,
+			LOGSEVERITY_ERROR_REPORT,
+			LOGSEVERITY_DISABLE = 99,
 
-	cdef enum cef_thread_id_t:
-		TID_UI = 0,
-		TID_IO = 1,
-		TID_FILE = 2,
+	IF CEF_VERSION == 1:
+		cdef enum cef_thread_id_t:
+			TID_UI = 0,
+			TID_IO = 1,
+			TID_FILE = 2,
+	ELIF CEF_VERSION == 3:
+		cdef enum cef_thread_id_t:
+			TID_UI,
+			TID_DB,
+			TID_FILE,
+			TID_FILE_USER_BLOCKING,
+			TID_PROCESS_LAUNCHER,
+			TID_CACHE,
+			TID_IO,
+			TID_RENDERER
 	
 	ctypedef long long int64
 
@@ -25,6 +48,7 @@ cdef extern from "include/internal/cef_types.h":
 	# http://src.chromium.org/viewvc/chrome/trunk/src/net/base/net_error_list.h?view=markup
 
 	cdef enum cef_handler_errorcode_t:
+		ERR_NONE = 0,
 		ERR_FAILED = -2,
 		ERR_ABORTED = -3,
 		ERR_INVALID_ARGUMENT = -4,
@@ -95,20 +119,33 @@ cdef extern from "include/internal/cef_types.h":
 		V8_PROPERTY_ATTRIBUTE_DONTENUM = 1 << 1,  # Not enumerable
 		V8_PROPERTY_ATTRIBUTE_DONTDELETE = 1 << 2   # Not configurable
 
-	# CefRequestHandler > OnBeforeBrowse > NavType
+	IF CEF_VERSION == 1:
+		# CefRequestHandler > OnBeforeBrowse > NavType
+		enum cef_handler_navtype_t:
+			NAVTYPE_LINKCLICKED = 0,
+			NAVTYPE_FORMSUBMITTED,
+			NAVTYPE_BACKFORWARD,
+			NAVTYPE_RELOAD,
+			NAVTYPE_FORMRESUBMITTED,
+			NAVTYPE_OTHER,
+			NAVTYPE_LINKDROPPED
+	ELIF CEF_VERSION == 3:
+		enum cef_navigation_type_t:
+			NAVIGATION_LINK_CLICKED = 0,
+			NAVIGATION_FORM_SUBMITTED,
+			NAVIGATION_BACK_FORWARD,
+			NAVIGATION_RELOAD,
+			NAVIGATION_FORM_RESUBMITTED,
+			NAVIGATION_OTHER,
 
-	enum cef_handler_navtype_t:
-		NAVTYPE_LINKCLICKED = 0,
-		NAVTYPE_FORMSUBMITTED,
-		NAVTYPE_BACKFORWARD,
-		NAVTYPE_RELOAD,
-		NAVTYPE_FORMRESUBMITTED,
-		NAVTYPE_OTHER,
-		NAVTYPE_LINKDROPPED
+	IF CEF_VERSION == 1:
+		# CefDisplayHandler > StatusType
+		enum cef_handler_statustype_t:
+			STATUSTYPE_TEXT = 0,
+			STATUSTYPE_MOUSEOVER_URL,
+			STATUSTYPE_KEYBOARD_FOCUS_URL,
 
-	# CefDisplayHandler > StatusType
-
-	enum cef_handler_statustype_t:
-		STATUSTYPE_TEXT = 0,
-		STATUSTYPE_MOUSEOVER_URL,
-		STATUSTYPE_KEYBOARD_FOCUS_URL,
+	IF CEF_VERSION == 3:
+		enum cef_process_id_t:
+			PID_BROWSER,
+			PID_RENDERER,
