@@ -2,11 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-include "utils.pyx"
-include "javascript_callback.pyx"
-include "python_callback.pyx"
-
 # CefV8 Objects, Arrays and Functions can be created only inside V8 context,
 # you need to call CefV8Context::Enter() and CefV8Context::Exit():
 # http://code.google.com/p/chromiumembedded/issues/detail?id=203
@@ -67,13 +62,13 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
 		pydict = dict()
 		while iterator != keys.end():
 			cefString = deref(iterator)
-			key = CefStringToPyString(cefString)
+			key = ToPyString(cefString)
 			value = V8ValueToPyValue(v8ValuePtr.GetValue(cefString), v8Context, nestingLevel+1)
 			pydict[key] = value
 			preinc(iterator)
 		return pydict
 	elif v8ValuePtr.IsString():
-		return CefStringToPyString(v8ValuePtr.GetStringValue())
+		return ToPyString(v8ValuePtr.GetStringValue())
 	elif v8ValuePtr.IsUndefined():
 		return None
 	else:
@@ -139,7 +134,7 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 		if pyValue <= 2147483647 and pyValue >= -2147483647: # int32 in CEF
 			return cef_v8_static.CreateInt(int(pyValue))
 		else:
-			PyStringToCefString(str(pyValue), cefString)
+			ToCefString(str(pyValue), cefString)
 			return cef_v8_static.CreateString(cefString)
 	elif pyValueType == float:
 		return cef_v8_static.CreateDouble(float(pyValue))
@@ -147,7 +142,7 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 		v8FunctionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
 		v8FunctionHandler.get().SetContext(v8Context)
 		v8Handler = <CefRefPtr[CefV8Handler]><CefV8Handler*>v8FunctionHandler.get()
-		PyStringToCefString(pyValue.__name__, cefFuncName)
+		ToCefString(pyValue.__name__, cefFuncName)
 		v8Value = cef_v8_static.CreateFunction(cefFuncName, v8Handler) # v8PythonCallback
 		callbackID = PutPythonCallback(pyValue)
 		v8FunctionHandler.get().SetCallback_RemovePythonCallback(
@@ -163,11 +158,11 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
 			# {0: 12, '0': 12, (0, 1): 123}
 			# Remember about increasing nestingLevel.
 			key = str(key)
-			PyStringToCefString(key, cefString)
+			ToCefString(key, cefString)
 			v8Value.get().SetValue(cefString, PyValueToV8Value(value, v8Context, nestingLevel+1), V8_PROPERTY_ATTRIBUTE_NONE)
 		return v8Value
 	elif pyValueType == str:
-		PyStringToCefString(pyValue, cefString)
+		ToCefString(pyValue, cefString)
 		return cef_v8_static.CreateString(cefString)
 	else:
 		raise Exception("PyValueToV8Value() failed: an unsupported python type was passed from"

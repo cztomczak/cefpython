@@ -2,11 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-include "utils.pyx"
-include "v8utils.pyx"
-include "python_callback.pyx"
-
 cdef public c_bool V8FunctionHandler_Execute(
 		CefRefPtr[CefV8Context] v8Context,
 		int pythonCallbackID,
@@ -16,6 +11,9 @@ cdef public c_bool V8FunctionHandler_Execute(
 		CefRefPtr[CefV8Value]& cefRetval,
 		CefString& cefException) except * with gil:
 
+	cdef PyBrowser pyBrowser
+	cdef PyFrame pyFrame
+	cdef JavascriptBindings javascriptBindings
 	cdef c_vector[CefRefPtr[CefV8Value]].iterator iterator
 	cdef CefRefPtr[CefV8Value] cefValue
 
@@ -40,21 +38,21 @@ cdef public c_bool V8FunctionHandler_Execute(
 
 			# V8ContextHandler_OnContextCreated() creates V8Functionhandler() - JavascriptBindings.
 
-			pyBrowser = GetPyBrowserByCefBrowser(v8Context.get().GetBrowser())
-			pyFrame = GetPyFrameByCefFrame(v8Context.get().GetFrame())
-			funcName = CefStringToPyString(cefFuncName)
+			pyBrowser = GetPyBrowser(v8Context.get().GetBrowser())
+			pyFrame = GetPyFrame(v8Context.get().GetFrame())
+			funcName = ToPyString(cefFuncName)
 
-			bindings = pyBrowser.GetJavascriptBindings()
-			if not bindings:
+			javascriptBindings = pyBrowser.GetJavascriptBindings()
+			if not javascriptBindings:
 				return <c_bool>False
 
 			if funcName.find(".") == -1:
-				func = bindings.GetFunction(funcName)
+				func = javascriptBindings.GetFunction(funcName)
 				if not func:
 					return <c_bool>False
 			else:
 				method = funcName.split(".") # "myobject.someMethod"
-				func = bindings.GetObjectMethod(method[0], method[1]) # "myobject", "someMethod"
+				func = javascriptBindings.GetObjectMethod(method[0], method[1]) # "myobject", "someMethod"
 				if not func:
 					return <c_bool>False
 
@@ -62,13 +60,13 @@ cdef public c_bool V8FunctionHandler_Execute(
 			# V8FunctionHandler_Execute() and OnContextCreated(), so that calling 
 			# a non-existent  property on window object throws an error.
 
-			if not pyFrame.IsMain() and not bindings.GetBindToFrames():
+			if not pyFrame.IsMain() and not javascriptBindings.GetBindToFrames():
 				return <c_bool>False
 
-			# This check is probably not needed, as GetPyBrowserByCefBrowser() will already pass bindings=None,
+			# This check is probably not needed, as GetPyBrowser() will already pass bindings=None,
 			# if this is a popup window and bindToPopups is False.
 
-			if pyBrowser.IsPopup() and not bindings.GetBindToPopups():
+			if pyBrowser.IsPopup() and not javascriptBindings.GetBindToPopups():
 				return <c_bool>False
 
 			arguments = []

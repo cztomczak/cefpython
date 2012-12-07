@@ -1,29 +1,60 @@
-CEF Python binary distribution
-------------------------------
+Chromium Embedded Framework (CEF) Binary Distribution
+-------------------------------------------------------------------------------
 
-EXAMPLES
+Date:             $DATE$
+
+CEF Version:      $CEF_VER$
+CEF URL:          $CEF_URL$@$CEF_REV$
+
+Chromium Verison: $CHROMIUM_VER$
+Chromium URL:     $CHROMIUM_URL$@$CHROMIUM_REV$
+
+
+This distribution contains all components necessary to build and distribute an
+application using CEF. Please see the LICENSING section of this document for
+licensing terms and conditions.
+
+
+CONTENTS
 --------
 
-Examples using pywin32 extension:
-- cefsimple.py
-- cefadvanced.py
+cefclient   Contains the cefclient sample application configured to build
+            using the files in this distribution.
 
-Embedding CEF in GUI frameworks:
-- pygtk_.py
-- wxpython.py
-- pyqt.py
-- pyside.py
+Debug       Contains libcef.dll and other components required to run the debug
+            version of CEF-based applications. Also acts as the build target for
+            the Debug build of cefclient.
 
-A test browser:
-- cefclient.exe
+docs        Contains C++ API documentation generated from the CEF header files.
 
-HELP
-----
+include     Contains all required CEF and NPAPI-related header files.  Read
+            the include/internal/npapi/README-TRANSFER.txt file for more
+            information about the NPAPI-related header files.
 
-Project's website: http://code.google.com/p/cefpython/
-Wiki pages: http://code.google.com/p/cefpython/w/list
-Help forum: https://groups.google.com/group/cefpython?hl=en
-Report bugs, star issues: http://code.google.com/p/cefpython/issues/list
+lib         Contains Debug and Release versions of the libcef.lib library file
+            that all CEF-based applications must link against.
+
+libcef_dll  Contains the source code for the libcef_dll_wrapper static library
+            that all applications using the CEF C++ API must link against.
+
+Release     Contains libcef.dll and other components required to run the release
+            version of CEF-based applications. Also acts as the build target for
+            the Release build of cefclient.
+
+
+USAGE
+-----
+
+Visual Studio 2010: Open the cefclient2010.sln solution and build.
+Visual Studio 2008: Open the cefclient2008.sln solution and build.
+  * If using VS2008 Express Edition add atlthunk.lib to the cefclient
+    Configuration Properties > Linker > Input > Additional Dependencies
+Visual Studio 2005: Open the cefclient2005.sln solution and build.
+
+Please visit the CEF Website for additional usage information.
+
+http://code.google.com/p/chromiumembedded
+
 
 REDISTRIBUTION
 --------------
@@ -36,66 +67,46 @@ features will not be used.
 Required components:
 
 * CEF core library
-libcef.dll
+    libcef.dll
 
 * Unicode support
-icudt.dll
-
-* Localized resources
-locales/
-
-Note: A .pak file is loaded from this folder based on the value of
-ApplicationSettings.locale. Only configured locales need to be distributed. If no
-locale is configured the default locale of "en-US" will be used. The
-locales folder must exist in the same directory as libcef.dll.
-
-* Other resources
-devtools_resources.pak
-
-Note: Contains WebKit image and inspector resources. Pack file loading can be
-disabled completely using CefSettings.pack_loading_disabled. The resources
-directory path can be customized using CefSettings.resources_dir_path.
-
-* cefpython.pyd - cefpython library compiled using Cython extension,
-this is a dll-like file in python world.
-* cefwindow.py - functions to create window using pywin32 extension.
-
-* Manifest and msvcr90.dll are dependencies of cefpython.pyd:
-Microsoft.VC90.CRT.manifest
-msvcm90.dll (not really required but must be redistributed together)
-msvcp90.dll (not really required but must be redistributed together)
-msvcr90.dll
+    icudt.dll
 
 Optional components:
 
+* Localized resources
+    locales/
+  Note: Contains localized strings for WebKit UI controls. A .pak file is loaded
+  from this folder based on the CefSettings.locale value. Only configured
+  locales need to be distributed. If no locale is configured the default locale
+  of "en-US" will be used. Locale file loading can be disabled completely using
+  CefSettings.pack_loading_disabled. The locales folder path can be customized
+  using CefSettings.locales_dir_path.
+
+* Other resources
+    devtools_resources.pak
+  Note: Contains WebKit image and inspector resources. Pack file loading can be
+  disabled completely using CefSettings.pack_loading_disabled. The resources
+  directory path can be customized using CefSettings.resources_dir_path.
+
 * Angle and Direct3D support
-d3dcompiler_43.dll
-d3dx9_43.dll
-libEGL.dll
-libGLESv2.dll
+    d3dcompiler_43.dll
+    d3dx9_43.dll
+    libEGL.dll
+    libGLESv2.dll
+  Note: Without these components the default ANGLE_IN_PROCESS graphics
+  implementation for HTML5 accelerated content like 2D canvas, 3D CSS and
+  WebGL will not function. To use the desktop GL graphics implementation which
+  does not require these components (and does not work on all systems) set
+  CefSettings.graphics_implementation to DESKTOP_IN_PROCESS.
 
-Note: Without these components the default ANGLE_IN_PROCESS graphics
-implementation for HTML5 accelerated content like 2D canvas, 3D CSS and
-WebGL will not function. To use the desktop GL graphics implementation which
-does not require these components (and does not work on all systems) set
-CefSettings.graphics_implementation to DESKTOP_IN_PROCESS.
-
-Test components:
-
-* cefclient application that does not need to be redistributed.
-cefclient.exe
-
-
-ICON
-----
-
-icon.ico is from "FS Ubuntu Icons" by Frank Souza.
-Licensed under GNU General Public License.
 
 LICENSING
 ---------
 
-The CEF Python project is BSD licensed (http://opensource.org/licenses/BSD-3-Clause).
-Other software included in this distribution is provided under other licenses.
-Please visit the below link for complete Chromium and third-party licensing information:
-http://code.google.com/chromium/terms.html
+The CEF project is BSD licensed. Please read the LICENSE.txt file included with
+this binary distribution for licensing terms and conditions. Other software
+included in this distribution is provided under other licenses. Please visit the
+below link for complete Chromium and third-party licensing information.
+
+http://code.google.com/chromium/terms.html 

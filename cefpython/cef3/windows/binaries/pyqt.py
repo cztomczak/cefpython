@@ -52,8 +52,10 @@ class MainFrame(QtGui.QWidget):
 	def __init__(self, parent=None):
 
 		super(MainFrame, self).__init__(parent)
-		self.browser = cefpython.CreateBrowser(int(self.winId()), browserSettings={}, 
-				navigateURL="example.html")
+		windowInfo = cefpython.WindowInfo()
+		windowInfo.SetAsChild(int(self.winId()))
+		self.browser = cefpython.CreateBrowser(windowInfo, browserSettings={}, 
+		                                       navigateURL="example.html")
 		self.show()
 
 	def moveEvent(self, event):

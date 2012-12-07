@@ -2,29 +2,23 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-include "utils.pyx"
-
 cdef public void LoadHandler_OnLoadEnd(
 		CefRefPtr[CefBrowser] cefBrowser,
 		CefRefPtr[CefFrame] cefFrame,
 		int httpStatusCode
 		) except * with gil:
 	
+	cdef PyBrowser pyBrowser
+	cdef PyFrame pyFrame
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
+		pyBrowser = GetPyBrowser(cefBrowser)
 		if not pyBrowser:
 			Debug("LoadHandler_OnLoadEnd() failed: pyBrowser is %s" % pyBrowser)
 			return
-		pyFrame = GetPyFrameByCefFrame(cefFrame)	
-		handler = pyBrowser.GetClientHandler("OnLoadEnd")
-		if type(handler) is tuple:
-			if pyFrame.IsMain():
-				handler = handler[0]
-			else:
-				handler = handler[1]
-		if handler:
-			handler(pyBrowser, pyFrame, httpStatusCode)
+		pyFrame = GetPyFrame(cefFrame)	
+		callback = pyBrowser.GetClientCallback("OnLoadEnd")
+		if callback:
+			callback(pyBrowser, pyFrame, httpStatusCode)
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
@@ -35,20 +29,17 @@ cdef public void LoadHandler_OnLoadStart(
 		CefRefPtr[CefFrame] cefFrame
 		) except * with gil:
 
+	cdef PyBrowser pyBrowser
+	cdef PyFrame pyFrame
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
+		pyBrowser = GetPyBrowser(cefBrowser)
 		if not pyBrowser:
 			Debug("LoadHandler_OnLoadStart(): failed: pyBrowser is %s" % pyBrowser)
 			return
-		pyFrame = GetPyFrameByCefFrame(cefFrame)	
-		handler = pyBrowser.GetClientHandler("OnLoadStart")
-		if type(handler) is tuple:
-			if pyFrame.IsMain():
-				handler = handler[0]
-			else:
-				handler = handler[1]
-		if handler:
-			handler(pyBrowser, pyFrame)
+		pyFrame = GetPyFrame(cefFrame)	
+		callback = pyBrowser.GetClientCallback("OnLoadStart")
+		if callback:
+			callback(pyBrowser, pyFrame)
 	except:
 		(exc_type, exc_value, exc_trace) = sys.exc_info()
 		sys.excepthook(exc_type, exc_value, exc_trace)
@@ -62,23 +53,20 @@ cdef public c_bool LoadHandler_OnLoadError(
 		CefString& cefErrorText
 		) except * with gil:
 
+	cdef PyBrowser pyBrowser
+	cdef PyFrame pyFrame
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
+		pyBrowser = GetPyBrowser(cefBrowser)
 		if not pyBrowser:
 			Debug("LoadHandler_OnLoadError() failed: pyBrowser is %s" % pyBrowser)
 			return False
-		pyFrame = GetPyFrameByCefFrame(cefFrame)	
-		handler = pyBrowser.GetClientHandler("OnLoadError")
-		if type(handler) is tuple:
-			if pyFrame.IsMain():
-				handler = handler[0]
-			else:
-				handler = handler[1]
-		if handler:
+		pyFrame = GetPyFrame(cefFrame)	
+		callback = pyBrowser.GetClientCallback("OnLoadError")
+		if callback:
 			errorText = [""] # errorText[0] is out
-			ret = handler(pyBrowser, pyFrame, cefErrorCode, CefStringToPyString(cefFailedURL), errorText)
+			ret = callback(pyBrowser, pyFrame, cefErrorCode, ToPyString(cefFailedURL), errorText)
 			if ret:
-				PyStringToCefString(errorText[0], cefErrorText)
+				ToCefString(errorText[0], cefErrorText)
 			return bool(ret)
 		else:
 			return False
@@ -87,7 +75,6 @@ cdef public c_bool LoadHandler_OnLoadError(
 		sys.excepthook(exc_type, exc_value, exc_trace)
 
 # Network error constants.
-
 ERR_FAILED = <int>cef_types.ERR_FAILED
 ERR_ABORTED = <int>cef_types.ERR_ABORTED
 ERR_INVALID_ARGUMENT = <int>cef_types.ERR_INVALID_ARGUMENT

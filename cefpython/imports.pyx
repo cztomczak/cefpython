@@ -2,8 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "include_cython/compile_time_constants.pxi"
-
 import os
 import sys
 import cython
@@ -25,6 +23,7 @@ if sys.version_info.major == 2:
 else:
 	from urllib.request import pathname2url as urllib_pathname2url
 
+from cpython cimport bool as py_bool
 from libcpp cimport bool as c_bool
 from libcpp.map cimport map as c_map
 from multimap cimport multimap as c_multimap
@@ -59,10 +58,13 @@ IF UNAME_SYSNAME == "Windows":
 from cef_ptr cimport *
 from cef_app cimport *
 from cef_browser cimport *
+cimport cef_browser_static
 from cef_client cimport *
 from client_handler cimport *
 from cef_frame cimport *
-cimport cef_types # cannot cimport *, that would cause name conflicts with constants.
+
+# cannot cimport *, that would cause name conflicts with constants.
+cimport cef_types 
 
 IF UNAME_SYSNAME == "Windows":
 	cimport cef_types_win # cannot cimport *, name conflicts

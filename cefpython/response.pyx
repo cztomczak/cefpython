@@ -2,8 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-
 cdef object CreatePyResponse(CefRefPtr[CefResponse] cefResponse):
 
 	pyResponse = PyResponse()
@@ -14,7 +12,7 @@ cdef class PyResponse:
 
 	cdef CefRefPtr[CefResponse] cefResponse
 
-	cdef CefRefPtr[CefResponse] GetCefResponse(self):
+	cdef CefRefPtr[CefResponse] GetCefResponse(self) except *:
 		
 		if <void*>self.cefResponse != NULL and self.cefResponse.get():
 			return self.cefResponse
@@ -31,24 +29,24 @@ cdef class PyResponse:
 
 	def GetStatusText(self):
 
-		return CefStringToPyString(self.GetCefResponse().get().GetStatusText())
+		return ToPyString(self.GetCefResponse().get().GetStatusText())
 
 	def SetStatusText(self, statusText):
 
 		assert type(statusText) in (str, unicode, bytes), "Response.SetStatusText() failed: statusText param is not a string"
 		cdef CefString cefStatusText
-		PyStringToCefString(statusText, cefStatusText)
+		ToCefString(statusText, cefStatusText)
 		self.GetCefResponse().get().SetStatusText(cefStatusText)
 
 	def GetMimeType(self):
 
-		return CefStringToPyString(self.GetCefResponse().get().GetMimeType())
+		return ToPyString(self.GetCefResponse().get().GetMimeType())
 
 	def SetMimeType(self, mimeType):
 
 		assert type(mimeType) in (str, unicode, bytes), "Response.SetMimeType() failed: mimeType param is not a string"
 		cdef CefString cefMimeType
-		PyStringToCefString(mimeType, cefMimeType)
+		ToCefString(mimeType, cefMimeType)
 		self.GetCefResponse().get().SetMimeType(cefMimeType)
 
 	def GetHeader(self, name):
@@ -56,8 +54,8 @@ cdef class PyResponse:
 		# TODO: what is returned when you try to get a non-existent header?
 		assert type(name) in (str, unicode, bytes), "Response.GetHeader() failed: name param is not a string"
 		cdef CefString cefName
-		PyStringToCefString(name, cefName)
-		return CefStringToPyString(self.GetCefResponse().get().GetHeader(cefName))
+		ToCefString(name, cefName)
+		return ToPyString(self.GetCefResponse().get().GetHeader(cefName))
 
 	def GetHeaderMap(self):
 
@@ -80,8 +78,8 @@ cdef class PyResponse:
 		while iterator != cefHeaderMap.end():
 			cefKey = deref(iterator).first
 			cefValue = deref(iterator).second
-			pyKey = CefStringToPyString(cefKey)
-			pyValue = CefStringToPyString(cefValue)
+			pyKey = ToPyString(cefKey)
+			pyValue = ToPyString(cefValue)
 			pyHeaderMultimap.append((pyKey, pyValue))
 			preinc(iterator)
 		return pyHeaderMultimap
@@ -104,8 +102,8 @@ cdef class PyResponse:
 		cdef CefString cefValue
 		cdef c_pair[CefString, CefString] pair
 		for headerTuple in headerMultimap:
-			PyStringToCefString(str(headerTuple[0]), cefKey)
-			PyStringToCefString(str(headerTuple[1]), cefValue)
+			ToCefString(str(headerTuple[0]), cefKey)
+			ToCefString(str(headerTuple[1]), cefValue)
 			pair.first, pair.second = cefKey, cefValue
 			cefHeaderMap.insert(pair)
 		self.GetCefResponse().get().SetHeaderMap(cefHeaderMap)
