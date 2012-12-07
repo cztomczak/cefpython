@@ -27,18 +27,20 @@ def CefSimple():
 		win32con.WM_SETFOCUS: cefpython.WindowUtils.OnSetFocus,
 		win32con.WM_ERASEBKGND: cefpython.WindowUtils.OnEraseBackground
 	}
-	windowID = cefwindow.CreateWindow(title="CefSimple", className="cefsimple", 
+	windowHandle = cefwindow.CreateWindow(title="CefSimple", className="cefsimple", 
 					width=800, height=600, icon="icon.ico", windowProc=wndproc)
-	browser = cefpython.CreateBrowser(windowID, browserSettings={}, navigateURL="cefsimple.html")
+	windowInfo = cefpython.WindowInfo()
+	windowInfo.SetAsChild(windowHandle)
+	browser = cefpython.CreateBrowserSync(windowInfo, browserSettings={}, navigateURL="cefsimple.html")
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
-def CloseWindow(windowID, message, wparam, lparam):
-	browser = cefpython.GetBrowserByWindowID(windowID)
+def CloseWindow(windowHandle, message, wparam, lparam):
+	browser = cefpython.GetBrowserByWindowHandle(windowHandle)
 	browser.CloseBrowser()
-	return win32gui.DefWindowProc(windowID, message, wparam, lparam)
+	return win32gui.DefWindowProc(windowHandle, message, wparam, lparam)
 
-def QuitApplication(windowID, message, wparam, lparam):
+def QuitApplication(windowHandle, message, wparam, lparam):
 	win32gui.PostQuitMessage(0)
 	return 0
 

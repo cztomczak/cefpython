@@ -2,10 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-include "utils.pyx"
-include "v8utils.pyx"
-
 cdef c_map[int, CefRefPtr[CefV8Value]] g_v8JavascriptCallbacks
 cdef c_map[int, CefRefPtr[CefV8Context]] g_v8JavascriptCallbackContexts
 cdef int g_v8JavascriptCallbackCount = 0 # next callbackID
@@ -88,9 +84,9 @@ class JavascriptCallback:
 			v8Exception = v8Value.get().GetException()
 			v8ExceptionPtr = v8Exception.get()
 			lineNumber = v8ExceptionPtr.GetLineNumber()
-			message = CefStringToPyString(v8ExceptionPtr.GetMessage())
-			scriptResourceName = CefStringToPyString(v8ExceptionPtr.GetScriptResourceName())
-			sourceLine = CefStringToPyString(v8ExceptionPtr.GetSourceLine())
+			message = ToPyString(v8ExceptionPtr.GetMessage())
+			scriptResourceName = ToPyString(v8ExceptionPtr.GetScriptResourceName())
+			sourceLine = ToPyString(v8ExceptionPtr.GetSourceLine())
 			
 			# TODO: throw exceptions according to execution context (Issue 11),
 			
@@ -115,4 +111,4 @@ class JavascriptCallback:
 		cdef CefRefPtr[CefV8Value] v8Value = GetV8JavascriptCallback(self.__callbackID)
 		cdef CefString cefFuncName
 		cefFuncName = v8Value.get().GetFunctionName()
-		return CefStringToPyString(cefFuncName)
+		return ToPyString(cefFuncName)

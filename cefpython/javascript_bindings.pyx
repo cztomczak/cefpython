@@ -2,76 +2,82 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-
-class JavascriptBindings:
+cdef class JavascriptBindings:
 
 	# By default we bind only to top frame.
-	__bindToFrames = False
-	__bindToPopups = False
-	__functions = {}
-	__properties = {}
-	__objects = {}
-	
-	# Many browsers may have the same JavascriptBindings object.
-	# __browsers = [] # currently not used, no browser is inserted here.
+	cdef public int bindToFrames
+	cdef public int bindToPopups
+	cdef public dict functions
+	cdef public dict properties
+	cdef public dict objects
 	
 	# V8ContextHandler_OnContextCreated inserts frames here that should have javascript bindings,
 	# it is later needed to do rebinding using Rebind() method. All frames are here, the main too,
 	# frames may be from different Browser objects.
-	__frames = {} # frameIdentifier(int64) : tuple(PyBrowser, PyFrame())
+	cdef public dict frames # frameIdentifier(int64) : tuple(PyBrowser, PyFrame())
 
 	def __init__(self, bindToFrames=False, bindToPopups=False):
 
-		self.__bindToFrames = bindToFrames
-		self.__bindToPopups = bindToPopups
+		# Initialize default values.
+		self.functions = {}
+		self.properties = {}
+		self.objects = {}
+		self.frames = {}
 
-	def GetBindToFrames(self):
+		self.bindToFrames = int(bindToFrames)
+		self.bindToPopups = int(bindToPopups)
 
-		return self.__bindToFrames
+	cpdef py_bool GetBindToFrames(self):
 
-	def GetBindToPopups(self):
+		return bool(self.bindToFrames)
 
-		return self.__bindToPopups
+	cpdef py_bool GetBindToPopups(self):
 
-	def SetFunction(self, name, func):
+		return bool(self.bindToPopups)
+
+	cpdef object SetFunction(self, str name, str func):
 
 		self.SetProperty(name, func)
 
-	def SetObject(self, name, obj):
+	cpdef object SetObject(self, str name, object obj):
 
 		if not hasattr(obj, "__class__"):
-			raise Exception("JavascriptBindings.SetObject() failed: name=%s, __class__ attribute missing, this is not an object" % name)
-		
-		methods = {}
-		for value in inspect.getmembers(obj, predicate=inspect.ismethod):
+			raise Exception("JavascriptBindings.SetObject() failed: name=%s, "
+			                "__class__ attribute missing, this is not an object" % name)
+		cdef dict methods = {}
+		cdef str key
+		cdef object method
+		cdef object predicate = inspect.ismethod
+		if isinstance(obj, (PyBrowser, PyFrame)):
+			predicate = inspect.isbuiltin
+		for value in inspect.getmembers(obj, predicate=predicate):
 			key = value[0]
 			method = value[1]
 			methods[key] = method
-		self.__objects[name] = methods
+		self.objects[name] = methods
 
-	def GetFunction(self, name):
+	cpdef object GetFunction(self, str name):
 
-		if name in self.__functions:
-			return self.__functions[name]
+		if name in self.functions:
+			return self.functions[name]
 
-	def GetFunctions(self):
+	cpdef dict GetFunctions(self):
 
-		return self.__functions
+		return self.functions
 
-	def GetObjects(self):
+	cpdef dict GetObjects(self):
 
-		return self.__objects
+		return self.objects
 
-	def GetObjectMethod(self, objectName, methodName):
+	cpdef object GetObjectMethod(self, str objectName, str methodName):
 
-		if objectName in self.__objects:
-			if methodName in self.__objects[objectName]:
-				return self.__objects[objectName][methodName]
+		if objectName in self.objects:
+			if methodName in self.objects[objectName]:
+				return self.objects[objectName][methodName]
 
-	def SetProperty(self, name, value):
+	cpdef object SetProperty(self, str name, object value):
 
-		allowed = self.__IsValueAllowed(value) # returns True or string.
+		allowed = self.IsValueAllowedRecursively(value) # returns True or string.
 		if allowed is not True:
 			raise Exception("JavascriptBindings.SetProperty() failed: name=%s, "
 			                "not allowed type: %s (this may be a type of a nested value)"
@@ -79,23 +85,23 @@ class JavascriptBindings:
 		
 		valueType = type(value)
 		if valueType == types.FunctionType or valueType == types.MethodType:
-			self.__functions[name] = value
+			self.functions[name] = value
 		else:
-			self.__properties[name] = value	
+			self.properties[name] = value	
 
-	def AddFrame(self, pyBrowser, pyFrame):
+	cdef object AddFrame(self, PyBrowser pyBrowser, PyFrame pyFrame):
 
-		if pyFrame.GetIdentifier() not in self.__frames:
+		if pyFrame.GetIdentifier() not in self.frames:
 			Debug("JavascriptBindings.AddFrame(): frameID = %s" % pyFrame.GetIdentifier())
-			self.__frames[pyFrame.GetIdentifier()] = (pyBrowser, pyFrame)
+			self.frames[pyFrame.GetIdentifier()] = (pyBrowser, pyFrame)
 
-	def RemoveFrame(self, pyBrowser, pyFrame):
+	cdef object RemoveFrame(self, PyBrowser pyBrowser, PyFrame pyFrame):
 
-		if pyFrame.GetIdentifier() in self.__frames:
+		if pyFrame.GetIdentifier() in self.frames:
 			Debug("JavascriptBindings.RemoveFrame(): frameID = %s" % pyFrame.GetIdentifier())
-			del self.__frames[pyFrame.GetIdentifier()]
+			del self.frames[pyFrame.GetIdentifier()]
 
-	def Rebind(self):
+	cpdef object Rebind(self):
 		
 		assert IsCurrentThread(TID_UI), "JavascriptBindings.Rebind() may only be called on UI thread"
 
@@ -103,14 +109,16 @@ class JavascriptBindings:
 		cdef CefRefPtr[CefFrame] cefFrame
 		cdef CefRefPtr[CefV8Context] v8Context
 		cdef c_bool sameContext
+		cdef PyBrowser pyBrowser
+		cdef PyFrame pyFrame
 
 		for frameID in self.__frames:
 			
-			pyBrowser = self.__frames[frameID][0]
-			pyFrame = self.__frames[frameID][1]
+			pyBrowser = self.frames[frameID][0]
+			pyFrame = self.frames[frameID][1]
 			
-			cefBrowser = GetCefBrowserByInnerWindowID(CheckInnerWindowID(pyBrowser.GetInnerWindowID()))
-			cefFrame = GetCefFrameByFrameID(CheckFrameID(pyFrame.GetIdentifier()))
+			cefBrowser = pyBrowser.GetCefBrowser()
+			cefFrame = pyFrame.GetCefFrame()
 			v8Context = cefFrame.get().GetV8Context()
 
 			sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
@@ -124,28 +132,29 @@ class JavascriptBindings:
 			if not sameContext:
 				assert v8Context.get().Exit(), "v8Context.Exit() failed"
 
-	def GetProperties(self):
+	cpdef dict GetProperties(self):
 
-		return self.__properties
-
-	@staticmethod
-	def IsValueAllowed(value):
-
-		return JavascriptBindings.__IsValueAllowed(value) is True
+		return self.properties
 
 	@staticmethod
-	def __IsValueAllowed(value, recursion=False) :
+	def IsValueAllowed(object value):
 
-		# !! When making changes here also check: Frame.SetProperty() 
-		#    as it checks for FunctionType, MethodType.
+		return JavascriptBindings.IsValueAllowedRecursively(value) is True
+
+	@staticmethod
+	def IsValueAllowedRecursively(object value, py_bool recursion=False):
+
+		# When making changes here also check: Frame.SetProperty() as it checks
+		# for FunctionType, MethodType.
 		
 		# - Return value: True - allowed, string - not allowed
-		# - Not using type().__name__ here as it is not consistent, for int it is "int" but for None it is "NoneType".
+		# - Not using type().__name__ here as it is not consistent, 
+		#   for int it is "int" but for None it is "NoneType".
 
 		valueType = type(value)
 		if valueType == list:
 			for val in value:
-				valueType2 = JavascriptBindings.__IsValueAllowed(val, True)
+				valueType2 = JavascriptBindings.IsValueAllowedRecursively(val, True)
 				if valueType2 is not True:
 					return valueType2.__name__
 			return True
@@ -164,7 +173,7 @@ class JavascriptBindings:
 				return True
 		elif valueType == dict:
 			for key in value:
-				valueType2 = JavascriptBindings.__IsValueAllowed(value[key], True)
+				valueType2 = JavascriptBindings.IsValueAllowedRecursively(value[key], True)
 				if valueType2 is not True:
 					return valueType2.__name__
 			return True

@@ -2,26 +2,44 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-include "utils.pyx"
-include "v8utils.pyx"
-include "v8context_handler.pyx"
+cdef list g_pyFrames = []
 
-# id: (int64 = long in python) CefFrame.GetIdentifier() - globally unique identifier.
-# In Python 2 there is: int (32 bit) long (64 bit).
-# In Python 3 there will be only int (64 bit).
-# long has no limit in python.
+cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 
-cdef c_map[cef_types.int64, CefRefPtr[CefFrame]] g_cefFrames
-g_pyFrames = {}
+	global g_pyFrames
 
-class PyFrame:
+	if <void*>cefFrame == NULL or not cefFrame.get():
+		Debug("GetPyFrame(): returning None")
+		return None
+	
+	cdef PyFrame pyFrame
+	for pyFrame in g_pyFrames:
+		if pyFrame.cefFrame.get():
+			if pyFrame.cefFrame.get().GetIdentifier() == cefFrame.get().GetIdentifier():
+				return pyFrame
+		else:
+			Debug("GetPyFrame(): removing an empty reference from g_pyFrames")
+			# TODO.
+	
+	Debug("GetPyFrame(): creating new PyFrame")
+	pyFrame = PyFrame()
+	pyFrame.cefFrame = cefFrame
+	g_pyFrames.append(pyFrame)
+	return pyFrame
 
-	frameID = 0
+cdef class PyFrame:
 
-	def __init__(self, frameID):
+	cdef CefRefPtr[CefFrame] cefFrame
 
-		self.frameID = frameID
+	cdef CefRefPtr[CefFrame] GetCefFrame(self) except *:
+
+		if <void*>self.cefFrame != NULL and self.cefFrame.get():
+			return self.cefFrame
+		raise Exception("PyFrame.GetCefFrame() failed: CefFrame was destroyed")
+
+	def __init__(self):
+
+		pass
 
 	def CallFunction(self, funcName):
 
@@ -40,22 +58,18 @@ class PyFrame:
 
 	def Copy(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cefFrame.get().Copy()
+		self.GetCefFrame().get().Copy()
 
 	def Cut(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cefFrame.get().Cut()
+		self.GetCefFrame().get().Cut()
 
 	def Delete(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cefFrame.get().Delete()
+		self.GetCefFrame().get().Delete()
 
-	def ExecuteJavascript(self, jsCode, scriptURL=None, startLine=None):
+	def ExecuteJavascript(self, jsCode, scriptUrl=None, startLine=None):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))		
 		cdef CefString cefJsCode
 
 		if bytes == str:
@@ -64,15 +78,15 @@ class PyFrame:
 			bytesJsCode = jsCode.encode("utf-8") # Python 3 requires bytes when converting to char*
 			cefJsCode.FromASCII(<char*>bytesJsCode)
 		
-		if not scriptURL:
-			scriptURL = ""
-		cdef CefString cefScriptURL
-		PyStringToCefString(scriptURL, cefScriptURL)
+		if not scriptUrl:
+			scriptUrl = ""
+		cdef CefString cefScriptUrl
+		ToCefString(scriptUrl, cefScriptUrl)
 
 		if not startLine:
 			startLine = -1
 
-		cefFrame.get().ExecuteJavaScript(cefJsCode, cefScriptURL, <int>startLine)
+		self.GetCefFrame().get().ExecuteJavaScript(cefJsCode, cefScriptUrl, <int>startLine)
 
 	def EvalJavascript(self):
 
@@ -81,32 +95,23 @@ class PyFrame:
 
 	def GetIdentifier(self):
 
-		return self.frameID
-
-		"""
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		return <long long>(cefFrame.get().GetIdentifier())
-		"""
+		return self.GetCefFrame().get().GetIdentifier()
 
 	def GetName(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cdef CefString cefName = cefFrame.get().GetName()
-		return CefStringToPyString(cefName)
+		return ToPyString(self.GetCefFrame().get().GetName())
 
 	IF CEF_VERSION == 1:
 
 		def GetProperty(self, name):
 
-			# GetV8Context() requires UI thread.
 			assert IsCurrentThread(TID_UI), "Frame.GetProperty() may only be called on the UI thread"
-			cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-			cdef CefRefPtr[CefV8Context] v8Context = cefFrame.get().GetV8Context()
+			cdef CefRefPtr[CefV8Context] v8Context = self.GetCefFrame().get().GetV8Context()
 			window = v8Context.get().GetGlobal()
 
 			cdef CefString cefPropertyName
 			name = str(name)
-			PyStringToCefString(name, cefPropertyName)
+			ToCefString(name, cefPropertyName)
 
 			cdef CefRefPtr[CefV8Value] v8Value
 			v8Value = window.get().GetValue(cefPropertyName)
@@ -119,35 +124,27 @@ class PyFrame:
 			
 			IF CEF_VERSION == 1:
 				assert IsCurrentThread(TID_UI), "Frame.GetSource() may only be called on the UI thread"
-			cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-			cdef CefString cefSource = cefFrame.get().GetSource()
-			return CefStringToPyString(cefSource)
+			return ToPyString(self.GetCefFrame().get().GetSource())
 
 		def GetText(self):
 			
 			IF CEF_VERSION == 1:
 				assert IsCurrentThread(TID_UI), "Frame.GetText() may only be called on the UI thread"
-			cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-			cdef CefString cefSource = cefFrame.get().GetText()
-			return CefStringToPyString(cefSource)
+			return ToPyString(self.GetCefFrame().get().GetText())
 
-	def GetURL(self):
+	def GetUrl(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cdef CefString cefURL = cefFrame.get().GetURL()
-		return CefStringToPyString(cefURL)
+		return ToPyString(self.GetCefFrame().get().GetURL())
 
 	def IsFocused(self):
 
 		IF CEF_VERSION == 1:
 			assert IsCurrentThread(TID_UI), "Frame.IsFocused() may only be called on the UI thread"
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		return cefFrame.get().IsFocused()
+		return self.GetCefFrame().get().IsFocused()
 
 	def IsMain(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		return cefFrame.get().IsMain()
+		return self.GetCefFrame().get().IsMain()
 
 	def LoadRequest(self):
 
@@ -155,41 +152,35 @@ class PyFrame:
 
 	def LoadString(self, value, url):
 		
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
 		cdef CefString cefValue
-		cdef CefString cefURL
-		PyStringToCefString(value, cefValue)
-		PyStringToCefString(url, cefURL)		
-		cefFrame.get().LoadString(cefValue, cefURL)
+		cdef CefString cefUrl
+		ToCefString(value, cefValue)
+		ToCefString(url, cefUrl)		
+		self.GetCefFrame().get().LoadString(cefValue, cefUrl)
 
-	def LoadURL(self, url):
+	def LoadUrl(self, url):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cdef CefString cefURL
-		PyStringToCefString(url, cefURL)
-		cefFrame.get().LoadURL(cefURL)
+		cdef CefString cefUrl
+		ToCefString(url, cefUrl)
+		self.GetCefFrame().get().LoadURL(cefUrl)
 
 	def Paste(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cefFrame.get().Paste()
+		self.GetCefFrame().get().Paste()
 
 	IF CEF_VERSION == 1:
 
 		def Print(self):
 
-			cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-			cefFrame.get().Print()
+			self.GetCefFrame().get().Print()
 
 	def Redo(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cefFrame.get().Redo()
+		self.GetCefFrame().get().Redo()
 
 	def SelectAll(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cefFrame.get().SelectAll()
+		self.GetCefFrame().get().SelectAll()
 
 	IF CEF_VERSION == 1:
 
@@ -202,17 +193,14 @@ class PyFrame:
 				valueType = JavascriptBindings.__IsValueAllowed(value)
 				raise Exception("Frame.SetProperty() failed: name=%s, not allowed type: %s (this may be a type of a nested value)" % (name, valueType))
 			
-			cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-			cdef CefRefPtr[CefV8Context] v8Context = cefFrame.get().GetV8Context()
-			
+			cdef CefRefPtr[CefV8Context] v8Context = self.GetCefFrame().get().GetV8Context()			
 			window = v8Context.get().GetGlobal()
-
+			
 			cdef CefString cefPropertyName
 			name = str(name)
-			PyStringToCefString(name, cefPropertyName)
-
-			cdef c_bool sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
+			ToCefString(name, cefPropertyName)
 			
+			cdef c_bool sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())			
 			if not sameContext:
 				Debug("Frame.SetProperty(): inside a different context, calling v8Context.Enter()")
 				assert v8Context.get().Enter(), "v8Context.Enter() failed"
@@ -224,10 +212,8 @@ class PyFrame:
 
 	def Undo(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cefFrame.get().Undo()
+		self.GetCefFrame().get().Undo()
 
 	def ViewSource(self):
 
-		cdef CefRefPtr[CefFrame] cefFrame = GetCefFrameByFrameID(CheckFrameID(self.frameID))
-		cefFrame.get().ViewSource()
+		self.GetCefFrame().get().ViewSource()

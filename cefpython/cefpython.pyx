@@ -4,17 +4,9 @@
 
 # IMPORTANT notes:
 #
-# - cdef functions that are called from c++ need to embrace whole function's
-#   code inside try..except, otherwise exceptions are ignored.
-#
-# - additionally all cdef functions that are returning types other than "object"
-#   (a python object) should have in its declaration "except *", otherwise
-#   exceptions may be ignored. Those cdef that return "object" have "except *"
-#   by default.
-#
-# - you should try running Cython code after even small changes, otherwise
-#   you might get into big trouble, error messages are often obfuscated and info
-#   is missing, so you will have no idea which chunk of code caused that error.
+# - cdef functions returning types other than "object" (a python object)
+#   should have in its declaration "except *", otherwise exceptions are ignored.
+#   Those cdef that return "object" have "except *" by default.
 #
 # - about acquiring/releasing GIL lock, see discussion here:
 #   https://groups.google.com/forum/?fromgroups=#!topic/cython-users/jcvjpSOZPp0
@@ -22,28 +14,21 @@
 # - <CefRefPtr[ClientHandler]?>new ClientHandler() 
 #   <...?> means to throw an error if the cast is not allowed
 #
-# - in client handler callbacks need to have try..except otherwise the error will 
-#   be ignored and only printed to output console, this is the default behavior
-#   of Cython, you need to add "except -1" or "except *" in function declaration
-#   (-1 does not work when you have "with gil"). Unfortunately it does not work, 
-#   some conflict with CEF threading, see topic at cython-users for more details: 
+# - in client handler callbacks must embrace all code in try..except otherwise 
+#   the error will  be ignored, only printed to the output console, this is the 
+#   default behavior of Cython, to remedy this you are supposed to add "except *"
+#   in function declaration, unfortunately it does not work, some conflict with
+#   CEF threading, see topic at cython-users for more details: 
 #   https://groups.google.com/d/msg/cython-users/CRxWoX57dnM/aufW3gXMhOUJ.
-#
-# - client handler callbacks should call GetPyBrowserByCefBrowser() with second
-#   parameter ignoreError set to True, this is because many of the callbacks
-#   may be called during browser creation, PyBrowser is not yet available, it
-#   is a temporary limitation on current cefpython implementation that will be fixed
-#   in the future.
 #
 
 # Global variables.
 
 g_debug = False
 
-# This must be initialized as a dict here, not a None. Later do a deepcopy in a loop,
-# not an assignment, neither update() using local dictionary. If you put here 
-# None and assign a local dictionary to this global variable then later that local 
-# dictionary might get garbage collected and the global settings will become None.
+# When put None here and assigned a local dictionary in Initialize(), later while
+# running app this global variable was garbage collected, see this topic:
+# https://groups.google.com/d/topic/cython-users/0dw3UASh7HY/discussion
 g_applicationSettings = {}
 
 # All .pyx files need to be included here.
@@ -51,11 +36,14 @@ g_applicationSettings = {}
 include "include_cython/compile_time_constants.pxi"
 include "imports.pyx"
 
+include "utils.pyx"
+include "string_utils.pyx"
+
+include "window_info.pyx"
 include "browser.pyx"
 include "frame.pyx"
 
 include "settings.pyx"
-include "utils.pyx"
 
 IF UNAME_SYSNAME == "Windows":
 	include "window_utils_win.pyx"
@@ -124,6 +112,8 @@ def ExceptHook(type, value, traceobject):
 
 def Initialize(applicationSettings=None):
 
+	Debug("thread in initialize: %s" % win32api.GetCurrentThreadId())
+
 	Debug("-" * 80)
 	Debug("Initialize() called")
 
@@ -171,70 +161,40 @@ def Initialize(applicationSettings=None):
 	if not ret: Debug("CefInitialize() failed")
 	return ret
 
-def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, javascriptBindings=None):
+def CreateBrowserSync(windowInfo, browserSettings, navigateURL):
 
-	assert IsCurrentThread(TID_UI), "cefpython.CreateBrowser() may be only called on UI thread"
-
-	if not clientHandlers:
-		clientHandlers = {}
-
-	Debug("CreateBrowser() called")
-
-	if not IsWindowHandle(windowID):
-		raise Exception("CreateBrowser() failed: invalid windowID: %s" % windowID)
-
-	cdef CefWindowInfo info
+	Debug("CreateBrowserSync() called")
+	assert IsCurrentThread(TID_UI), "cefpython.CreateBrowserSync() can only be called on UI thread"
+	
+	if not isinstance(windowInfo, WindowInfo):
+		raise Exception("CreateBrowserSync() failed: windowInfo: invalid object")
+	
 	cdef CefBrowserSettings cefBrowserSettings
-
 	SetBrowserSettings(browserSettings, &cefBrowserSettings)	
 
-	IF UNAME_SYSNAME == "Windows":
-		Debug("GetClientRect()")
-		cdef RECT rect
-		GetClientRect(<HWND><int>windowID, &rect)
-		Debug("GetSystemError(): %s" % GetSystemError())
-
-	Debug("CefWindowInfo.SetAsChild()")
-	info.SetAsChild(<CefWindowHandle><int>windowID, rect)	
+	cdef CefWindowInfo cefWindowInfo
+	SetCefWindowInfo(cefWindowInfo, windowInfo)
 
 	navigateURL = GetRealPath(file=navigateURL, encodeURL=True)
 	Debug("navigateURL: %s" % navigateURL)
 	
 	cdef CefString cefNavigateURL
-	PyStringToCefString(navigateURL, cefNavigateURL)
+	ToCefString(navigateURL, cefNavigateURL)
 
 	Debug("CefBrowser::CreateBrowserSync()")
-	cdef CefRefPtr[CefBrowser] cefBrowser = CreateBrowserSync(info, <CefRefPtr[CefClient]?>g_clientHandler, cefNavigateURL, cefBrowserSettings)
+	cdef CefRefPtr[CefBrowser] cefBrowser = cef_browser_static.CreateBrowserSync(
+			cefWindowInfo, <CefRefPtr[CefClient]?>g_clientHandler, cefNavigateURL,
+			cefBrowserSettings)
 
 	if <void*>cefBrowser == NULL: 
 		Debug("CefBrowser::CreateBrowserSync() failed")
 		return None
-	else: 
+	else:
 		Debug("CefBrowser::CreateBrowserSync() succeeded")
 
-	cdef int innerWindowID
-	IF CEF_VERSION == 1:
-		innerWindowID = <int>cefBrowser.get().GetWindowHandle()
-	ELIF CEF_VERSION == 3:
-		innerWindowID = <int>GetCefBrowserHost(cefBrowser).get().GetWindowHandle()
-
-	g_cefBrowsers[innerWindowID] = cefBrowser
-	g_pyBrowsers[innerWindowID] = PyBrowser(windowID, innerWindowID, clientHandlers, javascriptBindings)
-	g_browserInnerWindows[windowID] = innerWindowID
-
-	return g_pyBrowsers[innerWindowID]
-
-def GetBrowserByWindowID(windowID):
-
-	# Get by top windowID.
-	if windowID in g_browserInnerWindows:
-		innerWindowID = g_browserInnerWindows[windowID]
-		if innerWindowID in g_pyBrowsers:
-			return g_pyBrowsers[innerWindowID]
-		else:
-			return None
-	else:
-		return None
+	cdef PyBrowser pyBrowser = GetPyBrowser(cefBrowser)
+	pyBrowser.SetUserData("__outerWindowHandle", windowInfo.parentWindowHandle)
+	return pyBrowser
 
 def MessageLoop():
 
@@ -304,9 +264,9 @@ IF CEF_VERSION == 1:
 			cefFrame = cefTrace.get().GetFrame(frameNo)
 			framePtr = cefFrame.get()
 			pyFrame = {}		
-			pyFrame["script"] = CefStringToPyString(framePtr.GetScriptName())
-			pyFrame["scriptOrSourceURL"] = CefStringToPyString(framePtr.GetScriptNameOrSourceURL())
-			pyFrame["function"] = CefStringToPyString(framePtr.GetFunctionName())
+			pyFrame["script"] = ToPyString(framePtr.GetScriptName())
+			pyFrame["scriptOrSourceURL"] = ToPyString(framePtr.GetScriptNameOrSourceURL())
+			pyFrame["function"] = ToPyString(framePtr.GetFunctionName())
 			pyFrame["line"] = framePtr.GetLineNumber()
 			pyFrame["column"] = framePtr.GetColumn()
 			pyFrame["isEval"] = framePtr.IsEval()

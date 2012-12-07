@@ -19,13 +19,13 @@ call python "setup.py" build_ext --inplace
 REM -- the setup above has disabled ECHO for commands, turning it back on.
 ECHO ON
 
+@if %ERRORLEVEL% neq 0 for /R %~dp0setup\ %%f in (*.pyx) do @del "%%f"
 @if %ERRORLEVEL% neq 0 pause
 @if %ERRORLEVEL% neq 0 exit
 
 for /R %~dp0setup\ %%f in (*.pyx) do @del "%%f"
 
 rmdir /S /Q "build\"
-
 @if %ERRORLEVEL% neq 0 pause
 @if %ERRORLEVEL% neq 0 exit
 
@@ -35,7 +35,10 @@ call "C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\mt.exe" -nologo -manifes
 @if %ERRORLEVEL% neq 0 exit
 
 move "cefpython_py%PYVERSION%.pyd" "../binaries/cefpython_py%PYVERSION%.pyd"
+@if %ERRORLEVEL% neq 0 pause
+@if %ERRORLEVEL% neq 0 exit
 
+copy %~dp0..\..\cef1_api.py %~dp0binaries\cefpython_py%PYVERSION%.py
 @if %ERRORLEVEL% neq 0 pause
 @if %ERRORLEVEL% neq 0 exit
 

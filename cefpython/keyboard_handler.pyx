@@ -2,9 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-include "utils.pyx"
-
 KEYEVENT_RAWKEYDOWN = <int>cef_types.KEYEVENT_RAWKEYDOWN
 KEYEVENT_KEYDOWN = <int>cef_types.KEYEVENT_KEYDOWN
 KEYEVENT_KEYUP = <int>cef_types.KEYEVENT_KEYUP
@@ -26,17 +23,15 @@ cdef public c_bool KeyboardHandler_OnKeyEvent(
 		c_bool isAfterJavascript
 		) except * with gil:
 
+	cdef PyBrowser pyBrowser
 	try:
-		pyBrowser = GetPyBrowserByCefBrowser(cefBrowser, True)
+		pyBrowser = GetPyBrowser(cefBrowser)
 		if not pyBrowser:
 			Debug("KeyboardHandler_OnKeyEvent() failed: pyBrowser is %s" % pyBrowser)
 			return False
-		handler = pyBrowser.GetClientHandler("OnKeyEvent")
-		if type(handler) is tuple:
-			# Not handler[2], because in popups handler[2] is already assigned to handler[0] in GetPyBrowserByCefBrowser()
-			handler = handler[0]
-		if handler:
-			return bool(handler(pyBrowser, <int>eventType, code, modifiers, isSystemKey, isAfterJavascript))
+		callback = pyBrowser.GetClientCallback("OnKeyEvent")
+		if callback:
+			return bool(callback(pyBrowser, <int>eventType, code, modifiers, isSystemKey, isAfterJavascript))
 		else:
 			return False
 	except:

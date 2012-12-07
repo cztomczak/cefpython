@@ -7,6 +7,7 @@ include "compile_time_constants.pxi"
 from windows cimport HWND, RECT, HINSTANCE
 from Cython.Shadow import void
 from cef_types_wrappers cimport CefStructBase
+from cef_string cimport CefString
 
 cdef extern from "include/internal/cef_win.h":
 	
@@ -15,12 +16,8 @@ cdef extern from "include/internal/cef_win.h":
 	cdef cppclass CefWindowInfo:
 		void SetAsChild(HWND, RECT)
 		void SetAsOffScreen(HWND)
-		HWND m_hWndParent
-		HWND m_hWnd
-		int m_x
-		int m_y
-		int m_nWidth
-		int m_nHeight
+		void SetAsPopup(HWND, CefString&)
+		void SetTransparentPainting(int)
 
 	IF CEF_VERSION == 3:
 		cdef cppclass CefMainArgs(CefStructBase):

@@ -2,9 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-include "utils.pyx"
-
 g_PythonCallbacks = {}
 g_PythonCallbackCount = 0 # next callbackID
 

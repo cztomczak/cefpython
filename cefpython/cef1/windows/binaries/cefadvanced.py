@@ -24,13 +24,13 @@ import win32gui
 import re
 import os
 import imp
+import inspect
+import pprint
 
 DEBUG = True
 
-# TODO: creating popup windows from python.
-# TODO: creating modal windows from python.
-# TODO: allow to pack html/css/images to a zip and run content from this file, 
-#       optionally allow to password protect this zip file (see WBEA implementation).
+# TODO: example of creating popup windows from python, call WindowInfo.SetAsPopup().
+# TODO: example of creating modal windows from python.
 
 def CefAdvanced():
 
@@ -59,8 +59,8 @@ def CefAdvanced():
 		win32con.WM_ERASEBKGND: cefpython.WindowUtils.OnEraseBackground
 	}
 	
-	windowID = cefwindow.CreateWindow(title="CefAdvanced", className="cefadvanced", 
-		width=800, height=600, icon="icon.ico", windowProc=wndproc)
+	windowHandle = cefwindow.CreateWindow(title="CefAdvanced", className="cefadvanced", 
+		width=900, height=710, icon="icon.ico", windowProc=wndproc)
 
 	# BrowserSettings, see: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings = dict() 
@@ -68,63 +68,55 @@ def CefAdvanced():
 	browserSettings["universal_access_from_file_urls_allowed"] = True
 	browserSettings["file_access_from_file_urls_allowed"] = True
 	
-	handlers = dict()
-	
-	# Handler function for LoadHandler may be a tuple.
-	# tuple[0] - the handler to call for the main frame.
-	# tuple[1] - the handler to call for the inner frames (not in popups).
-	# tuple[2] - the handler to call for the popups (only main frame).
+	javascriptBindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
+	windowInfo = cefpython.WindowInfo()
+	windowInfo.SetAsChild(windowHandle)
+	browser = cefpython.CreateBrowserSync(windowInfo, browserSettings, "cefadvanced.html")
+	browser.SetUserData("outerWindowHandle", windowInfo.parentWindowHandle)
+	browser.SetClientHandler(ClientHandler())
+	browser.SetJavascriptBindings(javascriptBindings)
 
-	clientHandler = ClientHandler()
-	handlers["OnLoadStart"] = clientHandler.OnLoadStart
-	handlers["OnLoadEnd"] = (clientHandler.OnLoadEnd, None, clientHandler.OnLoadEnd) # OnLoadEnd = document is ready.
-	handlers["OnLoadError"] = clientHandler.OnLoadError
-	handlers["OnKeyEvent"] = (clientHandler.OnKeyEvent, None, clientHandler.OnKeyEvent)
-	handlers["OnConsoleMessage"] = clientHandler.OnConsoleMessage
-	handlers["OnResourceResponse"] = clientHandler.OnResourceResponse
-	handlers["OnUncaughtException"] = clientHandler.OnUncaughtException
-
-	cefBindings = cefpython.JavascriptBindings(bindToFrames=False, bindToPopups=False)
-	browser = cefpython.CreateBrowser(windowID, browserSettings, "cefadvanced.html", handlers, cefBindings)
-	
-	jsBindings = JSBindings(cefBindings, browser)
-	jsBindings.Bind()
-	browser.jsBindings = jsBindings
+	javascriptRebindings = JavascriptRebindings(javascriptBindings, browser)
+	javascriptRebindings.Bind()
+	browser.SetUserData("javascriptRebindings", javascriptRebindings)
 
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
-def CloseWindow(windowID, msg, wparam, lparam):
+def CloseWindow(windowHandle, msg, wparam, lparam):
 
-	browser = cefpython.GetBrowserByWindowID(windowID)
+	browser = cefpython.GetBrowserByWindowHandle(windowHandle)
 	browser.CloseBrowser()
-	return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
+	return win32gui.DefWindowProc(windowHandle, msg, wparam, lparam)
 
-def QuitApplication(windowID, msg, wparam, lparam):
+def QuitApplication(windowHandle, msg, wparam, lparam):
 
 	win32gui.PostQuitMessage(0)
 	return 0
 
-class JSBindings:
+class JavascriptRebindings:
 
-	cefBindings = None
+	javascriptBindings = None
 	browser = None
 
-	def __init__(self, cefBindings, browser):
+	def __init__(self, javascriptBindings, browser):
 
-		self.cefBindings = cefBindings
+		self.javascriptBindings = javascriptBindings
 		self.browser = browser
 
 	def Bind(self):
 
-		# These bindings are rebinded when pressing F5 (this is not useful for the main module as it can't be reloaded).
-
+		# These bindings are rebinded when pressing F5.
+		# It's not useful for the main module as it can't be reloaded.
 		python = Python()
 		python.browser = self.browser
 
-		#self.cefBindings.SetFunction("alert", python.Alert) # overwrite "window.alert"
-		self.cefBindings.SetObject("python", python)
-		self.cefBindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
+		# Overwrite "window.alert".
+		# self.javascriptBindings.SetFunction("alert", python.Alert)
+
+		self.javascriptBindings.SetObject("python", python)
+		self.javascriptBindings.SetObject("browser", self.browser)
+		self.javascriptBindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
 
 	def Rebind(self):
 
@@ -149,123 +141,7 @@ class JSBindings:
 			cefwindow.g_debug = True
 
 		self.Bind()
-		self.cefBindings.Rebind()
-		# print("cefwindow.test=%s" % cefwindow.test)
-
-class Python:
-
-	browser = None
-
-	def ExecuteJavascript(self, jsCode):
-
-		self.browser.GetMainFrame().ExecuteJavascript(jsCode)
-
-	def LoadURL(self):
-
-		self.browser.GetMainFrame().LoadURL(cefpython.GetRealPath("cefsimple.html"))
-
-	def Version(self):
-
-		return sys.version
-
-	def Test1(self, arg1):
-
-		print("python.Test1(%s) called" % arg1)
-		return "This string was returned from python function python.Test1()"
-
-	def Test2(self, arg1, arg2):
-
-		print("python.Test2(%s, %s) called" % (arg1, arg2))
-		return [1,2, [2.1, {'3': 3, '4': [5,6]}]] # testing nested return values.
-
-	def PrintPyConfig(self):
-
-		print("python.PrintPyConfig(): %s" % self.browser.GetMainFrame().GetProperty("PyConfig"))
-
-	def ChangePyConfig(self):
-
-		self.browser.GetMainFrame().SetProperty("PyConfig", "Changed in python during runtime in python.ChangePyConfig()")
-
-	def TestJavascriptCallback(self, jsCallback):
-
-		if isinstance(jsCallback, cefpython.JavascriptCallback):
-			print("python.TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName())
-			print("jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'unicode string')")
-			if bytes == str:
-				# Python 2.7
-				jsCallback.Call(1, [2,3], ('tuple', 'tuple'), unicode('unicode string'))
-			else:
-				# Python 3.2 - there is no "unicode()" in python 3
-				jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'bytes string'.encode('utf-8'))
-		else:
-			raise Exception("python.TestJavascriptCallback() failed: given argument is not a javascript callback function")
-
-	def TestPythonCallbackThroughReturn(self):
-
-		print("python.TestPythonCallbackThroughReturn() called, returning PyCallback.")
-		return self.PyCallback
-
-	def PyCallback(self, *args):
-
-		print("python.PyCallback() called, args: %s" % str(args))
-
-	def TestPythonCallbackThroughJavascriptCallback(self, jsCallback):
-
-		print("python.TestPythonCallbackThroughJavascriptCallback(jsCallback) called")
-		print("jsCallback.Call(PyCallback)")
-		jsCallback.Call(self.PyCallback)
-
-	def Alert(self, msg):
-
-		print("python.Alert() called instead of window.alert()")
-		win32gui.MessageBox(self.browser.GetWindowID(), msg, "python.Alert()", win32con.MB_ICONQUESTION)
-
-	def ChangeAlertDuringRuntime(self):
-
-		self.browser.GetMainFrame().SetProperty("alert", self.Alert2)
-
-	def Alert2(self, msg):
-
-		print("python.Alert2() called instead of window.alert()")
-		win32gui.MessageBox(self.browser.GetWindowID(), msg, "python.Alert2()", win32con.MB_ICONWARNING)
-
-	def Find(self, searchText, findNext=False):
-
-		self.browser.Find(1, searchText, forward=True, matchCase=False, findNext=findNext)
-
-	def ResizeWindow(self):
-
-		cefwindow.MoveWindow(self.browser.GetWindowID(), width=500, height=500)
-
-	def MoveWindow(self):
-
-		cefwindow.MoveWindow(self.browser.GetWindowID(), xpos=0, ypos=0)
-
-	def GetType(self, arg1):
-
-		return "arg1=%s, type=%s" % (arg1, type(arg1).__name__)
-
-	def CreateSecondBrowser(self):
-
-		# Closing second window won't quit application, WM_DESTROY not defined here.
-		wndproc2 = {
-			win32con.WM_CLOSE: CloseWindow, 
-			win32con.WM_SIZE: cefpython.WindowUtils.OnSize,
-			win32con.WM_SETFOCUS: cefpython.WindowUtils.OnSetFocus,
-			win32con.WM_ERASEBKGND: cefpython.WindowUtils.OnEraseBackground
-		}
-		windowID2 = cefwindow.CreateWindow(title="SecondBrowser", className="secondbrowser", 
-				width=800, height=600, xpos=0, ypos=0, icon="icon.ico", windowProc=wndproc2)
-		browser2 = cefpython.CreateBrowser(windowID2, browserSettings={}, navigateURL="cefsimple.html")
-
-	def GetUnicodeString(self):
-		
-		if bytes == str:
-			# Python 2.7
-			# Can't write u"This is unicode string \u2014" because Python 3 complains.
-			return unicode("This is unicode string \xe2\x80\x94".decode("utf-8"))
-		else:
-			return "Unicode string can be tested only in python 2.x"
+		self.javascriptBindings.Rebind()
 
 class ClientHandler:
 
@@ -302,8 +178,8 @@ class ClientHandler:
 		if keyCode == cefpython.VK_F5 and cefpython.IsKeyModifier(cefpython.KEY_NONE, modifiers):
 			# When we press F5 in Developer Tools popup, there are no bindings in this window, error would be thrown.
 			# Pressing F5 in Developer Tools seem to not refresh the parent window.
-			if hasattr(browser, "jsBindings"):
-				browser.jsBindings.Rebind()
+			if hasattr(browser, "javascriptRebindings"):
+				browser.GetUserData("javascriptRebindings").Rebind()
 			browser.ReloadIgnoreCache() # this is not required, rebinding will work without refreshing page.
 			return True
 
@@ -359,6 +235,124 @@ class ClientHandler:
 		                exception["message"], exception["lineNumber"], 
 		                url, exception["sourceLine"], stackTrace))
 
+class Python:
+
+	browser = None
+
+	def ExecuteJavascript(self, jsCode):
+
+		self.browser.GetMainFrame().ExecuteJavascript(jsCode)
+
+	def LoadUrl(self):
+
+		self.browser.GetMainFrame().LoadUrl(cefpython.GetRealPath("cefsimple.html"))
+
+	def Version(self):
+
+		return sys.version
+
+	def Test1(self, arg1):
+
+		print("python.Test1(%s) called" % arg1)
+		return "This string was returned from python function python.Test1()"
+
+	def Test2(self, arg1, arg2):
+
+		print("python.Test2(%s, %s) called" % (arg1, arg2))
+		return [1,2, [2.1, {'3': 3, '4': [5,6]}]] # testing nested return values.
+
+	def PrintPyConfig(self):
+
+		print("python.PrintPyConfig(): %s" % self.browser.GetMainFrame().GetProperty("PyConfig"))
+
+	def ChangePyConfig(self):
+
+		self.browser.GetMainFrame().SetProperty("PyConfig", "Changed in python during runtime in python.ChangePyConfig()")
+
+	def TestJavascriptCallback(self, jsCallback):
+
+		if isinstance(jsCallback, cefpython.JavascriptCallback):
+			print("python.TestJavascriptCallback(): jsCallback.GetName(): %s" % jsCallback.GetName())
+			print("jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'unicode string')")
+			if bytes == str:
+				# Python 2.7
+				jsCallback.Call(1, [2,3], ('tuple', 'tuple'), unicode('unicode string'))
+			else:
+				# Python 3.2 - there is no "unicode()" in python 3
+				jsCallback.Call(1, [2,3], ('tuple', 'tuple'), 'bytes string'.encode('utf-8'))
+		else:
+			raise Exception("python.TestJavascriptCallback() failed: given argument is not a javascript callback function")
+
+	def TestPythonCallbackThroughReturn(self):
+
+		print("python.TestPythonCallbackThroughReturn() called, returning PyCallback.")
+		return self.PyCallback
+
+	def PyCallback(self, *args):
+
+		print("python.PyCallback() called, args: %s" % str(args))
+
+	def TestPythonCallbackThroughJavascriptCallback(self, jsCallback):
+
+		print("python.TestPythonCallbackThroughJavascriptCallback(jsCallback) called")
+		print("jsCallback.Call(PyCallback)")
+		jsCallback.Call(self.PyCallback)
+
+	def Alert(self, msg):
+
+		print("python.Alert() called instead of window.alert()")
+		win32gui.MessageBox(self.browser.GetUserData("outerWindowHandle"), msg, "python.Alert()", win32con.MB_ICONQUESTION)
+
+	def ChangeAlertDuringRuntime(self):
+
+		self.browser.GetMainFrame().SetProperty("alert", self.Alert2)
+
+	def Alert2(self, msg):
+
+		print("python.Alert2() called instead of window.alert()")
+		win32gui.MessageBox(self.browser.GetUserData("outerWindowHandle"), msg, "python.Alert2()", win32con.MB_ICONWARNING)
+
+	def Find(self, searchText, findNext=False):
+
+		self.browser.Find(1, searchText, forward=True, matchCase=False, findNext=findNext)
+
+	def ResizeWindow(self):
+
+		cefwindow.MoveWindow(self.browser.GetUserData("outerWindowHandle"), width=500, height=500)
+
+	def MoveWindow(self):
+
+		cefwindow.MoveWindow(self.browser.GetUserData("outerWindowHandle"), xpos=0, ypos=0)
+
+	def GetType(self, arg1):
+
+		return "arg1=%s, type=%s" % (arg1, type(arg1).__name__)
+
+	def CreateSecondBrowser(self):
+
+		# Closing second window won't quit application, WM_DESTROY not defined here.
+		wndproc2 = {
+			win32con.WM_CLOSE: CloseWindow, 
+			win32con.WM_SIZE: cefpython.WindowUtils.OnSize,
+			win32con.WM_SETFOCUS: cefpython.WindowUtils.OnSetFocus,
+			win32con.WM_ERASEBKGND: cefpython.WindowUtils.OnEraseBackground
+		}
+		windowHandle2 = cefwindow.CreateWindow(title="SecondBrowser", className="secondbrowser", 
+				width=800, height=600, xpos=0, ypos=0, icon="icon.ico", windowProc=wndproc2)
+		windowInfo2 = cefpython.WindowInfo()
+		windowInfo2.SetAsChild(windowHandle2)
+		browser2 = cefpython.CreateBrowserSync(windowInfo2, browserSettings={}, navigateURL="cefsimple.html")
+		browser2.SetUserData("outerWindowHandle", windowHandle2)
+
+	def GetUnicodeString(self):
+		
+		if bytes == str:
+			# Python 2.7
+			# Can't write u"This is unicode string \u2014" because Python 3 complains.
+			return unicode("This is unicode string \xe2\x80\x94".decode("utf-8"))
+		else:
+			return "Unicode string can be tested only in python 2.x"
+
+
 if __name__ == "__main__":
-	
 	CefAdvanced()

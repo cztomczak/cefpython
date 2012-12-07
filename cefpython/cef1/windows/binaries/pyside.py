@@ -54,8 +54,10 @@ class MainFrame(QtGui.QWidget):
 	def __init__(self, parent=None):
 
 		super(MainFrame, self).__init__(parent)
-		self.browser = cefpython.CreateBrowser(int(self.winIdFixed()), browserSettings={}, 
-				navigateURL="cefsimple.html")
+		windowInfo = cefpython.WindowInfo()
+		windowInfo.SetAsChild(int(self.winIdFixed()))
+		self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings={}, 
+		                                           navigateURL="cefsimple.html")
 		self.show()
 
 	def winIdFixed(self):

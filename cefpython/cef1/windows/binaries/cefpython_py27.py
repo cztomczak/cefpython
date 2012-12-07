@@ -1,9 +1,8 @@
-# This file contains full API of "cefpython.pyd" module, all functions are dummy.
-# Use it as a quick reference.
-# Use it for code completion in your IDE.
+# This file contains API for the "cefpython.pyd" module, all functions are dummy.
+# Use it as a quick reference. Use it for code completion in your IDE.
 # This file does NOT need to be distribitued along with binaries.
 
-raise Exception("A dummy file was imported instead of the PYD module.")
+raise Exception("A dummy API file was imported instead of the PYD module.")
 
 """
 Detailed documentation with examples can be found on wiki pages:

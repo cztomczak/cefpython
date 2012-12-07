@@ -48,19 +48,21 @@ def CefAdvanced():
 	browserSettings["universal_access_from_file_urls_allowed"] = True
 	browserSettings["file_access_from_file_urls_allowed"] = True
 
-	windowID = cefwindow.CreateWindow(title="CEF Python 3 Example", className="cefpython3_example", 
+	windowHandle = cefwindow.CreateWindow(title="CEF Python 3 Example", className="cefpython3_example", 
 					width=1024, height=768, icon="icon.ico", windowProc=wndproc)
-	browser = cefpython.CreateBrowser(windowID, browserSettings, navigateURL="example.html")
+	windowInfo = cefpython.WindowInfo()
+	windowInfo.SetAsChild(windowHandle)
+	browser = cefpython.CreateBrowserSync(windowInfo, browserSettings, navigateURL="example.html")
 	cefpython.MessageLoop()
 	cefpython.Shutdown()
 
-def CloseWindow(windowID, message, wparam, lparam):
+def CloseWindow(windowHandle, message, wparam, lparam):
 	
-	browser = cefpython.GetBrowserByWindowID(windowID)
+	browser = cefpython.GetBrowserByWindowHandle(windowHandle)
 	browser.CloseBrowser()
-	return win32gui.DefWindowProc(windowID, message, wparam, lparam)
+	return win32gui.DefWindowProc(windowHandle, message, wparam, lparam)
 
-def QuitApplication(windowID, message, wparam, lparam):
+def QuitApplication(windowHandle, message, wparam, lparam):
 	
 	win32gui.PostQuitMessage(0)
 	return 0

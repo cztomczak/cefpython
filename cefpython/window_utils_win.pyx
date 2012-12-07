@@ -5,65 +5,47 @@
 class WindowUtils:
 
 	@staticmethod
-	def OnSetFocus(windowID, msg, wparam, lparam):
+	def OnSetFocus(int windowHandle, long msg, long wparam, long lparam):
 
-		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True) # 2nd param = ignoreError
-		if <void*>cefBrowser == NULL:
+		cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
+		if not pyBrowser:
 			return 0
-
-		cdef HWND innerHwnd
-		IF CEF_VERSION == 1:
-			innerHwnd = cefBrowser.get().GetWindowHandle()
-		ELIF CEF_VERSION == 3:
-			innerHwnd = GetCefBrowserHost(cefBrowser).get().GetWindowHandle()
-
-		# wparam,lparam from pywin32 seems to be always 0,0
-		PostMessage(innerHwnd, WM_SETFOCUS, 0, 0)
-
+		pyBrowser.SetFocus(True)		
 		return 0	
 
 	@staticmethod
-	def OnSize(windowID, msg, wparam, lparam):
+	def OnSize(int windowHandle, long msg, long wparam, long lparam):
 
-		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True) # 2nd param = ignoreError
-		if <void*>cefBrowser == NULL:
-			return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
+		cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
+		if not pyBrowser:
+			return win32gui.DefWindowProc(windowHandle, msg, wparam, lparam)
 
-		cdef HWND innerHwnd
-		IF CEF_VERSION == 1:
-			innerHwnd = cefBrowser.get().GetWindowHandle()
-		ELIF CEF_VERSION == 3:
-			innerHwnd = GetCefBrowserHost(cefBrowser).get().GetWindowHandle()
-
+		cdef HWND innerHwnd = <HWND><int>int(pyBrowser.GetWindowHandle())
 		cdef RECT rect2
-		GetClientRect(<HWND><int>windowID, &rect2)
+		GetClientRect(<HWND><int>windowHandle, &rect2)
 
-		cdef HDWP hdwp = BeginDeferWindowPos(<int>1)
-		hdwp = DeferWindowPos(hdwp, innerHwnd, NULL, rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top, SWP_NOZORDER)
+		cdef HDWP hdwp = BeginDeferWindowPos(1)
+		hdwp = DeferWindowPos(hdwp, innerHwnd, NULL, rect2.left, rect2.top,
+				rect2.right - rect2.left, rect2.bottom - rect2.top, SWP_NOZORDER)
 		EndDeferWindowPos(hdwp)
 
-		return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
+		return win32gui.DefWindowProc(windowHandle, msg, wparam, lparam)
 	
 	@staticmethod
-	def OnEraseBackground(windowID, msg, wparam, lparam):
+	def OnEraseBackground(int windowHandle, long msg, long wparam, long lparam):
 		
-		cdef CefRefPtr[CefBrowser] cefBrowser = GetCefBrowserByTopWindowID(windowID, True) # 2nd param = ignoreError
-		if <void*>cefBrowser == NULL:
-			return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
+		cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
+		if not pyBrowser:
+			return win32gui.DefWindowProc(windowHandle, msg, wparam, lparam)
 
-		cdef HWND innerHwnd
-		IF CEF_VERSION == 1:
-			innerHwnd = cefBrowser.get().GetWindowHandle()
-		ELIF CEF_VERSION == 3:
-			innerHwnd = GetCefBrowserHost(cefBrowser).get().GetWindowHandle()
+		# Dont erase the background if the browser window has been loaded (this avoids flashing)
+		if pyBrowser.GetWindowHandle():
+			return 0 
 
-		if innerHwnd:
-			return 0 # Dont erase the background if the browser window has been loaded (this avoids flashing)
-
-		return win32gui.DefWindowProc(windowID, msg, wparam, lparam)
+		return win32gui.DefWindowProc(windowHandle, msg, wparam, lparam)
 
 	@staticmethod
-	def SetTitle(pyBrowser, pyTitle):
+	def SetTitle(PyBrowser pyBrowser, str pyTitle):
 
 		# Each browser window should have a title (Issue 3).	
 		# When popup is created, the window that sits in taskbar has no title.
@@ -71,59 +53,56 @@ class WindowUtils:
 		if not pyTitle:
 			return
 
-		if pyBrowser.IsPopup():
-			windowID = pyBrowser.GetInnerWindowID()
+		if pyBrowser.GetUserData("__outerWindowHandle"):
+			windowHandle = pyBrowser.GetUserData("__outerWindowHandle")
 		else:
-			windowID = pyBrowser.GetWindowID()
+			windowHandle = pyBrowser.GetWindowHandle()
 
-		assert windowID and windowID != -1
+		assert windowHandle, "WindowUtils.SetTitle() failed: windowHandle is empty"
 
-		currentTitle = win32gui.GetWindowText(windowID)
-		if pyBrowser.IsPopup():
-			# For popups we always change title to what page is displayed currently.
-			win32gui.SetWindowText(windowID, pyTitle)
-		else:
-			# For main window we probably don't want to do that - as this is main application
-			# window that displays application's name. Let's do it only when there is no title set.
+		currentTitle = win32gui.GetWindowText(windowHandle)
+		if pyBrowser.GetUserData("__outerWindowHandle"):
 			if not currentTitle:
-				win32gui.SetWindowText(windowID, pyTitle)
+				win32gui.SetWindowText(windowHandle, pyTitle)
+		else:
+			# For independent popups we always change title to what page is displayed currently.
+			win32gui.SetWindowText(windowHandle, pyTitle)
 	
 	@staticmethod
-	def SetIcon(pyBrowser, icon="inherit"):
+	def SetIcon(PyBrowser pyBrowser, str icon="inherit"):
 
 		# `icon` parameter is not implemented.
 		# Popup window inherits icon from the main window.
 
-		if pyBrowser.IsPopup():
-			windowID = pyBrowser.GetInnerWindowID()
-		else:
-			return
+		if pyBrowser.GetUserData("__outerWindowHandle"):
+			return None
+		
+		windowHandle = pyBrowser.GetWindowHandle()
+		assert windowHandle, "WindowUtils.SetIcon() failed: windowHandle is empty"
 
-		assert windowID and windowID != -1
-
-		iconBig = win32api.SendMessage(windowID, win32con.WM_GETICON, win32con.ICON_BIG, 0)
-		iconSmall = win32api.SendMessage(windowID, win32con.WM_GETICON, win32con.ICON_SMALL, 0)
+		iconBig = win32api.SendMessage(windowHandle, win32con.WM_GETICON, win32con.ICON_BIG, 0)
+		iconSmall = win32api.SendMessage(windowHandle, win32con.WM_GETICON, win32con.ICON_SMALL, 0)
 
 		if not iconBig and not iconSmall:
 
-			parentWindowID = pyBrowser.GetOpenerWindowID()
+			parentWindowHandle = pyBrowser.GetOpenerWindowHandle()
 
-			parentIconBig = win32api.SendMessage(parentWindowID, win32con.WM_GETICON, win32con.ICON_BIG, 0)
-			parentIconSmall = win32api.SendMessage(parentWindowID, win32con.WM_GETICON, win32con.ICON_SMALL, 0)
+			parentIconBig = win32api.SendMessage(parentWindowHandle, win32con.WM_GETICON, win32con.ICON_BIG, 0)
+			parentIconSmall = win32api.SendMessage(parentWindowHandle, win32con.WM_GETICON, win32con.ICON_SMALL, 0)
 
-			# If parent is main application window, then GetOpenerWindowID() returned
-			# innerWindowID of the parent window, try again.
+			# If parent is main application window, then GetOpenerWindowHandle() returned
+			# innerWindowHandle of the parent window, try again.
 
 			if not parentIconBig and not parentIconSmall:
-				parentWindowID = win32gui.GetParent(parentWindowID)
+				parentWindowHandle = win32gui.GetParent(parentWindowHandle)
 
-			Debug("WindowUtils.SetIcon(): popup inherits icon from parent window: %s" % parentWindowID)
+			Debug("WindowUtils.SetIcon(): popup inherits icon from parent window: %s" % parentWindowHandle)
 
-			parentIconBig = win32api.SendMessage(parentWindowID, win32con.WM_GETICON, win32con.ICON_BIG, 0)
-			parentIconSmall = win32api.SendMessage(parentWindowID, win32con.WM_GETICON, win32con.ICON_SMALL, 0)
+			parentIconBig = win32api.SendMessage(parentWindowHandle, win32con.WM_GETICON, win32con.ICON_BIG, 0)
+			parentIconSmall = win32api.SendMessage(parentWindowHandle, win32con.WM_GETICON, win32con.ICON_SMALL, 0)
 
 			if parentIconBig:
-				win32api.SendMessage(windowID, win32con.WM_SETICON, win32con.ICON_BIG, parentIconBig)
+				win32api.SendMessage(windowHandle, win32con.WM_SETICON, win32con.ICON_BIG, parentIconBig)
 			if parentIconSmall:
-				win32api.SendMessage(windowID, win32con.WM_SETICON, win32con.ICON_SMALL, parentIconSmall)
+				win32api.SendMessage(windowHandle, win32con.WM_SETICON, win32con.ICON_SMALL, parentIconSmall)
 

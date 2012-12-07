@@ -22,7 +22,10 @@ class MainFrame(wx.Frame):
 		
 		wx.Frame.__init__(self, parent=None, id=wx.ID_ANY, title='wxPython CEF 3 example', size=(1024,768))
 		self.CreateMenu()
-		self.browser = cefpython.CreateBrowser(self.GetHandle(), browserSettings={}, navigateURL="example.html")		
+		
+		windowInfo = cefpython.WindowInfo()
+		windowInfo.SetAsChild(self.GetHandle())
+		self.browser = cefpython.CreateBrowser(windowInfo, browserSettings={}, navigateURL="example.html")		
 		
 		self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
 		self.Bind(wx.EVT_SIZE, self.OnSize)

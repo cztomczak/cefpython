@@ -6,14 +6,14 @@ include "compile_time_constants.pxi"
 
 from cef_ptr cimport CefRefPtr
 from cef_base cimport CefBase
-IF UNAME_SYSNAME == "Windows":
-	from cef_win cimport CefWindowHandle, CefWindowInfo
 from cef_string cimport CefString
 from cef_client cimport CefClient
-from cef_types_wrappers cimport CefSettings, CefBrowserSettings
 from libcpp cimport bool as c_bool
 from libcpp.vector cimport vector as c_vector
 from cef_frame cimport CefFrame
+
+IF UNAME_SYSNAME == "Windows":
+	from cef_win cimport CefWindowHandle, CefWindowInfo
 
 cdef extern from "include/cef_browser.h":
 
@@ -50,6 +50,7 @@ cdef extern from "include/cef_browser.h":
 			void StopFinding(c_bool clearSelection)
 			c_bool IsWindowRenderingDisabled()
 			c_bool IsPopupVisible()
+			int GetIdentifier()
 
 	ELIF CEF_VERSION == 3:
 
@@ -99,27 +100,3 @@ cdef extern from "include/cef_browser.h":
 		#	 virtual void OnFileDialogDismissed(
 		#    CefRefPtr<CefBrowserHost> browser_host,
 		#	 const std::vector<CefString>& file_paths) =0;
-
-
-IF CEF_VERSION == 1:
-
-	# Namespace is a way to import a static method.
-	cdef extern from "include/cef_browser.h" namespace "CefBrowser":
-
-		cdef CefRefPtr[CefBrowser] CreateBrowserSync(
-			CefWindowInfo, 
-			CefRefPtr[CefClient], 
-			CefString,
-			CefBrowserSettings)
-
-ELIF CEF_VERSION == 3:
-
-	# Namespace is a way to import a static method.
-	cdef extern from "include/cef_browser.h" namespace "CefBrowserHost":
-
-		cdef CefRefPtr[CefBrowser] CreateBrowserSync(
-			CefWindowInfo,
-			CefRefPtr[CefClient], 
-			CefString,
-			CefBrowserSettings)
-

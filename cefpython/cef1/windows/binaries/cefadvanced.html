@@ -4,81 +4,118 @@
 	<meta charset=utf-8>
 	<title>CefAdvanced</title>
 	<style>
-	body { font: 13px Arial; }
-	pre { background: #ddd; }
+	body { font: 13px Segoe UI, Arial; }
+	pre { background: #ddd; font: 12px Consolas, Courier New; }
 	</style>
 </head>
 <body>
 
-Welcome to <b>CEF Python</b> - bindings for the Chromium Embedded Framework.<br>
-
-<br>
+Welcome to <b>CEF Python</b> - bindings for the Chromium Embedded Framework.<br><br>
 
 Project's website: <a href="http://code.google.com/p/cefpython/">http://code.google.com/p/cefpython/</a><br>
-Programming API: <a href="http://code.google.com/p/cefpython/wiki/API">http://code.google.com/p/cefpython/wiki/API</a><br>
+Wiki documentation: <a href="http://code.google.com/p/cefpython/wiki/">http://code.google.com/p/cefpython/wiki/</a><br>
 Support forum: <a href="https://groups.google.com/group/cefpython?hl=en">https://groups.google.com/group/cefpython?hl=en</a><br>
-<br>
 
-navigator.userAgent: <span style="background:#eee"><script>document.write(navigator.userAgent)</script></span>
-<br><br>
+<h3>User agent</h3>
 
-Python version: <script>document.write(python.Version())</script>	
-<br>
+	<script>document.write(navigator.userAgent)</script>
 
-<br>
-Press F5 to refresh.<br>
-Press backspace to go back.<br>
-Press Ctrl(+) to zoom in.<br>
-Press Ctrl(-) to zoom out.<br>
-Press F11 to go fullscreen, press F11 again to exit fullscreen.<br>
-<span style="color: red">Press F12 key to show developer tools for the main frame.</span><br>
+<h3>Python version</h3>
+
+	<script>document.write(python.Version())</script>
+
+<h3>Keyboard and mouse shortcuts</h3>
+
+	<ul>
+		<li>Press F5 to refresh & rebind python<>javascript bindings (does not work for the main module).
+		<li>Press F11 to go fullscreen, press F11 again to exit fullscreen.
+		<li><span style="color: red">Press F12 key to show developer tools for the main frame.</span>
+		<li>Press backspace to go Back in history.
+		<li>Use right mouse button context menu to go Back/Forward or to view the sources.
+		<li>Press Ctrl(+) to zoom in.
+		<li>Press Ctrl(-) to zoom out.
+	</ul>
+
+<h3>Browser object</h3>
+
+	<a href="javascript:alert(browser.CanGoBack())">CanGoBack()</a><br>
+
+	<a href="javascript:alert(browser.CanGoForward())">CanGoForward()</a><br>
+
+	<a href="javascript:alert(browser.ClearHistory())">ClearHistory()</a><br>
+
+	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+
+	<a href="javascript:alert(browser.CloseDevTools())">CloseDevTools()</a><br>
+
+	<a href="javascript:alert(browser.Find(searchID=0, searchText='test', forward=true, matchCase=false, findNext=false))">Find(searchId=0, searchText='test', forward=true, matchCase=false, findNext=false)</a><br>
+
+	<a href="javascript:alert(browser.GetUserData('some'))">GetUserData('some')</a><br>
+
+	<a href="javascript:alert(browser.GetFocusedFrame())">GetFocusedFrame()</a> 
+	(returning an object from python, it is not yet supported)<br>
+
+	<a href="javascript:alert(browser.GetFrame('simple'))">CloseBrowser('simple')</a><br>
+
+	<a href="javascript:alert(browser.GetFrameNames())">GetFrameNames()</a><br>
+
+	<a href="javascript:alert(browser.GetMainFrame())">GetMainFrame()</a>
+	(returning an object from python, it is not yet supported)<br>
+
+	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+
+	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+
+	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+
+	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+
+	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+
+	<a href="javascript:alert(browser.SetUserData('some', 'something'))">CloseBrowser('some', 'something')</a><br>
 
 <h3>Test unicode string</h3>
 
-<a href="javascript:alert(python.GetUnicodeString())">alert(python.GetUnicodeString())</a>
+	<a href="javascript:alert(python.GetUnicodeString())">python.GetUnicodeString()</a>
 
 <h3>Test creation of second browser</h3>
 
-<a href="javascript:python.CreateSecondBrowser()">python.CreateSecondBrowser()</a>
+	<a href="javascript:python.CreateSecondBrowser()">python.CreateSecondBrowser()</a>
 
 <h3>Test int32, uint, long</h3>
 
-<a href="javascript:alert(python.GetType(2147483647))">python.GetType(2147483647)</a><br>
-<a href="javascript:alert(python.GetType(2147483648))">python.GetType(2147483648)</a> - here we get UINT from CEF so it's still converted to long.<br>
-<a href="javascript:alert(python.GetType(4294967295))">python.GetType(4294967295)</a> - uint limit.<br>
-<a href="javascript:alert(python.GetType(4294967296))">python.GetType(4294967296)</a> - outside of uint limit, converted to float.<br>
-<a href="javascript:alert(python.GetType(-2147483647))">python.GetType(-2147483647)</a><br>
-<a href="javascript:alert(python.GetType(-2147483648))">python.GetType(-2147483648)</a><br>
-<a href="javascript:alert(python.GetType(-2147483649))">python.GetType(-2147483649)</a> - here you get a FLOAT value, not long.<br>
-<br>
-TODO: do these tests the other way, from javascript to python.
+	<a href="javascript:alert(python.GetType(2147483647))">python.GetType(2147483647)</a><br>
+	<a href="javascript:alert(python.GetType(2147483648))">python.GetType(2147483648)</a> - here we get UINT from CEF so it's still converted to long.<br>
+	<a href="javascript:alert(python.GetType(4294967295))">python.GetType(4294967295)</a> - uint limit.<br>
+	<a href="javascript:alert(python.GetType(4294967296))">python.GetType(4294967296)</a> - outside of uint limit, converted to float.<br>
+	<a href="javascript:alert(python.GetType(-2147483647))">python.GetType(-2147483647)</a><br>
+	<a href="javascript:alert(python.GetType(-2147483648))">python.GetType(-2147483648)</a><br>
+	<a href="javascript:alert(python.GetType(-2147483649))">python.GetType(-2147483649)</a> - here you get a FLOAT value, not long.<br>
+	<br>
+	TODO: do these tests the other way, from javascript to python.
 
-<br>
+	<br>
 
 <h3>Basic authentication</h3>
 
-<input type=text value="http://127.0.0.1/cefpython/cefpython/cefpython1/var/http_authentication.php" size=60 id=httpauth>
-<input type=button value="Go" onclick="location.href=httpauth.value">
+	<input type=text value="http://127.0.0.1/cefpython/cefpython/cefpython1/var/http_authentication.php" size=60 id=httpauth>
+	<input type=button value="Go" onclick="location.href=httpauth.value">
 
-<br>
+	<br>
 
 <h3>Frame.ExecuteJavascript()</h3>
 
-<textarea id=jscode>alert('test me')</textarea><br>
-<a href="javascript:python.ExecuteJavascript(jscode.value)">python.ExecuteJavascript(jscode.value)</a> - execute javascript from the textarea above.
+	<textarea id=jscode>alert('test me')</textarea><br>
+	<a href="javascript:python.ExecuteJavascript(jscode.value)">python.ExecuteJavascript(jscode.value)</a> - execute javascript from the textarea above.
 
-<h3>Frame.LoadURL(url)</h3>
+<h3>Frame.LoadUrl(url)</h3>
 
-<a href="javascript:python.LoadURL()">python.LoadURL()</a> - will load "cefsimple.html" into main frame of this window.
+	<a href="javascript:python.LoadUrl()">python.LoadUrl()</a> - will load "cefsimple.html" into main frame of this window.
 
 <h3>Frames</h3>
 
-<iframe src="cefsimple.html"></iframe>
-<iframe src="cefsimple_onloaderror.html"></iframe>
-
-<script>
-//frames["simple"].focus()
-</script>
+	<iframe src="cefsimple.html" name=simple></iframe>
+	<iframe src="cefsimple_onloaderror.html"></iframe>
 
 <h3>Javascript bindings</h3>
 
@@ -113,46 +150,46 @@ TODO: do these tests the other way, from javascript to python.
 
 <h3>Javasript callbacks</h3>
 
-<script>
-function MyJSCallback(arg1, arg2, arg3, arg4)
-{
-	alert("MyJSCallback() called\narg1="+JSON.stringify(arg1)+"\narg2="+JSON.stringify(arg2)+"\narg3="+JSON.stringify(arg3)+"\narg4="+JSON.stringify(arg4))
-}
-function MyJSCallback2()
-{
-	throw new Error("asd")
-}
-</script>
+	<script>
+	function MyJSCallback(arg1, arg2, arg3, arg4)
+	{
+		alert("MyJSCallback() called\narg1="+JSON.stringify(arg1)+"\narg2="+JSON.stringify(arg2)+"\narg3="+JSON.stringify(arg3)+"\narg4="+JSON.stringify(arg4))
+	}
+	function MyJSCallback2()
+	{
+		throw new Error("asd")
+	}
+	</script>
 
-<a href="javascript:python.TestJavascriptCallback(MyJSCallback)">python.TestJavascriptCallback(MyJSCallback)</a> - MyJSCallback alerts arguments
-<br>
-<a href="javascript:python.TestJavascriptCallback(MyJSCallback2)">python.TestJavascriptCallback(MyJSCallback2)</a> - MyJSCallback2 throws new Error("asd")
+	<a href="javascript:python.TestJavascriptCallback(MyJSCallback)">python.TestJavascriptCallback(MyJSCallback)</a> - MyJSCallback alerts arguments
+	<br>
+	<a href="javascript:python.TestJavascriptCallback(MyJSCallback2)">python.TestJavascriptCallback(MyJSCallback2)</a> - MyJSCallback2 throws new Error("asd")
 
 
 <h3>Python callbacks</h3>
 
-<script>
-function JSCallbackForPythonCallback(pycallback)
-{
-	pycallback("Calling pycallback via javascript's callback")
-}
-</script>
+	<script>
+	function JSCallbackForPythonCallback(pycallback)
+	{
+		pycallback("Calling pycallback via javascript's callback")
+	}
+	</script>
 
-<a href="javascript:python.TestPythonCallbackThroughReturn()('some')">python.TestPythonCallbackThroughReturn()('some')</a><br>
-<a href="javascript:python.TestPythonCallbackThroughJavascriptCallback(JSCallbackForPythonCallback)">python.TestPythonCallbackThroughJavascriptCallback(JSCallbackForPythonCallback)</a>
+	<a href="javascript:python.TestPythonCallbackThroughReturn()('some')">python.TestPythonCallbackThroughReturn()('some')</a><br>
+	<a href="javascript:python.TestPythonCallbackThroughJavascriptCallback(JSCallbackForPythonCallback)">python.TestPythonCallbackThroughJavascriptCallback(JSCallbackForPythonCallback)</a>
 
 <h3>Catching javascript errors programmatically</h3>
 
-<p>Typically when you browse a webpage your javascript errors appear in javascript console in developer tools (in cefadvanced.py there is a binding to F12 key for developer tools).</p>
+	<p>Typically when you browse a webpage your javascript errors appear in javascript console in developer tools (in cefadvanced.py there is a binding to F12 key for developer tools).</p>
 
 <h3>Test javascript error, OnUncaughtException() callback will catch it</h3>
 
-<p>Test javascript error: <a href="javascript:Undefined()">Undefined()</a></p>
+	<p>Test javascript error: <a href="javascript:Undefined()">Undefined()</a></p>
 
 <h3>Moving and resizing window</h3>
 
-<a href="javascript:python.ResizeWindow()">python.ResizeWindow()</a> - cefwindow.MoveWindow(__browser.GetWindowID(), width=500, height=500)<br>
-<a href="javascript:python.MoveWindow()">python.MoveWindow()</a> - cefwindow.MoveWindow(__browser.GetWindowID(), xpos=0, ypos=0)
+	<a href="javascript:python.ResizeWindow()">python.ResizeWindow()</a> - cefwindow.MoveWindow(__browser.GetWindowID(), width=500, height=500)<br>
+	<a href="javascript:python.MoveWindow()">python.MoveWindow()</a> - cefwindow.MoveWindow(__browser.GetWindowID(), xpos=0, ypos=0)
 
 <h3>Popups</h3>
 
@@ -161,22 +198,22 @@ function JSCallbackForPythonCallback(pycallback)
 
 <h3>Overwriting window.alert()</h3>
 
-<pre>def Alert(self, msg):
-	print "python.Alert() called instead of window.alert()"
-	win32gui.MessageBox(__browser.GetWindowID(), msg, "python.Alert()")</pre>
+	<pre>def Alert(self, msg):
+		print "python.Alert() called instead of window.alert()"
+		win32gui.MessageBox(__browser.GetWindowID(), msg, "python.Alert()")</pre>
 
-<a href="javascript:window.alert('SOME ALERT!')">window.alert('SOME ALERT!')</a>
-<br><br>
-<pre>def ChangeAlertDuringRuntime(self):
-    __browser.GetMainFrame().SetProperty("alert", self.Alert2)</pre>
-<a href="javascript:python.ChangeAlertDuringRuntime()">python.ChangeAlertDuringRuntime()</a> - now check window.alert() above, the messagebox style should be changed.
+	<a href="javascript:window.alert('SOME ALERT!')">window.alert('SOME ALERT!')</a>
+	<br><br>
+	<pre>def ChangeAlertDuringRuntime(self):
+		__browser.GetMainFrame().SetProperty("alert", self.Alert2)</pre>
+	<a href="javascript:python.ChangeAlertDuringRuntime()">python.ChangeAlertDuringRuntime()</a> - now check window.alert() above, the messagebox style should be changed.
 
 <h3>Find text on this page</h3>
 
-<pre>def Find(self, searchText, findNext=False):
-	__browser.Find(1, searchText, forward=True, matchCase=False, findNext=findNext)</pre>
+	<pre>def Find(self, searchText, findNext=False):
+		__browser.Find(1, searchText, forward=True, matchCase=False, findNext=findNext)</pre>
 
-<input type=text id=searchText value="python"> <input type=button value="python.Find()" onclick="python.Find(document.getElementById('searchText').value)">
+	<input type=text id=searchText value="python"> <input type=button value="python.Find()" onclick="python.Find(document.getElementById('searchText').value)">
 
 </body>
 </html>

@@ -8,10 +8,10 @@ cdef c_bool HttpAuthenticationDialog(
 
 	# Using "with nogil" in this function, so it needs to be a "cdef function".
 	cdef AuthCredentialsData* credentialsData
-	innerWindowID = browser.GetInnerWindowID() # innerWindowID is a top window for a popup
-	cdef HWND handle = <HWND><int>innerWindowID
+	innerWindowHandle = browser.GetWindowHandle()
+	cdef HWND hwnd = <HWND><int>innerWindowHandle
 	with nogil:
-		credentialsData = AuthDialog(handle)
+		credentialsData = AuthDialog(hwnd)
 	if credentialsData == NULL:
 		return False
 	else:

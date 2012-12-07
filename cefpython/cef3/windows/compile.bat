@@ -19,6 +19,7 @@ call python "setup.py" build_ext --inplace
 REM -- the setup above has disabled ECHO for commands, turning it back on.
 ECHO ON
 
+@if %ERRORLEVEL% neq 0 for /R %~dp0setup\ %%f in (*.pyx) do @del "%%f"
 @if %ERRORLEVEL% neq 0 pause
 @if %ERRORLEVEL% neq 0 exit
 

@@ -2,9 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "imports.pyx"
-include "utils.pyx"
-
 IF CEF_VERSION == 3:
 	LOGSEVERITY_DEFAULT = <int>cef_types.LOGSEVERITY_DEFAULT
 LOGSEVERITY_VERBOSE = <int>cef_types.LOGSEVERITY_VERBOSE
@@ -40,23 +37,23 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 				cefAppSettings.multi_threaded_message_loop = bool(appSettings[key])
 			elif key == "cache_path":
 				cefString = new CefString(&cefAppSettings.cache_path)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "user_agent":
 				cefString = new CefString(&cefAppSettings.user_agent)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "product_version":
 				cefString = new CefString(&cefAppSettings.product_version)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "log_file":
 				cefString = new CefString(&cefAppSettings.log_file)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "locale":
 				cefString = new CefString(&cefAppSettings.locale)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "log_severity":
 				cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
@@ -70,7 +67,7 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 				cefAppSettings.session_storage_quota = <int>int(appSettings[key])
 			elif key == "javascript_flags":
 				cefString = new CefString(&cefAppSettings.javascript_flags)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "auto_detect_proxy_settings_enabled":
 				IF UNAME_SYSNAME == "Windows":
@@ -79,11 +76,11 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 					raise Exception("auto_detect_proxy_settings_enabled is a Windows-only option")
 			elif key == "resources_dir_path":
 				cefString = new CefString(&cefAppSettings.resources_dir_path)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "locales_dir_path":
 				cefString = new CefString(&cefAppSettings.locales_dir_path)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "pack_loading_disabled":
 				cefAppSettings.pack_loading_disabled = bool(appSettings[key])
@@ -101,23 +98,23 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 				cefAppSettings.multi_threaded_message_loop = bool(appSettings[key])
 			elif key == "cache_path":
 				cefString = new CefString(&cefAppSettings.cache_path)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "user_agent":
 				cefString = new CefString(&cefAppSettings.user_agent)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "product_version":
 				cefString = new CefString(&cefAppSettings.product_version)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "log_file":
 				cefString = new CefString(&cefAppSettings.log_file)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "locale":
 				cefString = new CefString(&cefAppSettings.locale)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "log_severity":
 				cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
@@ -125,17 +122,17 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 				cefAppSettings.release_dcheck_enabled = bool(appSettings[key])
 			elif key == "javascript_flags":
 				cefString = new CefString(&cefAppSettings.javascript_flags)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "auto_detect_proxy_settings_enabled":
 				cefAppSettings.auto_detect_proxy_settings_enabled = bool(appSettings[key])
 			elif key == "resources_dir_path":
 				cefString = new CefString(&cefAppSettings.resources_dir_path)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "locales_dir_path":
 				cefString = new CefString(&cefAppSettings.locales_dir_path)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "pack_loading_disabled":
 				cefAppSettings.pack_loading_disabled = bool(appSettings[key])
@@ -145,7 +142,7 @@ cdef void SetApplicationSettings(appSettings, CefSettings* cefAppSettings) excep
 				cefAppSettings.single_process = bool(appSettings[key])
 			elif key == "browser_subprocess_path":
 				cefString = new CefString(&cefAppSettings.browser_subprocess_path)
-				PyStringToCefStringPtr(appSettings[key], cefString)
+				ToCefStringPointer(appSettings[key], cefString)
 				del cefString
 			elif key == "command_line_args_disabled":
 				cefAppSettings.command_line_args_disabled = bool(appSettings[key])
@@ -174,27 +171,27 @@ cdef void SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSett
 				cefBrowserSettings.history_disabled = bool(browserSettings[key])
 			elif key == "standard_font_family":
 				cefString = new CefString(&cefBrowserSettings.standard_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "fixed_font_family":
 				cefString = new CefString(&cefBrowserSettings.fixed_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "serif_font_family":
 				cefString = new CefString(&cefBrowserSettings.serif_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "sans_serif_font_family":
 				cefString = new CefString(&cefBrowserSettings.sans_serif_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "cursive_font_family":
 				cefString = new CefString(&cefBrowserSettings.cursive_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "fantasy_font_family":
 				cefString = new CefString(&cefBrowserSettings.fantasy_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "default_font_size":
 				cefBrowserSettings.default_font_size = <int>int(browserSettings[key])
@@ -208,7 +205,7 @@ cdef void SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSett
 				cefBrowserSettings.remote_fonts_disabled = bool(browserSettings[key])
 			elif key == "default_encoding":
 				cefString = new CefString(&cefBrowserSettings.default_encoding)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "encoding_detector_enabled":
 				cefBrowserSettings.encoding_detector_enabled = bool(browserSettings[key])
@@ -254,7 +251,7 @@ cdef void SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSett
 				cefBrowserSettings.user_style_sheet_enabled = bool(browserSettings[key])
 			elif key == "user_style_sheet_location":
 				cefString = new CefString(&cefBrowserSettings.user_style_sheet_location)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "author_and_user_styles_disabled":
 				cefBrowserSettings.author_and_user_styles_disabled = bool(browserSettings[key])
@@ -291,27 +288,27 @@ cdef void SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSett
 
 			if key == "standard_font_family":
 				cefString = new CefString(&cefBrowserSettings.standard_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "fixed_font_family":
 				cefString = new CefString(&cefBrowserSettings.fixed_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "serif_font_family":
 				cefString = new CefString(&cefBrowserSettings.serif_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "sans_serif_font_family":
 				cefString = new CefString(&cefBrowserSettings.sans_serif_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "cursive_font_family":
 				cefString = new CefString(&cefBrowserSettings.cursive_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "fantasy_font_family":
 				cefString = new CefString(&cefBrowserSettings.fantasy_font_family)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "default_font_size":
 				cefBrowserSettings.default_font_size = <int>int(browserSettings[key])
@@ -325,7 +322,7 @@ cdef void SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSett
 				cefBrowserSettings.remote_fonts_disabled = bool(browserSettings[key])
 			elif key == "default_encoding":
 				cefString = new CefString(&cefBrowserSettings.default_encoding)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "encoding_detector_enabled":
 				cefBrowserSettings.encoding_detector_enabled = bool(browserSettings[key])
@@ -371,7 +368,7 @@ cdef void SetBrowserSettings(browserSettings, CefBrowserSettings* cefBrowserSett
 				cefBrowserSettings.user_style_sheet_enabled = bool(browserSettings[key])
 			elif key == "user_style_sheet_location":
 				cefString = new CefString(&cefBrowserSettings.user_style_sheet_location)
-				PyStringToCefStringPtr(browserSettings[key], cefString)
+				ToCefStringPointer(browserSettings[key], cefString)
 				del cefString
 			elif key == "author_and_user_styles_disabled":
 				cefBrowserSettings.author_and_user_styles_disabled = bool(browserSettings[key])
