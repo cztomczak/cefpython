@@ -50,7 +50,7 @@ cdef class WindowInfo:
 	cdef public str windowType
 	cdef public int parentWindowHandle
 	cdef public list windowRect
-	cdef public str windowName
+	cdef public py_string windowName
 	cdef public py_bool transparentPainting
 
 	def __init__(self):
@@ -74,7 +74,7 @@ cdef class WindowInfo:
 
 	IF UNAME_SYSNAME == "Windows":
 		
-		cpdef object SetAsPopup(self, int parentWindowHandle, str windowName):
+		cpdef object SetAsPopup(self, int parentWindowHandle, py_string windowName):
 
 			if not IsWindowHandle(parentWindowHandle):
 				raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)

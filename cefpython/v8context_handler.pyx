@@ -139,7 +139,7 @@ cdef public void V8ContextHandler_OnContextReleased(
 		pyFrame = GetPyFrame(cefFrame)
 		isMainFrame = pyFrame.IsMain()
 		
-		Debug("V8ContextHandler_OnContextReleased(): frameID = %s" % pyFrame.GetIdentifier())
+		Debug("V8ContextHandler_OnContextReleased(): frameId=%s" % pyFrame.GetIdentifier())
 		
 		javascriptBindings = pyBrowser.GetJavascriptBindings()
 		if javascriptBindings:

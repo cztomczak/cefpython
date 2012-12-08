@@ -42,37 +42,119 @@ Support forum: <a href="https://groups.google.com/group/cefpython?hl=en">https:/
 
 	<a href="javascript:alert(browser.CanGoForward())">CanGoForward()</a><br>
 
-	<a href="javascript:alert(browser.ClearHistory())">ClearHistory()</a><br>
+	<a href="javascript:browser.ClearHistory()">ClearHistory()</a><br>
 
-	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+	<a href="javascript:browser.CloseBrowser()">CloseBrowser()</a><br>
 
-	<a href="javascript:alert(browser.CloseDevTools())">CloseDevTools()</a><br>
+	<a href="javascript:browser.CloseDevTools()">CloseDevTools()</a><br>
 
-	<a href="javascript:alert(browser.Find(searchID=0, searchText='test', forward=true, matchCase=false, findNext=false))">Find(searchId=0, searchText='test', forward=true, matchCase=false, findNext=false)</a><br>
+	<a href="javascript:browser.Find(searchID=0, searchText='test', forward=true, matchCase=false, findNext=false)">Find(searchId=0, searchText='test', forward=true, matchCase=false, findNext=false)</a><br>
 
 	<a href="javascript:alert(browser.GetUserData('some'))">GetUserData('some')</a><br>
 
-	<a href="javascript:alert(browser.GetFocusedFrame())">GetFocusedFrame()</a> 
-	(returning an object from python, it is not yet supported)<br>
+	<a href="javascript:alert(browser.GetFocusedFrame())">GetFocusedFrame()</a>
+	(returning a class object from python is not yet supported)<br>
 
 	<a href="javascript:alert(browser.GetFrame('simple'))">CloseBrowser('simple')</a><br>
 
 	<a href="javascript:alert(browser.GetFrameNames())">GetFrameNames()</a><br>
 
 	<a href="javascript:alert(browser.GetMainFrame())">GetMainFrame()</a>
-	(returning an object from python, it is not yet supported)<br>
+	(returning a class object from python is not yet supported)<br>
 
-	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+	<a href="javascript:alert(browser.GetOpenerWindowHandle())">GetOpenerWindowHandle()</a><br>
 
-	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+	<a href="javascript:alert(browser.GetOuterWindowHandle())">GetOuterWindowHandle()</a><br>
 
-	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+	<a href="javascript:alert(browser.GetWindowHandle())">GetWindowHandle()</a><br>
 
-	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+	<a href="javascript:alert(browser.GetZoomLevel())">GetZoomLevel()</a><br>
 
-	<a href="javascript:alert(browser.CloseBrowser())">CloseBrowser()</a><br>
+	<a href="javascript:browser.GoBack()">GoBack()</a><br>
 
-	<a href="javascript:alert(browser.SetUserData('some', 'something'))">CloseBrowser('some', 'something')</a><br>
+	<a href="javascript:browser.GoForward()">GoForward()</a><br>
+
+	<a href="javascript:alert(browser.HasDocument())">HasDocument()</a><br>
+
+	<a href="javascript:browser.HidePopup()">HidePopup()</a><br>
+
+	<a href="javascript:alert(browser.IsFullscreen())">IsFullscreen()</a><br>
+
+	<a href="javascript:alert(browser.IsPopup())">IsPopup()</a><br>
+
+	<a href="javascript:alert(browser.IsPopupVisible())">IsPopupVisible()</a><br>
+
+	<a href="javascript:alert(browser.IsWindowRenderingDisabled())">IsWindowRenderingDisabled()</a><br>
+
+	<a href="javascript:browser.Reload()">Reload()</a><br>
+
+	<a href="javascript:browser.ReloadIgnoreCache()">ReloadIgnoreCache()</a><br>
+
+	<a href="javascript:browser.SetFocus(false)">SetFocus(false)</a> - inner window loses focus, check keyboard & mouse wheel scrolling<br>
+
+	<a href="javascript:browser.SetUserData('some', 'something')">SetUserData('some', 'something')</a><br>
+
+	<a href="javascript:browser.SetZoomLevel(2)">SetZoomLevel(2)</a><br>
+
+	<a href="javascript:browser.ShowDevTools()">ShowDevTools()</a><br>
+
+	<a href="javascript:browser.StopLoad()">StopLoad()</a><br>
+
+	<a href="javascript:browser.StopFinding(true)">StopFinding(true)</a><br>
+
+	<a href="javascript:browser.ToggleFullscreen()">ToggleFullscreen()</a><br>
+
+<h3>Frame object</h3>
+
+    <a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
+
+	<a href="javascript:alert(frame.asd())">asd()</a><br>
 
 <h3>Test unicode string</h3>
 
@@ -138,7 +220,7 @@ Support forum: <a href="https://groups.google.com/group/cefpython?hl=en">https:/
 	<a href="javascript:python.Test1(nested)">python.Test1(nested)</a> (var nested = [1,2, [3, 4, [5,6, [{7:7, 8: [9,10]}, 11]]]];) - dictionary keys will be in a different order in Python.<br>
 
 	<br>
-	window.PyConfig = 
+	window.PyConfig =
 	<script>document.write(JSON.stringify(window.PyConfig));</script>
 	<br>
 	Now change PyConfig: <a href="javascript:window.PyConfig={'option1': false, 'option2': 40}">window.PyConfig={'option1': False, 'option2': 40}</a><br>

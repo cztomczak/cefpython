@@ -45,7 +45,7 @@ class WindowUtils:
 		return win32gui.DefWindowProc(windowHandle, msg, wparam, lparam)
 
 	@staticmethod
-	def SetTitle(PyBrowser pyBrowser, str pyTitle):
+	def SetTitle(PyBrowser pyBrowser, py_string pyTitle):
 
 		# Each browser window should have a title (Issue 3).	
 		# When popup is created, the window that sits in taskbar has no title.
@@ -69,7 +69,7 @@ class WindowUtils:
 			win32gui.SetWindowText(windowHandle, pyTitle)
 	
 	@staticmethod
-	def SetIcon(PyBrowser pyBrowser, str icon="inherit"):
+	def SetIcon(PyBrowser pyBrowser, py_string icon="inherit"):
 
 		# `icon` parameter is not implemented.
 		# Popup window inherits icon from the main window.

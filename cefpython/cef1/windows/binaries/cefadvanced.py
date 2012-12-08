@@ -64,7 +64,7 @@ def CefAdvanced():
 
 	# BrowserSettings, see: http://code.google.com/p/cefpython/wiki/BrowserSettings
 	browserSettings = dict() 
-	browserSettings["history_disabled"] = False # Backspace key will act as "History back" action in browser.
+	browserSettings["history_disabled"] = False
 	browserSettings["universal_access_from_file_urls_allowed"] = True
 	browserSettings["file_access_from_file_urls_allowed"] = True
 	

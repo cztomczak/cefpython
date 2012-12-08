@@ -23,8 +23,18 @@ if sys.version_info.major == 2:
 else:
 	from urllib.request import pathname2url as urllib_pathname2url
 
+# We should allow multiple string types: str, unicode, bytes. ToCefString() can 
+# handle them all.
+ctypedef object py_string
+
+# You can't use "void" along with cpdef function returning None, it is planned to be 
+# added to Cython in the future, creating this virtual type temporarily. If you
+# change it later to "void" then don't forget to add "except *".
+ctypedef object py_void
+
 from cpython cimport bool as py_bool
 from libcpp cimport bool as c_bool
+
 from libcpp.map cimport map as c_map
 from multimap cimport multimap as c_multimap
 from libcpp.pair cimport pair as c_pair
