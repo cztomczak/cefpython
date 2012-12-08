@@ -4,106 +4,106 @@
 
 cdef object CreatePyResponse(CefRefPtr[CefResponse] cefResponse):
 
-	pyResponse = PyResponse()
-	pyResponse.cefResponse = cefResponse
-	return pyResponse
+    pyResponse = PyResponse()
+    pyResponse.cefResponse = cefResponse
+    return pyResponse
 
 cdef class PyResponse:
 
-	cdef CefRefPtr[CefResponse] cefResponse
+    cdef CefRefPtr[CefResponse] cefResponse
 
-	cdef CefRefPtr[CefResponse] GetCefResponse(self) except *:
-		
-		if <void*>self.cefResponse != NULL and self.cefResponse.get():
-			return self.cefResponse
-		raise Exception("CefResponse was destroyed, you cannot use this object anymore")
+    cdef CefRefPtr[CefResponse] GetCefResponse(self) except *:
 
-	def GetStatus(self):
+        if <void*>self.cefResponse != NULL and self.cefResponse.get():
+            return self.cefResponse
+        raise Exception("CefResponse was destroyed, you cannot use this object anymore")
 
-		return self.GetCefResponse().get().GetStatus()
+    def GetStatus(self):
 
-	def SetStatus(self, status):
+        return self.GetCefResponse().get().GetStatus()
 
-		assert type(status) == int, "Response.SetStatus() failed: status param is not an int"		
-		self.GetCefResponse().get().SetStatus(int(status))
+    def SetStatus(self, status):
 
-	def GetStatusText(self):
+        assert type(status) == int, "Response.SetStatus() failed: status param is not an int"
+        self.GetCefResponse().get().SetStatus(int(status))
 
-		return ToPyString(self.GetCefResponse().get().GetStatusText())
+    def GetStatusText(self):
 
-	def SetStatusText(self, statusText):
+        return ToPyString(self.GetCefResponse().get().GetStatusText())
 
-		assert type(statusText) in (str, unicode, bytes), "Response.SetStatusText() failed: statusText param is not a string"
-		cdef CefString cefStatusText
-		ToCefString(statusText, cefStatusText)
-		self.GetCefResponse().get().SetStatusText(cefStatusText)
+    def SetStatusText(self, statusText):
 
-	def GetMimeType(self):
+        assert type(statusText) in (str, unicode, bytes), "Response.SetStatusText() failed: statusText param is not a string"
+        cdef CefString cefStatusText
+        ToCefString(statusText, cefStatusText)
+        self.GetCefResponse().get().SetStatusText(cefStatusText)
 
-		return ToPyString(self.GetCefResponse().get().GetMimeType())
+    def GetMimeType(self):
 
-	def SetMimeType(self, mimeType):
+        return ToPyString(self.GetCefResponse().get().GetMimeType())
 
-		assert type(mimeType) in (str, unicode, bytes), "Response.SetMimeType() failed: mimeType param is not a string"
-		cdef CefString cefMimeType
-		ToCefString(mimeType, cefMimeType)
-		self.GetCefResponse().get().SetMimeType(cefMimeType)
+    def SetMimeType(self, mimeType):
 
-	def GetHeader(self, name):
+        assert type(mimeType) in (str, unicode, bytes), "Response.SetMimeType() failed: mimeType param is not a string"
+        cdef CefString cefMimeType
+        ToCefString(mimeType, cefMimeType)
+        self.GetCefResponse().get().SetMimeType(cefMimeType)
 
-		# TODO: what is returned when you try to get a non-existent header?
-		assert type(name) in (str, unicode, bytes), "Response.GetHeader() failed: name param is not a string"
-		cdef CefString cefName
-		ToCefString(name, cefName)
-		return ToPyString(self.GetCefResponse().get().GetHeader(cefName))
+    def GetHeader(self, name):
 
-	def GetHeaderMap(self):
+        # TODO: what is returned when you try to get a non-existent header?
+        assert type(name) in (str, unicode, bytes), "Response.GetHeader() failed: name param is not a string"
+        cdef CefString cefName
+        ToCefString(name, cefName)
+        return ToPyString(self.GetCefResponse().get().GetHeader(cefName))
 
-		headerMultimap = self.GetHeaderMultimap()
-		headerMap = {}
-		for headerTuple in headerMultimap:
-			key = headerTuple[0]
-			value = headerTuple[1]
-			headerMap[key] = value
-		return headerMap
+    def GetHeaderMap(self):
 
-	def GetHeaderMultimap(self):
-		
-		cdef c_multimap[CefString, CefString] cefHeaderMap
-		self.GetCefResponse().get().GetHeaderMap(cefHeaderMap)
-		pyHeaderMultimap = []
-		cdef c_multimap[CefString, CefString].iterator iterator = cefHeaderMap.begin()
-		cdef CefString cefKey
-		cdef CefString cefValue
-		while iterator != cefHeaderMap.end():
-			cefKey = deref(iterator).first
-			cefValue = deref(iterator).second
-			pyKey = ToPyString(cefKey)
-			pyValue = ToPyString(cefValue)
-			pyHeaderMultimap.append((pyKey, pyValue))
-			preinc(iterator)
-		return pyHeaderMultimap
+        headerMultimap = self.GetHeaderMultimap()
+        headerMap = {}
+        for headerTuple in headerMultimap:
+            key = headerTuple[0]
+            value = headerTuple[1]
+            headerMap[key] = value
+        return headerMap
 
-	def SetHeaderMap(self, headerMap):
+    def GetHeaderMultimap(self):
 
-		assert type(headerMap) == dict, "headerMap param is not a dictionary"
-		assert len(headerMap) > 0, "headerMap param is an empty dictionary"
-		headerMultimap = []
-		for key in headerMap:
-			headerMultimap.append((str(key), str(headerMap[key])))
-		self.SetHeaderMultimap(headerMultimap)
+        cdef c_multimap[CefString, CefString] cefHeaderMap
+        self.GetCefResponse().get().GetHeaderMap(cefHeaderMap)
+        pyHeaderMultimap = []
+        cdef c_multimap[CefString, CefString].iterator iterator = cefHeaderMap.begin()
+        cdef CefString cefKey
+        cdef CefString cefValue
+        while iterator != cefHeaderMap.end():
+            cefKey = deref(iterator).first
+            cefValue = deref(iterator).second
+            pyKey = ToPyString(cefKey)
+            pyValue = ToPyString(cefValue)
+            pyHeaderMultimap.append((pyKey, pyValue))
+            preinc(iterator)
+        return pyHeaderMultimap
 
-	def SetHeaderMultimap(self, headerMultimap):
+    def SetHeaderMap(self, headerMap):
 
-		assert type(headerMultimap) == list, "headerMultimap param is not a list"
-		assert len(headerMultimap) > 0, "headerMultimap param is an empty list"
-		cdef c_multimap[CefString, CefString] cefHeaderMap
-		cdef CefString cefKey
-		cdef CefString cefValue
-		cdef c_pair[CefString, CefString] pair
-		for headerTuple in headerMultimap:
-			ToCefString(str(headerTuple[0]), cefKey)
-			ToCefString(str(headerTuple[1]), cefValue)
-			pair.first, pair.second = cefKey, cefValue
-			cefHeaderMap.insert(pair)
-		self.GetCefResponse().get().SetHeaderMap(cefHeaderMap)
+        assert type(headerMap) == dict, "headerMap param is not a dictionary"
+        assert len(headerMap) > 0, "headerMap param is an empty dictionary"
+        headerMultimap = []
+        for key in headerMap:
+            headerMultimap.append((str(key), str(headerMap[key])))
+        self.SetHeaderMultimap(headerMultimap)
+
+    def SetHeaderMultimap(self, headerMultimap):
+
+        assert type(headerMultimap) == list, "headerMultimap param is not a list"
+        assert len(headerMultimap) > 0, "headerMultimap param is an empty list"
+        cdef c_multimap[CefString, CefString] cefHeaderMap
+        cdef CefString cefKey
+        cdef CefString cefValue
+        cdef c_pair[CefString, CefString] pair
+        for headerTuple in headerMultimap:
+            ToCefString(str(headerTuple[0]), cefKey)
+            ToCefString(str(headerTuple[1]), cefValue)
+            pair.first, pair.second = cefKey, cefValue
+            cefHeaderMap.insert(pair)
+        self.GetCefResponse().get().SetHeaderMap(cefHeaderMap)

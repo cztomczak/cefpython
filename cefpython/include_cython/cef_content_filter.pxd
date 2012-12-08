@@ -5,6 +5,6 @@
 from cef_base cimport CefBase
 
 cdef extern from "include/cef_content_filter.h":
-	
-	cdef cppclass CefContentFilter(CefBase):
-		pass
+
+    cdef cppclass CefContentFilter(CefBase):
+        pass

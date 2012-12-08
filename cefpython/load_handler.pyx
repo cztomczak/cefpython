@@ -3,76 +3,76 @@
 # Website: http://code.google.com/p/cefpython/
 
 cdef public void LoadHandler_OnLoadEnd(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefRefPtr[CefFrame] cefFrame,
-		int httpStatusCode
-		) except * with gil:
-	
-	cdef PyBrowser pyBrowser
-	cdef PyFrame pyFrame
-	try:
-		pyBrowser = GetPyBrowser(cefBrowser)
-		if not pyBrowser:
-			Debug("LoadHandler_OnLoadEnd() failed: pyBrowser is %s" % pyBrowser)
-			return
-		pyFrame = GetPyFrame(cefFrame)	
-		callback = pyBrowser.GetClientCallback("OnLoadEnd")
-		if callback:
-			callback(pyBrowser, pyFrame, httpStatusCode)
-	except:
-		(exc_type, exc_value, exc_trace) = sys.exc_info()
-		sys.excepthook(exc_type, exc_value, exc_trace)
+        CefRefPtr[CefBrowser] cefBrowser,
+        CefRefPtr[CefFrame] cefFrame,
+        int httpStatusCode
+        ) except * with gil:
+
+    cdef PyBrowser pyBrowser
+    cdef PyFrame pyFrame
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        if not pyBrowser:
+            Debug("LoadHandler_OnLoadEnd() failed: pyBrowser is %s" % pyBrowser)
+            return
+        pyFrame = GetPyFrame(cefFrame)
+        callback = pyBrowser.GetClientCallback("OnLoadEnd")
+        if callback:
+            callback(pyBrowser, pyFrame, httpStatusCode)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 
 cdef public void LoadHandler_OnLoadStart(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefRefPtr[CefFrame] cefFrame
-		) except * with gil:
+        CefRefPtr[CefBrowser] cefBrowser,
+        CefRefPtr[CefFrame] cefFrame
+        ) except * with gil:
 
-	cdef PyBrowser pyBrowser
-	cdef PyFrame pyFrame
-	try:
-		pyBrowser = GetPyBrowser(cefBrowser)
-		if not pyBrowser:
-			Debug("LoadHandler_OnLoadStart(): failed: pyBrowser is %s" % pyBrowser)
-			return
-		pyFrame = GetPyFrame(cefFrame)	
-		callback = pyBrowser.GetClientCallback("OnLoadStart")
-		if callback:
-			callback(pyBrowser, pyFrame)
-	except:
-		(exc_type, exc_value, exc_trace) = sys.exc_info()
-		sys.excepthook(exc_type, exc_value, exc_trace)
+    cdef PyBrowser pyBrowser
+    cdef PyFrame pyFrame
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        if not pyBrowser:
+            Debug("LoadHandler_OnLoadStart(): failed: pyBrowser is %s" % pyBrowser)
+            return
+        pyFrame = GetPyFrame(cefFrame)
+        callback = pyBrowser.GetClientCallback("OnLoadStart")
+        if callback:
+            callback(pyBrowser, pyFrame)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 
 cdef public c_bool LoadHandler_OnLoadError(
-		CefRefPtr[CefBrowser] cefBrowser,
-		CefRefPtr[CefFrame] cefFrame,
-		cef_types.cef_handler_errorcode_t cefErrorCode,
-		CefString& cefFailedURL,
-		CefString& cefErrorText
-		) except * with gil:
+        CefRefPtr[CefBrowser] cefBrowser,
+        CefRefPtr[CefFrame] cefFrame,
+        cef_types.cef_handler_errorcode_t cefErrorCode,
+        CefString& cefFailedURL,
+        CefString& cefErrorText
+        ) except * with gil:
 
-	cdef PyBrowser pyBrowser
-	cdef PyFrame pyFrame
-	try:
-		pyBrowser = GetPyBrowser(cefBrowser)
-		if not pyBrowser:
-			Debug("LoadHandler_OnLoadError() failed: pyBrowser is %s" % pyBrowser)
-			return False
-		pyFrame = GetPyFrame(cefFrame)	
-		callback = pyBrowser.GetClientCallback("OnLoadError")
-		if callback:
-			errorText = [""] # errorText[0] is out
-			ret = callback(pyBrowser, pyFrame, cefErrorCode, ToPyString(cefFailedURL), errorText)
-			if ret:
-				ToCefString(errorText[0], cefErrorText)
-			return bool(ret)
-		else:
-			return False
-	except:
-		(exc_type, exc_value, exc_trace) = sys.exc_info()
-		sys.excepthook(exc_type, exc_value, exc_trace)
+    cdef PyBrowser pyBrowser
+    cdef PyFrame pyFrame
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        if not pyBrowser:
+            Debug("LoadHandler_OnLoadError() failed: pyBrowser is %s" % pyBrowser)
+            return False
+        pyFrame = GetPyFrame(cefFrame)
+        callback = pyBrowser.GetClientCallback("OnLoadError")
+        if callback:
+            errorText = [""] # errorText[0] is out
+            ret = callback(pyBrowser, pyFrame, cefErrorCode, ToPyString(cefFailedURL), errorText)
+            if ret:
+                ToCefString(errorText[0], cefErrorText)
+            return bool(ret)
+        else:
+            return False
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 # Network error constants.
 ERR_FAILED = <int>cef_types.ERR_FAILED

@@ -5,6 +5,6 @@
 from cef_base cimport CefBase
 
 cdef extern from "include/cef_download_handler.h":
-	
-	cdef cppclass CefDownloadHandler(CefBase):
-		pass
+
+    cdef cppclass CefDownloadHandler(CefBase):
+        pass

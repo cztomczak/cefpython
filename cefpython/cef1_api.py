@@ -12,64 +12,64 @@ http://code.google.com/p/cefpython/w/list
 # Global functions in cefpython module.
 
 def CreateBrowser(windowID, browserSettings, navigateURL, clientHandlers=None, javascriptBindings=None):
-	return Browser()
+    return Browser()
 
 def ExceptHook(type, value, traceObject):
-	return None
+    return None
 
 def FormatJavascriptStackTrace(stackTrace):
-	return ""
+    return ""
 
 def GetBrowserByWindowID(windowID):
-	return Browser()
+    return Browser()
 
 def GetJavascriptStackTrace(frameLimit=100):
-	return []
+    return []
 
 def GetRealPath(file=None, encodeURL=False):
-	return ""
+    return ""
 
 def Initialize(applicationSettings={}):
-	return None
+    return None
 
 def IsKeyModifier(key, modifiers):
-	return False
+    return False
 
 def MessageLoop():
-	return None
+    return None
 
 def SingleMessageLoop():
-	return None
+    return None
 
 def QuitMessageLoop():
-	return None
+    return None
 
 def Shutdown():
-	return None
+    return None
 
 # WindowUtils class.
 
 class WindowUtils:
 
-	@staticmethod
-	def OnSetFocus(windowID, msg, wparam, lparam):
-		return 0
+    @staticmethod
+    def OnSetFocus(windowID, msg, wparam, lparam):
+        return 0
 
-	@staticmethod
-	def OnSize(windowID, msg, wparam, lparam):
-		return 0
+    @staticmethod
+    def OnSize(windowID, msg, wparam, lparam):
+        return 0
 
-	@staticmethod
-	def OnEraseBackground(windowID, msg, wparam, lparam):
-		return 0
+    @staticmethod
+    def OnEraseBackground(windowID, msg, wparam, lparam):
+        return 0
 
-	@staticmethod
-	def SetTitle(pyBrowser, pyTitle):
-		return None
+    @staticmethod
+    def SetTitle(pyBrowser, pyTitle):
+        return None
 
-	@staticmethod
-	def SetIcon(pyBrowser, icon="inherit"):
-		return None
+    @staticmethod
+    def SetIcon(pyBrowser, icon="inherit"):
+        return None
 
 # ApplicationSettings["log_severity"]
 LOGSEVERITY_VERBOSE = 0
@@ -87,81 +87,81 @@ DESKTOP_IN_PROCESS_COMMAND_BUFFER = 0
 
 # Values are dummy, these are NOT the defaults.
 ApplicationSettings = {
-	"auto_detect_proxy_settings_enabled": False,
-	"cache_path": "",
-	"extra_plugin_paths": [""],
-	"graphics_implementation": ANGLE_IN_PROCESS,
-	"javascript_flags": "",
-	"local_storage_quota": 5*1024*1024,
-	"locale": "",
-	"locales_dir_path": "",
-	"log_file": "",
-	"log_severity": LOGSEVERITY_VERBOSE,
-	"release_dcheck_enabled": False,
-	"multi_threaded_message_loop": False,
-	"pack_loading_disabled": False,
-	"product_version": "",
-	"resources_dir_path": "",
-	"session_storage_quota": 5*1024*1024,
-	"unicode_to_bytes_encoding": "utf-8",
-	"uncaught_exception_stack_size": 0,
-	"user_agent": "",
+    "auto_detect_proxy_settings_enabled": False,
+    "cache_path": "",
+    "extra_plugin_paths": [""],
+    "graphics_implementation": ANGLE_IN_PROCESS,
+    "javascript_flags": "",
+    "local_storage_quota": 5*1024*1024,
+    "locale": "",
+    "locales_dir_path": "",
+    "log_file": "",
+    "log_severity": LOGSEVERITY_VERBOSE,
+    "release_dcheck_enabled": False,
+    "multi_threaded_message_loop": False,
+    "pack_loading_disabled": False,
+    "product_version": "",
+    "resources_dir_path": "",
+    "session_storage_quota": 5*1024*1024,
+    "unicode_to_bytes_encoding": "utf-8",
+    "uncaught_exception_stack_size": 0,
+    "user_agent": "",
 }
 
 # Values are dummy, these are NOT the defaults.
 BrowserSettings = {
-	"accelerated_2d_canvas_disabled": False,
-	"accelerated_compositing_enabled": False,
-	"accelerated_filters_disabled": False,
-	"accelerated_layers_disabled": False,
-	"accelerated_painting_disabled": False,
-	"accelerated_plugins_disabled": False,
-	"accelerated_video_disabled": False,
-	"animation_frame_rate": 0,
-	"application_cache_disabled": False,
-	"author_and_user_styles_disabled": False,
-	"caret_browsing_enabled": False,
-	"cursive_font_family": "",
-	"databases_disabled": False,
-	"default_encoding": "iso-8859-1",
-	"default_fixed_font_size": 0,
-	"default_font_size": 0,
-	"developer_tools_disabled": False,
-	"dom_paste_disabled": False,
-	"drag_drop_disabled": False,
-	"encoding_detector_enabled": False,
-	"fantasy_font_family": "",
-	"file_access_from_file_urls_allowed": False,
-	"fixed_font_family": "",
-	"fullscreen_enabled": False,
-	"history_disabled": False,
-	"hyperlink_auditing_disabled": False,
-	"image_load_disabled": False,
-	"java_disabled": False,
-	"javascript_access_clipboard_disallowed": False,
-	"javascript_close_windows_disallowed": False,
-	"javascript_disabled": False,
-	"javascript_open_windows_disallowed": False,
-	"load_drops_disabled": False,
-	"local_storage_disabled": False,
-	"minimum_font_size": 0,
-	"minimum_logical_font_size": 0,
-	"page_cache_disabled": False,
-	"plugins_disabled": False,
-	"remote_fonts_disabled": False,
-	"sans_serif_font_family": "",
-	"serif_font_family": "",
-	"shrink_standalone_images_to_fit": False,
-	"site_specific_quirks_disabled": False,
-	"standard_font_family": "",
-	"tab_to_links_disabled": False,
-	"text_area_resize_disabled": False,
-	"universal_access_from_file_urls_allowed": False,
-	"user_style_sheet_enabled": False,
-	"user_style_sheet_location": "",
-	"web_security_disabled": False,
-	"webgl_disabled": False,
-	"xss_auditor_enabled": False,
+    "accelerated_2d_canvas_disabled": False,
+    "accelerated_compositing_enabled": False,
+    "accelerated_filters_disabled": False,
+    "accelerated_layers_disabled": False,
+    "accelerated_painting_disabled": False,
+    "accelerated_plugins_disabled": False,
+    "accelerated_video_disabled": False,
+    "animation_frame_rate": 0,
+    "application_cache_disabled": False,
+    "author_and_user_styles_disabled": False,
+    "caret_browsing_enabled": False,
+    "cursive_font_family": "",
+    "databases_disabled": False,
+    "default_encoding": "iso-8859-1",
+    "default_fixed_font_size": 0,
+    "default_font_size": 0,
+    "developer_tools_disabled": False,
+    "dom_paste_disabled": False,
+    "drag_drop_disabled": False,
+    "encoding_detector_enabled": False,
+    "fantasy_font_family": "",
+    "file_access_from_file_urls_allowed": False,
+    "fixed_font_family": "",
+    "fullscreen_enabled": False,
+    "history_disabled": False,
+    "hyperlink_auditing_disabled": False,
+    "image_load_disabled": False,
+    "java_disabled": False,
+    "javascript_access_clipboard_disallowed": False,
+    "javascript_close_windows_disallowed": False,
+    "javascript_disabled": False,
+    "javascript_open_windows_disallowed": False,
+    "load_drops_disabled": False,
+    "local_storage_disabled": False,
+    "minimum_font_size": 0,
+    "minimum_logical_font_size": 0,
+    "page_cache_disabled": False,
+    "plugins_disabled": False,
+    "remote_fonts_disabled": False,
+    "sans_serif_font_family": "",
+    "serif_font_family": "",
+    "shrink_standalone_images_to_fit": False,
+    "site_specific_quirks_disabled": False,
+    "standard_font_family": "",
+    "tab_to_links_disabled": False,
+    "text_area_resize_disabled": False,
+    "universal_access_from_file_urls_allowed": False,
+    "user_style_sheet_enabled": False,
+    "user_style_sheet_location": "",
+    "web_security_disabled": False,
+    "webgl_disabled": False,
+    "xss_auditor_enabled": False,
 }
 
 #
@@ -173,26 +173,26 @@ STATUSTYPE_TEXT = 0
 STATUSTYPE_MOUSEOVER_URL = 0
 STATUSTYPE_KEYBOARD_FOCUS_URL = 0
 
-def DisplayHandler_OnAddressChange(browser, frame, url): 
-	return None
+def DisplayHandler_OnAddressChange(browser, frame, url):
+    return None
 
-def DisplayHandler_OnConsoleMessage(browser, message, source, line): 
-	return False
+def DisplayHandler_OnConsoleMessage(browser, message, source, line):
+    return False
 
-def DisplayHandler_OnContentsSizeChange(browser, frame, width, height): 
-	return None
+def DisplayHandler_OnContentsSizeChange(browser, frame, width, height):
+    return None
 
 def DisplayHandler_OnNavStateChange(browser, canGoBack, canGoForward):
-	return None
+    return None
 
 def DisplayHandler_OnStatusMessage(browser, text, statusType):
-	return None
+    return None
 
 def DisplayHandler_OnTitleChange(browser, title):
-	return None
+    return None
 
 def DisplayHandler_OnTooltip(browser, text_out=[""]):
-	return False
+    return False
 
 #
 # KeyboardHandler.
@@ -369,7 +369,7 @@ VK_ICO_00=0xE4
 VK_ICO_CLEAR=0xE6
 
 def KeyboardHandler_OnKeyEvent(browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
-	return False
+    return False
 
 #
 # LoadHandler.
@@ -425,14 +425,14 @@ ERR_RESPONSE_HEADERS_TOO_BIG = 0
 ERR_CACHE_MISS = 0
 ERR_INSECURE_RESPONSE = 0
 
-def LoadHandler_OnLoadEnd(browser, frame, httpStatusCode): 
-	return None
+def LoadHandler_OnLoadEnd(browser, frame, httpStatusCode):
+    return None
 
-def LoadHandler_OnLoadError(browser, frame, errorCode, failedURL, errorText_out=[""]): 
-	return False
+def LoadHandler_OnLoadError(browser, frame, errorCode, failedURL, errorText_out=[""]):
+    return False
 
-def LoadHandler_OnLoadStart(browser, frame): 
-	return None
+def LoadHandler_OnLoadStart(browser, frame):
+    return None
 
 #
 # RequestHandler.
@@ -448,33 +448,33 @@ NAVTYPE_OTHER = 0
 NAVTYPE_LINKDROPPED = 0
 
 """
-def RequestHandler_OnBeforeBrowse(browser, frame, request, navType, isRedirect): 
-	return False
+def RequestHandler_OnBeforeBrowse(browser, frame, request, navType, isRedirect):
+    return False
 
-def RequestHandler_OnBeforeResourceLoad(browser, request, redirectURL_out, resourceStream, response, loadFlags): 
-	return False
+def RequestHandler_OnBeforeResourceLoad(browser, request, redirectURL_out, resourceStream, response, loadFlags):
+    return False
 """
 
-def RequestHandler_OnResourceRedirect(browser, oldURL, newURL_out=[""]): 
-	return None
+def RequestHandler_OnResourceRedirect(browser, oldURL, newURL_out=[""]):
+    return None
 
-def RequestHandler_OnResourceResponse(browser, url, response, filter_out=[None]): 
-	return None
+def RequestHandler_OnResourceResponse(browser, url, response, filter_out=[None]):
+    return None
 
-def RequestHandler_OnProtocolExecution(browser, url, allowOSExecution_out=[False]): 
-	return False
+def RequestHandler_OnProtocolExecution(browser, url, allowOSExecution_out=[False]):
+    return False
 
 """
-def RequestHandler_GetDownloadHandler(browser, mimeType, filename, contentLength, downloadHandler_out=[None]): 
-	return False
+def RequestHandler_GetDownloadHandler(browser, mimeType, filename, contentLength, downloadHandler_out=[None]):
+    return False
 """
 
-def RequestHandler_GetAuthCredentials(browser, isProxy, host, port, realm, scheme, username_out=[""], password_out=[""]): 
-	return False
+def RequestHandler_GetAuthCredentials(browser, isProxy, host, port, realm, scheme, username_out=[""], password_out=[""]):
+    return False
 
 """
 def RequestHandler_GetCookieManager(browser, mainURL):
-	return cookieManager
+    return cookieManager
 """
 
 #
@@ -482,47 +482,47 @@ def RequestHandler_GetCookieManager(browser, mainURL):
 #
 
 def JavascriptContextHandler_OnUncaughtException(browser, frame, exception, stackTrace):
-	return None
+    return None
 
 #
 # LifespanHandler
 #
 
 def LifespanHandler_DoClose(browser):
-	return False
+    return False
 
 def LifespanHandler_OnAfterCreated(browser):
-	return None
+    return None
 
 def LifespanHandler_OnBeforeClose(browser):
-	return None
+    return None
 
 def LifespanHandler_RunModal(browser):
-	return False
+    return False
 
 #
 # JavascriptBindings class.
 #
 
 class JavascriptBindings:
-	
-	def __init__(self, bindToFrames=False, bindToPopups=False):
-		return None
 
-	def IsValueAllowed(self, value):
-		return False
+    def __init__(self, bindToFrames=False, bindToPopups=False):
+        return None
 
-	def Rebind(self):
-		return None
-	
-	def SetFunction(self, name, func):
-		return None
+    def IsValueAllowed(self, value):
+        return False
 
-	def SetObject(self, name, obj):
-		return None
+    def Rebind(self):
+        return None
 
-	def SetProperty(self, name, value):
-		return None
+    def SetFunction(self, name, func):
+        return None
+
+    def SetObject(self, name, obj):
+        return None
+
+    def SetProperty(self, name, value):
+        return None
 
 #
 # JavascriptCallback object.
@@ -530,11 +530,11 @@ class JavascriptBindings:
 
 class JavascriptCallback:
 
-	def Call(self, param1, param2, param3_etc):
-		return mixed
+    def Call(self, param1, param2, param3_etc):
+        return mixed
 
-	def GetName(self):
-		return name
+    def GetName(self):
+        return name
 
 #
 # Browser object.
@@ -542,130 +542,130 @@ class JavascriptCallback:
 
 class Browser:
 
-	def CanGoBack(self):
-		return False
+    def CanGoBack(self):
+        return False
 
-	def CanGoForward(self):
-		return False
+    def CanGoForward(self):
+        return False
 
-	def ClearHistory(self):
-		return None
+    def ClearHistory(self):
+        return None
 
-	def CloseBrowser(self):
-		return None
+    def CloseBrowser(self):
+        return None
 
-	def CloseDevTools(self):
-		return None
+    def CloseDevTools(self):
+        return None
 
-	def Find(self, searchID, searchText, forward, matchCase, findNext):
-		return None
+    def Find(self, searchID, searchText, forward, matchCase, findNext):
+        return None
 
-	def GetClientHandler(self, name):
-		return clientHandlers[name]
+    def GetClientHandler(self, name):
+        return clientHandlers[name]
 
-	def GetClientHandlers(self):
-		return clientHandlers
+    def GetClientHandlers(self):
+        return clientHandlers
 
-	def GetFocusedFrame(self):
-		return Frame()
+    def GetFocusedFrame(self):
+        return Frame()
 
-	def GetFrame(self):
-		return Frame()
+    def GetFrame(self):
+        return Frame()
 
-	def GetFrameNames(self):
-		return ["", ""]
+    def GetFrameNames(self):
+        return ["", ""]
 
-	def GetJavascriptBindings(self):
-		return JavascriptBindings()
+    def GetJavascriptBindings(self):
+        return JavascriptBindings()
 
-	def GetMainFrame(self):
-		return Frame()
+    def GetMainFrame(self):
+        return Frame()
 
-	def GetOpenerWindowID(self):
-		return windowID
+    def GetOpenerWindowID(self):
+        return windowID
 
-	def GetUserData(self, key):
-		return None
-	
-	def GetWindowID(self):
-		return windowID
+    def GetUserData(self, key):
+        return None
 
-	def GetInnerWindowID(self):
-		return windowID
+    def GetWindowID(self):
+        return windowID
 
-	def GetZoomLevel(self):
-		return 0.0
+    def GetInnerWindowID(self):
+        return windowID
 
-	def GoBack(self):
-		return None
+    def GetZoomLevel(self):
+        return 0.0
 
-	def GoForward(self):
-		return None
+    def GoBack(self):
+        return None
 
-	def HasDocument(self):
-		return False
+    def GoForward(self):
+        return None
 
-	def HidePopup(self):
-		return None
+    def HasDocument(self):
+        return False
 
-	def IsFullscreen(self):
-		return False
+    def HidePopup(self):
+        return None
 
-	def IsPopup(self):
-		return False
+    def IsFullscreen(self):
+        return False
 
-	def IsPopupVisible(self):
-		return False
+    def IsPopup(self):
+        return False
 
-	def IsWindowRenderingDisabled(self):
-		return False
+    def IsPopupVisible(self):
+        return False
 
-	def Reload(self):
-		return None
+    def IsWindowRenderingDisabled(self):
+        return False
 
-	def ReloadIgnoreCache(self):
-		return None
+    def Reload(self):
+        return None
 
-	"""
-	def SendKeyEvent(self, keyType, keyInfo, modifiers):
-		return None
+    def ReloadIgnoreCache(self):
+        return None
 
-	def SendMouseClickEvent(self, x, y, buttonType, mouseUp, clickCount):
-		return None
+    """
+    def SendKeyEvent(self, keyType, keyInfo, modifiers):
+        return None
 
-	def SendMouseMoveEvent(self, x, y, mouseLeave):
-		return None
+    def SendMouseClickEvent(self, x, y, buttonType, mouseUp, clickCount):
+        return None
 
-	def SendMouseWheelEvent(self, x, y, deltaX, deltaY):
-		return None
+    def SendMouseMoveEvent(self, x, y, mouseLeave):
+        return None
 
-	def SendFocusEvent(self, setFocus):
-		return None
+    def SendMouseWheelEvent(self, x, y, deltaX, deltaY):
+        return None
 
-	def SendCaptureLostEvent(self):
-		return None
-	"""
+    def SendFocusEvent(self, setFocus):
+        return None
 
-	def SetFocus(self, enable):
-		return None
+    def SendCaptureLostEvent(self):
+        return None
+    """
 
-	def SetZoomLevel(self, zoomLevel):
-		return None
+    def SetFocus(self, enable):
+        return None
 
-	def SetUserData(self, key, value):
-		return None
+    def SetZoomLevel(self, zoomLevel):
+        return None
 
-	def ShowDevTools(self):
-		return None
+    def SetUserData(self, key, value):
+        return None
 
-	def StopLoad(self):
-		return None
+    def ShowDevTools(self):
+        return None
 
-	def StopFinding(self, clearSelection):
-		return None
+    def StopLoad(self):
+        return None
 
-	def ToggleFullscreen(self):
-		return None
+    def StopFinding(self, clearSelection):
+        return None
+
+    def ToggleFullscreen(self):
+        return None
 
 #
 # Frame object.
@@ -673,132 +673,132 @@ class Browser:
 
 class Frame:
 
-	"""
-	def CallFunction(self, funcName, param1, param2, param3_etc):
-		return None
-	"""
+    """
+    def CallFunction(self, funcName, param1, param2, param3_etc):
+        return None
+    """
 
-	def Copy(self):
-		return None
+    def Copy(self):
+        return None
 
-	def Cut(self):
-		return None
+    def Cut(self):
+        return None
 
-	def Delete(self):
-		return None
+    def Delete(self):
+        return None
 
-	def ExecuteJavascript(self, jsCode, scriptURL=None, startLine=None):
-		return None
+    def ExecuteJavascript(self, jsCode, scriptURL=None, startLine=None):
+        return None
 
-	"""
-	def EvalJavascript(self, code, retval, exception):
-		return None
+    """
+    def EvalJavascript(self, code, retval, exception):
+        return None
 
-	def GetBrowser(self):
-		return Browser()
-	"""
+    def GetBrowser(self):
+        return Browser()
+    """
 
-	def GetIdentifier(self):
-		return 0
+    def GetIdentifier(self):
+        return 0
 
-	def GetName(self):
-		return ""
+    def GetName(self):
+        return ""
 
-	"""
-	def GetParent(self):
-		return Frame()
-	"""
+    """
+    def GetParent(self):
+        return Frame()
+    """
 
-	def GetProperty(self, name):
-		return mixed
+    def GetProperty(self, name):
+        return mixed
 
-	def GetSource(self):
-		return ""
+    def GetSource(self):
+        return ""
 
-	def GetText(self):
-		return ""
+    def GetText(self):
+        return ""
 
-	def GetURL(self):
-		return ""
+    def GetURL(self):
+        return ""
 
-	def IsFocused(self):
-		return False
+    def IsFocused(self):
+        return False
 
-	def IsMain(self):
-		return False
+    def IsMain(self):
+        return False
 
-	"""
-	def LoadRequest(self, request):
-		return None
+    """
+    def LoadRequest(self, request):
+        return None
 
-	def LoadStream(self, stream, url):
-		return None
-	"""
+    def LoadStream(self, stream, url):
+        return None
+    """
 
-	def LoadString(self, value, url):
-		return None
+    def LoadString(self, value, url):
+        return None
 
-	def LoadURL(self, url):
-		return None
+    def LoadURL(self, url):
+        return None
 
-	def Paste(self):
-		return None
+    def Paste(self):
+        return None
 
-	def Print(self):
-		return None
+    def Print(self):
+        return None
 
-	def Redo(self):
-		return None
+    def Redo(self):
+        return None
 
-	def SelectAll(self):
-		return None
+    def SelectAll(self):
+        return None
 
-	def SetProperty(self, name, value):
-		return None
+    def SetProperty(self, name, value):
+        return None
 
-	def Undo(self):
-		return None
+    def Undo(self):
+        return None
 
-	def ViewSource(self):
-		return None
+    def ViewSource(self):
+        return None
 
-	"""
-	def VisitDOM(visitor):
-		return None
-	"""
+    """
+    def VisitDOM(visitor):
+        return None
+    """
 
 class Response:
 
-	def GetStatus(self):
-		return 0
+    def GetStatus(self):
+        return 0
 
-	def SetStatus(self, status):
-		return None
+    def SetStatus(self, status):
+        return None
 
-	def GetStatusText(self):
-		return ""
+    def GetStatusText(self):
+        return ""
 
-	def SetStatusText(self, statusText):
-		return None
+    def SetStatusText(self, statusText):
+        return None
 
-	def GetMimeType(self):
-		return ""
+    def GetMimeType(self):
+        return ""
 
-	def SetMimeType(self, mimeType):
-		return None
+    def SetMimeType(self, mimeType):
+        return None
 
-	def GetHeader(self, name):
-		return ""
+    def GetHeader(self, name):
+        return ""
 
-	def GetHeaderMap(self):
-		return {}
+    def GetHeaderMap(self):
+        return {}
 
-	def GetHeaderMultimap(self):
-		return [("","")]
+    def GetHeaderMultimap(self):
+        return [("","")]
 
-	def SetHeaderMap(self, headerMap={}):
-		return None
+    def SetHeaderMap(self, headerMap={}):
+        return None
 
-	def SetHeaderMultimap(self, headerMultimap=[]):
-		return None
+    def SetHeaderMultimap(self, headerMultimap=[]):
+        return None
 

@@ -4,104 +4,104 @@
 
 cdef void SetCefWindowInfo(CefWindowInfo& cefWindowInfo, windowInfo) except *:
 
-	if not windowInfo.windowType:
-		raise Exception("WindowInfo: windowType is not set")
-	if not windowInfo.parentWindowHandle:
-		raise Exception("WindowInfo: parentWindowHandle is not set")
+    if not windowInfo.windowType:
+        raise Exception("WindowInfo: windowType is not set")
+    if not windowInfo.parentWindowHandle:
+        raise Exception("WindowInfo: parentWindowHandle is not set")
 
-	IF UNAME_SYSNAME == "Windows":
-		cdef RECT rect	
-	cdef CefString cefString
-	
-	if windowInfo.windowType == "child":
-		IF UNAME_SYSNAME == "Windows":
-			if windowInfo.windowRect:
-				rect.left = int(windowInfo.windowRect[0])
-				rect.top = int(windowInfo.windowRect[1])
-				rect.right = int(windowInfo.windowRect[2])
-				rect.bottom = int(windowInfo.windowRect[3])
-			else:
-				GetClientRect(<HWND><int>windowInfo.parentWindowHandle, &rect)
-			cefWindowInfo.SetAsChild(<HWND><int>windowInfo.parentWindowHandle, rect)
-		ELIF UNAME_SYSNAME == "Darwin":
-			raise Exception("WindowInfo.SetAsChild() not yet implemented on Mac")
-		ELIF UNAME_SYSNAME == "Linux":
-			raise Exception("WindowInfo.SetAsChild() not yet implemented on Linux")
+    IF UNAME_SYSNAME == "Windows":
+        cdef RECT rect
+    cdef CefString cefString
 
-	IF UNAME_SYSNAME == "Windows":
-		if windowInfo.windowType == "popup":
-			ToCefString(windowInfo.windowName, cefString)
-			cefWindowInfo.SetAsPopup(<HWND><int>windowInfo.parentWindowHandle, cefString)
-	
-	IF CEF_VERSION == 1:
-		IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
-			if windowInfo.windowType == "offscreen":
-				cefWindowInfo.SetAsOffScreen(<HWND><int>windowInfo.parentWindowHandle)
+    if windowInfo.windowType == "child":
+        IF UNAME_SYSNAME == "Windows":
+            if windowInfo.windowRect:
+                rect.left = int(windowInfo.windowRect[0])
+                rect.top = int(windowInfo.windowRect[1])
+                rect.right = int(windowInfo.windowRect[2])
+                rect.bottom = int(windowInfo.windowRect[3])
+            else:
+                GetClientRect(<HWND><int>windowInfo.parentWindowHandle, &rect)
+            cefWindowInfo.SetAsChild(<HWND><int>windowInfo.parentWindowHandle, rect)
+        ELIF UNAME_SYSNAME == "Darwin":
+            raise Exception("WindowInfo.SetAsChild() not yet implemented on Mac")
+        ELIF UNAME_SYSNAME == "Linux":
+            raise Exception("WindowInfo.SetAsChild() not yet implemented on Linux")
 
-	IF CEF_VERSION == 1:
-		IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
-			cefWindowInfo.SetTransparentPainting(int(windowInfo.transparentPainting))
-	ELIF CEF_VERSION == 3:
-		IF UNAME_SYSNAME == "Windows":
-			cefWindowInfo.SetTransparentPainting(int(windowInfo.transparentPainting))
+    IF UNAME_SYSNAME == "Windows":
+        if windowInfo.windowType == "popup":
+            ToCefString(windowInfo.windowName, cefString)
+            cefWindowInfo.SetAsPopup(<HWND><int>windowInfo.parentWindowHandle, cefString)
+
+    IF CEF_VERSION == 1:
+        IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
+            if windowInfo.windowType == "offscreen":
+                cefWindowInfo.SetAsOffScreen(<HWND><int>windowInfo.parentWindowHandle)
+
+    IF CEF_VERSION == 1:
+        IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
+            cefWindowInfo.SetTransparentPainting(int(windowInfo.transparentPainting))
+    ELIF CEF_VERSION == 3:
+        IF UNAME_SYSNAME == "Windows":
+            cefWindowInfo.SetTransparentPainting(int(windowInfo.transparentPainting))
 
 cdef class WindowInfo:
 
-	cdef public str windowType
-	cdef public int parentWindowHandle
-	cdef public list windowRect
-	cdef public py_string windowName
-	cdef public py_bool transparentPainting
+    cdef public str windowType
+    cdef public int parentWindowHandle
+    cdef public list windowRect
+    cdef public py_string windowName
+    cdef public py_bool transparentPainting
 
-	def __init__(self):
+    def __init__(self):
 
-		self.transparentPainting = False
-	
-	cpdef object SetAsChild(self, int parentWindowHandle, list windowRect=None):
+        self.transparentPainting = False
 
-		if not IsWindowHandle(parentWindowHandle):
-			raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
-		self.windowType = "child"
-		self.parentWindowHandle = parentWindowHandle
-		IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
-			if not windowRect:
-				raise Exception("WindowInfo.SetAsChild() failed: windowRect is required")
-		if windowRect:
-			if type(windowRect) == list and len(windowRect) == 4:
-				self.windowRect = [windowRect[0], windowRect[1], windowRect[2], windowRect[3]]
-			else:
-				raise Exception("WindowInfo.SetAsChild() failed: windowRect: invalid value")
+    cpdef object SetAsChild(self, int parentWindowHandle, list windowRect=None):
 
-	IF UNAME_SYSNAME == "Windows":
-		
-		cpdef object SetAsPopup(self, int parentWindowHandle, py_string windowName):
+        if not IsWindowHandle(parentWindowHandle):
+            raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
+        self.windowType = "child"
+        self.parentWindowHandle = parentWindowHandle
+        IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
+            if not windowRect:
+                raise Exception("WindowInfo.SetAsChild() failed: windowRect is required")
+        if windowRect:
+            if type(windowRect) == list and len(windowRect) == 4:
+                self.windowRect = [windowRect[0], windowRect[1], windowRect[2], windowRect[3]]
+            else:
+                raise Exception("WindowInfo.SetAsChild() failed: windowRect: invalid value")
 
-			if not IsWindowHandle(parentWindowHandle):
-				raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
-			self.parentWindowHandle = parentWindowHandle
-			self.windowType = "popup"
-			self.windowName = str(windowName)
+    IF UNAME_SYSNAME == "Windows":
 
-	IF CEF_VERSION == 1:
-		IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
+        cpdef object SetAsPopup(self, int parentWindowHandle, py_string windowName):
 
-			cpdef object SetAsOffscreen(self, int parentWindowHandle):
+            if not IsWindowHandle(parentWindowHandle):
+                raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
+            self.parentWindowHandle = parentWindowHandle
+            self.windowType = "popup"
+            self.windowName = str(windowName)
 
-				if not IsWindowHandle(parentWindowHandle):
-					raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
-				self.parentWindowHandle = parentWindowHandle
-				self.windowType = "offscreen"
+    IF CEF_VERSION == 1:
+        IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
 
-	IF CEF_VERSION == 1:
-		IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
+            cpdef object SetAsOffscreen(self, int parentWindowHandle):
 
-			cpdef object SetTransparentPainting(self, py_bool transparentPainting):
+                if not IsWindowHandle(parentWindowHandle):
+                    raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
+                self.parentWindowHandle = parentWindowHandle
+                self.windowType = "offscreen"
 
-				self.transparentPainting = transparentPainting
+    IF CEF_VERSION == 1:
+        IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
 
-	ELIF CEF_VERSION == 3:
-		IF UNAME_SYSNAME == "Windows":
+            cpdef object SetTransparentPainting(self, py_bool transparentPainting):
 
-			cpdef object SetTransparentPainting(self, py_bool transparentPainting):
+                self.transparentPainting = transparentPainting
 
-				self.transparentPainting = transparentPainting
+    ELIF CEF_VERSION == 3:
+        IF UNAME_SYSNAME == "Windows":
+
+            cpdef object SetTransparentPainting(self, py_bool transparentPainting):
+
+                self.transparentPainting = transparentPainting

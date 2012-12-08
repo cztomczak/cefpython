@@ -19,15 +19,15 @@ import win32gui
 import win32con
 
 if sys.version_info.major == 2:
-	from urllib import pathname2url as urllib_pathname2url
+    from urllib import pathname2url as urllib_pathname2url
 else:
-	from urllib.request import pathname2url as urllib_pathname2url
+    from urllib.request import pathname2url as urllib_pathname2url
 
-# We should allow multiple string types: str, unicode, bytes. ToCefString() can 
+# We should allow multiple string types: str, unicode, bytes. ToCefString() can
 # handle them all.
 ctypedef object py_string
 
-# You can't use "void" along with cpdef function returning None, it is planned to be 
+# You can't use "void" along with cpdef function returning None, it is planned to be
 # added to Cython in the future, creating this virtual type temporarily. If you
 # change it later to "void" then don't forget to add "except *".
 ctypedef object py_void
@@ -52,18 +52,18 @@ from libc.stdlib cimport atoi
 # When pyx file cimports * from a pxd file and that pxd cimports * from another pxd
 # then these names will be visible in pyx file.
 
-# Circular imports are allowed in form "cimport ...", but won't work if you do 
+# Circular imports are allowed in form "cimport ...", but won't work if you do
 # "from ... cimport *", this is important to know in pxd files.
 
 IF UNAME_SYSNAME == "Windows":
-	from windows cimport *
+    from windows cimport *
 
 from cef_string cimport *
 from cef_types_wrappers cimport *
 from cef_task cimport *
 
 IF UNAME_SYSNAME == "Windows":
-	from cef_win cimport *
+    from cef_win cimport *
 
 from cef_ptr cimport *
 from cef_app cimport *
@@ -74,23 +74,23 @@ from client_handler cimport *
 from cef_frame cimport *
 
 # cannot cimport *, that would cause name conflicts with constants.
-cimport cef_types 
+cimport cef_types
 
 IF UNAME_SYSNAME == "Windows":
-	cimport cef_types_win # cannot cimport *, name conflicts
+    cimport cef_types_win # cannot cimport *, name conflicts
 
 IF CEF_VERSION == 1:
-	from cef_v8 cimport *
-	cimport cef_v8_static
-	cimport cef_v8_stack_trace
-	from v8function_handler cimport *
-	from cef_request cimport *
-	from cef_response cimport *
-	from cef_stream cimport *
-	from cef_content_filter cimport *
-	from cef_download_handler cimport *
-	from cef_cookie cimport *
+    from cef_v8 cimport *
+    cimport cef_v8_static
+    cimport cef_v8_stack_trace
+    from v8function_handler cimport *
+    from cef_request cimport *
+    from cef_response cimport *
+    from cef_stream cimport *
+    from cef_content_filter cimport *
+    from cef_download_handler cimport *
+    from cef_cookie cimport *
 
 IF UNAME_SYSNAME == "Windows":
-	IF CEF_VERSION == 1:
-		from http_authentication cimport *
+    IF CEF_VERSION == 1:
+        from http_authentication cimport *

@@ -15,26 +15,26 @@ KEY_META  = <int>cef_types.KEY_META
 KEY_KEYPAD = <int>cef_types.KEY_KEYPAD
 
 cdef public c_bool KeyboardHandler_OnKeyEvent(
-		CefRefPtr[CefBrowser] cefBrowser,
-		cef_types.cef_handler_keyevent_type_t eventType,
-		int code,
-		int modifiers,
-		c_bool isSystemKey,
-		c_bool isAfterJavascript
-		) except * with gil:
+        CefRefPtr[CefBrowser] cefBrowser,
+        cef_types.cef_handler_keyevent_type_t eventType,
+        int code,
+        int modifiers,
+        c_bool isSystemKey,
+        c_bool isAfterJavascript
+        ) except * with gil:
 
-	cdef PyBrowser pyBrowser
-	try:
-		pyBrowser = GetPyBrowser(cefBrowser)
-		if not pyBrowser:
-			Debug("KeyboardHandler_OnKeyEvent() failed: pyBrowser is %s" % pyBrowser)
-			return False
-		callback = pyBrowser.GetClientCallback("OnKeyEvent")
-		if callback:
-			return bool(callback(pyBrowser, <int>eventType, code, modifiers, isSystemKey, isAfterJavascript))
-		else:
-			return False
-	except:
-		(exc_type, exc_value, exc_trace) = sys.exc_info()
-		sys.excepthook(exc_type, exc_value, exc_trace)
+    cdef PyBrowser pyBrowser
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        if not pyBrowser:
+            Debug("KeyboardHandler_OnKeyEvent() failed: pyBrowser is %s" % pyBrowser)
+            return False
+        callback = pyBrowser.GetClientCallback("OnKeyEvent")
+        if callback:
+            return bool(callback(pyBrowser, <int>eventType, code, modifiers, isSystemKey, isAfterJavascript))
+        else:
+            return False
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 

@@ -3,4 +3,4 @@
 # Website: http://code.google.com/p/cefpython/
 
 cdef extern from "stddef.h":
-	ctypedef void wchar_t
+    ctypedef void wchar_t

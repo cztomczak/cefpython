@@ -7,10 +7,10 @@ from libcpp.string cimport string as c_string
 
 cdef extern from "http_authentication/AuthCredentials.h":
 
-	ctypedef struct AuthCredentialsData:
-		c_string username
-		c_string password
+    ctypedef struct AuthCredentialsData:
+        c_string username
+        c_string password
 
 cdef extern from "http_authentication/AuthDialog.h":
-	
-	cdef AuthCredentialsData* AuthDialog(HWND parent) nogil
+
+    cdef AuthCredentialsData* AuthDialog(HWND parent) nogil

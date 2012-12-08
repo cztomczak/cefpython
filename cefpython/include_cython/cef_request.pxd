@@ -5,6 +5,6 @@
 from cef_base cimport CefBase
 
 cdef extern from "include/cef_request.h":
-	
-	cdef cppclass CefRequest(CefBase):
-		pass
+
+    cdef cppclass CefRequest(CefBase):
+        pass

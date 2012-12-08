@@ -8,17 +8,17 @@ from multimap cimport multimap
 
 cdef extern from "include/cef_response.h":
 
-	ctypedef multimap[CefString, CefString] HeaderMap
-	
-	cdef cppclass CefResponse(CefBase):
-		
-		int GetStatus()
-		void SetStatus(int status)
-		CefString GetStatusText()
-		void SetStatusText(CefString& statusText)
-		CefString GetMimeType()
-		void SetMimeType(CefString& mimeType)
-		CefString GetHeader(CefString& name)
-		void GetHeaderMap(HeaderMap& headerMap)
-		void SetHeaderMap(HeaderMap& headerMap)
+    ctypedef multimap[CefString, CefString] HeaderMap
+
+    cdef cppclass CefResponse(CefBase):
+
+        int GetStatus()
+        void SetStatus(int status)
+        CefString GetStatusText()
+        void SetStatusText(CefString& statusText)
+        CefString GetMimeType()
+        void SetMimeType(CefString& mimeType)
+        CefString GetHeader(CefString& name)
+        void GetHeaderMap(HeaderMap& headerMap)
+        void SetHeaderMap(HeaderMap& headerMap)
 
