@@ -6,6 +6,6 @@ from cef_client cimport CefClient
 
 cdef extern from "client_handler/client_handler.h":
 
-	cdef cppclass ClientHandler(CefClient):
-		pass
-		
+    cdef cppclass ClientHandler(CefClient):
+        pass
+

@@ -10,16 +10,16 @@ from cef_types_wrappers cimport CefStructBase
 from cef_string cimport CefString
 
 cdef extern from "include/internal/cef_win.h":
-	
-	ctypedef HWND CefWindowHandle
-	
-	cdef cppclass CefWindowInfo:
-		void SetAsChild(HWND, RECT)
-		void SetAsOffScreen(HWND)
-		void SetAsPopup(HWND, CefString&)
-		void SetTransparentPainting(int)
 
-	IF CEF_VERSION == 3:
-		cdef cppclass CefMainArgs(CefStructBase):
-			CefMainArgs()
-			CefMainArgs(HINSTANCE hInstance)
+    ctypedef HWND CefWindowHandle
+
+    cdef cppclass CefWindowInfo:
+        void SetAsChild(HWND, RECT)
+        void SetAsOffScreen(HWND)
+        void SetAsPopup(HWND, CefString&)
+        void SetTransparentPainting(int)
+
+    IF CEF_VERSION == 3:
+        cdef cppclass CefMainArgs(CefStructBase):
+            CefMainArgs()
+            CefMainArgs(HINSTANCE hInstance)

@@ -5,6 +5,6 @@
 from cef_base cimport CefBase
 
 cdef extern from "include/cef_stream.h":
-	
-	cdef cppclass CefStreamReader(CefBase):
-		pass
+
+    cdef cppclass CefStreamReader(CefBase):
+        pass

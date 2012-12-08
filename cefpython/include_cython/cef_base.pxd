@@ -4,5 +4,5 @@
 
 cdef extern from "include/cef_base.h":
 
-	cdef cppclass CefBase:
-		pass
+    cdef cppclass CefBase:
+        pass

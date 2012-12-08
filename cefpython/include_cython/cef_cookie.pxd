@@ -5,6 +5,6 @@
 from cef_base cimport CefBase
 
 cdef extern from "include/cef_cookie.h":
-	
-	cdef cppclass CefCookieManager(CefBase):
-		pass
+
+    cdef cppclass CefCookieManager(CefBase):
+        pass

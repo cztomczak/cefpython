@@ -6,7 +6,7 @@ include "compile_time_constants.pxi"
 
 from cef_ptr cimport CefRefPtr
 IF UNAME_SYSNAME == "Windows":
-	from cef_win cimport CefWindowHandle, CefWindowInfo
+    from cef_win cimport CefWindowHandle, CefWindowInfo
 from cef_client cimport CefClient
 from cef_types_wrappers cimport CefBrowserSettings
 from cef_browser cimport CefBrowser
@@ -15,34 +15,34 @@ from cef_string cimport CefString
 
 IF CEF_VERSION == 1:
 
-	# Specifying namespace allows to import a static method.
-	cdef extern from "include/cef_browser.h" namespace "CefBrowser":
+    # Specifying namespace allows to import a static method.
+    cdef extern from "include/cef_browser.h" namespace "CefBrowser":
 
-		cdef c_bool CreateBrowser(
-			CefWindowInfo&,
-			CefRefPtr[CefClient],
-			CefString&,
-			CefBrowserSettings&)
+        cdef c_bool CreateBrowser(
+            CefWindowInfo&,
+            CefRefPtr[CefClient],
+            CefString&,
+            CefBrowserSettings&)
 
-		cdef CefRefPtr[CefBrowser] CreateBrowserSync(
-			CefWindowInfo&,
-			CefRefPtr[CefClient],
-			CefString&,
-			CefBrowserSettings&)
+        cdef CefRefPtr[CefBrowser] CreateBrowserSync(
+            CefWindowInfo&,
+            CefRefPtr[CefClient],
+            CefString&,
+            CefBrowserSettings&)
 
 ELIF CEF_VERSION == 3:
 
-	# Specifying namespace allows to import a static method.
-	cdef extern from "include/cef_browser.h" namespace "CefBrowserHost":
+    # Specifying namespace allows to import a static method.
+    cdef extern from "include/cef_browser.h" namespace "CefBrowserHost":
 
-		cdef c_bool CreateBrowser(
-			CefWindowInfo&,
-			CefRefPtr[CefClient], 
-			CefString&,
-			CefBrowserSettings&)
+        cdef c_bool CreateBrowser(
+            CefWindowInfo&,
+            CefRefPtr[CefClient],
+            CefString&,
+            CefBrowserSettings&)
 
-		cdef CefRefPtr[CefBrowser] CreateBrowserSync(
-			CefWindowInfo&,
-			CefRefPtr[CefClient], 
-			CefString&,
-			CefBrowserSettings&)
+        cdef CefRefPtr[CefBrowser] CreateBrowserSync(
+            CefWindowInfo&,
+            CefRefPtr[CefClient],
+            CefString&,
+            CefBrowserSettings&)

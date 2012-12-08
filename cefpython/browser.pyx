@@ -9,417 +9,417 @@ cdef dict g_pyBrowsers = {}
 
 cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
 
-	global g_pyBrowsers
+    global g_pyBrowsers
 
-	if <void*>cefBrowser == NULL or not cefBrowser.get():
-		Debug("GetPyBrowser(): returning None")
-		return None
+    if <void*>cefBrowser == NULL or not cefBrowser.get():
+        Debug("GetPyBrowser(): returning None")
+        return None
 
-	cdef PyBrowser pyBrowser
-	cdef int browserId
+    cdef PyBrowser pyBrowser
+    cdef int browserId
 
-	browserId = cefBrowser.get().GetIdentifier()
-	if browserId in g_pyBrowsers:
-		return g_pyBrowsers[browserId]
+    browserId = cefBrowser.get().GetIdentifier()
+    if browserId in g_pyBrowsers:
+        return g_pyBrowsers[browserId]
 
-	for id, pyBrowser in g_pyBrowsers.items():
-		if not pyBrowser.cefBrowser.get():
-			Debug("GetPyBrowser(): removing an empty CefBrowser reference, browserId=%s" % id)
-			del g_pyBrowsers[id]
+    for id, pyBrowser in g_pyBrowsers.items():
+        if not pyBrowser.cefBrowser.get():
+            Debug("GetPyBrowser(): removing an empty CefBrowser reference, browserId=%s" % id)
+            del g_pyBrowsers[id]
 
-	Debug("GetPyBrowser(): creating new PyBrowser, browserId=%s" % browserId)
-	pyBrowser = PyBrowser()
-	pyBrowser.cefBrowser = cefBrowser
-	g_pyBrowsers[browserId] = pyBrowser
-	return pyBrowser
+    Debug("GetPyBrowser(): creating new PyBrowser, browserId=%s" % browserId)
+    pyBrowser = PyBrowser()
+    pyBrowser.cefBrowser = cefBrowser
+    g_pyBrowsers[browserId] = pyBrowser
+    return pyBrowser
 
 cpdef PyBrowser GetBrowserByWindowHandle(int windowHandle):
 
-	cdef PyBrowser pyBrowser
-	for browserId in g_pyBrowsers:
-		pyBrowser = g_pyBrowsers[browserId]
-		if (pyBrowser.GetWindowHandle() == windowHandle or
-				pyBrowser.GetUserData("__outerWindowHandle") == windowHandle):
-			return pyBrowser
-	return None
+    cdef PyBrowser pyBrowser
+    for browserId in g_pyBrowsers:
+        pyBrowser = g_pyBrowsers[browserId]
+        if (pyBrowser.GetWindowHandle() == windowHandle or
+                pyBrowser.GetUserData("__outerWindowHandle") == windowHandle):
+            return pyBrowser
+    return None
 
 IF CEF_VERSION == 3:
 
-	cdef CefRefPtr[CefBrowserHost] GetCefBrowserHost(
-			CefRefPtr[CefBrowser] cefBrowser) except *:
+    cdef CefRefPtr[CefBrowserHost] GetCefBrowserHost(
+            CefRefPtr[CefBrowser] cefBrowser) except *:
 
-		cdef CefRefPtr[CefBrowserHost] cefBrowserHost = cefBrowser.get().GetHost()
-		if <void*>cefBrowserHost != NULL and cefBrowserHost.get():
-			return cefBrowserHost
-		raise Exception("GetCefBrowserHost() failed: this method of Browser object "
-						"can only be called in the browser process.")
+        cdef CefRefPtr[CefBrowserHost] cefBrowserHost = cefBrowser.get().GetHost()
+        if <void*>cefBrowserHost != NULL and cefBrowserHost.get():
+            return cefBrowserHost
+        raise Exception("GetCefBrowserHost() failed: this method of Browser object "
+                        "can only be called in the browser process.")
 
 cdef class PyBrowser:
 
-	cdef CefRefPtr[CefBrowser] cefBrowser
+    cdef CefRefPtr[CefBrowser] cefBrowser
 
-	cdef public dict clientCallbacks
-	cdef public list allowedClientCallbacks
-	IF CEF_VERSION == 1:
-		cdef public JavascriptBindings javascriptBindings
-	cdef public dict userData
+    cdef public dict clientCallbacks
+    cdef public list allowedClientCallbacks
+    IF CEF_VERSION == 1:
+        cdef public JavascriptBindings javascriptBindings
+    cdef public dict userData
 
-	# Properties used by ToggleFullscreen().
-	cdef public int isFullscreen
-	cdef public int maximized
-	cdef public int gwlStyle
-	cdef public int gwlExStyle
-	cdef public tuple windowRect
+    # Properties used by ToggleFullscreen().
+    cdef public int isFullscreen
+    cdef public int maximized
+    cdef public int gwlStyle
+    cdef public int gwlExStyle
+    cdef public tuple windowRect
 
-	cdef CefRefPtr[CefBrowser] GetCefBrowser(self) except *:
+    cdef CefRefPtr[CefBrowser] GetCefBrowser(self) except *:
 
-		if <void*>self.cefBrowser != NULL and self.cefBrowser.get():
-			return self.cefBrowser
-		raise Exception("PyBrowser.GetCefBrowser() failed: CefBrowser was destroyed")
+        if <void*>self.cefBrowser != NULL and self.cefBrowser.get():
+            return self.cefBrowser
+        raise Exception("PyBrowser.GetCefBrowser() failed: CefBrowser was destroyed")
 
-	IF CEF_VERSION == 3:
+    IF CEF_VERSION == 3:
 
-		cdef CefRefPtr[CefBrowserHost] GetCefBrowserHost(self) except *:
+        cdef CefRefPtr[CefBrowserHost] GetCefBrowserHost(self) except *:
 
-			cdef CefRefPtr[CefBrowserHost] cefBrowserHost = self.GetCefBrowser().get().GetHost()
-			if <void*>cefBrowserHost != NULL and cefBrowserHost.get():
-				return cefBrowserHost
-			raise Exception("PyBrowser.GetCefBrowserHost() failed: this method "
-							"can only be called in the browser process.")
+            cdef CefRefPtr[CefBrowserHost] cefBrowserHost = self.GetCefBrowser().get().GetHost()
+            if <void*>cefBrowserHost != NULL and cefBrowserHost.get():
+                return cefBrowserHost
+            raise Exception("PyBrowser.GetCefBrowserHost() failed: this method "
+                            "can only be called in the browser process.")
 
-	def __init__(self):
+    def __init__(self):
 
-		self.clientCallbacks = {}
-		self.allowedClientCallbacks = []
-		self.userData = {}
+        self.clientCallbacks = {}
+        self.allowedClientCallbacks = []
+        self.userData = {}
 
-	cpdef py_void SetClientCallback(self, py_string name, object callback):
+    cpdef py_void SetClientCallback(self, py_string name, object callback):
 
-		if not self.allowedClientCallbacks:
+        if not self.allowedClientCallbacks:
 
-			# CefLoadHandler.
-			self.allowedClientCallbacks += ["OnLoadEnd", "OnLoadError", "OnLoadStart"]
+            # CefLoadHandler.
+            self.allowedClientCallbacks += ["OnLoadEnd", "OnLoadError", "OnLoadStart"]
 
-			# CefKeyboardHandler.
-			self.allowedClientCallbacks += ["OnKeyEvent"]
+            # CefKeyboardHandler.
+            self.allowedClientCallbacks += ["OnKeyEvent"]
 
-			# CefV8ContextHandler.
-			self.allowedClientCallbacks += ["OnUncaughtException"]
+            # CefV8ContextHandler.
+            self.allowedClientCallbacks += ["OnUncaughtException"]
 
-			# CefRequestHandler.
-			self.allowedClientCallbacks += ["OnBeforeBrowse", "OnBeforeResourceLoad",
-					"OnResourceRedirect", "OnResourceResponse",	"OnProtocolExecution",
-					"GetDownloadHandler", "GetAuthCredentials", "GetCookieManager"]
+            # CefRequestHandler.
+            self.allowedClientCallbacks += ["OnBeforeBrowse", "OnBeforeResourceLoad",
+                    "OnResourceRedirect", "OnResourceResponse", "OnProtocolExecution",
+                    "GetDownloadHandler", "GetAuthCredentials", "GetCookieManager"]
 
-			# CefDisplayHandler.
-			self.allowedClientCallbacks += ["OnAddressChange", "OnConsoleMessage",
-					"OnContentsSizeChange", "OnNavStateChange", "OnStatusMessage",
-					"OnTitleChange", "OnTooltip"]
+            # CefDisplayHandler.
+            self.allowedClientCallbacks += ["OnAddressChange", "OnConsoleMessage",
+                    "OnContentsSizeChange", "OnNavStateChange", "OnStatusMessage",
+                    "OnTitleChange", "OnTooltip"]
 
-			# LifespanHandler.
-			self.allowedClientCallbacks += ["DoClose", "OnAfterCreated", "OnBeforeClose",
-					"RunModal"]
+            # LifespanHandler.
+            self.allowedClientCallbacks += ["DoClose", "OnAfterCreated", "OnBeforeClose",
+                    "RunModal"]
 
-		if name not in self.allowedClientCallbacks:
-			raise Exception("Browser.SetClientCallback() failed: unknown callback: %s" % name)
+        if name not in self.allowedClientCallbacks:
+            raise Exception("Browser.SetClientCallback() failed: unknown callback: %s" % name)
 
-		self.clientCallbacks[name] = callback
+        self.clientCallbacks[name] = callback
 
-	cpdef py_void SetClientHandler(self, object clientHandler):
+    cpdef py_void SetClientHandler(self, object clientHandler):
 
-		if not hasattr(clientHandler, "__class__"):
-			raise Exception("Browser.SetClientHandler() failed: __class__ attribute missing")
-		cdef dict methods = {}
-		cdef py_string key
-		cdef object method
-		cdef tuple value
-		for value in inspect.getmembers(clientHandler, predicate=inspect.ismethod):
-			key = value[0]
-			method = value[1]
-			if key and key[0] != '_':
-				self.SetClientCallback(key, method)
+        if not hasattr(clientHandler, "__class__"):
+            raise Exception("Browser.SetClientHandler() failed: __class__ attribute missing")
+        cdef dict methods = {}
+        cdef py_string key
+        cdef object method
+        cdef tuple value
+        for value in inspect.getmembers(clientHandler, predicate=inspect.ismethod):
+            key = value[0]
+            method = value[1]
+            if key and key[0] != '_':
+                self.SetClientCallback(key, method)
 
-	cpdef object GetClientCallback(self, py_string name):
+    cpdef object GetClientCallback(self, py_string name):
 
-		if name in self.clientCallbacks:
-			return self.clientCallbacks[name]
+        if name in self.clientCallbacks:
+            return self.clientCallbacks[name]
 
-	cpdef dict GetClientCallbacksDict(self):
+    cpdef dict GetClientCallbacksDict(self):
 
-		return self.clientCallbacks
+        return self.clientCallbacks
 
-	IF CEF_VERSION == 1:
+    IF CEF_VERSION == 1:
 
-		cpdef py_void SetJavascriptBindings(self, JavascriptBindings bindings):
+        cpdef py_void SetJavascriptBindings(self, JavascriptBindings bindings):
 
-			self.javascriptBindings = bindings
+            self.javascriptBindings = bindings
 
-		cpdef JavascriptBindings GetJavascriptBindings(self):
+        cpdef JavascriptBindings GetJavascriptBindings(self):
 
-			return self.javascriptBindings
+            return self.javascriptBindings
 
-	# --------------
-	# CEF API.
-	# --------------
+    # --------------
+    # CEF API.
+    # --------------
 
-	cpdef py_bool CanGoBack(self):
+    cpdef py_bool CanGoBack(self):
 
-		return self.GetCefBrowser().get().CanGoBack()
+        return self.GetCefBrowser().get().CanGoBack()
 
-	cpdef py_bool CanGoForward(self):
+    cpdef py_bool CanGoForward(self):
 
-		return self.GetCefBrowser().get().CanGoForward()
+        return self.GetCefBrowser().get().CanGoForward()
 
-	IF CEF_VERSION == 1:
+    IF CEF_VERSION == 1:
 
-		cpdef object ClearHistory(self):
+        cpdef object ClearHistory(self):
 
-			self.GetCefBrowser().get().ClearHistory()
+            self.GetCefBrowser().get().ClearHistory()
 
-	cpdef py_void CloseBrowser(self):
+    cpdef py_void CloseBrowser(self):
 
-		# In cefclient/cefclient_win.cpp there is only ParentWindowWillClose() called.
-		# CloseBrowser() is called only for popups.
+        # In cefclient/cefclient_win.cpp there is only ParentWindowWillClose() called.
+        # CloseBrowser() is called only for popups.
 
-		if self.GetUserData("__outerWindowHandle"):
-			IF CEF_VERSION == 1:
-				Debug("CefBrowser::ParentWindowWillClose()")
-				self.GetCefBrowser().get().ParentWindowWillClose()
-			ELIF CEF_VERSION == 3:
-				Debug("CefBrowserHost::ParentWindowWillClose()")
-				self.GetCefBrowserHost().get().ParentWindowWillClose()
-		else:
-			IF CEF_VERSION == 1:
-				Debug("CefBrowser::CloseBrowser()")
-				self.GetCefBrowser().get().CloseBrowser()
-			ELIF CEF_VERSION == 3:
-				Debug("CefBrowserHost::CloseBrowser()")
-				self.GetCefBrowserHost().get().CloseBrowser()
+        if self.GetUserData("__outerWindowHandle"):
+            IF CEF_VERSION == 1:
+                Debug("CefBrowser::ParentWindowWillClose()")
+                self.GetCefBrowser().get().ParentWindowWillClose()
+            ELIF CEF_VERSION == 3:
+                Debug("CefBrowserHost::ParentWindowWillClose()")
+                self.GetCefBrowserHost().get().ParentWindowWillClose()
+        else:
+            IF CEF_VERSION == 1:
+                Debug("CefBrowser::CloseBrowser()")
+                self.GetCefBrowser().get().CloseBrowser()
+            ELIF CEF_VERSION == 3:
+                Debug("CefBrowserHost::CloseBrowser()")
+                self.GetCefBrowserHost().get().CloseBrowser()
 
-	IF CEF_VERSION == 1:
+    IF CEF_VERSION == 1:
 
-		cpdef py_void CloseDevTools(self):
+        cpdef py_void CloseDevTools(self):
 
-			self.GetCefBrowser().get().CloseDevTools()
+            self.GetCefBrowser().get().CloseDevTools()
 
-		cpdef py_void Find(self, int searchId, py_string searchText, py_bool forward,
-		                  py_bool matchCase, py_bool findNext):
+        cpdef py_void Find(self, int searchId, py_string searchText, py_bool forward,
+                          py_bool matchCase, py_bool findNext):
 
-			cdef CefString cefSearchText
-			ToCefString(searchText, cefSearchText)
-			self.GetCefBrowser().get().Find(searchId, cefSearchText, bool(forward),
-			                                bool(matchCase), bool(findNext))
+            cdef CefString cefSearchText
+            ToCefString(searchText, cefSearchText)
+            self.GetCefBrowser().get().Find(searchId, cefSearchText, bool(forward),
+                                            bool(matchCase), bool(findNext))
 
-	cpdef PyFrame GetFocusedFrame(self):
+    cpdef PyFrame GetFocusedFrame(self):
 
-		assert IsCurrentThread(TID_UI), "Browser.GetFocusedFrame() may only be called on the UI thread"
-		return GetPyFrame(self.GetCefBrowser().get().GetFocusedFrame())
+        assert IsCurrentThread(TID_UI), "Browser.GetFocusedFrame() may only be called on the UI thread"
+        return GetPyFrame(self.GetCefBrowser().get().GetFocusedFrame())
 
-	cpdef PyFrame GetFrame(self, py_string name):
+    cpdef PyFrame GetFrame(self, py_string name):
 
-		assert IsCurrentThread(TID_UI), "Browser.GetFrame() may only be called on the UI thread"
-		cdef CefString cefName
-		ToCefString(name, cefName)
-		return GetPyFrame(self.GetCefBrowser().get().GetFrame(cefName))
+        assert IsCurrentThread(TID_UI), "Browser.GetFrame() may only be called on the UI thread"
+        cdef CefString cefName
+        ToCefString(name, cefName)
+        return GetPyFrame(self.GetCefBrowser().get().GetFrame(cefName))
 
-	cpdef list GetFrameNames(self):
+    cpdef list GetFrameNames(self):
 
-		assert IsCurrentThread(TID_UI), "Browser.GetFrameNames() may only be called on the UI thread"
-		cdef c_vector[CefString] cefNames
-		self.GetCefBrowser().get().GetFrameNames(cefNames)
-		cdef list names = []
-		cdef c_vector[CefString].iterator iterator = cefNames.begin()
-		cdef CefString cefString
-		while iterator != cefNames.end():
-			cefString = deref(iterator)
-			names.append(ToPyString(cefString))
-			preinc(iterator)
-		return names
+        assert IsCurrentThread(TID_UI), "Browser.GetFrameNames() may only be called on the UI thread"
+        cdef c_vector[CefString] cefNames
+        self.GetCefBrowser().get().GetFrameNames(cefNames)
+        cdef list names = []
+        cdef c_vector[CefString].iterator iterator = cefNames.begin()
+        cdef CefString cefString
+        while iterator != cefNames.end():
+            cefString = deref(iterator)
+            names.append(ToPyString(cefString))
+            preinc(iterator)
+        return names
 
-	cpdef PyFrame GetMainFrame(self):
+    cpdef PyFrame GetMainFrame(self):
 
-		return GetPyFrame(self.GetCefBrowser().get().GetMainFrame())
+        return GetPyFrame(self.GetCefBrowser().get().GetMainFrame())
 
-	cpdef int GetOpenerWindowHandle(self) except *:
+    cpdef int GetOpenerWindowHandle(self) except *:
 
-		cdef HWND hwnd
-		IF CEF_VERSION == 1:
-			hwnd = self.GetCefBrowser().get().GetOpenerWindowHandle()
-		ELIF CEF_VERSION == 3:
-			hwnd = self.GetCefBrowserHost().get().GetOpenerWindowHandle()
-		return <int>hwnd
+        cdef HWND hwnd
+        IF CEF_VERSION == 1:
+            hwnd = self.GetCefBrowser().get().GetOpenerWindowHandle()
+        ELIF CEF_VERSION == 3:
+            hwnd = self.GetCefBrowserHost().get().GetOpenerWindowHandle()
+        return <int>hwnd
 
-	cpdef int GetOuterWindowHandle(self) except *:
+    cpdef int GetOuterWindowHandle(self) except *:
 
-		if self.GetUserData("__outerWindowHandle"):
-			return int(self.GetUserData("__outerWindowHandle"))
-		else:
-			return self.GetWindowHandle()
+        if self.GetUserData("__outerWindowHandle"):
+            return int(self.GetUserData("__outerWindowHandle"))
+        else:
+            return self.GetWindowHandle()
 
-	cpdef object GetUserData(self, object key):
+    cpdef object GetUserData(self, object key):
 
-		if key in self.userData:
-			return self.userData[key]
-		return None
+        if key in self.userData:
+            return self.userData[key]
+        return None
 
-	cpdef int GetWindowHandle(self) except *:
+    cpdef int GetWindowHandle(self) except *:
 
-		cdef HWND hwnd
-		IF CEF_VERSION == 1:
-			hwnd = self.GetCefBrowser().get().GetWindowHandle()
-		ELIF CEF_VERSION == 3:
-			hwnd = self.GetCefBrowserHost().get().GetWindowHandle()
-		return <int>hwnd
+        cdef HWND hwnd
+        IF CEF_VERSION == 1:
+            hwnd = self.GetCefBrowser().get().GetWindowHandle()
+        ELIF CEF_VERSION == 3:
+            hwnd = self.GetCefBrowserHost().get().GetWindowHandle()
+        return <int>hwnd
 
-	cpdef double GetZoomLevel(self) except *:
+    cpdef double GetZoomLevel(self) except *:
 
-		IF CEF_VERSION == 1:
-			assert IsCurrentThread(TID_UI), "Browser.GetZoomLevel() may only be called on the UI thread"
-		cdef double zoomLevel
-		IF CEF_VERSION == 1:
-			zoomLevel = self.GetCefBrowser().get().GetZoomLevel()
-		ELIF CEF_VERSION == 3:
-			zoomLevel = self.GetCefBrowserHost().get().GetZoomLevel()
-		return zoomLevel
+        IF CEF_VERSION == 1:
+            assert IsCurrentThread(TID_UI), "Browser.GetZoomLevel() may only be called on the UI thread"
+        cdef double zoomLevel
+        IF CEF_VERSION == 1:
+            zoomLevel = self.GetCefBrowser().get().GetZoomLevel()
+        ELIF CEF_VERSION == 3:
+            zoomLevel = self.GetCefBrowserHost().get().GetZoomLevel()
+        return zoomLevel
 
-	cpdef py_void GoBack(self):
+    cpdef py_void GoBack(self):
 
-		self.GetCefBrowser().get().GoBack()
+        self.GetCefBrowser().get().GoBack()
 
-	cpdef py_void GoForward(self):
+    cpdef py_void GoForward(self):
 
-		self.GetCefBrowser().get().GoForward()
+        self.GetCefBrowser().get().GoForward()
 
-	cpdef py_bool HasDocument(self):
+    cpdef py_bool HasDocument(self):
 
-		return self.GetCefBrowser().get().HasDocument()
+        return self.GetCefBrowser().get().HasDocument()
 
-	IF CEF_VERSION == 1:
+    IF CEF_VERSION == 1:
 
-		cpdef py_void HidePopup(self):
+        cpdef py_void HidePopup(self):
 
-			self.GetCefBrowser().get().HidePopup()
+            self.GetCefBrowser().get().HidePopup()
 
-	cpdef py_bool IsFullscreen(self):
+    cpdef py_bool IsFullscreen(self):
 
-		return bool(self.isFullscreen)
+        return bool(self.isFullscreen)
 
-	cpdef py_bool IsPopup(self):
+    cpdef py_bool IsPopup(self):
 
-		return self.GetCefBrowser().get().IsPopup()
+        return self.GetCefBrowser().get().IsPopup()
 
-	IF CEF_VERSION == 1:
+    IF CEF_VERSION == 1:
 
-		cpdef py_bool IsPopupVisible(self):
+        cpdef py_bool IsPopupVisible(self):
 
-			assert IsCurrentThread(TID_UI), "Browser.IsPopupVisible() may only be called on the UI thread"
-			return self.GetCefBrowser().get().IsPopupVisible()
+            assert IsCurrentThread(TID_UI), "Browser.IsPopupVisible() may only be called on the UI thread"
+            return self.GetCefBrowser().get().IsPopupVisible()
 
-		cpdef py_bool IsWindowRenderingDisabled(self):
+        cpdef py_bool IsWindowRenderingDisabled(self):
 
-			return self.GetCefBrowser().get().IsWindowRenderingDisabled()
+            return self.GetCefBrowser().get().IsWindowRenderingDisabled()
 
-	cpdef py_void Reload(self):
+    cpdef py_void Reload(self):
 
-		self.GetCefBrowser().get().Reload()
+        self.GetCefBrowser().get().Reload()
 
-	cpdef py_void ReloadIgnoreCache(self):
+    cpdef py_void ReloadIgnoreCache(self):
 
-		self.GetCefBrowser().get().ReloadIgnoreCache()
+        self.GetCefBrowser().get().ReloadIgnoreCache()
 
-	cpdef py_void SetFocus(self, enable):
+    cpdef py_void SetFocus(self, enable):
 
-		IF CEF_VERSION == 1:
-			self.GetCefBrowser().get().SetFocus(bool(enable))
-		ELIF CEF_VERSION == 3:
-			self.GetCefBrowserHost().get().SetFocus(bool(enable))
+        IF CEF_VERSION == 1:
+            self.GetCefBrowser().get().SetFocus(bool(enable))
+        ELIF CEF_VERSION == 3:
+            self.GetCefBrowserHost().get().SetFocus(bool(enable))
 
-	cpdef py_void SetUserData(self, object key, object value):
+    cpdef py_void SetUserData(self, object key, object value):
 
-		self.userData[key] = value
+        self.userData[key] = value
 
-	cpdef py_void SetZoomLevel(self, double zoomLevel):
+    cpdef py_void SetZoomLevel(self, double zoomLevel):
 
-		IF CEF_VERSION == 1:
-			self.GetCefBrowser().get().SetZoomLevel(zoomLevel)
-		ELIF CEF_VERSION == 3:
-			self.GetCefBrowserHost().get().SetZoomLevel(zoomLevel)
+        IF CEF_VERSION == 1:
+            self.GetCefBrowser().get().SetZoomLevel(zoomLevel)
+        ELIF CEF_VERSION == 3:
+            self.GetCefBrowserHost().get().SetZoomLevel(zoomLevel)
 
-	IF CEF_VERSION == 1:
+    IF CEF_VERSION == 1:
 
-		cpdef py_void ShowDevTools(self):
+        cpdef py_void ShowDevTools(self):
 
-			self.GetCefBrowser().get().ShowDevTools()
+            self.GetCefBrowser().get().ShowDevTools()
 
-	cpdef py_void StopLoad(self):
+    cpdef py_void StopLoad(self):
 
-		self.GetCefBrowser().get().StopLoad()
+        self.GetCefBrowser().get().StopLoad()
 
-	IF CEF_VERSION == 1:
+    IF CEF_VERSION == 1:
 
-		cpdef py_void StopFinding(self, py_bool clearSelection):
+        cpdef py_void StopFinding(self, py_bool clearSelection):
 
-			self.GetCefBrowser().get().StopFinding(bool(clearSelection))
+            self.GetCefBrowser().get().StopFinding(bool(clearSelection))
 
-	cpdef py_void ToggleFullscreen(self):
+    cpdef py_void ToggleFullscreen(self):
 
-		IF UNAME_SYSNAME == "Windows":
+        IF UNAME_SYSNAME == "Windows":
 
-			cdef int windowHandle
-			if self.GetUserData("__outerWindowHandle"):
-				windowHandle = self.GetUserData("__outerWindowHandle")
-			else:
-				windowHandle = self.GetWindowHandle()
+            cdef int windowHandle
+            if self.GetUserData("__outerWindowHandle"):
+                windowHandle = self.GetUserData("__outerWindowHandle")
+            else:
+                windowHandle = self.GetWindowHandle()
 
-			# Offscreen browser will have an empty window handle.
-			assert windowHandle, "Browser.ToggleFullscreen() failed: no window handle found"
+            # Offscreen browser will have an empty window handle.
+            assert windowHandle, "Browser.ToggleFullscreen() failed: no window handle found"
 
-			cdef HWND hwnd = <HWND><int>int(windowHandle)
-			cdef RECT rect
-			cdef HMONITOR monitor
-			cdef MONITORINFO monitorInfo
-			monitorInfo.cbSize = sizeof(monitorInfo)
+            cdef HWND hwnd = <HWND><int>int(windowHandle)
+            cdef RECT rect
+            cdef HMONITOR monitor
+            cdef MONITORINFO monitorInfo
+            monitorInfo.cbSize = sizeof(monitorInfo)
 
-			# Logic copied from chromium > fullscreen_handler.cc > FullscreenHandler::SetFullscreenImpl:
-			# http://src.chromium.org/viewvc/chrome/trunk/src/ui/views/win/fullscreen_handler.cc
+            # Logic copied from chromium > fullscreen_handler.cc > FullscreenHandler::SetFullscreenImpl:
+            # http://src.chromium.org/viewvc/chrome/trunk/src/ui/views/win/fullscreen_handler.cc
 
-			cdef py_bool for_metro = False
+            cdef py_bool for_metro = False
 
-			if not self.isFullscreen:
-				self.maximized = IsZoomed(hwnd)
-				if self.maximized:
-					SendMessage(hwnd, WM_SYSCOMMAND, SC_RESTORE, 0)
-				self.gwlStyle = GetWindowLong(hwnd, GWL_STYLE)
-				self.gwlExStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
-				GetWindowRect(hwnd, &rect)
-				self.windowRect = (rect.left, rect.top, rect.right, rect.bottom)
+            if not self.isFullscreen:
+                self.maximized = IsZoomed(hwnd)
+                if self.maximized:
+                    SendMessage(hwnd, WM_SYSCOMMAND, SC_RESTORE, 0)
+                self.gwlStyle = GetWindowLong(hwnd, GWL_STYLE)
+                self.gwlExStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
+                GetWindowRect(hwnd, &rect)
+                self.windowRect = (rect.left, rect.top, rect.right, rect.bottom)
 
-			cdef int remove_style, remove_exstyle
-			cdef int left, top, right, bottom
+            cdef int remove_style, remove_exstyle
+            cdef int left, top, right, bottom
 
-			if not self.isFullscreen:
-				remove_style = WS_CAPTION | WS_THICKFRAME
-				remove_exstyle = WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE
-				SetWindowLong(hwnd, GWL_STYLE, self.gwlStyle & ~(remove_style))
-				SetWindowLong(hwnd, GWL_EXSTYLE, self.gwlExStyle & ~(remove_exstyle))
-				if not for_metro:
-					# MONITOR_DEFAULTTONULL, MONITOR_DEFAULTTOPRIMARY, MONITOR_DEFAULTTONEAREST
-					monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
-					GetMonitorInfo(monitor, &monitorInfo)
-					left = monitorInfo.rcMonitor.left
-					top = monitorInfo.rcMonitor.top
-					right = monitorInfo.rcMonitor.right
-					bottom = monitorInfo.rcMonitor.bottom
-					SetWindowPos(hwnd, NULL, left, top, right-left, bottom-top,
-							SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
-			else:
-				SetWindowLong(hwnd, GWL_STYLE, int(self.gwlStyle))
-				SetWindowLong(hwnd, GWL_EXSTYLE, int(self.gwlExStyle))
-				if not for_metro:
-					(left, top, right, bottom) = self.windowRect
-					SetWindowPos(hwnd, NULL, int(left), int(top), int(right-left), int(bottom-top),
-							SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
-				if self.maximized:
-					SendMessage(hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0)
+            if not self.isFullscreen:
+                remove_style = WS_CAPTION | WS_THICKFRAME
+                remove_exstyle = WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE
+                SetWindowLong(hwnd, GWL_STYLE, self.gwlStyle & ~(remove_style))
+                SetWindowLong(hwnd, GWL_EXSTYLE, self.gwlExStyle & ~(remove_exstyle))
+                if not for_metro:
+                    # MONITOR_DEFAULTTONULL, MONITOR_DEFAULTTOPRIMARY, MONITOR_DEFAULTTONEAREST
+                    monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+                    GetMonitorInfo(monitor, &monitorInfo)
+                    left = monitorInfo.rcMonitor.left
+                    top = monitorInfo.rcMonitor.top
+                    right = monitorInfo.rcMonitor.right
+                    bottom = monitorInfo.rcMonitor.bottom
+                    SetWindowPos(hwnd, NULL, left, top, right-left, bottom-top,
+                            SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
+            else:
+                SetWindowLong(hwnd, GWL_STYLE, int(self.gwlStyle))
+                SetWindowLong(hwnd, GWL_EXSTYLE, int(self.gwlExStyle))
+                if not for_metro:
+                    (left, top, right, bottom) = self.windowRect
+                    SetWindowPos(hwnd, NULL, int(left), int(top), int(right-left), int(bottom-top),
+                            SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
+                if self.maximized:
+                    SendMessage(hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0)
 
-			self.isFullscreen = int(not bool(self.isFullscreen))
+            self.isFullscreen = int(not bool(self.isFullscreen))
