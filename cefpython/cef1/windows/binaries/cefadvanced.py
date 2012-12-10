@@ -116,6 +116,7 @@ class JavascriptRebindings:
 
         self.javascriptBindings.SetObject("python", python)
         self.javascriptBindings.SetObject("browser", self.browser)
+        self.javascriptBindings.SetObject("frame", self.browser.GetMainFrame())
         self.javascriptBindings.SetProperty("PyConfig", {"option1": True, "option2": 20})
 
     def Rebind(self):

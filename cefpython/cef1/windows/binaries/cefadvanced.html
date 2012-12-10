@@ -10,11 +10,17 @@
 </head>
 <body>
 
-Welcome to <b>CEF Python</b> - bindings for the Chromium Embedded Framework.<br><br>
+Welcome to <b>CEF Python</b> - bindings for the Chromium Embedded Framework.
+<br><br>
 
-Project's website: <a href="http://code.google.com/p/cefpython/">http://code.google.com/p/cefpython/</a><br>
-Wiki documentation: <a href="http://code.google.com/p/cefpython/wiki/">http://code.google.com/p/cefpython/wiki/</a><br>
-Support forum: <a href="https://groups.google.com/group/cefpython?hl=en">https://groups.google.com/group/cefpython?hl=en</a><br>
+Project's website: <a href="http://code.google.com/p/cefpython/">
+http://code.google.com/p/cefpython/</a><br>
+
+Wiki documentation: <a href="http://code.google.com/p/cefpython/wiki/">
+http://code.google.com/p/cefpython/wiki/</a><br>
+
+Support forum: <a href="https://groups.google.com/group/cefpython?hl=en">
+https://groups.google.com/group/cefpython?hl=en</a><br>
 
 <h3>User agent</h3>
 
@@ -27,134 +33,84 @@ Support forum: <a href="https://groups.google.com/group/cefpython?hl=en">https:/
 <h3>Keyboard and mouse shortcuts</h3>
 
     <ul>
-        <li>Press F5 to refresh & rebind python<>javascript bindings (does not work for the main module).
+        <li>Press F5 to refresh & rebind python<>javascript bindings
+              (does not work for the main module).
         <li>Press F11 to go fullscreen, press F11 again to exit fullscreen.
-        <li><span style="color: red">Press F12 key to show developer tools for the main frame.</span>
+        <li>Press F12 key to show developer tools for the main frame.
         <li>Press backspace to go Back in history.
         <li>Use right mouse button context menu to go Back/Forward or to view the sources.
-        <li>Press Ctrl(+) to zoom in.
-        <li>Press Ctrl(-) to zoom out.
+        <li>Press Ctrl(+) to zoom in, Ctrl(-) to zoom out.
     </ul>
 
 <h3>Browser object</h3>
 
     <a href="javascript:alert(browser.CanGoBack())">CanGoBack()</a><br>
-
     <a href="javascript:alert(browser.CanGoForward())">CanGoForward()</a><br>
-
     <a href="javascript:browser.ClearHistory()">ClearHistory()</a><br>
-
     <a href="javascript:browser.CloseBrowser()">CloseBrowser()</a><br>
-
     <a href="javascript:browser.CloseDevTools()">CloseDevTools()</a><br>
-
     <a href="javascript:browser.Find(searchID=0, searchText='test', forward=true, matchCase=false, findNext=false)">Find(searchId=0, searchText='test', forward=true, matchCase=false, findNext=false)</a><br>
-
     <a href="javascript:alert(browser.GetUserData('some'))">GetUserData('some')</a><br>
-
     <a href="javascript:alert(browser.GetFocusedFrame())">GetFocusedFrame()</a>
     (returning a class object from python is not yet supported)<br>
-
     <a href="javascript:alert(browser.GetFrame('simple'))">CloseBrowser('simple')</a><br>
-
     <a href="javascript:alert(browser.GetFrameNames())">GetFrameNames()</a><br>
-
     <a href="javascript:alert(browser.GetMainFrame())">GetMainFrame()</a>
     (returning a class object from python is not yet supported)<br>
-
-    <a href="javascript:alert(browser.GetOpenerWindowHandle())">GetOpenerWindowHandle()</a><br>
-
-    <a href="javascript:alert(browser.GetOuterWindowHandle())">GetOuterWindowHandle()</a><br>
-
+    <a href="javascript:alert(browser.GetOpenerWindowHandle())">
+    GetOpenerWindowHandle()</a><br>
+    <a href="javascript:alert(browser.GetOuterWindowHandle())">
+    GetOuterWindowHandle()</a><br>
     <a href="javascript:alert(browser.GetWindowHandle())">GetWindowHandle()</a><br>
-
     <a href="javascript:alert(browser.GetZoomLevel())">GetZoomLevel()</a><br>
-
     <a href="javascript:browser.GoBack()">GoBack()</a><br>
-
     <a href="javascript:browser.GoForward()">GoForward()</a><br>
-
     <a href="javascript:alert(browser.HasDocument())">HasDocument()</a><br>
-
     <a href="javascript:browser.HidePopup()">HidePopup()</a><br>
-
     <a href="javascript:alert(browser.IsFullscreen())">IsFullscreen()</a><br>
-
     <a href="javascript:alert(browser.IsPopup())">IsPopup()</a><br>
-
     <a href="javascript:alert(browser.IsPopupVisible())">IsPopupVisible()</a><br>
-
-    <a href="javascript:alert(browser.IsWindowRenderingDisabled())">IsWindowRenderingDisabled()</a><br>
-
+    <a href="javascript:alert(browser.IsWindowRenderingDisabled())">
+    IsWindowRenderingDisabled()</a><br>
     <a href="javascript:browser.Reload()">Reload()</a><br>
-
     <a href="javascript:browser.ReloadIgnoreCache()">ReloadIgnoreCache()</a><br>
-
-    <a href="javascript:browser.SetFocus(false)">SetFocus(false)</a> - inner window loses focus, check keyboard & mouse wheel scrolling<br>
-
-    <a href="javascript:browser.SetUserData('some', 'something')">SetUserData('some', 'something')</a><br>
-
+    <a href="javascript:browser.SetFocus(false)">SetFocus(false)</a>
+    (inner window loses focus, check keyboard & mouse wheel scrolling)<br>
+    <a href="javascript:browser.SetUserData('some', 'something')">
+    SetUserData('some', 'something')</a><br>
     <a href="javascript:browser.SetZoomLevel(2)">SetZoomLevel(2)</a><br>
-
     <a href="javascript:browser.ShowDevTools()">ShowDevTools()</a><br>
-
     <a href="javascript:browser.StopLoad()">StopLoad()</a><br>
-
     <a href="javascript:browser.StopFinding(true)">StopFinding(true)</a><br>
-
     <a href="javascript:browser.ToggleFullscreen()">ToggleFullscreen()</a><br>
 
 <h3>Frame object</h3>
 
-  <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
-
-    <a href="javascript:alert(frame.asd())">asd()</a><br>
+    <a href="javascript:(frame.Copy())">Copy()</a><br>
+    <a href="javascript:(frame.Cut())">Cut()</a><br>
+    <a href="javascript:(frame.Delete())">Delete()</a><br>
+    <a href="javascript:((frame.ExecuteJavascript('alert(1)')))">
+    ExecuteJavascript('alert(1)')</a><br>
+    <a href="javascript:(alert(frame.GetIdentifier()))">GetIdentifier()</a><br>
+    <script>window.name="This string was set using 'window.name'";</script>
+    <a href="javascript:(alert(frame.GetName()))">GetName()</a><br>
+    <a href="javascript:(alert(frame.GetProperty('name')))">GetProperty('name')</a><br>
+    <a href="javascript:(alert(frame.GetSource()))">GetSource()</a><br>
+    <a href="javascript:(alert(frame.GetText()))">GetText()</a><br>
+    <a href="javascript:(alert(frame.GetUrl()))">GetUrl()</a><br>
+    <a href="javascript:(alert(frame.IsFocused()))">IsFocused()</a><br>
+    <a href="javascript:(alert(frame.IsMain()))">IsMain()</a><br>
+    <a href="javascript:((frame.LoadString('some html source', 'cef://some')))">LoadString('some html source', 'cef://some')</a><br>
+    <a href="javascript:((frame.LoadUrl('http://www.google.com/')))">
+    LoadUrl('http://www.google.com/')</a><br>
+    <a href="javascript:((frame.Paste()))">Paste()</a><br>
+    <a href="javascript:((frame.Print()))">Print()</a><br>
+    <a href="javascript:((frame.Redo()))">Redo()</a><br>
+    <a href="javascript:((frame.SelectAll()))">SelectAll()</a><br>
+    <a href="javascript:((frame.SetProperty('name', 'noname')))">
+    SetProperty('name', 'noname')</a><br>
+    <a href="javascript:((frame.Undo()))">Undo()</a><br>
+    <a href="javascript:((frame.ViewSource()))">ViewSource()</a><br>
 
 <h3>Test unicode string</h3>
 

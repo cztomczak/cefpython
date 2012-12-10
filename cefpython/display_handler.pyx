@@ -2,28 +2,26 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-STATUSTYPE_TEXT = <int>cef_types.STATUSTYPE_TEXT
-STATUSTYPE_MOUSEOVER_URL = <int>cef_types.STATUSTYPE_MOUSEOVER_URL
-STATUSTYPE_KEYBOARD_FOCUS_URL = <int>cef_types.STATUSTYPE_KEYBOARD_FOCUS_URL
+STATUSTYPE_TEXT = cef_types.STATUSTYPE_TEXT
+STATUSTYPE_MOUSEOVER_URL = cef_types.STATUSTYPE_MOUSEOVER_URL
+STATUSTYPE_KEYBOARD_FOCUS_URL = cef_types.STATUSTYPE_KEYBOARD_FOCUS_URL
 
 cdef public void DisplayHandler_OnAddressChange(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         CefString& cefURL
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
+    cdef str pyUrl
+    cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("DisplayHandler_OnAddressChange() failed: pyBrowser is %s" % pyBrowser)
-            return
         pyFrame = GetPyFrame(cefFrame)
-        pyURL = ToPyString(cefURL)
+        pyUrl = CefToPyString(cefURL)
         callback = pyBrowser.GetClientCallback("OnAddressChange")
         if callback:
-            callback(pyBrowser, pyFrame, pyURL)
+            callback(pyBrowser, pyFrame, pyUrl)
         return
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
@@ -35,15 +33,14 @@ cdef public c_bool DisplayHandler_OnConsoleMessage(
         CefString& cefSource,
         int line
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
+    cdef str pyMessage
+    cdef str pySource
+    cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("DisplayHandler_OnConsoleMessage() failed: pyBrowser is %s" % pyBrowser)
-            return False
-        pyMessage = ToPyString(cefMessage)
-        pySource = ToPyString(cefSource)
+        pyMessage = CefToPyString(cefMessage)
+        pySource = CefToPyString(cefSource)
         callback = pyBrowser.GetClientCallback("OnConsoleMessage")
         if callback:
             return bool(callback(pyBrowser, pyMessage, pySource, line))
@@ -59,14 +56,11 @@ cdef public void DisplayHandler_OnContentsSizeChange(
         int width,
         int height
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
+    cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("DisplayHandler_OnContentsSizeChange() failed: pyBrowser is %s" % pyBrowser)
-            return
         pyFrame = GetPyFrame(cefFrame)
         callback = pyBrowser.GetClientCallback("OnContentsSizeChange")
         if callback:
@@ -81,13 +75,10 @@ cdef public void DisplayHandler_OnNavStateChange(
         c_bool canGoBack,
         c_bool canGoForward
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
+    cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("DisplayHandler_OnNavStateChange() failed: pyBrowser is %s" % pyBrowser)
-            return
         callback = pyBrowser.GetClientCallback("OnNavStateChange")
         if callback:
             callback(pyBrowser, canGoBack, canGoForward)
@@ -101,14 +92,12 @@ cdef public void DisplayHandler_OnStatusMessage(
         CefString& cefText,
         cef_types.cef_handler_statustype_t statusType
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
+    cdef str pyText
+    cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("DisplayHandler_OnStatusMessage() failed: pyBrowser is %s" % pyBrowser)
-            return
-        pyText = ToPyString(cefText)
+        pyText = CefToPyString(cefText)
         callback = pyBrowser.GetClientCallback("OnStatusMessage")
         if callback:
             callback(pyBrowser, pyText, statusType)
@@ -121,26 +110,25 @@ cdef public void DisplayHandler_OnTitleChange(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& cefTitle
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
+    cdef str pyTitle
+    cdef object callback
+    cdef py_bool ret
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("DisplayHandler_OnTitleChange() failed: pyBrowser is %s" % pyBrowser)
-            return
-        pyTitle = ToPyString(cefTitle)
+        pyTitle = CefToPyString(cefTitle)
         callback = pyBrowser.GetClientCallback("OnTitleChange")
         if callback:
             ret = bool(callback(pyBrowser, pyTitle))
             IF UNAME_SYSNAME == "Windows":
                 if ret:
                     WindowUtils.SetTitle(pyBrowser, pyTitle)
-                    WindowUtils.SetIcon(pyBrowser, "inherit")
+                    WindowUtils.SetIcon(pyBrowser, icon="inherit")
             return
         else:
             IF UNAME_SYSNAME == "Windows":
                 WindowUtils.SetTitle(pyBrowser, pyTitle)
-                WindowUtils.SetIcon(pyBrowser, "inherit")
+                WindowUtils.SetIcon(pyBrowser, icon="inherit")
             return
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
@@ -150,22 +138,20 @@ cdef public c_bool DisplayHandler_OnTooltip(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& cefText
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
+    cdef list pyText
+    cdef object callback
+    cdef py_bool ret
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("DisplayHandler_OnTooltip() failed: pyBrowser is %s" % pyBrowser)
-            return False
-        pyText = [ToPyString(cefText)] # In/Out
+        pyText = [CefToPyString(cefText)] # In/Out
         callback = pyBrowser.GetClientCallback("OnTooltip")
         if callback:
             ret = callback(pyBrowser, pyText)
-            ToCefString(pyText[0], cefText);
+            PyToCefString(pyText[0], cefText);
             return bool(ret)
         else:
             return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
-

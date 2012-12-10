@@ -50,7 +50,7 @@ class World(DirectObject):
         windowID = base.win.getWindowHandle().getIntHandle()
 
         # image = OnscreenImage("wxpython.png", pos = Vec3(0,0,0))
-        # image.setImage("panda3D.jpg")
+        # image.setImage("panda3d_.jpg")
 
         # from panda3d.core import PTAUchar
 
@@ -67,7 +67,7 @@ class World(DirectObject):
 
         tex = Texture()
         tex.setup2dTexture()
-        tex.read("panda3D.jpg")
+        tex.read("panda3d_.jpg")
         #tex.setup2dTexture(512, 512, Texture.CMOff, Texture.FRgba32)
         #tex.setRamMipmapPointerFromInt(bufferIntPointer, 0, width*height*4)
 
