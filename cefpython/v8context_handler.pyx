@@ -2,38 +2,45 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# enum cef_v8_propertyattribute_t.
-V8_PROPERTY_ATTRIBUTE_NONE = <int>cef_types.V8_PROPERTY_ATTRIBUTE_NONE
-V8_PROPERTY_ATTRIBUTE_READONLY = <int>cef_types.V8_PROPERTY_ATTRIBUTE_READONLY
-V8_PROPERTY_ATTRIBUTE_DONTENUM = <int>cef_types.V8_PROPERTY_ATTRIBUTE_DONTENUM
-V8_PROPERTY_ATTRIBUTE_DONTDELETE = <int>cef_types.V8_PROPERTY_ATTRIBUTE_DONTDELETE
+V8_PROPERTY_ATTRIBUTE_NONE = cef_types.V8_PROPERTY_ATTRIBUTE_NONE
+V8_PROPERTY_ATTRIBUTE_READONLY = cef_types.V8_PROPERTY_ATTRIBUTE_READONLY
+V8_PROPERTY_ATTRIBUTE_DONTENUM = cef_types.V8_PROPERTY_ATTRIBUTE_DONTENUM
+V8_PROPERTY_ATTRIBUTE_DONTDELETE = cef_types.V8_PROPERTY_ATTRIBUTE_DONTDELETE
 
 cdef public void V8ContextHandler_OnContextCreated(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         CefRefPtr[CefV8Context] cefContext
         ) except * with gil:
-
     # This handler may also be called by JavascriptBindings.Rebind().
     # This handler may be called multiple times for the same frame - rebinding.
 
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
+
     cdef JavascriptBindings javascriptBindings
+    cdef dict javascriptFunctions
+    cdef dict javascriptProperties
+    cdef dict javascriptObjects
 
     cdef CefRefPtr[V8FunctionHandler] functionHandler
     cdef CefRefPtr[CefV8Handler] v8Handler
-    cdef CefRefPtr[CefV8Value] window
-    cdef CefRefPtr[CefV8Value] func
+    cdef CefRefPtr[CefV8Value] v8Window
+    cdef CefRefPtr[CefV8Value] v8Function
     cdef CefRefPtr[CefV8Value] v8Object
-    cdef CefString cefFuncName
+    cdef CefRefPtr[CefV8Value] v8Method
+
+    cdef CefString cefFunctionName
     cdef CefString cefPropertyName
     cdef CefString cefMethodName
     cdef CefString cefObjectName
 
-    # See LoadHandler_OnLoadEnd() for the try..except explanation.
+    cdef object key
+    cdef object value
+    cdef py_string functionName
+    cdef py_string objectName
+
     try:
-        # No need for second param ignoreError=True.
         pyBrowser = GetPyBrowser(cefBrowser)
         pyFrame = GetPyFrame(cefFrame)
 
@@ -47,12 +54,11 @@ cdef public void V8ContextHandler_OnContextCreated(
             if javascriptBindings.GetBindToFrames():
                 javascriptBindings.AddFrame(pyBrowser, pyFrame)
 
-        # jsFunctions is a dict.
-        jsFunctions = javascriptBindings.GetFunctions()
-        jsProperties = javascriptBindings.GetProperties()
-        jsObjects = javascriptBindings.GetObjects()
+        javascriptFunctions = javascriptBindings.GetFunctions()
+        javascriptProperties = javascriptBindings.GetProperties()
+        javascriptObjects = javascriptBindings.GetObjects()
 
-        if not jsFunctions and not jsProperties and not jsObjects:
+        if not javascriptFunctions and not javascriptProperties and not javascriptObjects:
             return
 
         # This checks GetBindToFrames/GetBindToPopups must also be made in both:
@@ -68,56 +74,46 @@ cdef public void V8ContextHandler_OnContextCreated(
         if pyBrowser.IsPopup() and not javascriptBindings.GetBindToPopups():
             return
 
-        window = cefContext.get().GetGlobal()
+        v8Window = cefContext.get().GetGlobal()
 
-        if jsProperties:
-            for key,val in jsProperties.items():
+        if javascriptProperties:
+            for key,value in javascriptProperties.items():
                 key = str(key)
-                ToCefString(key, cefPropertyName)
-                window.get().SetValue(cefPropertyName, PyValueToV8Value(val, cefContext), V8_PROPERTY_ATTRIBUTE_NONE)
+                PyToCefString(key, cefPropertyName)
+                v8Window.get().SetValue(
+                        cefPropertyName,
+                        PyToV8Value(value, cefContext),
+                        V8_PROPERTY_ATTRIBUTE_NONE)
 
-        if jsFunctions or jsObjects:
-
-            # CefRefPtr are smart pointers and should release memory automatically for V8FunctionHandler().
+        if javascriptFunctions or javascriptObjects:
             functionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
             functionHandler.get().SetContext(cefContext)
-            v8Handler = <CefRefPtr[CefV8Handler]><CefV8Handler*>functionHandler.get()
+            v8Handler = <CefRefPtr[CefV8Handler]>functionHandler.get()
 
-        if jsFunctions:
+        if javascriptFunctions:
+            for functionName in javascriptFunctions:
+                functionName = str(functionName)
+                PyToCefString(functionName, cefFunctionName)
+                v8Function = cef_v8_static.CreateFunction(cefFunctionName, v8Handler)
+                v8Window.get().SetValue(cefFunctionName, v8Function, V8_PROPERTY_ATTRIBUTE_NONE)
 
-            for funcName in jsFunctions:
-
-                funcName = str(funcName)
-                ToCefString(funcName, cefFuncName)
-                func = cef_v8_static.CreateFunction(cefFuncName, v8Handler)
-                window.get().SetValue(cefFuncName, func, V8_PROPERTY_ATTRIBUTE_NONE)
-
-        if jsObjects:
-
-            for objectName in jsObjects:
-
-                # Create V8Value object.
+        if javascriptObjects:
+            for objectName in javascriptObjects:
                 v8Object = cef_v8_static.CreateObject(<CefRefPtr[CefV8Accessor]>NULL)
+                PyToCefString(objectName, cefObjectName)
+                v8Window.get().SetValue(
+                        cefObjectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE)
 
-                # Bind that object to window.
-                ToCefString(objectName, cefObjectName)
-                window.get().SetValue(cefObjectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE)
-
-                for methodName in jsObjects[objectName]:
-
-                    # Bind methods to that V8 object.
-                    methodName = str(methodName) # methodName = "someMethod"
-
-                    ToCefString(objectName+"."+methodName, cefMethodName) # cefMethodName = "myobject.someMethod"
-                    method = cef_v8_static.CreateFunction(cefMethodName, v8Handler)
-
-                    ToCefString(methodName, cefMethodName) # cefMethodName = "someMethod"
-                    v8Object.get().SetValue(cefMethodName, method, V8_PROPERTY_ATTRIBUTE_NONE)
-
-        # return void
-
+                for methodName in javascriptObjects[objectName]:
+                    methodName = str(methodName)
+                    # cefMethodName = "myobject.someMethod"
+                    PyToCefString(objectName+"."+methodName, cefMethodName)
+                    v8Method = cef_v8_static.CreateFunction(cefMethodName, v8Handler)
+                    # cefMethodName = "someMethod"
+                    PyToCefString(methodName, cefMethodName)
+                    v8Object.get().SetValue(
+                            cefMethodName, v8Method, V8_PROPERTY_ATTRIBUTE_NONE)
     except:
-
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
@@ -126,25 +122,15 @@ cdef public void V8ContextHandler_OnContextReleased(
         CefRefPtr[CefFrame] cefFrame,
         CefRefPtr[CefV8Context] cefContext
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef JavascriptBindings javascriptBindings
     try:
-        # If this is the main frame, PyBrowser might be already destroyed.
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("V8ContextHandler_OnContextReleased() failed: pyBrowser is %s" % pyBrowser)
-            return
         pyFrame = GetPyFrame(cefFrame)
-        isMainFrame = pyFrame.IsMain()
-
-        Debug("V8ContextHandler_OnContextReleased(): frameId=%s" % pyFrame.GetIdentifier())
-
         javascriptBindings = pyBrowser.GetJavascriptBindings()
         if javascriptBindings:
             javascriptBindings.RemoveFrame(pyBrowser, pyFrame)
-
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -154,24 +140,24 @@ cdef public void V8ContextHandler_OnUncaughtException(
         CefRefPtr[CefFrame] cefFrame,
         CefRefPtr[CefV8Context] cefContext,
         CefRefPtr[CefV8Exception] cefException,
-        CefRefPtr[CefV8StackTrace] cefStackTrace) except * with gil:
-
+        CefRefPtr[CefV8StackTrace] cefStackTrace
+        ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef CefRefPtr[CefV8Exception] v8Exception
-    cdef CefV8Exception* v8ExceptionPtr
-
+    cdef CefV8Exception* v8ExceptionPointer
+    cdef object callback
     try:
-        # No need for second param ignoreError=True.
         pyBrowser = GetPyBrowser(cefBrowser)
         pyFrame = GetPyFrame(cefFrame)
 
-        v8ExceptionPtr = cefException.get()
+        v8ExceptionPointer = cefException.get()
         pyException = {}
-        pyException["lineNumber"] = v8ExceptionPtr.GetLineNumber()
-        pyException["message"] = ToPyString(v8ExceptionPtr.GetMessage())
-        pyException["scriptResourceName"] = ToPyString(v8ExceptionPtr.GetScriptResourceName())
-        pyException["sourceLine"] = ToPyString(v8ExceptionPtr.GetSourceLine())
+        pyException["lineNumber"] = v8ExceptionPointer.GetLineNumber()
+        pyException["message"] = CefToPyString(v8ExceptionPointer.GetMessage())
+        pyException["scriptResourceName"] = CefToPyString(
+                v8ExceptionPointer.GetScriptResourceName())
+        pyException["sourceLine"] = CefToPyString(v8ExceptionPointer.GetSourceLine())
 
         pyStackTrace = CefV8StackTraceToPython(cefStackTrace)
 
@@ -181,4 +167,3 @@ cdef public void V8ContextHandler_OnUncaughtException(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
-

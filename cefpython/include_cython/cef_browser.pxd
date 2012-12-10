@@ -26,14 +26,14 @@ cdef extern from "include/cef_browser.h":
             void ClearHistory()
             void CloseBrowser()
             void CloseDevTools()
-            void Find(int identifier, CefString& searchText, c_bool forward, c_bool matchCase, c_bool findNext)
+            void Find(int identifier, CefString& searchText, c_bool forward,
+                    c_bool matchCase, c_bool findNext)
             CefRefPtr[CefFrame] GetFocusedFrame()
             CefRefPtr[CefFrame] GetFrame(CefString& name)
             void GetFrameNames(c_vector[CefString]& names)
             CefRefPtr[CefFrame] GetMainFrame()
             CefWindowHandle GetOpenerWindowHandle()
             CefWindowHandle GetWindowHandle()
-            # virtual CefRefPtr<CefClient> GetClient() =0;
             double GetZoomLevel()
             void GoBack()
             void GoForward()
@@ -52,6 +52,8 @@ cdef extern from "include/cef_browser.h":
             c_bool IsPopupVisible()
             int GetIdentifier()
 
+            # virtual CefRefPtr<CefClient> GetClient() =0;
+
     ELIF CEF_VERSION == 3:
 
         cdef cppclass CefBrowserHost(CefBase):
@@ -62,9 +64,10 @@ cdef extern from "include/cef_browser.h":
             void SetFocus(c_bool enable)
             CefWindowHandle GetWindowHandle()
             CefWindowHandle GetOpenerWindowHandle()
-            # virtual CefString GetDevToolsURL(bool http_scheme) =0;
             double GetZoomLevel()
             void SetZoomLevel(double zoomLevel)
+
+            # virtual CefString GetDevToolsURL(bool http_scheme) =0;
             # virtual void RunFileDialog(FileDialogMode mode,
             #                 const CefString& title,
             #                 const CefString& default_file_name,
@@ -78,11 +81,9 @@ cdef extern from "include/cef_browser.h":
             c_bool CanGoBack()
             c_bool CanGoForward()
             CefRefPtr[CefFrame] GetFocusedFrame()
-            # CefRefPtr<CefFrame> GetFrame(int64 identifier) =0;
             CefRefPtr[CefFrame] GetFrame(CefString& name)
             void GetFrameNames(c_vector[CefString]& names)
             CefRefPtr[CefFrame] GetMainFrame()
-            # virtual CefRefPtr<CefClient> GetClient() =0;
             void GoBack()
             void GoForward()
             c_bool HasDocument()
@@ -92,9 +93,11 @@ cdef extern from "include/cef_browser.h":
             void StopLoad()
             c_bool IsLoading()
             int GetIdentifier()
+
+            # CefRefPtr<CefFrame> GetFrame(int64 identifier) =0;
+            # virtual CefRefPtr<CefClient> GetClient() =0;
             # virtual bool SendProcessMessage(CefProcessId target_process,
             #                           CefRefPtr<CefProcessMessage> message) =0;
-
 
         # class CefRunFileDialogCallback : public virtual CefBase {
         #    virtual void OnFileDialogDismissed(

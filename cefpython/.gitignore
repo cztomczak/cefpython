@@ -18,8 +18,8 @@ console.log
 *.user
 *.aps
 *.sdf
-
 Debug*/
 Release*/
-
 *.pdb
+
+ctags

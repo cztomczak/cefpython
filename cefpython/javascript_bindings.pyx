@@ -3,22 +3,20 @@
 # Website: http://code.google.com/p/cefpython/
 
 cdef class JavascriptBindings:
-
-    # By default we bind only to top frame.
+    # By default binding only to top frame.
     cdef public int bindToFrames
     cdef public int bindToPopups
     cdef public dict functions
     cdef public dict properties
     cdef public dict objects
 
-    # V8ContextHandler_OnContextCreated inserts frames here that should have javascript bindings,
-    # it is later needed to do rebinding using Rebind() method. All frames are here, the main too,
-    # frames may be from different Browser objects.
+    # V8ContextHandler_OnContextCreated inserts frames here that should have
+    # javascript bindings, it is later needed to do rebinding using Rebind()
+    # method. All frames are here, the main too, frames may be from different
+    # Browser objects.
     cdef public dict frames # frameIdentifier(int64) : tuple(PyBrowser, PyFrame())
 
     def __init__(self, bindToFrames=False, bindToPopups=False):
-
-        # Initialize default values.
         self.functions = {}
         self.properties = {}
         self.objects = {}
@@ -28,19 +26,15 @@ cdef class JavascriptBindings:
         self.bindToPopups = int(bindToPopups)
 
     cpdef py_bool GetBindToFrames(self):
-
         return bool(self.bindToFrames)
 
     cpdef py_bool GetBindToPopups(self):
-
         return bool(self.bindToPopups)
 
     cpdef py_void SetFunction(self, py_string name, object func):
-
         self.SetProperty(name, func)
 
     cpdef py_void SetObject(self, py_string name, object obj):
-
         if not hasattr(obj, "__class__"):
             raise Exception("JavascriptBindings.SetObject() failed: name=%s, "
                             "__class__ attribute missing, this is not an object" % name)
@@ -57,26 +51,21 @@ cdef class JavascriptBindings:
         self.objects[name] = methods
 
     cpdef object GetFunction(self, py_string name):
-
         if name in self.functions:
             return self.functions[name]
 
     cpdef dict GetFunctions(self):
-
         return self.functions
 
     cpdef dict GetObjects(self):
-
         return self.objects
 
     cpdef object GetObjectMethod(self, py_string objectName, py_string methodName):
-
         if objectName in self.objects:
             if methodName in self.objects[objectName]:
                 return self.objects[objectName][methodName]
 
     cpdef py_void SetProperty(self, py_string name, object value):
-
         cdef object allowed = self.IsValueAllowedRecursively(value) # returns True or string.
         if allowed is not True:
             raise Exception("JavascriptBindings.SetProperty() failed: name=%s, "
@@ -90,20 +79,16 @@ cdef class JavascriptBindings:
             self.properties[name] = value
 
     cdef py_void AddFrame(self, PyBrowser pyBrowser, PyFrame pyFrame):
-
         if pyFrame.GetIdentifier() not in self.frames:
-            Debug("JavascriptBindings.AddFrame(): frameId=%s" % pyFrame.GetIdentifier())
             self.frames[pyFrame.GetIdentifier()] = (pyBrowser, pyFrame)
 
     cdef py_void RemoveFrame(self, PyBrowser pyBrowser, PyFrame pyFrame):
-
         if pyFrame.GetIdentifier() in self.frames:
-            Debug("JavascriptBindings.RemoveFrame(): frameId=%s" % pyFrame.GetIdentifier())
             del self.frames[pyFrame.GetIdentifier()]
 
     cpdef py_void Rebind(self):
-
-        assert IsCurrentThread(TID_UI), "JavascriptBindings.Rebind() may only be called on UI thread"
+        assert IsCurrentThread(TID_UI), (
+                "JavascriptBindings.Rebind() may only be called on UI thread")
 
         cdef CefRefPtr[CefBrowser] cefBrowser
         cdef CefRefPtr[CefFrame] cefFrame
@@ -112,17 +97,14 @@ cdef class JavascriptBindings:
         cdef PyBrowser pyBrowser
         cdef PyFrame pyFrame
 
-        for frameID in self.__frames:
-
-            pyBrowser = self.frames[frameID][0]
-            pyFrame = self.frames[frameID][1]
-
+        for frameId in self.__frames:
+            pyBrowser = self.frames[frameId][0]
+            pyFrame = self.frames[frameId][1]
             cefBrowser = pyBrowser.GetCefBrowser()
             cefFrame = pyFrame.GetCefFrame()
             v8Context = cefFrame.get().GetV8Context()
 
             sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
-
             if not sameContext:
                 Debug("JavascriptBindings.Rebind(): inside a different context, calling v8Context.Enter()")
                 assert v8Context.get().Enter(), "v8Context.Enter() failed"
@@ -133,23 +115,16 @@ cdef class JavascriptBindings:
                 assert v8Context.get().Exit(), "v8Context.Exit() failed"
 
     cpdef dict GetProperties(self):
-
         return self.properties
 
     @staticmethod
     def IsValueAllowed(object value):
-
         return JavascriptBindings.IsValueAllowedRecursively(value) is True
 
     @staticmethod
     def IsValueAllowedRecursively(object value, py_bool recursion=False):
-
-        # When making changes here also check: Frame.SetProperty() as it checks
-        # for FunctionType, MethodType.
-
-        # - Return value: True - allowed, string - not allowed
-        # - Not using type().__name__ here as it is not consistent,
-        #   for int it is "int" but for None it is "NoneType".
+        # When making changes here modify also Frame.SetProperty() as it
+        # checks for FunctionType, MethodType.
 
         cdef object valueType = type(value)
         cdef object valueType2

@@ -11,7 +11,7 @@ http://code.google.com/p/cefpython/w/list
 
 # Global functions in cefpython module.
 
-def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
+def CreateBrowserSync(windowInfo, browserSettings, navigateURL):
     return Browser()
 
 def ExceptHook(type, value, traceObject):
@@ -26,7 +26,7 @@ def GetBrowserByWindowHandle(windowHandle):
 def GetJavascriptStackTrace(frameLimit=100):
     return []
 
-def GetRealPath(file=None, encodeUrl=False):
+def GetRealPath(file=None, encodeURL=False):
     return ""
 
 def Initialize(applicationSettings={}):
@@ -47,9 +47,43 @@ def QuitMessageLoop():
 def Shutdown():
     return None
 
-#
-# Settings
-#
+# WindowUtils class.
+
+class WindowUtils:
+
+    @staticmethod
+    def OnSetFocus(windowID, msg, wparam, lparam):
+        return 0
+
+    @staticmethod
+    def OnSize(windowID, msg, wparam, lparam):
+        return 0
+
+    @staticmethod
+    def OnEraseBackground(windowID, msg, wparam, lparam):
+        return 0
+
+    @staticmethod
+    def SetTitle(pyBrowser, pyTitle):
+        return None
+
+    @staticmethod
+    def SetIcon(pyBrowser, icon="inherit"):
+        return None
+
+# ApplicationSettings["log_severity"]
+LOGSEVERITY_VERBOSE = 0
+LOGSEVERITY_INFO = 0
+LOGSEVERITY_WARNING = 0
+LOGSEVERITY_ERROR = 0
+LOGSEVERITY_ERROR_REPORT = 0
+LOGSEVERITY_DISABLE = 0
+
+# ApplicationSettings["graphics_implementation"]
+ANGLE_IN_PROCESS = 0
+ANGLE_IN_PROCESS_COMMAND_BUFFER = 0
+DESKTOP_IN_PROCESS = 0
+DESKTOP_IN_PROCESS_COMMAND_BUFFER = 0
 
 # Values are dummy, these are NOT the defaults.
 ApplicationSettings = {
@@ -73,20 +107,6 @@ ApplicationSettings = {
     "uncaught_exception_stack_size": 0,
     "user_agent": "",
 }
-
-# ApplicationSettings["log_severity"]
-LOGSEVERITY_VERBOSE = 0
-LOGSEVERITY_INFO = 0
-LOGSEVERITY_WARNING = 0
-LOGSEVERITY_ERROR = 0
-LOGSEVERITY_ERROR_REPORT = 0
-LOGSEVERITY_DISABLE = 0
-
-# ApplicationSettings["graphics_implementation"]
-ANGLE_IN_PROCESS = 0
-ANGLE_IN_PROCESS_COMMAND_BUFFER = 0
-DESKTOP_IN_PROCESS = 0
-DESKTOP_IN_PROCESS_COMMAND_BUFFER = 0
 
 # Values are dummy, these are NOT the defaults.
 BrowserSettings = {
@@ -145,269 +165,6 @@ BrowserSettings = {
 }
 
 #
-# Browser object.
-#
-
-class Browser:
-
-    def CanGoBack(self):
-        return False
-
-    def CanGoForward(self):
-        return False
-
-    def ClearHistory(self):
-        return None
-
-    def CloseBrowser(self):
-        return None
-
-    def CloseDevTools(self):
-        return None
-
-    def Find(self, searchID, searchText, forward, matchCase, findNext):
-        return None
-
-    def GetClientCallback(self, name):
-        return callback
-
-    def GetClientCallbacksDict(self):
-        return {}
-
-    def GetFocusedFrame(self):
-        return Frame()
-
-    def GetFrame(self):
-        return Frame()
-
-    def GetFrameNames(self):
-        return ["", ""]
-
-    def GetJavascriptBindings(self):
-        return JavascriptBindings()
-
-    def GetMainFrame(self):
-        return Frame()
-
-    def GetOpenerWindowHandle(self):
-        return 0
-
-    def GetOuterWindowHandle(self):
-        return 0
-
-    def GetUserData(self, key):
-        return None
-
-    def GetWindowID(self):
-        return windowID
-
-    def GetWindowHandle(self):
-        return 0
-
-    def GetZoomLevel(self):
-        return 0.0
-
-    def GoBack(self):
-        return None
-
-    def GoForward(self):
-        return None
-
-    def HasDocument(self):
-        return False
-
-    def HidePopup(self):
-        return None
-
-    def IsFullscreen(self):
-        return False
-
-    def IsPopup(self):
-        return False
-
-    def IsPopupVisible(self):
-        return False
-
-    def IsWindowRenderingDisabled(self):
-        return False
-
-    def Reload(self):
-        return None
-
-    def ReloadIgnoreCache(self):
-        return None
-
-    def SetClientCallback(self, name, callback):
-        return None
-
-    def SetClientHandler(self, clientHandler):
-        return None
-
-    def SetFocus(self, enable):
-        return None
-
-    def SetJavascriptBindings(self, javascriptBindings):
-        return None
-
-    def SetZoomLevel(self, zoomLevel):
-        return None
-
-    def SetUserData(self, key, value):
-        return None
-
-    def ShowDevTools(self):
-        return None
-
-    def StopLoad(self):
-        return None
-
-    def StopFinding(self, clearSelection):
-        return None
-
-    def ToggleFullscreen(self):
-        return None
-
-#
-# Frame object.
-#
-
-class Frame:
-
-    def Copy(self):
-        return None
-
-    def Cut(self):
-        return None
-
-    def Delete(self):
-        return None
-
-    def ExecuteJavascript(self, jsCode, scriptUrl=None, startLine=None):
-        return None
-
-    def GetIdentifier(self):
-        return 0
-
-    def GetName(self):
-        return ""
-
-    def GetProperty(self, name):
-        return mixed
-
-    def GetSource(self):
-        return ""
-
-    def GetText(self):
-        return ""
-
-    def GetUrl(self):
-        return ""
-
-    def IsFocused(self):
-        return False
-
-    def IsMain(self):
-        return False
-
-    def LoadString(self, value, url):
-        return None
-
-    def LoadUrl(self, url):
-        return None
-
-    def Paste(self):
-        return None
-
-    def Print(self):
-        return None
-
-    def Redo(self):
-        return None
-
-    def SelectAll(self):
-        return None
-
-    def SetProperty(self, name, value):
-        return None
-
-    def Undo(self):
-        return None
-
-    def ViewSource(self):
-        return None
-
-class Response:
-
-    def GetStatus(self):
-        return 0
-
-    def SetStatus(self, status):
-        return None
-
-    def GetStatusText(self):
-        return ""
-
-    def SetStatusText(self, statusText):
-        return None
-
-    def GetMimeType(self):
-        return ""
-
-    def SetMimeType(self, mimeType):
-        return None
-
-    def GetHeader(self, name):
-        return ""
-
-    def GetHeaderMap(self):
-        return {}
-
-    def GetHeaderMultimap(self):
-        return [("","")]
-
-    def SetHeaderMap(self, headerMap={}):
-        return None
-
-    def SetHeaderMultimap(self, headerMultimap=[]):
-        return None
-
-#
-# JavascriptBindings class.
-#
-
-class JavascriptBindings:
-
-    def __init__(self, bindToFrames=False, bindToPopups=False):
-        return None
-
-    def IsValueAllowed(self, value):
-        return False
-
-    def Rebind(self):
-        return None
-
-    def SetFunction(self, name, func):
-        return None
-
-    def SetObject(self, name, obj):
-        return None
-
-    def SetProperty(self, name, value):
-        return None
-
-#
-# JavascriptCallback object.
-#
-
-class JavascriptCallback:
-
-    def Call(self, param1, param2, param3_etc):
-        return mixed
-
-    def GetName(self):
-        return name
-
-#
 # DisplayHandler.
 #
 
@@ -441,9 +198,19 @@ def DisplayHandler_OnTooltip(browser, text_out=[""]):
 # KeyboardHandler.
 #
 
-def KeyboardHandler_OnKeyEvent(
-        browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
-    return False
+# eventType constants (OnKeyEvent).
+KEYEVENT_RAWKEYDOWN = 0
+KEYEVENT_KEYDOWN = 0
+KEYEVENT_KEYUP = 0
+KEYEVENT_CHAR = 0
+
+# Constants for checking modifiers param (OnKeyEvent), for use with IsKeyModifier() function.
+KEY_NONE = 0
+KEY_SHIFT = 0
+KEY_CTRL = 0
+KEY_ALT = 0
+KEY_META = 0
+KEY_KEYPAD = 0
 
 # keyCode constants (OnKeyEvent).
 VK_0=0x30
@@ -601,32 +368,13 @@ VK_ICO_HELP=0xE3
 VK_ICO_00=0xE4
 VK_ICO_CLEAR=0xE6
 
-# eventType constants (OnKeyEvent).
-KEYEVENT_RAWKEYDOWN = 0
-KEYEVENT_KEYDOWN = 0
-KEYEVENT_KEYUP = 0
-KEYEVENT_CHAR = 0
-
-# Constants for checking modifiers param (OnKeyEvent), for use with IsKeyModifier() function.
-KEY_NONE = 0
-KEY_SHIFT = 0
-KEY_CTRL = 0
-KEY_ALT = 0
-KEY_META = 0
-KEY_KEYPAD = 0
+def KeyboardHandler_OnKeyEvent(
+        browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript):
+    return False
 
 #
 # LoadHandler.
 #
-
-def LoadHandler_OnLoadEnd(browser, frame, httpStatusCode):
-    return None
-
-def LoadHandler_OnLoadError(browser, frame, errorCode, failedUrl, errorText_out=[""]):
-    return False
-
-def LoadHandler_OnLoadStart(browser, frame):
-    return None
 
 # errorCode constants (OnLoadError).
 ERR_FAILED = 0
@@ -678,11 +426,29 @@ ERR_RESPONSE_HEADERS_TOO_BIG = 0
 ERR_CACHE_MISS = 0
 ERR_INSECURE_RESPONSE = 0
 
+def LoadHandler_OnLoadEnd(browser, frame, httpStatusCode):
+    return None
+
+def LoadHandler_OnLoadError(browser, frame, errorCode, failedURL, errorText_out=[""]):
+    return False
+
+def LoadHandler_OnLoadStart(browser, frame):
+    return None
+
 #
 # RequestHandler.
 #
 
-def RequestHandler_OnResourceRedirect(browser, oldUrl, newUrl_out=[""]):
+# navType constants (OnBeforeBrowse).
+NAVTYPE_LINKCLICKED = 0
+NAVTYPE_FORMSUBMITTED = 0
+NAVTYPE_BACKFORWARD = 0
+NAVTYPE_RELOAD = 0
+NAVTYPE_FORMRESUBMITTED = 0
+NAVTYPE_OTHER = 0
+NAVTYPE_LINKDROPPED = 0
+
+def RequestHandler_OnResourceRedirect(browser, oldURL, newURL_out=[""]):
     return None
 
 def RequestHandler_OnResourceResponse(browser, url, response, filter_out=[None]):
@@ -693,15 +459,6 @@ def RequestHandler_OnProtocolExecution(browser, url, allowOSExecution_out=[False
 
 def RequestHandler_GetAuthCredentials(browser, isProxy, host, port, realm, scheme, username_out=[""], password_out=[""]):
     return False
-
-# navType constants (OnBeforeBrowse).
-NAVTYPE_LINKCLICKED = 0
-NAVTYPE_FORMSUBMITTED = 0
-NAVTYPE_BACKFORWARD = 0
-NAVTYPE_RELOAD = 0
-NAVTYPE_FORMRESUBMITTED = 0
-NAVTYPE_OTHER = 0
-NAVTYPE_LINKDROPPED = 0
 
 #
 # JavascriptContextHandler
@@ -726,26 +483,297 @@ def LifespanHandler_OnBeforeClose(browser):
 def LifespanHandler_RunModal(browser):
     return False
 
-# WindowUtils class.
+#
+# JavascriptBindings class.
+#
 
-class WindowUtils:
+class JavascriptBindings:
 
-    @staticmethod
-    def OnSetFocus(windowID, msg, wparam, lparam):
-        return 0
-
-    @staticmethod
-    def OnSize(windowID, msg, wparam, lparam):
-        return 0
-
-    @staticmethod
-    def OnEraseBackground(windowID, msg, wparam, lparam):
-        return 0
-
-    @staticmethod
-    def SetTitle(pyBrowser, pyTitle):
+    def __init__(self, bindToFrames=False, bindToPopups=False):
         return None
 
-    @staticmethod
-    def SetIcon(pyBrowser, icon="inherit"):
+    def IsValueAllowed(self, value):
+        return False
+
+    def Rebind(self):
         return None
+
+    def SetFunction(self, name, func):
+        return None
+
+    def SetObject(self, name, obj):
+        return None
+
+    def SetProperty(self, name, value):
+        return None
+
+#
+# JavascriptCallback object.
+#
+
+class JavascriptCallback:
+
+    def Call(self, param1, param2, param3_etc):
+        return mixed
+
+    def GetName(self):
+        return name
+
+#
+# Browser object.
+#
+
+class Browser:
+
+    def CanGoBack(self):
+        return False
+
+    def CanGoForward(self):
+        return False
+
+    def ClearHistory(self):
+        return None
+
+    def CloseBrowser(self):
+        return None
+
+    def CloseDevTools(self):
+        return None
+
+    def Find(self, searchID, searchText, forward, matchCase, findNext):
+        return None
+
+    def GetClientCallback(self, name):
+        return callback
+
+    def GetClientCallbacksDict(self):
+        return {}
+
+    def GetFocusedFrame(self):
+        return Frame()
+
+    def GetFrame(self):
+        return Frame()
+
+    def GetFrameNames(self):
+        return ["", ""]
+
+    def GetJavascriptBindings(self):
+        return JavascriptBindings()
+
+    def GetMainFrame(self):
+        return Frame()
+
+    def GetOpenerWindowHandle(self):
+        return 0
+
+    def GetOuterWindowHandle(self):
+        return 0
+
+    def GetUserData(self, key):
+        return None
+
+    def GetWindowID(self):
+        return windowID
+
+    def GetWindowHandle(self):
+        return 0
+
+    def GetZoomLevel(self):
+        return 0.0
+
+    def GoBack(self):
+        return None
+
+    def GoForward(self):
+        return None
+
+    def HasDocument(self):
+        return False
+
+    def HidePopup(self):
+        return None
+
+    def IsFullscreen(self):
+        return False
+
+    def IsPopup(self):
+        return False
+
+    def IsPopupVisible(self):
+        return False
+
+    def IsWindowRenderingDisabled(self):
+        return False
+
+    def Reload(self):
+        return None
+
+    def ReloadIgnoreCache(self):
+        return None
+
+    def SetClientCallback(self, name, callback):
+        return None
+
+    def SetClientHandler(self, clientHandler):
+        return None
+
+    def SetFocus(self, enable):
+        return None
+
+    def SetJavascriptBindings(self, javascriptBindings):
+        return None
+
+    def SetZoomLevel(self, zoomLevel):
+        return None
+
+    def SetUserData(self, key, value):
+        return None
+
+    def ShowDevTools(self):
+        return None
+
+    def StopLoad(self):
+        return None
+
+    def StopFinding(self, clearSelection):
+        return None
+
+    def ToggleFullscreen(self):
+        return None
+
+#
+# Frame object.
+#
+
+class Frame:
+
+    """
+    def CallFunction(self, funcName, param1, param2, param3_etc):
+        return None
+    """
+
+    def Copy(self):
+        return None
+
+    def Cut(self):
+        return None
+
+    def Delete(self):
+        return None
+
+    def ExecuteJavascript(self, jsCode, scriptURL=None, startLine=None):
+        return None
+
+    """
+    def EvalJavascript(self, code, retval, exception):
+        return None
+
+    def GetBrowser(self):
+        return Browser()
+    """
+
+    def GetIdentifier(self):
+        return 0
+
+    def GetName(self):
+        return ""
+
+    """
+    def GetParent(self):
+        return Frame()
+    """
+
+    def GetProperty(self, name):
+        return mixed
+
+    def GetSource(self):
+        return ""
+
+    def GetText(self):
+        return ""
+
+    def GetURL(self):
+        return ""
+
+    def IsFocused(self):
+        return False
+
+    def IsMain(self):
+        return False
+
+    """
+    def LoadRequest(self, request):
+        return None
+
+    def LoadStream(self, stream, url):
+        return None
+    """
+
+    def LoadString(self, value, url):
+        return None
+
+    def LoadURL(self, url):
+        return None
+
+    def Paste(self):
+        return None
+
+    def Print(self):
+        return None
+
+    def Redo(self):
+        return None
+
+    def SelectAll(self):
+        return None
+
+    def SetProperty(self, name, value):
+        return None
+
+    def Undo(self):
+        return None
+
+    def ViewSource(self):
+        return None
+
+    """
+    def VisitDOM(visitor):
+        return None
+    """
+
+class Response:
+
+    def GetStatus(self):
+        return 0
+
+    def SetStatus(self, status):
+        return None
+
+    def GetStatusText(self):
+        return ""
+
+    def SetStatusText(self, statusText):
+        return None
+
+    def GetMimeType(self):
+        return ""
+
+    def SetMimeType(self, mimeType):
+        return None
+
+    def GetHeader(self, name):
+        return ""
+
+    def GetHeaderMap(self):
+        return {}
+
+    def GetHeaderMultimap(self):
+        return [("","")]
+
+    def SetHeaderMap(self, headerMap={}):
+        return None
+
+    def SetHeaderMultimap(self, headerMultimap=[]):
+        return None
+

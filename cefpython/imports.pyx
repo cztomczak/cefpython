@@ -23,8 +23,8 @@ if sys.version_info.major == 2:
 else:
     from urllib.request import pathname2url as urllib_pathname2url
 
-# We should allow multiple string types: str, unicode, bytes. ToCefString() can
-# handle them all.
+# We should allow multiple string types: str, unicode, bytes.
+# PyToCefString() can handle them all.
 ctypedef object py_string
 
 # You can't use "void" along with cpdef function returning None, it is planned to be

@@ -7,15 +7,63 @@
 # http://code.google.com/p/chromiumembedded/issues/detail?id=203
 # Entering context should be done for Frame::CallFunction().
 
-# Arrays, objects and functions may only be created, modified and, in the case of functions, executed, if V8 is inside a context.
+# Arrays, objects and functions may only be created, modified and,
+# in the case of functions, executed, if V8 is inside a context.
 
-cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Context] v8Context, nestingLevel=0):
+IF CEF_VERSION == 1:
 
-    # With nestingLevel > 10 we get windows exceptions.
+    cdef list CefV8StackTraceToPython(CefRefPtr[CefV8StackTrace] cefTrace):
+        cdef int frameNumber
+        cdef int frameCount = cefTrace.get().GetFrameCount()
+        cdef CefRefPtr[CefV8StackFrame] cefFrame
+        cdef CefV8StackFrame* framePtr
+        cdef list pyTrace = []
 
+        for frameNumber in range(0, frameCount):
+            cefFrame = cefTrace.get().GetFrame(frameNumber)
+            framePtr = cefFrame.get()
+            pyFrame = {}
+            pyFrame["script"] = CefToPyString(framePtr.GetScriptName())
+            pyFrame["scriptOrSourceURL"] = CefToPyString(
+                    framePtr.GetScriptNameOrSourceURL())
+            pyFrame["function"] = CefToPyString(framePtr.GetFunctionName())
+            pyFrame["line"] = framePtr.GetLineNumber()
+            pyFrame["column"] = framePtr.GetColumn()
+            pyFrame["isEval"] = framePtr.IsEval()
+            pyFrame["isConstructor"] = framePtr.IsConstructor()
+            pyTrace.append(pyFrame)
+
+        return pyTrace
+
+    cpdef list GetJavascriptStackTrace(int frameLimit=100):
+        assert IsCurrentThread(TID_UI), (
+                "cefpython.GetJavascriptStackTrace() may only be called on the UI thread")
+        cdef CefRefPtr[CefV8StackTrace] cefTrace = (
+                cef_v8_stack_trace.GetCurrent(frameLimit))
+        return CefV8StackTraceToPython(cefTrace)
+
+    cpdef str FormatJavascriptStackTrace(list stackTrace):
+        cdef str formatted = ""
+        cdef dict frame
+        for frameNumber, frame in enumerate(stackTrace):
+            formatted += "\t[%s] %s() in %s on line %s (col:%s)\n" % (
+                    frameNumber,
+                    frame["function"],
+                    frame["scriptOrSourceURL"],
+                    frame["line"],
+                    frame["column"])
+        return formatted
+
+cdef object V8ToPyValue(
+        CefRefPtr[CefV8Value] v8Value,
+        CefRefPtr[CefV8Context] v8Context,
+        int nestingLevel=0):
+
+    # With nestingLevel > 10 we get system exceptions.
     if nestingLevel > 8:
-        raise Exception("V8ValueToPyValue() failed: data passed from Javascript to Python has "
-                        "more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
+        raise Exception("V8ToPyValue() failed: data passed from Javascript to "
+                "Python has more than 8 levels of nesting, this is probably an infinite "
+                "recursion, stopping.")
 
     cdef CefV8Value* v8ValuePtr = v8Value.get()
     cdef CefString cefString
@@ -23,35 +71,35 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
     cdef c_vector[CefString] keys
     cdef c_vector[CefString].iterator iterator
 
-    cdef CefRefPtr[CefV8Value] v8JavascriptCallback
-    cdef CefRefPtr[V8FunctionHandler] v8FunctionHandler # V8FunctionHandler inherits from V8Handler.
-    cdef CefRefPtr[CefV8Handler] v8Handler
+    cdef list pyArray
+    cdef int callbackId
+    cdef dict pyDict
 
+    # A test against IsArray should be done before IsObject().
     if v8ValuePtr.IsArray():
-        # A test against IsArray should be done before IsObject().
-        # Remember about increasing the nestingLevel.
-        arrayLength = v8ValuePtr.GetArrayLength()
-        pyarray = []
-        for key in range(0, arrayLength):
-            pyarray.append(V8ValueToPyValue(v8ValuePtr.GetValue(<int>int(key)), v8Context, nestingLevel+1))
-        return pyarray
+        pyArray = []
+        for key in range(0, v8ValuePtr.GetArrayLength()):
+            pyArray.append(V8ToPyValue(
+                    v8ValuePtr.GetValue(<int>int(key)),
+                    v8Context,
+                    nestingLevel+1))
+        return pyArray
     elif v8ValuePtr.IsBool():
         return v8ValuePtr.GetBoolValue()
     elif v8ValuePtr.IsDate():
-        raise Exception("V8ValueToPyValue() failed: Date object is not supported, you are not allowed"
-                "to pass it from Javascript to Python.")
+        raise Exception("V8ToPyValue() failed: Date object is not supported, "
+                "you are not allowed to pass it from Javascript to Python.")
     elif v8ValuePtr.IsInt():
         # A check against IsInt() must be done before IsDouble(), as any js integer
         # returns true when calling IsDouble().
         return v8ValuePtr.GetIntValue()
     elif v8ValuePtr.IsUInt():
-        # Should be after IsInt() or should be before?
         return v8ValuePtr.GetUIntValue()
     elif v8ValuePtr.IsDouble():
         return v8ValuePtr.GetDoubleValue()
     elif v8ValuePtr.IsFunction():
-        callbackID = PutV8JavascriptCallback(v8Value, v8Context)
-        return JavascriptCallback(callbackID)
+        callbackId = PutV8JavascriptCallback(v8Value, v8Context)
+        return JavascriptCallback(callbackId)
     elif v8ValuePtr.IsNull():
         return None
     elif v8ValuePtr.IsObject():
@@ -59,95 +107,107 @@ cdef object V8ValueToPyValue(CefRefPtr[CefV8Value] v8Value, CefRefPtr[CefV8Conte
         # Remember about increasing the nestingLevel.
         v8ValuePtr.GetKeys(keys)
         iterator = keys.begin()
-        pydict = dict()
+        pyDict = {}
         while iterator != keys.end():
             cefString = deref(iterator)
-            key = ToPyString(cefString)
-            value = V8ValueToPyValue(v8ValuePtr.GetValue(cefString), v8Context, nestingLevel+1)
-            pydict[key] = value
+            key = CefToPyString(cefString)
+            value = V8ToPyValue(
+                    v8ValuePtr.GetValue(cefString),
+                    v8Context,
+                    nestingLevel+1)
+            pyDict[key] = value
             preinc(iterator)
-        return pydict
+        return pyDict
     elif v8ValuePtr.IsString():
-        return ToPyString(v8ValuePtr.GetStringValue())
+        return CefToPyString(v8ValuePtr.GetStringValue())
     elif v8ValuePtr.IsUndefined():
         return None
     else:
-        raise Exception("V8ValueToPyValue() failed: unknown type of CefV8Value.")
+        raise Exception("V8ToPyValue() failed: unknown type of CefV8Value.")
 
-# Any function calling PyValueToV8Value must be inside that v8Context,
+# Any function calling PyToV8Value must be inside that v8Context,
 # check current context and call Enter if required otherwise exception is
 # thrown while trying to create an array, object or function.
 
-cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Context] v8Context, nestingLevel=0) except *:
+cdef CefRefPtr[CefV8Value] PyToV8Value(
+        object pyValue,
+        CefRefPtr[CefV8Context] v8Context,
+        int nestingLevel=0) except *:
 
-    # With nestingLevel > 10 we get windows exceptions.
-
+    # With nestingLevel > 10 we get system exceptions.
     if nestingLevel > 8:
-        raise Exception("PyValueToV8Value() failed: data passed from Python to Javascript has"
-                " more than 8 levels of nesting, this is probably an infinite recursion, stopping.")
+        raise Exception("PyToV8Value() failed: data passed from Python "
+                "to Javascript has more than 8 levels of nesting, this is probably "
+                "an infinite recursion, stopping.")
 
     cdef c_bool sameContext
-
     if g_debug:
         sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
         if not sameContext:
-            raise Exception("PyValueToV8Value() called in wrong v8 context")
-
+            raise Exception("PyToV8Value() called in wrong v8 context")
 
     cdef CefString cefString
-    cdef CefRefPtr[CefV8Value] v8Value # not initialized, later we assign using "cef_v8_static.Create...()"
+    cdef CefRefPtr[CefV8Value] v8Value
     cdef CefString cefFuncName
-
-    pyValueType = type(pyValue)
-
-    # Issue 10: support for unicode and tuple.
-    # http://code.google.com/p/cefpython/issues/detail?id=10
+    cdef type pyValueType = type(pyValue)
 
     if bytes == str:
         # Python 2.7
-        if pyValueType == unicode: # unicode string to bytes string
+        if pyValueType == unicode:
+            # Unicode string to bytes string.
             pyValue = pyValue.encode(g_applicationSettings["unicode_to_bytes_encoding"])
     else:
         # Python 3.2
-        if pyValueType == bytes: # bytes to string
+        if pyValueType == bytes:
+            # Bytes to string.
             pyValue = pyValue.decode(g_applicationSettings["unicode_to_bytes_encoding"])
 
     if pyValueType == tuple:
         pyValue = list(pyValue)
 
-    # Check type again, as code above might have changed it.
+    # Check type again, as code above may have changed it.
     pyValueType = type(pyValue)
 
+    cdef int index
+    cdef object value
+    cdef CefRefPtr[V8FunctionHandler] v8FunctionHandler
+    cdef CefRefPtr[CefV8Handler] v8Handler
+    cdef int callbackId
+    cdef object key
+
     if pyValueType == list:
-        # Remember about increasing nestingLevel.
         v8Value = cef_v8_static.CreateArray(len(pyValue))
         for index,value in enumerate(pyValue):
-            v8Value.get().SetValue(int(index), PyValueToV8Value(value, v8Context, nestingLevel+1))
+            v8Value.get().SetValue(
+                    index,
+                    PyToV8Value(value, v8Context, nestingLevel+1))
         return v8Value
     elif pyValueType == bool:
         return cef_v8_static.CreateBool(bool(pyValue))
     elif pyValueType == int:
         return cef_v8_static.CreateInt(int(pyValue))
     elif pyValueType == long:
-        # If should probably be "-2147483648"? But when changing to -2147483648 then I'm getting
-        # a C++ warning from Cython: "unary minus operator applied to unsigned type, result still unsigned"
-        if pyValue <= 2147483647 and pyValue >= -2147483647: # int32 in CEF
+        # If should probably be "-2147483648"? But when changing to -2147483648
+        # then getting a C++ warning from Cython: "unary minus operator applied
+        # to unsigned type, result still unsigned". -2147483648..2147483647 is int32.
+        if pyValue <= 2147483647 and pyValue >= -2147483647:
             return cef_v8_static.CreateInt(int(pyValue))
         else:
-            ToCefString(str(pyValue), cefString)
+            PyToCefString(str(pyValue), cefString)
             return cef_v8_static.CreateString(cefString)
     elif pyValueType == float:
         return cef_v8_static.CreateDouble(float(pyValue))
     elif pyValueType == types.FunctionType or pyValueType == types.MethodType:
         v8FunctionHandler = <CefRefPtr[V8FunctionHandler]>new V8FunctionHandler()
         v8FunctionHandler.get().SetContext(v8Context)
-        v8Handler = <CefRefPtr[CefV8Handler]><CefV8Handler*>v8FunctionHandler.get()
-        ToCefString(pyValue.__name__, cefFuncName)
-        v8Value = cef_v8_static.CreateFunction(cefFuncName, v8Handler) # v8PythonCallback
-        callbackID = PutPythonCallback(pyValue)
+        v8Handler = <CefRefPtr[CefV8Handler]>v8FunctionHandler.get()
+        PyToCefString(pyValue.__name__, cefFuncName)
+         # V8PythonCallback.
+        v8Value = cef_v8_static.CreateFunction(cefFuncName, v8Handler)
+        callbackId = PutPythonCallback(pyValue)
         v8FunctionHandler.get().SetCallback_RemovePythonCallback(
                 <RemovePythonCallback_type>RemovePythonCallback)
-        v8FunctionHandler.get().SetPythonCallbackID(callbackID)
+        v8FunctionHandler.get().SetPythonCallbackID(callbackId)
         return v8Value
     elif pyValueType == type(None):
         return cef_v8_static.CreateNull()
@@ -157,13 +217,19 @@ cdef CefRefPtr[CefV8Value] PyValueToV8Value(object pyValue, CefRefPtr[CefV8Conte
             # A dict may have an int key, a string key or even a tuple key:
             # {0: 12, '0': 12, (0, 1): 123}
             # Remember about increasing nestingLevel.
-            key = str(key)
-            ToCefString(key, cefString)
-            v8Value.get().SetValue(cefString, PyValueToV8Value(value, v8Context, nestingLevel+1), V8_PROPERTY_ATTRIBUTE_NONE)
+            PyToCefString(str(key), cefString)
+            v8Value.get().SetValue(
+                    cefString,
+                    PyToV8Value(value, v8Context, nestingLevel+1),
+                    V8_PROPERTY_ATTRIBUTE_NONE)
         return v8Value
     elif pyValueType == str:
-        ToCefString(pyValue, cefString)
+        PyToCefString(pyValue, cefString)
+        return cef_v8_static.CreateString(cefString)
+    elif pyValueType == type:
+        PyToCefString(str(pyValue), cefString)
         return cef_v8_static.CreateString(cefString)
     else:
-        raise Exception("PyValueToV8Value() failed: an unsupported python type was passed from"
-                " python to javascript: %s, value: %s" % (pyValueType.__name__, pyValue))
+        raise Exception("PyToV8Value() failed: an unsupported python type "
+                "was passed from python to javascript: %s, value: %s"
+                % (pyValueType.__name__, pyValue))

@@ -2,13 +2,13 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-NAVTYPE_LINKCLICKED = <int>cef_types.NAVTYPE_LINKCLICKED
-NAVTYPE_FORMSUBMITTED = <int>cef_types.NAVTYPE_FORMSUBMITTED
-NAVTYPE_BACKFORWARD = <int>cef_types.NAVTYPE_BACKFORWARD
-NAVTYPE_RELOAD = <int>cef_types.NAVTYPE_RELOAD
-NAVTYPE_FORMRESUBMITTED = <int>cef_types.NAVTYPE_FORMRESUBMITTED
-NAVTYPE_OTHER = <int>cef_types.NAVTYPE_OTHER
-NAVTYPE_LINKDROPPED = <int>cef_types.NAVTYPE_LINKDROPPED
+NAVTYPE_LINKCLICKED = cef_types.NAVTYPE_LINKCLICKED
+NAVTYPE_FORMSUBMITTED = cef_types.NAVTYPE_FORMSUBMITTED
+NAVTYPE_BACKFORWARD = cef_types.NAVTYPE_BACKFORWARD
+NAVTYPE_RELOAD = cef_types.NAVTYPE_RELOAD
+NAVTYPE_FORMRESUBMITTED = cef_types.NAVTYPE_FORMRESUBMITTED
+NAVTYPE_OTHER = cef_types.NAVTYPE_OTHER
+NAVTYPE_LINKDROPPED = cef_types.NAVTYPE_LINKDROPPED
 
 cdef public c_bool RequestHandler_OnBeforeBrowse(
         CefRefPtr[CefBrowser] cefBrowser,
@@ -17,25 +17,21 @@ cdef public c_bool RequestHandler_OnBeforeBrowse(
         cef_types.cef_handler_navtype_t navType,
         c_bool isRedirect
         ) except * with gil:
-
     # TODO: not yet implemented.
     return False
 
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     # cdef PyRequest pyRequest
+    cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("RequestHandler_OnBeforeBrowse() failed: pyBrowser is %s" % pyBrowser)
-            return False
-
         pyFrame = GetPyFrame(cefFrame)
         pyRequest = None
-
         callback = pyBrowser.GetClientCallback("OnBeforeBrowse")
         if callback:
-            return bool(callback(pyBrowser, pyFrame, pyRequest, <int>navType, isRedirect))
+            return bool(callback(
+                    pyBrowser, pyFrame, pyRequest, <int>navType, isRedirect))
         else:
             return False
     except:
@@ -50,32 +46,30 @@ cdef public c_bool RequestHandler_OnBeforeResourceLoad(
         CefRefPtr[CefResponse] cefResponse,
         int loadFlags
         ) except * with gil:
-
     # TODO: not yet implemented.
     return False
 
     cdef PyBrowser pyBrowser
     # cdef PyRequest pyRequest
+    cdef list pyRedirectUrl
     # cdef PyResourceStream pyResourceStream
     # cdef PyResponse pyResponse
+    cdef object callback
+    cdef py_bool ret
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("RequestHandler_OnBeforeResourceLoad() failed: pyBrowser is %s" % pyBrowser)
-            return False
-
         pyRequest = None
         pyRedirectUrl = [""]
         pyResourceStream = None
         pyResponse = None
-
         callback = pyBrowser.GetClientCallback("OnBeforeResourceLoad")
         if callback:
-            ret = callback(pyBrowser, pyRequest, pyRedirectUrl, pyResourceStream, pyResponse)
+            ret = callback(
+                    pyBrowser, pyRequest, pyRedirectUrl, pyResourceStream, pyResponse)
             assert type(pyRedirectUrl) == list
             assert type(pyRedirectUrl[0]) == str
             if pyRedirectUrl[0]:
-                ToCefString(pyRedirectUrl[0], cefRedirectUrl)
+                PyToCefString(pyRedirectUrl[0], cefRedirectUrl)
             return bool(ret)
         else:
             return False
@@ -88,24 +82,21 @@ cdef public void RequestHandler_OnResourceRedirect(
         CefString& cefOldUrl,
         CefString& cefNewUrl
         ) except * with gil:
-
     # TODO: needs testing.
-
     cdef PyBrowser pyBrowser
+    cdef str pyOldUrl
+    # [""] pass by reference (out).
+    cdef list pyNewUrl
+    cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("RequestHandler_OnResourceRedirect() failed: pyBrowser is %s" % pyBrowser)
-            return
-
-        pyOldUrl = ToPyString(cefOldUrl)
-        pyNewUrl = [ToPyString(cefNewUrl)] # [""] pass by reference.
-
+        pyOldUrl = CefToPyString(cefOldUrl)
+        pyNewUrl = [CefToPyString(cefNewUrl)]
         callback = pyBrowser.GetClientCallback("OnResourceRedirect")
         if callback:
             callback(pyBrowser, pyOldUrl, pyNewUrl)
             if pyNewUrl[0]:
-                ToCefString(pyNewUrl[0], cefNewUrl)
+                PyToCefString(pyNewUrl[0], cefNewUrl)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -116,20 +107,16 @@ cdef public void RequestHandler_OnResourceResponse(
         CefRefPtr[CefResponse] cefResponse,
         CefRefPtr[CefContentFilter]& cefContentFilter
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
+    cdef str pyUrl
     # cdef PyResponse pyResponse
     # cdef PyContentFilter pyContentFilter
+    cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("RequestHandler_OnResourceResponse() failed: pyBrowser is %s" % pyBrowser)
-            return
-
-        pyUrl = ToPyString(cefUrl)
+        pyUrl = CefToPyString(cefUrl)
         pyResponse = CreatePyResponse(cefResponse)
         pyContentFilter = None
-
         callback = pyBrowser.GetClientCallback("OnResourceResponse")
         if callback:
             callback(pyBrowser, pyUrl, pyResponse, pyContentFilter)
@@ -142,22 +129,21 @@ cdef public c_bool RequestHandler_OnProtocolExecution(
         CefString& cefUrl,
         c_bool& cefAllowOSExecution
         ) except * with gil:
-
     # TODO: needs testing.
-
     cdef PyBrowser pyBrowser
+    cdef str pyUrl
+    # [True] pass by reference (out).
+    cdef list pyAllowExecution
+    cdef object callback
+    cdef py_bool ret
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("RequestHandler_OnProtocolExecution() failed: pyBrowser is %s" % pyBrowser)
-            return False
-
-        pyUrl = ToPyString(cefUrl)
-        pyAllowOSExecution = [bool(cefAllowOSExecution)] # [True] pass by reference.
-
+        pyUrl = CefToPyString(cefUrl)
+        pyAllowOSExecution = [bool(cefAllowOSExecution)]
         callback = pyBrowser.GetClientCallback("OnProtocolExecution")
         if callback:
-            ret = callback(pyBrowser, pyUrl, pyAllowOSExecution)
+            ret = callback(
+                    pyBrowser, pyUrl, pyAllowOSExecution)
             cefAllowOSExecution = bool(pyAllowOSExecution[0])
             return bool(ret)
         else:
@@ -173,23 +159,21 @@ cdef public c_bool RequestHandler_GetDownloadHandler(
         cef_types.int64 cefContentLength,
         CefRefPtr[CefDownloadHandler]& cefDownloadHandler
         ) except * with gil:
-
     # TODO: not yet implemented.
     return False
 
     cdef PyBrowser pyBrowser
+    cdef str pyMimeType
+    cdef str pyFilename
+    cdef int pyContentLength
     # cdef PyDownloadHandler pyDownloadHandler
+    cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("RequestHandler_GetDownloadHandler() failed: pyBrowser is %s" % pyBrowser)
-            return False
-
-        pyMimeType = ToPyString(cefMimeType)
-        pyFilename = ToPyString(cefFilename)
+        pyMimeType = CefToPyString(cefMimeType)
+        pyFilename = CefToPyString(cefFilename)
         pyContentLength = int(cefContentLength)
         pyDownloadHandler = None
-
         callback = pyBrowser.GetClientCallback("GetDownloadHandler")
         if callback:
             return bool(callback(pyBrowser, pyMimeType, pyFilename, pyContentLength, pyDownloadHandler))
@@ -209,63 +193,69 @@ cdef public c_bool RequestHandler_GetAuthCredentials(
         CefString& cefUsername,
         CefString& cefPassword
         ) except * with gil:
-
     cdef PyBrowser pyBrowser
+    cdef py_bool pyIsProxy
+    cdef str pyHost
+    cdef int pyPort
+    cdef str pyRealm
+    cdef str pyScheme
+    # [""] pass by reference (out).
+    cdef list pyUsername
+    cdef list pyPassword
+    cdef object callback
+    cdef py_bool ret
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("RequestHandler_GetAuthCredentials() failed: pyBrowser is %s" % pyBrowser)
-            return False
-
         pyIsProxy = bool(cefIsProxy)
-        pyHost = ToPyString(cefHost)
+        pyHost = CefToPyString(cefHost)
         pyPort = int(cefPort)
-        pyRealm = ToPyString(cefRealm)
-        pyScheme = ToPyString(cefScheme)
+        pyRealm = CefToPyString(cefRealm)
+        pyScheme = CefToPyString(cefScheme)
         pyUsername = [""]
         pyPassword = [""]
-
         callback = pyBrowser.GetClientCallback("GetAuthCredentials")
         if callback:
-            ret = callback(pyBrowser, pyIsProxy, pyHost, pyPort, pyRealm, pyScheme, pyUsername, pyPassword)
+            ret = callback(
+                    pyBrowser,
+                    pyIsProxy, pyHost, pyPort, pyRealm, pyScheme,
+                    pyUsername, pyPassword)
             if ret:
-                ToCefString(pyUsername[0], cefUsername)
-                ToCefString(pyPassword[0], cefPassword)
+                PyToCefString(pyUsername[0], cefUsername)
+                PyToCefString(pyPassword[0], cefPassword)
             return bool(ret)
         else:
             # Default implementation.
             IF UNAME_SYSNAME == "Windows":
-                ret = HttpAuthenticationDialog(pyBrowser, pyIsProxy, pyHost, pyPort, pyRealm, pyScheme, pyUsername, pyPassword)
+                ret = HttpAuthenticationDialog(
+                        pyBrowser,
+                        pyIsProxy, pyHost, pyPort, pyRealm, pyScheme,
+                        pyUsername, pyPassword)
                 if ret:
-                    ToCefString(pyUsername[0], cefUsername)
-                    ToCefString(pyPassword[0], cefPassword)
+                    PyToCefString(pyUsername[0], cefUsername)
+                    PyToCefString(pyPassword[0], cefPassword)
                 return bool(ret)
             return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-
-
 cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
         CefRefPtr[CefBrowser] cefBrowser,
-        CefString& mainUrl) except * with gil:
-
+        CefString& mainUrl
+        ) except * with gil:
     # TODO: not yet implemented.
     return <CefRefPtr[CefCookieManager]>NULL
-
     cdef PyBrowser pyBrowser
+    cdef str pyMainUrl
+    cdef object callback
+    cdef py_bool ret
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        if not pyBrowser:
-            Debug("RequestHandler_GetCookieManager() failed: pyBrowser is %s" % pyBrowser)
-            return <CefRefPtr[CefCookieManager]>NULL
-
-        pyMainUrl = ToPyString(mainUrl)
-
+        pyMainUrl = CefToPyString(mainUrl)
         callback = pyBrowser.GetClientCallback("GetCookieManager")
         if callback:
-            ret = callback(pyBrowser, pyMainUrl)
+            ret = bool(callback(
+                    pyBrowser, pyMainUrl))
             if ret:
                 pass
             return <CefRefPtr[CefCookieManager]>NULL
@@ -274,4 +264,3 @@ cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
-
