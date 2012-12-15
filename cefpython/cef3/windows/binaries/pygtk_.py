@@ -55,7 +55,7 @@ class PyGTKExample:
         windowID = self.container.get_window().handle
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(windowID)
-        self.browser = cefpython.CreateBrowser(windowInfo, browserSettings={}, navigateURL='example.html')
+        self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings={}, navigateURL='example.html')
 
         self.mainWindow.show()
 

@@ -2,29 +2,43 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef str CefToPyString(
-        CefString& cefString):
-    cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
-    cdef int charstr_bytes = WideCharToMultiByte(
-            CP_UTF8, 0, wcharstr, -1, NULL, 0, NULL, NULL)
+IF UNAME_SYSNAME == "Windows":
+    cdef int wchar_t_size = 2
+ELSE:
+    cdef int wchar_t_size = 4
+
+cdef str CharToPyString(
+        char* charString):
     cdef str pyString
+    if bytes == str:
+        # Python 2.7, bytes and str are the same types.
+        # "" + charString >> makes a copy of char*
+        pyString = "" + charString
+    else:
+        # Python 3.
+        pyString = (b"" + charString).decode("utf-8", "ignore")
+    return pyString
+
+cdef str WcharToPyString(
+        wchar_t* wcharString):
+    cdef int charBytes = WideCharToMultiByte(
+            CP_UTF8, 0, wcharString, -1, NULL, 0, NULL, NULL)
 
     # When CefString is an empty string, WideCharToMultiByte returns 0 bytes, it does
     # not include the NUL character, so we need to use calloc instead of malloc.
-    cdef char* charstr = <char*>calloc(charstr_bytes, sizeof(char))
-    cdef int copied_bytes = WideCharToMultiByte(
-            CP_UTF8, 0, wcharstr, -1, charstr, charstr_bytes, NULL, NULL)
 
-    if bytes == str:
-        # Python 2.7, bytes and str are the same types.
-        # "" + charstr >> makes a copy of char*
-        pyString = "" + charstr
-    else:
-        # Python 3.
-        pyString = (b"" + charstr).decode("utf-8", "ignore")
+    cdef char* charString = <char*>calloc(charBytes, sizeof(char))
+    cdef int copiedBytes = WideCharToMultiByte(
+            CP_UTF8, 0, wcharString, -1, charString, charBytes, NULL, NULL)
 
-    free(charstr)
+    cdef str pyString = CharToPyString(charString)
+    free(charString)
     return pyString
+
+cdef str CefToPyString(
+        CefString& cefString):
+    cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
+    return WcharToPyString(wcharstr)
 
 cdef void PyToCefString(
         py_string pyString,

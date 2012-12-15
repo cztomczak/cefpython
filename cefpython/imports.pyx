@@ -13,11 +13,6 @@ import re
 import copy
 import inspect # used by JavascriptBindings.__SetObjectMethods()
 
-# pywin32 extension is required by window_utils_win.pyx
-import win32api
-import win32gui
-import win32con
-
 if sys.version_info.major == 2:
     from urllib import pathname2url as urllib_pathname2url
 else:
@@ -31,6 +26,12 @@ ctypedef object py_string
 # added to Cython in the future, creating this virtual type temporarily. If you
 # change it later to "void" then don't forget to add "except *".
 ctypedef object py_void
+
+# TODO: use WindowHandle type instead of int.
+IF UNAME_SYSNAME == "Windows":
+    ctypedef int WindowHandle
+ELSE:
+    pass
 
 from cpython cimport bool as py_bool
 from libcpp cimport bool as c_bool
