@@ -25,7 +25,7 @@ class MainFrame(wx.Frame):
 
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(self.GetHandle())
-        self.browser = cefpython.CreateBrowser(windowInfo, browserSettings={}, navigateURL="example.html")
+        self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings={}, navigateURL="example.html")
 
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         self.Bind(wx.EVT_SIZE, self.OnSize)

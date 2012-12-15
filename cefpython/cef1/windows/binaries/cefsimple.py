@@ -25,13 +25,14 @@ def CefSimple():
         win32con.WM_DESTROY: QuitApplication,
         win32con.WM_SIZE: cefpython.WindowUtils.OnSize,
         win32con.WM_SETFOCUS: cefpython.WindowUtils.OnSetFocus,
-        win32con.WM_ERASEBKGND: cefpython.WindowUtils.OnEraseBackground
-    }
-    windowHandle = cefwindow.CreateWindow(title="CefSimple", className="cefsimple",
-                    width=800, height=600, icon="icon.ico", windowProc=wndproc)
+        win32con.WM_ERASEBKGND: cefpython.WindowUtils.OnEraseBackground }
+    windowHandle = cefwindow.CreateWindow(
+            title="CefSimple", className="cefsimple", width=800, height=600,
+            icon="icon.ico", windowProc=wndproc)
     windowInfo = cefpython.WindowInfo()
     windowInfo.SetAsChild(windowHandle)
-    browser = cefpython.CreateBrowserSync(windowInfo, browserSettings={}, navigateURL="cefsimple.html")
+    browser = cefpython.CreateBrowserSync(
+            windowInfo, browserSettings={}, navigateURL="cefsimple.html")
     cefpython.MessageLoop()
     cefpython.Shutdown()
 

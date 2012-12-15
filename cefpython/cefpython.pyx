@@ -74,7 +74,7 @@ IF CEF_VERSION == 1:
 cdef CefRefPtr[ClientHandler] g_clientHandler = <CefRefPtr[ClientHandler]?> new ClientHandler()
 
 def Initialize(applicationSettings=None):
-    Debug("-" * 80)
+    Debug("-" * 60)
     Debug("Initialize() called")
 
     cdef CefRefPtr[CefApp] cefApp
