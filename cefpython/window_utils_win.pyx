@@ -23,14 +23,18 @@ class WindowUtils:
         GetClientRect(<HWND>windowHandle, &rect2)
 
         cdef HDWP hdwp = BeginDeferWindowPos(1)
-        hdwp = DeferWindowPos(hdwp, innerHwnd, NULL, rect2.left, rect2.top,
-                rect2.right - rect2.left, rect2.bottom - rect2.top, SWP_NOZORDER)
+        hdwp = DeferWindowPos(hdwp, innerHwnd, NULL,
+                rect2.left, rect2.top,
+                rect2.right - rect2.left,
+                rect2.bottom - rect2.top,
+                SWP_NOZORDER)
         EndDeferWindowPos(hdwp)
 
         return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
 
     @staticmethod
-    def OnEraseBackground(int windowHandle, long msg, long wparam, long lparam):
+    def OnEraseBackground(int windowHandle, long msg, long wparam,
+                          long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
             return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
@@ -45,8 +49,8 @@ class WindowUtils:
     @staticmethod
     def SetTitle(PyBrowser pyBrowser, str pyTitle):
         # Each browser window should have a title (Issue 3).
-        # When popup is created, the window that sits in taskbar has no title.
-
+        # When popup is created, the window that sits in taskbar
+        # has no title.
         if not pyTitle:
             return
 
@@ -56,28 +60,33 @@ class WindowUtils:
         else:
             windowHandle = pyBrowser.GetWindowHandle()
 
-        assert windowHandle, ("WindowUtils.SetTitle() failed: windowHandle is empty")
+        assert windowHandle, (
+                "WindowUtils.SetTitle() failed: windowHandle is empty")
 
-        cdef char* charCurrentTitle = <char*>calloc(100, sizeof(char))
+        cdef int sizeOfTitle = 100
+        cdef wchar_t* widecharTitle = (
+                <wchar_t*>calloc(sizeOfTitle, wchar_t_size))
         cdef str currentTitle
-        GetWindowTextA(<HWND>windowHandle, charCurrentTitle, 100)
-        currentTitle = CharToPyString(charCurrentTitle)
-        free(charCurrentTitle)
+        GetWindowTextW(<HWND>windowHandle, widecharTitle, sizeOfTitle)
+        currentTitle = WidecharToPyString(widecharTitle)
+        free(widecharTitle)
 
         cdef bytes bytesTitle
         if str == bytes:
             bytesTitle = <bytes>pyTitle
         else:
             bytesTitle = pyTitle.encode("utf-8")
-        cdef char* charTitle = bytesTitle
+        cdef std_string stdStringTitle = bytesTitle
+        cdef CefString cefTitle
+        cefTitle.FromString(stdStringTitle)
 
         if pyBrowser.GetUserData("__outerWindowHandle"):
             if not currentTitle:
-                SetWindowTextA(<HWND>windowHandle, charTitle)
+                SetWindowTextW(<HWND>windowHandle, cefTitle.ToWString().c_str())
         else:
             # For independent popups we always change title to what page
             # is displayed currently.
-            SetWindowTextA(<HWND>windowHandle, charTitle)
+            SetWindowTextW(<HWND>windowHandle, cefTitle.ToWString().c_str())
 
     @staticmethod
     def SetIcon(PyBrowser pyBrowser, py_string icon="inherit"):
@@ -88,7 +97,8 @@ class WindowUtils:
             return None
 
         windowHandle = pyBrowser.GetWindowHandle()
-        assert windowHandle, ("WindowUtils.SetIcon() failed: windowHandle is empty")
+        assert windowHandle, (
+                "WindowUtils.SetIcon() failed: windowHandle is empty")
 
         iconBig = SendMessage(
                 <HWND>windowHandle, WM_GETICON, ICON_BIG, 0)
@@ -104,8 +114,9 @@ class WindowUtils:
             parentIconSmall = SendMessage(
                     <HWND>parentWindowHandle, WM_GETICON, ICON_SMALL, 0)
 
-            # If parent is main application window, then GetOpenerWindowHandle()
-            # returned innerWindowHandle of the parent window, try again.
+            # If parent is main application window, then
+            # GetOpenerWindowHandle() returned innerWindowHandle
+            # of the parent window, try again.
 
             if not parentIconBig and not parentIconSmall:
                 parentWindowHandle = <int>GetParent(<HWND>parentWindowHandle)
@@ -119,9 +130,13 @@ class WindowUtils:
                     <HWND>parentWindowHandle, WM_GETICON, ICON_SMALL, 0)
 
             if parentIconBig:
-                SendMessage(
-                        <HWND>windowHandle, WM_SETICON, ICON_BIG, parentIconBig)
+                SendMessage(<HWND>windowHandle, WM_SETICON,
+                            ICON_BIG, parentIconBig)
             if parentIconSmall:
-                SendMessage(
-                        <HWND>windowHandle, WM_SETICON, ICON_SMALL, parentIconSmall)
+                SendMessage(<HWND>windowHandle, WM_SETICON,
+                            ICON_SMALL, parentIconSmall)
 
+    @staticmethod
+    def GetParentHandle(int windowHandle):
+
+        return <int>GetParent(<HWND>windowHandle)

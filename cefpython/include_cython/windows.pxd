@@ -4,8 +4,15 @@
 
 from stddef cimport wchar_t
 
-cdef extern from "Windows.h":
+cdef extern from *:
+    ctypedef char const_char "const char"
+    ctypedef wchar_t const_wchar_t "const wchar_t"
 
+cdef extern from "stdio.h" nogil:
+    cdef int printf(const_char* TEMPLATE, ...)
+    cdef int wprintf(const_wchar_t* TEMPLATE, ...)
+
+cdef extern from "Windows.h" nogil:
     ctypedef void* HANDLE
     ctypedef HANDLE HWND
     ctypedef HANDLE HINSTANCE
@@ -24,8 +31,11 @@ cdef extern from "Windows.h":
         long bottom
     ctypedef RECT* LPRECT
 
-    cdef int CP_UTF8
+    cdef UINT CP_UTF8
+    cdef UINT CP_ACP
+    cdef DWORD WC_COMPOSITECHECK
     cdef int WideCharToMultiByte(int, int, wchar_t*, int, char*, int, char*, int*)
+    cdef DWORD MB_COMPOSITE
     cdef int MultiByteToWideChar(int, int, char*, int, wchar_t*, int)
 
     ctypedef void* HDWP
@@ -98,12 +108,13 @@ cdef extern from "Windows.h":
     cdef LRESULT DefWindowProc(
             HWND hWnd,  UINT Msg, WPARAM wParam, LPARAM lParam)
 
-    cdef int GetWindowTextA(
-            HWND hWnd, char* lpString, int nMaxCount)
-    cdef BOOL SetWindowTextA(HWND hWnd, char* lpString)
+    cdef int GetWindowTextW(HWND hWnd, wchar_t* lpString, int nMaxCount)
+    cdef BOOL SetWindowTextW(HWND hWnd, wchar_t* lpString)
 
     cdef UINT WM_GETICON
     cdef UINT WM_SETICON
     cdef int ICON_BIG
     cdef int ICON_SMALL
     cdef HWND GetParent(HWND hwnd)
+
+    cdef size_t mbstowcs(wchar_t *wcstr, const_char *mbstr, size_t count)
