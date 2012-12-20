@@ -2,8 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# If you try to keep PyBrowser() objects inside c_vector you will get segmentation
-# faults, as they will be garbage collected.
+# If you try to keep PyBrowser() objects inside c_vector you will
+# get segmentation faults, as they will be garbage collected.
 
 cdef dict g_pyBrowsers = {}
 
@@ -15,6 +15,7 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
 
     cdef PyBrowser pyBrowser
     cdef int browserId
+    cdef int id
 
     browserId = cefBrowser.get().GetIdentifier()
     if browserId in g_pyBrowsers:
@@ -29,6 +30,34 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
     pyBrowser = PyBrowser()
     pyBrowser.cefBrowser = cefBrowser
     g_pyBrowsers[browserId] = pyBrowser
+
+    # Inherit client callbacks and javascript bindings
+    # from parent browser.
+
+    # Checking __outerWindowHandle as we should not inherit
+    # client callbacks and javascript bindings if the browser
+    # was created explicitily by calling CreateBrowserSync().
+
+    # Popups inherit client callbacks by default.
+
+    # Popups inherit javascript bindings only when "bindToPopups"
+    # constructor param was set to True.
+
+    cdef WindowHandle openerHandle
+    cdef dict clientCallbacks
+    cdef JavascriptBindings javascriptBindings
+
+    if pyBrowser.IsPopup() and (
+    not pyBrowser.GetUserData("__outerWindowHandle")):
+        openerHandle = pyBrowser.GetOpenerWindowHandle()
+        for id, tempPyBrowser in g_pyBrowsers.items():
+            if tempPyBrowser.GetWindowHandle() == openerHandle:
+                clientCallbacks = tempPyBrowser.GetClientCallbacksDict()
+                if clientCallbacks:
+                    pyBrowser.SetClientCallbacksDict(clientCallbacks)
+                javascriptBindings = tempPyBrowser.GetJavascriptBindings()
+                if javascriptBindings.GetBindToPopups():
+                    pyBrowser.SetJavascriptBindings(javascriptBindings)
 
     return pyBrowser
 
@@ -132,6 +161,9 @@ cdef class PyBrowser:
     cpdef object GetClientCallback(self, py_string name):
         if name in self.clientCallbacks:
             return self.clientCallbacks[name]
+
+    cpdef py_void SetClientCallbacksDict(self, dict clientCallbacks):
+        self.clientCallbacks = clientCallbacks
 
     cpdef dict GetClientCallbacksDict(self):
         return self.clientCallbacks

@@ -40,7 +40,9 @@ from libcpp.map cimport map as c_map
 from multimap cimport multimap as c_multimap
 from libcpp.pair cimport pair as c_pair
 from libcpp.vector cimport vector as c_vector
-from libcpp.string cimport string as c_string
+
+from libcpp.string cimport string as std_string
+from wstring cimport wstring as std_wstring
 
 # preincrement and dereference must be "as" otherwise not seen.
 from cython.operator cimport preincrement as preinc, dereference as deref

@@ -7,6 +7,10 @@ IF UNAME_SYSNAME == "Windows":
 ELSE:
     cdef int wchar_t_size = 4
 
+cdef void CharToWidechar(char* charString, wchar_t* wideString, int wideSize):
+    cdef int copiedChars = MultiByteToWideChar(
+            CP_UTF8, 0, charString, -1, wideString, wideSize)
+
 cdef str CharToPyString(
         char* charString):
     cdef str pyString
@@ -19,13 +23,14 @@ cdef str CharToPyString(
         pyString = (b"" + charString).decode("utf-8", "ignore")
     return pyString
 
-cdef str WcharToPyString(
+cdef str WidecharToPyString(
         wchar_t* wcharString):
     cdef int charBytes = WideCharToMultiByte(
             CP_UTF8, 0, wcharString, -1, NULL, 0, NULL, NULL)
 
-    # When CefString is an empty string, WideCharToMultiByte returns 0 bytes, it does
-    # not include the NUL character, so we need to use calloc instead of malloc.
+    # When CefString is an empty string, WideCharToMultiByte
+    # returns 0 bytes, it does not include the NUL character,
+    # so we need to use calloc instead of malloc.
 
     cdef char* charString = <char*>calloc(charBytes, sizeof(char))
     cdef int copiedBytes = WideCharToMultiByte(
@@ -37,8 +42,12 @@ cdef str WcharToPyString(
 
 cdef str CefToPyString(
         CefString& cefString):
+    if cefString.empty():
+        return ""
     cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
-    return WcharToPyString(wcharstr)
+    return WidecharToPyString(wcharstr)
+    # Or this way:
+    # return cefString.ToString()
 
 cdef void PyToCefString(
         py_string pyString,
@@ -47,15 +56,17 @@ cdef void PyToCefString(
     if bytes == str:
         # Python 2.7, bytes and str are the same types.
         if type(pyString) == unicode:
-            pyString = pyString.encode(g_applicationSettings["unicode_to_bytes_encoding"])
+            pyString = pyString.encode(
+                    g_applicationSettings["unicode_to_bytes_encoding"])
     else:
         # Python 3 requires bytes before converting to char*.
         if type(pyString) != bytes:
             pyString = pyString.encode("utf-8")
 
-    cdef c_string cString = pyString
-    # When used cefString.FromASCII(), a DCHECK failed when passed a unicode string.
-    cefString.FromString(cString)
+    cdef std_string stdString = pyString
+    # When used cefString.FromASCII(), a DCHECK failed
+    # when passed a unicode string.
+    cefString.FromString(stdString)
 
 cdef void PyToCefStringPointer(
         py_string pyString,
@@ -64,13 +75,15 @@ cdef void PyToCefStringPointer(
     if bytes == str:
         # Python 2.7, bytes and str are the same types.
         if type(pyString) == unicode:
-            pyString = pyString.encode(g_applicationSettings["unicode_to_bytes_encoding"])
+            pyString = pyString.encode(
+                    g_applicationSettings["unicode_to_bytes_encoding"])
         cefString.FromASCII(<char*>pyString)
     else:
         # Python 3 requires bytes before converting to char*.
         if type(pyString) != bytes:
             pyString = pyString.encode("utf-8")
 
-    cdef c_string cString = pyString
-    # When used cefString.FromASCII(), a DCHECK failed when passed a unicode string.
-    cefString.FromString(cString)
+    cdef std_string stdString = pyString
+    # When used cefString.FromASCII(), a DCHECK failed
+    # when passed a unicode string.
+    cefString.FromString(stdString)
