@@ -138,5 +138,4 @@ class WindowUtils:
 
     @staticmethod
     def GetParentHandle(int windowHandle):
-
         return <int>GetParent(<HWND>windowHandle)

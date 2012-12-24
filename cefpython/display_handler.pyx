@@ -27,7 +27,7 @@ cdef public void DisplayHandler_OnAddressChange(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public c_bool DisplayHandler_OnConsoleMessage(
+cdef public cpp_bool DisplayHandler_OnConsoleMessage(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& cefMessage,
         CefString& cefSource,
@@ -72,8 +72,8 @@ cdef public void DisplayHandler_OnContentsSizeChange(
 
 cdef public void DisplayHandler_OnNavStateChange(
         CefRefPtr[CefBrowser] cefBrowser,
-        c_bool canGoBack,
-        c_bool canGoForward
+        cpp_bool canGoBack,
+        cpp_bool canGoForward
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef object callback
@@ -134,7 +134,7 @@ cdef public void DisplayHandler_OnTitleChange(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public c_bool DisplayHandler_OnTooltip(
+cdef public cpp_bool DisplayHandler_OnTooltip(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& cefText
         ) except * with gil:

@@ -7,7 +7,7 @@ include "compile_time_constants.pxi"
 cdef extern from "include/internal/cef_types.h":
 
     IF CEF_VERSION == 1:
-        enum cef_log_severity_t:
+        cdef enum cef_log_severity_t:
             LOGSEVERITY_VERBOSE = -1,
             LOGSEVERITY_INFO,
             LOGSEVERITY_WARNING,
@@ -15,7 +15,7 @@ cdef extern from "include/internal/cef_types.h":
             LOGSEVERITY_ERROR_REPORT,
             LOGSEVERITY_DISABLE = 99,
     ELIF CEF_VERSION == 3:
-        enum cef_log_severity_t:
+        cdef enum cef_log_severity_t:
             LOGSEVERITY_DEFAULT,
             LOGSEVERITY_VERBOSE,
             LOGSEVERITY_INFO,
@@ -99,20 +99,20 @@ cdef extern from "include/internal/cef_types.h":
         ERR_INSECURE_RESPONSE = -501,
 
     # KeyboardHandler > OnKeyEvent - KeyEventType.
-    enum cef_handler_keyevent_type_t:
+    cdef enum cef_handler_keyevent_type_t:
         KEYEVENT_RAWKEYDOWN = 0,
         KEYEVENT_KEYDOWN,
         KEYEVENT_KEYUP,
         KEYEVENT_CHAR
 
-    enum cef_handler_keyevent_modifiers_t:
+    cdef enum cef_handler_keyevent_modifiers_t:
         KEY_SHIFT = 1 << 0,
         KEY_CTRL = 1 << 1,
         KEY_ALT = 1 << 2,
         KEY_META  = 1 << 3,
         KEY_KEYPAD = 1 << 4,  # Only used on Mac OS-X
 
-    enum cef_v8_propertyattribute_t:
+    cdef enum cef_v8_propertyattribute_t:
         V8_PROPERTY_ATTRIBUTE_NONE = 0,       # Writeable, Enumerable,
         #  Configurable
         V8_PROPERTY_ATTRIBUTE_READONLY = 1 << 0,  # Not writeable
@@ -121,7 +121,7 @@ cdef extern from "include/internal/cef_types.h":
 
     IF CEF_VERSION == 1:
         # CefRequestHandler > OnBeforeBrowse > NavType
-        enum cef_handler_navtype_t:
+        cdef enum cef_handler_navtype_t:
             NAVTYPE_LINKCLICKED = 0,
             NAVTYPE_FORMSUBMITTED,
             NAVTYPE_BACKFORWARD,
@@ -130,7 +130,7 @@ cdef extern from "include/internal/cef_types.h":
             NAVTYPE_OTHER,
             NAVTYPE_LINKDROPPED
     ELIF CEF_VERSION == 3:
-        enum cef_navigation_type_t:
+        cdef enum cef_navigation_type_t:
             NAVIGATION_LINK_CLICKED = 0,
             NAVIGATION_FORM_SUBMITTED,
             NAVIGATION_BACK_FORWARD,
@@ -140,12 +140,18 @@ cdef extern from "include/internal/cef_types.h":
 
     IF CEF_VERSION == 1:
         # CefDisplayHandler > StatusType
-        enum cef_handler_statustype_t:
+        cdef enum cef_handler_statustype_t:
             STATUSTYPE_TEXT = 0,
             STATUSTYPE_MOUSEOVER_URL,
             STATUSTYPE_KEYBOARD_FOCUS_URL,
 
     IF CEF_VERSION == 3:
-        enum cef_process_id_t:
+        cdef enum cef_process_id_t:
             PID_BROWSER,
             PID_RENDERER,
+
+    IF CEF_VERSION == 1:
+        ctypedef enum cef_paint_element_type_t:
+            PET_VIEW = 0,
+            PET_POPUP,
+

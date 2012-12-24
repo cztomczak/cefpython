@@ -47,6 +47,7 @@ include "browser.pyx"
 include "frame.pyx"
 
 include "settings.pyx"
+include "paint_buffer.pyx"
 
 IF UNAME_SYSNAME == "Windows":
     include "window_utils_win.pyx"
@@ -61,6 +62,7 @@ IF CEF_VERSION == 1:
     include "response.pyx"
     include "display_handler.pyx"
     include "lifespan_handler.pyx"
+    include "render_handler.pyx"
 
 IF CEF_VERSION == 1:
     include "v8context_handler.pyx"
@@ -107,7 +109,7 @@ def Initialize(applicationSettings=None):
     SetApplicationSettings(applicationSettings, &cefApplicationSettings)
 
     Debug("CefInitialize()")
-    cdef c_bool ret
+    cdef cpp_bool ret
     IF CEF_VERSION == 1:
         ret = CefInitialize(cefApplicationSettings, cefApp)
     ELIF CEF_VERSION == 3:

@@ -63,6 +63,7 @@ ext_modules = [Extension(
         'libcef',
         'libcef_dll_wrapper',
         'User32',
+        'Gdi32',
         'http_authentication', # Build with /MD.
         'v8function_handler_py%s' % PYTHON_VERSION, # Build with /MD.
         'client_handler_py%s' % PYTHON_VERSION # Build with /MD.
@@ -76,7 +77,10 @@ ext_modules = [Extension(
     #                  client_handler or other vcprojects include setup/cefpython.h,
     #                  this is a list of functions with "public" statement that is
     #                  accessible from c++.
-    extra_link_args=['/ignore:4217']
+    extra_link_args=['/ignore:4217'],
+
+    # Defining macros:
+    # define_macros = [("UNICODE","1"), ("_UNICODE","1"), ]
 )]
 
 setup(

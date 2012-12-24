@@ -61,10 +61,10 @@ cdef class PyResponse:
         return headerMap
 
     cpdef list GetHeaderMultimap(self):
-        cdef c_multimap[CefString, CefString] cefHeaderMap
+        cdef cpp_multimap[CefString, CefString] cefHeaderMap
         self.GetCefResponse().get().GetHeaderMap(cefHeaderMap)
         cdef list pyHeaderMultimap = []
-        cdef c_multimap[CefString, CefString].iterator iterator = cefHeaderMap.begin()
+        cdef cpp_multimap[CefString, CefString].iterator iterator = cefHeaderMap.begin()
         cdef CefString cefKey
         cdef CefString cefValue
         cdef str pyKey
@@ -88,10 +88,10 @@ cdef class PyResponse:
 
     cpdef py_void SetHeaderMultimap(self, list headerMultimap):
         assert len(headerMultimap) > 0, "headerMultimap param is empty"
-        cdef c_multimap[CefString, CefString] cefHeaderMap
+        cdef cpp_multimap[CefString, CefString] cefHeaderMap
         cdef CefString cefKey
         cdef CefString cefValue
-        cdef c_pair[CefString, CefString] pair
+        cdef cpp_pair[CefString, CefString] pair
         cdef tuple headerTuple
         for headerTuple in headerMultimap:
             PyToCefString(str(headerTuple[0]), cefKey)

@@ -16,11 +16,17 @@ cdef extern from "Windows.h" nogil:
     ctypedef void* HANDLE
     ctypedef HANDLE HWND
     ctypedef HANDLE HINSTANCE
+    ctypedef HANDLE HICON
+    ctypedef HANDLE HDC
+    ctypedef HANDLE HBITMAP
+    ctypedef HICON HCURSOR
+
     ctypedef unsigned int UINT
     ctypedef wchar_t* LPCTSTR
     ctypedef wchar_t* LPTSTR
     ctypedef int BOOL
     ctypedef unsigned long DWORD
+    ctypedef unsigned short WORD
 
     cdef HINSTANCE GetModuleHandle(LPCTSTR lpModuleName)
 
@@ -37,6 +43,7 @@ cdef extern from "Windows.h" nogil:
     cdef int WideCharToMultiByte(int, int, wchar_t*, int, char*, int, char*, int*)
     cdef DWORD MB_COMPOSITE
     cdef int MultiByteToWideChar(int, int, char*, int, wchar_t*, int)
+    cdef size_t mbstowcs(wchar_t *wcstr, const_char *mbstr, size_t count)
 
     ctypedef void* HDWP
     cdef int SWP_NOZORDER
@@ -117,4 +124,3 @@ cdef extern from "Windows.h" nogil:
     cdef int ICON_SMALL
     cdef HWND GetParent(HWND hwnd)
 
-    cdef size_t mbstowcs(wchar_t *wcstr, const_char *mbstr, size_t count)

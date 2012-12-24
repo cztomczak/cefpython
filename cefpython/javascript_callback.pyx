@@ -2,8 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef c_map[int, CefRefPtr[CefV8Value]] g_v8JavascriptCallbacks
-cdef c_map[int, CefRefPtr[CefV8Context]] g_v8JavascriptCallbackContexts
+cdef cpp_map[int, CefRefPtr[CefV8Value]] g_v8JavascriptCallbacks
+cdef cpp_map[int, CefRefPtr[CefV8Context]] g_v8JavascriptCallbackContexts
 # Next callbackId.
 cdef int g_v8JavascriptCallbackCount = 0
 
@@ -65,7 +65,7 @@ cdef class JavascriptCallback:
         # a different v8 frame context. Need to enter js v8 context before
         # calling PyToV8Value().
 
-        cdef c_bool sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
+        cdef cpp_bool sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
 
         if not sameContext:
             Debug("JavascriptCallback.Call(): inside a different context, calling v8Context.Enter()")

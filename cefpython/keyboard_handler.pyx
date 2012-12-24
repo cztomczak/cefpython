@@ -14,13 +14,13 @@ KEY_ALT = cef_types.KEY_ALT
 KEY_META  = cef_types.KEY_META
 KEY_KEYPAD = cef_types.KEY_KEYPAD
 
-cdef public c_bool KeyboardHandler_OnKeyEvent(
+cdef public cpp_bool KeyboardHandler_OnKeyEvent(
         CefRefPtr[CefBrowser] cefBrowser,
         cef_types.cef_handler_keyevent_type_t eventType,
         int code,
         int modifiers,
-        c_bool isSystemKey,
-        c_bool isAfterJavascript
+        cpp_bool isSystemKey,
+        cpp_bool isAfterJavascript
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef object callback

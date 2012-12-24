@@ -4,7 +4,7 @@
 
 include "compile_time_constants.pxi"
 
-from windows cimport HWND, RECT, HINSTANCE
+from windows cimport HWND, RECT, HINSTANCE, HCURSOR
 from Cython.Shadow import void
 from cef_types_wrappers cimport CefStructBase
 from cef_string cimport CefString
@@ -12,6 +12,7 @@ from cef_string cimport CefString
 cdef extern from "include/internal/cef_win.h":
 
     ctypedef HWND CefWindowHandle
+    ctypedef HCURSOR CefCursorHandle
 
     cdef cppclass CefWindowInfo:
         void SetAsChild(HWND, RECT)

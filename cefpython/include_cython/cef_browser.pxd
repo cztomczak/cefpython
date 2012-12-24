@@ -8,9 +8,11 @@ from cef_ptr cimport CefRefPtr
 from cef_base cimport CefBase
 from cef_string cimport CefString
 from cef_client cimport CefClient
-from libcpp cimport bool as c_bool
-from libcpp.vector cimport vector as c_vector
+from libcpp cimport bool as cpp_bool
+from libcpp.vector cimport vector as cpp_vector
 from cef_frame cimport CefFrame
+from cef_types cimport cef_paint_element_type_t
+from cef_types_wrappers cimport CefRect
 
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo
@@ -21,36 +23,45 @@ cdef extern from "include/cef_browser.h":
 
         cdef cppclass CefBrowser(CefBase):
 
-            c_bool CanGoBack()
-            c_bool CanGoForward()
+            cpp_bool CanGoBack()
+            cpp_bool CanGoForward()
             void ClearHistory()
             void CloseBrowser()
             void CloseDevTools()
-            void Find(int identifier, CefString& searchText, c_bool forward,
-                    c_bool matchCase, c_bool findNext)
+            void Find(int identifier, CefString& searchText, cpp_bool forward,
+                    cpp_bool matchCase, cpp_bool findNext)
             CefRefPtr[CefFrame] GetFocusedFrame()
             CefRefPtr[CefFrame] GetFrame(CefString& name)
-            void GetFrameNames(c_vector[CefString]& names)
+            void GetFrameNames(cpp_vector[CefString]& names)
             CefRefPtr[CefFrame] GetMainFrame()
             CefWindowHandle GetOpenerWindowHandle()
             CefWindowHandle GetWindowHandle()
             double GetZoomLevel()
             void GoBack()
             void GoForward()
-            c_bool HasDocument()
+            cpp_bool HasDocument()
             void HidePopup()
-            c_bool IsPopup()
+            cpp_bool IsPopup()
             void ParentWindowWillClose()
             void Reload()
             void ReloadIgnoreCache()
-            void SetFocus(c_bool enable)
+            void SetFocus(cpp_bool enable)
             void SetZoomLevel(double zoomLevel)
             void ShowDevTools()
             void StopLoad()
-            void StopFinding(c_bool clearSelection)
-            c_bool IsWindowRenderingDisabled()
-            c_bool IsPopupVisible()
+            void StopFinding(cpp_bool clearSelection)
+            cpp_bool IsWindowRenderingDisabled()
+            cpp_bool IsPopupVisible()
             int GetIdentifier()
+
+            # off-screen rendering.
+            cpp_bool GetSize(cef_paint_element_type_t type,
+                           int& width, int& height)
+            void SetSize(cef_paint_element_type_t type,
+                         int width, int height)
+            void Invalidate(CefRect& dirtyRect)
+            cpp_bool GetImage(cef_paint_element_type_t type,
+                          int width, int height, void* buffer)
 
             # virtual CefRefPtr<CefClient> GetClient() =0;
 
@@ -61,7 +72,7 @@ cdef extern from "include/cef_browser.h":
             void CloseBrowser()
             void ParentWindowWillClose()
             CefRefPtr[CefBrowser] GetBrowser()
-            void SetFocus(c_bool enable)
+            void SetFocus(cpp_bool enable)
             CefWindowHandle GetWindowHandle()
             CefWindowHandle GetOpenerWindowHandle()
             double GetZoomLevel()
@@ -78,20 +89,20 @@ cdef extern from "include/cef_browser.h":
         cdef cppclass CefBrowser(CefBase):
 
             CefRefPtr[CefBrowserHost] GetHost()
-            c_bool CanGoBack()
-            c_bool CanGoForward()
+            cpp_bool CanGoBack()
+            cpp_bool CanGoForward()
             CefRefPtr[CefFrame] GetFocusedFrame()
             CefRefPtr[CefFrame] GetFrame(CefString& name)
-            void GetFrameNames(c_vector[CefString]& names)
+            void GetFrameNames(cpp_vector[CefString]& names)
             CefRefPtr[CefFrame] GetMainFrame()
             void GoBack()
             void GoForward()
-            c_bool HasDocument()
-            c_bool IsPopup()
+            cpp_bool HasDocument()
+            cpp_bool IsPopup()
             void Reload()
             void ReloadIgnoreCache()
             void StopLoad()
-            c_bool IsLoading()
+            cpp_bool IsLoading()
             int GetIdentifier()
 
             # CefRefPtr<CefFrame> GetFrame(int64 identifier) =0;
