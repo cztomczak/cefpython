@@ -33,7 +33,6 @@ from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
 from math import pi, sin, cos
 from direct.gui.OnscreenImage import OnscreenImage
-from PIL import Image
 
 class World(DirectObject):
 
