@@ -2,7 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef c_bool HttpAuthenticationDialog(
+cdef cpp_bool HttpAuthenticationDialog(
         browser, isProxy, host, port, realm, scheme, username, password
         ) except *:
     cdef AuthCredentialsData* credentialsData

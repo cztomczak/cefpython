@@ -68,8 +68,8 @@ cdef object V8ToPyValue(
     cdef CefV8Value* v8ValuePtr = v8Value.get()
     cdef CefString cefString
     cdef CefString cefFuncName
-    cdef c_vector[CefString] keys
-    cdef c_vector[CefString].iterator iterator
+    cdef cpp_vector[CefString] keys
+    cdef cpp_vector[CefString].iterator iterator
 
     cdef list pyArray
     cdef int callbackId
@@ -140,7 +140,7 @@ cdef CefRefPtr[CefV8Value] PyToV8Value(
                 "to Javascript has more than 8 levels of nesting, this is probably "
                 "an infinite recursion, stopping.")
 
-    cdef c_bool sameContext
+    cdef cpp_bool sameContext
     if g_debug:
         sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
         if not sameContext:

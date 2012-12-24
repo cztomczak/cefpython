@@ -2,7 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef public c_bool LifespanHandler_DoClose(
+cdef public cpp_bool LifespanHandler_DoClose(
         CefRefPtr[CefBrowser] cefBrowser
         ) except * with gil:
     cdef PyBrowser pyBrowser
@@ -48,7 +48,7 @@ cdef public void LifespanHandler_OnBeforeClose(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public c_bool LifespanHandler_RunModal(
+cdef public cpp_bool LifespanHandler_RunModal(
         CefRefPtr[CefBrowser] cefBrowser
         ) except * with gil:
     cdef PyBrowser pyBrowser

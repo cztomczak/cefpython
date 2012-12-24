@@ -4,7 +4,7 @@
 
 #pragma once
 
-// d:\cefpython\src\setup/cefpython.h(22) : warning C4190: 'RequestHandler_GetCookieManager' 
+// d:\cefpython\src\setup/cefpython.h(22) : warning C4190: 'RequestHandler_GetCookieManager'
 // has C-linkage specified, but returns UDT 'CefRefPtr<T>' which is incompatible with C
 #pragma warning(disable:4190)
 
@@ -22,7 +22,7 @@
 #define DL_EXPORT(RTYPE) RTYPE
 #endif
 
-#if defined(OS_WIN) 
+#if defined(OS_WIN)
 #include "windows/setup/cefpython.h"
 #endif
 
@@ -32,7 +32,8 @@ class ClientHandler : public CefClient,
         public CefV8ContextHandler,
         public CefRequestHandler,
         public CefDisplayHandler,
-        public CefLifeSpanHandler
+        public CefLifeSpanHandler,
+        public CefRenderHandler
 /*
         public CefFocusHandler,
         public CefPrintHandler,
@@ -46,16 +47,16 @@ public:
   virtual ~ClientHandler(){}
 
   // Implemented handlers:
-  
+
   virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE
   { return this; }
-  
+
   virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE
   { return this; }
-  
+
   virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE
   { return this; }
-  
+
   virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() OVERRIDE
   { return this; }
 
@@ -65,29 +66,29 @@ public:
   virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE
   { return this; }
 
+  virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE
+  { return this; }
+
   // NOT implemented handlers:
 
   virtual CefRefPtr<CefFocusHandler> GetFocusHandler() OVERRIDE
   { return NULL; }
 
   virtual CefRefPtr<CefMenuHandler> GetMenuHandler() OVERRIDE
-  { return NULL; }  
-  
+  { return NULL; }
+
   virtual CefRefPtr<CefPermissionHandler> GetPermissionHandler() OVERRIDE
-  { return NULL; }  
-  
+  { return NULL; }
+
   virtual CefRefPtr<CefPrintHandler> GetPrintHandler() OVERRIDE
   { return NULL; }
-  
+
   virtual CefRefPtr<CefFindHandler> GetFindHandler() OVERRIDE
   { return NULL; }
-  
+
   virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() OVERRIDE
-  { return NULL; }  
-  
-  virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE
   { return NULL; }
-  
+
   virtual CefRefPtr<CefDragHandler> GetDragHandler() OVERRIDE
   { return NULL; }
 
@@ -100,13 +101,13 @@ public:
       CefRefPtr<CefFrame> frame,
       int httpStatusCode
     ) OVERRIDE;
-  
-  
+
+
   virtual void OnLoadStart(
       CefRefPtr<CefBrowser> browser,
       CefRefPtr<CefFrame> frame
     ) OVERRIDE;
-  
+
   virtual bool OnLoadError(
       CefRefPtr<CefBrowser> browser,
       CefRefPtr<CefFrame> frame,
@@ -256,13 +257,41 @@ public:
 
   virtual bool RunModal(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
-  
-  
+  //
+  // CefRenderHandler
+  //
+
+  virtual bool GetViewRect(CefRefPtr<CefBrowser> browser,
+                           CefRect& rect) OVERRIDE;
+
+  virtual bool GetScreenRect(CefRefPtr<CefBrowser> browser,
+                             CefRect& rect) OVERRIDE;
+
+  virtual bool GetScreenPoint(CefRefPtr<CefBrowser> browser,
+                              int viewX,
+                              int viewY,
+                              int& screenX,
+                              int& screenY) OVERRIDE;
+
+  virtual void OnPopupShow(CefRefPtr<CefBrowser> browser,
+                           bool show) OVERRIDE;
+
+  virtual void OnPopupSize(CefRefPtr<CefBrowser> browser,
+                           const CefRect& rect) OVERRIDE;
+
+  virtual void OnPaint(CefRefPtr<CefBrowser> browser,
+                       PaintElementType type,
+                       const RectList& dirtyRects,
+                       const void* buffer) OVERRIDE;
+
+  virtual void OnCursorChange(CefRefPtr<CefBrowser> browser,
+                              CefCursorHandle cursor) OVERRIDE;
+
 protected:
-   
+
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(ClientHandler);
-  
+
   // Include the default locking implementation.
   IMPLEMENT_LOCKING(ClientHandler);
 

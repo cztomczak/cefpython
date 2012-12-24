@@ -93,7 +93,7 @@ cdef class JavascriptBindings:
         cdef CefRefPtr[CefBrowser] cefBrowser
         cdef CefRefPtr[CefFrame] cefFrame
         cdef CefRefPtr[CefV8Context] v8Context
-        cdef c_bool sameContext
+        cdef cpp_bool sameContext
         cdef PyBrowser pyBrowser
         cdef PyFrame pyFrame
 

@@ -185,7 +185,7 @@ cdef class PyFrame:
             cdef CefString cefPropertyName
             PyToCefString(name, cefPropertyName)
 
-            cdef c_bool sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
+            cdef cpp_bool sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
             if not sameContext:
                 Debug("Frame.SetProperty(): inside a different context, calling v8Context.Enter()")
                 assert v8Context.get().Enter(), "v8Context.Enter() failed"

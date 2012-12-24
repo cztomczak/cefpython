@@ -57,7 +57,7 @@ cdef class WindowInfo:
     def __init__(self):
         self.transparentPainting = False
 
-    cpdef object SetAsChild(self, int parentWindowHandle, list windowRect=None):
+    cpdef py_void SetAsChild(self, int parentWindowHandle, list windowRect=None):
         if not IsWindowHandle(parentWindowHandle):
             raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
 
@@ -76,7 +76,7 @@ cdef class WindowInfo:
 
     IF UNAME_SYSNAME == "Windows":
 
-        cpdef object SetAsPopup(self, int parentWindowHandle, py_string windowName):
+        cpdef py_void SetAsPopup(self, int parentWindowHandle, py_string windowName):
             if not IsWindowHandle(parentWindowHandle):
                 raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
             self.parentWindowHandle = parentWindowHandle
@@ -86,7 +86,7 @@ cdef class WindowInfo:
     IF CEF_VERSION == 1:
         IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
 
-            cpdef object SetAsOffscreen(self, int parentWindowHandle):
+            cpdef py_void SetAsOffscreen(self, int parentWindowHandle):
                 if not IsWindowHandle(parentWindowHandle):
                     raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
                 self.parentWindowHandle = parentWindowHandle
@@ -95,11 +95,11 @@ cdef class WindowInfo:
     IF CEF_VERSION == 1:
         IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
 
-            cpdef object SetTransparentPainting(self, py_bool transparentPainting):
+            cpdef py_void SetTransparentPainting(self, py_bool transparentPainting):
                 self.transparentPainting = transparentPainting
 
     ELIF CEF_VERSION == 3:
         IF UNAME_SYSNAME == "Windows":
 
-            cpdef object SetTransparentPainting(self, py_bool transparentPainting):
+            cpdef py_void SetTransparentPainting(self, py_bool transparentPainting):
                 self.transparentPainting = transparentPainting

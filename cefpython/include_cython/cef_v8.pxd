@@ -3,12 +3,12 @@
 # Website: http://code.google.com/p/cefpython/
 
 from cef_ptr cimport CefRefPtr
-from libcpp.vector cimport vector as c_vector
+from libcpp.vector cimport vector as cpp_vector
 from cef_browser cimport CefBrowser
 from cef_frame cimport CefFrame
 from cef_string cimport CefString
 from cef_base cimport CefBase
-from libcpp cimport bool as c_bool
+from libcpp cimport bool as cpp_bool
 cimport cef_types
 
 cdef extern from "include/cef_v8.h":
@@ -18,11 +18,11 @@ cdef extern from "include/cef_v8.h":
         CefRefPtr[CefV8Value] GetGlobal()
         CefRefPtr[CefBrowser] GetBrowser()
         CefRefPtr[CefFrame] GetFrame()
-        c_bool Enter()
-        c_bool Exit()
-        c_bool IsSame(CefRefPtr[CefV8Context] that)
+        cpp_bool Enter()
+        cpp_bool Exit()
+        cpp_bool IsSame(CefRefPtr[CefV8Context] that)
 
-    ctypedef c_vector[CefRefPtr[CefV8Value]] CefV8ValueList
+    ctypedef cpp_vector[CefRefPtr[CefV8Value]] CefV8ValueList
 
     cdef cppclass CefV8Accessor(CefBase):
         pass
@@ -45,38 +45,38 @@ cdef extern from "include/cef_v8.h":
                 CefV8ValueList& arguments)
 
         int GetArrayLength()
-        c_bool GetBoolValue()
+        cpp_bool GetBoolValue()
         double GetDoubleValue()
         CefString GetFunctionName()
         int GetIntValue()
         unsigned int GetUIntValue()
-        c_bool GetKeys(c_vector[CefString]& keys)
+        cpp_bool GetKeys(cpp_vector[CefString]& keys)
         CefString GetStringValue()
 
         CefRefPtr[CefV8Value] GetValue(CefString& key) # object's property by key
         CefRefPtr[CefV8Value] GetValue(int index) # arrays index value
 
-        c_bool HasValue(CefString& key)
-        c_bool HasValue(int index)
+        cpp_bool HasValue(CefString& key)
+        cpp_bool HasValue(int index)
 
-        c_bool SetValue(CefString& key, CefRefPtr[CefV8Value] value, cef_types.cef_v8_propertyattribute_t attribute)
-        c_bool SetValue(int index, CefRefPtr[CefV8Value] value)
+        cpp_bool SetValue(CefString& key, CefRefPtr[CefV8Value] value, cef_types.cef_v8_propertyattribute_t attribute)
+        cpp_bool SetValue(int index, CefRefPtr[CefV8Value] value)
 
-        c_bool IsArray()
-        c_bool IsBool()
-        c_bool IsDate()
-        c_bool IsDouble()
-        c_bool IsFunction()
-        c_bool IsInt()
-        c_bool IsUInt()
-        c_bool IsNull()
-        c_bool IsObject()
-        c_bool IsString()
-        c_bool IsUndefined()
+        cpp_bool IsArray()
+        cpp_bool IsBool()
+        cpp_bool IsDate()
+        cpp_bool IsDouble()
+        cpp_bool IsFunction()
+        cpp_bool IsInt()
+        cpp_bool IsUInt()
+        cpp_bool IsNull()
+        cpp_bool IsObject()
+        cpp_bool IsString()
+        cpp_bool IsUndefined()
 
-        c_bool HasException()
+        cpp_bool HasException()
         CefRefPtr[CefV8Exception] GetException()
-        c_bool ClearException()
+        cpp_bool ClearException()
 
     cdef cppclass CefV8StackTrace(CefBase):
 
@@ -90,6 +90,6 @@ cdef extern from "include/cef_v8.h":
         CefString GetFunctionName()
         int GetLineNumber()
         int GetColumn()
-        c_bool IsEval()
-        c_bool IsConstructor()
+        cpp_bool IsEval()
+        cpp_bool IsConstructor()
 

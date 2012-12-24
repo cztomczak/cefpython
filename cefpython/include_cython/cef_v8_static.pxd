@@ -9,7 +9,7 @@ from cef_v8 cimport CefV8Handler
 from cef_v8 cimport CefV8Accessor
 from cef_v8 cimport CefV8Context
 from cef_base cimport CefBase
-from libcpp cimport bool as c_bool
+from libcpp cimport bool as cpp_bool
 
 # Importing static methods only in this file. This is in a separate file as we do not want
 # these names to be imported into global namespace, you will be using them like this:
@@ -19,7 +19,7 @@ from libcpp cimport bool as c_bool
 cdef extern from "include/cef_v8.h" namespace "CefV8Value":
 
     cdef CefRefPtr[CefV8Value] CreateArray(int length)
-    cdef CefRefPtr[CefV8Value] CreateBool(c_bool value)
+    cdef CefRefPtr[CefV8Value] CreateBool(cpp_bool value)
     cdef CefRefPtr[CefV8Value] CreateDouble(double value)
     cdef CefRefPtr[CefV8Value] CreateFunction(
         CefString& name,

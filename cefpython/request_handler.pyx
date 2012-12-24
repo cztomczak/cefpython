@@ -10,12 +10,12 @@ NAVTYPE_FORMRESUBMITTED = cef_types.NAVTYPE_FORMRESUBMITTED
 NAVTYPE_OTHER = cef_types.NAVTYPE_OTHER
 NAVTYPE_LINKDROPPED = cef_types.NAVTYPE_LINKDROPPED
 
-cdef public c_bool RequestHandler_OnBeforeBrowse(
+cdef public cpp_bool RequestHandler_OnBeforeBrowse(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         CefRefPtr[CefRequest] cefRequest,
         cef_types.cef_handler_navtype_t navType,
-        c_bool isRedirect
+        cpp_bool isRedirect
         ) except * with gil:
     # TODO: not yet implemented.
     return False
@@ -38,7 +38,7 @@ cdef public c_bool RequestHandler_OnBeforeBrowse(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public c_bool RequestHandler_OnBeforeResourceLoad(
+cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefRequest] cefRequest,
         CefString& cefRedirectUrl,
@@ -124,10 +124,10 @@ cdef public void RequestHandler_OnResourceResponse(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public c_bool RequestHandler_OnProtocolExecution(
+cdef public cpp_bool RequestHandler_OnProtocolExecution(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& cefUrl,
-        c_bool& cefAllowOSExecution
+        cpp_bool& cefAllowOSExecution
         ) except * with gil:
     # TODO: needs testing.
     cdef PyBrowser pyBrowser
@@ -152,7 +152,7 @@ cdef public c_bool RequestHandler_OnProtocolExecution(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public c_bool RequestHandler_GetDownloadHandler(
+cdef public cpp_bool RequestHandler_GetDownloadHandler(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& cefMimeType,
         CefString& cefFilename,
@@ -183,9 +183,9 @@ cdef public c_bool RequestHandler_GetDownloadHandler(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public c_bool RequestHandler_GetAuthCredentials(
+cdef public cpp_bool RequestHandler_GetAuthCredentials(
         CefRefPtr[CefBrowser] cefBrowser,
-        c_bool cefIsProxy,
+        cpp_bool cefIsProxy,
         CefString& cefHost,
         int cefPort,
         CefString& cefRealm,

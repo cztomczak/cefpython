@@ -37,7 +37,7 @@ cdef public void LoadHandler_OnLoadStart(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public c_bool LoadHandler_OnLoadError(
+cdef public cpp_bool LoadHandler_OnLoadError(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         cef_types.cef_handler_errorcode_t cefErrorCode,

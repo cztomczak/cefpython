@@ -34,15 +34,18 @@ ELSE:
     pass
 
 from cpython cimport bool as py_bool
-from libcpp cimport bool as c_bool
+from libcpp cimport bool as cpp_bool
 
-from libcpp.map cimport map as c_map
-from multimap cimport multimap as c_multimap
-from libcpp.pair cimport pair as c_pair
-from libcpp.vector cimport vector as c_vector
+from libcpp.map cimport map as cpp_map
+from multimap cimport multimap as cpp_multimap
+from libcpp.pair cimport pair as cpp_pair
+from libcpp.vector cimport vector as cpp_vector
 
 from libcpp.string cimport string as std_string
 from wstring cimport wstring as std_wstring
+
+from libc.string cimport strlen
+from libc.string cimport memcpy
 
 # preincrement and dereference must be "as" otherwise not seen.
 from cython.operator cimport preincrement as preinc, dereference as deref
@@ -78,6 +81,7 @@ from cef_frame cimport *
 
 # cannot cimport *, that would cause name conflicts with constants.
 cimport cef_types
+ctypedef cef_types.cef_paint_element_type_t PaintElementType
 
 IF UNAME_SYSNAME == "Windows":
     cimport cef_types_win # cannot cimport *, name conflicts
@@ -93,6 +97,7 @@ IF CEF_VERSION == 1:
     from cef_content_filter cimport *
     from cef_download_handler cimport *
     from cef_cookie cimport *
+    from cef_render_handler cimport *
 
 IF UNAME_SYSNAME == "Windows":
     IF CEF_VERSION == 1:

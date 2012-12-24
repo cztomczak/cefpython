@@ -7,7 +7,7 @@ include "compile_time_constants.pxi"
 from cef_base cimport CefBase
 from cef_types cimport int64
 from cef_string cimport CefString
-from libcpp cimport bool as c_bool
+from libcpp cimport bool as cpp_bool
 from cef_ptr cimport CefRefPtr
 from cef_v8 cimport CefV8Context
 
@@ -21,7 +21,7 @@ cdef extern from "include/cef_frame.h":
             CefString GetURL()
             int64 GetIdentifier()
             CefRefPtr[CefV8Context] GetV8Context()
-            c_bool IsMain()
+            cpp_bool IsMain()
             void LoadURL(CefString& url)
             void Undo()
             void Redo()
@@ -36,7 +36,7 @@ cdef extern from "include/cef_frame.h":
             CefString GetText()
             void LoadString(CefString& string_val, CefString& url)
             # virtual void LoadStream(CefRefPtr<CefStreamReader> stream, const CefString& url) =0;
-            c_bool IsFocused()
+            cpp_bool IsFocused()
             CefString GetName()
             # virtual void VisitDOM(CefRefPtr<CefDOMVisitor> visitor) =0;
 
@@ -48,7 +48,7 @@ cdef extern from "include/cef_frame.h":
             CefString GetURL()
             int64 GetIdentifier()
             CefRefPtr[CefV8Context] GetV8Context()
-            c_bool IsMain()
+            cpp_bool IsMain()
             void LoadURL(CefString& url)
             void Undo()
             void Redo()
@@ -62,7 +62,7 @@ cdef extern from "include/cef_frame.h":
             # CefString GetSource()
             # CefString GetText()
             void LoadString(CefString& string_val, CefString& url)
-            c_bool IsFocused()
+            cpp_bool IsFocused()
             CefString GetName()
             # virtual void VisitDOM(CefRefPtr<CefDOMVisitor> visitor) =0;
 

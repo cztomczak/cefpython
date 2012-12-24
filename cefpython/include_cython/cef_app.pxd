@@ -10,7 +10,7 @@ include "compile_time_constants.pxi"
 from cef_types_wrappers cimport CefSettings
 from cef_ptr cimport CefRefPtr
 from cef_base cimport CefBase
-from libcpp cimport bool as c_bool
+from libcpp cimport bool as cpp_bool
 
 IF CEF_VERSION == 3:
     IF UNAME_SYSNAME == "Windows":
@@ -25,9 +25,9 @@ cdef extern from "include/cef_app.h":
         cdef int CefExecuteProcess(CefMainArgs& args, CefRefPtr[CefApp] application)
 
     IF CEF_VERSION == 1:
-        cdef c_bool CefInitialize(CefSettings&, CefRefPtr[CefApp])
+        cdef cpp_bool CefInitialize(CefSettings&, CefRefPtr[CefApp])
     ELIF CEF_VERSION == 3:
-        cdef c_bool CefInitialize(CefMainArgs&, CefSettings&, CefRefPtr[CefApp])
+        cdef cpp_bool CefInitialize(CefMainArgs&, CefSettings&, CefRefPtr[CefApp])
 
     cdef void CefRunMessageLoop() nogil
     cdef void CefDoMessageLoopWork() nogil

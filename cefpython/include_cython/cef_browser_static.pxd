@@ -10,7 +10,7 @@ IF UNAME_SYSNAME == "Windows":
 from cef_client cimport CefClient
 from cef_types_wrappers cimport CefBrowserSettings
 from cef_browser cimport CefBrowser
-from libcpp cimport bool as c_bool
+from libcpp cimport bool as cpp_bool
 from cef_string cimport CefString
 
 IF CEF_VERSION == 1:
@@ -18,7 +18,7 @@ IF CEF_VERSION == 1:
     # Specifying namespace allows to import a static method.
     cdef extern from "include/cef_browser.h" namespace "CefBrowser":
 
-        cdef c_bool CreateBrowser(
+        cdef cpp_bool CreateBrowser(
             CefWindowInfo&,
             CefRefPtr[CefClient],
             CefString&,
@@ -35,7 +35,7 @@ ELIF CEF_VERSION == 3:
     # Specifying namespace allows to import a static method.
     cdef extern from "include/cef_browser.h" namespace "CefBrowserHost":
 
-        cdef c_bool CreateBrowser(
+        cdef cpp_bool CreateBrowser(
             CefWindowInfo&,
             CefRefPtr[CefClient],
             CefString&,

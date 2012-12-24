@@ -2,7 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef public c_bool V8FunctionHandler_Execute(
+cdef public cpp_bool V8FunctionHandler_Execute(
         CefRefPtr[CefV8Context] v8Context,
         int pythonCallbackId,
         CefString& cefFuncName,
@@ -14,7 +14,7 @@ cdef public c_bool V8FunctionHandler_Execute(
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef JavascriptBindings javascriptBindings
-    cdef c_vector[CefRefPtr[CefV8Value]].iterator iterator
+    cdef cpp_vector[CefRefPtr[CefV8Value]].iterator iterator
     cdef CefRefPtr[CefV8Value] cefValue
     cdef object pythonCallback
     cdef list arguments
@@ -38,7 +38,7 @@ cdef public c_bool V8FunctionHandler_Execute(
             pyReturnValue = pythonCallback(*arguments)
             cefReturnValue = PyToV8Value(pyReturnValue, v8Context)
 
-            return <c_bool>True
+            return <cpp_bool>True
         else:
             pyBrowser = GetPyBrowser(v8Context.get().GetBrowser())
             pyFrame = GetPyFrame(v8Context.get().GetFrame())
@@ -46,28 +46,28 @@ cdef public c_bool V8FunctionHandler_Execute(
 
             javascriptBindings = pyBrowser.GetJavascriptBindings()
             if not javascriptBindings:
-                return <c_bool>False
+                return <cpp_bool>False
 
             if functionName.find(".") == -1:
                 pyFunction = javascriptBindings.GetFunction(functionName)
                 if not pyFunction:
-                    return <c_bool>False
+                    return <cpp_bool>False
             else:
                 # functionName == "myobject.someMethod"
                 (objectName, methodName) = functionName.split(".")
                 pyFunction = javascriptBindings.GetObjectMethod(objectName, methodName)
                 if not pyFunction:
-                    return <c_bool>False
+                    return <cpp_bool>False
 
             # GetBindToFrames/GetBindToPopups must also be checked in:
             # V8FunctionHandler_Execute() and OnContextCreated(), so that calling
             # a non-existent  property on window object throws an error.
 
             if not pyFrame.IsMain() and not javascriptBindings.GetBindToFrames():
-                return <c_bool>False
+                return <cpp_bool>False
 
             if pyBrowser.IsPopup() and not javascriptBindings.GetBindToPopups():
-                return <c_bool>False
+                return <cpp_bool>False
 
             arguments = []
             iterator = v8Arguments.begin()
@@ -79,7 +79,7 @@ cdef public c_bool V8FunctionHandler_Execute(
             pyReturnValue = pyFunction(*arguments)
             cefReturnValue = PyToV8Value(pyReturnValue, v8Context)
 
-            return <c_bool>True
+            return <cpp_bool>True
 
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
