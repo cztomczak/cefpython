@@ -497,7 +497,6 @@ cdef class PyBrowser:
         cdef PaintBuffer GetImage_Windows(self,
                 PaintElementType paintElementType, int width, int height):
             if not self.imageBuffer:
-                print("Browser.imageBuffer = malloc(%d)" % (width*height*4))
                 self.imageBuffer = <void*>malloc(width*height*4)
             cdef cpp_bool ret = self.GetCefBrowser().get().GetImage(
                     paintElementType, width, height, self.imageBuffer)

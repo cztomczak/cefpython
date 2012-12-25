@@ -64,6 +64,8 @@ from libc.stdlib cimport atoi
 IF UNAME_SYSNAME == "Windows":
     from windows cimport *
 
+from cpp_utils cimport *
+
 from cef_string cimport *
 from cef_types_wrappers cimport *
 from cef_task cimport *

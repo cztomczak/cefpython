@@ -36,7 +36,7 @@ g_applicationSettings = {}
 
 # All .pyx files need to be included here.
 
-include "include_cython/compile_time_constants.pxi"
+include "cython_includes/compile_time_constants.pxi"
 include "imports.pyx"
 
 include "utils.pyx"
