@@ -2,15 +2,20 @@
 # __author__ = "Greg Kacy <grkacy@gmail.com>"
 
 import wx
+import wx.lib.agw.flatnotebook as fnb
 
 from cefwxpanel import initCEF, shutdownCEF, CEFWindow
 
 ROOT_NAME = "My Locations"
 
 URLS = ["cefsimple.html",
+        "http://google.com",
+        "http://maps.google.com",
+        "http://youtube.com",
         "http://yahoo.com",
         "http://wikipedia.com",
-        "http://maps.google.com"]
+        "http://cyaninc.com",
+        ]
 
 class MainFrame(wx.Frame):
     def __init__(self):
@@ -26,16 +31,17 @@ class MainFrame(wx.Frame):
             self.tree.AppendItem(self.root, url)
         self.tree.Expand(self.root)
 
-        self.tabs = wx.Notebook(self, id=-1, style=wx.BK_DEFAULT)
+        self.tabs = fnb.FlatNotebook(self, wx.ID_ANY, agwStyle=fnb.FNB_NODRAG|fnb.FNB_X_ON_TAB)
 
     def layoutComponents(self):
-        sizer = wx.BoxSizer()
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self.tree, 0, wx.EXPAND)
         sizer.Add(self.tabs, 1, wx.EXPAND)
         self.SetSizer(sizer)
 
     def initEventHandlers(self):
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
+        self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
     def OnSelChanged(self, event):
@@ -44,7 +50,11 @@ class MainFrame(wx.Frame):
         if url and url != ROOT_NAME:
             cefPanel = CEFWindow(self.tabs, url=str(url))
             self.tabs.AddPage(cefPanel, url)
+            self.tabs.SetSelection(self.tabs.GetPageCount()-1)
+        event.Skip()
 
+    def OnPageClosing(self, event):
+        print "One could place some extra closing stuff here"
         event.Skip()
 
     def OnClose(self, event):
