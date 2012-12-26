@@ -70,8 +70,7 @@ from cef_string cimport *
 from cef_types_wrappers cimport *
 from cef_task cimport *
 
-IF UNAME_SYSNAME == "Windows":
-    from cef_win cimport *
+from cef_platform cimport *
 
 from cef_ptr cimport *
 from cef_app cimport *
@@ -85,8 +84,13 @@ from cef_frame cimport *
 cimport cef_types
 ctypedef cef_types.cef_paint_element_type_t PaintElementType
 
+# cannot cimport *, name conflicts
 IF UNAME_SYSNAME == "Windows":
-    cimport cef_types_win # cannot cimport *, name conflicts
+    cimport cef_types_win
+ELIF UNAME_SYSNAME == "Darwin":
+    cimport cef_types_mac
+ELIF UNAME_SYSNAME == "Linux":
+    cimport cef_types_linux
 
 IF CEF_VERSION == 1:
     from cef_v8 cimport *

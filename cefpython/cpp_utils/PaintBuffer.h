@@ -29,9 +29,10 @@ void SwapBufferFromBgraToRgba(void* _dest, void* _src, int width, int height) {
   int length = width*height;
   for (int i = 0; i < length; i++) {
     bgra = src[i];
-    rgba = (bgra & 0x00ff0000) >> 16
-           | (bgra & 0xff00ff00)
-           | (bgra & 0x000000ff) << 16;
+    // BGRA in hex = 0xAARRGGBB.
+    rgba = (bgra & 0x00ff0000) >> 16 // Red >> Blue.
+           | (bgra & 0xff00ff00) // Green Alpha.
+           | (bgra & 0x000000ff) << 16; // Blue >> Red.
     dest[i] = rgba;
   }
 }

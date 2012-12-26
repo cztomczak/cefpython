@@ -1,0 +1,10 @@
+# Copyright (c) 2012 CefPython Authors. All rights reserved.
+# License: New BSD License.
+# Website: http://code.google.com/p/cefpython/
+
+cdef extern from "include/internal/cef_types_win.h":
+
+    ctypedef struct _cef_key_info_t:
+        int keyCode
+        int character
+        int characterNoModifiers

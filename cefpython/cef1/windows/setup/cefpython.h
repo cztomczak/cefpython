@@ -41,7 +41,7 @@ __PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_GetScreenPoint(CefRefPtr<CefBrowser
 __PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnPopupShow(CefRefPtr<CefBrowser>, bool);
 __PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnPopupSize(CefRefPtr<CefBrowser>, CefRect &);
 __PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnPaint(CefRefPtr<CefBrowser>, cef_paint_element_type_t, std::vector<CefRect> &, void *);
-__PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle);
+__PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextReleased(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnUncaughtException(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>, CefRefPtr<CefV8Exception>, CefRefPtr<CefV8StackTrace>);

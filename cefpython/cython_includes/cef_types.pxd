@@ -151,7 +151,21 @@ cdef extern from "include/internal/cef_types.h":
             PID_RENDERER,
 
     IF CEF_VERSION == 1:
+
+        # Browser > GetImage(), RenderHandler > OnPaint().
         ctypedef enum cef_paint_element_type_t:
             PET_VIEW = 0,
             PET_POPUP,
+
+        # Browser > SendKeyEvent().
+        ctypedef enum cef_key_type_t:
+            KT_KEYUP = 0,
+            KT_KEYDOWN,
+            KT_CHAR,
+
+        # Browser > SendMouseClickEvent().
+        ctypedef enum cef_mouse_button_type_t:
+            MBT_LEFT = 0,
+            MBT_MIDDLE,
+            MBT_RIGHT,
 
