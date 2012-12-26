@@ -269,6 +269,22 @@ class ClientHandler:
 class Python:
     browser = None
 
+    def SaveImage(self, outfile, format):
+        outfile = cefpython.GetRealPath(outfile)
+        try:
+            from PIL import Image
+        except:
+            print("PIL library not available, can't save image")
+            return
+        (width, height) = self.browser.GetSize(cefpython.PET_VIEW)
+        buffer = self.browser.GetImage(cefpython.PET_VIEW, width, height)
+        image = Image.fromstring(
+            "RGBA", (width,height),
+            buffer.GetString(mode="rgba", origin="top-left"),
+            "raw", "RGBA", 0, 1)
+        image.save(outfile, format)
+        os.system(outfile)
+
     def ExecuteJavascript(self, jsCode):
         self.browser.GetMainFrame().ExecuteJavascript(jsCode)
 

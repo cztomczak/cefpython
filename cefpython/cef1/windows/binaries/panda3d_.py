@@ -55,8 +55,11 @@ class World(DirectObject):
         windowHandle = base.win.getWindowHandle().getIntHandle()
 
         self.texture = Texture()
-        self.texture.setup2dTexture(400, 300, Texture.CMOff,
-                Texture.FLuminanceAlpha)
+        self.texture.setXSize(400)
+        self.texture.setYSize(300)
+        self.texture.setCompression(Texture.CMOff)
+        self.texture.setComponentType(Texture.TUnsignedByte)
+        self.texture.setFormat(Texture.FRgba4)
 
         cardMaker = CardMaker("browser2d")
         cardMaker.setFrame(-0.75,.75,-0.75,0.75)

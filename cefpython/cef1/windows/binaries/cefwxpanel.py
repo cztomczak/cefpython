@@ -27,7 +27,7 @@ class CEFWindow(wx.Window):
     """Standalone CEF component. The class provides facilites for interacting with wx message loop"""
     def __init__(self, parent, url="", size=(-1, -1), *args, **kwargs):
         wx.Window.__init__(self, parent, id=wx.ID_ANY, size=size, *args, **kwargs)
-
+        self.url = url
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(self.GetHandle())
         self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings={}, navigateURL=url)
@@ -63,12 +63,19 @@ class CEFWindow(wx.Window):
     def OnSize(self, event):
         cefpython.WindowUtils.OnSize(self.GetHandle(), 0, 0, 0)
 
+    #def Shutdown(self):
+        #print "CLOSING PAGE %s, YA MAN" % self.url
+        #self.timer.Stop()
+        #self.browser.CloseBrowser()
 #-------------------------------------------------------------------------------
 
-def initCEF():
-    """Initializes CEF, We should do it before initializing wx"""
+def initCEF(settings=None):
+    """Initializes CEF, We should do it before initializing wx
+       If no settings passed a default is used
+    """
     sys.excepthook = cefpython.ExceptHook
-    settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "release_dcheck_enabled": True}
+    if not settings:
+        settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "release_dcheck_enabled": True}
     cefpython.Initialize(settings)
 
 def shutdownCEF():
