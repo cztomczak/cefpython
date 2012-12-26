@@ -14,6 +14,12 @@
 #
 # This will enable your copy of python to find the panda libraries.
 
+# TODO: implement forwarding key/mouse events to the CEF browser.
+#       Browser object has following methods: SendKeyEvent(),
+#       SendMouseClickEvent(), SendMouseMoveEvent(),
+#       SendMouseWheelEvent(), SendFocusEvent(),
+#       SendCaptureLostEvent().
+
 import platform
 if platform.architecture()[0] != "32bit":
     raise Exception("Unsupported architecture: %s" % (

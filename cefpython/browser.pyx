@@ -2,6 +2,16 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+# cef_key_type_t, SendKeyEvent().
+KEYTYPE_KEYUP = cef_types.KT_KEYUP
+KEYTYPE_KEYDOWN = cef_types.KT_KEYDOWN
+KEYTYPE_CHAR = cef_types.KT_CHAR
+
+# cef_mouse_button_type_t, SendMouseClickEvent().
+MOUSEBUTTON_LEFT = cef_types.MBT_LEFT
+MOUSEBUTTON_MIDDLE = cef_types.MBT_MIDDLE
+MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
+
 # If you try to keep PyBrowser() objects inside cpp_vector you will
 # get segmentation faults, as they will be garbage collected.
 
@@ -272,6 +282,9 @@ cdef class PyBrowser:
             preinc(iterator)
         return names
 
+    cpdef int GetIdentifier(self) except *:
+        return self.GetCefBrowser().get().GetIdentifier()
+
     cpdef PyFrame GetMainFrame(self):
         return GetPyFrame(self.GetCefBrowser().get().GetMainFrame())
 
@@ -512,20 +525,44 @@ cdef class PyBrowser:
 
     IF CEF_VERSION == 1:
 
-        cpdef py_void SendKeyEvent(self):
-            pass
+        cpdef py_void SendKeyEvent(self, cef_types.cef_key_type_t keyType,
+                tuple keyInfo, int modifiers):
+            cdef CefKeyInfo cefKeyInfo
+            IF UNAME_SYSNAME == "Windows":
+                assert len(keyInfo) == 3, "Invalid keyInfo param"
+                cefKeyInfo.key = keyInfo[0]
+                cefKeyInfo.sysChar = keyInfo[1]
+                cefKeyInfo.imeChar = keyInfo[2]
+            ELIF UNAME_SYSNAME == "Darwin":
+                cefKeyInfo.keyCode = keyInfo[0]
+                cefKeyInfo.character = keyInfo[1]
+                cefKeyInfo.characterNoModifiers = keyInfo[2]
+            ELIF UNAME_SYSNAME == "Linux":
+                cefKeyInfo.key = keyInfo[0]
+            ELSE:
+                raise Exception("Invalid UNAME_SYSNAME")
 
-        cpdef py_void SendMouseClickEvent(self):
-            pass
+            self.GetCefBrowser().get().SendKeyEvent(keyType, cefKeyInfo,
+                    modifiers)
 
-        cpdef py_void SendMouseMoveEvent(self):
-            pass
+        cpdef py_void SendMouseClickEvent(self, int x, int y,
+                cef_types.cef_mouse_button_type_t mouseButtonType,
+                py_bool mouseUp, int clickCount):
+            self.GetCefBrowser().get().SendMouseClickEvent(x, y,
+                    mouseButtonType, bool(mouseUp), clickCount)
 
-        cpdef py_void SendMouseWheelEvent(self):
-            pass
+        cpdef py_void SendMouseMoveEvent(self, int x, int y,
+                py_bool mouseLeave):
+            self.GetCefBrowser().get().SendMouseMoveEvent(x, y,
+                    bool(mouseLeave))
 
-        cpdef py_void SendFocusEvent(self):
-            pass
+        cpdef py_void SendMouseWheelEvent(self, int x, int y,
+                int deltaX, int deltaY):
+            self.GetCefBrowser().get().SendMouseWheelEvent(x, y,
+                    deltaX, deltaY)
+
+        cpdef py_void SendFocusEvent(self, py_bool setFocus):
+            self.GetCefBrowser().get().SendFocusEvent(bool(setFocus))
 
         cpdef py_void SendCaptureLostEvent(self):
-            pass
+            self.GetCefBrowser().get().SendCaptureLostEvent()

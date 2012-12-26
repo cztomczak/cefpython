@@ -11,8 +11,9 @@ from cef_client cimport CefClient
 from libcpp cimport bool as cpp_bool
 from libcpp.vector cimport vector as cpp_vector
 from cef_frame cimport CefFrame
-from cef_types cimport cef_paint_element_type_t
+cimport cef_types
 from cef_types_wrappers cimport CefRect
+from cef_platform cimport CefKeyInfo
 
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo
@@ -54,14 +55,27 @@ cdef extern from "include/cef_browser.h":
             cpp_bool IsPopupVisible()
             int GetIdentifier()
 
-            # off-screen rendering.
-            cpp_bool GetSize(cef_paint_element_type_t type,
+            # Off-screen rendering.
+
+            cpp_bool GetSize(cef_types.cef_paint_element_type_t type,
                            int& width, int& height)
-            void SetSize(cef_paint_element_type_t type,
+            void SetSize(cef_types.cef_paint_element_type_t type,
                          int width, int height)
             void Invalidate(CefRect& dirtyRect)
-            cpp_bool GetImage(cef_paint_element_type_t type,
+            cpp_bool GetImage(cef_types.cef_paint_element_type_t type,
                           int width, int height, void* buffer)
+
+            # Sending mouse/key events.
+
+            void SendKeyEvent(cef_types.cef_key_type_t type,
+                    CefKeyInfo& keyInfo, int modifiers)
+            void SendMouseClickEvent(int x, int y,
+                    cef_types.cef_mouse_button_type_t type,
+                    cpp_bool mouseUp, int clickCount)
+            void SendMouseMoveEvent(int x, int y, cpp_bool mouseLeave)
+            void SendMouseWheelEvent(int x, int y, int deltaX, int deltaY)
+            void SendFocusEvent(cpp_bool setFocus)
+            void SendCaptureLostEvent()
 
             # virtual CefRefPtr<CefClient> GetClient() =0;
 
