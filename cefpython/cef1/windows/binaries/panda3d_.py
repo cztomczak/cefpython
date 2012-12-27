@@ -70,8 +70,10 @@ class World(DirectObject):
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsOffscreen(windowHandle)
 
+        browserSettings = {"animation_frame_rate": 60}
+
         self.browser = cefpython.CreateBrowserSync(
-                windowInfo, browserSettings={}, navigateURL="cefsimple.html")
+                windowInfo, browserSettings, navigateURL="cefsimple.html")
         self.browser.SetClientHandler(
                 ClientHandler(self.browser, self.texture))
 
@@ -218,6 +220,7 @@ if __name__ == "__main__":
     sys.excepthook = cefpython.ExceptHook
     settings = {
         "log_file": cefpython.GetRealPath("debug.log"),
+        # Change to LOGSEVERITY_INFO if you want less debug output.
         "log_severity": cefpython.LOGSEVERITY_VERBOSE,
         "release_dcheck_enabled": True
     }

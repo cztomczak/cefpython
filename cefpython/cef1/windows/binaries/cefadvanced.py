@@ -53,6 +53,7 @@ def CefAdvanced():
     appSettings = dict()
     appSettings["log_file"] = cefpython.GetRealPath("debug.log")
 
+    # LOGSEVERITY_INFO - less debug oput.
     # LOGSEVERITY_DISABLE - will not create "debug.log" file.
     appSettings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE
 

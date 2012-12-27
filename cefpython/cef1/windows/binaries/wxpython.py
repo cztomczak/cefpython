@@ -95,7 +95,11 @@ class MyApp(wx.App):
 if __name__ == '__main__':
 
     sys.excepthook = cefpython.ExceptHook
-    settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "release_dcheck_enabled": True}
+    settings = {
+        # Change to LOGSEVERITY_INFO if you want less debug output.
+        "log_severity": cefpython.LOGSEVERITY_VERBOSE,
+        "release_dcheck_enabled": True
+    }
     cefpython.Initialize(settings) # Initialize cefpython before wx.
 
     print('wx.version=%s' % wx.version())
