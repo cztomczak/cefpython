@@ -87,7 +87,7 @@ cdef class JavascriptBindings:
             del self.frames[pyFrame.GetIdentifier()]
 
     cpdef py_void Rebind(self):
-        assert IsCurrentThread(TID_UI), (
+        assert IsThread(TID_UI), (
                 "JavascriptBindings.Rebind() may only be called on UI thread")
 
         cdef CefRefPtr[CefBrowser] cefBrowser

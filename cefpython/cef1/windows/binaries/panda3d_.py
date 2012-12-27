@@ -15,6 +15,7 @@
 # This will enable your copy of python to find the panda libraries.
 
 # TODO: fix the blurriness of the browser when window is resized.
+# TODO: add keyboard handlers.
 
 import platform
 if platform.architecture()[0] != "32bit":
@@ -40,6 +41,8 @@ import ctypes
 class World(DirectObject):
     browser = None
     texture = None
+    nodePath = None
+    lastMouseMove = (-1, -1)
 
     def __init__(self):
         wp = WindowProperties()
@@ -56,12 +59,10 @@ class World(DirectObject):
         self.texture.setCompression(Texture.CMOff)
         self.texture.setComponentType(Texture.TUnsignedByte)
         self.texture.setFormat(Texture.FRgba4)
-        self.texture.setTexturesPower2(0)
-        self.texture.setAutoTextureScale(0)
 
-        self.cardMaker = CardMaker("browser2d")
-        self.cardMaker.setFrame(-0.75, 0.75, -0.75, 0.75)
-        node = self.cardMaker.generate()
+        cardMaker = CardMaker("browser2d")
+        cardMaker.setFrame(-0.75, 0.75, -0.75, 0.75)
+        node = cardMaker.generate()
         self.nodePath = render2d.attachNewNode(node)
         self.nodePath.setTexture(self.texture)
         self.nodePath.setHpr(0, 0, 5)
@@ -70,6 +71,8 @@ class World(DirectObject):
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsOffscreen(windowHandle)
 
+        # By default window rendering is 30 fps,
+        # let's change it to 60 for better user experience.
         browserSettings = {"animation_frame_rate": 60}
 
         self.browser = cefpython.CreateBrowserSync(
@@ -137,6 +140,13 @@ class World(DirectObject):
     def onMouseMove(self, task):
         if base.mouseWatcherNode.hasMouse():
             mouse = base.mouseWatcherNode.getMouse()
+
+            (lastX, lastY) = self.lastMouseMove
+            if lastX == mouse.getX() and lastY == mouse.getY():
+                return Task.cont
+            else:
+                self.lastMouseMove = (mouse.getX(), mouse.getY())
+
             if self.isMouseInsideBrowser(mouse):
                 self.nodePath.setHpr(0, 0, 0)
                 (x,y) = self.getMousePixelCoordinates(mouse)

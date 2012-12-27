@@ -6,7 +6,7 @@ TID_UI = cef_types.TID_UI
 TID_IO = cef_types.TID_IO
 TID_FILE = cef_types.TID_FILE
 
-cpdef py_bool IsCurrentThread(int threadID):
+cpdef py_bool IsThread(int threadID):
     return bool(CefCurrentlyOn(<CefThreadId>threadID))
 
 cpdef object Debug(str msg):

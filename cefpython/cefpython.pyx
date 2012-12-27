@@ -120,7 +120,7 @@ def Initialize(applicationSettings=None):
 
 def CreateBrowserSync(windowInfo, browserSettings, navigateURL):
     Debug("CreateBrowserSync() called")
-    assert IsCurrentThread(TID_UI), (
+    assert IsThread(TID_UI), (
             "cefpython.CreateBrowserSync() can only be called on UI thread")
 
     if not isinstance(windowInfo, WindowInfo):

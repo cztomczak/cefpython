@@ -101,7 +101,7 @@ cdef class PyFrame:
     IF CEF_VERSION == 1:
 
         cpdef object GetProperty(self, py_string name):
-            assert IsCurrentThread(TID_UI), (
+            assert IsThread(TID_UI), (
                     "Frame.GetProperty() may only be called on the UI thread")
 
             cdef CefRefPtr[CefV8Context] v8Context = self.GetCefFrame().get().GetV8Context()
@@ -117,13 +117,13 @@ cdef class PyFrame:
 
         cpdef str GetSource(self):
             IF CEF_VERSION == 1:
-                assert IsCurrentThread(TID_UI), (
+                assert IsThread(TID_UI), (
                         "Frame.GetSource() may only be called on the UI thread")
             return CefToPyString(self.GetCefFrame().get().GetSource())
 
         cpdef str GetText(self):
             IF CEF_VERSION == 1:
-                assert IsCurrentThread(TID_UI), (
+                assert IsThread(TID_UI), (
                         "Frame.GetText() may only be called on the UI thread")
             return CefToPyString(self.GetCefFrame().get().GetText())
 
@@ -132,7 +132,7 @@ cdef class PyFrame:
 
     cpdef py_bool IsFocused(self):
         IF CEF_VERSION == 1:
-            assert IsCurrentThread(TID_UI), (
+            assert IsThread(TID_UI), (
                     "Frame.IsFocused() may only be called on the UI thread")
         return self.GetCefFrame().get().IsFocused()
 
@@ -170,7 +170,7 @@ cdef class PyFrame:
     IF CEF_VERSION == 1:
 
         cpdef py_void SetProperty(self, py_string name, object value):
-            assert IsCurrentThread(TID_UI), (
+            assert IsThread(TID_UI), (
                     "Frame.SetProperty() may only be called on the UI thread")
 
             if not JavascriptBindings.IsValueAllowed(value):
