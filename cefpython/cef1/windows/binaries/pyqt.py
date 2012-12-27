@@ -103,7 +103,11 @@ if __name__ == '__main__':
     print("QtCore version: %s" % QtCore.qVersion())
 
     sys.excepthook = cefpython.ExceptHook
-    settings = {"log_severity": cefpython.LOGSEVERITY_VERBOSE, "release_dcheck_enabled": True}
+    settings = {
+        # Change to LOGSEVERITY_INFO if you want less debug output.
+        "log_severity": cefpython.LOGSEVERITY_VERBOSE,
+        "release_dcheck_enabled": True
+    }
     cefpython.Initialize(settings)
 
     app = CefApplication(sys.argv)

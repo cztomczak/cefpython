@@ -163,7 +163,7 @@ cdef void SetBrowserSettings(
         IF CEF_VERSION == 1:
 
             if key == "animation_frame_rate":
-                cefBrowserSettings.animation_frame_rate = bool(browserSettings[key])
+                cefBrowserSettings.animation_frame_rate = int(browserSettings[key])
             elif key == "drag_drop_disabled":
                 cefBrowserSettings.drag_drop_disabled = bool(browserSettings[key])
             elif key == "load_drops_disabled":
