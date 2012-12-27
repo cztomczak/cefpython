@@ -14,11 +14,7 @@
 #
 # This will enable your copy of python to find the panda libraries.
 
-# TODO: implement forwarding key/mouse events to the CEF browser.
-#       Browser object has following methods: SendKeyEvent(),
-#       SendMouseClickEvent(), SendMouseMoveEvent(),
-#       SendMouseWheelEvent(), SendFocusEvent(),
-#       SendCaptureLostEvent().
+# TODO: fix the blurriness of the browser when window is resized.
 
 import platform
 if platform.architecture()[0] != "32bit":
@@ -37,14 +33,18 @@ import direct.directbase.DirectStart
 from panda3d.core import *
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
-from math import pi, sin, cos
+from math import pi, sin, cos, floor, ceil
+import platform
+import ctypes
 
 class World(DirectObject):
-
     browser = None
     texture = None
 
     def __init__(self):
+        wp = WindowProperties()
+        wp.setTitle('Panda3D example')
+        base.win.requestProperties(wp)
 
         environ = loader.loadModel("models/environment")
         environ.reparentTo(render)
@@ -52,30 +52,125 @@ class World(DirectObject):
         environ.setPos(-8,42,0)
         taskMgr.add(self.spinCameraTask, "SpinCameraTask")
 
-        windowHandle = base.win.getWindowHandle().getIntHandle()
-
         self.texture = Texture()
-        self.texture.setXSize(400)
-        self.texture.setYSize(300)
         self.texture.setCompression(Texture.CMOff)
         self.texture.setComponentType(Texture.TUnsignedByte)
         self.texture.setFormat(Texture.FRgba4)
+        self.texture.setTexturesPower2(0)
+        self.texture.setAutoTextureScale(0)
 
-        cardMaker = CardMaker("browser2d")
-        cardMaker.setFrame(-0.75,.75,-0.75,0.75)
-        card = render2d.attachNewNode(cardMaker.generate())
-        card.setTexture(self.texture)
-        card.setHpr(0, 0, 5)
+        self.cardMaker = CardMaker("browser2d")
+        self.cardMaker.setFrame(-0.75, 0.75, -0.75, 0.75)
+        node = self.cardMaker.generate()
+        self.nodePath = render2d.attachNewNode(node)
+        self.nodePath.setTexture(self.texture)
+        self.nodePath.setHpr(0, 0, 5)
 
+        windowHandle = base.win.getWindowHandle().getIntHandle()
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsOffscreen(windowHandle)
+
         self.browser = cefpython.CreateBrowserSync(
                 windowInfo, browserSettings={}, navigateURL="cefsimple.html")
         self.browser.SetClientHandler(
                 ClientHandler(self.browser, self.texture))
-        self.browser.SetSize(cefpython.PET_VIEW, 400, 300);
+
+        # SetFocus needs to be called after browser creation.
+        if platform.system() == "Windows":
+            ctypes.windll.user32.SetFocus(windowHandle)
+
+        self.setBrowserSize()
+        self.accept("window-event", self.setBrowserSize)
+
+        # Browser methods for sending mouse/keyboard/focus events:
+        # SendKeyEvent(), SendMouseClickEvent(), SendMouseMoveEvent(),
+        # SendMouseWheelEvent(), SendFocusEvent(), SendCaptureLostEvent().
+
+        self.initMouseHandlers()
+        self.initKeyboardHandlers()
 
         taskMgr.add(self.messageLoop, "CefMessageLoop")
+
+    def setBrowserSize(self, window=None):
+        width = int(round(base.win.getXSize() * 0.75))
+        height = int(round(base.win.getYSize() * 0.75))
+        self.texture.setXSize(width)
+        self.texture.setYSize(height)
+        self.browser.SetSize(cefpython.PET_VIEW, width, height)
+
+    def initMouseHandlers(self):
+        taskMgr.add(self.onMouseMove, "onMouseMove")
+        self.accept("mouse1", self.onMouseDown)
+        self.accept("mouse1-up", self.onMouseUp)
+        self.accept("wheel_up", self.onMouseWheelUp)
+        self.accept("wheel_down", self.onMouseWheelDown)
+
+    def initKeyboardHandlers(self):
+        pass
+
+    def isMouseInsideBrowser(self, mouse):
+        if mouse.getX() >= -0.75 and mouse.getX() <= 0.75 and (
+                mouse.getY() >= -0.75 and mouse.getY() <= 0.75):
+            return True
+        else:
+            return False
+
+    def getMousePixelCoordinates(self, mouse):
+        # This calculation works only for the browser area.
+        relX = mouse.getX()
+        relY = mouse.getY()
+        relX += 0.75 # 0 .. 1.5
+        relY += 0.75 # 0 .. 1.5
+        width = self.texture.getXSize()
+        height = self.texture.getYSize()
+        width /= 1.5
+        height /= 1.5
+        pixelX = relX * width
+        pixelY = relY * height
+        pixelY = abs(pixelY - self.texture.getYSize())
+        pixelX = int(round(pixelX))
+        pixelY = int(round(pixelY))
+        return (pixelX, pixelY)
+
+    def onMouseMove(self, task):
+        if base.mouseWatcherNode.hasMouse():
+            mouse = base.mouseWatcherNode.getMouse()
+            if self.isMouseInsideBrowser(mouse):
+                self.nodePath.setHpr(0, 0, 0)
+                (x,y) = self.getMousePixelCoordinates(mouse)
+                self.browser.SendMouseMoveEvent(x, y, mouseLeave=False)
+            else:
+                self.browser.SendMouseMoveEvent(-1, -1, mouseLeave=True)
+                self.nodePath.setHpr(0, 0, 5)
+        else:
+            self.nodePath.setHpr(0, 0, 5)
+        return Task.cont
+
+    def onMouseDown(self):
+        mouse = base.mouseWatcherNode.getMouse()
+        (x,y) = self.getMousePixelCoordinates(mouse)
+        self.browser.SendMouseClickEvent(x, y, cefpython.MOUSEBUTTON_LEFT,
+                mouseUp=False, clickCount=1)
+
+    def onMouseUp(self):
+        mouse = base.mouseWatcherNode.getMouse()
+        (x,y) = self.getMousePixelCoordinates(mouse)
+        self.browser.SendMouseClickEvent(x, y, cefpython.MOUSEBUTTON_LEFT,
+                mouseUp=True, clickCount=1)
+
+    def onMouseWheelUp(self):
+        if base.mouseWatcherNode.hasMouse():
+            mouse = base.mouseWatcherNode.getMouse()
+            if self.isMouseInsideBrowser(mouse):
+                (x,y) = self.getMousePixelCoordinates(mouse)
+                self.browser.SendMouseWheelEvent(x, y, deltaX=0, deltaY=120)
+
+    def onMouseWheelDown(self):
+        if base.mouseWatcherNode.hasMouse():
+            mouse = base.mouseWatcherNode.getMouse()
+            if self.isMouseInsideBrowser(mouse):
+                (x,y) = self.getMousePixelCoordinates(mouse)
+                self.browser.SendMouseWheelEvent(x, y, deltaX=0, deltaY=-120)
 
     def messageLoop(self, task):
         cefpython.SingleMessageLoop()
