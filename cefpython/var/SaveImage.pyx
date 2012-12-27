@@ -4,7 +4,7 @@
 
 cpdef py_bool SaveImage(self, py_string filePath,
         str imageType="bitmap"):
-    assert IsCurrentThread(TID_UI), (
+    assert IsThread(TID_UI), (
             "Browser.SaveImage(): this method should only be called "
             "on the UI thread")
 

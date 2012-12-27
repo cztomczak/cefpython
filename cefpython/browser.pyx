@@ -257,19 +257,19 @@ cdef class PyBrowser:
                     bool(forward), bool(matchCase), bool(findNext))
 
     cpdef PyFrame GetFocusedFrame(self):
-        assert IsCurrentThread(TID_UI), (
+        assert IsThread(TID_UI), (
                 "Browser.GetFocusedFrame() may only be called on UI thread")
         return GetPyFrame(self.GetCefBrowser().get().GetFocusedFrame())
 
     cpdef PyFrame GetFrame(self, py_string name):
-        assert IsCurrentThread(TID_UI), (
+        assert IsThread(TID_UI), (
                 "Browser.GetFrame() may only be called on the UI thread")
         cdef CefString cefName
         PyToCefString(name, cefName)
         return GetPyFrame(self.GetCefBrowser().get().GetFrame(cefName))
 
     cpdef list GetFrameNames(self):
-        assert IsCurrentThread(TID_UI), (
+        assert IsThread(TID_UI), (
                 "Browser.GetFrameNames() may only be called on the UI thread")
         cdef cpp_vector[CefString] cefNames
         self.GetCefBrowser().get().GetFrameNames(cefNames)
@@ -317,7 +317,7 @@ cdef class PyBrowser:
 
     cpdef double GetZoomLevel(self) except *:
         IF CEF_VERSION == 1:
-            assert IsCurrentThread(TID_UI), (
+            assert IsThread(TID_UI), (
                     "Browser.GetZoomLevel() may only be called on UI thread")
         cdef double zoomLevel
         IF CEF_VERSION == 1:
@@ -349,7 +349,7 @@ cdef class PyBrowser:
     IF CEF_VERSION == 1:
 
         cpdef py_bool IsPopupVisible(self):
-            assert IsCurrentThread(TID_UI), (
+            assert IsThread(TID_UI), (
                     "Browser.IsPopupVisible() may only be called on UI thread")
             return self.GetCefBrowser().get().IsPopupVisible()
 
@@ -471,7 +471,7 @@ cdef class PyBrowser:
     IF CEF_VERSION == 1:
 
         cpdef tuple GetSize(self, PaintElementType paintElementType):
-            assert IsCurrentThread(TID_UI), (
+            assert IsThread(TID_UI), (
                     "Browser.GetSize(): this method should only be called "
                     "on the UI thread")
             cdef int width = 0
@@ -496,7 +496,7 @@ cdef class PyBrowser:
 
         cpdef PaintBuffer GetImage(self, PaintElementType paintElementType,
                                int width, int height):
-            assert IsCurrentThread(TID_UI), (
+            assert IsThread(TID_UI), (
                     "Browser.GetImage(): this method should only be called "
                     "on the UI thread")
 
