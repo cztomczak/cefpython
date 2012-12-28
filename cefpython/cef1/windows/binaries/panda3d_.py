@@ -15,7 +15,6 @@
 # This will enable your copy of python to find the panda libraries.
 
 # TODO: fix the blurriness of the browser when window is resized.
-# TODO: add keyboard handlers.
 
 import platform
 if platform.architecture()[0] != "32bit":
