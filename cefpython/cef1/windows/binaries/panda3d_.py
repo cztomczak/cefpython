@@ -30,6 +30,11 @@ elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
 else:
     raise Exception("Unsupported python version: %s" % sys.version)
 
+from pandac.PandaModules import loadPrcFileData
+loadPrcFileData("", "Panda3D example")
+loadPrcFileData("", "fullscreen 0")
+loadPrcFileData("", "win-size 1024 768")
+
 import direct.directbase.DirectStart
 from panda3d.core import *
 from direct.showbase.DirectObject import DirectObject
@@ -43,12 +48,11 @@ class World(DirectObject):
     texture = None
     nodePath = None
     lastMouseMove = (-1, -1)
+    translateKeys = None
+    keyModifiers = 0
+    modifierKeys = None
 
     def __init__(self):
-        wp = WindowProperties()
-        wp.setTitle('Panda3D example')
-        base.win.requestProperties(wp)
-
         environ = loader.loadModel("models/environment")
         environ.reparentTo(render)
         environ.setScale(0.25,0.25,0.25)
@@ -83,13 +87,10 @@ class World(DirectObject):
         # SetFocus needs to be called after browser creation.
         if platform.system() == "Windows":
             ctypes.windll.user32.SetFocus(windowHandle)
+        self.browser.SendFocusEvent(True)
 
         self.setBrowserSize()
         self.accept("window-event", self.setBrowserSize)
-
-        # Browser methods for sending mouse/keyboard/focus events:
-        # SendKeyEvent(), SendMouseClickEvent(), SendMouseMoveEvent(),
-        # SendMouseWheelEvent(), SendFocusEvent(), SendCaptureLostEvent().
 
         self.initMouseHandlers()
         self.initKeyboardHandlers()
@@ -104,6 +105,10 @@ class World(DirectObject):
         self.browser.SetSize(cefpython.PET_VIEW, width, height)
 
     def initMouseHandlers(self):
+        # Browser methods for sending mouse/keyboard/focus events:
+        # SendKeyEvent(), SendMouseClickEvent(), SendMouseMoveEvent(),
+        # SendMouseWheelEvent(), SendFocusEvent(), SendCaptureLostEvent().
+
         taskMgr.add(self.onMouseMove, "onMouseMove")
         self.accept("mouse1", self.onMouseDown)
         self.accept("mouse1-up", self.onMouseUp)
@@ -111,7 +116,86 @@ class World(DirectObject):
         self.accept("wheel_down", self.onMouseWheelDown)
 
     def initKeyboardHandlers(self):
-        pass
+        self.translateKeys = {
+            "f1": cefpython.VK_F1, "f2": cefpython.VK_F2,
+            "f3": cefpython.VK_F3, "f4": cefpython.VK_F4,
+            "f5": cefpython.VK_F5, "f6": cefpython.VK_F6,
+            "f7": cefpython.VK_F7, "f8": cefpython.VK_F8,
+            "f9": cefpython.VK_F9, "f10": cefpython.VK_F10,
+            "f11": cefpython.VK_F11, "f12": cefpython.VK_F12,
+
+            "arrow_left": cefpython.VK_LEFT,
+            "arrow_up": cefpython.VK_UP,
+            "arrow_down": cefpython.VK_DOWN,
+            "arrow_right": cefpython.VK_RIGHT,
+
+            "enter": cefpython.VK_RETURN,
+            "tab": cefpython.VK_TAB,
+            "space": cefpython.VK_SPACE,
+            "escape": cefpython.VK_ESCAPE,
+            "backspace": cefpython.VK_BACK,
+            "insert": cefpython.VK_INSERT,
+            "delete": cefpython.VK_DELETE,
+            "home": cefpython.VK_HOME,
+            "end": cefpython.VK_END,
+            "page_up": cefpython.VK_PAGEUP,
+            "page_down": cefpython.VK_PAGEDOWN,
+
+            "num_lock": cefpython.VK_NUMLOCK,
+            "caps_lock": cefpython.VK_CAPITAL,
+            "scroll_lock": cefpython.VK_SCROLL,
+
+            "lshift": cefpython.VK_LSHIFT,
+            "rshift": cefpython.VK_RSHIFT,
+            "lcontrol": cefpython.VK_LCONTROL,
+            "rcontrol": cefpython.VK_RCONTROL,
+            "lalt": cefpython.VK_LMENU,
+            "ralt": cefpython.VK_RMENU,
+        }
+
+        base.buttonThrowers[0].node().setKeystrokeEvent('keystroke')
+        base.buttonThrowers[0].node().setButtonDownEvent('button-down')
+        base.buttonThrowers[0].node().setButtonUpEvent('button-up')
+        base.buttonThrowers[0].node().setButtonRepeatEvent('button-repeat')
+
+        self.accept("keystroke", self.onKeystroke)
+        self.accept("button-down", self.onButtonDown)
+        self.accept("button-up", self.onButtonUp)
+        self.accept("button-repeat", self.onButtonDown)
+
+        self.keyModifiers = 0
+        self.modifierKeys = {
+            "shift": cefpython.KEY_SHIFT,
+            "ctrl": cefpython.KEY_CTRL,
+            "alt": cefpython.KEY_ALT
+        }
+
+    def keyInfo(self, key):
+        if platform.system() == "Windows":
+            return (key, 0, 0)
+        elif platform.system() == "Darwin":
+            return (key, 0, 0)
+        elif platform.system() == "Linux":
+            return (key,)
+
+    def onKeystroke(self, key):
+        self.browser.SendKeyEvent(cefpython.KEYTYPE_CHAR,
+                self.keyInfo(ord(key)), 0)
+
+    def onButtonDownOrUp(self, keyType, key):
+        if self.modifierKeys.has_key(key):
+            self.keyModifiers |= self.modifierKeys[key]
+        else:
+            if self.translateKeys.has_key(key):
+                self.browser.SendKeyEvent(keyType,
+                        self.keyInfo(self.translateKeys[key]),
+                        self.keyModifiers)
+
+    def onButtonDown(self, key):
+        self.onButtonDownOrUp(cefpython.KEYTYPE_KEYDOWN, key)
+
+    def onButtonUp(self, key):
+        self.onButtonDownOrUp(cefpython.KEYTYPE_KEYUP, key)
 
     def isMouseInsideBrowser(self, mouse):
         if mouse.getX() >= -0.75 and mouse.getX() <= 0.75 and (
@@ -207,6 +291,15 @@ class ClientHandler:
         (width, height) = self.browser.GetSize(paintElementType)
         img = self.texture.modifyRamImage()
         img.setData(buffer.GetString(mode="bgra", origin="bottom-left"))
+
+    def GetViewRect(self, browser, rect):
+        print("GetViewRect()")
+
+    def GetScreenRect(self, browser, rect):
+        print("GetScreenRect()")
+
+    def GetScreenPoint(self, browser, viewX, viewY, screenCoordinates):
+        print("GetScreenPoint()")
 
     def OnLoadEnd(self, browser, frame, httpStatusCode):
         return
