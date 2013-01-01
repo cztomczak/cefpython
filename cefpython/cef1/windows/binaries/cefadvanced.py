@@ -10,16 +10,20 @@
 
 import platform
 if platform.architecture()[0] != "32bit":
-    raise Exception("Unsupported architecture: %s" % (
-        platform.architecture()[0]))
+    raise Exception("Only 32bit architecture is supported")
 
 import sys
-if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
-    import cefpython_py27 as cefpython
-elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
-    import cefpython_py32 as cefpython
-else:
-    raise Exception("Unsupported python version: %s" % sys.version)
+try:
+    # Import local PYD file (portable zip).
+    if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
+        import cefpython_py27 as cefpython
+    elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
+        import cefpython_py32 as cefpython
+    else:
+        raise Exception("Unsupported python version: %s" % sys.version)
+except ImportError:
+    # Import from package (installer exe).
+    from cefpython1 import cefpython
 
 import cefwindow
 
@@ -33,6 +37,8 @@ import os
 import imp
 import inspect
 import pprint
+import time
+import imp
 
 DEBUG = True
 
@@ -40,18 +46,52 @@ DEBUG = True
 #       call WindowInfo.SetAsPopup().
 # TODO: example of creating modal windows from python.
 
-def CefAdvanced():
+def GetApplicationPath(file=None):
+    import re, os
+    # If file is None return current directory without trailing slash.
+    if file is None:
+        file = ""
+    # Only when relative path.
+    if not file.startswith("/") and not file.startswith("\\") and (
+            not re.search(r"^[\w-]+:", file)):
+        if hasattr(sys, "frozen"):
+            path = os.path.dirname(sys.executable)
+        elif "__file__" in globals():
+            path = os.path.dirname(os.path.realpath(__file__))
+        else:
+            path = os.getcwd()
+        path = path + os.sep + file
+        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+        path = re.sub(r"[/\\]+$", "", path)
+        return path
+    return str(file)
+
+def ExceptHook(type, value, traceObject):
+    import traceback, os, time
     # This hook does the following: in case of exception display it,
     # write to error.log, shutdown CEF and exit application.
-    sys.excepthook = cefpython.ExceptHook
+    error = "\n".join(traceback.format_exception(type, value, traceObject))
+    with open(GetApplicationPath("error.log"), "a") as file:
+        file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
+    print("\n"+error+"\n")
+    cefpython.QuitMessageLoop()
+    cefpython.Shutdown()
+    # So that "finally" does not execute.
+    os._exit(1)
 
+def InitDebugging():
     # Whether to print & log debug messages, log file is "debug.log".
     if DEBUG:
         cefpython.g_debug = True
+        cefpython.g_debugFile = GetApplicationPath("debug.log")
         cefwindow.g_debug = True
 
+def CefAdvanced():
+    sys.excepthook = ExceptHook
+    InitDebugging()
+
     appSettings = dict()
-    appSettings["log_file"] = cefpython.GetRealPath("debug.log")
+    appSettings["log_file"] = GetApplicationPath("debug.log")
 
     # LOGSEVERITY_INFO - less debug oput.
     # LOGSEVERITY_DISABLE - will not create "debug.log" file.
@@ -89,7 +129,8 @@ def CefAdvanced():
     windowInfo = cefpython.WindowInfo()
     windowInfo.SetAsChild(windowHandle)
     browser = cefpython.CreateBrowserSync(
-            windowInfo, browserSettings, "cefadvanced.html")
+            windowInfo, browserSettings=browserSettings,
+            navigateUrl=GetApplicationPath("cefadvanced.html"))
     browser.SetUserData("outerWindowHandle", windowInfo.parentWindowHandle)
     browser.SetClientHandler(ClientHandler())
     browser.SetJavascriptBindings(javascriptBindings)
@@ -137,7 +178,7 @@ class JavascriptRebindings:
         # Reload all application modules, next rebind javascript bindings.
         # Called from: OnKeyEvent > F5.
 
-        currentDir = cefpython.GetRealPath()
+        currentDir = GetApplicationPath()
 
         for mod in sys.modules.values():
             if mod and mod.__name__ != "__main__":
@@ -152,11 +193,9 @@ class JavascriptRebindings:
                         print("WARNING: reloading module failed: %s. "
                               "Exception: %s" % (mod.__name__, exc))
 
-        if DEBUG:
-            # These modules have been reloaded, we need to set
-            # debug variables again.
-            cefpython.g_debug = True
-            cefwindow.g_debug = True
+        # cefpython & cefwindow modules have been reloaded,
+        # we need to re-initialize debugging.
+        InitDebugging()
 
         self.Bind()
         self.javascriptBindings.Rebind()
@@ -227,7 +266,7 @@ class ClientHandler:
         return False
 
     def OnConsoleMessage(self, browser, message, source, line):
-        appdir = cefpython.GetRealPath().replace("\\", "/")
+        appdir = GetApplicationPath().replace("\\", "/")
         if appdir[1] == ":":
             appdir = appdir[0].upper() + appdir[1:]
         source = source.replace("file:///", "")
@@ -253,7 +292,7 @@ class ClientHandler:
             # get rid of the "file://d:/.../cefpython/".
             url = re.sub(r"^file:/+", "", url)
             url = re.sub(r"[/\\]+", re.escape(os.sep), url)
-            url = re.sub(r"%s" % re.escape(cefpython.GetRealPath()),
+            url = re.sub(r"%s" % re.escape(GetApplicationPath()),
                          "", url, flags=re.IGNORECASE)
             url = re.sub(r"^%s" % re.escape(os.sep), "", url)
         raise Exception("%s.\n"
@@ -267,31 +306,51 @@ class ClientHandler:
         # return False
         return True
 
+def ModuleExists(module):
+    try:
+        imp.find_module(module)
+        return True
+    except ImportError:
+        return False
+
 class Python:
     browser = None
 
     def SaveImage(self, outfile, format):
-        outfile = cefpython.GetRealPath(outfile)
-        try:
-            from PIL import Image
-        except:
-            print("PIL library not available, can't save image")
-            return
+        outfile = GetApplicationPath(outfile)
         (width, height) = self.browser.GetSize(cefpython.PET_VIEW)
         buffer = self.browser.GetImage(cefpython.PET_VIEW, width, height)
+        if ModuleExists("PIL"):
+            self.__SaveImageWithPil(buffer, width, height, outfile, format)
+        elif ModuleExists("pygame"):
+            self.__SaveImageWithPygame(buffer, width, height, outfile)
+        else:
+            print("Could not save image, no image library found (PIL, pygame)")
+        if os.path.exists(outfile):
+            os.system(outfile)
+
+    def __SaveImageWithPil(self, buffer, width, height, outfile, format):
+        from PIL import Image
         image = Image.fromstring(
             "RGBA", (width,height),
             buffer.GetString(mode="rgba", origin="top-left"),
             "raw", "RGBA", 0, 1)
         image.save(outfile, format)
-        os.system(outfile)
+
+    def __SaveImageWithPygame(self, buffer, width, height, outfile):
+        import pygame
+        # Format "PNG" is read from the filename.
+        surface  = pygame.image.frombuffer(
+                buffer.GetString(mode="rgba", origin="top-left"),
+                (width, height), "RGBA")
+        pygame.image.save(surface, outfile)
 
     def ExecuteJavascript(self, jsCode):
         self.browser.GetMainFrame().ExecuteJavascript(jsCode)
 
     def LoadUrl(self):
         self.browser.GetMainFrame().LoadUrl(
-                cefpython.GetRealPath("cefsimple.html"))
+                GetApplicationPath("cefsimple.html"))
 
     def Version(self):
         return sys.version
@@ -389,7 +448,8 @@ class Python:
         windowInfo2 = cefpython.WindowInfo()
         windowInfo2.SetAsChild(windowHandle2)
         browser2 = cefpython.CreateBrowserSync(
-                windowInfo2, browserSettings={}, navigateURL="cefsimple.html")
+                windowInfo2, browserSettings={},
+                navigateUrl=GetApplicationPath("cefsimple.html"))
         browser2.SetUserData("outerWindowHandle", windowHandle2)
 
     def GetUnicodeString(self):
