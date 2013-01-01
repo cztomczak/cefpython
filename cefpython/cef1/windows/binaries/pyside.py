@@ -14,7 +14,7 @@ try:
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
 except ImportError:
-    # Import from package (installer exe).
+    # Import from package (installer).
     from cefpython1 import cefpython
 
 import PySide
