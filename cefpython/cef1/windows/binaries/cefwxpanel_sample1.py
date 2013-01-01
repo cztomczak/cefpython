@@ -3,13 +3,14 @@
 
 import wx
 
-from cefwxpanel import initCEF, shutdownCEF, CEFWindow
+from cefwxpanel import initCEF, shutdownCEF, CEFWindow, GetApplicationPath
 
 class MainFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY, title='wxPython example', size=(600,400))
 
-        self.cefPanel = CEFWindow(self, url="cefsimple.html")
+        self.cefPanel = CEFWindow(self,
+                url=GetApplicationPath("cefsimple.html"))
 
         sizer = wx.BoxSizer()
         sizer.Add(self.cefPanel, 1, wx.EXPAND, 0)

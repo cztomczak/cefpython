@@ -4,12 +4,11 @@
 import wx
 import wx.lib.agw.flatnotebook as fnb
 
-from cefwxpanel import initCEF, shutdownCEF, CEFWindow
+from cefwxpanel import initCEF, shutdownCEF, CEFWindow, GetApplicationPath
 
 ROOT_NAME = "My Locations"
 
-URLS = ["cefsimple.html",
-        "http://google.com",
+URLS = ["http://google.com",
         "http://maps.google.com",
         "http://youtube.com",
         "http://yahoo.com",

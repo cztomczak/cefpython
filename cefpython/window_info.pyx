@@ -58,7 +58,7 @@ cdef class WindowInfo:
         self.transparentPainting = False
 
     cpdef py_void SetAsChild(self, int parentWindowHandle, list windowRect=None):
-        if not IsWindowHandle(parentWindowHandle):
+        if not WindowUtils.IsWindowHandle(parentWindowHandle):
             raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
 
         self.windowType = "child"
@@ -77,7 +77,7 @@ cdef class WindowInfo:
     IF UNAME_SYSNAME == "Windows":
 
         cpdef py_void SetAsPopup(self, int parentWindowHandle, py_string windowName):
-            if not IsWindowHandle(parentWindowHandle):
+            if not WindowUtils.IsWindowHandle(parentWindowHandle):
                 raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
             self.parentWindowHandle = parentWindowHandle
             self.windowType = "popup"
@@ -87,7 +87,7 @@ cdef class WindowInfo:
         IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
 
             cpdef py_void SetAsOffscreen(self, int parentWindowHandle):
-                if not IsWindowHandle(parentWindowHandle):
+                if not WindowUtils.IsWindowHandle(parentWindowHandle):
                     raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
                 self.parentWindowHandle = parentWindowHandle
                 self.windowType = "offscreen"

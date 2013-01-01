@@ -2,27 +2,63 @@
 
 import platform
 if platform.architecture()[0] != "32bit":
-    raise Exception("Architecture not supported: %s" % platform.architecture()[0])
+    raise Exception("Only 32bit architecture is supported")
 
 import sys
-if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
-    import cefpython_py27 as cefpython
-elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
-    import cefpython_py32 as cefpython
-else:
-    raise Exception("Unsupported python version: %s" % sys.version)
+try:
+    # Import local PYD file (portable zip).
+    if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
+        import cefpython_py27 as cefpython
+    elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
+        import cefpython_py32 as cefpython
+    else:
+        raise Exception("Unsupported python version: %s" % sys.version)
+except ImportError:
+    # Import from package (installer exe).
+    from cefpython1 import cefpython
 
 import PySide
 from PySide import QtGui
 from PySide import QtCore
 import ctypes
 
-class MainWindow(QtGui.QMainWindow):
+def GetApplicationPath(file=None):
+    import re, os
+    # If file is None return current directory without trailing slash.
+    if file is None:
+        file = ""
+    # Only when relative path.
+    if not file.startswith("/") and not file.startswith("\\") and (
+            not re.search(r"^[\w-]+:", file)):
+        if hasattr(sys, "frozen"):
+            path = os.path.dirname(sys.executable)
+        elif "__file__" in globals():
+            path = os.path.dirname(os.path.realpath(__file__))
+        else:
+            path = os.getcwd()
+        path = path + os.sep + file
+        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+        path = re.sub(r"[/\\]+$", "", path)
+        return path
+    return str(file)
 
+def ExceptHook(type, value, traceObject):
+    import traceback, os, time
+    # This hook does the following: in case of exception display it,
+    # write to error.log, shutdown CEF and exit application.
+    error = "\n".join(traceback.format_exception(type, value, traceObject))
+    with open(GetApplicationPath("error.log"), "a") as file:
+        file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
+    print("\n"+error+"\n")
+    cefpython.QuitMessageLoop()
+    cefpython.Shutdown()
+    # So that "finally" does not execute.
+    os._exit(1)
+
+class MainWindow(QtGui.QMainWindow):
     mainFrame = None
 
     def __init__(self):
-
         super(MainWindow, self).__init__(None)
         self.createMenu()
         self.mainFrame = MainFrame(self)
@@ -32,7 +68,6 @@ class MainWindow(QtGui.QMainWindow):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
     def createMenu(self):
-
         menubar = self.menuBar()
         filemenu = menubar.addMenu("&File")
         filemenu.addAction(QtGui.QAction("Open", self))
@@ -40,28 +75,24 @@ class MainWindow(QtGui.QMainWindow):
         aboutmenu = menubar.addMenu("&About")
 
     def focusInEvent(self, event):
-
         cefpython.WindowUtils.OnSetFocus(int(self.centralWidget().winIdFixed()), 0, 0, 0)
 
     def closeEvent(self, event):
-
         self.mainFrame.browser.CloseBrowser()
 
 class MainFrame(QtGui.QWidget):
-
     browser = None
 
     def __init__(self, parent=None):
-
         super(MainFrame, self).__init__(parent)
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(int(self.winIdFixed()))
-        self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings={},
-                                                   navigateURL="cefsimple.html")
+        self.browser = cefpython.CreateBrowserSync(windowInfo,
+                browserSettings={},
+                navigateUrl=GetApplicationPath("cefsimple.html"))
         self.show()
 
     def winIdFixed(self):
-
         # PySide bug: QWidget.winId() returns <PyCObject object at 0x02FD8788>,
         # there is no easy way to convert it to int.
         try:
@@ -77,54 +108,45 @@ class MainFrame(QtGui.QWidget):
                 return ctypes.pythonapi.PyCapsule_GetPointer(self.winId(), None)
 
     def moveEvent(self, event):
-
         cefpython.WindowUtils.OnSize(int(self.winIdFixed()), 0, 0, 0)
 
     def resizeEvent(self, event):
-
         cefpython.WindowUtils.OnSize(int(self.winIdFixed()), 0, 0, 0)
 
 class CefApplication(QtGui.QApplication):
-
     timer = None
 
     def __init__(self, args):
-
         super(CefApplication, self).__init__(args)
         self.createTimer()
 
     def createTimer(self):
-
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.onTimer)
         self.timer.start(10)
 
     def onTimer(self):
-
         # The proper way of doing message loop should be:
         # 1. In createTimer() call self.timer.start(0)
         # 2. In onTimer() call SingleMessageLoop() only when
         #    QtGui.QApplication.instance()->hasPendingEvents() returns False.
         # But... there is a bug in Qt, hasPendingEvents() returns always true.
-
         cefpython.SingleMessageLoop()
 
     def stopTimer(self):
-
         # Stop the timer after Qt message loop ended, calls to SingleMessageLoop()
         # should not happen anymore.
         self.timer.stop()
 
 if __name__ == '__main__':
-
     print("PySide version: %s" % PySide.__version__)
     print("QtCore version: %s" % QtCore.__version__)
 
-    sys.excepthook = cefpython.ExceptHook
+    sys.excepthook = ExceptHook
     settings = {
-        # Change to LOGSEVERITY_INFO if you want less debug output.
-        "log_severity": cefpython.LOGSEVERITY_VERBOSE,
-        "release_dcheck_enabled": True
+        "log_severity": cefpython.LOGSEVERITY_INFO,
+        "log_file": GetApplicationPath("debug.log"),
+        "release_dcheck_enabled": True # Enable only when debugging.
     }
     cefpython.Initialize(settings)
 

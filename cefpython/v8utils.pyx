@@ -24,7 +24,7 @@ IF CEF_VERSION == 1:
             framePtr = cefFrame.get()
             pyFrame = {}
             pyFrame["script"] = CefToPyString(framePtr.GetScriptName())
-            pyFrame["scriptOrSourceURL"] = CefToPyString(
+            pyFrame["scriptOrSourceUrl"] = CefToPyString(
                     framePtr.GetScriptNameOrSourceURL())
             pyFrame["function"] = CefToPyString(framePtr.GetFunctionName())
             pyFrame["line"] = framePtr.GetLineNumber()
@@ -49,7 +49,7 @@ IF CEF_VERSION == 1:
             formatted += "\t[%s] %s() in %s on line %s (col:%s)\n" % (
                     frameNumber,
                     frame["function"],
-                    frame["scriptOrSourceURL"],
+                    frame["scriptOrSourceUrl"],
                     frame["line"],
                     frame["column"])
         return formatted

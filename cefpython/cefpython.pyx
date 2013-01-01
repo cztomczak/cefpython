@@ -28,6 +28,7 @@
 # Global variables.
 
 g_debug = False
+g_debugFile = None
 
 # When put None here and assigned a local dictionary in Initialize(), later while
 # running app this global variable was garbage collected, see topic:
@@ -118,7 +119,7 @@ def Initialize(applicationSettings=None):
     if not ret: Debug("CefInitialize() failed")
     return ret
 
-def CreateBrowserSync(windowInfo, browserSettings, navigateURL):
+def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
     Debug("CreateBrowserSync() called")
     assert IsThread(TID_UI), (
             "cefpython.CreateBrowserSync() can only be called on UI thread")
@@ -132,14 +133,14 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateURL):
     cdef CefWindowInfo cefWindowInfo
     SetCefWindowInfo(cefWindowInfo, windowInfo)
 
-    navigateURL = GetRealPath(file=navigateURL, encodeUrl=True)
-    Debug("navigateURL: %s" % navigateURL)
-    cdef CefString cefNavigateURL
-    PyToCefString(navigateURL, cefNavigateURL)
+    navigateUrl = GetNavigateUrl(navigateUrl)
+    Debug("navigateUrl: %s" % navigateUrl)
+    cdef CefString cefNavigateUrl
+    PyToCefString(navigateUrl, cefNavigateUrl)
 
     Debug("CefBrowser::CreateBrowserSync()")
     cdef CefRefPtr[CefBrowser] cefBrowser = cef_browser_static.CreateBrowserSync(
-            cefWindowInfo, <CefRefPtr[CefClient]?>g_clientHandler, cefNavigateURL,
+            cefWindowInfo, <CefRefPtr[CefClient]?>g_clientHandler, cefNavigateUrl,
             cefBrowserSettings)
 
     if <void*>cefBrowser == NULL:

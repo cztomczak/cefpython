@@ -139,3 +139,9 @@ class WindowUtils:
     @staticmethod
     def GetParentHandle(int windowHandle):
         return <int>GetParent(<HWND>windowHandle)
+
+    @staticmethod
+    def IsWindowHandle(int windowHandle):
+        IF UNAME_SYSNAME == "Windows":
+            return bool(IsWindow(<HWND>windowHandle))
+        return False

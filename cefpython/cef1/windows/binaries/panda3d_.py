@@ -6,8 +6,8 @@
 
 # To use custom python (not the one provided with the SDK)
 # create a "panda.pth" file inside your copy of python, in
-# this file put paths to panda & bin directory on separate,
-# for example:
+# this file put paths to panda & bin directory on separate
+# lines, for example:
 #
 # c:\Panda3D-1.8.0
 # c:\Panda3D-1.8.0\bin
@@ -18,16 +18,20 @@
 
 import platform
 if platform.architecture()[0] != "32bit":
-    raise Exception("Unsupported architecture: %s" % (
-            platform.architecture()[0]))
+    raise Exception("Only 32bit architecture is supported")
 
 import sys
-if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
-    import cefpython_py27 as cefpython
-elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
-    import cefpython_py32 as cefpython
-else:
-    raise Exception("Unsupported python version: %s" % sys.version)
+try:
+    # Import local PYD file (portable zip).
+    if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
+        import cefpython_py27 as cefpython
+    elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
+        import cefpython_py32 as cefpython
+    else:
+        raise Exception("Unsupported python version: %s" % sys.version)
+except ImportError:
+    # Import from package (installer exe).
+    from cefpython1 import cefpython
 
 from pandac.PandaModules import loadPrcFileData
 loadPrcFileData("", "Panda3D example")
@@ -41,6 +45,39 @@ from direct.task import Task
 from math import pi, sin, cos, floor, ceil
 import platform
 import ctypes
+
+def GetApplicationPath(file=None):
+    import re, os
+    # If file is None return current directory without trailing slash.
+    if file is None:
+        file = ""
+    # Only when relative path.
+    if not file.startswith("/") and not file.startswith("\\") and (
+            not re.search(r"^[\w-]+:", file)):
+        if hasattr(sys, "frozen"):
+            path = os.path.dirname(sys.executable)
+        elif "__file__" in globals():
+            path = os.path.dirname(os.path.realpath(__file__))
+        else:
+            path = os.getcwd()
+        path = path + os.sep + file
+        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+        path = re.sub(r"[/\\]+$", "", path)
+        return path
+    return str(file)
+
+def ExceptHook(type, value, traceObject):
+    import traceback, os, time
+    # This hook does the following: in case of exception display it,
+    # write to error.log, shutdown CEF and exit application.
+    error = "\n".join(traceback.format_exception(type, value, traceObject))
+    with open(GetApplicationPath("error.log"), "a") as file:
+        file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
+    print("\n"+error+"\n")
+    cefpython.QuitMessageLoop()
+    cefpython.Shutdown()
+    # So that "finally" does not execute.
+    os._exit(1)
 
 class World(DirectObject):
     browser = None
@@ -74,12 +111,13 @@ class World(DirectObject):
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsOffscreen(windowHandle)
 
-        # By default window rendering is 30 fps,
-        # let's change it to 60 for better user experience.
+        # By default window rendering is 30 fps, let's change
+        # it to 60 for better user experience when scrolling.
         browserSettings = {"animation_frame_rate": 60}
 
         self.browser = cefpython.CreateBrowserSync(
-                windowInfo, browserSettings, navigateURL="cefsimple.html")
+                windowInfo, browserSettings,
+                navigateUrl=GetApplicationPath("cefsimple.html"))
         self.browser.SetClientHandler(
                 ClientHandler(self.browser, self.texture))
 
@@ -292,13 +330,25 @@ class ClientHandler:
         img.setData(buffer.GetString(mode="bgra", origin="bottom-left"))
 
     def GetViewRect(self, browser, rect):
+        return False
         print("GetViewRect()")
+        width  = self.texture.getXSize()
+        height = self.texture.getYSize()
+        rect.append(0)
+        rect.append(0)
+        rect.append(width)
+        rect.append(height)
+        return True
 
     def GetScreenRect(self, browser, rect):
+        return False
         print("GetScreenRect()")
+        return self.GetViewRect(browser, rect)
 
     def GetScreenPoint(self, browser, viewX, viewY, screenCoordinates):
+        return False
         print("GetScreenPoint()")
+        return False
 
     def OnLoadEnd(self, browser, frame, httpStatusCode):
         return
@@ -319,12 +369,11 @@ class ClientHandler:
         image.save("panda3d_image.png", "PNG")
 
 if __name__ == "__main__":
-    sys.excepthook = cefpython.ExceptHook
+    sys.excepthook = ExceptHook
     settings = {
-        "log_file": cefpython.GetRealPath("debug.log"),
-        # Change to LOGSEVERITY_INFO if you want less debug output.
-        "log_severity": cefpython.LOGSEVERITY_VERBOSE,
-        "release_dcheck_enabled": True
+        "log_severity": cefpython.LOGSEVERITY_INFO,
+        "log_file": GetApplicationPath("debug.log"),
+        "release_dcheck_enabled": True # Enable only when debugging.
     }
     cefpython.Initialize(settings)
 

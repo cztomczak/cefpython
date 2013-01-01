@@ -23,3 +23,6 @@ Release*/
 *.pdb
 
 ctags
+
+/cef1/windows/installer/Output/
+/cef3/windows/installer/Output/
