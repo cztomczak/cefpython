@@ -134,7 +134,7 @@ class PyGTKExample:
 
         if self.exiting:
             return False
-        cefpython.SingleMessageLoop()
+        cefpython.MessageLoopWork()
         return True
 
     def OnFocusIn(self, widget, data):

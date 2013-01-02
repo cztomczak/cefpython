@@ -80,7 +80,7 @@ def ExceptHook(type, value, traceObject):
     os._exit(1)
 
 def InitDebugging():
-    # Whether to print & log debug messages, log file is "debug.log".
+    # Whether to print & log debug messages
     if DEBUG:
         cefpython.g_debug = True
         cefpython.g_debugFile = GetApplicationPath("debug.log")

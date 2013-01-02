@@ -5,20 +5,57 @@ if platform.architecture()[0] != "32bit":
     raise Exception("Architecture not supported: %s" % platform.architecture()[0])
 
 import sys
-if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
-    import cefpython_py27 as cefpython
-elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
-    import cefpython_py32 as cefpython
-else:
-    raise Exception("Unsupported python version: %s" % sys.version)
+try:
+    # Import local PYD file (portable zip).
+    if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
+        import cefpython_py27 as cefpython
+    elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
+        import cefpython_py32 as cefpython
+    else:
+        raise Exception("Unsupported python version: %s" % sys.version)
+except ImportError:
+    # Import from package (installer).
+    from cefpython1 import cefpython
 
 import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
 
-class PyGTKExample:
+def GetApplicationPath(file=None):
+    import re, os
+    # If file is None return current directory without trailing slash.
+    if file is None:
+        file = ""
+    # Only when relative path.
+    if not file.startswith("/") and not file.startswith("\\") and (
+            not re.search(r"^[\w-]+:", file)):
+        if hasattr(sys, "frozen"):
+            path = os.path.dirname(sys.executable)
+        elif "__file__" in globals():
+            path = os.path.dirname(os.path.realpath(__file__))
+        else:
+            path = os.getcwd()
+        path = path + os.sep + file
+        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+        path = re.sub(r"[/\\]+$", "", path)
+        return path
+    return str(file)
 
+def ExceptHook(type, value, traceObject):
+    import traceback, os, time
+    # This hook does the following: in case of exception display it,
+    # write to error.log, shutdown CEF and exit application.
+    error = "\n".join(traceback.format_exception(type, value, traceObject))
+    with open(GetApplicationPath("error.log"), "a") as file:
+        file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
+    print("\n"+error+"\n")
+    cefpython.QuitMessageLoop()
+    cefpython.Shutdown()
+    # So that "finally" does not execute.
+    os._exit(1)
+
+class PyGTKExample:
     mainWindow = None
     container = None
     browser = None
@@ -26,7 +63,6 @@ class PyGTKExample:
     searchEntry = None
 
     def __init__(self):
-
         gobject.timeout_add(10, self.OnTimer)
 
         self.mainWindow = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -55,7 +91,9 @@ class PyGTKExample:
         windowID = self.container.get_window().handle
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(windowID)
-        self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings={}, navigateURL='example.html')
+        self.browser = cefpython.CreateBrowserSync(windowInfo, 
+                browserSettings={}, 
+                navigateUrl=GetApplicationPath('example.html'))
 
         self.mainWindow.show()
 
@@ -64,7 +102,6 @@ class PyGTKExample:
         self.searchEntry.grab_focus()
 
     def CreateMenu(self):
-
         file = gtk.MenuItem('File')
         file.show()
         filemenu = gtk.Menu()
@@ -75,54 +112,45 @@ class PyGTKExample:
         filemenu.append(item)
         item.show()
         file.set_submenu(filemenu)
-
         about = gtk.MenuItem('About')
         about.show()
-
         menubar = gtk.MenuBar()
         menubar.append(file)
         menubar.append(about)
         menubar.show()
-
         return menubar
 
     def OnWidgetClick(self, widget, data):
-
         self.mainWindow.get_window().focus()
 
     def OnTimer(self):
-
         if self.exiting:
             return False
-        cefpython.SingleMessageLoop()
+        cefpython.MessageLoopWork()
         return True
 
     def OnFocusIn(self, widget, data):
-
         # This function is currently not called by any of code, but if you would like
         # for browser to have automatic focus add such line:
         # self.mainWindow.connect('focus-in-event', self.OnFocusIn)
         cefpython.WindowUtils.OnSetFocus(self.container.get_window().handle, 0, 0, 0)
 
     def OnSize(self, widget, sizeAlloc):
-
         cefpython.WindowUtils.OnSize(self.container.get_window().handle, 0, 0, 0)
 
     def OnExit(self, widget, data=None):
-
         self.exiting = True
         gtk.main_quit()
 
 if __name__ == '__main__':
-
     version = '.'.join(map(str, list(gtk.gtk_version)))
     print('GTK version: %s' % version)
 
-    sys.excepthook = cefpython.ExceptHook
+    sys.excepthook = ExceptHook
     settings = {}
-    settings["log_file"] = cefpython.GetRealPath("debug.log")
+    settings["log_file"] = GetApplicationPath("debug.log")
     settings["log_severity"] = cefpython.LOGSEVERITY_INFO
-    settings["release_dcheck_enabled"] = True
+    settings["release_dcheck_enabled"] = True # Enable only when debugging
     settings["browser_subprocess_path"] = "subprocess"
     cefpython.Initialize(settings)
 

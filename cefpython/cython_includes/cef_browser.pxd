@@ -12,8 +12,10 @@ from libcpp cimport bool as cpp_bool
 from libcpp.vector cimport vector as cpp_vector
 from cef_frame cimport CefFrame
 cimport cef_types
-from cef_types_wrappers cimport CefRect
 from cef_platform cimport CefKeyInfo
+
+IF CEF_VERSION == 1:
+    from cef_types_wrappers cimport CefRect
 
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo

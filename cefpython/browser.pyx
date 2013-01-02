@@ -2,15 +2,16 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# cef_key_type_t, SendKeyEvent().
-KEYTYPE_KEYUP = cef_types.KT_KEYUP
-KEYTYPE_KEYDOWN = cef_types.KT_KEYDOWN
-KEYTYPE_CHAR = cef_types.KT_CHAR
+IF CEF_VERSION == 1:
+    # cef_key_type_t, SendKeyEvent().
+    KEYTYPE_KEYUP = cef_types.KT_KEYUP
+    KEYTYPE_KEYDOWN = cef_types.KT_KEYDOWN
+    KEYTYPE_CHAR = cef_types.KT_CHAR
 
-# cef_mouse_button_type_t, SendMouseClickEvent().
-MOUSEBUTTON_LEFT = cef_types.MBT_LEFT
-MOUSEBUTTON_MIDDLE = cef_types.MBT_MIDDLE
-MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
+    # cef_mouse_button_type_t, SendMouseClickEvent().
+    MOUSEBUTTON_LEFT = cef_types.MBT_LEFT
+    MOUSEBUTTON_MIDDLE = cef_types.MBT_MIDDLE
+    MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
 
 # If you try to keep PyBrowser() objects inside cpp_vector you will
 # get segmentation faults, as they will be garbage collected.
@@ -56,7 +57,8 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
 
     cdef WindowHandle openerHandle
     cdef dict clientCallbacks
-    cdef JavascriptBindings javascriptBindings
+    IF CEF_VERSION == 1:
+        cdef JavascriptBindings javascriptBindings
 
     if pyBrowser.IsPopup() and (
     not pyBrowser.GetUserData("__outerWindowHandle")):
@@ -66,9 +68,10 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
                 clientCallbacks = tempPyBrowser.GetClientCallbacksDict()
                 if clientCallbacks:
                     pyBrowser.SetClientCallbacksDict(clientCallbacks)
-                javascriptBindings = tempPyBrowser.GetJavascriptBindings()
-                if javascriptBindings.GetBindToPopups():
-                    pyBrowser.SetJavascriptBindings(javascriptBindings)
+                IF CEF_VERSION == 1:
+                    javascriptBindings = tempPyBrowser.GetJavascriptBindings()
+                    if javascriptBindings.GetBindToPopups():
+                        pyBrowser.SetJavascriptBindings(javascriptBindings)
 
     return pyBrowser
 

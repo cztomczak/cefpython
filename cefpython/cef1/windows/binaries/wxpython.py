@@ -93,7 +93,7 @@ class MainFrame(wx.Frame):
         self.Destroy()
 
     def OnIdle(self, event):
-        cefpython.SingleMessageLoop()
+        cefpython.MessageLoopWork()
 
 class MyApp(wx.App):
 
