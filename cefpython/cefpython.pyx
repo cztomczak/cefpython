@@ -159,16 +159,23 @@ def MessageLoop():
     with nogil:
         CefRunMessageLoop()
 
-def SingleMessageLoop():
-    # Perform a single iteration of CEF message loop processing. This function is
-    # used to integrate the CEF message loop into an existing application message
-    # loop. Anything that can block for a significant amount of time and is
-    # thread-safe should release the GIL:
+def MessageLoopWork():
+    # Perform a single iteration of CEF message loop processing.
+    # This function is used to integrate the CEF message loop
+    # into an existing application message loop.
+
+    # Anything that can block for a significant amount of time
+    # and is thread-safe should release the GIL:
     # https://groups.google.com/d/msg/cython-users/jcvjpSOZPp0/KHpUEX8IhnAJ
-    # GIL must be released here otherwise we will get dead lock when calling from
-    # c++ to python.
+    # GIL must be released here otherwise we will get dead lock
+    # when calling from c++ to python.
+
     with nogil:
         CefDoMessageLoopWork();
+
+def SingleMessageLoop():
+    # @deprecated, use MessageLoopWork() instead
+    MessageLoopWork()
 
 def QuitMessageLoop():
     Debug("QuitMessageLoop()")

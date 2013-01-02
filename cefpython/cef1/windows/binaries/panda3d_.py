@@ -306,7 +306,7 @@ class World(DirectObject):
                 self.browser.SendMouseWheelEvent(x, y, deltaX=0, deltaY=-120)
 
     def messageLoop(self, task):
-        cefpython.SingleMessageLoop()
+        cefpython.MessageLoopWork()
         return Task.cont
 
     def spinCameraTask(self, task):

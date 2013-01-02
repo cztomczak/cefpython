@@ -1,0 +1,17 @@
+Getting chromium sources
+------------------------
+gclient sync fails, you need to install:
+    sudo apt-get install libdbus-glib-1-dev
+
+Building
+--------
+building in release mode:
+    # j = jobs
+    make BUILDTYPE=Release -j4 cefclient
+
+Binary package
+--------------
+cd /path/to/chromium/src/cef/tools
+make_distrib.sh --allow-partial
+If the process succeeds a binary distribution package
+will be created in the /path/to/chromium/src/cef/binary_distrib directory.

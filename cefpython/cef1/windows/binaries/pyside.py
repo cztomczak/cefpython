@@ -128,13 +128,13 @@ class CefApplication(QtGui.QApplication):
     def onTimer(self):
         # The proper way of doing message loop should be:
         # 1. In createTimer() call self.timer.start(0)
-        # 2. In onTimer() call SingleMessageLoop() only when
+        # 2. In onTimer() call MessageLoopWork() only when
         #    QtGui.QApplication.instance()->hasPendingEvents() returns False.
         # But... there is a bug in Qt, hasPendingEvents() returns always true.
-        cefpython.SingleMessageLoop()
+        cefpython.MessageLoopWork()
 
     def stopTimer(self):
-        # Stop the timer after Qt message loop ended, calls to SingleMessageLoop()
+        # Stop the timer after Qt message loop ended, calls to MessageLoopWork()
         # should not happen anymore.
         self.timer.stop()
 

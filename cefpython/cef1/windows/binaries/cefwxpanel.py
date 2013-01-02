@@ -94,7 +94,7 @@ class CEFWindow(wx.Window):
 
     def _onTimer(self, event):
         """Service CEF message loop"""
-        cefpython.SingleMessageLoop()
+        cefpython.MessageLoopWork()
 
     def OnSetFocus(self, event):
         cefpython.WindowUtils.OnSetFocus(self.GetHandle(), 0, 0, 0)
