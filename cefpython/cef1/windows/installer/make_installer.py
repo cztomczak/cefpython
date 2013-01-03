@@ -42,6 +42,18 @@ def main():
 
     print("Saved: %s" % ISS_FILE)
 
+    initPyTemplate = os.getcwd()+r"\__init__.py.template"
+    initPyInstall = os.getcwd()+r"\__init__.py.install"
+    
+    f = open(initPyTemplate)
+    initPyTemplateCode = f.read()
+    f.close()
+
+    f = open(initPyInstall, "w")
+    f.write(initPyTemplateCode % vars)
+    f.close()
+    print("Saved: %s" % initPyInstall)
+
     iscc_command = '"'+ ISCC + '" ' + ISS_FILE
     print("Running ISCC: %s" % iscc_command)
     os.system(iscc_command)

@@ -15,3 +15,12 @@ cd /path/to/chromium/src/cef/tools
 make_distrib.sh --allow-partial
 If the process succeeds a binary distribution package
 will be created in the /path/to/chromium/src/cef/binary_distrib directory.
+
+Commands
+--------
+schroot -c precise32 # change chroot to precise32
+sudo schroot -a -e # -end -all chroots & sessions
+schroot -l # list all chroots
+
+chromium/install-chroot.sh
+	echo "-c always copy 64bit helper binaries to 32bit chroot"

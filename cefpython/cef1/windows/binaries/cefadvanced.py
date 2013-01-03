@@ -203,16 +203,16 @@ class JavascriptRebindings:
 class ClientHandler:
 
     def OnLoadStart(self, browser, frame):
-        # print("OnLoadStart(): frame URL: %s" % frame.GetURL())
+        # print("OnLoadStart(): frame url: %s" % frame.GetUrl())
         pass
 
     def OnLoadEnd(self, browser, frame, httpStatusCode):
-        # print("OnLoadEnd(): frame URL: %s" % frame.GetURL())
+        # print("OnLoadEnd(): frame url: %s" % frame.GetUrl())
         pass
 
-    def OnLoadError(self, browser, frame, errorCode, failedURL, errorText):
-        # print("OnLoadError() failedURL: %s" % (failedURL))
-        errorText[0] = ("Custom error message when loading URL fails, "
+    def OnLoadError(self, browser, frame, errorCode, failedUrl, errorText):
+        # print("OnLoadError() failedUrl: %s" % (failedUrl))
+        errorText[0] = ("Custom error message when loading url fails, "
                        "see: def OnLoadError()")
         return True
 

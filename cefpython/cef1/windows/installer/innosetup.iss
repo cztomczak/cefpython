@@ -26,12 +26,12 @@ DisableProgramGroupPage = no
 UsePreviousAppDir = yes
 UsePreviousGroup = yes
 
-SourceDir = C:\cefpython\cefpython\cefpython\cef1\windows\binaries
-OutputDir = C:\cefpython\cefpython\cefpython\cef1\windows\installer\Output
+SourceDir = C:\cefpython\cefpython-src\cefpython\cef1\windows\binaries
+OutputDir = C:\cefpython\cefpython-src\cefpython\cef1\windows\installer\Output
 OutputBaseFilename = cefpython1_v0.52_win32_installer
 
 UninstallFilesDir = {app}\cefpython1
-LicenseFile = C:\cefpython\cefpython\cefpython\cef1\windows\binaries\LICENSE.txt
+LicenseFile = C:\cefpython\cefpython-src\cefpython\cef1\windows\binaries\LICENSE.txt
 
 [Icons]
 
@@ -47,7 +47,7 @@ Filename: "{app}\cefpython1\examples"; Flags: postinstall shellexec;
 Source: "*.dll"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
 Source: "*.pak"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
 Source: "locales\*.pak"; DestDir: "{app}\cefpython1\locales"; Flags: ignoreversion;
-Source: "C:\cefpython\cefpython\cefpython\cef1\windows\installer\__init__.py.install"; DestDir: "{app}\cefpython1"; DestName: "__init__.py"; Flags: ignoreversion;
+Source: "C:\cefpython\cefpython-src\cefpython\cef1\windows\installer\__init__.py.install"; DestDir: "{app}\cefpython1"; DestName: "__init__.py"; Flags: ignoreversion;
 Source: "cefclient.exe"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
 Source: "cefpython_py27.py"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
 Source: "cefpython_py27.pyd"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
