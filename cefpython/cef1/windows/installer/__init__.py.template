@@ -1,4 +1,4 @@
 import cefpython_py27 as cefpython
 
-__version__ = "0.52"
+__version__ = "%(APP_VERSION)s"
 __author__ = "Czarek Tomczak <czarek.tomczak@gmail.com>"
