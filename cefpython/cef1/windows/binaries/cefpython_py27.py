@@ -14,9 +14,6 @@ http://code.google.com/p/cefpython/w/list
 def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
     return Browser()
 
-def ExceptHook(type, value, traceObject):
-    return None
-
 def FormatJavascriptStackTrace(stackTrace):
     return ""
 
@@ -25,9 +22,6 @@ def GetBrowserByWindowHandle(windowHandle):
 
 def GetJavascriptStackTrace(frameLimit=100):
     return []
-
-def GetRealPath(file=None, encodeUrl=False):
-    return ""
 
 def Initialize(applicationSettings={}):
     return None
@@ -38,7 +32,7 @@ def IsKeyModifier(key, modifiers):
 def MessageLoop():
     return None
 
-def SingleMessageLoop():
+def MessageLoopWork():
     return None
 
 def QuitMessageLoop():
@@ -62,7 +56,7 @@ ApplicationSettings = {
     "locale": "",
     "locales_dir_path": "",
     "log_file": "",
-    "log_severity": LOGSEVERITY_VERBOSE,
+    "log_severity": LOGSEVERITY_INFO,
     "release_dcheck_enabled": False,
     "multi_threaded_message_loop": False,
     "pack_loading_disabled": False,
@@ -183,6 +177,12 @@ class Browser:
     def GetFrameNames(self):
         return ["", ""]
 
+    def GetIdentifier(self):
+        return 0
+
+    def GetImage(self, paintElementType, width, height):
+        return PaintBuffer()
+
     def GetJavascriptBindings(self):
         return JavascriptBindings()
 
@@ -194,6 +194,9 @@ class Browser:
 
     def GetOuterWindowHandle(self):
         return 0
+
+    def GetSize(self, paintElementType):
+        return (0,0,)
 
     def GetUserData(self, key):
         return None
@@ -219,6 +222,9 @@ class Browser:
     def HidePopup(self):
         return None
 
+    def Invalidate(self, dirtyRect):
+        return None
+
     def IsFullscreen(self):
         return False
 
@@ -237,6 +243,24 @@ class Browser:
     def ReloadIgnoreCache(self):
         return None
 
+    def SendKeyEvent(self, keyType, keyInfo, modifiers):
+        return None
+
+    def SendMouseClickEvent(self, x, y, mouseButtonType, mouseUp, clickCount):
+        return None
+
+    def SendMouseMoveEvent(self, x, y, mouseLeave):
+        return None
+
+    def SendMouseWheelEvent(self, x, y, deltaX, deltaY):
+        return None
+
+    def SendFocusEvent(self, setFocus):
+        return None
+
+    def SendCaptureLostEvent(self):
+        return None
+
     def SetClientCallback(self, name, callback):
         return None
 
@@ -247,6 +271,9 @@ class Browser:
         return None
 
     def SetJavascriptBindings(self, javascriptBindings):
+        return None
+
+    def SetSize(self, paintElementType, width, height):
         return None
 
     def SetZoomLevel(self, zoomLevel):
@@ -371,9 +398,13 @@ class Response:
     def SetHeaderMultimap(self, headerMultimap=[]):
         return None
 
-#
-# JavascriptBindings class.
-#
+class PaintBuffer:
+
+    def GetIntPointer(self):
+        return 0
+
+    def GetString(self, mode="bgra", origin="top-left"):
+        return ""
 
 class JavascriptBindings:
 
@@ -395,10 +426,6 @@ class JavascriptBindings:
     def SetProperty(self, name, value):
         return None
 
-#
-# JavascriptCallback object.
-#
-
 class JavascriptCallback:
 
     def Call(self, param1, param2, param3_etc):
@@ -406,6 +433,28 @@ class JavascriptCallback:
 
     def GetName(self):
         return name
+
+class WindowUtils:
+
+    @staticmethod
+    def OnSetFocus(windowID, msg, wparam, lparam):
+        return 0
+
+    @staticmethod
+    def OnSize(windowID, msg, wparam, lparam):
+        return 0
+
+    @staticmethod
+    def OnEraseBackground(windowID, msg, wparam, lparam):
+        return 0
+
+    @staticmethod
+    def SetTitle(pyBrowser, pyTitle):
+        return None
+
+    @staticmethod
+    def SetIcon(pyBrowser, icon="inherit"):
+        return None
 
 #
 # DisplayHandler.
@@ -726,26 +775,39 @@ def LifespanHandler_OnBeforeClose(browser):
 def LifespanHandler_RunModal(browser):
     return False
 
-# WindowUtils class.
+#
+# RenderHandler
+#
 
-class WindowUtils:
+PET_VIEW = 0
+PET_POPUP = 0
 
-    @staticmethod
-    def OnSetFocus(windowID, msg, wparam, lparam):
-        return 0
+KEYTYPE_KEYUP = 0
+KEYTYPE_KEYDOWN = 0
+KEYTYPE_CHAR = 0
 
-    @staticmethod
-    def OnSize(windowID, msg, wparam, lparam):
-        return 0
+MOUSEBUTTON_LEFT = 0
+MOUSEBUTTON_MIDDLE = 0
+MOUSEBUTTON_RIGHT = 0
 
-    @staticmethod
-    def OnEraseBackground(windowID, msg, wparam, lparam):
-        return 0
+def RenderHandler_GetViewRect(browser, out_rect):
+    return False
 
-    @staticmethod
-    def SetTitle(pyBrowser, pyTitle):
-        return None
+def RenderHandler_GetScreenRect(browser, out_rect):
+    return False
 
-    @staticmethod
-    def SetIcon(pyBrowser, icon="inherit"):
-        return None
+def RenderHandler_GetScreenPoint(browser, viewX, viewY, out_screenCoordinates):
+    return False
+
+def RenderHandler_OnPopupShow(browser, show):
+    return None
+
+def RenderHandler_OnPopupSize(browser, rect):
+    return None
+
+def RenderHandler_OnPaint(browser, paintElementType, out_dirtyRects, 
+        paintBuffer):
+    return None
+
+def RenderHandler_OnCursorChange(browser, cursor):
+    return None

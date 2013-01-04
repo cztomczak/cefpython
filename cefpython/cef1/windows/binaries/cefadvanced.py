@@ -285,6 +285,10 @@ class ClientHandler:
         #        response.GetHeaderMultimap()))
 
     def OnUncaughtException(self, browser, frame, exception, stackTrace):
+        if not "cefadvanced.html" in frame.GetUrl():
+            # Exit application when javascript encountered
+            # only for the cefadvanced.html example.
+            return
         url = exception["scriptResourceName"]
         stackTrace = cefpython.FormatJavascriptStackTrace(stackTrace)
         if re.match(r"file:/+", url):
