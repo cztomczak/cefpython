@@ -57,6 +57,7 @@ def ExceptHook(type, value, traceObject):
 
 def CefSimple():
     sys.excepthook = ExceptHook
+    cefpython.g_debug = True
     cefpython.Initialize()
     wndproc = {
         win32con.WM_CLOSE: CloseWindow,
