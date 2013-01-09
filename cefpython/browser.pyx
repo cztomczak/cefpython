@@ -70,9 +70,9 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
                     pyBrowser.SetClientCallbacksDict(clientCallbacks)
                 IF CEF_VERSION == 1:
                     javascriptBindings = tempPyBrowser.GetJavascriptBindings()
-                    if javascriptBindings.GetBindToPopups():
-                        pyBrowser.SetJavascriptBindings(javascriptBindings)
-
+                    if javascriptBindings:
+                        if javascriptBindings.GetBindToPopups():
+                            pyBrowser.SetJavascriptBindings(javascriptBindings)
     return pyBrowser
 
 cpdef PyBrowser GetBrowserByWindowHandle(int windowHandle):
@@ -128,7 +128,8 @@ cdef class PyBrowser:
             if <void*>cefBrowserHost != NULL and cefBrowserHost.get():
                 return cefBrowserHost
             raise Exception("PyBrowser.GetCefBrowserHost() failed: this "
-                            "method can only be called in the browser process.")
+                            "method can only be called in the browser "
+                            "process.")
 
     def __init__(self):
         self.clientCallbacks = {}
