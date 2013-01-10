@@ -22,7 +22,8 @@ cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":
         cdef DWORD errorCode = GetLastError()
         return "Error Code = %d" % (errorCode)
-    return ""
+    ELSE:
+        return ""
 
 cpdef str GetNavigateUrl(py_string url):
     # Only local file paths: some.html, some/some.html, D:\, /var, file://
