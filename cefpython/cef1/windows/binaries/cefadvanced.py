@@ -363,10 +363,10 @@ class Python:
         print("python.Test1(%s) called" % arg1)
         return "This string was returned from python function python.Test1()"
 
-    def Test2(self, arg1, arg2):
-        print("python.Test2(%s, %s) called" % (arg1, arg2))
+    def Test2(self, arg1, arg2, arg3):
+        print("python.Test2(%s, '%s', '%s') called" % (arg1, arg2, arg3))
         # Testing nested return values.
-        return [1,2, [2.1, {'3': 3, '4': [5,6]}]]
+        return [1,2, [2.1, {'3': 3, '4': [5,6]}], '']
 
     def PrintPyConfig(self):
         print("python.PrintPyConfig(): %s" % (
