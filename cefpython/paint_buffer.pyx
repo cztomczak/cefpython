@@ -24,6 +24,8 @@ cdef class PaintBuffer:
         cdef py_bool dest_alloced = False
         cdef object ret
 
+        origin = origin.lower()
+        mode = mode.lower()
         assert origin in ("top-left", "bottom-left"), "Invalid origin"
         assert mode in ("bgra", "rgba"), "Invalid mode"
 

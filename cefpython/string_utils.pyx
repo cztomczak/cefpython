@@ -8,8 +8,12 @@ ELSE:
     cdef int wchar_t_size = 4
 
 cdef void CharToWidechar(char* charString, wchar_t* wideString, int wideSize):
-    cdef int copiedChars = MultiByteToWideChar(
+    cdef int copiedCharacters = MultiByteToWideChar(
             CP_UTF8, 0, charString, -1, wideString, wideSize)
+    # MultiByteToWideChar does not include the NULL character
+    # when 0 bytes are written.
+    if wideSize > 0 and copiedCharacters == 0:
+        wideString[0] = <wchar_t>0;
 
 cdef str CharToPyString(
         char* charString):
@@ -27,14 +31,16 @@ cdef str WidecharToPyString(
         wchar_t* wcharString):
     cdef int charBytes = WideCharToMultiByte(
             CP_UTF8, 0, wcharString, -1, NULL, 0, NULL, NULL)
+    assert charBytes > 0, "WideCharToMultiByte() returned 0"
 
-    # When CefString is an empty string, WideCharToMultiByte
-    # returns 0 bytes, it does not include the NUL character,
-    # so we need to use calloc instead of malloc.
-
-    cdef char* charString = <char*>calloc(charBytes, sizeof(char))
+    cdef char* charString = <char*>malloc(charBytes * sizeof(char))
     cdef int copiedBytes = WideCharToMultiByte(
             CP_UTF8, 0, wcharString, -1, charString, charBytes, NULL, NULL)
+
+    # WideCharToMultiByte does not include the NULL character
+    # when 0 bytes are written.
+    if copiedBytes == 0:
+        charString[0] = <char>0;
 
     cdef str pyString = CharToPyString(charString)
     free(charString)
