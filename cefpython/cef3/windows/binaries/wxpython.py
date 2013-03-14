@@ -15,7 +15,7 @@ try:
         raise Exception("Unsupported python version: %s" % sys.version)
 except ImportError:
     # Import from package (installer).
-    from cefpython1 import cefpython
+    from cefpython3 import cefpython
 
 import wx
 
@@ -56,14 +56,14 @@ class MainFrame(wx.Frame):
     browser = None
 
     def __init__(self):
-        wx.Frame.__init__(self, parent=None, id=wx.ID_ANY, 
+        wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
                 title='wxPython CEF 3 example', size=(1024,768))
         self.CreateMenu()
 
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(self.GetHandle())
-        self.browser = cefpython.CreateBrowserSync(windowInfo, 
-                browserSettings={}, 
+        self.browser = cefpython.CreateBrowserSync(windowInfo,
+                browserSettings={},
                 navigateUrl=GetApplicationPath("example.html"))
 
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
@@ -109,7 +109,8 @@ if __name__ == '__main__':
     settings["log_file"] = GetApplicationPath("debug.log")
     settings["log_severity"] = cefpython.LOGSEVERITY_INFO
     settings["release_dcheck_enabled"] = True # Enable only when debugging
-    settings["browser_subprocess_path"] = "subprocess"
+    settings["browser_subprocess_path"] = "%s/%s" % (
+            cefpython.GetModuleDirectory(), "subprocess")
     cefpython.Initialize(settings) # Initialize cefpython before wx.
 
     print('wx.version=%s' % wx.version())

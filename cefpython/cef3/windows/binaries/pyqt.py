@@ -15,7 +15,7 @@ try:
         raise Exception("Unsupported python version: %s" % sys.version)
 except ImportError:
     # Import from package (installer).
-    from cefpython1 import cefpython
+    from cefpython3 import cefpython
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -85,7 +85,7 @@ class MainFrame(QtGui.QWidget):
         super(MainFrame, self).__init__(parent)
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(int(self.winId()))
-        self.browser = cefpython.CreateBrowserSync(windowInfo, 
+        self.browser = cefpython.CreateBrowserSync(windowInfo,
                 browserSettings={},
                 navigateUrl=GetApplicationPath("example.html"))
         self.show()
@@ -130,7 +130,8 @@ if __name__ == '__main__':
     settings["log_file"] = GetApplicationPath("debug.log")
     settings["log_severity"] = cefpython.LOGSEVERITY_INFO
     settings["release_dcheck_enabled"] = True # Enable only when debugging
-    settings["browser_subprocess_path"] = "subprocess"
+    settings["browser_subprocess_path"] = "%s/%s" % (
+            cefpython.GetModuleDirectory(), "subprocess")
     cefpython.Initialize(settings)
 
     app = CefApplication(sys.argv)

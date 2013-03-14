@@ -15,7 +15,7 @@ try:
         raise Exception("Unsupported python version: %s" % sys.version)
 except ImportError:
     # Import from package (installer).
-    from cefpython1 import cefpython
+    from cefpython3 import cefpython
 
 import PySide
 from PySide import QtGui
@@ -147,7 +147,8 @@ if __name__ == '__main__':
     settings["log_file"] = GetApplicationPath("debug.log")
     settings["log_severity"] = cefpython.LOGSEVERITY_INFO
     settings["release_dcheck_enabled"] = True # Enable only when debugging
-    settings["browser_subprocess_path"] = "subprocess"
+    settings["browser_subprocess_path"] = "%s/%s" % (
+            cefpython.GetModuleDirectory(), "subprocess")
     cefpython.Initialize(settings)
 
     app = CefApplication(sys.argv)

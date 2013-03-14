@@ -100,7 +100,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../;c:\python27_32bit\include"
+				AdditionalIncludeDirectories="../;c:\python27\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
 				ExceptionHandling="1"
 				RuntimeLibrary="2"
