@@ -100,7 +100,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../;c:\python32_32bit\include"
+				AdditionalIncludeDirectories="../;c:\python32\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"

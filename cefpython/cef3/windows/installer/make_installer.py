@@ -19,7 +19,7 @@ def main():
     assert re.search(r"^v\d+$", args.version), "Invalid version string"
 
     vars = {}
-    vars["PACKAGE_NAME"] = "cefpython1"
+    vars["PACKAGE_NAME"] = "cefpython3"
     vars["APP_VERSION"] = args.version
     vars["PYTHON_VERSION"] = (str(sys.version_info.major) + "."
             + str(sys.version_info.minor))

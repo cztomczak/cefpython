@@ -17,7 +17,7 @@ try:
         raise Exception("Unsupported python version: %s" % sys.version)
 except ImportError:
     # Import from package (installer).
-    from cefpython1 import cefpython
+    from cefpython3 import cefpython
 
 import cefwindow
 import win32con
@@ -68,13 +68,14 @@ def InitDebugging():
 
 def CefAdvanced():
     sys.excepthook = ExceptHook
-    InitDebugging()    
+    InitDebugging()
 
     appSettings = dict()
     appSettings["log_file"] = GetApplicationPath("debug.log")
     appSettings["log_severity"] = cefpython.LOGSEVERITY_INFO
     appSettings["release_dcheck_enabled"] = True # Enable only when debugging
-    appSettings["browser_subprocess_path"] = "subprocess"
+    appSettings["browser_subprocess_path"] = "%s/%s" % (
+            cefpython.GetModuleDirectory(), "subprocess")
     cefpython.Initialize(appSettings)
 
     wndproc = {
@@ -93,7 +94,7 @@ def CefAdvanced():
                     width=1024, height=768, icon="icon.ico", windowProc=wndproc)
     windowInfo = cefpython.WindowInfo()
     windowInfo.SetAsChild(windowHandle)
-    browser = cefpython.CreateBrowserSync(windowInfo, browserSettings, 
+    browser = cefpython.CreateBrowserSync(windowInfo, browserSettings,
             navigateUrl=GetApplicationPath("example.html"))
     cefpython.MessageLoop()
     cefpython.Shutdown()

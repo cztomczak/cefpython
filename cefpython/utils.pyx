@@ -47,3 +47,15 @@ IF CEF_VERSION == 1:
             # and (KEY_SHIFT & modifiers) != KEY_SHIFT
             return ((KEY_SHIFT  | KEY_CTRL | KEY_ALT) & modifiers) == 0
         return (key & modifiers) == key
+
+cpdef str GetModuleDirectory():
+    import re, os
+    if hasattr(sys, "frozen"):
+        path = os.path.dirname(sys.executable)
+    elif "__file__" in globals():
+        path = os.path.dirname(os.path.realpath(__file__))
+    else:
+        path = os.getcwd()
+    path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+    path = re.sub(r"[/\\]+$", "", path)
+    return str(path)

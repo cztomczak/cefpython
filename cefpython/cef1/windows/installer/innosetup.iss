@@ -2,19 +2,19 @@
 
 [Setup]
 
-AppName = CEF Python 1
-AppVersion = 0.52
-AppVerName = CEF Python 1 version 0.52 for Python 2.7 32bit
+AppName = CEF Python 1 for Python 2.7
+AppVersion = v52
+AppVerName = CEF Python 1 version v52 for Python 2.7 32bit
 
 AppPublisher = Czarek Tomczak
 AppPublisherURL = http://code.google.com/cefpython/
 AppSupportURL = https://groups.google.com/group/cefpython?hl=en
 AppUpdatesURL = http://code.google.com/cefpython/
-AppCopyright = Copyright 2012 Czarek Tomczak
+AppCopyright = Copyright 2012-2013 Czarek Tomczak
 
 DefaultDirName = {code:GetInstallDir|c:\Python}
 
-DefaultGroupName = CEF Python 1
+DefaultGroupName = CEF Python 1 for Python 2.7
 PrivilegesRequired = none
 DisableStartupPrompt = yes
 Compression = zip
@@ -28,7 +28,7 @@ UsePreviousGroup = yes
 
 SourceDir = C:\cefpython\cefpython-src\cefpython\cef1\windows\binaries
 OutputDir = C:\cefpython\cefpython-src\cefpython\cef1\windows\installer\Output
-OutputBaseFilename = cefpython1_v0.52_win32_installer
+OutputBaseFilename = cefpython1_v52_py27_win32_installer
 
 UninstallFilesDir = {app}\cefpython1
 LicenseFile = C:\cefpython\cefpython-src\cefpython\cef1\windows\binaries\LICENSE.txt
@@ -51,6 +51,8 @@ Source: "C:\cefpython\cefpython-src\cefpython\cef1\windows\installer\__init__.py
 Source: "cefclient.exe"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
 Source: "cefpython_py27.py"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
 Source: "cefpython_py27.pyd"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
+Source: "cefpython_py32.py"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
+Source: "cefpython_py32.pyd"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
 Source: "LICENSE.txt"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
 Source: "Microsoft.VC90.CRT.manifest"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
 Source: "README.txt"; DestDir: "{app}\cefpython1"; Flags: ignoreversion;
