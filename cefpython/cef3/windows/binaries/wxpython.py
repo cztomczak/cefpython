@@ -19,6 +19,13 @@ except ImportError:
 
 import wx
 
+# Which method to use for message loop processing.
+#   EVT_IDLE - wx application has priority (default)
+#   EVT_TIMER - cef browser has priority
+# From the tests it seems that Flash content behaves
+# better when using a timer.
+USE_EVT_IDLE = True
+
 def GetApplicationPath(file=None):
     import re, os
     # If file is None return current directory without trailing slash.
@@ -69,7 +76,9 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.Bind(wx.EVT_IDLE, self.OnIdle)
+        if USE_EVT_IDLE:
+            # Bind EVT_IDLE only for the main application frame.
+            self.Bind(wx.EVT_IDLE, self.OnIdle)
 
     def CreateMenu(self):
         filemenu = wx.Menu()
@@ -96,12 +105,34 @@ class MainFrame(wx.Frame):
         cefpython.MessageLoopWork()
 
 class MyApp(wx.App):
+    timer = None
+    timerID = 1
 
     def OnInit(self):
+        if not USE_EVT_IDLE:
+            self.CreateTimer()
         frame = MainFrame()
         self.SetTopWindow(frame)
         frame.Show()
         return True
+
+    def CreateTimer(self):
+        # See "Making a render loop":
+        # http://wiki.wxwidgets.org/Making_a_render_loop
+        # Another approach is to use EVT_IDLE in MainFrame,
+        # see which one fits you better.
+        self.timer = wx.Timer(self, self.timerID)
+        self.timer.Start(10) # 10ms
+        wx.EVT_TIMER(self, self.timerID, self.OnTimer)
+
+    def OnTimer(self, event):
+        cefpython.SingleMessageLoop()
+
+    def OnExit(self):
+        # When app.MainLoop() returns, MessageLoopWork() should
+        # not be called anymore.
+        if not USE_EVT_IDLE:
+            self.timer.Stop()
 
 if __name__ == '__main__':
     sys.excepthook = ExceptHook

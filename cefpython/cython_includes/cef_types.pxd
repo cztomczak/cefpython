@@ -169,3 +169,9 @@ cdef extern from "include/internal/cef_types.h":
             MBT_MIDDLE,
             MBT_RIGHT,
 
+    IF CEF_VERSION == 3:
+
+        ctypedef enum cef_state_t:
+            STATE_DEFAULT = 0,
+            STATE_ENABLED,
+            STATE_DISABLED,
