@@ -47,7 +47,7 @@ Filename: "{app}\%(PACKAGE_NAME)s\examples"; Flags: postinstall shellexec;
 Source: "*.dll"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
 Source: "*.pak"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
 Source: "locales\*.pak"; DestDir: "{app}\%(PACKAGE_NAME)s\locales"; Flags: ignoreversion;
-Source: "%(INSTALLER_DIR)s\__init__.py.install"; DestDir: "{app}\%(PACKAGE_NAME)s"; DestName: "__init__.py"; Flags: ignoreversion;
+Source: "%(INSTALLER_DIR)s\__init__.py.generated"; DestDir: "{app}\%(PACKAGE_NAME)s"; DestName: "__init__.py"; Flags: ignoreversion;
 Source: "cefclient.exe"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
 Source: "cefpython_py27.pyd"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
 Source: "cefpython_py32.pyd"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
