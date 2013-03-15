@@ -45,29 +45,36 @@ class CefClient;
 
 ///
 // Implement this interface to handle events related to browser life span. The
-// methods of this class will be called on the UI thread.
+// methods of this class will be called on the UI thread unless otherwise
+// indicated.
 ///
 /*--cef(source=client)--*/
 class CefLifeSpanHandler : public virtual CefBase {
  public:
   ///
-  // Called before a new popup window is created. The |parentBrowser| parameter
-  // will point to the parent browser window. The |popupFeatures| parameter will
-  // contain information about the style of popup window requested. Return false
-  // to have the framework create the new popup window based on the parameters
-  // in |windowInfo|. Return true to cancel creation of the popup window. By
-  // default, a newly created popup window will have the same client and
-  // settings as the parent window. To change the client for the new window
-  // modify the object that |client| points to. To change the settings for the
-  // new window modify the |settings| structure.
-  ///
-  /*--cef(optional_param=url)--*/
-  virtual bool OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
+  // Called on the IO thread before a new popup window is created. The |browser|
+  // and |frame| parameters represent the source of the popup request. The
+  // |target_url| and |target_frame_name| values may be empty if none were
+  // specified with the request. The |popupFeatures| structure contains
+  // information about the requested popup window. To allow creation of the
+  // popup window optionally modify |windowInfo|, |client|, |settings| and
+  // |no_javascript_access| and return false. To cancel creation of the popup
+  // window return true. The |client| and |settings| values will default to the
+  // source browser's values. The |no_javascript_access| value indicates whether
+  // the new browser window should be scriptable and in the same process as the
+  // source browser.
+  /*--cef(optional_param=target_url,optional_param=target_frame_name)--*/
+  virtual bool OnBeforePopup(CefRefPtr<CefBrowser> browser,
+                             CefRefPtr<CefFrame> frame,
+                             const CefString& target_url,
+                             const CefString& target_frame_name,
                              const CefPopupFeatures& popupFeatures,
                              CefWindowInfo& windowInfo,
-                             const CefString& url,
                              CefRefPtr<CefClient>& client,
-                             CefBrowserSettings& settings) { return false; }
+                             CefBrowserSettings& settings,
+                             bool* no_javascript_access) {
+    return false;
+  }
 
   ///
   // Called after a new window is created.

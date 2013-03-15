@@ -2,6 +2,10 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+# More options/flags can be specified for Chromium through
+# CefApp::OnBeforeCommandLineProcessing(), see comment 10 by Marshall:
+# https://code.google.com/p/chromiumembedded/issues/detail?id=878#c10
+
 IF CEF_VERSION == 3:
     LOGSEVERITY_DEFAULT = cef_types.LOGSEVERITY_DEFAULT
 LOGSEVERITY_VERBOSE = cef_types.LOGSEVERITY_VERBOSE
@@ -125,8 +129,6 @@ cdef void SetApplicationSettings(
                 cefString = new CefString(&cefAppSettings.javascript_flags)
                 PyToCefStringPointer(appSettings[key], cefString)
                 del cefString
-            elif key == "auto_detect_proxy_settings_enabled":
-                cefAppSettings.auto_detect_proxy_settings_enabled = bool(appSettings[key])
             elif key == "resources_dir_path":
                 cefString = new CefString(&cefAppSettings.resources_dir_path)
                 PyToCefStringPointer(appSettings[key], cefString)
@@ -319,85 +321,159 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.minimum_font_size = <int>int(browserSettings[key])
             elif key == "minimum_logical_font_size":
                 cefBrowserSettings.minimum_logical_font_size = <int>int(browserSettings[key])
-            elif key == "remote_fonts_disabled":
-                cefBrowserSettings.remote_fonts_disabled = bool(browserSettings[key])
             elif key == "default_encoding":
                 cefString = new CefString(&cefBrowserSettings.default_encoding)
                 PyToCefStringPointer(browserSettings[key], cefString)
                 del cefString
-            elif key == "encoding_detector_enabled":
-                cefBrowserSettings.encoding_detector_enabled = bool(browserSettings[key])
-            elif key == "javascript_disabled":
-                cefBrowserSettings.javascript_disabled = bool(browserSettings[key])
-            elif key == "javascript_open_windows_disallowed":
-                cefBrowserSettings.javascript_open_windows_disallowed = bool(browserSettings[key])
-            elif key == "javascript_close_windows_disallowed":
-                cefBrowserSettings.javascript_close_windows_disallowed = bool(browserSettings[key])
-            elif key == "javascript_access_clipboard_disallowed":
-                cefBrowserSettings.javascript_access_clipboard_disallowed = bool(browserSettings[key])
-            elif key == "dom_paste_disabled":
-                cefBrowserSettings.dom_paste_disabled = bool(browserSettings[key])
-            elif key == "caret_browsing_enabled":
-                cefBrowserSettings.caret_browsing_enabled = bool(browserSettings[key])
-            elif key == "java_disabled":
-                cefBrowserSettings.java_disabled = bool(browserSettings[key])
-            elif key == "plugins_disabled":
-                cefBrowserSettings.plugins_disabled = bool(browserSettings[key])
-            elif key == "universal_access_from_file_urls_allowed":
-                cefBrowserSettings.universal_access_from_file_urls_allowed = bool(browserSettings[key])
-            elif key == "file_access_from_file_urls_allowed":
-                cefBrowserSettings.file_access_from_file_urls_allowed = bool(browserSettings[key])
-            elif key == "web_security_disabled":
-                cefBrowserSettings.web_security_disabled = bool(browserSettings[key])
-            elif key == "xss_auditor_enabled":
-                cefBrowserSettings.xss_auditor_enabled = bool(browserSettings[key])
-            elif key == "image_load_disabled":
-                cefBrowserSettings.image_load_disabled = bool(browserSettings[key])
-            elif key == "shrink_standalone_images_to_fit":
-                cefBrowserSettings.shrink_standalone_images_to_fit = bool(browserSettings[key])
-            elif key == "site_specific_quirks_disabled":
-                cefBrowserSettings.site_specific_quirks_disabled = bool(browserSettings[key])
-            elif key == "text_area_resize_disabled":
-                cefBrowserSettings.text_area_resize_disabled = bool(browserSettings[key])
-            elif key == "page_cache_disabled":
-                cefBrowserSettings.page_cache_disabled = bool(browserSettings[key])
-            elif key == "tab_to_links_disabled":
-                cefBrowserSettings.tab_to_links_disabled = bool(browserSettings[key])
-            elif key == "hyperlink_auditing_disabled":
-                cefBrowserSettings.hyperlink_auditing_disabled = bool(browserSettings[key])
-            elif key == "user_style_sheet_enabled":
-                cefBrowserSettings.user_style_sheet_enabled = bool(browserSettings[key])
             elif key == "user_style_sheet_location":
                 cefString = new CefString(&cefBrowserSettings.user_style_sheet_location)
                 PyToCefStringPointer(browserSettings[key], cefString)
                 del cefString
+            elif key == "remote_fonts_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.remote_fonts = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.remote_fonts = cef_types.STATE_ENABLED
+            elif key == "javascript_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.javascript = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.javascript = cef_types.STATE_ENABLED
+            elif key == "javascript_open_windows_disallowed":
+                if browserSettings[key]:
+                    cefBrowserSettings.javascript_open_windows = (
+                            cef_types.STATE_DISABLED)
+                else:
+                    cefBrowserSettings.javascript_open_windows = (
+                            cef_types.STATE_ENABLED)
+            elif key == "javascript_close_windows_disallowed":
+                if browserSettings[key]:
+                    cefBrowserSettings.javascript_close_windows = (
+                            cef_types.STATE_DISABLED)
+                else:
+                    cefBrowserSettings.javascript_close_windows = (
+                            cef_types.STATE_ENABLED)
+            elif key == "javascript_access_clipboard_disallowed":
+                if browserSettings[key]:
+                    cefBrowserSettings.javascript_access_clipboard = (
+                            cef_types.STATE_DISABLED)
+                else:
+                    cefBrowserSettings.javascript_access_clipboard = (
+                            cef_types.STATE_ENABLED)
+            elif key == "dom_paste_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.javascript_dom_paste = (
+                            cef_types.STATE_DISABLED)
+                else:
+                    cefBrowserSettings.javascript_dom_paste = (
+                            cef_types.STATE_ENABLED)
+            elif key == "caret_browsing_enabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.caret_browsing = (
+                            cef_types.STATE_ENABLED)
+                else:
+                    cefBrowserSettings.caret_browsing = (
+                            cef_types.STATE_DISABLED)
+            elif key == "java_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.java = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.java = cef_types.STATE_ENABLED
+            elif key == "plugins_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.plugins = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.plugins = cef_types.STATE_ENABLED
+            elif key == "universal_access_from_file_urls_allowed":
+                if browserSettings[key]:
+                    cefBrowserSettings.universal_access_from_file_urls = (
+                            cef_types.STATE_ENABLED)
+                else:
+                    cefBrowserSettings.universal_access_from_file_urls = (
+                            cef_types.STATE_DISABLED)
+            elif key == "file_access_from_file_urls_allowed":
+                if browserSettings[key]:
+                    cefBrowserSettings.file_access_from_file_urls = (
+                            cef_types.STATE_ENABLED)
+                else:
+                    cefBrowserSettings.file_access_from_file_urls = (
+                            cef_types.STATE_DISABLED)
+            elif key == "web_security_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.web_security = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.web_security = cef_types.STATE_ENABLED
+            elif key == "image_load_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.image_loading = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.image_loading = cef_types.STATE_ENABLED
+            elif key == "shrink_standalone_images_to_fit":
+                if browserSettings[key]:
+                    cefBrowserSettings.image_shrink_standalone_to_fit = (
+                            cef_types.STATE_ENABLED)
+                else:
+                    cefBrowserSettings.image_shrink_standalone_to_fit = (
+                            cef_types.STATE_DISABLED)
+            elif key == "text_area_resize_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.text_area_resize = (
+                            cef_types.STATE_DISABLED)
+                else:
+                    cefBrowserSettings.text_area_resize = (
+                            cef_types.STATE_ENABLED)
+            elif key == "page_cache_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.page_cache = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.page_cache = cef_types.STATE_ENABLED
+            elif key == "tab_to_links_disabled":
+                if browserSettings[key]:
+                    cefBrowserSettings.tab_to_links = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.tab_to_links = cef_types.STATE_ENABLED
             elif key == "author_and_user_styles_disabled":
-                cefBrowserSettings.author_and_user_styles_disabled = bool(browserSettings[key])
+                if browserSettings[key]:
+                    cefBrowserSettings.author_and_user_styles = (
+                            cef_types.STATE_DISABLED)
+                else:
+                    cefBrowserSettings.author_and_user_styles = (
+                            cef_types.STATE_ENABLED)
             elif key == "local_storage_disabled":
-                cefBrowserSettings.local_storage_disabled = bool(browserSettings[key])
+                if browserSettings[key]:
+                    cefBrowserSettings.local_storage = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.local_storage = cef_types.STATE_ENABLED
             elif key == "databases_disabled":
-                cefBrowserSettings.databases_disabled = bool(browserSettings[key])
+                if browserSettings[key]:
+                    cefBrowserSettings.databases = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.databases = cef_types.STATE_ENABLED
             elif key == "application_cache_disabled":
-                cefBrowserSettings.application_cache_disabled = bool(browserSettings[key])
+                if browserSettings[key]:
+                    cefBrowserSettings.application_cache = (
+                            cef_types.STATE_DISABLED)
+                else:
+                    cefBrowserSettings.application_cache = (
+                            cef_types.STATE_ENABLED)
             elif key == "webgl_disabled":
-                cefBrowserSettings.webgl_disabled = bool(browserSettings[key])
+                if browserSettings[key]:
+                    cefBrowserSettings.webgl = cef_types.STATE_DISABLED
+                else:
+                    cefBrowserSettings.webgl = cef_types.STATE_ENABLED
             elif key == "accelerated_compositing_disabled":
-                cefBrowserSettings.accelerated_compositing_disabled = bool(browserSettings[key])
-            elif key == "accelerated_layers_disabled":
-                cefBrowserSettings.accelerated_layers_disabled = bool(browserSettings[key])
-            elif key == "accelerated_video_disabled":
-                cefBrowserSettings.accelerated_video_disabled = bool(browserSettings[key])
-            elif key == "accelerated_2d_canvas_disabled":
-                cefBrowserSettings.accelerated_2d_canvas_disabled = bool(browserSettings[key])
-            elif key == "accelerated_painting_enabled":
-                cefBrowserSettings.accelerated_painting_enabled = bool(browserSettings[key])
-            elif key == "accelerated_filters_disabled":
-                cefBrowserSettings.accelerated_filters_enabled = bool(browserSettings[key])
-            elif key == "accelerated_plugins_enabled":
-                cefBrowserSettings.accelerated_plugins_disabled = bool(browserSettings[key])
+                if browserSettings[key]:
+                    cefBrowserSettings.accelerated_compositing = (
+                            cef_types.STATE_DISABLED)
+                else:
+                    cefBrowserSettings.accelerated_compositing = (
+                            cef_types.STATE_ENABLED)
             elif key == "developer_tools_disabled":
-                cefBrowserSettings.developer_tools_disabled = bool(browserSettings[key])
-            elif key == "fullscreen_enabled":
-                cefBrowserSettings.fullscreen_enabled = bool(browserSettings[key])
+                if browserSettings[key]:
+                    cefBrowserSettings.developer_tools = (
+                            cef_types.STATE_DISABLED)
+                else:
+                    cefBrowserSettings.developer_tools = (
+                            cef_types.STATE_ENABLED)
             else:
                 raise Exception("Invalid browserSettings key: %s" % key)

@@ -144,4 +144,5 @@ class WindowUtils:
     def IsWindowHandle(int windowHandle):
         IF UNAME_SYSNAME == "Windows":
             return bool(IsWindow(<HWND>windowHandle))
-        return False
+        ELSE:
+            return False
