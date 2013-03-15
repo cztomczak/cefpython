@@ -9,7 +9,7 @@ if "INNO5" in os.environ:
     ISCC = os.environ["INNO5"]
 
 TEMPLATE_FILE = os.getcwd()+r"\innosetup.template"
-ISS_FILE = os.getcwd()+r"\innosetup.iss"
+ISS_FILE = os.getcwd()+r"\innosetup.generated"
 
 def main():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]")
@@ -45,7 +45,7 @@ def main():
     print("Saved: %s" % ISS_FILE)
 
     initPyTemplate = os.getcwd()+r"\__init__.py.template"
-    initPyInstall = os.getcwd()+r"\__init__.py.install"
+    initPyInstall = os.getcwd()+r"\__init__.py.generated"
 
     f = open(initPyTemplate)
     initPyTemplateCode = f.read()
