@@ -464,5 +464,12 @@ class Python:
         else:
             return "Unicode string can be tested only in python 2.x"
 
+    def TransparentPopup(self):
+        windowInfo = cefpython.WindowInfo()
+        windowInfo.SetAsPopup(self.browser.GetWindowHandle(), "transparent")
+        windowInfo.SetTransparentPainting(True)
+        cefpython.CreateBrowserSync(windowInfo, browserSettings={},
+                navigateUrl=GetApplicationPath("cefsimple.html"))
+
 if __name__ == "__main__":
     CefAdvanced()
