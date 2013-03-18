@@ -432,7 +432,7 @@ cdef class PyBrowser:
                 self.gwlStyle = GetWindowLong(hwnd, GWL_STYLE)
                 self.gwlExStyle = GetWindowLong(hwnd, GWL_EXSTYLE)
                 GetWindowRect(hwnd, &rect)
-                self.windowRect = (rect.left, rect.top, 
+                self.windowRect = (rect.left, rect.top,
                                   rect.right, rect.bottom)
 
             cdef int removeStyle, removeExStyle
@@ -456,7 +456,7 @@ cdef class PyBrowser:
                     top = monitorInfo.rcMonitor.top
                     right = monitorInfo.rcMonitor.right
                     bottom = monitorInfo.rcMonitor.bottom
-                    SetWindowPos(hwnd, NULL, 
+                    SetWindowPos(hwnd, NULL,
                             left, top, right-left, bottom-top,
                             SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
             else:
@@ -490,7 +490,7 @@ cdef class PyBrowser:
             if ret:
                 return (width, height)
             else:
-                return ()
+                return (0, 0)
 
         cpdef py_void SetSize(self, PaintElementType paintElementType,
                               int width, int height):

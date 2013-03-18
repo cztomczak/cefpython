@@ -1,7 +1,7 @@
 # CEF off-screen rendering using the Panda3D game engine:
 # http://www.panda3d.org/
 
-# You need panda3D runtime that is compatible with python 2.7,
+# You need panda3D SDK that is compatible with python 2.7,
 # version 1.8.0 comes by default with python 2.7.
 
 # To use custom python (not the one provided with the SDK)
@@ -327,7 +327,12 @@ class ClientHandler:
     def OnPaint(self, browser, paintElementType, dirtyRects, buffer):
         (width, height) = self.browser.GetSize(paintElementType)
         img = self.texture.modifyRamImage()
-        img.setData(buffer.GetString(mode="bgra", origin="bottom-left"))
+        if paintElementType == cefpython.PET_POPUP:
+            print("width=%s, height=%s" % (width, height))
+        elif paintElementType == cefpython.PET_VIEW:
+            img.setData(buffer.GetString(mode="bgra", origin="bottom-left"))
+        else:
+            raise Exception("Unknown paintElementType: %s" % paintElementType)
 
     def GetViewRect(self, browser, rect):
         return False

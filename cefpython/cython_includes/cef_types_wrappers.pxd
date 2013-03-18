@@ -6,7 +6,8 @@ include "compile_time_constants.pxi"
 
 from libcpp cimport bool as cpp_bool
 from cef_string cimport cef_string_t
-from cef_types cimport cef_state_t
+IF CEF_VERSION == 3:
+      from cef_types cimport cef_state_t
 
 cdef extern from "include/internal/cef_types_wrappers.h":
 
