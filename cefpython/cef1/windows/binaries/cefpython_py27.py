@@ -41,6 +41,9 @@ def QuitMessageLoop():
 def Shutdown():
     return None
 
+def GetModuleDirectory():
+    return ""
+
 #
 # Settings
 #
@@ -805,7 +808,7 @@ def RenderHandler_OnPopupShow(browser, show):
 def RenderHandler_OnPopupSize(browser, rect):
     return None
 
-def RenderHandler_OnPaint(browser, paintElementType, out_dirtyRects, 
+def RenderHandler_OnPaint(browser, paintElementType, out_dirtyRects,
         paintBuffer):
     return None
 
