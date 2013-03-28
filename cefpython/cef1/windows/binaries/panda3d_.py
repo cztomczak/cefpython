@@ -16,6 +16,8 @@
 
 # TODO: fix the blurriness of the browser when window is resized.
 
+TEST_TRANSPARENCY = False
+
 import platform
 if platform.architecture()[0] != "32bit":
     raise Exception("Only 32bit architecture is supported")
@@ -37,6 +39,7 @@ from pandac.PandaModules import loadPrcFileData
 loadPrcFileData("", "Panda3D example")
 loadPrcFileData("", "fullscreen 0")
 loadPrcFileData("", "win-size 1024 768")
+from pandac.PandaModules import TransparencyAttrib
 
 import direct.directbase.DirectStart
 from panda3d.core import *
@@ -105,11 +108,15 @@ class World(DirectObject):
         node = cardMaker.generate()
         self.nodePath = render2d.attachNewNode(node)
         self.nodePath.setTexture(self.texture)
+        if TEST_TRANSPARENCY:
+            self.nodePath.setTransparency(TransparencyAttrib.MAlpha)
         self.nodePath.setHpr(0, 0, 5)
 
         windowHandle = base.win.getWindowHandle().getIntHandle()
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsOffscreen(windowHandle)
+        if TEST_TRANSPARENCY:
+            windowInfo.SetTransparentPainting(True)
 
         # By default window rendering is 30 fps, let's change
         # it to 60 for better user experience when scrolling.
