@@ -11,24 +11,6 @@ Options.fast_fail = True
 # Written to cython_includes/compile_time_constants.pxi
 CEF_VERSION = 1
 
-"""
-Building libcef_dll_wrapper
----------------------------
-
-libcef_dll_wrapper needs to be compiled with /MD, otherwise you get linker errors
-of type "already defined". When you try to compile using /MD you may get warnings:
-
-  warning C4275: non dll-interface class 'stdext::exception' used as base for
-  dll-interface class 'std::bad_typeid' see declaration of 'stdext::exception'
-  see declaration of 'std::bad_typeid'
-
-Which results in build errors. To solve it you need to add command line option:
-
-  -D_HAS_EXCEPTIONS=1
-
-Enabling C++ exceptions ("/EHsc") is not required.
-"""
-
 # Python version string: "27" or "32".
 PYTHON_VERSION = str(sys.version_info.major) + str(sys.version_info.minor)
 
@@ -51,34 +33,30 @@ ext_modules = [Extension(
     language='c++',
     include_dirs=[r'./../', r'./../../', r'./../../../', r'./../../../cython_includes/'],
 
+    # http_authentication not implemented on Linux.
     library_dirs=[
         r'./',
-        r"c:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x86/",
-        r'./../../http_authentication/Release/',
         r'./../../v8function_handler/Release_py%s/' % PYTHON_VERSION,
         r'./../../client_handler/Release_py%s/' % PYTHON_VERSION,
-        r'./../../../cpp_utils/Release/cpp_utils.lib',
+        r'./../../../cpp_utils/Release/',
     ],
 
     libraries=[
-        'libcef',
         'libcef_dll_wrapper',
-        'User32',
-        'Gdi32',
-        'http_authentication', # Build with /MD.
         'v8function_handler_py%s' % PYTHON_VERSION, # Build with /MD.
-        'client_handler_py%s' % PYTHON_VERSION # Build with /MD.
+        'client_handler_py%s' % PYTHON_VERSION, # Build with /MD.
+        'cpp_utils'
     ],
 
     # /EHsc - using STL string, multimap and others that use C++ exceptions.
-    extra_compile_args=['/EHsc'],
+    extra_compile_args=[],
 
     # '/ignore:4217' - silence warnings: "locally defined symbol _V8FunctionHandler_Execute
     #                  imported in function "public: virtual bool __thiscall V8FunctionHandler::Execute".
     #                  client_handler or other vcprojects include setup/cefpython.h,
     #                  this is a list of functions with "public" statement that is
     #                  accessible from c++.
-    extra_link_args=['/ignore:4217'],
+    extra_link_args=[],
 
     # Defining macros:
     # define_macros = [("UNICODE","1"), ("_UNICODE","1"), ]
