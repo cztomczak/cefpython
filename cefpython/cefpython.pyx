@@ -42,18 +42,24 @@ include "imports.pyx"
 
 include "utils.pyx"
 include "string_utils.pyx"
+IF UNAME_SYSNAME == "Windows":
+    include "string_utils_win.pyx"
 
 include "window_info.pyx"
 include "browser.pyx"
 include "frame.pyx"
 
 include "settings.pyx"
-include "paint_buffer.pyx"
+IF UNAME_SYSNAME == "Windows":
+    # Off-screen rendering currently supported only on Windows
+    include "paint_buffer.pyx"
 
 IF UNAME_SYSNAME == "Windows":
     include "window_utils_win.pyx"
     IF CEF_VERSION == 1:
         include "http_authentication_win.pyx"
+ELIF UNAME_SYSNAME == "Linux":
+    include "window_utils_linux.pyx"
 
 IF CEF_VERSION == 1:
     include "load_handler.pyx"
@@ -63,7 +69,9 @@ IF CEF_VERSION == 1:
     include "response.pyx"
     include "display_handler.pyx"
     include "lifespan_handler.pyx"
-    include "render_handler.pyx"
+    IF UNAME_SYSNAME == "Windows":
+        # Off-screen rendering currently supported only on Windows.
+        include "render_handler.pyx"
 
 IF CEF_VERSION == 1:
     include "v8context_handler.pyx"
@@ -150,7 +158,7 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
         Debug("CefBrowser::CreateBrowserSync() succeeded")
 
     cdef PyBrowser pyBrowser = GetPyBrowser(cefBrowser)
-    pyBrowser.SetUserData("__outerWindowHandle", windowInfo.parentWindowHandle)
+    pyBrowser.SetUserData("__outerWindowHandle", int(windowInfo.parentWindowHandle))
 
     return pyBrowser
 

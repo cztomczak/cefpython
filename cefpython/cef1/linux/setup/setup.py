@@ -31,7 +31,19 @@ ext_modules = [Extension(
     ["cefpython.pyx"],
 
     language='c++',
-    include_dirs=[r'./../', r'./../../', r'./../../../', r'./../../../cython_includes/'],
+    include_dirs=[
+        r'./../', 
+        r'./../../', 
+        r'./../../../', 
+        r'./../../../cython_includes/',
+        '/usr/include/gtk-2.0', 
+        '/usr/include/glib-2.0', 
+        '/usr/lib/i386-linux-gnu/gtk-2.0/include',
+        '/usr/lib/i386-linux-gnu/glib-2.0/include',
+        '/usr/include/cairo',
+        '/usr/include/pango-1.0',
+        '/usr/include/gdk-pixbuf-2.0',
+        '/usr/include/atk-1.0'],
 
     # http_authentication not implemented on Linux.
     library_dirs=[
@@ -42,7 +54,7 @@ ext_modules = [Extension(
     ],
 
     libraries=[
-        'libcef_dll_wrapper',
+        'cef_dll_wrapper',
         'v8function_handler',
         'client_handler',
         'cpp_utils'

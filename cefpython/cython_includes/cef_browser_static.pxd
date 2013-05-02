@@ -7,6 +7,8 @@ include "compile_time_constants.pxi"
 from cef_ptr cimport CefRefPtr
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo
+ELIF UNAME_SYSNAME == "Linux":
+    from cef_linux cimport CefWindowHandle, CefWindowInfo
 from cef_client cimport CefClient
 from cef_types_wrappers cimport CefBrowserSettings
 from cef_browser cimport CefBrowser

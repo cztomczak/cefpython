@@ -59,6 +59,7 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
     cdef dict clientCallbacks
     IF CEF_VERSION == 1:
         cdef JavascriptBindings javascriptBindings
+    cdef PyBrowser tempPyBrowser
 
     if pyBrowser.IsPopup() and (
     not pyBrowser.GetUserData("__outerWindowHandle")):
@@ -75,12 +76,12 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
                             pyBrowser.SetJavascriptBindings(javascriptBindings)
     return pyBrowser
 
-cpdef PyBrowser GetBrowserByWindowHandle(int windowHandle):
+cpdef PyBrowser GetBrowserByWindowHandle(WindowHandle windowHandle):
     cdef PyBrowser pyBrowser
     for browserId in g_pyBrowsers:
         pyBrowser = g_pyBrowsers[browserId]
         if (pyBrowser.GetWindowHandle() == windowHandle or
-                pyBrowser.GetUserData("__outerWindowHandle") == windowHandle):
+                pyBrowser.GetUserData("__outerWindowHandle") == int(windowHandle)):
             return pyBrowser
     return None
 
@@ -292,17 +293,17 @@ cdef class PyBrowser:
     cpdef PyFrame GetMainFrame(self):
         return GetPyFrame(self.GetCefBrowser().get().GetMainFrame())
 
-    cpdef int GetOpenerWindowHandle(self) except *:
-        cdef HWND hwnd
+    cpdef WindowHandle GetOpenerWindowHandle(self) except *:
+        cdef WindowHandle hwnd
         IF CEF_VERSION == 1:
-            hwnd = self.GetCefBrowser().get().GetOpenerWindowHandle()
+            hwnd = <int>self.GetCefBrowser().get().GetOpenerWindowHandle()
         ELIF CEF_VERSION == 3:
-            hwnd = self.GetCefBrowserHost().get().GetOpenerWindowHandle()
-        return <int>hwnd
+            hwnd = <int>self.GetCefBrowserHost().get().GetOpenerWindowHandle()
+        return hwnd
 
-    cpdef int GetOuterWindowHandle(self) except *:
+    cpdef WindowHandle GetOuterWindowHandle(self) except *:
         if self.GetUserData("__outerWindowHandle"):
-            return int(self.GetUserData("__outerWindowHandle"))
+            return <int>self.GetUserData("__outerWindowHandle")
         else:
             return self.GetWindowHandle()
 
@@ -311,13 +312,13 @@ cdef class PyBrowser:
             return self.userData[key]
         return None
 
-    cpdef int GetWindowHandle(self) except *:
-        cdef HWND hwnd
+    cpdef WindowHandle GetWindowHandle(self) except *:
+        cdef WindowHandle hwnd
         IF CEF_VERSION == 1:
-            hwnd = self.GetCefBrowser().get().GetWindowHandle()
+            hwnd = <int>self.GetCefBrowser().get().GetWindowHandle()
         ELIF CEF_VERSION == 3:
-            hwnd = self.GetCefBrowserHost().get().GetWindowHandle()
-        return <int>hwnd
+            hwnd = <int>self.GetCefBrowserHost().get().GetWindowHandle()
+        return hwnd
 
     cpdef double GetZoomLevel(self) except *:
         IF CEF_VERSION == 1:
@@ -401,9 +402,9 @@ cdef class PyBrowser:
     IF UNAME_SYSNAME == "Windows":
 
         cpdef py_void ToggleFullscreen_Windows(self):
-            cdef int windowHandle
+            cdef WindowHandle windowHandle
             if self.GetUserData("__outerWindowHandle"):
-                windowHandle = self.GetUserData("__outerWindowHandle")
+                windowHandle = <int>self.GetUserData("__outerWindowHandle")
             else:
                 windowHandle = self.GetWindowHandle()
 
@@ -503,6 +504,8 @@ cdef class PyBrowser:
                     dirtyRect[0], dirtyRect[1], dirtyRect[2], dirtyRect[3])
             self.GetCefBrowser().get().Invalidate(cefRect)
 
+    IF CEF_VERSION == 1 and UNAME_SYSNAME == "Windows":
+
         cpdef PaintBuffer GetImage(self, PaintElementType paintElementType,
                                int width, int height):
             assert IsThread(TID_UI), (
@@ -513,8 +516,6 @@ cdef class PyBrowser:
                 return self.GetImage_Windows(paintElementType, width, height)
             ELSE:
                 return None
-
-    IF CEF_VERSION == 1 and UNAME_SYSNAME == "Windows":
 
         cdef PaintBuffer GetImage_Windows(self,
                 PaintElementType paintElementType, int width, int height):
