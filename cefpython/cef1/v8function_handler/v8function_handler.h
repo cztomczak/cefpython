@@ -32,6 +32,10 @@
 #include "windows/setup/cefpython.h"
 #endif
 
+#if defined(OS_LINUX)
+#include "linux/setup/cefpython.h"
+#endif
+
 typedef void (*RemovePythonCallback_type)(
 		int callbackID
 );

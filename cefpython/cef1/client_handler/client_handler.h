@@ -26,6 +26,10 @@
 #include "windows/setup/cefpython.h"
 #endif
 
+#if defined(OS_LINUX)
+#include "linux/setup/cefpython.h"
+#endif
+
 class ClientHandler : public CefClient,
         public CefLoadHandler,
         public CefKeyboardHandler,

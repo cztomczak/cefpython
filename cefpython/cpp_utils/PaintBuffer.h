@@ -4,6 +4,12 @@
 
 #pragma once
 
+#if defined(OS_WIN)
+// FlipBufferUpsideDown and SwapBufferFromBgraToRgba
+// are Windows only, as off-screen rendering is not
+// supported on Linux. This code wouldn't compile on
+// Linux as there is no __int32 type.
+
 #include "windows.h"
 #include "stdio.h"
 
@@ -36,3 +42,5 @@ void SwapBufferFromBgraToRgba(void* _dest, void* _src, int width, int height) {
     dest[i] = rgba;
   }
 }
+
+#endif
