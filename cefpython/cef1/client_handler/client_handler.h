@@ -6,7 +6,9 @@
 
 // d:\cefpython\src\setup/cefpython.h(22) : warning C4190: 'RequestHandler_GetCookieManager'
 // has C-linkage specified, but returns UDT 'CefRefPtr<T>' which is incompatible with C
+#if defined(OS_WIN)
 #pragma warning(disable:4190)
+#endif
 
 #include "include/cef_client.h"
 #include "util.h"
@@ -265,6 +267,8 @@ public:
   // CefRenderHandler
   //
 
+#if defined(OS_WIN)
+
   virtual bool GetViewRect(CefRefPtr<CefBrowser> browser,
                            CefRect& rect) OVERRIDE;
 
@@ -290,6 +294,8 @@ public:
 
   virtual void OnCursorChange(CefRefPtr<CefBrowser> browser,
                               CefCursorHandle cursor) OVERRIDE;
+
+#endif  
 
 protected:
 

@@ -54,9 +54,9 @@ class WindowUtils:
         if not pyTitle:
             return
 
-        cdef int windowHandle
+        cdef WindowHandle windowHandle
         if pyBrowser.GetUserData("__outerWindowHandle"):
-            windowHandle = pyBrowser.GetUserData("__outerWindowHandle")
+            windowHandle = <int>pyBrowser.GetUserData("__outerWindowHandle")
         else:
             windowHandle = pyBrowser.GetWindowHandle()
 

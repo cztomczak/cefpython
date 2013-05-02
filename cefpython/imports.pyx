@@ -12,6 +12,7 @@ import types
 import re
 import copy
 import inspect # used by JavascriptBindings.__SetObjectMethods()
+from Cython.Shadow import void
 
 if sys.version_info.major == 2:
     from urllib import pathname2url as urllib_pathname2url
@@ -26,12 +27,7 @@ ctypedef object py_string
 # added to Cython in the future, creating this virtual type temporarily. If you
 # change it later to "void" then don't forget to add "except *".
 ctypedef object py_void
-
-# TODO: use WindowHandle type instead of int.
-IF UNAME_SYSNAME == "Windows":
-    ctypedef int WindowHandle
-ELSE:
-    pass
+ctypedef int WindowHandle
 
 from cpython cimport bool as py_bool
 from libcpp cimport bool as cpp_bool
@@ -67,6 +63,9 @@ IF UNAME_SYSNAME == "Windows":
 from cpp_utils cimport *
 
 from cef_string cimport *
+cdef extern from *:
+    ctypedef CefString ConstCefString "const CefString"
+    
 from cef_types_wrappers cimport *
 from cef_task cimport *
 

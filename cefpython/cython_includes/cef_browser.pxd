@@ -19,6 +19,8 @@ IF CEF_VERSION == 1:
 
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo
+ELIF UNAME_SYSNAME == "Linux":
+    from cef_linux cimport CefWindowHandle, CefWindowInfo
 
 cdef extern from "include/cef_browser.h":
 

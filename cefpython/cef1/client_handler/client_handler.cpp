@@ -256,6 +256,8 @@ bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) {
 // CefRenderHandler
 //
 
+#if defined(OS_WIN)
+
 bool ClientHandler::GetViewRect(CefRefPtr<CefBrowser> browser,
                            CefRect& rect) {
   return RenderHandler_GetViewRect(browser, rect);
@@ -298,3 +300,6 @@ void ClientHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
                             CefCursorHandle cursor) {
   RenderHandler_OnCursorChange(browser, cursor);
 }
+
+// OS_WIN / CefRenderHandler
+#endif

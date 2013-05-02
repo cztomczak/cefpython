@@ -65,7 +65,9 @@ cdef void SetApplicationSettings(
             elif key == "release_dcheck_enabled":
                 cefAppSettings.release_dcheck_enabled = bool(appSettings[key])
             elif key == "graphics_implementation" and platform.system() == "Windows":
-                cefAppSettings.graphics_implementation = <cef_types_win.cef_graphics_implementation_t?><int>int(appSettings[key])
+                # Cython compiler error: cef_types_win not defined on linux
+                IF UNAME_SYSNAME == "Windows":
+                    cefAppSettings.graphics_implementation = <cef_types_win.cef_graphics_implementation_t?><int>int(appSettings[key])
             elif key == "local_storage_quota":
                 cefAppSettings.local_storage_quota = <int>int(appSettings[key])
             elif key == "session_storage_quota":

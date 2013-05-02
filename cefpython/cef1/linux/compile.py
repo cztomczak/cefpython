@@ -45,7 +45,7 @@ for pyxfile in oldpyxfiles:
 if ret != 0:	
 	sys.exit("ERROR")
 
-os.rename("./setup/cefpython_py%s.so", "./binaries/cefpython_py%s.so" % (PYVERSION, PYVERSION))
+os.rename("./setup/cefpython_py%s.so" % PYVERSION, "./binaries/cefpython_py%s.so" % PYVERSION)
 
 shutil.copyfile("./../../cef1_api.py", "./binaries/cefpython_py%s.py" % PYVERSION)
 

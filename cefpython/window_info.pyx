@@ -28,7 +28,7 @@ cdef void SetCefWindowInfo(
         ELIF UNAME_SYSNAME == "Darwin":
             raise Exception("WindowInfo.SetAsChild() not yet implemented on Mac")
         ELIF UNAME_SYSNAME == "Linux":
-            raise Exception("WindowInfo.SetAsChild() not yet implemented on Linux")
+            cefWindowInfo.SetAsChild(<CefWindowHandle><int>windowInfo.parentWindowHandle)
 
     IF UNAME_SYSNAME == "Windows":
         if windowInfo.windowType == "popup":
@@ -49,7 +49,7 @@ cdef void SetCefWindowInfo(
 
 cdef class WindowInfo:
     cdef public str windowType
-    cdef public int parentWindowHandle
+    cdef public WindowHandle parentWindowHandle
     cdef public list windowRect
     cdef public py_string windowName
     cdef public py_bool transparentPainting
@@ -57,14 +57,14 @@ cdef class WindowInfo:
     def __init__(self):
         self.transparentPainting = False
 
-    cpdef py_void SetAsChild(self, int parentWindowHandle, list windowRect=None):
+    cpdef py_void SetAsChild(self, WindowHandle parentWindowHandle, list windowRect=None):
         if not WindowUtils.IsWindowHandle(parentWindowHandle):
             raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
 
         self.windowType = "child"
         self.parentWindowHandle = parentWindowHandle
 
-        IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
+        IF UNAME_SYSNAME == "Darwin":
             if not windowRect:
                 raise Exception("WindowInfo.SetAsChild() failed: windowRect is required")
 
@@ -76,7 +76,7 @@ cdef class WindowInfo:
 
     IF UNAME_SYSNAME == "Windows":
 
-        cpdef py_void SetAsPopup(self, int parentWindowHandle, py_string windowName):
+        cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle, py_string windowName):
             if not WindowUtils.IsWindowHandle(parentWindowHandle):
                 raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
             self.parentWindowHandle = parentWindowHandle
@@ -86,7 +86,7 @@ cdef class WindowInfo:
     IF CEF_VERSION == 1:
         IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
 
-            cpdef py_void SetAsOffscreen(self, int parentWindowHandle):
+            cpdef py_void SetAsOffscreen(self, WindowHandle parentWindowHandle):
                 if not WindowUtils.IsWindowHandle(parentWindowHandle):
                     raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
                 self.parentWindowHandle = parentWindowHandle
