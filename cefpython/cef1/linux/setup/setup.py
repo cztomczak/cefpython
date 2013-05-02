@@ -36,15 +36,15 @@ ext_modules = [Extension(
     # http_authentication not implemented on Linux.
     library_dirs=[
         r'./',
-        r'./../../v8function_handler/Release_py%s/' % PYTHON_VERSION,
-        r'./../../client_handler/Release_py%s/' % PYTHON_VERSION,
-        r'./../../../cpp_utils/Release/',
+        r'./../../v8function_handler/',
+        r'./../../client_handler/',
+        r'./../../../cpp_utils/',
     ],
 
     libraries=[
         'libcef_dll_wrapper',
-        'v8function_handler_py%s' % PYTHON_VERSION, # Build with /MD.
-        'client_handler_py%s' % PYTHON_VERSION, # Build with /MD.
+        'v8function_handler',
+        'client_handler',
         'cpp_utils'
     ],
 
