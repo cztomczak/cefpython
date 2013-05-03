@@ -36,6 +36,7 @@ cpdef str GetNavigateUrl(py_string url):
         # but should be:
         # >> %E6%A1%8C%E9%9D%A2
         url = urllib_pathname2url(url)
+        url = re.sub("^file%3A", "file:", url)
     return str(url)
 
 IF CEF_VERSION == 1:
