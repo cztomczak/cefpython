@@ -50,15 +50,23 @@ ext_modules = [Extension(
         r'./',
         r'./../../v8function_handler/',
         r'./../../client_handler/',
-        r'./../../../cpp_utils/',
+        r'./../../../cpp_utils/'
     ],
 
     libraries=[
         'cef_dll_wrapper',
         'v8function_handler',
         'client_handler',
-        'cpp_utils'
+        'cpp_utils'        
     ],
+
+    """
+    Loading libcef.so will only work when running scripts from the same
+    directory that libcef.so resides in when you put "./" in here.
+    runtime_library_dirs=[
+        './'
+    ],
+    """
 
     # /EHsc - using STL string, multimap and others that use C++ exceptions.
     extra_compile_args=[],

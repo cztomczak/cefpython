@@ -1,27 +1,21 @@
-# An example of embedding CEF in wxPython application.
+# An example of embedding CEF browser in wxPython on Linux.
 
 import platform
 if platform.architecture()[0] != "32bit":
     raise Exception("Only 32bit architecture is supported")
 
-import ctypes, os
-ctypes.CDLL(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so'), ctypes.RTLD_GLOBAL) 
-import cefpython_py27 as cefpython
-
-import sys
-"""
-try:
-    # Import local PYD file (portable zip).
+import ctypes, os, sys
+libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so')
+if os.path.exists(libcef_so):
+    # Import local module
+    ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
     if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
-    elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
-        import cefpython_py32 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
-except ImportError:
-    # Import from package (installer).
+else:
+    # Import from package
     from cefpython1 import cefpython
-"""
 
 import wx
 import time
@@ -29,10 +23,11 @@ import time
 # Which method to use for message loop processing.
 #   EVT_IDLE - wx application has priority (default)
 #   EVT_TIMER - cef browser has priority
-# From the tests it seems that Flash content behaves 
-# better when using a timer.
-
-# IMPORTANT! On Linux CPU goes 100% when using EVT_IDLE, why?
+# It seems that Flash content behaves better when using a timer.
+# IMPORTANT! On Linux EVT_IDLE does not work, the events seems to 
+# be propagated only when you move your mouse, which is not the 
+# expected behavior, it is recommended to use EVT_TIMER on Linux,
+# so set this value to False.
 USE_EVT_IDLE = False
 
 def GetApplicationPath(file=None):
@@ -73,6 +68,7 @@ class MainFrame(wx.Frame):
     browser = None
     initialized = False
     idleCount = 0
+    box = None
 
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
@@ -80,27 +76,24 @@ class MainFrame(wx.Frame):
         self.CreateMenu()
 
         windowInfo = cefpython.WindowInfo()
-        windowInfo.SetAsChild(self.GetWindowHandle())
+        windowInfo.SetAsChild(self.GetGtkWidget())
         print("wxpython.py: creating browser in a moment")
         # Linux requires adding "file://" for local files,
         # otherwise /home/some will be replaced as http://home/some
         self.browser = cefpython.CreateBrowserSync(
             windowInfo,
             browserSettings={},
-            navigateUrl="file://"+GetApplicationPath("cefsimple.html")))
-        print("wxpython.py: browser created, handle = %s" % self.GetWindowHandle())
+            navigateUrl="file://"+GetApplicationPath("cefsimple.html"))
+        print("wxpython.py: browser created")
 
-        # Remains of windows code:
+        # Remains of OS_WIN code:
         #self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         #self.Bind(wx.EVT_SIZE, self.OnSize)
-        
+
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         if USE_EVT_IDLE:
             # Bind EVT_IDLE only for the main application frame.
             self.Bind(wx.EVT_IDLE, self.OnIdle)
-
-    def GetWindowHandle(self):
-        return self.GetGtkWidget()
 
     def CreateMenu(self):
         filemenu = wx.Menu()

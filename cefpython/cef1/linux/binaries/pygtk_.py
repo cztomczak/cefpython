@@ -1,34 +1,26 @@
-# An example of embedding CEF in PyGTK application.
+# An example of embedding CEF browser in PyGTK on Linux.
 
 import platform
 if platform.architecture()[0] != "32bit":
     raise Exception("Only 32bit architecture is supported")
 
-import ctypes, os
-ctypes.CDLL(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so'), ctypes.RTLD_GLOBAL) 
-import cefpython_py27 as cefpython
-
-import sys
-
-"""
-try:
-    # Import local PYD file (portable zip).
+import ctypes, os, sys
+libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so')
+if os.path.exists(libcef_so):
+    # Import local module
+    ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
     if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
-    elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
-        import cefpython_py32 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
-except ImportError:
-    # Import from package (installer).
+else:
+    # Import from package
     from cefpython1 import cefpython
-"""
 
 import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
-import ctypes
 import re
 
 def GetApplicationPath(file=None):
@@ -101,9 +93,9 @@ class PyGTKExample:
 
         # Must be show_all() for VBox otherwise browser doesn't 
         # appear when you just call show().
-        self.vbox.show_all()
+        self.vbox.show()
 
-        self.mainWindow.show()        
+        self.mainWindow.show()
         gobject.timeout_add(10, self.OnTimer)
 
     def CreateMenu(self):
