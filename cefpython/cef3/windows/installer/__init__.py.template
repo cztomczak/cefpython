@@ -1,8 +1,8 @@
 import sys
 
-if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
+if 0x02070000 <= sys.hexversion < 0x03000000:
     from . import cefpython_py27 as cefpython
-elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
+elif 0x03000000 <= sys.hexversion < 0x04000000:
     from . import cefpython_py32 as cefpython
 else:
     raise Exception("Unsupported python version: " + sys.version)
