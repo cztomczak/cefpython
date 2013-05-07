@@ -88,7 +88,9 @@ class PyGTKExample:
         # otherwise /home/some will be replaced as http://home/some
         self.browser = cefpython.CreateBrowserSync(
             windowInfo,
-            browserSettings={},
+            # Flash will crash app in CEF 1 on Linux, setting
+            # plugins_disabled to True.
+            browserSettings={"plugins_disabled": True},
             navigateUrl="file://"+GetApplicationPath("cefsimple.html"))
 
         # Must be show_all() for VBox otherwise browser doesn't 

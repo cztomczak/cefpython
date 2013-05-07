@@ -77,14 +77,14 @@ class MainFrame(wx.Frame):
 
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(self.GetGtkWidget())
-        print("wxpython.py: creating browser in a moment")
         # Linux requires adding "file://" for local files,
         # otherwise /home/some will be replaced as http://home/some
         self.browser = cefpython.CreateBrowserSync(
             windowInfo,
-            browserSettings={},
+            # Flash will crash app in CEF 1 on Linux, setting
+            # plugins_disabled to True.
+            browserSettings={"plugins_disabled": True},
             navigateUrl="file://"+GetApplicationPath("cefsimple.html"))
-        print("wxpython.py: browser created")
 
         # Remains of OS_WIN code:
         #self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
