@@ -6,15 +6,15 @@ if platform.architecture()[0] != "32bit":
 
 import sys
 try:
-    # Import local PYD file (portable zip).
-    if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
+    # Import local module.
+    if 0x02070000 <= sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
-    elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
+    elif 0x03000000 <= sys.hexversion < 0x04000000:
         import cefpython_py32 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
 except ImportError:
-    # Import from package (installer).
+    # Import from package.
     from cefpython1 import cefpython
 
 import pygtk

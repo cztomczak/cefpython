@@ -9,7 +9,7 @@ libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so'
 if os.path.exists(libcef_so):
     # Import local module
     ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
-    if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
+    if 0x02070000 <= sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
