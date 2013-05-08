@@ -1,0 +1,9 @@
+1. To install CEF Python 1 type:
+   
+       sudo python setup.py install
+
+2. Go to /usr/local/lib/python2.7/dist-packages/cefpython1/examples/
+   and run some examples:
+       
+       python wxpython.py
+       python pygtk_.py

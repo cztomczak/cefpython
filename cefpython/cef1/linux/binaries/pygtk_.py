@@ -7,15 +7,22 @@ if platform.architecture()[0] != "32bit":
 import ctypes, os, sys
 libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so')
 if os.path.exists(libcef_so):
+    CEFPYTHON_PACKAGE = False
     # Import local module
     ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
     if 0x02070000 <= sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
+    # These dirs will be set after GetApplicationPath() is defined.
+    cefpython.locales_dir = None
+    cefpython.resources_dir = None
 else:
+    CEFPYTHON_PACKAGE = True
     # Import from package
     from cefpython1 import cefpython
+    # cefpython.locales_dir and cefpython.resources_dir are already
+    # defined when importing cefpython from a package.
 
 import pygtk
 pygtk.require('2.0')
@@ -44,13 +51,24 @@ def GetApplicationPath(file=None):
         return path
     return str(file)
 
+if not CEFPYTHON_PACKAGE:
+    # Set these only when importing a local module.
+    cefpython.locales_dir = GetApplicationPath("locales")
+    cefpython.resources_dir = GetApplicationPath()
+
 def ExceptHook(type, value, traceObject):
     import traceback, os, time
     # This hook does the following: in case of exception display it,
     # write to error.log, shutdown CEF and exit application.
     error = "\n".join(traceback.format_exception(type, value, traceObject))
-    with open(GetApplicationPath("error.log"), "a") as file:
-        file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
+    try:
+        with open(GetApplicationPath("error.log"), "a") as file:
+            file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
+    except:
+        # If this is an example run from 
+        # /usr/local/lib/python2.7/dist-packages/cefpython1/examples/
+        # then we do not have permission to write to that directory.
+        pass
     print("\n"+error+"\n")
     cefpython.QuitMessageLoop()
     cefpython.Shutdown()
@@ -159,15 +177,20 @@ if __name__ == '__main__':
 
     sys.excepthook = ExceptHook
     cefpython.g_debug = True
-    cefpython.g_debugFile = GetApplicationPath("debug.log")
+    if not CEFPYTHON_PACKAGE:
+        # No permission to write files when running examples/ from a package.
+        cefpython.g_debugFile = GetApplicationPath("debug.log")
     settings = {
         "log_severity": cefpython.LOGSEVERITY_INFO,
         "log_file": GetApplicationPath("debug.log"),
         "release_dcheck_enabled": True, # Enable only when debugging.
         # This directories must be set on Linux
-        "locales_dir_path": GetApplicationPath("locales"),
-        "resources_dir_path": GetApplicationPath()
+        "locales_dir_path": cefpython.locales_dir,
+        "resources_dir_path": cefpython.resources_dir
     }
+    if CEFPYTHON_PACKAGE:
+        # No permission to write files when running examples/ from a package.
+        settings["log_file"] = ""
     cefpython.Initialize(settings)
 
     gobject.threads_init() # timer for messageloop
