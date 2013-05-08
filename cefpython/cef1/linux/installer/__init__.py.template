@@ -1,0 +1,15 @@
+import ctypes, os
+libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)), "libcef.so")
+ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
+
+import sys
+if 0x02070000 <=  sys.hexversion < 0x03000000:
+    from . import cefpython_py27 as cefpython
+else:
+    raise Exception("Unsupported python version: " + sys.version)
+
+cefpython.locales_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "locales")
+cefpython.resources_dir = os.path.dirname(os.path.abspath(__file__))
+
+__version__ = "v53"
+__author__ = "CEF Python authors"

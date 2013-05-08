@@ -1,0 +1,21 @@
+from distutils.core import setup
+
+setup(
+    name='CEF Python 1',
+    version='v53',
+    description='Python bindings for the Chromium Embedded Framework',
+    license='BSD 3-Clause',
+    author='Czarek Tomczak',
+    author_email='czarek.tomczak@gmail.com',
+    url='http://code.google.com/p/cefpython/',
+    packages=['cefpython1'],
+    package_data={'cefpython1': [
+        'examples/*.py',
+        'examples/*.html',
+        'locales/*.pak',
+        '*.txt',
+        'cefclient',
+        '*.so',
+        '*.pak'
+    ]}
+)
