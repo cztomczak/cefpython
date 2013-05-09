@@ -8,5 +8,5 @@ if 0x02070000 <=  sys.hexversion < 0x03000000:
 else:
     raise Exception("Unsupported python version: " + sys.version)
 
-__version__ = "v53"
+__version__ = "v54"
 __author__ = "CEF Python authors"
