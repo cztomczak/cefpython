@@ -4,7 +4,6 @@
 import os
 import wx
 import wx.lib.agw.flatnotebook as fnb
-
 import cefpython1.wx.chromectrl as chrome
 
 class MainFrame(wx.Frame):
@@ -70,10 +69,11 @@ class CustomNavigationBar(chrome.NavigationBar):
 
 if __name__ == '__main__':
     chrome.Initialize()
-    print('wx.version=%s' % wx.version())
+    print('sample3.py: wx.version=%s' % wx.version())
     app = wx.PySimpleApp()
     MainFrame().Show()
     app.MainLoop()
-    del app # Let wx.App destructor do the cleanup before calling cefpython.Shutdown().
+    # Important: do the wx cleanup before calling Shutdown.
+    del app
     chrome.Shutdown()
 

@@ -3,26 +3,13 @@
 
 #-------------------------------------------------------------------------------
 
-import sys
-import os
-
-def GetApplicationPath(myFile=None):
-    import re, os
-    # If myFile is None return current directory without trailing slash.
-    if myFile is None:
-        myFile = ""
-    # Only when relative path.
-    if not myFile.startswith("/") and not myFile.startswith("\\") and not re.search(r"^[\w-]+:", myFile):
-        if hasattr(sys, "frozen"):
-            path = os.path.dirname(sys.executable)
-        elif "__file__" in globals():
-            path = os.path.dirname(os.path.realpath(__file__))
-        else:
-            path = os.getcwd()
-        path = path + os.sep + myFile
-        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
-        path = re.sub(r"[/\\]+$", "", path)
-        return path
-    return str(myFile)
-
-
+def ExceptHook(type, value, traceObject):
+    import traceback, os
+    # This hook does the following: in case of exception display it,
+    # write to error.log, shutdown CEF and exit application.
+    error = "\n".join(traceback.format_exception(type, value, traceObject))
+    print("\n"+error+"\n")
+    #cefpython.QuitMessageLoop()
+    #cefpython.Shutdown()
+    # So that "finally" does not execute.
+    #os._exit(1)
