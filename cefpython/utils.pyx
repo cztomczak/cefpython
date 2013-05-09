@@ -15,8 +15,13 @@ cpdef object Debug(str msg):
     msg = "cefpython: "+str(msg)
     print(msg)
     if g_debugFile:
-        with open(g_debugFile, "a") as file:
-            file.write(msg+"\n")
+        try:
+            with open(g_debugFile, "a") as file:
+                file.write(msg+"\n")
+        except:
+            print("cefpython: WARNING: failed writing to debug file: %s" % (
+                    g_debugFile))
+                    
 
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":
@@ -57,6 +62,9 @@ cpdef str GetModuleDirectory():
         path = os.path.dirname(os.path.realpath(__file__))
     else:
         path = os.getcwd()
-    path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+    if platform.system() == "Windows":
+        # On linux this regexp would give: 
+        # "\/home\/czarek\/cefpython\/cefpython\/cef1\/linux\/binaries"
+        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
     path = re.sub(r"[/\\]+$", "", path)
     return str(path)
