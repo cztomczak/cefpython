@@ -60,13 +60,11 @@ ext_modules = [Extension(
         'cpp_utils'        
     ],
 
-    """
-    Loading libcef.so will only work when running scripts from the same
-    directory that libcef.so resides in when you put "./" in here.
-    runtime_library_dirs=[
-        './'
-    ],
-    """
+    # Loading libcef.so will only work when running scripts from the same
+    # directory that libcef.so resides in when you put "./" in here.
+    # runtime_library_dirs=[
+    #    './'
+    #],
 
     # /EHsc - using STL string, multimap and others that use C++ exceptions.
     extra_compile_args=[],

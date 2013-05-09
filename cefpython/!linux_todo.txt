@@ -1,6 +1,0 @@
-- przeniesc IsWindowHandle z utils do window_utils_win,
-  zeby wspierac rozne biblioteki GUI, kazda aplikacja
-  dostarczy wlasna klase WindowUtils poprzez nadpisanie
-  cefpython.WindowUtils własną klasą.
-- dostosowac string_utils pod linuxa, uzyc odpoowiednikow
-  MultibyteToWideChar i WideCharToMultibyte.
