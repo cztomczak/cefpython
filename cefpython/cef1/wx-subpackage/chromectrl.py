@@ -3,28 +3,11 @@
 
 #--------------------------------------------------------------------------------
 
-import platform
-if platform.architecture()[0] != "32bit":
-    raise Exception("Only 32bit architecture is supported")
-
-import os
-import sys
-try:
-    # Import local PYD file (portable zip).
-    if sys.hexversion >= 0x02070000 and sys.hexversion < 0x03000000:
-        import cefpython_py27 as cefpython
-    elif sys.hexversion >= 0x03000000 and sys.hexversion < 0x04000000:
-        import cefpython_py32 as cefpython
-    else:
-        raise Exception("Unsupported python version: %s" % sys.version)
-except ImportError:
-    # Import from package (installer).
-    from cefpython1 import cefpython
-
+from cefpython1 import cefpython
+from cefpython1.wx.utils import ExceptHook
+import os, sys, platform
 import wx
 import wx.lib.buttons as buttons
-
-from cefpython1.wx.utils import GetApplicationPath
 
 #-------------------------------------------------------------------------------
 
@@ -111,14 +94,35 @@ class ChromeWindow(wx.Window):
                  *args, **kwargs):
         wx.Window.__init__(self, parent, id=wx.ID_ANY, size=size,
                            *args, **kwargs)
+        # On Linux absolute file urls need to start with "file://"
+        # otherwise a path of "/home/some" is converted to "http://home/some".
+        if platform.system() == "Linux":
+            if url.startswith("/"):
+                url = "file://" + url
         self.url = url
+        
         windowInfo = cefpython.WindowInfo()
-        windowInfo.SetAsChild(self.GetHandle())
-        self.browser = cefpython.CreateBrowserSync(windowInfo,
-                browserSettings={}, navigateUrl=url)
+        if platform.system() == "Windows":
+            windowInfo.SetAsChild(self.GetHandle())
+        elif platform.system() == "Linux":
+            windowInfo.SetAsChild(self.GetGtkWidget())
+        else:
+            raise Exception("Unsupported OS")
+        
+        # TODO: allow for custom browser settings for the ChromeWindow
+        browserSettings = {}
+        if platform.system() == "Linux":
+            # Disable plugins on Linux as Flash will crash the application
+            # in CEF 1 on Linux, it's a known problem.
+            if not "plugins_disabled" in browserSettings:
+                browserSettings["plugins_disabled"] = True
 
-        self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
-        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.browser = cefpython.CreateBrowserSync(windowInfo,
+                browserSettings=browserSettings, navigateUrl=url)
+
+        if platform.system() == "Windows":
+            self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
+            self.Bind(wx.EVT_SIZE, self.OnSize)
         if useTimer:
             self.timerID = 1
             self._CreateTimer(timerMillis)
@@ -149,11 +153,12 @@ class ChromeWindow(wx.Window):
         event.Skip()
 
     def OnSetFocus(self, event):
+        """OS_WIN only."""
         cefpython.WindowUtils.OnSetFocus(self.GetHandle(), 0, 0, 0)
         event.Skip()
 
     def OnSize(self, event):
-        """Handle the the size event"""
+        """OS_WIN only. Handle the the size event"""
         cefpython.WindowUtils.OnSize(self.GetHandle(), 0, 0, 0)
         event.Skip()
 
@@ -246,6 +251,8 @@ class ChromeCtrl(wx.Panel):
                 browser.GetMainFrame().GetUrl())
             self.navigationBar.AddToHistory(browser.GetMainFrame().GetUrl())
 
+    def OnLoadEnd(self, browser, frame, httpStatusCode):
+        pass
 
 class DefaultClientHandler(object):
     def __init__(self, parentCtrl):
@@ -259,7 +266,7 @@ class DefaultClientHandler(object):
 
     def OnLoadError(self, browser, frame, errorCode, failedUrl, errorText):
         # TODO
-        print "ERROR LOADING URL : %" % failedUrl
+        print("ERROR LOADING URL : %s" % failedUrl)
 
 class CallbackClientHandler(object):
     def __init__(self, onLoadStart=None, onLoadEnd=None):
@@ -276,7 +283,7 @@ class CallbackClientHandler(object):
 
     def OnLoadError(self, browser, frame, errorCode, failedUrl, errorText):
         # TODO
-        print "ERROR LOADING URL : %" % failedUrl
+        print("ERROR LOADING URL : %s" % failedUrl)
 
 #-------------------------------------------------------------------------------
 
@@ -286,26 +293,21 @@ def Initialize(settings=None):
     """
     sys.excepthook = ExceptHook
     if not settings:
-        settings = {
-            "log_severity": cefpython.LOGSEVERITY_INFO,
-            "log_file": GetApplicationPath("debug.log"),
-            "release_dcheck_enabled": True # Enable only when debugging.
-        }
+        settings = {}
+    if not "log_severity" in settings:
+        settings["log_severity"] = cefpython.LOGSEVERITY_INFO
+    if not "log_file" in settings:
+        settings["log_file"] = ""
+    if platform.system() == "Linux":
+        # On Linux we need to set locales and resources directories.
+        if not "locales_dir_path" in settings:
+            settings["locales_dir_path"] = cefpython.GetModuleDirectory()+(
+                "/locales")
+        if not "resources_dir_path" in settings:
+            settings["resources_dir_path"] = cefpython.GetModuleDirectory()
+        
     cefpython.Initialize(settings)
 
 def Shutdown():
     """Shuts down CEF, should be called by app exiting code"""
     cefpython.Shutdown()
-
-def ExceptHook(t, value, traceObject):
-    import traceback, os, time
-    # This hook does the following: in case of exception display it,
-    # write to error.log, shutdown CEF and exit application.
-    error = "\n".join(traceback.format_exception(t, value, traceObject))
-    with open(GetApplicationPath("error.log"), "a") as f:
-        f.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
-    print("\n"+error+"\n")
-    ##cefpython.QuitMessageLoop()
-    ##cefpython.Shutdown()
-    # So that "finally" does not execute.
-    ##os._exit(1)

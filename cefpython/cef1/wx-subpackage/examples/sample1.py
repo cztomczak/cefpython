@@ -3,7 +3,6 @@
 
 import os
 import wx
-
 import cefpython1.wx.chromectrl as chrome
 
 class MainFrame(wx.Frame):
@@ -12,10 +11,8 @@ class MainFrame(wx.Frame):
                           title='cefwx example1', size=(600,400))
 
         self.cefWindow = chrome.ChromeWindow(self,
-                #url=os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                # "../cefsimple.html"))
                 url=os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 "../withpopup.html"))
+                                 "sample1.html"))
 
         sizer = wx.BoxSizer()
         sizer.Add(self.cefWindow, 1, wx.EXPAND, 0)
@@ -28,11 +25,10 @@ class MainFrame(wx.Frame):
 
 if __name__ == '__main__':
     chrome.Initialize()
-    print('wx.version=%s' % wx.version())
+    print('sample1.py: wx.version=%s' % wx.version())
     app = wx.PySimpleApp()
     MainFrame().Show()
     app.MainLoop()
-    del app # Let wx.App destructor do the cleanup before calling cefpython.Shutdown().
+    # Important: do the wx cleanup before calling Shutdown.
+    del app
     chrome.Shutdown()
-
-

@@ -3,7 +3,6 @@
 
 import wx
 import wx.lib.agw.flatnotebook as fnb
-
 import cefpython1.wx.chromectrl as chrome
 
 ROOT_NAME = "My Locations"
@@ -21,7 +20,7 @@ URLS = ["http://gmail.com",
 class MainFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
-                          title='cefwx example2', size=(600, 400))
+                          title='cefwx example2', size=(1024, 768))
 
         self.initComponents()
         self.layoutComponents()
@@ -57,7 +56,7 @@ class MainFrame(wx.Frame):
         event.Skip()
 
     def OnPageClosing(self, event):
-        print "One could place some extra closing stuff here"
+        print("sample2.py: One could place some extra closing stuff here")
         event.Skip()
 
     def OnClose(self, event):
@@ -65,10 +64,11 @@ class MainFrame(wx.Frame):
 
 if __name__ == '__main__':
     chrome.Initialize()
-    print('wx.version=%s' % wx.version())
+    print('sample2.py: wx.version=%s' % wx.version())
     app = wx.PySimpleApp()
     MainFrame().Show()
     app.MainLoop()
-    del app # Let wx.App destructor do the cleanup before calling cefpython.Shutdown().
+    # Important: do the wx cleanup before calling Shutdown.
+    del app
     chrome.Shutdown()
 
