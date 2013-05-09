@@ -94,10 +94,6 @@ class MainFrame(wx.Frame):
             browserSettings={"plugins_disabled": True},
             navigateUrl="file://"+GetApplicationPath("cefsimple.html"))
 
-        # Remains of OS_WIN code:
-        #self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
-        #self.Bind(wx.EVT_SIZE, self.OnSize)
-
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         if USE_EVT_IDLE:
             # Bind EVT_IDLE only for the main application frame.
@@ -113,14 +109,6 @@ class MainFrame(wx.Frame):
         menubar.Append(filemenu,"&File")
         menubar.Append(aboutmenu, "&About")
         self.SetMenuBar(menubar)
-
-    def OnSetFocus(self, event):
-        #cefpython.WindowUtils.OnSetFocus(self.GetWindowHandle(), 0, 0, 0)
-        pass
-
-    def OnSize(self, event):
-        #cefpython.WindowUtils.OnSize(self.GetWindowHandle(), 0, 0, 0)
-        pass
 
     def OnClose(self, event):
         self.browser.CloseBrowser()

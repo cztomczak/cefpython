@@ -8,14 +8,19 @@ setup(
     author='Czarek Tomczak',
     author_email='czarek.tomczak@gmail.com',
     url='http://code.google.com/p/cefpython/',
-    packages=['cefpython1'],
+    packages=['cefpython1', 'cefpython1.wx'],
     package_data={'cefpython1': [
         'examples/*.py',
         'examples/*.html',
+        'examples/wx/*.py',
+        'examples/wx/*.html',
+        'examples/wx/*.png',
         'locales/*.pak',
+        'wx/*.txt',
+        'wx/images/*.png',
         '*.txt',
         'cefclient',
         '*.so',
-        '*.pak'
+        '*.pak',
     ]}
 )
