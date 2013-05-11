@@ -1,8 +1,4 @@
-# An example of embedding CEF browser in wxPython on Linux.
-
-import platform
-if platform.architecture()[0] != "32bit":
-    raise Exception("Only 32bit architecture is supported")
+# An example of embedding CEF browser in PyGTK on Linux.
 
 import ctypes, os, sys
 libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so')
@@ -17,21 +13,14 @@ else:
     # Import from package
     from cefpython1 import cefpython
 
-import wx
-import time
-
-# Which method to use for message loop processing.
-#   EVT_IDLE - wx application has priority (default)
-#   EVT_TIMER - cef browser has priority
-# It seems that Flash content behaves better when using a timer.
-# IMPORTANT! On Linux EVT_IDLE does not work, the events seems to 
-# be propagated only when you move your mouse, which is not the 
-# expected behavior, it is recommended to use EVT_TIMER on Linux,
-# so set this value to False.
-USE_EVT_IDLE = False
+import pygtk
+pygtk.require('2.0')
+import gtk
+import gobject
+import re
 
 def GetApplicationPath(file=None):
-    import re, os
+    import re, os, platform
     # If file is None return current directory without trailing slash.
     if file is None:
         file = ""
@@ -72,19 +61,33 @@ def ExceptHook(type, value, traceObject):
     # So that "finally" does not execute.
     os._exit(1)
 
-class MainFrame(wx.Frame):
+class PyGTKExample:
+
+    mainWindow = None
+    container = None
     browser = None
-    initialized = False
-    idleCount = 0
-    box = None
+    exiting = None
+    searchEntry = None
+    vbox = None
 
     def __init__(self):
-        wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
-                          title='wxPython example', size=(600,400))
-        self.CreateMenu()
+
+        self.mainWindow = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.mainWindow.connect('destroy', self.OnExit)
+        self.mainWindow.set_size_request(width=600, height=400)
+        self.mainWindow.set_title('PyGTK CEF example')
+        self.mainWindow.realize()
+
+        self.vbox = gtk.VBox(False, 0)
+        self.vbox.pack_start(self.CreateMenu(), False, False, 0)
+        self.mainWindow.add(self.vbox)
+
+        m = re.search("GtkVBox at 0x(\w+)", str(self.vbox))
+        hexID = m.group(1)
+        windowID = int(hexID, 16)
 
         windowInfo = cefpython.WindowInfo()
-        windowInfo.SetAsChild(self.GetGtkWidget())
+        windowInfo.SetAsChild(windowID)
         # Linux requires adding "file://" for local files,
         # otherwise /home/some will be replaced as http://home/some
         self.browser = cefpython.CreateBrowserSync(
@@ -94,65 +97,70 @@ class MainFrame(wx.Frame):
             browserSettings={"plugins_disabled": True},
             navigateUrl="file://"+GetApplicationPath("cefsimple.html"))
 
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
-        if USE_EVT_IDLE:
-            # Bind EVT_IDLE only for the main application frame.
-            self.Bind(wx.EVT_IDLE, self.OnIdle)
+        # Must be show_all() for VBox otherwise browser doesn't 
+        # appear when you just call show().
+        self.vbox.show()
+
+        self.mainWindow.show()
+        gobject.timeout_add(10, self.OnTimer)
 
     def CreateMenu(self):
-        filemenu = wx.Menu()
-        filemenu.Append(1, "Open")
-        filemenu.Append(2, "Exit")
-        aboutmenu = wx.Menu()
-        aboutmenu.Append(1, "CEF Python")
-        menubar = wx.MenuBar()
-        menubar.Append(filemenu,"&File")
-        menubar.Append(aboutmenu, "&About")
-        self.SetMenuBar(menubar)
 
-    def OnClose(self, event):
-        self.browser.CloseBrowser()
-        self.Destroy()
+        file = gtk.MenuItem('File')
+        file.show()
+        filemenu = gtk.Menu()
+        item = gtk.MenuItem('Open')
+        filemenu.append(item)
+        item.show()
+        item = gtk.MenuItem('Exit')
+        filemenu.append(item)
+        item.show()
+        file.set_submenu(filemenu)
 
-    def OnIdle(self, event):
-        self.idleCount += 1
-        print("wxpython.py: OnIdle() %d" % self.idleCount)
+        about = gtk.MenuItem('About')
+        about.show()
+        aboutmenu = gtk.Menu()
+        item = gtk.MenuItem('CEF Python')
+        aboutmenu.append(item)
+        item.show()
+        about.set_submenu(aboutmenu)
+
+        menubar = gtk.MenuBar()
+        menubar.append(file)
+        menubar.append(about)
+        menubar.show()
+
+        return menubar
+
+    def OnWidgetClick(self, widget, data):
+
+        self.mainWindow.get_window().focus()
+
+    def OnTimer(self):
+
+        if self.exiting:
+            return False
         cefpython.MessageLoopWork()
-
-class MyApp(wx.App):
-    timer = None
-    timerID = 1
-    timerCount = 0
-
-    def OnInit(self):
-        if not USE_EVT_IDLE:
-            self.CreateTimer()
-        frame = MainFrame()
-        self.SetTopWindow(frame)
-        frame.Show()
         return True
 
-    def CreateTimer(self):
-        # See "Making a render loop": 
-        # http://wiki.wxwidgets.org/Making_a_render_loop
-        # Another approach is to use EVT_IDLE in MainFrame,
-        # see which one fits you better.
-        self.timer = wx.Timer(self, self.timerID)
-        self.timer.Start(10) # 10ms
-        wx.EVT_TIMER(self, self.timerID, self.OnTimer)
+    def OnFocusIn(self, widget, data):
 
-    def OnTimer(self, event):
-        self.timerCount += 1
-        # print("wxpython.py: OnTimer() %d" % self.timerCount)
-        cefpython.MessageLoopWork()
+        # This function is currently not called by any of code, 
+        # but if you would like for browser to have automatic focus
+        # add such line:
+        # self.mainWindow.connect('focus-in-event', self.OnFocusIn)
+        self.browser.SetFocus(True)
 
-    def OnExit(self):
-        # When app.MainLoop() returns, MessageLoopWork() should 
-        # not be called anymore.
-        if not USE_EVT_IDLE:
-            self.timer.Stop()
+    def OnExit(self, widget, data=None):
+
+        self.exiting = True
+        gtk.main_quit()
 
 if __name__ == '__main__':
+
+    version = '.'.join(map(str, list(gtk.gtk_version)))
+    print('GTK version: %s' % version)
+
     sys.excepthook = ExceptHook
     cefpython.g_debug = True
     cefpython.g_debugFile = GetApplicationPath("debug.log")
@@ -166,10 +174,8 @@ if __name__ == '__main__':
     }
     cefpython.Initialize(settings)
 
-    print('wx.version=%s' % wx.version())
-    app = MyApp(False)
-    app.MainLoop()
-    # Let wx.App destructor do the cleanup before calling cefpython.Shutdown().
-    del app
+    gobject.threads_init() # timer for messageloop
+    PyGTKExample()
+    gtk.main()
 
     cefpython.Shutdown()

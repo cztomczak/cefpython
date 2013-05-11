@@ -27,7 +27,7 @@ ctypedef object py_string
 # added to Cython in the future, creating this virtual type temporarily. If you
 # change it later to "void" then don't forget to add "except *".
 ctypedef object py_void
-ctypedef int WindowHandle
+ctypedef long WindowHandle
 
 from cpython cimport bool as py_bool
 from libcpp cimport bool as cpp_bool
