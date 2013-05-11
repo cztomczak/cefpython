@@ -28,7 +28,7 @@ cdef void SetCefWindowInfo(
         ELIF UNAME_SYSNAME == "Darwin":
             raise Exception("WindowInfo.SetAsChild() not yet implemented on Mac")
         ELIF UNAME_SYSNAME == "Linux":
-            cefWindowInfo.SetAsChild(<CefWindowHandle><int>windowInfo.parentWindowHandle)
+            cefWindowInfo.SetAsChild(<CefWindowHandle><WindowHandle>windowInfo.parentWindowHandle)
 
     IF UNAME_SYSNAME == "Windows":
         if windowInfo.windowType == "popup":

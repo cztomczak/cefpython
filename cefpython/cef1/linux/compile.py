@@ -3,12 +3,17 @@ import os
 import glob
 import shutil
 import subprocess
+import platform
+
+BITS = platform.architecture()[0]
+assert (BITS == "32bit" or BITS == "64bit")
 
 PYVERSION = str(sys.version_info[0])+str(sys.version_info[1])
 print("PYVERSION = %s" % PYVERSION)
+print("BITS = %s" % BITS)
 
 try:
-	os.remove("./binaries/cefpython_py%s.so" % PYVERSION)
+	os.remove("./binaries_%s/cefpython_py%s.so" % (BITS, PYVERSION))
 except OSError:
 	pass
 
@@ -45,11 +50,11 @@ for pyxfile in oldpyxfiles:
 if ret != 0:	
 	sys.exit("ERROR")
 
-os.rename("./setup/cefpython_py%s.so" % PYVERSION, "./binaries/cefpython_py%s.so" % PYVERSION)
+os.rename("./setup/cefpython_py%s.so" % PYVERSION, "./binaries_%s/cefpython_py%s.so" % (BITS, PYVERSION))
 
-shutil.copyfile("./../../cef1_api.py", "./binaries/cefpython_py%s.py" % PYVERSION)
+shutil.copyfile("./../../cef1_api.py", "./binaries_%s/cefpython_py%s.py" % (BITS, PYVERSION))
 
 print("DONE")
 
-os.chdir("./binaries")
+os.chdir("./binaries_%s" % BITS)
 subprocess.call(["python", "./wxpython.py"])

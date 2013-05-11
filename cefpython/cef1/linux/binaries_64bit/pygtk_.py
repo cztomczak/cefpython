@@ -1,9 +1,5 @@
 # An example of embedding CEF browser in PyGTK on Linux.
 
-import platform
-if platform.architecture()[0] != "32bit":
-    raise Exception("Only 32bit architecture is supported")
-
 import ctypes, os, sys
 libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so')
 if os.path.exists(libcef_so):
@@ -24,7 +20,7 @@ import gobject
 import re
 
 def GetApplicationPath(file=None):
-    import re, os
+    import re, os, platform
     # If file is None return current directory without trailing slash.
     if file is None:
         file = ""

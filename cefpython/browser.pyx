@@ -81,7 +81,7 @@ cpdef PyBrowser GetBrowserByWindowHandle(WindowHandle windowHandle):
     for browserId in g_pyBrowsers:
         pyBrowser = g_pyBrowsers[browserId]
         if (pyBrowser.GetWindowHandle() == windowHandle or
-                pyBrowser.GetUserData("__outerWindowHandle") == int(windowHandle)):
+                pyBrowser.GetUserData("__outerWindowHandle") == long(windowHandle)):
             return pyBrowser
     return None
 
@@ -296,14 +296,14 @@ cdef class PyBrowser:
     cpdef WindowHandle GetOpenerWindowHandle(self) except *:
         cdef WindowHandle hwnd
         IF CEF_VERSION == 1:
-            hwnd = <int>self.GetCefBrowser().get().GetOpenerWindowHandle()
+            hwnd = <WindowHandle>self.GetCefBrowser().get().GetOpenerWindowHandle()
         ELIF CEF_VERSION == 3:
-            hwnd = <int>self.GetCefBrowserHost().get().GetOpenerWindowHandle()
+            hwnd = <WindowHandle>self.GetCefBrowserHost().get().GetOpenerWindowHandle()
         return hwnd
 
     cpdef WindowHandle GetOuterWindowHandle(self) except *:
         if self.GetUserData("__outerWindowHandle"):
-            return <int>self.GetUserData("__outerWindowHandle")
+            return <WindowHandle>self.GetUserData("__outerWindowHandle")
         else:
             return self.GetWindowHandle()
 
@@ -315,9 +315,9 @@ cdef class PyBrowser:
     cpdef WindowHandle GetWindowHandle(self) except *:
         cdef WindowHandle hwnd
         IF CEF_VERSION == 1:
-            hwnd = <int>self.GetCefBrowser().get().GetWindowHandle()
+            hwnd = <WindowHandle>self.GetCefBrowser().get().GetWindowHandle()
         ELIF CEF_VERSION == 3:
-            hwnd = <int>self.GetCefBrowserHost().get().GetWindowHandle()
+            hwnd = <WindowHandle>self.GetCefBrowserHost().get().GetWindowHandle()
         return hwnd
 
     cpdef double GetZoomLevel(self) except *:
@@ -404,7 +404,7 @@ cdef class PyBrowser:
         cpdef py_void ToggleFullscreen_Windows(self):
             cdef WindowHandle windowHandle
             if self.GetUserData("__outerWindowHandle"):
-                windowHandle = <int>self.GetUserData("__outerWindowHandle")
+                windowHandle = <WindowHandle>self.GetUserData("__outerWindowHandle")
             else:
                 windowHandle = self.GetWindowHandle()
 

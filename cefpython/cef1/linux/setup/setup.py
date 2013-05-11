@@ -5,6 +5,9 @@ import sys
 import platform
 from Cython.Compiler import Options
 
+BITS = platform.architecture()[0]
+assert (BITS == "32bit" or BITS == "64bit")
+
 # Stop on first error, otherwise hundreds of errors appear in the console.
 Options.fast_fail = True
 
@@ -43,11 +46,15 @@ ext_modules = [Extension(
         '/usr/include/cairo',
         '/usr/include/pango-1.0',
         '/usr/include/gdk-pixbuf-2.0',
-        '/usr/include/atk-1.0'],
+        '/usr/include/atk-1.0',
+        # 64bit Ubuntu
+        '/usr/lib/x86_64-linux-gnu/glib-2.0/include',
+        '/usr/lib/x86_64-linux-gnu/gtk-2.0/include',
+    ],
 
     # http_authentication not implemented on Linux.
     library_dirs=[
-        r'./',
+        r'./lib_%s' % BITS,
         r'./../../v8function_handler/',
         r'./../../client_handler/',
         r'./../../../cpp_utils/'
