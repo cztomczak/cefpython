@@ -2,21 +2,22 @@ See this topic on CEF C++ forum for more details about this CEF
 patch to make it work with wxPython on Linux:
 http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10641
 
-Do the following changes in CEF C++ sources:
+Do the following changes in the CEF C++ sources:
 
-1. CefBrowserImpl::UIT_CreateBrowser() in `libcef/browser_impl_gtk.cc`
+1. In `chromium/src/cef/libcef/browser_impl_gtk.cc`:
 
-    Add this code at the end of the function:
+    At the end of the CefBrowserImpl::UIT_CreateBrowser() function,
+    before the return statement add the following code:
 
         gtk_widget_show_all(GTK_WIDGET(window_info_.m_Widget));
 
-2. WebWidgetHostGtkWidget::CreateNewWidget() in `libcef/webwidget_host_gtk.cc`
+2. In `chromium/src/cef/libcef/webwidget_host_gtk.cc`:
 
-    Replace this line:
+    In WebWidgetHostGtkWidget::CreateNewWidget() function replace this line:
 
         gtk_box_pack_start(GTK_BOX(parent_view), widget, TRUE, TRUE, 0);
 
-    With this code:
+    With the following code:
 
         if (GTK_IS_BOX(parent_view)) {
           gtk_box_pack_start(GTK_BOX(parent_view), widget, TRUE, TRUE, 0);
