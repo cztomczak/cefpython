@@ -1,5 +1,4 @@
-See this topic on CEF C++ forum for more details about this CEF
-patch to make it work with wxPython on Linux:
+See this topic on the CEF C++ forum for more details:
 http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10641
 
 Do the following changes in the CEF C++ sources:
