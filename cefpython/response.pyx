@@ -2,7 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef object CreatePyResponse(CefRefPtr[CefResponse] cefResponse):
+cdef PyResponse CreatePyResponse(CefRefPtr[CefResponse] cefResponse):
     cdef PyResponse pyResponse = PyResponse()
     pyResponse.cefResponse = cefResponse
     return pyResponse
