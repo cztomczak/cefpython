@@ -76,7 +76,7 @@ class MainFrame(wx.Frame):
 
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
-                          title='wxPython example', size=(600,400))
+                          title='wxPython example', size=(800,600))
         self.CreateMenu()
 
         windowInfo = cefpython.WindowInfo()
@@ -88,7 +88,9 @@ class MainFrame(wx.Frame):
             # Flash will crash app in CEF 1 on Linux, setting
             # plugins_disabled to True.
             browserSettings={"plugins_disabled": True},
-            navigateUrl="file://"+GetApplicationPath("cefsimple.html"))
+            navigateUrl="file://"+GetApplicationPath("wxpython.html"))
+
+        self.browser.SetClientHandler(ClientHandler())
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         if USE_EVT_IDLE:
@@ -114,6 +116,29 @@ class MainFrame(wx.Frame):
         self.idleCount += 1
         print("wxpython.py: OnIdle() %d" % self.idleCount)
         cefpython.MessageLoopWork()
+
+class ClientHandler:
+
+    # Request handler, see documentation at:
+    # https://code.google.com/p/cefpython/wiki/RequestHandler
+
+    def OnBeforeBrowse(self, browser, frame, request, navType, isRedirect):
+        # frame.GetUrl() returns current url
+        # request.GetUrl() returns new url
+        # Return true to cancel the navigation or false to allow 
+        # the navigation to proceed.
+        print("wxpython.py: OnBeforeBrowse()")
+
+    def OnBeforeResourceLoad(self, browser, request, redirectUrl, 
+            resourceStream, response, loadFlags):
+        print("wxpython.py: OnBeforeResourceLoad()")
+
+    def OnResourceRedirect(self, browser, oldUrl, newUrl):
+        print("wxpython.py: OnResourceRedirect(): oldUrl: %s, newUrl: %s" % (
+                oldUrl, newUrl[0]))
+
+    def OnResourceResponse(self, browser, url, response, contentFilter):
+        print("wxpython.py: OnResourceResponse()")
 
 class MyApp(wx.App):
     timer = None

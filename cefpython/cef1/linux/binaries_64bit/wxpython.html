@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>CefSimple (utf-8: ąś)</title>
+    <style>
+    body { font: 13px Segoe UI, Arial; line-height: 1.4em; }
+    pre { background: #ddd; font: 12px Consolas, Courier New; }
+    </style>
+</head>
+<body>
+
+Use mouse context menu to go Back/Forward in history navigation.
+
+<h3>Google Search</h3>
+<a href="http://www.google.com/">http://www.google.com/</a>
+
+<h3>User agent</h3>
+<script>document.write(navigator.userAgent)</script>
+
+<h3>Popup</h3>
+<a href="javascript:window.open('cefsimple.html')">
+    window.open('cefsimple.html')</a>
+
+<h3>RequestHandler tests</h3>
+
+<p>See messages in the console.</p>
+
+OnBeforeBrowse() - navigate to see message: 
+<a href="wxpython.html">wxpython.html</a>
+<br>
+
+OnBeforeResourceLoad() - try loading nonexistent css file locally:
+<a href="javascript:LoadCssFile('nonexistent.css')">
+    LoadCssFile('nonexistent.css')</a>
+<script>
+function LoadCssFile(url) {
+    var cssFile=document.createElement("link")
+    cssFile.setAttribute("rel", "stylesheet")
+    cssFile.setAttribute("type", "text/css")
+    cssFile.setAttribute("href", url)
+    document.getElementsByTagName("head")[0].appendChild(cssFile)
+}
+</script>
+<br>
+
+OnResourceRedirect() - try loading this url: 
+<a href="http://tinyurl.com/google404redirect">
+    http://tinyurl.com/google404redirect</a>
+<br>
+
+OnResourceResponse() - try loading nonexistent css file via http:
+<a href="javascript:LoadCssFile('http://www.google.com/404.css')">
+    LoadCssFile('http://www.google.com/404.css')</a>    
+
+<br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br>
+
+</body>
+</html>

@@ -17,9 +17,6 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
         cef_types.cef_handler_navtype_t navType,
         cpp_bool isRedirect
         ) except * with gil:
-    # TODO: not yet implemented.
-    return False
-
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     # cdef PyRequest pyRequest
@@ -46,14 +43,11 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         CefRefPtr[CefResponse] cefResponse,
         int loadFlags
         ) except * with gil:
-    # TODO: not yet implemented.
-    return False
-
     cdef PyBrowser pyBrowser
     # cdef PyRequest pyRequest
     cdef list pyRedirectUrl
     # cdef PyResourceStream pyResourceStream
-    # cdef PyResponse pyResponse
+    cdef PyResponse pyResponse
     cdef object callback
     cdef py_bool ret
     try:
@@ -61,11 +55,11 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         pyRequest = None
         pyRedirectUrl = [""]
         pyResourceStream = None
-        pyResponse = None
+        pyResponse = CreatePyResponse(cefResponse)
         callback = pyBrowser.GetClientCallback("OnBeforeResourceLoad")
         if callback:
-            ret = callback(
-                    pyBrowser, pyRequest, pyRedirectUrl, pyResourceStream, pyResponse)
+            ret = callback(pyBrowser, pyRequest, pyRedirectUrl, 
+                    pyResourceStream, pyResponse, loadFlags)
             assert type(pyRedirectUrl) == list
             assert type(pyRedirectUrl[0]) == str
             if pyRedirectUrl[0]:
@@ -82,11 +76,9 @@ cdef public void RequestHandler_OnResourceRedirect(
         CefString& cefOldUrl,
         CefString& cefNewUrl
         ) except * with gil:
-    # TODO: needs testing.
     cdef PyBrowser pyBrowser
     cdef str pyOldUrl
-    # [""] pass by reference (out).
-    cdef list pyNewUrl
+    cdef list pyNewUrl # [""] pass by reference (out).
     cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
@@ -109,7 +101,7 @@ cdef public void RequestHandler_OnResourceResponse(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef str pyUrl
-    # cdef PyResponse pyResponse
+    cdef PyResponse pyResponse
     # cdef PyContentFilter pyContentFilter
     cdef object callback
     try:
