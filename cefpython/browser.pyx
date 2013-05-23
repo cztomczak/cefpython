@@ -113,6 +113,7 @@ cdef class PyBrowser:
     cdef public int gwlExStyle
     cdef public tuple windowRect
 
+    # C-level attributes are initialized to 0 automatically.
     cdef void* imageBuffer
 
     cdef CefRefPtr[CefBrowser] GetCefBrowser(self) except *:
@@ -137,7 +138,7 @@ cdef class PyBrowser:
         self.allowedClientCallbacks = []
         self.userData = {}
 
-    def __del__(self):
+    def __dealloc__(self):
         if self.imageBuffer:
             free(self.imageBuffer)
 

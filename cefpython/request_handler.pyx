@@ -19,12 +19,12 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
-    # cdef PyRequest pyRequest
+    cdef PyRequest pyRequest
     cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
         pyFrame = GetPyFrame(cefFrame)
-        pyRequest = None
+        pyRequest = CreatePyRequest(cefRequest)
         callback = pyBrowser.GetClientCallback("OnBeforeBrowse")
         if callback:
             return bool(callback(
@@ -39,31 +39,33 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefRequest] cefRequest,
         CefString& cefRedirectUrl,
-        CefRefPtr[CefStreamReader]& cefResourceStream,
+        CefRefPtr[CefStreamReader]& cefStreamReader,
         CefRefPtr[CefResponse] cefResponse,
         int loadFlags
         ) except * with gil:
     cdef PyBrowser pyBrowser
-    # cdef PyRequest pyRequest
+    cdef PyRequest pyRequest
     cdef list pyRedirectUrl
-    # cdef PyResourceStream pyResourceStream
+    cdef PyStreamReader pyStreamReader
     cdef PyResponse pyResponse
     cdef object callback
     cdef py_bool ret
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        pyRequest = None
+        pyRequest = CreatePyRequest(cefRequest)
         pyRedirectUrl = [""]
-        pyResourceStream = None
+        pyStreamReader = PyStreamReader()
         pyResponse = CreatePyResponse(cefResponse)
         callback = pyBrowser.GetClientCallback("OnBeforeResourceLoad")
         if callback:
             ret = callback(pyBrowser, pyRequest, pyRedirectUrl, 
-                    pyResourceStream, pyResponse, loadFlags)
+                    pyStreamReader, pyResponse, loadFlags)
             assert type(pyRedirectUrl) == list
             assert type(pyRedirectUrl[0]) == str
             if pyRedirectUrl[0]:
                 PyToCefString(pyRedirectUrl[0], cefRedirectUrl)
+            if pyStreamReader.HasCefStreamReader():
+                (&cefStreamReader)[0] = pyStreamReader.GetCefStreamReader()
             return bool(ret)
         else:
             return False
@@ -102,16 +104,18 @@ cdef public void RequestHandler_OnResourceResponse(
     cdef PyBrowser pyBrowser
     cdef str pyUrl
     cdef PyResponse pyResponse
-    # cdef PyContentFilter pyContentFilter
+    cdef PyContentFilter pyContentFilter
     cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
         pyUrl = CefToPyString(cefUrl)
         pyResponse = CreatePyResponse(cefResponse)
-        pyContentFilter = None
+        pyContentFilter = PyContentFilter()
         callback = pyBrowser.GetClientCallback("OnResourceResponse")
         if callback:
             callback(pyBrowser, pyUrl, pyResponse, pyContentFilter)
+            if pyContentFilter.HasHandler():
+                (&cefContentFilter)[0] = pyContentFilter.GetCefContentFilter()
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -136,7 +140,11 @@ cdef public cpp_bool RequestHandler_OnProtocolExecution(
         if callback:
             ret = callback(
                     pyBrowser, pyUrl, pyAllowOSExecution)
-            cefAllowOSExecution = bool(pyAllowOSExecution[0])
+            # Since Cython 0.17.4 assigning a value to an argument
+            # passed by reference will throw an error, the fix is to
+            # to use "(&arg)[0] =" instead of "arg =", see this topic:
+            # https://groups.google.com/forum/#!msg/cython-users/j58Sp3QMrD4/y9vJy9YBi_kJ
+            (&cefAllowOSExecution)[0] = bool(pyAllowOSExecution[0])
             return bool(ret)
         else:
             return False

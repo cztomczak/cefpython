@@ -4,14 +4,12 @@
 
 from cef_base cimport CefBase
 from cef_string cimport CefString
-from multimap cimport multimap
+from multimap cimport multimap as cpp_multimap
 
 cdef extern from "include/cef_response.h":
-
-    ctypedef multimap[CefString, CefString] HeaderMap
+    ctypedef cpp_multimap[CefString, CefString] CefResponseHeaderMap
 
     cdef cppclass CefResponse(CefBase):
-
         int GetStatus()
         void SetStatus(int status)
         CefString GetStatusText()
@@ -19,6 +17,6 @@ cdef extern from "include/cef_response.h":
         CefString GetMimeType()
         void SetMimeType(CefString& mimeType)
         CefString GetHeader(CefString& name)
-        void GetHeaderMap(HeaderMap& headerMap)
-        void SetHeaderMap(HeaderMap& headerMap)
+        void GetHeaderMap(CefResponseHeaderMap& headerMap)
+        void SetHeaderMap(CefResponseHeaderMap& headerMap)
 

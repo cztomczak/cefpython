@@ -4,9 +4,15 @@
 
 # IMPORTANT notes:
 #
-# - cdef functions returning types other than "object" (a python object)
-#   should have in its declaration "except *", otherwise exceptions are ignored.
-#   Those cdef that return "object" have "except *" by default.
+# - cdef/cpdef functions returning something other than a Python object
+#   should have in its declaration "except *", otherwise exceptions are
+#   ignored. Those cdef/cpdef that return "object" have "except *" by 
+#   default. The setup/compile.py script will check for functions missing
+#   "except *" and will display an error message about that, so in most
+#   cases you shouldn't worry about it.
+#
+# - TODO: add checking for "except * with gil" in functions with the
+#   "public" keyword
 #
 # - about acquiring/releasing GIL lock, see discussion here:
 #   https://groups.google.com/forum/?fromgroups=#!topic/cython-users/jcvjpSOZPp0
@@ -24,6 +30,14 @@
 # - CTags requires all functions/methods imported in .pxd files to be preceded with "cdef",
 #   otherwise they are not indexed.
 #
+# - __del__ method does not exist in Extension Types (cdef class),
+#   you have to use __dealloc__ instead, try to remember that as
+#   defining __del__ will not raise any warning and could lead to
+#   memory leaks.
+#
+# - CefString.c_str() is safe to use only on Windows, on Ubuntu 64bit
+#   for a "Pers" string it returns: "P\x00e\x00r\x00s\x00", which is
+#   most probably not what you expected.
 
 # Global variables.
 
@@ -65,6 +79,10 @@ IF CEF_VERSION == 1:
     include "load_handler.pyx"
     include "keyboard_handler.pyx"
     include "virtual_keys.pyx"
+    include "request.pyx"
+    include "web_request.pyx"
+    include "stream.pyx"
+    include "content_filter.pyx"
     include "request_handler.pyx"
     include "response.pyx"
     include "display_handler.pyx"
@@ -82,7 +100,8 @@ IF CEF_VERSION == 1:
     include "python_callback.pyx"
 
 # Client handler.
-cdef CefRefPtr[ClientHandler] g_clientHandler = <CefRefPtr[ClientHandler]?> new ClientHandler()
+cdef CefRefPtr[ClientHandler] g_clientHandler = (
+        <CefRefPtr[ClientHandler]?>new ClientHandler())
 
 def Initialize(applicationSettings=None):
     Debug("-" * 60)
@@ -147,6 +166,7 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
     PyToCefString(navigateUrl, cefNavigateUrl)
 
     Debug("CefBrowser::CreateBrowserSync()")
+    global g_clientHandler
     cdef CefRefPtr[CefBrowser] cefBrowser = cef_browser_static.CreateBrowserSync(
             cefWindowInfo, <CefRefPtr[CefClient]?>g_clientHandler, cefNavigateUrl,
             cefBrowserSettings)

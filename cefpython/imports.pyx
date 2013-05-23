@@ -12,12 +12,18 @@ import types
 import re
 import copy
 import inspect # used by JavascriptBindings.__SetObjectMethods()
-from Cython.Shadow import void
+import urlparse
+import urllib
+import json
 
 if sys.version_info.major == 2:
     from urllib import pathname2url as urllib_pathname2url
 else:
     from urllib.request import pathname2url as urllib_pathname2url
+
+from Cython.Shadow import void
+from cpython.version cimport PY_MAJOR_VERSION
+import weakref
 
 # We should allow multiple string types: str, unicode, bytes.
 # PyToCefString() can handle them all.
@@ -37,8 +43,8 @@ from multimap cimport multimap as cpp_multimap
 from libcpp.pair cimport pair as cpp_pair
 from libcpp.vector cimport vector as cpp_vector
 
-from libcpp.string cimport string as std_string
-from wstring cimport wstring as std_wstring
+from libcpp.string cimport string as cpp_string
+from wstring cimport wstring as cpp_wstring
 
 from libc.string cimport strlen
 from libc.string cimport memcpy
@@ -57,6 +63,9 @@ from libc.stdlib cimport atoi
 # Circular imports are allowed in form "cimport ...", but won't work if you do
 # "from ... cimport *", this is important to know in pxd files.
 
+from libc.stdint cimport uint64_t
+from libc.stdint cimport uintptr_t
+
 IF UNAME_SYSNAME == "Windows":
     from windows cimport *
 
@@ -65,7 +74,7 @@ from cpp_utils cimport *
 from cef_string cimport *
 cdef extern from *:
     ctypedef CefString ConstCefString "const CefString"
-    
+
 from cef_types_wrappers cimport *
 from cef_task cimport *
 
@@ -98,9 +107,16 @@ IF CEF_VERSION == 1:
     cimport cef_v8_stack_trace
     from v8function_handler cimport *
     from cef_request cimport *
+    cimport cef_request_static
+    from cef_web_urlrequest cimport *
+    cimport cef_web_urlrequest_static
+    from web_request_client cimport *
+    from cef_stream cimport *
+    cimport cef_stream_static
     from cef_response cimport *
     from cef_stream cimport *
     from cef_content_filter cimport *
+    from content_filter_handler cimport *
     from cef_download_handler cimport *
     from cef_cookie cimport *
     from cef_render_handler cimport *

@@ -40,10 +40,23 @@ cdef class PyFrame:
     def __init__(self):
         pass
 
-    cpdef py_void CallFunction(self, funcName, ...):
-        pass
+    def CallFunction(self, *args):
+        # No need to enter V8 context as we're calling javascript
+        # asynchronously using ExecuteJavascript() function.
+        funcName = args[0]
+        code = funcName+"("
+        for i in range(1, len(args)):
+            if i != 1:
+                code += ", "
+            code += json.dumps(args[i])
+        code += ")"
+        self.ExecuteJavascript(code)
 
-    cpdef object CallFunctionSync(self, funcName, ...):
+    # Synchronous javascript calls won't be supported as CEF 3
+    # does not support it, so supporting it in CEF 1 is probably
+    # not a good idea - porting to CEF 3 would be problematic.
+    
+    # cpdef object CallFunctionSync(self, funcName, ...):
         # CefV8 Objects, Arrays and Functions can be created only inside V8 context,
         # you need to call CefV8Context::Enter() and CefV8Context::Exit():
         # http://code.google.com/p/chromiumembedded/issues/detail?id=203
@@ -54,7 +67,16 @@ cdef class PyFrame:
         # now iterate through its all properties and compare to funcName, you get a
         # real javascript object which you can call and be able to get return value, also
         # you can pass python callbacks this way.'''
-        pass
+        # Example:
+        # cdef CefRefPtr[CefV8Context] v8Context = (
+        #         self.GetCefFrame().get().GetV8Context())
+        # sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
+        # if not sameContext:
+        #    assert v8Context.get().Enter(), "v8Context.Enter() failed"
+        # ... execute function here ...
+        # if not sameContext:
+        #     assert v8Context.get().Exit(), "v8Context.Exit() failed"
+    #    pass
 
     cpdef py_void Copy(self):
         self.GetCefFrame().get().Copy()

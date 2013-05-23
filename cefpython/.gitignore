@@ -29,3 +29,5 @@ ctags
 
 # Inno setup files generated from a template
 *.generated
+
+cython_debug/

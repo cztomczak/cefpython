@@ -151,7 +151,6 @@ cdef extern from "include/internal/cef_types.h":
             PID_RENDERER,
 
     IF CEF_VERSION == 1:
-
         # Browser > GetImage(), RenderHandler > OnPaint().
         ctypedef enum cef_paint_element_type_t:
             PET_VIEW = 0,
@@ -170,8 +169,32 @@ cdef extern from "include/internal/cef_types.h":
             MBT_RIGHT,
 
     IF CEF_VERSION == 3:
-
         ctypedef enum cef_state_t:
             STATE_DEFAULT = 0,
             STATE_ENABLED,
             STATE_DISABLED,
+
+    # CefRequest
+    IF CEF_VERSION == 1:
+        enum cef_postdataelement_type_t:
+          PDE_TYPE_EMPTY  = 0,
+          PDE_TYPE_BYTES,
+          PDE_TYPE_FILE,
+
+        enum cef_weburlrequest_flags_t:
+          WUR_FLAG_NONE = 0,
+          WUR_FLAG_SKIP_CACHE = 0x1,
+          WUR_FLAG_ALLOW_CACHED_CREDENTIALS = 0x2,
+          WUR_FLAG_ALLOW_COOKIES = 0x4,
+          WUR_FLAG_REPORT_UPLOAD_PROGRESS = 0x8,
+          WUR_FLAG_REPORT_LOAD_TIMING = 0x10,
+          WUR_FLAG_REPORT_RAW_HEADERS = 0x20
+
+        enum cef_weburlrequest_state_t:
+          WUR_STATE_UNSENT = 0,
+          WUR_STATE_STARTED = 1,
+          WUR_STATE_HEADERS_RECEIVED = 2,
+          WUR_STATE_LOADING = 3,
+          WUR_STATE_DONE = 4,
+          WUR_STATE_ERROR = 5,
+          WUR_STATE_ABORT = 6,
