@@ -36,7 +36,10 @@ cdef public cpp_bool V8FunctionHandler_Execute(
                 preinc(iterator)
 
             pyReturnValue = pythonCallback(*arguments)
-            cefReturnValue = PyToV8Value(pyReturnValue, v8Context)
+            # Can't use "arg = " for a referenced argument, bug in Cython,
+            # see comment in RequestHandler_OnProtocolExecution() for
+            # more details.
+            (&cefReturnValue)[0] = PyToV8Value(pyReturnValue, v8Context)
 
             return <cpp_bool>True
         else:
@@ -77,7 +80,7 @@ cdef public cpp_bool V8FunctionHandler_Execute(
                 preinc(iterator)
 
             pyReturnValue = pyFunction(*arguments)
-            cefReturnValue = PyToV8Value(pyReturnValue, v8Context)
+            (&cefReturnValue)[0] = PyToV8Value(pyReturnValue, v8Context)
 
             return <cpp_bool>True
 

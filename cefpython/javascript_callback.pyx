@@ -49,7 +49,7 @@ cdef class JavascriptCallback:
         assert callbackId, "JavascriptCallback.__init__() failed: callbackId is empty"
         self.callbackId = callbackId
 
-    def __del__(self):
+    def __dealloc__(self):
         DelV8JavascriptCallback(self.callbackId)
 
     def Call(self, *args):

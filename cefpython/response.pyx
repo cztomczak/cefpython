@@ -64,7 +64,8 @@ cdef class PyResponse:
         cdef cpp_multimap[CefString, CefString] cefHeaderMap
         self.GetCefResponse().get().GetHeaderMap(cefHeaderMap)
         cdef list pyHeaderMultimap = []
-        cdef cpp_multimap[CefString, CefString].iterator iterator = cefHeaderMap.begin()
+        cdef cpp_multimap[CefString, CefString].iterator iterator = (
+                cefHeaderMap.begin())
         cdef CefString cefKey
         cdef CefString cefValue
         cdef str pyKey

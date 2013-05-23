@@ -8,7 +8,6 @@ from cef_string cimport CefString
 from cef_v8 cimport CefV8Handler
 from cef_v8 cimport CefV8Accessor
 from cef_v8 cimport CefV8Context
-from cef_base cimport CefBase
 from libcpp cimport bool as cpp_bool
 
 # Importing static methods only in this file. This is in a separate file as we do not want

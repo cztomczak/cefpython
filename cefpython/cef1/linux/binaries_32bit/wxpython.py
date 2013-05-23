@@ -76,7 +76,7 @@ class MainFrame(wx.Frame):
 
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
-                          title='wxPython example', size=(600,400))
+                          title='wxPython example', size=(1024,768))
         self.CreateMenu()
 
         windowInfo = cefpython.WindowInfo()
@@ -88,7 +88,14 @@ class MainFrame(wx.Frame):
             # Flash will crash app in CEF 1 on Linux, setting
             # plugins_disabled to True.
             browserSettings={"plugins_disabled": True},
-            navigateUrl="file://"+GetApplicationPath("cefsimple.html"))
+            navigateUrl="file://"+GetApplicationPath("wxpython.html"))
+
+        self.browser.SetClientHandler(ClientHandler())
+        
+        jsBindings = cefpython.JavascriptBindings(
+            bindToFrames=False, bindToPopups=True)
+        jsBindings.SetObject("external", JavascriptBindings(self.browser))
+        self.browser.SetJavascriptBindings(jsBindings)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         if USE_EVT_IDLE:
@@ -111,9 +118,116 @@ class MainFrame(wx.Frame):
         self.Destroy()
 
     def OnIdle(self, event):
-        self.idleCount += 1
-        print("wxpython.py: OnIdle() %d" % self.idleCount)
+        # self.idleCount += 1
+        # print("wxpython.py: OnIdle() %d" % self.idleCount)
         cefpython.MessageLoopWork()
+
+class JavascriptBindings:
+    browser = None
+    webRequest = None
+    
+    def __init__(self, browser):
+        self.browser = browser
+
+    def WebRequest(self, url):
+        request = cefpython.Request.CreateRequest()
+        request.SetUrl(url)
+        webRequestClient = WebRequestClient()
+        # Must keep the reference otherwise WebRequestClient 
+        # callbacks won't be called.
+        self.webRequest = cefpython.WebRequest.CreateWebRequest(request,
+                webRequestClient)
+
+    def DoCallFunction(self):
+        self.browser.GetMainFrame().CallFunction(
+                "MyFunction", "abc", 12, [1,2,3], {"qwe": 456, "rty": 789})
+
+class WebRequestClient:
+    def OnStateChange(self, webRequest, state):
+        stateName = "unknown"
+        for key, value in cefpython.WebRequest.State.iteritems():
+            if value == state:
+                stateName = key        
+        print("WebRequestClient::OnStateChange(): state = %s" % stateName)
+
+    def OnRedirect(self, webRequest, request, response):
+        print("WebRequestClient::OnRedirect(): url = %s" % request.GetUrl())
+
+    def OnHeadersReceived(self, webRequest, response):
+        print("WebRequestClient::OnHeadersReceived(): headers = %s" % (
+                response.GetHeaderMap()))
+
+    def OnProgress(self, webRequest, bytesSent, totalBytesToBeSent):
+        print("WebRequestClient::OnProgress(): bytesSent = %s, "
+                "totalBytesToBeSent = %s" % (bytesSent, totalBytesToBeSent))
+
+    def OnData(self, webRequest, data):
+        print("WebRequestClient::OnData(): data:")
+        print("-" * 60)
+        print(data)
+        print("-" * 60)
+
+    def OnError(self, webRequest, errorCode):
+        print("WebRequestClient::OnError(): errorCode = %s" % errorCode)
+
+class ContentFilterHandler:
+    def ProcessData(self, data, substitute_data):
+        if data == "body { color: red; }":
+            substitute_data.SetData("body { color: green; }")
+
+    def Drain(self, remainder):
+        remainder.SetData("body h3 { color: orange; }")
+
+class ClientHandler:
+    # Request handler, see documentation at:
+    # https://code.google.com/p/cefpython/wiki/RequestHandler
+    contentFilter = None    
+
+    def OnBeforeBrowse(self, browser, frame, request, navType, isRedirect):
+        # - frame.GetUrl() returns current url
+        # - request.GetUrl() returns new url
+        # - Return true to cancel the navigation or false to allow 
+        # the navigation to proceed.
+        # - Modifying headers or post data can be done only in
+        # OnBeforeResourceLoad()
+        print("OnBeforeBrowse(): request.GetUrl() = %s, "
+                "request.GetHeaderMap(): %s" % (
+                request.GetUrl(), request.GetHeaderMap()))
+        if request.GetMethod() == "POST":
+            print("OnBeforeBrowse(): POST data: %s" % (
+                    request.GetPostData()))
+
+    def OnBeforeResourceLoad(self, browser, request, redirectUrl, 
+            streamReader, response, loadFlags):
+        print("OnBeforeResourceLoad(): request.GetUrl() = %s" % (
+                request.GetUrl()))
+        if request.GetMethod() == "POST":
+            if request.GetUrl().startswith(
+                        "https://accounts.google.com/ServiceLogin"):
+                postData = request.GetPostData()
+                postData["Email"] = "--changed via python"
+                request.SetPostData(postData)
+                print("OnBeforeResourceLoad(): modified POST data: %s" % (
+                        request.GetPostData()))
+        if request.GetUrl().endswith("replace-on-the-fly.css"):
+            print("OnBeforeResourceLoad(): replacing css on the fly")
+            response.SetStatus(200)
+            response.SetStatusText("OK")
+            response.SetMimeType("text/css")
+            streamReader.SetData("body { color: red; }")
+
+    def OnResourceRedirect(self, browser, oldUrl, newUrl):
+        print("OnResourceRedirect(): oldUrl: %s, newUrl: %s" % (
+                oldUrl, newUrl[0]))
+
+    def OnResourceResponse(self, browser, url, response, contentFilter):
+        print("OnResourceResponse()")
+        if url.endswith("content-filter/replace-on-the-fly.css"):
+            print("OnResourceResponse(): setting contentFilter handler")
+            contentFilter.SetHandler(ContentFilterHandler())
+            # Must keep the reference to contentFilter otherwise
+            # ContentFilterHandler callbacks won't be called.
+            self.contentFilter = contentFilter
 
 class MyApp(wx.App):
     timer = None

@@ -76,9 +76,9 @@ class WindowUtils:
             bytesTitle = <bytes>pyTitle
         else:
             bytesTitle = pyTitle.encode("utf-8")
-        cdef std_string stdStringTitle = bytesTitle
+        cdef cpp_string cppStringTitle = bytesTitle
         cdef CefString cefTitle
-        cefTitle.FromString(stdStringTitle)
+        cefTitle.FromString(cppStringTitle)
 
         if pyBrowser.GetUserData("__outerWindowHandle"):
             if not currentTitle:
