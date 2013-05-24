@@ -15,6 +15,7 @@ import inspect # used by JavascriptBindings.__SetObjectMethods()
 import urlparse
 import urllib
 import json
+import datetime
 
 if sys.version_info.major == 2:
     from urllib import pathname2url as urllib_pathname2url
@@ -65,6 +66,8 @@ from libc.stdlib cimport atoi
 
 from libc.stdint cimport uint64_t
 from libc.stdint cimport uintptr_t
+
+cimport ctime
 
 IF UNAME_SYSNAME == "Windows":
     from windows cimport *
@@ -119,6 +122,7 @@ IF CEF_VERSION == 1:
     from content_filter_handler cimport *
     from cef_download_handler cimport *
     from cef_cookie cimport *
+    from cef_time cimport *
     from cef_render_handler cimport *
 
 IF UNAME_SYSNAME == "Windows":
