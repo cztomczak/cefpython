@@ -58,10 +58,14 @@ include "utils.pyx"
 include "string_utils.pyx"
 IF UNAME_SYSNAME == "Windows":
     include "string_utils_win.pyx"
+include "time_utils.pyx"
 
 include "window_info.pyx"
 include "browser.pyx"
 include "frame.pyx"
+
+IF CEF_VERSION == 1:
+    include "cookie.pyx"
 
 include "settings.pyx"
 IF UNAME_SYSNAME == "Windows":
