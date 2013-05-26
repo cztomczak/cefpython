@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2013 CEF Python Authors. All rights reserved.
+# Copyright (c) 2012-2013 The CEF Python authors. All rights reserved.
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
@@ -60,14 +60,20 @@ cdef class Cookie:
     cpdef py_void SetName(self, py_string name):
         # This works:
         # | CefString(&self.cefCookie.name).FromString(name)
-        # This does not work (strange!):
+        # This does not work:
         # | cdef CefString cefString = CefString(&self.cefCookie.name)
         # | PyToCefString(name, cefString)
+        # Because it's a Copy Constructor, it does not reference the
+        # same underlying cef_string_t, instead it copies the value.
+        # "T a(b)" - direct initialization (not supported by cython)
+        # "T a = b" - copy initialization        
         # But this works:
         # | cdef CefString* cefString = new CefString(&self.cefCookie.name)
         # | PyToCefStringPointer(name, cefString)
         # | del cefString
-        CefString(&self.cefCookie.name).FromString(name)
+        cdef CefString cefString
+        cefString.Attach(&self.cefCookie.name, False)
+        PyToCefString(name, cefString)
 
     cpdef str GetName(self):
         cdef CefString cefString = CefString(&self.cefCookie.name)
