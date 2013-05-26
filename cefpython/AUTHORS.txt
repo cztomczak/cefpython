@@ -1,4 +1,4 @@
-Main developers:
+Core developers:
 
     Czarek Tomczak <czarek.tomczak@@gmail.com>
 
