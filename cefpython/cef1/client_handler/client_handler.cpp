@@ -1,8 +1,12 @@
+// Copyright (c) 2012-2013 The CEF Python authors. All rights reserved.
+// License: New BSD License.
+// Website: http://code.google.com/p/cefpython/
+
 #include "client_handler.h"
 #include <stdio.h>
 
-// Cython doesn't know nothing about 'const' so we need to remove it,
-// otherwise you get compile error.
+// The const_cast<> were required in Cython <= 0.17.4,
+// todo: get rid of it.
 
 //
 // CefLoadHandler

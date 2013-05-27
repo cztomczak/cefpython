@@ -5,11 +5,12 @@
 from cef_string cimport cef_string_t
 from libcpp cimport bool as cpp_bool
 from cef_time cimport cef_time_t
+from libcpp.vector cimport vector as cpp_vector
+from Cython.Shadow import void
+from cef_string cimport CefString
+from cef_ptr cimport CefRefPtr
 
 cdef extern from "include/cef_cookie.h":
-    cdef cppclass CefCookieManager:
-        pass
-
     ctypedef struct CefCookie:
         cef_string_t name
         cef_string_t value
@@ -21,3 +22,17 @@ cdef extern from "include/cef_cookie.h":
         cef_time_t last_access
         cpp_bool has_expires
         cef_time_t expires
+
+    cdef cppclass CefCookieManager:
+        void SetSupportedSchemes(const cpp_vector[CefString]& schemes)
+        cpp_bool VisitAllCookies(CefRefPtr[CefCookieVisitor] visitor)
+        cpp_bool VisitUrlCookies(const CefString& url, 
+                                 cpp_bool includeHttpOnly,
+                                 CefRefPtr[CefCookieVisitor] visitor)
+        cpp_bool SetCookie(const CefString& url, const CefCookie& cookie)
+        cpp_bool DeleteCookies(const CefString& url,
+                               const CefString& cookie_name)
+        cpp_bool SetStoragePath(const CefString& path)
+
+    cdef cppclass CefCookieVisitor:
+        pass

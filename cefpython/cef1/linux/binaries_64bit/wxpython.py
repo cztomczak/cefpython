@@ -76,7 +76,7 @@ class MainFrame(wx.Frame):
 
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
-                          title='wxPython example', size=(1024,768))
+                          title='wxPython example', size=(800,600))
         self.CreateMenu()
 
         windowInfo = cefpython.WindowInfo()
@@ -93,7 +93,7 @@ class MainFrame(wx.Frame):
         self.browser.SetClientHandler(ClientHandler())
         
         jsBindings = cefpython.JavascriptBindings(
-            bindToFrames=False, bindToPopups=True)
+            bindToFrames=False, bindToPopups=False)
         jsBindings.SetObject("external", JavascriptBindings(self.browser))
         self.browser.SetJavascriptBindings(jsBindings)
 
@@ -123,11 +123,12 @@ class MainFrame(wx.Frame):
         cefpython.MessageLoopWork()
 
 class JavascriptBindings:
-    browser = None
+    mainBrowser = None
     webRequest = None
+    cookieVisitor = None
     
-    def __init__(self, browser):
-        self.browser = browser
+    def __init__(self, mainBrowser):
+        self.mainBrowser = mainBrowser
 
     def WebRequest(self, url):
         request = cefpython.Request.CreateRequest()
@@ -139,8 +140,60 @@ class JavascriptBindings:
                 webRequestClient)
 
     def DoCallFunction(self):
-        self.browser.GetMainFrame().CallFunction(
+        self.mainBrowser.GetMainFrame().CallFunction(
                 "MyFunction", "abc", 12, [1,2,3], {"qwe": 456, "rty": 789})
+
+    def VisitAllCookies(self):
+        # Need to keep the reference alive.
+        self.cookieVisitor = CookieVisitor()
+        cookieManager = self.mainBrowser.GetUserData("cookieManager")
+        if not cookieManager:
+            print("Cookie manager not yet created! Visit http website first")
+            return
+        cookieManager.VisitAllCookies(self.cookieVisitor)
+
+    def VisitUrlCookies(self):
+        # Need to keep the reference alive.
+        self.cookieVisitor = CookieVisitor()
+        cookieManager = self.mainBrowser.GetUserData("cookieManager")
+        if not cookieManager:
+            print("Cookie manager not yet created! Visit http website first")
+            return
+        cookieManager.VisitUrlCookies(
+            "http://www.html-kit.com/tools/cookietester/",
+            False, self.cookieVisitor)
+        # .www.html-kit.com
+
+    def SetCookie(self):
+        cookieManager = self.mainBrowser.GetUserData("cookieManager")
+        if not cookieManager:
+            print("Cookie manager not yet created! Visit http website first")
+            return
+        cookie = cefpython.Cookie()
+        cookie.SetName("Created_Via_Python")
+        cookie.SetValue("yeah really")
+        cookieManager.SetCookie("http://www.html-kit.com/tools/cookietester/",
+                cookie)
+        print("Cookie created! Visit html-kit cookietester to see it")
+
+    def DeleteCookies(self):
+        cookieManager = self.mainBrowser.GetUserData("cookieManager")
+        if not cookieManager:
+            print("Cookie manager not yet created! Visit http website first")
+            return
+        cookieManager.DeleteCookies(
+                "http://www.html-kit.com/tools/cookietester/",
+                "Created_Via_Python")
+        print("Cookie deleted! Visit html-kit cookietester to see the result")
+
+class CookieVisitor:
+    def Visit(self, cookie, count, total, deleteCookie):
+        if count == 0:
+            print("CookieVisitor.Visit(): total cookies: %s" % total)
+        print("CookieVisitor.Visit(): cookie:")
+        print(cookie.Get())
+        # True to continue visiting cookies
+        return True 
 
 class WebRequestClient:
     def OnStateChange(self, webRequest, state):
@@ -151,7 +204,8 @@ class WebRequestClient:
         print("WebRequestClient::OnStateChange(): state = %s" % stateName)
 
     def OnRedirect(self, webRequest, request, response):
-        print("WebRequestClient::OnRedirect(): url = %s" % request.GetUrl())
+        print("WebRequestClient::OnRedirect(): url = %s" % (
+                request.GetUrl()[:80]))
 
     def OnHeadersReceived(self, webRequest, response):
         print("WebRequestClient::OnHeadersReceived(): headers = %s" % (
@@ -192,7 +246,7 @@ class ClientHandler:
         # OnBeforeResourceLoad()
         print("OnBeforeBrowse(): request.GetUrl() = %s, "
                 "request.GetHeaderMap(): %s" % (
-                request.GetUrl(), request.GetHeaderMap()))
+                request.GetUrl()[:80], request.GetHeaderMap()))
         if request.GetMethod() == "POST":
             print("OnBeforeBrowse(): POST data: %s" % (
                     request.GetPostData()))
@@ -200,7 +254,7 @@ class ClientHandler:
     def OnBeforeResourceLoad(self, browser, request, redirectUrl, 
             streamReader, response, loadFlags):
         print("OnBeforeResourceLoad(): request.GetUrl() = %s" % (
-                request.GetUrl()))
+                request.GetUrl()[:80]))
         if request.GetMethod() == "POST":
             if request.GetUrl().startswith(
                         "https://accounts.google.com/ServiceLogin"):
@@ -228,6 +282,17 @@ class ClientHandler:
             # Must keep the reference to contentFilter otherwise
             # ContentFilterHandler callbacks won't be called.
             self.contentFilter = contentFilter
+
+    def GetCookieManager(self, browser, mainUrl):
+        # Create unique cookie manager for each browser.
+        cookieManager = browser.GetUserData("cookieManager")
+        if cookieManager:
+            return cookieManager
+        else:
+            cookieManager = cefpython.CookieManager.CreateManager("")
+            browser.SetUserData("cookieManager", cookieManager)
+            return cookieManager
+
 
 class MyApp(wx.App):
     timer = None

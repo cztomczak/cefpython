@@ -80,6 +80,7 @@ cdef extern from *:
 
 from cef_types_wrappers cimport *
 from cef_task cimport *
+from cef_runnable cimport *
 
 from cef_platform cimport *
 
@@ -122,6 +123,9 @@ IF CEF_VERSION == 1:
     from content_filter_handler cimport *
     from cef_download_handler cimport *
     from cef_cookie cimport *
+    cimport cef_cookie_static
+    cimport cef_cookie_manager_namespace
+    from cookie_visitor cimport *
     from cef_time cimport *
     from cef_render_handler cimport *
 

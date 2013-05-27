@@ -129,7 +129,7 @@ cdef public cpp_bool RequestHandler_OnProtocolExecution(
     cdef PyBrowser pyBrowser
     cdef str pyUrl
     # [True] pass by reference (out).
-    cdef list pyAllowExecution
+    cdef list pyAllowOSExecution
     cdef object callback
     cdef py_bool ret
     try:
@@ -243,21 +243,22 @@ cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& mainUrl
         ) except * with gil:
-    # TODO: not yet implemented.
-    return <CefRefPtr[CefCookieManager]>NULL
+    assert IsThread(TID_IO), "Must be called on the IO thread"
     cdef PyBrowser pyBrowser
     cdef str pyMainUrl
     cdef object callback
-    cdef py_bool ret
+    cdef PyCookieManager ret
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
         pyMainUrl = CefToPyString(mainUrl)
         callback = pyBrowser.GetClientCallback("GetCookieManager")
         if callback:
-            ret = bool(callback(
-                    pyBrowser, pyMainUrl))
+            ret = callback(pyBrowser, pyMainUrl)
             if ret:
-                pass
+                if isinstance(ret, PyCookieManager):
+                    return ret.cefCookieManager
+                else:
+                    raise Exception("Expected CookieManager object")
             return <CefRefPtr[CefCookieManager]>NULL
         else:
             return <CefRefPtr[CefCookieManager]>NULL

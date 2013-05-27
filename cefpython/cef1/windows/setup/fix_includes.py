@@ -31,7 +31,8 @@ def ExceptAllMissing(content):
     patterns = []
     patterns.append(
         r"\bcp?def\s+"
-        "((int|short|long|double|char|unsigned|float|double)\s+)+"
+        "((int|short|long|double|char|unsigned|float|double|cpp_bool"
+                "|cpp_string|cpp_wstring|uint64_t|uintptr_t|void)\s+)+"
         "\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:")
     patterns.append(
         r"\bcp?def\s+"

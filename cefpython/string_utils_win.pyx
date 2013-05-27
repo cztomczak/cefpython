@@ -4,7 +4,8 @@
 
 cdef int wchar_t_size = 2
 
-cdef void CharToWidechar(char* charString, wchar_t* wideString, int wideSize):
+cdef void CharToWidechar(char* charString, wchar_t* wideString, int wideSize
+        ) except *:
     cdef int copiedCharacters = MultiByteToWideChar(
             CP_UTF8, 0, charString, -1, wideString, wideSize)
     # MultiByteToWideChar does not include the NULL character

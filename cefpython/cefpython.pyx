@@ -8,8 +8,8 @@
 #   should have in its declaration "except *", otherwise exceptions are
 #   ignored. Those cdef/cpdef that return "object" have "except *" by 
 #   default. The setup/compile.py script will check for functions missing
-#   "except *" and will display an error message about that, so in most
-#   cases you shouldn't worry about it.
+#   "except *" and will display an error message about that, but it's
+#   not perfect and won't detect all cases.
 #
 # - TODO: add checking for "except * with gil" in functions with the
 #   "public" keyword

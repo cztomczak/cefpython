@@ -12,6 +12,7 @@
   #endif
 #endif
 
+__PYX_EXTERN_C DL_IMPORT(bool) CookieVisitor_Visit(int, CefCookie const &, int, int, bool &);
 __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnLoadEnd(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, int);
 __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnLoadStart(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>);
 __PYX_EXTERN_C DL_IMPORT(bool) LoadHandler_OnLoadError(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, enum cef_handler_errorcode_t, CefString &, CefString &);
