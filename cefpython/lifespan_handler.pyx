@@ -62,4 +62,3 @@ cdef public cpp_bool LifespanHandler_RunModal(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
-

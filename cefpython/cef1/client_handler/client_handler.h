@@ -13,20 +13,24 @@ class ClientHandler : public CefClient,
         public CefRequestHandler,
         public CefDisplayHandler,
         public CefLifeSpanHandler,
-        public CefRenderHandler
+        public CefRenderHandler,
+        public CefDragHandler
 /*
         public CefFocusHandler,
+        public CefMenuHandler,
         public CefPrintHandler,
-        public CefDragHandler,
         public CefPermissionHandler,
-        public DownloadListener{
+        public CefFindHandler,
+        public CefJSDialogHandler,
 */
 {
 public:
   ClientHandler(){}
   virtual ~ClientHandler(){}
 
-  // Implemented handlers:
+  // ---------------------------------------------------------------------------
+  // Handlers that are already implemented
+  // ---------------------------------------------------------------------------
 
   virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE
   { return this; }
@@ -49,7 +53,12 @@ public:
   virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE
   { return this; }
 
-  // NOT implemented handlers:
+  virtual CefRefPtr<CefDragHandler> GetDragHandler() OVERRIDE
+  { return this; }
+
+  // ---------------------------------------------------------------------------
+  // NOT yet implemented handlers
+  // ---------------------------------------------------------------------------
 
   virtual CefRefPtr<CefFocusHandler> GetFocusHandler() OVERRIDE
   { return NULL; }
@@ -69,12 +78,9 @@ public:
   virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() OVERRIDE
   { return NULL; }
 
-  virtual CefRefPtr<CefDragHandler> GetDragHandler() OVERRIDE
-  { return NULL; }
-
-  //
+  // ---------------------------------------------------------------------------
   // CefLoadHandler methods.
-  //
+  // ---------------------------------------------------------------------------
 
   virtual void OnLoadEnd(
       CefRefPtr<CefBrowser> browser,
@@ -96,9 +102,9 @@ public:
       CefString& errorText
     ) OVERRIDE;
 
-  //
+  // ---------------------------------------------------------------------------
   // CefKeyboardHandler methods.
-  //
+  // ---------------------------------------------------------------------------
 
   virtual bool OnKeyEvent(
       CefRefPtr<CefBrowser> browser,
@@ -109,9 +115,9 @@ public:
       bool isAfterJavascript
     ) OVERRIDE;
 
-  //
+  // ---------------------------------------------------------------------------
   // CefV8ContextHandler methods.
-  //
+  // ---------------------------------------------------------------------------
 
   virtual void OnContextCreated(
       CefRefPtr<CefBrowser> cefBrowser,
@@ -130,9 +136,9 @@ public:
       CefRefPtr<CefV8Exception> exception,
       CefRefPtr<CefV8StackTrace> stackTrace) OVERRIDE;
 
-  //
+  // ---------------------------------------------------------------------------
   // CefRequestHandler methods.
-  //
+  // ---------------------------------------------------------------------------
 
   virtual bool OnBeforeBrowse(
       CefRefPtr<CefBrowser> browser,
@@ -186,9 +192,9 @@ public:
       CefRefPtr<CefBrowser> browser,
       const CefString& main_url) OVERRIDE;
 
-  //
+  // ---------------------------------------------------------------------------
   // CefDisplayHandler
-  //
+  // ---------------------------------------------------------------------------
 
   virtual void OnAddressChange(CefRefPtr<CefBrowser> browser,
                                CefRefPtr<CefFrame> frame,
@@ -218,9 +224,9 @@ public:
   virtual bool OnTooltip(CefRefPtr<CefBrowser> browser,
                          CefString& text) OVERRIDE;
 
-  //
+  // ---------------------------------------------------------------------------
   // CefLifeSpanHandler
-  //
+  // ---------------------------------------------------------------------------
 
   virtual bool DoClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
@@ -237,9 +243,9 @@ public:
 
   virtual bool RunModal(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
-  //
+  // ---------------------------------------------------------------------------
   // CefRenderHandler
-  //
+  // ---------------------------------------------------------------------------
 
 #if defined(OS_WIN)
 
@@ -269,7 +275,19 @@ public:
   virtual void OnCursorChange(CefRefPtr<CefBrowser> browser,
                               CefCursorHandle cursor) OVERRIDE;
 
-#endif  
+#endif
+
+  // --------------------------------------------------------------------------- 
+  // CefDragHandler
+  // ---------------------------------------------------------------------------
+
+  virtual bool OnDragStart(CefRefPtr<CefBrowser> browser,
+                           CefRefPtr<CefDragData> dragData,
+                           DragOperationsMask mask) OVERRIDE;
+
+  virtual bool OnDragEnter(CefRefPtr<CefBrowser> browser,
+                           CefRefPtr<CefDragData> dragData,
+                           DragOperationsMask mask) OVERRIDE;
 
 protected:
 

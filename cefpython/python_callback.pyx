@@ -6,8 +6,10 @@ cdef dict g_PythonCallbacks = {}
 # Next callbackId.
 cdef int g_PythonCallbackCount = 0
 
-cpdef int PutPythonCallback(object pythonCallback
+cpdef int PutPythonCallback(
+        object pythonCallback
         ) except *:
+    # Called from v8utils.pyx > PyToV8Value().
     global g_PythonCallbacks
     global g_PythonCallbackCount
     g_PythonCallbackCount += 1
@@ -21,10 +23,10 @@ cpdef object GetPythonCallback(int callbackId):
         raise Exception("GetPythonCallback() failed: invalid callbackId: %s" % callbackId)
     return g_PythonCallbacks[callbackId]
 
-# We call it through V8FunctionHandler's detructor, see v8function_handler.h >
-# ~V8FunctionHandler(). "with gil" must be added as we call it from c++.
-
-cdef void RemovePythonCallback(int callbackId
+cdef void RemovePythonCallback(
+        int callbackId
         ) except * with gil:
+    # Called from v8function_handler.h > ~V8FunctionHandler().
+    # Added "with gil" as it's called from C++.
     global g_PythonCallbacks
     del g_PythonCallbacks[callbackId]

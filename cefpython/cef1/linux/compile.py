@@ -26,6 +26,38 @@ PYVERSION = str(sys.version_info[0])+str(sys.version_info[1])
 print("PYVERSION = %s" % PYVERSION)
 print("BITS = %s" % BITS)
 
+print("Compiling C++ projects")
+
+# Need to allow continuing even when make fails, as it may
+# fail because the "public" function declaration is not yet
+# in "cefpython.h", but for it to be generated we need to run
+# cython compiling, so in this case you continue even when make
+# fails and then run the compile.py script again and this time
+# make should succeed.
+
+os.chdir("./../../cpp_utils/")
+ret = subprocess.call(["make", "-f", "Makefile"])
+if ret != 0:
+    what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
+    if what != "y":
+        exit()
+
+os.chdir("./../cef1/client_handler/")
+ret = subprocess.call(["make", "-f", "Makefile"])
+if ret != 0:
+    what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
+    if what != "y":
+        exit()
+
+os.chdir("./../v8function_handler/")
+ret = subprocess.call(["make", "-f", "Makefile"])
+if ret != 0:
+    what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
+    if what != "y":
+        exit()
+
+os.chdir("./../linux/")
+
 try:
     os.remove("./binaries_%s/cefpython_py%s.so" % (BITS, PYVERSION))
 except OSError:

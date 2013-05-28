@@ -20,7 +20,8 @@
 # - <CefRefPtr[ClientHandler]?>new ClientHandler()
 #   <...?> means to throw an error if the cast is not allowed
 #
-# - in client handler callbacks must embrace all code in try..except otherwise
+# - in client handler callbacks (or others that are called from C++ and
+#   use "except * with gil") must embrace all code in try..except otherwise
 #   the error will  be ignored, only printed to the output console, this is the
 #   default behavior of Cython, to remedy this you are supposed to add "except *"
 #   in function declaration, unfortunately it does not work, some conflict with
@@ -94,6 +95,8 @@ IF CEF_VERSION == 1:
     IF UNAME_SYSNAME == "Windows":
         # Off-screen rendering currently supported only on Windows.
         include "render_handler.pyx"
+    include "drag_data.pyx"
+    include "drag_handler.pyx"
 
 IF CEF_VERSION == 1:
     include "v8context_handler.pyx"

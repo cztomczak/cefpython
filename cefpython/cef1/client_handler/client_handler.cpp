@@ -6,11 +6,11 @@
 #include <stdio.h>
 
 // The const_cast<> were required in Cython <= 0.17.4,
-// todo: get rid of it.
+// TODO: get rid of it.
 
-//
+// -----------------------------------------------------------------------------
 // CefLoadHandler
-//
+// -----------------------------------------------------------------------------
 
 void ClientHandler::OnLoadEnd(
       CefRefPtr<CefBrowser> browser,
@@ -39,9 +39,9 @@ bool ClientHandler::OnLoadError(
       browser, frame, errorCode, const_cast<CefString&>(failedUrl), errorText);
 }
 
-//
+// -----------------------------------------------------------------------------
 // CefKeyboardHandler
-//
+// -----------------------------------------------------------------------------
 
 bool ClientHandler::OnKeyEvent(
       CefRefPtr<CefBrowser> browser,
@@ -55,9 +55,9 @@ bool ClientHandler::OnKeyEvent(
       browser, eventType, keyCode, modifiers, isSystemKey, isAfterJavascript);
 }
 
-//
+// -----------------------------------------------------------------------------
 // CefV8ContextHandler
-//
+// -----------------------------------------------------------------------------
 
 void ClientHandler::OnContextCreated(
       CefRefPtr<CefBrowser> cefBrowser,
@@ -86,9 +86,9 @@ void ClientHandler::OnUncaughtException(
       browser, frame, context, exception, stackTrace);
 }
 
-//
+// -----------------------------------------------------------------------------
 // CefRequestHandler
-//
+// -----------------------------------------------------------------------------
 
 bool ClientHandler::OnBeforeBrowse(
       CefRefPtr<CefBrowser> browser,
@@ -177,13 +177,14 @@ CefRefPtr<CefCookieManager> ClientHandler::GetCookieManager(
       browser, const_cast<CefString&>(main_url));
 }
 
-//
+// -----------------------------------------------------------------------------
 // CefDisplayHandler
-//
+// -----------------------------------------------------------------------------
 
 void ClientHandler::OnAddressChange(CefRefPtr<CefBrowser> browser,
                                CefRefPtr<CefFrame> frame,
                                const CefString& url) {
+  REQUIRE_UI_THREAD();
   DisplayHandler_OnAddressChange(browser, frame, const_cast<CefString&>(url));
 }
 
@@ -191,6 +192,7 @@ bool ClientHandler::OnConsoleMessage(CefRefPtr<CefBrowser> browser,
                                 const CefString& message,
                                 const CefString& source,
                                 int line) {
+  REQUIRE_UI_THREAD();
   return DisplayHandler_OnConsoleMessage(
       browser, const_cast<CefString&>(message),
       const_cast<CefString&>(source), line);
@@ -200,45 +202,53 @@ void ClientHandler::OnContentsSizeChange(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     int width,
                                     int height) {
+  REQUIRE_UI_THREAD();
   DisplayHandler_OnContentsSizeChange(browser, frame, width, height);
 }
 
 void ClientHandler::OnNavStateChange(CefRefPtr<CefBrowser> browser,
                                 bool canGoBack,
                                 bool canGoForward) {
+  REQUIRE_UI_THREAD();
   DisplayHandler_OnNavStateChange(browser, canGoBack, canGoForward);
 }
 
 void ClientHandler::OnStatusMessage(CefRefPtr<CefBrowser> browser,
                                const CefString& value,
                                StatusType type) {
+  REQUIRE_UI_THREAD();
   DisplayHandler_OnStatusMessage(browser, const_cast<CefString&>(value), type);
 }
 
 
 void ClientHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
                              const CefString& title) {
+  REQUIRE_UI_THREAD();
   DisplayHandler_OnTitleChange(browser, const_cast<CefString&>(title));
 }
 
 bool ClientHandler::OnTooltip(CefRefPtr<CefBrowser> browser,
                          CefString& text) {
+  REQUIRE_UI_THREAD();
   return DisplayHandler_OnTooltip(browser, text);
 }
 
-//
+// -----------------------------------------------------------------------------
 // CefLifeSpanHandler
-//
+// -----------------------------------------------------------------------------
 
 bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
+  REQUIRE_UI_THREAD();
   return LifespanHandler_DoClose(browser);
 }
 
 void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
+  REQUIRE_UI_THREAD();
   LifespanHandler_OnAfterCreated(browser);
 }
 
 void ClientHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
+  REQUIRE_UI_THREAD();
   LifespanHandler_OnBeforeClose(browser);
 }
 
@@ -248,27 +258,31 @@ bool ClientHandler::OnBeforePopup(CefRefPtr<CefBrowser> parentBrowser,
                            const CefString& url,
                            CefRefPtr<CefClient>& client,
                            CefBrowserSettings& settings) {
+  REQUIRE_UI_THREAD();
   // @TODO
   return false;
 }
 
 bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) {
+  REQUIRE_UI_THREAD();
   return LifespanHandler_RunModal(browser);
 }
 
-//
+// -----------------------------------------------------------------------------
 // CefRenderHandler
-//
+// -----------------------------------------------------------------------------
 
 #if defined(OS_WIN)
 
 bool ClientHandler::GetViewRect(CefRefPtr<CefBrowser> browser,
                            CefRect& rect) {
+  REQUIRE_UI_THREAD();
   return RenderHandler_GetViewRect(browser, rect);
 }
 
 bool ClientHandler::GetScreenRect(CefRefPtr<CefBrowser> browser,
                            CefRect& rect) {
+  REQUIRE_UI_THREAD();
   return RenderHandler_GetScreenRect(browser, rect);
 }
 
@@ -277,17 +291,20 @@ bool ClientHandler::GetScreenPoint(CefRefPtr<CefBrowser> browser,
                             int viewY,
                             int& screenX,
                             int& screenY) {
+  REQUIRE_UI_THREAD();
   return RenderHandler_GetScreenPoint(
       browser, viewX, viewY, screenX, screenY);
 }
 
 void ClientHandler::OnPopupShow(CefRefPtr<CefBrowser> browser,
                          bool show) {
+  REQUIRE_UI_THREAD();
   RenderHandler_OnPopupShow(browser, show);
 }
 
 void ClientHandler::OnPopupSize(CefRefPtr<CefBrowser> browser,
                          const CefRect& rect) {
+  REQUIRE_UI_THREAD();
   RenderHandler_OnPopupSize(browser, const_cast<CefRect&>(rect));
 }
 
@@ -295,6 +312,7 @@ void ClientHandler::OnPaint(CefRefPtr<CefBrowser> browser,
                      PaintElementType type,
                      const RectList& dirtyRects,
                      const void* buffer) {
+  REQUIRE_UI_THREAD();
   RenderHandler_OnPaint(browser, type,
       const_cast<RectList&>(dirtyRects),
       const_cast<void*>(buffer));
@@ -302,8 +320,27 @@ void ClientHandler::OnPaint(CefRefPtr<CefBrowser> browser,
 
 void ClientHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
                             CefCursorHandle cursor) {
+  REQUIRE_UI_THREAD();
   RenderHandler_OnCursorChange(browser, cursor);
 }
 
-// OS_WIN / CefRenderHandler
-#endif
+// #if defined(OS_WIN) - CefRenderHandler
+#endif 
+
+// -----------------------------------------------------------------------------
+// CefDragHandler
+// -----------------------------------------------------------------------------
+
+bool ClientHandler::OnDragStart(CefRefPtr<CefBrowser> browser,
+                           CefRefPtr<CefDragData> dragData,
+                           DragOperationsMask mask) {
+  REQUIRE_UI_THREAD();
+  return DragHandler_OnDragStart(browser, dragData, mask);
+}
+
+bool ClientHandler::OnDragEnter(CefRefPtr<CefBrowser> browser,
+                         CefRefPtr<CefDragData> dragData,
+                         DragOperationsMask mask) {
+  REQUIRE_UI_THREAD();
+  return DragHandler_OnDragEnter(browser, dragData, mask);
+}

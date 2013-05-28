@@ -2,6 +2,10 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+# ------------------------------------------------------------------------------
+# Tests
+# ------------------------------------------------------------------------------
+
 #cdef Cookie cookie = Cookie()
 #cookie.SetName("asd1")
 #print("cookie.cefCookie: %s" % cookie.cefCookie)
@@ -249,7 +253,7 @@ cdef class PyCookieManager:
 # PyCookieVisitor
 # ------------------------------------------------------------------------------
 
-cdef int StoreUserCookieVisitor(object userCookieVisitor) except * with gil:
+cdef int StoreUserCookieVisitor(object userCookieVisitor) except *:
     global g_userCookieVisitorMaxId
     global g_userCookieVisitors
     g_userCookieVisitorMaxId += 1
@@ -288,16 +292,22 @@ cdef public cpp_bool CookieVisitor_Visit(
         int total,
         cpp_bool& deleteCookie
         ) except * with gil:
-    assert IsThread(TID_IO), "Must be called on the IO thread"
-    cdef PyCookieVisitor pyCookieVisitor = GetPyCookieVisitor(cookieVisitorId)
+    cdef PyCookieVisitor pyCookieVisitor
     cdef object callback
     cdef py_bool ret
-    cdef PyCookie pyCookie = CreatePyCookie(cookie)
+    cdef PyCookie pyCookie
     cdef list pyDeleteCookie = [False]
-    if pyCookieVisitor:
-        callback = pyCookieVisitor.GetCallback("Visit")
-        if callback:
-            ret = callback(pyCookie, count, total, pyDeleteCookie)
-            (&deleteCookie)[0] = bool(pyDeleteCookie[0])
-            return bool(ret)
-    return False
+    try:
+        assert IsThread(TID_IO), "Must be called on the IO thread"
+        pyCookieVisitor = GetPyCookieVisitor(cookieVisitorId)
+        pyCookie = CreatePyCookie(cookie)
+        if pyCookieVisitor:
+            callback = pyCookieVisitor.GetCallback("Visit")
+            if callback:
+                ret = callback(pyCookie, count, total, pyDeleteCookie)
+                (&deleteCookie)[0] = bool(pyDeleteCookie[0])
+                return bool(ret)
+        return False
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
