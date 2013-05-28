@@ -176,6 +176,9 @@ cdef class PyBrowser:
                     "GetScreenPoint", "OnPopupShow", "OnPopupSize",
                     "OnPaint", "OnCursorChange"]
 
+            # DragHandler
+            self.allowedClientCallbacks += ["OnDragStart", "OnDragEnter"]
+
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
                             "callback: %s" % name)

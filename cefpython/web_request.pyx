@@ -115,12 +115,17 @@ cdef public void WebRequestClient_OnStateChange(
         CefRefPtr[CefWebURLRequest] requester,
         cef_types.cef_weburlrequest_state_t state
         ) except * with gil:
-    cdef PyWebRequest webRequest = GetPyWebRequest(webRequestId)
+    cdef PyWebRequest webRequest
     cdef object callback
-    if webRequest:
-        callback = webRequest.GetCallback("OnStateChange")
-        if callback:
-            callback(webRequest, <int>state)
+    try:
+        webRequest = GetPyWebRequest(webRequestId)
+        if webRequest:
+            callback = webRequest.GetCallback("OnStateChange")
+            if callback:
+                callback(webRequest, <int>state)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void WebRequestClient_OnRedirect(
         int webRequestId,
@@ -128,25 +133,35 @@ cdef public void WebRequestClient_OnRedirect(
         CefRefPtr[CefRequest] request,
         CefRefPtr[CefResponse] response
         ) except * with gil:
-    cdef PyWebRequest webRequest = GetPyWebRequest(webRequestId)
+    cdef PyWebRequest webRequest
     cdef object callback
-    if webRequest:
-        callback = webRequest.GetCallback("OnRedirect")
-        if callback:
-            callback(webRequest, webRequest.pyRequest,
-                    CreatePyResponse(response))
+    try:
+        webRequest = GetPyWebRequest(webRequestId)
+        if webRequest:
+            callback = webRequest.GetCallback("OnRedirect")
+            if callback:
+                callback(webRequest, webRequest.pyRequest,
+                        CreatePyResponse(response))
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void WebRequestClient_OnHeadersReceived(
         int webRequestId,
         CefRefPtr[CefWebURLRequest] requester,
         CefRefPtr[CefResponse] response
         ) except * with gil:
-    cdef PyWebRequest webRequest = GetPyWebRequest(webRequestId)
+    cdef PyWebRequest webRequest
     cdef object callback
-    if webRequest:
-        callback = webRequest.GetCallback("OnHeadersReceived")
-        if callback:
-            callback(webRequest, CreatePyResponse(response))
+    try:
+        webRequest = GetPyWebRequest(webRequestId)
+        if webRequest:
+            callback = webRequest.GetCallback("OnHeadersReceived")
+            if callback:
+                callback(webRequest, CreatePyResponse(response))
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void WebRequestClient_OnProgress(
         int webRequestId,
@@ -154,12 +169,17 @@ cdef public void WebRequestClient_OnProgress(
         uint64_t bytesSent, 
         uint64_t totalBytesToBeSent
         ) except * with gil:
-    cdef PyWebRequest webRequest = GetPyWebRequest(webRequestId)
+    cdef PyWebRequest webRequest
     cdef object callback
-    if webRequest:
-        callback = webRequest.GetCallback("OnProgress")
-        if callback:
-            callback(webRequest, bytesSent, totalBytesToBeSent)
+    try:
+        webRequest = GetPyWebRequest(webRequestId)
+        if webRequest:
+            callback = webRequest.GetCallback("OnProgress")
+            if callback:
+                callback(webRequest, bytesSent, totalBytesToBeSent)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void WebRequestClient_OnData(
         int webRequestId,
@@ -167,21 +187,31 @@ cdef public void WebRequestClient_OnData(
         void* data, 
         int dataLength
         ) except * with gil:
-    cdef PyWebRequest webRequest = GetPyWebRequest(webRequestId)
+    cdef PyWebRequest webRequest
     cdef object callback
-    if webRequest:
-        callback = webRequest.GetCallback("OnData")
-        if callback:
-            callback(webRequest, VoidPtrToStr(data, dataLength))
+    try:
+        webRequest = GetPyWebRequest(webRequestId)
+        if webRequest:
+            callback = webRequest.GetCallback("OnData")
+            if callback:
+                callback(webRequest, VoidPtrToStr(data, dataLength))
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void WebRequestClient_OnError(
         int webRequestId,
         CefRefPtr[CefWebURLRequest] requester,
         int errorCode
         ) except * with gil:
-    cdef PyWebRequest webRequest = GetPyWebRequest(webRequestId)
+    cdef PyWebRequest webRequest
     cdef object callback
-    if webRequest:
-        callback = webRequest.GetCallback("OnError")
-        if callback:
-            callback(webRequest, errorCode)
+    try:
+        webRequest = GetPyWebRequest(webRequestId)
+        if webRequest:
+            callback = webRequest.GetCallback("OnError")
+            if callback:
+                callback(webRequest, errorCode)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)

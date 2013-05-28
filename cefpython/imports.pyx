@@ -128,6 +128,8 @@ IF CEF_VERSION == 1:
     from cookie_visitor cimport *
     from cef_time cimport *
     from cef_render_handler cimport *
+    from cef_drag cimport *
+    from cef_drag_data cimport *
 
 IF UNAME_SYSNAME == "Windows":
     IF CEF_VERSION == 1:

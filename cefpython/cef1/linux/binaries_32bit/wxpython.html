@@ -12,15 +12,24 @@
 
 Use mouse context menu to go Back/Forward in history navigation.
 
+
+
 <h3>Google Search</h3>
 <a href="http://www.google.com/">http://www.google.com/</a>
+
+
 
 <h3>User agent</h3>
 <script>document.write(navigator.userAgent)</script>
 
+
+
 <h3>Popup</h3>
 <a href="javascript:window.open('wxpython.html')">
     window.open('wxpython.html')</a>
+
+
+
 
 <h3>RequestHandler tests</h3>
 
@@ -76,6 +85,10 @@ OnResourceResponse() - try filtering content of the resource:
 (new css content: body { color: green; } and body h3 { color: orange; } )
 <br><br>
 
+
+
+
+
 <h3>WebRequest test</h3>
 
 See the console for messages.<br>
@@ -93,7 +106,10 @@ function MyFunction(param1, param2, param3, param4) {
 <a href="javascript:external.DoCallFunction()">
     external.DoCallFunction()</a>
 
-<h3>Cookies</h3>
+
+
+
+<h3>Cookie tests</h3>
 
 See messages in the console.
 <br><br>
@@ -127,6 +143,17 @@ CookieManager.DeleteCookies() - delete the single cookie previously created
 via SetCookie(): <a href="javascript:external.DeleteCookies()">
     external.DeleteCookies()</a>
 <br><br>
+
+
+
+
+<h3>DragHandler tests</h3>
+
+Try dragging a file, or a text/html fragment to the browser window
+and look for the messages in the console. In the wxpython.py script see
+ClientHandler.OnDragStart() and OnDragEnter().
+
+
 
 </body>
 </html>

@@ -44,6 +44,8 @@ __PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_DoClose(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnAfterCreated(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnBeforeClose(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_RunModal(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(bool) DragHandler_OnDragStart(CefRefPtr<CefBrowser>, CefRefPtr<CefDragData>, enum cef_drag_operations_mask_t);
+__PYX_EXTERN_C DL_IMPORT(bool) DragHandler_OnDragEnter(CefRefPtr<CefBrowser>, CefRefPtr<CefDragData>, enum cef_drag_operations_mask_t);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextReleased(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnUncaughtException(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>, CefRefPtr<CefV8Exception>, CefRefPtr<CefV8StackTrace>);

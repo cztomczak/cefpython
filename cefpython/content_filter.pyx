@@ -57,28 +57,38 @@ cdef public void ContentFilterHandler_ProcessData(
         int data_size,
         CefRefPtr[CefStreamReader]& substitute_data
         ) except * with gil:
-    cdef PyContentFilter contentFilter = GetPyContentFilter(contentFilterId)
+    cdef PyContentFilter contentFilter
     cdef object callback
     cdef PyStreamReader pyStreamReader
-    if contentFilter:
-        callback = contentFilter.GetCallback("ProcessData")
-        if callback:
-            pyStreamReader = PyStreamReader()
-            callback(VoidPtrToStr(data, data_size), pyStreamReader)
-            if pyStreamReader.HasCefStreamReader():
-                (&substitute_data)[0] = pyStreamReader.GetCefStreamReader()
+    try:
+        contentFilter = GetPyContentFilter(contentFilterId)
+        if contentFilter:
+            callback = contentFilter.GetCallback("ProcessData")
+            if callback:
+                pyStreamReader = PyStreamReader()
+                callback(VoidPtrToStr(data, data_size), pyStreamReader)
+                if pyStreamReader.HasCefStreamReader():
+                    (&substitute_data)[0] = pyStreamReader.GetCefStreamReader()
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void ContentFilterHandler_Drain(
         int contentFilterId,
         CefRefPtr[CefStreamReader]& remainder
         ) except * with gil:
-    cdef PyContentFilter contentFilter = GetPyContentFilter(contentFilterId)
+    cdef PyContentFilter contentFilter
     cdef object callback
     cdef PyStreamReader pyStreamReader
-    if contentFilter:
-        callback = contentFilter.GetCallback("Drain")
-        if callback:
-            pyStreamReader = PyStreamReader()
-            callback(pyStreamReader)
-            if pyStreamReader.HasCefStreamReader():
-                (&remainder)[0] = pyStreamReader.GetCefStreamReader()
+    try:
+        contentFilter = GetPyContentFilter(contentFilterId)
+        if contentFilter:
+            callback = contentFilter.GetCallback("Drain")
+            if callback:
+                pyStreamReader = PyStreamReader()
+                callback(pyStreamReader)
+                if pyStreamReader.HasCefStreamReader():
+                    (&remainder)[0] = pyStreamReader.GetCefStreamReader()
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)

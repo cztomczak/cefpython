@@ -232,9 +232,12 @@ class ContentFilterHandler:
     def Drain(self, remainder):
         remainder.SetData("body h3 { color: orange; }")
 
-class ClientHandler:
-    # Request handler, see documentation at:
-    # https://code.google.com/p/cefpython/wiki/RequestHandler
+class ClientHandler:    
+    
+    # --------------------------------------------------------------------------
+    # RequestHandler
+    # --------------------------------------------------------------------------
+
     contentFilter = None    
 
     def OnBeforeBrowse(self, browser, frame, request, navType, isRedirect):
@@ -293,6 +296,63 @@ class ClientHandler:
             browser.SetUserData("cookieManager", cookieManager)
             return cookieManager
 
+    # --------------------------------------------------------------------------
+    # DragHandler
+    # --------------------------------------------------------------------------
+
+    def OnDragStart(self, browser, dragData, mask):
+        maskNames = ""
+        for key, value in cefpython.Drag.Operation.iteritems():
+            if value and (value & mask) == value:
+                maskNames += " "+key
+        print("OnDragStart(): mask=%s" % maskNames)
+        print("  IsLink(): %s" % dragData.IsLink())
+        print("  IsFragment(): %s" % dragData.IsFragment())
+        print("  IsFile(): %s" % dragData.IsFile())
+        print("  GetLinkUrl(): %s" % dragData.GetLinkUrl())
+        print("  GetLinkTitle(): %s" % dragData.GetLinkTitle())
+        print("  GetLinkMetadata(): %s" % dragData.GetLinkMetadata())
+        print("  GetFragmentText(): %s" % dragData.GetFragmentText())
+        print("  GetFragmentHtml(): %s" % dragData.GetFragmentHtml())
+        print("  GetFragmentBaseUrl(): %s" % dragData.GetFragmentBaseUrl())
+        print("  GetFile(): %s" % dragData.GetFile())
+        print("  GetFiles(): %s" % dragData.GetFiles())        
+        # Returning True on Linux causes segmentation fault,
+        # reported the bug here:
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10693        
+        # Not being able to cancel a drag event is a problem
+        # only when a link or a folder is dragged, as this will
+        # cause loading the link or the folder in the browser window.
+        # When dragging text/html or a file it is not a problem, as
+        # it does not lead to browser navigating.
+        return False
+
+    def OnDragEnter(self, browser, dragData, mask):
+        maskNames = ""
+        for key, value in cefpython.Drag.Operation.iteritems():
+            if value and (value & mask) == value:
+                maskNames += " "+key
+        print("OnDragEnter(): mask=%s" % maskNames)
+        print("  IsLink(): %s" % dragData.IsLink())
+        print("  IsFragment(): %s" % dragData.IsFragment())
+        print("  IsFile(): %s" % dragData.IsFile())
+        print("  GetLinkUrl(): %s" % dragData.GetLinkUrl())
+        print("  GetLinkTitle(): %s" % dragData.GetLinkTitle())
+        print("  GetLinkMetadata(): %s" % dragData.GetLinkMetadata())
+        print("  GetFragmentText(): %s" % dragData.GetFragmentText())
+        print("  GetFragmentHtml(): %s" % dragData.GetFragmentHtml())
+        print("  GetFragmentBaseUrl(): %s" % dragData.GetFragmentBaseUrl())
+        print("  GetFile(): %s" % dragData.GetFile())
+        print("  GetFiles(): %s" % dragData.GetFiles())
+        # Returning True on Linux causes segmentation fault,
+        # reported the bug here:
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10693        
+        # Not being able to cancel a drag event is a problem
+        # only when a link or a folder is dragged, as this will
+        # cause loading the link or the folder in the browser window.
+        # When dragging text/html or a file it is not a problem, as
+        # it does not lead to browser navigating.
+        return False
 
 class MyApp(wx.App):
     timer = None

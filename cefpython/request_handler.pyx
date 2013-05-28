@@ -80,7 +80,7 @@ cdef public void RequestHandler_OnResourceRedirect(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef str pyOldUrl
-    cdef list pyNewUrl # [""] pass by reference (out).
+    cdef list pyNewUrl # = [""] pass by reference (out).
     cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
@@ -128,8 +128,7 @@ cdef public cpp_bool RequestHandler_OnProtocolExecution(
     # TODO: needs testing.
     cdef PyBrowser pyBrowser
     cdef str pyUrl
-    # [True] pass by reference (out).
-    cdef list pyAllowOSExecution
+    cdef list pyAllowOSExecution # = [True] pass by reference (out).
     cdef object callback
     cdef py_bool ret
     try:
@@ -199,8 +198,7 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
     cdef int pyPort
     cdef str pyRealm
     cdef str pyScheme
-    # [""] pass by reference (out).
-    cdef list pyUsername
+    cdef list pyUsername # = [""] pass by reference (out).
     cdef list pyPassword
     cdef object callback
     cdef py_bool ret
@@ -243,12 +241,12 @@ cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& mainUrl
         ) except * with gil:
-    assert IsThread(TID_IO), "Must be called on the IO thread"
     cdef PyBrowser pyBrowser
     cdef str pyMainUrl
     cdef object callback
     cdef PyCookieManager ret
     try:
+        assert IsThread(TID_IO), "Must be called on the IO thread"
         pyBrowser = GetPyBrowser(cefBrowser)
         pyMainUrl = CefToPyString(mainUrl)
         callback = pyBrowser.GetClientCallback("GetCookieManager")
