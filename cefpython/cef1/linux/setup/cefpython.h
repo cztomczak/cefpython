@@ -30,7 +30,7 @@ __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforeResourceLoad(CefRefPtr<Cef
 __PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnResourceRedirect(CefRefPtr<CefBrowser>, CefString &, CefString &);
 __PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnResourceResponse(CefRefPtr<CefBrowser>, CefString &, CefRefPtr<CefResponse>, CefRefPtr<CefContentFilter> &);
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnProtocolExecution(CefRefPtr<CefBrowser>, CefString &, bool &);
-__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_GetDownloadHandler(CefRefPtr<CefBrowser>, CefString &, CefString &, int64, CefRefPtr<CefDownloadHandler> &);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_GetDownloadHandler(CefRefPtr<CefBrowser>, CefString const &, CefString const &, int64, CefRefPtr<CefDownloadHandler> &);
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_GetAuthCredentials(CefRefPtr<CefBrowser>, bool, CefString &, int, CefString &, CefString &, CefString &, CefString &);
 __PYX_EXTERN_C DL_IMPORT(CefRefPtr<CefCookieManager>) RequestHandler_GetCookieManager(CefRefPtr<CefBrowser>, CefString &);
 __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnAddressChange(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString &);
@@ -46,6 +46,8 @@ __PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnBeforeClose(CefRefPtr<CefBrowse
 __PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_RunModal(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(bool) DragHandler_OnDragStart(CefRefPtr<CefBrowser>, CefRefPtr<CefDragData>, enum cef_drag_operations_mask_t);
 __PYX_EXTERN_C DL_IMPORT(bool) DragHandler_OnDragEnter(CefRefPtr<CefBrowser>, CefRefPtr<CefDragData>, enum cef_drag_operations_mask_t);
+__PYX_EXTERN_C DL_IMPORT(bool) DownloadHandler_ReceivedData(int, void *, int);
+__PYX_EXTERN_C DL_IMPORT(void) DownloadHandler_Complete(int);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextReleased(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnUncaughtException(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>, CefRefPtr<CefV8Exception>, CefRefPtr<CefV8StackTrace>);

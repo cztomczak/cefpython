@@ -2,7 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef object g_contentFilters = weakref.WeakValueDictionary()
+# TODO: temporarily removed weakref.WeakValueDictionary()
+cdef object g_contentFilters = {}
 cdef int g_contentFilterMaxId = 0
 
 # ------------------------------------------------------------------------------
@@ -16,7 +17,7 @@ cdef PyContentFilter GetPyContentFilter(int contentFilterId):
     return None
 
 cdef class PyContentFilter:
-    cdef object __weakref__ # see g_contentFilters
+    #cdef object __weakref__ # see g_contentFilters
     cdef int contentFilterId
     cdef CefRefPtr[CefContentFilter] cefContentFilter
     cdef object handler
@@ -32,6 +33,13 @@ cdef class PyContentFilter:
                         self.contentFilterId))
 
     def SetHandler(self, handler):
+        assert handler, "ContentFilterHandler is empty"
+        has_OnData = hasattr(handler, "OnData") and (
+                callable(getattr(handler, "OnData")))
+        has_OnDrain = hasattr(handler, "OnDrain") and (
+                callable(getattr(handler, "OnDrain")))
+        assert has_OnData, "ContentFilterHandler is missing OnData() method"
+        assert has_OnDrain, "ContentFilterHandler is missing OnDrain() method"
         self.handler = handler
 
     def HasHandler(self):
@@ -48,7 +56,7 @@ cdef class PyContentFilter:
         return self.cefContentFilter
 
 # ------------------------------------------------------------------------------
-# ContentFilterHandler
+# C++ ContentFilterHandler
 # ------------------------------------------------------------------------------
 
 cdef public void ContentFilterHandler_ProcessData(
@@ -63,12 +71,12 @@ cdef public void ContentFilterHandler_ProcessData(
     try:
         contentFilter = GetPyContentFilter(contentFilterId)
         if contentFilter:
-            callback = contentFilter.GetCallback("ProcessData")
+            callback = contentFilter.GetCallback("OnData")
             if callback:
                 pyStreamReader = PyStreamReader()
                 callback(VoidPtrToStr(data, data_size), pyStreamReader)
                 if pyStreamReader.HasCefStreamReader():
-                    (&substitute_data)[0] = pyStreamReader.GetCefStreamReader()
+                    substitute_data.swap(pyStreamReader.GetCefStreamReader())
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -83,12 +91,12 @@ cdef public void ContentFilterHandler_Drain(
     try:
         contentFilter = GetPyContentFilter(contentFilterId)
         if contentFilter:
-            callback = contentFilter.GetCallback("Drain")
+            callback = contentFilter.GetCallback("OnDrain")
             if callback:
                 pyStreamReader = PyStreamReader()
                 callback(pyStreamReader)
                 if pyStreamReader.HasCefStreamReader():
-                    (&remainder)[0] = pyStreamReader.GetCefStreamReader()
+                    remainder.swap(pyStreamReader.GetCefStreamReader())
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

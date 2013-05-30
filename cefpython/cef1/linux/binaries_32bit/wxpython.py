@@ -15,6 +15,8 @@ else:
 
 import wx
 import time
+import re
+import uuid
 
 # Which method to use for message loop processing.
 #   EVT_IDLE - wx application has priority (default)
@@ -148,7 +150,7 @@ class JavascriptBindings:
         self.cookieVisitor = CookieVisitor()
         cookieManager = self.mainBrowser.GetUserData("cookieManager")
         if not cookieManager:
-            print("Cookie manager not yet created! Visit http website first")
+            print("\nCookie manager not yet created! Visit http website first")
             return
         cookieManager.VisitAllCookies(self.cookieVisitor)
 
@@ -157,7 +159,7 @@ class JavascriptBindings:
         self.cookieVisitor = CookieVisitor()
         cookieManager = self.mainBrowser.GetUserData("cookieManager")
         if not cookieManager:
-            print("Cookie manager not yet created! Visit http website first")
+            print("\nCookie manager not yet created! Visit http website first")
             return
         cookieManager.VisitUrlCookies(
             "http://www.html-kit.com/tools/cookietester/",
@@ -167,30 +169,30 @@ class JavascriptBindings:
     def SetCookie(self):
         cookieManager = self.mainBrowser.GetUserData("cookieManager")
         if not cookieManager:
-            print("Cookie manager not yet created! Visit http website first")
+            print("\nCookie manager not yet created! Visit http website first")
             return
         cookie = cefpython.Cookie()
         cookie.SetName("Created_Via_Python")
         cookie.SetValue("yeah really")
         cookieManager.SetCookie("http://www.html-kit.com/tools/cookietester/",
                 cookie)
-        print("Cookie created! Visit html-kit cookietester to see it")
+        print("\nCookie created! Visit html-kit cookietester to see it")
 
     def DeleteCookies(self):
         cookieManager = self.mainBrowser.GetUserData("cookieManager")
         if not cookieManager:
-            print("Cookie manager not yet created! Visit http website first")
+            print("\nCookie manager not yet created! Visit http website first")
             return
         cookieManager.DeleteCookies(
                 "http://www.html-kit.com/tools/cookietester/",
                 "Created_Via_Python")
-        print("Cookie deleted! Visit html-kit cookietester to see the result")
+        print("\nCookie deleted! Visit html-kit cookietester to see the result")
 
 class CookieVisitor:
     def Visit(self, cookie, count, total, deleteCookie):
         if count == 0:
-            print("CookieVisitor.Visit(): total cookies: %s" % total)
-        print("CookieVisitor.Visit(): cookie:")
+            print("\nCookieVisitor.Visit(): total cookies: %s" % total)
+        print("\nCookieVisitor.Visit(): cookie:")
         print(cookie.Get())
         # True to continue visiting cookies
         return True 
@@ -201,35 +203,35 @@ class WebRequestClient:
         for key, value in cefpython.WebRequest.State.iteritems():
             if value == state:
                 stateName = key        
-        print("WebRequestClient::OnStateChange(): state = %s" % stateName)
+        print("\nWebRequestClient::OnStateChange(): state = %s" % stateName)
 
     def OnRedirect(self, webRequest, request, response):
-        print("WebRequestClient::OnRedirect(): url = %s" % (
+        print("\nWebRequestClient::OnRedirect(): url = %s" % (
                 request.GetUrl()[:80]))
 
     def OnHeadersReceived(self, webRequest, response):
-        print("WebRequestClient::OnHeadersReceived(): headers = %s" % (
+        print("\nWebRequestClient::OnHeadersReceived(): headers = %s" % (
                 response.GetHeaderMap()))
 
     def OnProgress(self, webRequest, bytesSent, totalBytesToBeSent):
-        print("WebRequestClient::OnProgress(): bytesSent = %s, "
+        print("\nWebRequestClient::OnProgress(): bytesSent = %s, "
                 "totalBytesToBeSent = %s" % (bytesSent, totalBytesToBeSent))
 
     def OnData(self, webRequest, data):
-        print("WebRequestClient::OnData(): data:")
+        print("\nWebRequestClient::OnData(): data:")
         print("-" * 60)
         print(data)
         print("-" * 60)
 
     def OnError(self, webRequest, errorCode):
-        print("WebRequestClient::OnError(): errorCode = %s" % errorCode)
+        print("\nWebRequestClient::OnError(): errorCode = %s" % errorCode)
 
 class ContentFilterHandler:
-    def ProcessData(self, data, substitute_data):
+    def OnData(self, data, substitute_data):
         if data == "body { color: red; }":
             substitute_data.SetData("body { color: green; }")
 
-    def Drain(self, remainder):
+    def OnDrain(self, remainder):
         remainder.SetData("body h3 { color: orange; }")
 
 class ClientHandler:    
@@ -247,16 +249,16 @@ class ClientHandler:
         # the navigation to proceed.
         # - Modifying headers or post data can be done only in
         # OnBeforeResourceLoad()
-        print("OnBeforeBrowse(): request.GetUrl() = %s, "
+        print("\nOnBeforeBrowse(): request.GetUrl() = %s, "
                 "request.GetHeaderMap(): %s" % (
                 request.GetUrl()[:80], request.GetHeaderMap()))
         if request.GetMethod() == "POST":
-            print("OnBeforeBrowse(): POST data: %s" % (
+            print("\nOnBeforeBrowse(): POST data: %s" % (
                     request.GetPostData()))
 
     def OnBeforeResourceLoad(self, browser, request, redirectUrl, 
             streamReader, response, loadFlags):
-        print("OnBeforeResourceLoad(): request.GetUrl() = %s" % (
+        print("\nOnBeforeResourceLoad(): request.GetUrl() = %s" % (
                 request.GetUrl()[:80]))
         if request.GetMethod() == "POST":
             if request.GetUrl().startswith(
@@ -264,23 +266,24 @@ class ClientHandler:
                 postData = request.GetPostData()
                 postData["Email"] = "--changed via python"
                 request.SetPostData(postData)
-                print("OnBeforeResourceLoad(): modified POST data: %s" % (
+                print("\nOnBeforeResourceLoad(): modified POST data: %s" % (
                         request.GetPostData()))
         if request.GetUrl().endswith("replace-on-the-fly.css"):
-            print("OnBeforeResourceLoad(): replacing css on the fly")
+            print("\nOnBeforeResourceLoad(): replacing css on the fly")
             response.SetStatus(200)
             response.SetStatusText("OK")
             response.SetMimeType("text/css")
             streamReader.SetData("body { color: red; }")
 
     def OnResourceRedirect(self, browser, oldUrl, newUrl):
-        print("OnResourceRedirect(): oldUrl: %s, newUrl: %s" % (
+        print("\nOnResourceRedirect(): oldUrl: %s, newUrl: %s" % (
                 oldUrl, newUrl[0]))
 
     def OnResourceResponse(self, browser, url, response, contentFilter):
-        print("OnResourceResponse()")
+        print("\nOnResourceResponse(): url = %s, headers = %s" % (
+                url[:80], response.GetHeaderMap()))
         if url.endswith("content-filter/replace-on-the-fly.css"):
-            print("OnResourceResponse(): setting contentFilter handler")
+            print("\nOnResourceResponse(): setting contentFilter handler")
             contentFilter.SetHandler(ContentFilterHandler())
             # Must keep the reference to contentFilter otherwise
             # ContentFilterHandler callbacks won't be called.
@@ -305,7 +308,7 @@ class ClientHandler:
         for key, value in cefpython.Drag.Operation.iteritems():
             if value and (value & mask) == value:
                 maskNames += " "+key
-        print("OnDragStart(): mask=%s" % maskNames)
+        print("\nOnDragStart(): mask=%s" % maskNames)
         print("  IsLink(): %s" % dragData.IsLink())
         print("  IsFragment(): %s" % dragData.IsFragment())
         print("  IsFile(): %s" % dragData.IsFile())
@@ -332,7 +335,7 @@ class ClientHandler:
         for key, value in cefpython.Drag.Operation.iteritems():
             if value and (value & mask) == value:
                 maskNames += " "+key
-        print("OnDragEnter(): mask=%s" % maskNames)
+        print("\nOnDragEnter(): mask=%s" % maskNames)
         print("  IsLink(): %s" % dragData.IsLink())
         print("  IsFragment(): %s" % dragData.IsFragment())
         print("  IsFile(): %s" % dragData.IsFile())
@@ -353,6 +356,109 @@ class ClientHandler:
         # When dragging text/html or a file it is not a problem, as
         # it does not lead to browser navigating.
         return False
+
+    # --------------------------------------------------------------------------
+    # DownloadHandler
+    # --------------------------------------------------------------------------
+
+    downloadHandler = None
+
+    def GetDownloadHandler(self, browser, mimeType, filename, contentLength):
+        # Close the browser window if it is a popup with 
+        # no other document contents.
+        if browser.IsPopup() and not browser.HasDocument():
+            browser.CloseBrowser()
+        # The reference to DownloadHandler must be kept alive
+        # while download proceeds.
+        if self.downloadHandler and self.downloadHandler.downloading:
+            print("\nDownload is already in progress")
+            return False
+        self.downloadHandler = DownloadHandler(mimeType, filename, 
+                contentLength)
+        return self.downloadHandler
+
+class DownloadHandler:
+    mimeType = ""
+    filename = ""
+    contentLength = -1 # -1 means that file size was not provided.
+    fp = None
+    downloadsDir = "./downloads"
+    alreadyDownloaded = 0
+    downloading = False
+
+    def __init__(self, mimeType, filename, contentLength):
+        self.downloading = True
+        if not os.path.exists(self.downloadsDir):
+            os.mkdir(self.downloadsDir)
+        filename = filename.strip()
+        if not len(filename):
+            filename = self.GetUniqueFilename()
+        filename = self.GetSafeFilename(filename)
+        print("\nDownloadHandler() created")
+        print("mimeType: %s" % mimeType)
+        print("filename: %s" % filename)
+        print("contentLength: %s" % contentLength)
+        # Append ".downloading" to the filename, in OnComplete()
+        # when download finishes get rid of this extension.
+        filename += ".downloading"
+        if os.path.exists(self.downloadsDir+"/"+filename):
+            # If the last download did not succeed, the 
+            # "xxx.downloading" might still be there.
+            os.remove(self.downloadsDir+"/"+filename)
+        self.mimeType = mimeType
+        self.filename = filename
+        self.contentLength = contentLength
+        self.fp = open(self.downloadsDir+"/"+filename, "wb")
+
+    def GetSafeFilename(self, filename):
+        # TODO:
+        # - remove any unsafe characters (".." or "/" or "\" and 
+        #   others), the safest way is to have a regexp with a list
+        #   safe characters. The dots ".." is a special case that 
+        #   needs to be treated separately.
+        if os.path.exists(self.downloadsDir+"/"+filename):
+            filename = self.GetUniqueFilename()[:4]+"_"+filename
+            assert not os.path.exists(self.downloadsDir+"/"+filename), (
+                    "File aready exists")
+        return filename
+
+    def GetUniqueFilename(self):
+        # The filename may be empty, in that case generate
+        # an unique name.
+        # TODO: 
+        # - guess the extension using the mimeType (but mimeType
+        #   may also be empty), "text/css" => ".css".
+        return str(uuid.uuid4()).replace("-", "")[:16]
+    
+    def OnData(self, data):
+        # TODO: display progress in percentage or/and KiB/MiB.
+        if self.alreadyDownloaded == 0:
+            sys.stdout.write("Download progress: ")
+        sys.stdout.write(".")
+        sys.stdout.flush()
+        self.alreadyDownloaded += len(data)
+        self.fp.write(data)
+        # time.sleep(1) # Let's make the progress a bit slower (if cached)
+        # Return True to continue receiving data, False to cancel.
+        return True
+    
+    def OnComplete(self):
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+        self.fp.close()
+        currentFile = self.downloadsDir+"/"+self.filename
+        newFilename = re.sub(".downloading$", "", self.filename)
+        os.rename(self.downloadsDir+"/"+self.filename, 
+                self.downloadsDir+"/"+newFilename)
+        self.downloading = False
+        print("\nDownload complete!")
+        print("Total downloaded: %s" % self.PrettyBytes(
+                self.alreadyDownloaded))
+        print("See the 'downloads' directory.")
+
+    def PrettyBytes(self, bytes):
+        KiB = 1024
+        return "%.3g KiB" % (bytes / KiB)
 
 class MyApp(wx.App):
     timer = None

@@ -22,11 +22,6 @@ public:
     virtual void Drain(CefRefPtr<CefStreamReader>& remainder) OVERRIDE;
     
 protected:
-
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(ContentFilterHandler);
-
-  // Include the default locking implementation.
-  IMPLEMENT_LOCKING(ContentFilterHandler);
-
 };

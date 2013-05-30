@@ -148,9 +148,8 @@ bool ClientHandler::GetDownloadHandler(
       int64 contentLength,
       CefRefPtr<CefDownloadHandler>& handler) {
   REQUIRE_UI_THREAD();
-  return RequestHandler_GetDownloadHandler(
-      browser, const_cast<CefString&>(mimeType),
-      const_cast<CefString&>(fileName), contentLength, handler);
+  return RequestHandler_GetDownloadHandler(browser, mimeType, fileName, 
+      contentLength, handler);
 }
 
 bool ClientHandler::GetAuthCredentials(
