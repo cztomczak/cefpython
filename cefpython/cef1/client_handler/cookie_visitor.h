@@ -23,11 +23,6 @@ public:
             ) OVERRIDE;
     
 protected:
-
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(CookieVisitor);
-
-  // Include the default locking implementation.
-  IMPLEMENT_LOCKING(CookieVisitor);
-
 };

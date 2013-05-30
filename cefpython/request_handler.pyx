@@ -65,7 +65,7 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
             if pyRedirectUrl[0]:
                 PyToCefString(pyRedirectUrl[0], cefRedirectUrl)
             if pyStreamReader.HasCefStreamReader():
-                (&cefStreamReader)[0] = pyStreamReader.GetCefStreamReader()
+                cefStreamReader.swap(pyStreamReader.GetCefStreamReader())
             return bool(ret)
         else:
             return False
@@ -115,7 +115,7 @@ cdef public void RequestHandler_OnResourceResponse(
         if callback:
             callback(pyBrowser, pyUrl, pyResponse, pyContentFilter)
             if pyContentFilter.HasHandler():
-                (&cefContentFilter)[0] = pyContentFilter.GetCefContentFilter()
+                cefContentFilter.swap(pyContentFilter.GetCefContentFilter())
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -143,6 +143,7 @@ cdef public cpp_bool RequestHandler_OnProtocolExecution(
             # passed by reference will throw an error, the fix is to
             # to use "(&arg)[0] =" instead of "arg =", see this topic:
             # https://groups.google.com/forum/#!msg/cython-users/j58Sp3QMrD4/y9vJy9YBi_kJ
+            # For CefRefPtr you should use swap() method instead.
             (&cefAllowOSExecution)[0] = bool(pyAllowOSExecution[0])
             return bool(ret)
         else:
@@ -153,29 +154,33 @@ cdef public cpp_bool RequestHandler_OnProtocolExecution(
 
 cdef public cpp_bool RequestHandler_GetDownloadHandler(
         CefRefPtr[CefBrowser] cefBrowser,
-        CefString& cefMimeType,
-        CefString& cefFilename,
+        const CefString& cefMimeType,
+        const CefString& cefFilename,
         cef_types.int64 cefContentLength,
         CefRefPtr[CefDownloadHandler]& cefDownloadHandler
         ) except * with gil:
-    # TODO: not yet implemented.
-    return False
-
     cdef PyBrowser pyBrowser
     cdef str pyMimeType
     cdef str pyFilename
-    cdef int pyContentLength
-    # cdef PyDownloadHandler pyDownloadHandler
+    cdef long pyContentLength
     cdef object callback
+    cdef object userDownloadHandler
+    cdef CefRefPtr[CefDownloadHandler] downloadHandler
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
         pyMimeType = CefToPyString(cefMimeType)
         pyFilename = CefToPyString(cefFilename)
-        pyContentLength = int(cefContentLength)
-        pyDownloadHandler = None
+        pyContentLength = <long>cefContentLength
         callback = pyBrowser.GetClientCallback("GetDownloadHandler")
         if callback:
-            return bool(callback(pyBrowser, pyMimeType, pyFilename, pyContentLength, pyDownloadHandler))
+            userDownloadHandler = callback(pyBrowser, pyMimeType, pyFilename,
+                    pyContentLength)
+            if userDownloadHandler:
+                downloadHandler = StoreUserDownloadHandler(userDownloadHandler)
+                cefDownloadHandler.swap(downloadHandler)
+                return True
+            else:
+                return False
         else:
             return False
     except:

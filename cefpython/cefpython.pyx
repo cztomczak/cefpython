@@ -97,6 +97,7 @@ IF CEF_VERSION == 1:
         include "render_handler.pyx"
     include "drag_data.pyx"
     include "drag_handler.pyx"
+    include "download_handler.pyx"
 
 IF CEF_VERSION == 1:
     include "v8context_handler.pyx"

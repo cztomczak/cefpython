@@ -35,11 +35,6 @@ public:
     virtual void OnError(CefRefPtr<CefWebURLRequest> requester,
                        ErrorCode errorCode) OVERRIDE;
 protected:
-
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(WebRequestClient);
-
-  // Include the default locking implementation.
-  IMPLEMENT_LOCKING(WebRequestClient);
-
 };

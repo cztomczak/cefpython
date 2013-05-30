@@ -122,6 +122,7 @@ IF CEF_VERSION == 1:
     from cef_content_filter cimport *
     from content_filter_handler cimport *
     from cef_download_handler cimport *
+    from download_handler cimport *
     from cef_cookie cimport *
     cimport cef_cookie_static
     cimport cef_cookie_manager_namespace

@@ -21,7 +21,9 @@
 #   see weak referencing:
 #   http://docs.cython.org/src/reference/extension_types.html#weak-referencing
 #cdef cpp_map[int, PyObject*] g_pyWebRequests
-cdef object g_pyWebRequests = weakref.WeakValueDictionary()
+
+# TODO: temporarily removed weakref.WeakValueDictionary()
+cdef object g_pyWebRequests = {}
 cdef int g_webRequestMaxId = 0
 
 # ------------------------------------------------------------------------------
@@ -73,7 +75,7 @@ cdef PyWebRequest GetPyWebRequest(int webRequestId):
     return None
 
 cdef class PyWebRequest:
-    cdef object __weakref__ # see g_pyWebRequests
+    #cdef object __weakref__ # see g_pyWebRequests
     cdef int webRequestId
     cdef PyRequest pyRequest
     cdef CefRefPtr[CefWebURLRequest] requester
