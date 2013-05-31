@@ -2,7 +2,22 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# TODO: temporarily removed weakref.WeakValueDictionary()
+# TODO: fix CefContentFilter memory corruption and restore weakrefs
+# for PyContentFilter object. Right now getting memory corruption
+# when CefRefPtr[CefWebURLRequest] is released after the request
+# is completed. The memory corruption manifests itself with the
+# "Segmentation Fault" error message or the strange "C function 
+# name could not be determined in the current C stack frame".
+# See this topic on cython-users group:
+# https://groups.google.com/d/topic/cython-users/FJZwHhqaCSI/discussion
+# After CefWebURLRequest memory corruption is fixed restore weakrefs:
+# 1. cdef object g_pyWebRequests = weakref.WeakValueDictionary()
+# 2. Add property "cdef object __weakref__" in PyContentFilter
+# When using normal dictionary for g_pyWebRequest then the memory
+# corruption doesn't occur, but the PyContentFilter and CefContentFilter
+# objects are never released, thus you have memory leaks, for now 
+# there is no other solution. See this topic on the CEF Forum:
+# http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10711
 cdef object g_contentFilters = {}
 cdef int g_contentFilterMaxId = 0
 
@@ -17,7 +32,7 @@ cdef PyContentFilter GetPyContentFilter(int contentFilterId):
     return None
 
 cdef class PyContentFilter:
-    #cdef object __weakref__ # see g_contentFilters
+    # cdef object __weakref__ # see g_contentFilters
     cdef int contentFilterId
     cdef CefRefPtr[CefContentFilter] cefContentFilter
     cdef object handler

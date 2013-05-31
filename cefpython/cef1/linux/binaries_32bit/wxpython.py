@@ -22,8 +22,8 @@ import uuid
 #   EVT_IDLE - wx application has priority (default)
 #   EVT_TIMER - cef browser has priority
 # It seems that Flash content behaves better when using a timer.
-# IMPORTANT! On Linux EVT_IDLE does not work, the events seems to 
-# be propagated only when you move your mouse, which is not the 
+# IMPORTANT! On Linux EVT_IDLE does not work, the events seems to
+# be propagated only when you move your mouse, which is not the
 # expected behavior, it is recommended to use EVT_TIMER on Linux,
 # so set this value to False.
 USE_EVT_IDLE = False
@@ -59,7 +59,7 @@ def ExceptHook(type, value, traceObject):
         with open(error_file, "a") as file:
             file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
     except:
-        # If this is an example run from 
+        # If this is an example run from
         # /usr/local/lib/python2.7/dist-packages/cefpython1/examples/
         # then we might have not permission to write to that directory.
         print("cefpython: WARNING: failed writing to error file: %s" % (
@@ -93,7 +93,7 @@ class MainFrame(wx.Frame):
             navigateUrl="file://"+GetApplicationPath("wxpython.html"))
 
         self.browser.SetClientHandler(ClientHandler())
-        
+
         jsBindings = cefpython.JavascriptBindings(
             bindToFrames=False, bindToPopups=False)
         jsBindings.SetObject("external", JavascriptBindings(self.browser))
@@ -127,8 +127,9 @@ class MainFrame(wx.Frame):
 class JavascriptBindings:
     mainBrowser = None
     webRequest = None
+    webRequestId = 0
     cookieVisitor = None
-    
+
     def __init__(self, mainBrowser):
         self.mainBrowser = mainBrowser
 
@@ -136,7 +137,7 @@ class JavascriptBindings:
         request = cefpython.Request.CreateRequest()
         request.SetUrl(url)
         webRequestClient = WebRequestClient()
-        # Must keep the reference otherwise WebRequestClient 
+        # Must keep the reference otherwise WebRequestClient
         # callbacks won't be called.
         self.webRequest = cefpython.WebRequest.CreateWebRequest(request,
                 webRequestClient)
@@ -195,14 +196,14 @@ class CookieVisitor:
         print("\nCookieVisitor.Visit(): cookie:")
         print(cookie.Get())
         # True to continue visiting cookies
-        return True 
+        return True
 
 class WebRequestClient:
     def OnStateChange(self, webRequest, state):
         stateName = "unknown"
         for key, value in cefpython.WebRequest.State.iteritems():
             if value == state:
-                stateName = key        
+                stateName = key
         print("\nWebRequestClient::OnStateChange(): state = %s" % stateName)
 
     def OnRedirect(self, webRequest, request, response):
@@ -234,18 +235,18 @@ class ContentFilterHandler:
     def OnDrain(self, remainder):
         remainder.SetData("body h3 { color: orange; }")
 
-class ClientHandler:    
-    
+class ClientHandler:
+
     # --------------------------------------------------------------------------
     # RequestHandler
     # --------------------------------------------------------------------------
 
-    contentFilter = None    
+    contentFilter = None
 
     def OnBeforeBrowse(self, browser, frame, request, navType, isRedirect):
         # - frame.GetUrl() returns current url
         # - request.GetUrl() returns new url
-        # - Return true to cancel the navigation or false to allow 
+        # - Return true to cancel the navigation or false to allow
         # the navigation to proceed.
         # - Modifying headers or post data can be done only in
         # OnBeforeResourceLoad()
@@ -256,7 +257,7 @@ class ClientHandler:
             print("\nOnBeforeBrowse(): POST data: %s" % (
                     request.GetPostData()))
 
-    def OnBeforeResourceLoad(self, browser, request, redirectUrl, 
+    def OnBeforeResourceLoad(self, browser, request, redirectUrl,
             streamReader, response, loadFlags):
         print("\nOnBeforeResourceLoad(): request.GetUrl() = %s" % (
                 request.GetUrl()[:80]))
@@ -319,10 +320,10 @@ class ClientHandler:
         print("  GetFragmentHtml(): %s" % dragData.GetFragmentHtml())
         print("  GetFragmentBaseUrl(): %s" % dragData.GetFragmentBaseUrl())
         print("  GetFile(): %s" % dragData.GetFile())
-        print("  GetFiles(): %s" % dragData.GetFiles())        
+        print("  GetFiles(): %s" % dragData.GetFiles())
         # Returning True on Linux causes segmentation fault,
         # reported the bug here:
-        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10693        
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10693
         # Not being able to cancel a drag event is a problem
         # only when a link or a folder is dragged, as this will
         # cause loading the link or the folder in the browser window.
@@ -349,7 +350,7 @@ class ClientHandler:
         print("  GetFiles(): %s" % dragData.GetFiles())
         # Returning True on Linux causes segmentation fault,
         # reported the bug here:
-        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10693        
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10693
         # Not being able to cancel a drag event is a problem
         # only when a link or a folder is dragged, as this will
         # cause loading the link or the folder in the browser window.
@@ -364,7 +365,7 @@ class ClientHandler:
     downloadHandler = None
 
     def GetDownloadHandler(self, browser, mimeType, filename, contentLength):
-        # Close the browser window if it is a popup with 
+        # Close the browser window if it is a popup with
         # no other document contents.
         if browser.IsPopup() and not browser.HasDocument():
             browser.CloseBrowser()
@@ -373,7 +374,7 @@ class ClientHandler:
         if self.downloadHandler and self.downloadHandler.downloading:
             print("\nDownload is already in progress")
             return False
-        self.downloadHandler = DownloadHandler(mimeType, filename, 
+        self.downloadHandler = DownloadHandler(mimeType, filename,
                 contentLength)
         return self.downloadHandler
 
@@ -402,7 +403,7 @@ class DownloadHandler:
         # when download finishes get rid of this extension.
         filename += ".downloading"
         if os.path.exists(self.downloadsDir+"/"+filename):
-            # If the last download did not succeed, the 
+            # If the last download did not succeed, the
             # "xxx.downloading" might still be there.
             os.remove(self.downloadsDir+"/"+filename)
         self.mimeType = mimeType
@@ -412,9 +413,9 @@ class DownloadHandler:
 
     def GetSafeFilename(self, filename):
         # TODO:
-        # - remove any unsafe characters (".." or "/" or "\" and 
+        # - remove any unsafe characters (".." or "/" or "\" and
         #   others), the safest way is to have a regexp with a list
-        #   safe characters. The dots ".." is a special case that 
+        #   safe characters. The dots ".." is a special case that
         #   needs to be treated separately.
         if os.path.exists(self.downloadsDir+"/"+filename):
             filename = self.GetUniqueFilename()[:4]+"_"+filename
@@ -425,11 +426,11 @@ class DownloadHandler:
     def GetUniqueFilename(self):
         # The filename may be empty, in that case generate
         # an unique name.
-        # TODO: 
+        # TODO:
         # - guess the extension using the mimeType (but mimeType
         #   may also be empty), "text/css" => ".css".
         return str(uuid.uuid4()).replace("-", "")[:16]
-    
+
     def OnData(self, data):
         # TODO: display progress in percentage or/and KiB/MiB.
         if self.alreadyDownloaded == 0:
@@ -441,14 +442,14 @@ class DownloadHandler:
         # time.sleep(1) # Let's make the progress a bit slower (if cached)
         # Return True to continue receiving data, False to cancel.
         return True
-    
+
     def OnComplete(self):
         sys.stdout.write("\n")
         sys.stdout.flush()
         self.fp.close()
         currentFile = self.downloadsDir+"/"+self.filename
         newFilename = re.sub(".downloading$", "", self.filename)
-        os.rename(self.downloadsDir+"/"+self.filename, 
+        os.rename(self.downloadsDir+"/"+self.filename,
                 self.downloadsDir+"/"+newFilename)
         self.downloading = False
         print("\nDownload complete!")
@@ -474,7 +475,7 @@ class MyApp(wx.App):
         return True
 
     def CreateTimer(self):
-        # See "Making a render loop": 
+        # See "Making a render loop":
         # http://wiki.wxwidgets.org/Making_a_render_loop
         # Another approach is to use EVT_IDLE in MainFrame,
         # see which one fits you better.
@@ -488,7 +489,7 @@ class MyApp(wx.App):
         cefpython.MessageLoopWork()
 
     def OnExit(self):
-        # When app.MainLoop() returns, MessageLoopWork() should 
+        # When app.MainLoop() returns, MessageLoopWork() should
         # not be called anymore.
         if not USE_EVT_IDLE:
             self.timer.Stop()

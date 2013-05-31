@@ -5,6 +5,12 @@ import shutil
 import subprocess
 import platform
 
+# This will not show "Segmentation fault" error message:
+# | subprocess.call(["python", "./wxpython.py"])
+# You need to call it with shell=True for this kind of
+# error message to be shown:
+# | subprocess.call("python wxpython.py", shell=True)
+
 # How to debug:
 # 1. Install "python-dbg" package
 # 2. Install "python-wxgtk2.8-dbg" package
@@ -36,21 +42,21 @@ print("Compiling C++ projects")
 # make should succeed.
 
 os.chdir("./../../cpp_utils/")
-ret = subprocess.call(["make", "-f", "Makefile"])
+ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
         exit()
 
 os.chdir("./../cef1/client_handler/")
-ret = subprocess.call(["make", "-f", "Makefile"])
+ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
         exit()
 
 os.chdir("./../v8function_handler/")
-ret = subprocess.call(["make", "-f", "Makefile"])
+ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
@@ -80,14 +86,15 @@ except OSError:
 
 os.chdir("./setup")
 
-ret = subprocess.call(["python", "./fix_includes.py"])
+ret = subprocess.call("python fix_includes.py", shell=True)
 if ret != 0:
     sys.exit("ERROR")
 
 if DEBUG:
-    ret = subprocess.call(["python-dbg", "setup.py", "build_ext", "--inplace", "--cython-gdb"])
+    ret = subprocess.call("python-dbg setup.py build_ext --inplace"
+            " --cython-gdb", shell=True)
 else:
-    ret = subprocess.call(["python", "setup.py", "build_ext", "--inplace"])
+    ret = subprocess.call("python setup.py build_ext --inplace", shell=True)
 
 if DEBUG:
     shutil.rmtree("./../binaries_%s/cython_debug/" % BITS, ignore_errors=True)
@@ -115,6 +122,6 @@ print("DONE")
 
 os.chdir("./binaries_%s" % BITS)
 if DEBUG:
-    subprocess.call(["cygdb", ".", "--args", "python-dbg", "wxpython.py"])
+    subprocess.call("cygdb . --args python-dbg wxpython.py", shell=True)
 else:
-    subprocess.call(["python", "./wxpython.py"])
+    subprocess.call("python wxpython.py", shell=True)

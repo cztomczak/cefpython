@@ -2,7 +2,22 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# TODO: temporarily removed weakref.WeakValueDictionary()
+# TODO: fix CefWebURLRequest memory corruption and restore weakrefs
+# for PyWebRequest object. Right now getting memory corruption
+# when CefRefPtr[CefWebURLRequest] is released after the request
+# is completed. The memory corruption manifests itself with the
+# "Segmentation Fault" error message or the strange "C function 
+# name could not be determined in the current C stack frame".
+# See this topic on cython-users group:
+# https://groups.google.com/d/topic/cython-users/FJZwHhqaCSI/discussion
+# After CefWebURLRequest memory corruption is fixed restore weakrefs:
+# 1. cdef object g_pyWebRequests = weakref.WeakValueDictionary()
+# 2. Add property "cdef object __weakref__" in PyWebRequest
+# When using normal dictionary for g_pyWebRequest then the memory
+# corruption doesn't occur, but the PyWebRequest and CefWebURLRequest
+# objects are never released, thus you have memory leaks, for now 
+# there is no other solution. See this topic on the CEF Forum:
+# http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10710
 cdef object g_pyWebRequests = {}
 cdef int g_webRequestMaxId = 0
 
@@ -53,19 +68,16 @@ cdef PyWebRequest GetPyWebRequest(int webRequestId):
     return None
 
 cdef class PyWebRequest:
-    #cdef object __weakref__ # see g_pyWebRequests
+    # cdef object __weakref__ # see g_pyWebRequests
     cdef int webRequestId
-    cdef PyRequest pyRequest
     cdef CefRefPtr[CefWebURLRequest] requester
-    cdef CefRefPtr[WebRequestClient] cppWebRequestClient
     cdef object pyWebRequestClient
 
     def __init__(self, PyRequest pyRequest, object pyWebRequestClient):
         global g_webRequestMaxId
         g_webRequestMaxId += 1
         self.webRequestId = g_webRequestMaxId
-        self.pyRequest = pyRequest
-        self.cppWebRequestClient = (
+        cdef CefRefPtr[WebRequestClient] cppWebRequestClient = (
                 <CefRefPtr[WebRequestClient]?>new WebRequestClient(
                         self.webRequestId))
         self.pyWebRequestClient = pyWebRequestClient
@@ -73,7 +85,7 @@ cdef class PyWebRequest:
                 cef_web_urlrequest_static.CreateWebURLRequest(
                         pyRequest.cefRequest, 
                         <CefRefPtr[CefWebURLRequestClient]?>(
-                                self.cppWebRequestClient)))
+                                cppWebRequestClient)))
 
     cdef object GetCallback(self, str funcName):
         if hasattr(self.pyWebRequestClient, funcName) and (
