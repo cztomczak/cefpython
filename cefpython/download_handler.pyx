@@ -48,7 +48,7 @@ cdef class PyDownloadHandler:
 
     def __init__(self, object userDownloadHandler):
         assert not isinstance(userDownloadHandler, int), (
-                "DownloadHandler is not an instance of a class")
+                "DownloadHandler is not a valid object")
         self.userDownloadHandler = userDownloadHandler
 
     cdef object GetCallback(self, str funcName):

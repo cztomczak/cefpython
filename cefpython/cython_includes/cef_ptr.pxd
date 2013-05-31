@@ -6,5 +6,10 @@ from Cython.Shadow import void
 
 cdef extern from "include/internal/cef_ptr.h":
     cdef cppclass CefRefPtr[T]:
+        CefRefPtr()
+        CefRefPtr(T* p)
+        CefRefPtr(const CefRefPtr[T]& r)
+        CefRefPtr[T]& Assign "operator="(T* p)
         T* get()
         void swap(CefRefPtr[T]& r)
+

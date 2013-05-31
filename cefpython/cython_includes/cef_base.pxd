@@ -5,4 +5,6 @@
 cdef extern from "include/cef_base.h":
 
     cdef cppclass CefBase:
-        pass
+        int AddRef()
+        int Release()
+        int GetRefCt()
