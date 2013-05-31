@@ -2,26 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# PyWebRequests are kept int a C++ map and not in a Python Dict,
-# as we do not want to increase references for them, the
-# deallocation will happen in PyRequest.__dealloc__(). We must
-# keep callbacks (OnStateChange and others) and they must be 
-# callable from C++ code, thus we need to keep PyWebRequests
-# objects in some global scope, if we put PyWebRequests in a
-# Python Dict then we would never know of when PyWebRequest 
-# global reference can be released, thus the memory for these
-# objects would live forever.
-# - using uintptr_t instead of void* as it resulted in compiler 
-#   crash
-# - Casting void* to python object example (see PyWebRequest.__dealloc__):
-#   cdef void* a
-#   cdef PyWebRequest b = <PyWebRequest>a
-# - todo: instead of the C++ map and __dealloc__, try using 
-#   WeakValueDictionary and cdef object __weakref__ on PyWebRequest,
-#   see weak referencing:
-#   http://docs.cython.org/src/reference/extension_types.html#weak-referencing
-#cdef cpp_map[int, PyObject*] g_pyWebRequests
-
 # TODO: temporarily removed weakref.WeakValueDictionary()
 cdef object g_pyWebRequests = {}
 cdef int g_webRequestMaxId = 0
@@ -69,9 +49,7 @@ cdef PyWebRequest CreatePyWebRequest(PyRequest request,
 cdef PyWebRequest GetPyWebRequest(int webRequestId):
     global g_pyWebRequests
     if webRequestId in g_pyWebRequests:
-        # Debug("GetPyWebRequest(): found webRequestId = %s" % webRequestId)
         return g_pyWebRequests[webRequestId]
-    # Debug("GetPyWebRequest(): not found webRequestId = %s" % webRequestId)
     return None
 
 cdef class PyWebRequest:
