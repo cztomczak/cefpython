@@ -88,7 +88,6 @@ BrowserSettings = {
     "accelerated_compositing_enabled": False,
     "accelerated_filters_disabled": False,
     "accelerated_layers_disabled": False,
-    "accelerated_painting_disabled": False,
     "accelerated_plugins_disabled": False,
     "accelerated_video_disabled": False,
     "animation_frame_rate": 0,
@@ -805,7 +804,7 @@ def RenderHandler_OnPopupShow(browser, show):
 def RenderHandler_OnPopupSize(browser, rect):
     return None
 
-def RenderHandler_OnPaint(browser, paintElementType, out_dirtyRects, 
+def RenderHandler_OnPaint(browser, paintElementType, out_dirtyRects,
         paintBuffer):
     return None
 

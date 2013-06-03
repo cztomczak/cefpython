@@ -31,3 +31,8 @@ ctags
 *.generated
 
 cython_debug/
+
+cefpython_py27.pyd
+cefpython_py32.pyd
+cefpython_py27.so
+cefpython_py32.so

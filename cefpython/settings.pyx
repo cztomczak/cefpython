@@ -276,8 +276,6 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.accelerated_video_disabled = bool(browserSettings[key])
             elif key == "accelerated_2d_canvas_disabled":
                 cefBrowserSettings.accelerated_2d_canvas_disabled = bool(browserSettings[key])
-            elif key == "accelerated_painting_disabled":
-                cefBrowserSettings.accelerated_painting_disabled = bool(browserSettings[key])
             elif key == "accelerated_filters_disabled":
                 cefBrowserSettings.accelerated_filters_disabled = bool(browserSettings[key])
             elif key == "accelerated_plugins_disabled":

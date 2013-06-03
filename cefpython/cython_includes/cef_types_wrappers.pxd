@@ -108,7 +108,6 @@ cdef extern from "include/internal/cef_types_wrappers.h":
             cpp_bool accelerated_layers_disabled
             cpp_bool accelerated_video_disabled
             cpp_bool accelerated_2d_canvas_disabled
-            cpp_bool accelerated_painting_disabled
             cpp_bool accelerated_filters_disabled
             cpp_bool accelerated_plugins_disabled
             cpp_bool developer_tools_disabled

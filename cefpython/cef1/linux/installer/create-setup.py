@@ -65,11 +65,11 @@ def main():
     print("Copying binaries to package dir")
     ret = os.system("cp -rf "+binaries_dir+"/* "+package_dir)
     assert ret == 0
-    
+
     os.chdir(package_dir)
     print("Removing .log files from the package dir")
     ret = os.system("rm *.log")
-    assert ret == 0
+    # assert ret == 0 - if there are no .log files this assert would fail.
     os.chdir(installer_dir)
 
     print("Creating __init__.py from template")
