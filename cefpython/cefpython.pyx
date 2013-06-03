@@ -6,7 +6,7 @@
 #
 # - cdef/cpdef functions returning something other than a Python object
 #   should have in its declaration "except *", otherwise exceptions are
-#   ignored. Those cdef/cpdef that return "object" have "except *" by 
+#   ignored. Those cdef/cpdef that return "object" have "except *" by
 #   default. The setup/compile.py script will check for functions missing
 #   "except *" and will display an error message about that, but it's
 #   not perfect and won't detect all cases.
@@ -39,6 +39,13 @@
 # - CefString.c_str() is safe to use only on Windows, on Ubuntu 64bit
 #   for a "Pers" string it returns: "P\x00e\x00r\x00s\x00", which is
 #   most probably not what you expected.
+#
+# - You can rename methods when importing in pxd files:
+#   | cdef cppclass _Object "Object":
+#
+# - Supporting operators that are not yet supported:
+#   | CefRefPtr[T]& Assign "operator="(T* p)
+#   | cefBrowser.Assign(CefBrowser*)
 
 # Global variables.
 

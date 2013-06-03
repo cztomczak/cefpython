@@ -43,18 +43,18 @@ ext_modules = [Extension(
     ["cefpython.pyx"],
 
     cython_directives={
-        "c_string_type": C_STRING_TYPE, 
+        "c_string_type": C_STRING_TYPE,
         "c_string_encoding": C_STRING_ENCODING,
     },
 
     language='c++',
     include_dirs=[
-        r'./../', 
-        r'./../../', 
-        r'./../../../', 
+        r'./../',
+        r'./../../',
+        r'./../../../',
         r'./../../../cython_includes/',
-        '/usr/include/gtk-2.0', 
-        '/usr/include/glib-2.0', 
+        '/usr/include/gtk-2.0',
+        '/usr/include/glib-2.0',
         '/usr/lib/i386-linux-gnu/gtk-2.0/include',
         '/usr/lib/i386-linux-gnu/glib-2.0/include',
         '/usr/include/cairo',
@@ -78,7 +78,7 @@ ext_modules = [Extension(
         'cef_dll_wrapper',
         'v8function_handler',
         'client_handler',
-        'cpp_utils'        
+        'cpp_utils'
     ],
 
     # Loading libcef.so will only work when running scripts from the same

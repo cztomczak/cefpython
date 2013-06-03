@@ -9,7 +9,7 @@ cdef extern from "include/internal/cef_ptr.h":
         CefRefPtr()
         CefRefPtr(T* p)
         CefRefPtr(const CefRefPtr[T]& r)
-        CefRefPtr[T]& Assign "operator="(T* p)
+        CefRefPtr[T]& Assign "operator="(T* p) # cefBrowser.Assign(CefBrowser*)
         T* get()
         void swap(CefRefPtr[T]& r)
 
