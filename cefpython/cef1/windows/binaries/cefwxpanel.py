@@ -79,7 +79,7 @@ class CEFWindow(wx.Window):
 
     def GetBrowser(self):
         '''Returns the CEF's browser object'''
-        return browser
+        return self.browser
 
     def __del__(self):
         '''cleanup stuff'''
