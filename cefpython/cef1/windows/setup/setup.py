@@ -58,12 +58,18 @@ ext_modules = [Extension(
     ["cefpython.pyx"],
 
     cython_directives={
-        "c_string_type": C_STRING_TYPE, 
+        "c_string_type": C_STRING_TYPE,
         "c_string_encoding": C_STRING_ENCODING,
     },
 
     language='c++',
-    include_dirs=[r'./../', r'./../../', r'./../../../', r'./../../../cython_includes/'],
+
+    include_dirs=[
+        r'./../',
+        r'./../../',
+        r'./../../../',
+        r'./../../../cython_includes/',
+    ],
 
     library_dirs=[
         r'./',

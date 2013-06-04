@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "../windows/stdint.h"
 #include "cefpython_public_api.h"
 
 typedef void (*RemovePythonCallback_type)(
