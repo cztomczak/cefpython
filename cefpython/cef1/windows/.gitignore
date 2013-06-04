@@ -7,3 +7,4 @@
 *.dll
 
 *.lib
+*.pyd

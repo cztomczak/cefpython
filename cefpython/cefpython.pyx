@@ -164,7 +164,7 @@ def Initialize(applicationSettings=None):
 def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
     Debug("CreateBrowserSync() called")
     assert IsThread(TID_UI), (
-            "cefpython.CreateBrowserSync() can only be called on UI thread")
+            "cefpython.CreateBrowserSync() may only be called on the UI thread")
 
     if not isinstance(windowInfo, WindowInfo):
         raise Exception("CreateBrowserSync() failed: windowInfo: invalid object")
