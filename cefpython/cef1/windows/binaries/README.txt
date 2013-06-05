@@ -1,19 +1,17 @@
-Chromium Embedded Framework (CEF) Binary Distribution
+Chromium Embedded Framework (CEF) Standard Binary Distribution for Windows
 -------------------------------------------------------------------------------
 
-Date:             March 04, 2013
+Date:             June 04, 2013
 
-CEF Version:      1.1364.1123
-CEF URL:          https://chromiumembedded.googlecode.com/svn/branches/1364/cef1@1123
+CEF Version:      1.1453.1268
+CEF URL:          http://chromiumembedded.googlecode.com/svn/branches/1453/cef1@1268
 
-Chromium Verison: 25.0.1364.152
-Chromium URL:     http://src.chromium.org/svn/branches/1364/src@185281
-
+Chromium Verison: 27.0.1453.93
+Chromium URL:     http://src.chromium.org/svn/branches/1453_81/src@200836
 
 This distribution contains all components necessary to build and distribute an
-application using CEF. Please see the LICENSING section of this document for
-licensing terms and conditions.
-
+application using CEF on the Windows platform. Please see the LICENSING
+section of this document for licensing terms and conditions.
 
 CONTENTS
 --------
@@ -21,25 +19,25 @@ CONTENTS
 cefclient   Contains the cefclient sample application configured to build
             using the files in this distribution.
 
-Debug       Contains libcef.dll and other components required to run the debug
-            version of CEF-based applications. Also acts as the build target for
-            the Debug build of cefclient.
+Debug       Contains libcef.dll, libcef.lib and other components required to
+            build and run the debug version of CEF-based applications. By
+            default these files should be placed in the same directory as the
+            executable and will be copied there as part of the build process.
 
-docs        Contains C++ API documentation generated from the CEF header files.
-
-include     Contains all required CEF and NPAPI-related header files.  Read
-            the include/internal/npapi/README-TRANSFER.txt file for more
-            information about the NPAPI-related header files.
-
-lib         Contains Debug and Release versions of the libcef.lib library file
-            that all CEF-based applications must link against.
+include     Contains all required CEF header files.
 
 libcef_dll  Contains the source code for the libcef_dll_wrapper static library
             that all applications using the CEF C++ API must link against.
 
-Release     Contains libcef.dll and other components required to run the release
-            version of CEF-based applications. Also acts as the build target for
-            the Release build of cefclient.
+Release     Contains libcef.dll, libcef.lib and other components required to
+            build and run the release version of CEF-based applications. By
+            default these files should be placed in the same directory as the
+            executable and will be copied there as part of the build process.
+
+Resources   Contains resources required by libcef.dll. By default these files
+            should be placed in the same directory as libcef.dll. By default
+            these files should be placed in the same directory as libcef.dll
+            and will be copied there as part of the build process.
 
 
 USAGE
@@ -61,7 +59,6 @@ Visual Studio 2005:
 Please visit the CEF Website for additional usage information.
 
 http://code.google.com/p/chromiumembedded
-
 
 REDISTRIBUTION
 --------------
@@ -107,13 +104,9 @@ Optional components:
   does not require these components (and does not work on all systems) set
   CefSettings.graphics_implementation to DESKTOP_IN_PROCESS.
 
-
 LICENSING
 ---------
 
 The CEF project is BSD licensed. Please read the LICENSE.txt file included with
 this binary distribution for licensing terms and conditions. Other software
-included in this distribution is provided under other licenses. Please visit the
-below link for complete Chromium and third-party licensing information.
-
-http://code.google.com/chromium/terms.html 
+included in this distribution is provided under other licenses.
