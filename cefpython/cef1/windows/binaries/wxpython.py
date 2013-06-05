@@ -4,17 +4,19 @@ import platform
 if platform.architecture()[0] != "32bit":
     raise Exception("Only 32bit architecture is supported")
 
-import sys
-try:
-    # Import local module.
+import os, sys
+libcef_dll = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        'libcef.dll')
+if os.path.exists(libcef_dll):
+    # Import the local module.
     if 0x02070000 <= sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
     elif 0x03000000 <= sys.hexversion < 0x04000000:
         import cefpython_py32 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
-except ImportError:
-    # Import from package.
+else:
+    # Import the package.
     from cefpython1 import cefpython
 
 import wx
@@ -22,7 +24,7 @@ import wx
 # Which method to use for message loop processing.
 #   EVT_IDLE - wx application has priority (default)
 #   EVT_TIMER - cef browser has priority
-# From the tests it seems that Flash content behaves 
+# From the tests it seems that Flash content behaves
 # better when using a timer.
 USE_EVT_IDLE = True
 
@@ -46,17 +48,35 @@ def GetApplicationPath(file=None):
         return path
     return str(file)
 
-def ExceptHook(type, value, traceObject):
+def ExceptHook(excType, excValue, traceObject):
     import traceback, os, time
-    # This hook does the following: in case of exception display it,
-    # write to error.log, shutdown CEF and exit application.
-    error = "\n".join(traceback.format_exception(type, value, traceObject))
-    with open(GetApplicationPath("error.log"), "a") as file:
-        file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
-    print("\n"+error+"\n")
+    # This hook does the following: in case of exception write it to
+    # the "error.log" file, display it to the console, shutdown CEF
+    # and exit application immediately by ignoring "finally" (_exit()).
+    errorMsg = "\n".join(traceback.format_exception(excType, excValue,
+            traceObject))
+    logFile = GetApplicationPath("error.log")
+    try:
+        appEncoding = cefpython.g_applicationSettings["string_encoding"]
+    except:
+        appEncoding = "utf-8"
+    if type(errorMsg) == bytes:
+        errorMsg = errorMsg.decode(encoding=appEncoding, errors="replace")
+    try:
+        with open(logFile, "a", encoding=appEncoding) as fp:
+            fp.write("\n[%s] %s\n" % (
+                    time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
+    except:
+        print("cefpython: WARNING: failed writing to error file: %s" % (
+                error_file))
+    # Convert error message to ascii before printing, otherwise
+    # you may get error like this:
+    # | UnicodeEncodeError: 'charmap' codec can't encode characters
+    errorMsg = errorMsg.encode("ascii", errors="replace")
+    errorMsg = errorMsg.decode("ascii", errors="replace")
+    print("\n"+errorMsg+"\n")
     cefpython.QuitMessageLoop()
     cefpython.Shutdown()
-    # So that "finally" does not execute.
     os._exit(1)
 
 class MainFrame(wx.Frame):
@@ -117,7 +137,7 @@ class MyApp(wx.App):
         return True
 
     def CreateTimer(self):
-        # See "Making a render loop": 
+        # See "Making a render loop":
         # http://wiki.wxwidgets.org/Making_a_render_loop
         # Another approach is to use EVT_IDLE in MainFrame,
         # see which one fits you better.
@@ -129,7 +149,7 @@ class MyApp(wx.App):
         cefpython.SingleMessageLoop()
 
     def OnExit(self):
-        # When app.MainLoop() returns, MessageLoopWork() should 
+        # When app.MainLoop() returns, MessageLoopWork() should
         # not be called anymore.
         if not USE_EVT_IDLE:
             self.timer.Stop()

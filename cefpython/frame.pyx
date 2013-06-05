@@ -55,7 +55,7 @@ cdef class PyFrame:
     # Synchronous javascript calls won't be supported as CEF 3
     # does not support it, so supporting it in CEF 1 is probably
     # not a good idea - porting to CEF 3 would be problematic.
-    
+
     # cpdef object CallFunctionSync(self, funcName, ...):
         # CefV8 Objects, Arrays and Functions can be created only inside V8 context,
         # you need to call CefV8Context::Enter() and CefV8Context::Exit():
@@ -87,27 +87,10 @@ cdef class PyFrame:
     cpdef py_void Delete(self):
         self.GetCefFrame().get().Delete()
 
-    cpdef py_void ExecuteJavascript(self, py_string jsCode, py_string scriptUrl="",
-            int startLine=0):
-        cdef CefString cefJsCode
-
-        if bytes == str:
-            # Python 2.7
-            cefJsCode.FromASCII(<char*>jsCode)
-        else:
-            # Python 3 requires bytes when converting to char*
-            bytesJsCode = jsCode.encode("utf-8")
-            cefJsCode.FromASCII(<char*>bytesJsCode)
-
-        if not scriptUrl:
-            scriptUrl = ""
-        cdef CefString cefScriptUrl
-        PyToCefString(scriptUrl, cefScriptUrl)
-
-        if not startLine:
-            startLine = -1
-
-        self.GetCefFrame().get().ExecuteJavaScript(cefJsCode, cefScriptUrl, startLine)
+    cpdef py_void ExecuteJavascript(self, py_string jsCode,
+            py_string scriptUrl="", int startLine=0):
+        self.GetCefFrame().get().ExecuteJavaScript(PyToCefStringValue(jsCode),
+                PyToCefStringValue(scriptUrl), startLine)
 
     cpdef object EvalJavascript(self):
         # TODO: CefV8Context > Eval
