@@ -171,7 +171,7 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
 
 <h3>Frame.ExecuteJavascript()</h3>
 
-    <textarea id=jscode>alert('test me')</textarea><br>
+    <textarea id=jscode cols=50 rows=2>alert('test me [unicode: ąś]')</textarea><br>
     <a href="javascript:python.ExecuteJavascript(jscode.value)">python.ExecuteJavascript(jscode.value)</a> - execute javascript from the textarea above.
 
 <h3>Frames</h3>
@@ -186,7 +186,7 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
     <h4>Passing arguments</h4>
 
     <a href="javascript:alert('Return value from python.Test1: '+python.Test1(100))">python.Test1(100)</a><br>
-    <a href="javascript:alert('Return value from python.Test2: '+JSON.stringify(python.Test2(100, 'This string was passed from javascript', '')))">python.Test2(100, 'This string was passed from javascript', '')</a> - python.Test2() should return: [1,2, [2.1, {'3': 3, '4': [5,6]}]]
+    <a href="javascript:alert('Return value from python.Test2: '+JSON.stringify(python.Test2(100, 'This string was passed from javascript  [unicode: ąś]', '')))">python.Test2(100, 'This string was passed from javascript [unicode: ąś]', '')</a> - python.Test2() should return: [1,2, [2.1, {'3': 3, '4': [5,6]}]]
     <br><br>
 
     <script>var array = [1]; array[100] = 100.01;</script>
@@ -210,9 +210,9 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
 <h3>Javasript callbacks</h3>
 
     <script>
-    function MyJSCallback(arg1, arg2, arg3, arg4)
+    function MyJSCallback(arg1, arg2, arg3, arg4, arg5)
     {
-        alert("MyJSCallback() called\narg1="+JSON.stringify(arg1)+"\narg2="+JSON.stringify(arg2)+"\narg3="+JSON.stringify(arg3)+"\narg4="+JSON.stringify(arg4))
+        alert("MyJSCallback() called\narg1="+JSON.stringify(arg1)+"\narg2="+JSON.stringify(arg2)+"\narg3="+JSON.stringify(arg3)+"\narg4="+JSON.stringify(arg4)+"\narg5="+JSON.stringify(arg5))
     }
     </script>
 

@@ -46,6 +46,12 @@
 # - Supporting operators that are not yet supported:
 #   | CefRefPtr[T]& Assign "operator="(T* p)
 #   | cefBrowser.Assign(CefBrowser*)
+#
+# - | cdef char* other_c_string = py_string
+#   This is a very fast operation after which other_c_string points 
+#   to the byte string buffer of the Python string itself. It is 
+#   tied to the life time of the Python string. When the Python 
+#   string is garbage collected, the pointer becomes invalid.
 
 # Global variables.
 
@@ -137,8 +143,8 @@ def Initialize(applicationSettings=None):
         applicationSettings = {}
     if not "multi_threaded_message_loop" in applicationSettings:
         applicationSettings["multi_threaded_message_loop"] = False
-    if not "unicode_to_bytes_encoding" in applicationSettings:
-        applicationSettings["unicode_to_bytes_encoding"] = "utf-8"
+    if not "string_encoding" in applicationSettings:
+        applicationSettings["string_encoding"] = "utf-8"
     IF CEF_VERSION == 3:
         if not "single_process" in applicationSettings:
             applicationSettings["single_process"] = False

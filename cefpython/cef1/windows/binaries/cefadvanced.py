@@ -12,17 +12,19 @@ import platform
 if platform.architecture()[0] != "32bit":
     raise Exception("Only 32bit architecture is supported")
 
-import sys
-try:
-    # Import local module.
+import os, sys
+libcef_dll = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        'libcef.dll')
+if os.path.exists(libcef_dll):
+    # Import the local module.
     if 0x02070000 <= sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
     elif 0x03000000 <= sys.hexversion < 0x04000000:
         import cefpython_py32 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
-except ImportError:
-    # Import from package.
+else:
+    # Import the package.
     from cefpython1 import cefpython
 
 import cefwindow
@@ -33,7 +35,6 @@ import win32con
 import win32gui
 
 import re
-import os
 import imp
 import inspect
 import pprint
@@ -66,17 +67,35 @@ def GetApplicationPath(file=None):
         return path
     return str(file)
 
-def ExceptHook(type, value, traceObject):
+def ExceptHook(excType, excValue, traceObject):
     import traceback, os, time
-    # This hook does the following: in case of exception display it,
-    # write to error.log, shutdown CEF and exit application.
-    error = "\n".join(traceback.format_exception(type, value, traceObject))
-    with open(GetApplicationPath("error.log"), "a") as file:
-        file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
-    print("\n"+error+"\n")
+    # This hook does the following: in case of exception write it to
+    # the "error.log" file, display it to the console, shutdown CEF
+    # and exit application immediately by ignoring "finally" (_exit()).
+    errorMsg = "\n".join(traceback.format_exception(excType, excValue,
+            traceObject))
+    logFile = GetApplicationPath("error.log")
+    try:
+        appEncoding = cefpython.g_applicationSettings["string_encoding"]
+    except:
+        appEncoding = "utf-8"
+    if type(errorMsg) == bytes:
+        errorMsg = errorMsg.decode(encoding=appEncoding, errors="replace")
+    try:
+        with open(logFile, "a", encoding=appEncoding) as fp:
+            fp.write("\n[%s] %s\n" % (
+                    time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
+    except:
+        print("cefpython: WARNING: failed writing to error file: %s" % (
+                error_file))
+    # Convert error message to ascii before printing, otherwise
+    # you may get error like this:
+    # | UnicodeEncodeError: 'charmap' codec can't encode characters
+    errorMsg = errorMsg.encode("ascii", errors="replace")
+    errorMsg = errorMsg.decode("ascii", errors="replace")
+    print("\n"+errorMsg+"\n")
     cefpython.QuitMessageLoop()
     cefpython.Shutdown()
-    # So that "finally" does not execute.
     os._exit(1)
 
 def InitDebugging():
@@ -361,12 +380,22 @@ class Python:
 
     def Test1(self, arg1):
         print("python.Test1(%s) called" % arg1)
-        return "This string was returned from python function python.Test1()"
+        return ("This string was returned from python function python.Test1()"
+                " [unicode: ąś]")
 
     def Test2(self, arg1, arg2, arg3):
+        # ąś == b"\xc4\x85\xc5\x9b"
+        # ąś == u"\u0105\u015b"
+        # Displaying utf-8 characters to the console may result
+        # in UnicodeDecodeError, thus let's convert it to bytes
+        # and display the raw b"\xc4\x85\xc5\x9b" characters.
+        arg2_original = arg2
+        if type(arg2) != bytes:
+            arg2 = arg2.encode(encoding="utf-8")
         print("python.Test2(%s, '%s', '%s') called" % (arg1, arg2, arg3))
         # Testing nested return values.
-        return [1,2, [2.1, {'3': 3, '4': [5,6]}], '']
+        return [1,2, [2.1, {'3': 3, '4': [5,6]}], "[unicode: ąś]", 
+                arg2_original, arg2]
 
     def PrintPyConfig(self):
         print("python.PrintPyConfig(): %s" % (
@@ -385,11 +414,12 @@ class Python:
             if bytes == str:
                 # Python 2.7
                 jsCallback.Call(1, [2,3], ('tuple', 'tuple'),
-                        unicode('unicode string'))
+                        unicode('unicode string [ąś]'))
             else:
                 # Python 3.2 - there is no "unicode()" in python 3
                 jsCallback.Call(1, [2,3], ('tuple', 'tuple'),
-                        'bytes string'.encode('utf-8'))
+                        'unicode string [ąś]', 
+                        'bytes string [ąś]'.encode('utf-8'))
         else:
             raise Exception("python.TestJavascriptCallback() failed: "
                     "given argument is not a javascript callback function")
