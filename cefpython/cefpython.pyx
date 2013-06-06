@@ -52,6 +52,17 @@
 #   to the byte string buffer of the Python string itself. It is 
 #   tied to the life time of the Python string. When the Python 
 #   string is garbage collected, the pointer becomes invalid.
+#
+# - Do not define cpdef functions returning "cpp_bool":
+#   | cpdef cpp_bool myfunc() except *:
+#   This causes compiler warnings like this:
+#   | cefpython.cpp(26533) : warning C4800: 'int' : forcing value
+#   | to bool 'true' or 'false' (performance warning)
+#   Do instead declare "py_bool" as return type:
+#   | cpdef py_bool myufunc():
+#   Lots of these warnings results in ignoring them, but sometimes
+#   they are shown for a good reason, for example when you forget
+#   to return a value in a function.
 
 # Global variables.
 

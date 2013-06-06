@@ -132,13 +132,16 @@ cdef class Cookie:
         return CefToPyString(cefString)
 
     cpdef py_void SetSecure(self, py_bool secure):
-        self.cefCookie.secure = secure
+        # Need to wrap it with bool() to get rid of the C++ compiler
+        # warnings: "cefpython.cpp(24740) : warning C4800: 'int' : 
+        # forcing value to bool 'true' or 'false' (performance warning)".
+        self.cefCookie.secure = bool(secure)
 
     cpdef py_bool GetSecure(self):
         return self.cefCookie.secure
 
     cpdef py_void SetHttpOnly(self, py_bool httpOnly):
-        self.cefCookie.httponly = httpOnly
+        self.cefCookie.httponly = bool(httpOnly)
 
     cpdef py_bool GetHttpOnly(self):
         return self.cefCookie.httponly
@@ -156,7 +159,7 @@ cdef class Cookie:
         return CefTimeTToDatetime(self.cefCookie.last_access)
 
     cpdef py_void SetHasExpires(self, py_bool hasExpires):
-        self.cefCookie.has_expires = hasExpires
+        self.cefCookie.has_expires = bool(hasExpires)
 
     cpdef py_bool GetHasExpires(self):
         return self.cefCookie.has_expires
@@ -216,23 +219,25 @@ cdef class PyCookieManager:
             return True
         raise Exception("CookieVisitor object is missing Visit() method")
 
-    cpdef cpp_bool VisitAllCookies(self, object userCookieVisitor) except *:
+    cpdef py_bool VisitAllCookies(self, object userCookieVisitor):
         self.ValidateUserCookieVisitor(userCookieVisitor)
         cdef int cookieVisitorId = StoreUserCookieVisitor(userCookieVisitor)
         cdef CefRefPtr[CefCookieVisitor] cefCookieVisitor = (
                 <CefRefPtr[CefCookieVisitor]?>new CookieVisitor(
                         cookieVisitorId))
-        self.cefCookieManager.get().VisitAllCookies(cefCookieVisitor)
+        return self.cefCookieManager.get().VisitAllCookies(
+                cefCookieVisitor)
 
-    cpdef cpp_bool VisitUrlCookies(self, py_string url, 
-            py_bool includeHttpOnly, object userCookieVisitor) except *:
+    cpdef py_bool VisitUrlCookies(self, py_string url, 
+            py_bool includeHttpOnly, object userCookieVisitor):
         self.ValidateUserCookieVisitor(userCookieVisitor)
         cdef int cookieVisitorId = StoreUserCookieVisitor(userCookieVisitor)
         cdef CefRefPtr[CefCookieVisitor] cefCookieVisitor = (
                 <CefRefPtr[CefCookieVisitor]?>new CookieVisitor(
                         cookieVisitorId))
-        self.cefCookieManager.get().VisitUrlCookies(PyToCefStringValue(url),
-                includeHttpOnly, cefCookieVisitor)
+        return self.cefCookieManager.get().VisitUrlCookies(
+                PyToCefStringValue(url), bool(includeHttpOnly), 
+                cefCookieVisitor)
 
     cpdef py_void SetCookie(self, py_string url, PyCookie cookie):
         assert isinstance(cookie, Cookie), "cookie object is invalid"
@@ -245,7 +250,7 @@ cdef class PyCookieManager:
                 &cef_cookie_manager_namespace.DeleteCookies, 
                 PyToCefStringValue(url), PyToCefStringValue(cookie_name)))
 
-    cpdef cpp_bool SetStoragePath(self, py_string path) except *:
+    cpdef py_bool SetStoragePath(self, py_string path):
         return self.cefCookieManager.get().SetStoragePath(
                 PyToCefStringValue(path))
 
