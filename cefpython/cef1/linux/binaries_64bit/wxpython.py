@@ -50,13 +50,13 @@ def GetApplicationPath(file=None):
     return str(file)
 
 def ExceptHook(excType, excValue, traceObject):
-    import traceback, os, time
+    import traceback, os, time, codecs
     # This hook does the following: in case of exception write it to
     # the "error.log" file, display it to the console, shutdown CEF
     # and exit application immediately by ignoring "finally" (_exit()).
     errorMsg = "\n".join(traceback.format_exception(excType, excValue,
             traceObject))
-    logFile = GetApplicationPath("error.log")
+    errorFile = GetApplicationPath("error.log")
     try:
         appEncoding = cefpython.g_applicationSettings["string_encoding"]
     except:
@@ -64,12 +64,12 @@ def ExceptHook(excType, excValue, traceObject):
     if type(errorMsg) == bytes:
         errorMsg = errorMsg.decode(encoding=appEncoding, errors="replace")
     try:
-        with open(logFile, "a", encoding=appEncoding) as fp:
+        with codecs.open(errorFile, mode="a", encoding=appEncoding) as fp:
             fp.write("\n[%s] %s\n" % (
                     time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
     except:
         print("cefpython: WARNING: failed writing to error file: %s" % (
-                error_file))
+                errorFile))
     # Convert error message to ascii before printing, otherwise
     # you may get error like this:
     # | UnicodeEncodeError: 'charmap' codec can't encode characters
@@ -82,9 +82,7 @@ def ExceptHook(excType, excValue, traceObject):
 
 class MainFrame(wx.Frame):
     browser = None
-    initialized = False
     idleCount = 0
-    box = None
 
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
@@ -246,11 +244,9 @@ class ContentFilterHandler:
         remainder.SetData("body h3 { color: orange; }")
 
 class ClientHandler:
-
     # --------------------------------------------------------------------------
     # RequestHandler
     # --------------------------------------------------------------------------
-
     contentFilter = None
 
     def OnBeforeBrowse(self, browser, frame, request, navType, isRedirect):

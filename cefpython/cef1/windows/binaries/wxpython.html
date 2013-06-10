@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>CefSimple (utf-8: ąś)</title>
+    <style>
+    body { font: 13px Segoe UI, Arial; line-height: 1.4em; }
+    pre { background: #ddd; font: 12px Consolas, Courier New; }
+    </style>
+</head>
+<body>
+
+Use mouse context menu to go Back/Forward in history navigation.
+
+
+
+<h3>Google Search</h3>
+<a href="http://www.google.com/">http://www.google.com/</a>
+
+
+
+<h3>User agent</h3>
+<script>document.write(navigator.userAgent)</script>
+
+
+
+<h3>Popup</h3>
+<a href="javascript:window.open('wxpython.html')">
+    window.open('wxpython.html')</a>
+
+
+
+
+<h3>RequestHandler tests</h3>
+
+<p>See messages in the console.</p>
+
+OnBeforeBrowse() - navigate to see message: 
+<a href="wxpython.html">wxpython.html</a>
+<br><br>
+
+OnBeforeBrowse() / OnBeforeResourceLoad() - test request.GetPostData()
+and request.SetPostData():
+submit a form:
+<a href="https://accounts.google.com/ServiceLogin">
+    https://accounts.google.com/ServiceLogin</a>,
+upload a file:
+<a href="http://encodable.com/uploaddemo/">
+    http://encodable.com/uploaddemo/</a>
+<br><br>
+
+OnBeforeResourceLoad() - try loading nonexistent css file locally:
+<a href="javascript:LoadCssFile('nonexistent.css')">
+    LoadCssFile('nonexistent.css')</a>
+<script>
+function LoadCssFile(url) {
+    var cssFile=document.createElement("link")
+    cssFile.setAttribute("rel", "stylesheet")
+    cssFile.setAttribute("type", "text/css")
+    cssFile.setAttribute("href", url)
+    document.getElementsByTagName("head")[0].appendChild(cssFile)
+}
+</script>
+<br><br>
+
+OnBeforeResourceLoad() - try replacing a resource on the fly:
+<a href="javascript:LoadCssFile('replace-on-the-fly.css')">
+    LoadCssFile('replace-on-the-fly.css')</a>
+(css content: body { color: red; })
+<br><br>
+
+OnResourceRedirect() - try loading this url: 
+<a href="http://tinyurl.com/google404redirect">
+    http://tinyurl.com/google404redirect</a>
+<br><br>
+
+OnResourceResponse() - try loading nonexistent css file via http:
+<a href="javascript:LoadCssFile('http://www.google.com/404.css')">
+    LoadCssFile('http://www.google.com/404.css')</a>
+<br><br>
+
+OnResourceResponse() - try filtering content of the resource:
+<a href="javascript:LoadCssFile('content-filter/replace-on-the-fly.css')">
+    LoadCssFile('content-filter/replace-on-the-fly.css')</a>
+(new css content: body { color: green; } and body h3 { color: orange; } )
+<br><br>
+
+
+
+
+
+<h3>WebRequest test</h3>
+
+See the console for messages.<br>
+
+<a href="javascript:external.WebRequest('https://code.google.com/robots.txt')">
+    external.WebRequest('https://code.google.com/robots.txt')</a>
+
+<h3>Frame.CallFunction() test</h3>
+
+<script>
+function MyFunction(param1, param2, param3, param4) {
+    alert("MyFunction() called\nparam1="+JSON.stringify(param1)+"\nparam2="+JSON.stringify(param2)+"\nparam3="+JSON.stringify(param3)+"\nparam4="+JSON.stringify(param4))
+}
+</script>
+<a href="javascript:external.DoCallFunction()">
+    external.DoCallFunction()</a>
+
+
+
+
+<h3>Cookie tests</h3>
+
+See messages in the console.
+<br><br>
+
+RequestHandler.GetCookieManager() - an example of having an unique
+cookie manager for each browser. Visit 
+<a href="http://www.html-kit.com/tools/cookietester/">
+    http://www.html-kit.com/tools/cookietester/</a> and set some cookie,
+then go back to this page using the context menu and open a 
+<a href="javascript:window.open('http://www.html-kit.com/tools/cookietester/')">
+    new popup window</a>, the cookie should not appear in the popup browser window.
+<br><br>
+
+CookieManager.VisitAllCookies() - visit all cookies: 
+<a href="javascript:external.VisitAllCookies()">external.VisitAllCookies()</a>
+(note: visit some http:// webpage first, otherwise cookie manager is not
+yet created)
+<br><br>
+
+CookieManager.VisitUrlCookies("http://www.html-kit.com/tools/cookietester/")
+- visit a subset of cookies given the url, test:
+<a href="javascript:external.VisitUrlCookies()">external.VisitUrlCookies()</a>
+<br><br>
+
+CookieManager.SetCookie("http://www.html-kit.com/tools/cookietester/",
+    {name:"Created_Via_Python", value:"yeah really"}) - create the cookie: 
+    <a href="javascript:external.SetCookie()">external.SetCookie()</a>
+<br><br>
+
+CookieManager.DeleteCookies() - delete the single cookie previously created 
+via SetCookie(): <a href="javascript:external.DeleteCookies()">
+    external.DeleteCookies()</a>
+<br><br>
+
+
+
+
+<h3>DragHandler test</h3>
+
+Try dragging a file, or a text/html fragment to the browser window
+and look for the messages in the console. In the wxpython.py script see
+ClientHandler.OnDragStart() and OnDragEnter().
+
+
+
+
+<h3>DownloadHandler test</h3>
+
+Try downloading this file (838 KiB):<br>
+<a href="http://cefpython.googlecode.com/files/ubuntu-wallpapers2.zip">
+    http://cefpython.googlecode.com/files/ubuntu-wallpapers2.zip</a>
+<br>
+See messages in the console. 
+The file will be saved in the ./downloads/ directory.
+
+
+
+
+</body>
+</html>
