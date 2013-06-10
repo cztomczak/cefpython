@@ -14,7 +14,7 @@
 Welcome to <b>CEF Python</b> - bindings for the Chromium Embedded Framework.
 <br><br>
 
-Project's website: <a href="http://code.google.com/p/cefpython/">
+Project website: <a href="http://code.google.com/p/cefpython/">
 http://code.google.com/p/cefpython/</a><br>
 
 Wiki documentation: <a href="http://code.google.com/p/cefpython/wiki/">
@@ -62,11 +62,11 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
     <a href="javascript:browser.Find(searchID=0, searchText='test', forward=true, matchCase=false, findNext=false)">Find(searchId=0, searchText='test', forward=true, matchCase=false, findNext=false)</a><br>
     <a href="javascript:alert(browser.GetUserData('some'))">GetUserData('some')</a><br>
     <a href="javascript:alert(browser.GetFocusedFrame())">GetFocusedFrame()</a>
-    (returning a class object from python is not yet supported)<br>
-    <a href="javascript:alert(browser.GetFrame('simple'))">CloseBrowser('simple')</a><br>
+    - throws an error, returning a PyFrame object to to javascript is not yet supported<br>
+    <a href="javascript:alert(browser.GetFrame('simple'))">GetFrame('simple')</a> - throws an error, returning a PyFrame object to javascript is not yet supported<br>
     <a href="javascript:alert(browser.GetFrameNames())">GetFrameNames()</a><br>
     <a href="javascript:alert(browser.GetMainFrame())">GetMainFrame()</a>
-    (returning a class object from python is not yet supported)<br>
+    - throws an error, returning a PyFrame object to javascript is not yet supported<br>
     <a href="javascript:alert(browser.GetOpenerWindowHandle())">
     GetOpenerWindowHandle()</a><br>
     <a href="javascript:alert(browser.GetOuterWindowHandle())">
@@ -85,13 +85,13 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
     <a href="javascript:browser.Reload()">Reload()</a><br>
     <a href="javascript:browser.ReloadIgnoreCache()">ReloadIgnoreCache()</a><br>
     <a href="javascript:browser.SetFocus(false)">SetFocus(false)</a>
-    (inner window loses focus, check keyboard & mouse wheel scrolling)<br>
+    - inner window loses focus, check keyboard and mouse wheel scrolling<br>
     <a href="javascript:browser.SetUserData('some', 'something')">
-    SetUserData('some', 'something')</a><br>
+    SetUserData('some', 'something')</a> - call GetUserData('some')<br>
     <a href="javascript:browser.SetZoomLevel(2)">SetZoomLevel(2)</a><br>
     <a href="javascript:browser.ShowDevTools()">ShowDevTools()</a><br>
     <a href="javascript:browser.StopLoad()">StopLoad()</a><br>
-    <a href="javascript:browser.StopFinding(true)">StopFinding(true)</a><br>
+    <a href="javascript:browser.StopFinding(true)">StopFinding(true)</a> - call Find(), then StopFinding()<br>
     <a href="javascript:browser.ToggleFullscreen()">ToggleFullscreen()</a><br>
 
 <h3>Frame object</h3>
@@ -118,24 +118,21 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
     <a href="javascript:((frame.Redo()))">Redo()</a><br>
     <a href="javascript:((frame.SelectAll()))">SelectAll()</a><br>
     <a href="javascript:((frame.SetProperty('name', 'noname')))">
-    SetProperty('name', 'noname')</a><br>
+    SetProperty('name', 'noname')</a> - call GetProperty('name')<br>
     <a href="javascript:((frame.Undo()))">Undo()</a><br>
     <a href="javascript:((frame.ViewSource()))">ViewSource()</a><br>
 
 <h3>Browser view as an image</h3>
 
-    Browser.GetImage() returns PaintBuffer, that object
-    has method called GetString() that returns the buffer
-    as a string that can be later passed to Python Imaging Library
-    by calling PIL.Image.fromstring() and saved as a PNG (or
-    other format) to a file. Test it:<br>
+    Browser.GetImage() returns a PaintBuffer object that has the GetString() 
+    method that returns the buffer as a string, that string can be
+    passed to PIL.Image.fromstring() and saved as a PNG or other 
+    format. This test requires the PIL or pygame library to be installed:<br>
     <a href="javascript:python.SaveImage('!cefadvanced.png', 'PNG')">
     python.SaveImage('!cefadvanced.png', 'PNG')</a><br>
-    (you need to have installed the PIL extension).
-
-    <br><br>
-    TODO: capture an image of all scrollable content on a webpage,
-    detect the height of content in javascript and call
+    
+    TODO: capture image of all the scrollable content on a webpage,
+    detect the height of the content in javascript and call 
     Browser.SetSize() using that height.
 
 <h3>Test unicode string</h3>
@@ -151,7 +148,7 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
 <h3>Test int32, uint, long</h3>
 
     <a href="javascript:alert(python.GetType(2147483647))">python.GetType(2147483647)</a><br>
-    <a href="javascript:alert(python.GetType(2147483648))">python.GetType(2147483648)</a> - here we get UINT from CEF so it's still converted to long.<br>
+    <a href="javascript:alert(python.GetType(2147483648))">python.GetType(2147483648)</a> - here we get UINT from CEF so it is converted to long in Py2, int in Py3.<br>
     <a href="javascript:alert(python.GetType(4294967295))">python.GetType(4294967295)</a> - uint limit.<br>
     <a href="javascript:alert(python.GetType(4294967296))">python.GetType(4294967296)</a> - outside of uint limit, converted to float.<br>
     <a href="javascript:alert(python.GetType(-2147483647))">python.GetType(-2147483647)</a><br>
@@ -164,7 +161,7 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
 
 <h3>Basic authentication</h3>
 
-    <input type=text value="http://127.0.0.1/cefpython/cefpython/cefpython1/var/http_authentication.php" size=60 id=httpauth>
+    <input type=text value="http://127.0.0.1/cefpython/cefpython-src/cefpython/var/http_authentication.php" size=80 id=httpauth>
     <input type=button value="Go" onclick="location.href=httpauth.value">
 
     <br>
@@ -181,12 +178,13 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
 
 <h3>Javascript bindings</h3>
 
-    See output in console for these tests. (Note: "window." is optional, you can just call "python.Test1()")<br>
+    See output in the console for the javascript bindings tests.<br>
+    Note: "window." is optional, you can just call "python.Test1()".<br>
 
     <h4>Passing arguments</h4>
 
     <a href="javascript:alert('Return value from python.Test1: '+python.Test1(100))">python.Test1(100)</a><br>
-    <a href="javascript:alert('Return value from python.Test2: '+JSON.stringify(python.Test2(100, 'This string was passed from javascript  [unicode: ąś]', '')))">python.Test2(100, 'This string was passed from javascript [unicode: ąś]', '')</a> - python.Test2() should return: [1,2, [2.1, {'3': 3, '4': [5,6]}]]
+    <a href="javascript:alert('Return value from python.Test2: '+JSON.stringify(python.Test2(100, 'This string was passed from javascript  [unicode: ąś]', '')))">python.Test2(100, 'This string was passed from javascript [unicode: ąś]', '')</a> - python.Test2() should return: [1,2, [2.1, {'3': 3, '4': [5,6]}], unicode...]
     <br><br>
 
     <script>var array = [1]; array[100] = 100.01;</script>
@@ -236,13 +234,23 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
 
 <h3>Errors</h3>
 
-    <p>Typically when you browse a webpage your javascript errors appear in javascript console in developer tools (in cefadvanced.py there is a binding to F12 key for developer tools).</p>
+    <p>Typically when you browse a webpage javascript errors appear in 
+        the developer tools javascript console (in cefadvanced.py there 
+        is a binding to F12 key for the developer tools popup).</p>
 
     <h4>Global exception handler</h4>
 
+    <script>
+    function DoSomeError() {
+        asd()
+    }
+    </script>
+
     <p>You can catch javascript errors programmatically by
-    using JavascriptContextHandler and the OnUncaughtException callback,
-    test it:<br>
+    using JavascriptContextHandler.OnUncaughtException() callback,
+    to see the complete stack trace you need to set the
+    "uncaught_exception_stack_size" ApplicationSettings option to
+    a value greater than 0, test it:<br>
     <a href="javascript:DoSomeError()">
     DoSomeError()</a>
     </p>
@@ -263,7 +271,7 @@ https://groups.google.com/group/cefpython?hl=en</a><br>
 
     <a href="javascript:python.Test1(window)">python.Test1(window)</a><br>
     You should see a python exception in the console (also in error.log),
-    data structures can have maximum 8 levels of nesting.
+    as data structures can have maximum 8 levels of nesting.
 
 <h3>Moving and resizing window</h3>
 
