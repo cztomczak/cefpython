@@ -81,12 +81,10 @@ Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s
 ; examples
 ; ------------------------------------------------------------------------------
 
-Source: "cefadvanced.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+Source: "*.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+
 Source: "cefadvanced.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
-
-Source: "cefsimple.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "cefsimple.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
-
 Source: "cefwindow.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 
 Source: "cefwxpanel.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
