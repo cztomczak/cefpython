@@ -8,4 +8,4 @@ else:
     raise Exception("Unsupported python version: " + sys.version)
 
 __version__ = "%(APP_VERSION)s"
-__author__ = "CEF Python authors"
+__author__ = "The CEF Python authors"

@@ -10,13 +10,13 @@ cdef PyDragData CreatePyDragData(CefRefPtr[CefDragData] cefDragData):
 cdef class PyDragData:
     cdef CefRefPtr[CefDragData] cefDragData
 
-    cpdef cpp_bool IsLink(self) except *:
+    cpdef py_bool IsLink(self):
         return self.cefDragData.get().IsLink()
 
-    cpdef cpp_bool IsFragment(self) except *:
+    cpdef py_bool IsFragment(self):
         return self.cefDragData.get().IsFragment()
 
-    cpdef cpp_bool IsFile(self) except *:
+    cpdef py_bool IsFile(self):
         return self.cefDragData.get().IsFile()
 
     cpdef str GetLinkUrl(self):

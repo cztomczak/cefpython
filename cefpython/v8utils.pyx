@@ -151,17 +151,6 @@ cdef CefRefPtr[CefV8Value] PyToV8Value(
     cdef CefString cefFuncName
     cdef type pyValueType = type(pyValue)
 
-    if bytes == str:
-        # Python 2.7
-        if pyValueType == unicode:
-            # Unicode string to bytes string.
-            pyValue = pyValue.encode(g_applicationSettings["unicode_to_bytes_encoding"])
-    else:
-        # Python 3.2
-        if pyValueType == bytes:
-            # Bytes to string.
-            pyValue = pyValue.decode(g_applicationSettings["unicode_to_bytes_encoding"])
-
     if pyValueType == tuple:
         pyValue = list(pyValue)
 
@@ -223,7 +212,7 @@ cdef CefRefPtr[CefV8Value] PyToV8Value(
                     PyToV8Value(value, v8Context, nestingLevel+1),
                     V8_PROPERTY_ATTRIBUTE_NONE)
         return v8Value
-    elif pyValueType == str:
+    elif pyValueType == bytes or pyValueType == unicode:
         PyToCefString(pyValue, cefString)
         return cef_v8_static.CreateString(cefString)
     elif pyValueType == type:

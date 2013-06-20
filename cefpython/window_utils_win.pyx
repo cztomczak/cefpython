@@ -63,22 +63,17 @@ class WindowUtils:
         assert windowHandle, (
                 "WindowUtils.SetTitle() failed: windowHandle is empty")
 
+        # Get window title.
         cdef int sizeOfTitle = 100
         cdef wchar_t* widecharTitle = (
                 <wchar_t*>calloc(sizeOfTitle, wchar_t_size))
-        cdef str currentTitle
         GetWindowTextW(<HWND>windowHandle, widecharTitle, sizeOfTitle)
-        currentTitle = WidecharToPyString(widecharTitle)
+        cdef str currentTitle = WidecharToPyString(widecharTitle)
         free(widecharTitle)
 
-        cdef bytes bytesTitle
-        if str == bytes:
-            bytesTitle = <bytes>pyTitle
-        else:
-            bytesTitle = pyTitle.encode("utf-8")
-        cdef cpp_string cppStringTitle = bytesTitle
+        # Must keep alive while c_str() is passed.
         cdef CefString cefTitle
-        cefTitle.FromString(cppStringTitle)
+        PyToCefString(pyTitle, cefTitle)
 
         if pyBrowser.GetUserData("__outerWindowHandle"):
             if not currentTitle:

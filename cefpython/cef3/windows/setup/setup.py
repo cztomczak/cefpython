@@ -40,6 +40,7 @@ def CompileTimeConstants():
         # A way around Python 3.2 bug: UNAME_SYSNAME is not set.
         fd.write('DEF UNAME_SYSNAME = "%s"\n' % platform.uname()[0])
         fd.write('DEF CEF_VERSION = %s\n' % CEF_VERSION)
+        fd.write('DEF PY_MAJOR_VERSION = %s\n' % sys.version_info.major)
 
 CompileTimeConstants()
 
@@ -48,8 +49,19 @@ ext_modules = [Extension(
     "cefpython_py%s" % PYTHON_VERSION,
     ["cefpython.pyx"],
 
+    cython_directives={
+        # Any conversion to unicode must be explicit using .decode().
+        "c_string_type": "bytes",
+        "c_string_encoding": "utf-8",
+    },
+
     language='c++',
-    include_dirs=[r'./../', r'./../../', r'./../../../', r'./../../../cython_includes/'],
+    
+    include_dirs=[
+        r'./../', 
+        r'./../../', 
+        r'./../../../', 
+        r'./../../../cython_includes/'],
 
     library_dirs=[
         r'./',

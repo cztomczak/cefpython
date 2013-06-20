@@ -35,8 +35,8 @@ LicenseFile = %(BINARIES_DIR)s\LICENSE.txt
 
 [Icons]
 
-Name: "{group}\Examples"; Filename: "{app}\%(PACKAGE_NAME)s\examples"
-Name: "{group}\Uninstall Package"; Filename: "{uninstallexe}"
+Name: "{group}\Examples"; Filename: "{app}\%(PACKAGE_NAME)s\examples";
+Name: "{group}\Uninstall Package"; Filename: "{uninstallexe}";
 
 [Run]
 
@@ -47,25 +47,52 @@ Filename: "{app}\%(PACKAGE_NAME)s\examples"; Flags: postinstall shellexec;
 Source: "*.dll"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
 Source: "*.pak"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
 Source: "locales\*.pak"; DestDir: "{app}\%(PACKAGE_NAME)s\locales"; Flags: ignoreversion;
+
 Source: "%(INSTALLER_DIR)s\__init__.py.generated"; DestDir: "{app}\%(PACKAGE_NAME)s"; DestName: "__init__.py"; Flags: ignoreversion;
+
 Source: "cefclient.exe"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
-Source: "cefpython_py27.py"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
-Source: "cefpython_py27.pyd"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
-Source: "cefpython_py32.py"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
-Source: "cefpython_py32.pyd"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
+
+Source: "cefpython_py%(PYTHON_VERSION_NODOT)s.pyd"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
+Source: "cefpython_py%(PYTHON_VERSION_NODOT)s.py"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
+
 Source: "LICENSE.txt"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
+
 Source: "Microsoft.VC90.CRT.manifest"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
+
 Source: "README.txt"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
 
-Source: "cefadvanced.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+; ------------------------------------------------------------------------------
+; wx subpackage
+; ------------------------------------------------------------------------------
+
+Source: "%(WX_SUBPACKAGE_DIR)s\*.py"; DestDir: "{app}\%(PACKAGE_NAME)s\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\*.txt"; DestDir: "{app}\%(PACKAGE_NAME)s\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\images\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s\wx\images"; Flags: ignoreversion;
+
+; ------------------------------------------------------------------------------
+; wx examples
+; ------------------------------------------------------------------------------
+
+Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
+
+; ------------------------------------------------------------------------------
+; examples
+; ------------------------------------------------------------------------------
+
+Source: "*.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+
 Source: "cefadvanced.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
-Source: "cefsimple.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "cefsimple.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "cefwindow.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+
 Source: "cefwxpanel.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "cefwxpanel_sample1.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "cefwxpanel_sample2.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+
 Source: "icon.ico"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+
 Source: "panda3d_.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "pygtk_.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "pyqt.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;

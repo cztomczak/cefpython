@@ -237,7 +237,8 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
                     PyToCefString(pyUsername[0], cefUsername)
                     PyToCefString(pyPassword[0], cefPassword)
                 return bool(ret)
-            return False
+            ELSE:
+                return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

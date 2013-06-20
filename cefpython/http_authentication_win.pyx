@@ -13,15 +13,6 @@ cdef cpp_bool HttpAuthenticationDialog(
     if credentialsData == NULL:
         return False
     else:
-        # In Python 2.7 c_str returns a string.
-        username[0] = credentialsData.username.c_str()
-        password[0] = credentialsData.password.c_str()
-        # In Python 3 c_str returns bytes.
-        if str != bytes:
-            if type(username[0]) == bytes:
-                username[0] = username[0].decode(
-                        g_applicationSettings["unicode_to_bytes_encoding"])
-            if type(password[0]) == bytes:
-                password[0] = password[0].decode(
-                        g_applicationSettings["unicode_to_bytes_encoding"])
+        username[0] = CharToPyString(credentialsData.username.c_str())
+        password[0] = CharToPyString(credentialsData.password.c_str())
         return True

@@ -2,46 +2,53 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef str CharToPyString(
-        char* charString):
-    cdef str pyString
-    if bytes == str:
-        # Python 2.7, bytes and str are the same types.
-        # "" + charString >> makes a copy of char*
-        pyString = "" + charString
-    else:
-        # Python 3.
-        pyString = (b"" + charString).decode("utf-8", "ignore")
-    return pyString
+# @TODO: make this configurable through ApplicationSettings.
+UNICODE_ENCODE_ERRORS = "replace"
+BYTES_DECODE_ERRORS = "replace"
 
-cdef str CefToPyString(
+# Any bytes/unicode encoding and decoding in cefpython should
+# be performed only using functions from this file - let's
+# keep it in one place for future fixes - see Issue 60 ("Strings
+# should be unicode by default, if bytes is required make it
+# explicit").
+
+cdef py_string CharToPyString(
+        const char* charString):
+    if PY_MAJOR_VERSION < 3:
+        return <bytes>charString
+    else:
+        return <unicode>((<bytes>charString).decode(
+                g_applicationSettings["string_encoding"],
+                errors=BYTES_DECODE_ERRORS))
+
+cdef py_string CefToPyString(
         ConstCefString& cefString):
+    cdef cpp_string cppString
     if cefString.empty():
         return ""
     IF UNAME_SYSNAME == "Windows":
         cdef wchar_t* wcharstr = <wchar_t*> cefString.c_str()
         return WidecharToPyString(wcharstr)
     ELSE:
-        # The windows version above is probably more efficient.
-        return cefString.ToString()
+        cppString = cefString.ToString()
+        if PY_MAJOR_VERSION < 3:
+            return <bytes>cppString
+        else:
+            return <unicode>((<bytes>cppString).decode(
+                    g_applicationSettings["string_encoding"],
+                    errors=BYTES_DECODE_ERRORS))
 
 cdef void PyToCefString(
         py_string pyString,
         CefString& cefString
         ) except *:
-    if bytes == str:
-        # Python 2.7, bytes and str are the same types.
-        if type(pyString) == unicode:
-            pyString = pyString.encode(
-                    g_applicationSettings["unicode_to_bytes_encoding"])
-    else:
-        # Python 3 requires bytes before converting to char*.
-        if type(pyString) != bytes:
-            pyString = pyString.encode("utf-8")
-
+    if type(pyString) == unicode:
+        pyString = <bytes>(pyString.encode(
+                g_applicationSettings["string_encoding"],
+                errors=UNICODE_ENCODE_ERRORS))
     cdef cpp_string cppString = pyString
-    # When used cefString.FromASCII(), a DCHECK failed
-    # when passed a unicode string.
+    # Using cefString.FromASCII() will result in DCHECK failures
+    # when a non-ascii character is encountered.
     cefString.FromString(cppString)
 
 cdef CefString PyToCefStringValue(
@@ -55,26 +62,26 @@ cdef void PyToCefStringPointer(
         py_string pyString,
         CefString* cefString
         ) except *:
-    if bytes == str:
-        # Python 2.7, bytes and str are the same types.
+    if PY_MAJOR_VERSION < 3:
         if type(pyString) == unicode:
-            pyString = pyString.encode(
-                    g_applicationSettings["unicode_to_bytes_encoding"])
+            pyString = <bytes>(pyString.encode(
+                    g_applicationSettings["string_encoding"],
+                    errors=UNICODE_ENCODE_ERRORS))
     else:
-        # Python 3 requires bytes before converting to char*.
         if type(pyString) != bytes:
-            pyString = pyString.encode("utf-8")
+            pyString = <bytes>(pyString.encode(
+                g_applicationSettings["string_encoding"],
+                errors=UNICODE_ENCODE_ERRORS))
 
     cdef cpp_string cppString = pyString
     # When used cefString.FromASCII(), a DCHECK failed
     # when passed a unicode string.
     cefString.FromString(cppString)
 
-cdef str VoidPtrToStr(const void* data, size_t dataLength):
-    cdef object pyData
+cdef py_string VoidPtrToStr(const void* data, size_t dataLength):
     if PY_MAJOR_VERSION < 3:
-        pyData = (<char*>data)[:dataLength]
+        return <bytes>((<char*>data)[:dataLength])
     else:
-        pyData = (<char*>data)[:dataLength].decode(
-                g_applicationSettings["unicode_to_bytes_encoding"])
-    return pyData
+        return <unicode>((<bytes>(<char*>data)[:dataLength]).decode(
+                g_applicationSettings["string_encoding"],
+                errors=BYTES_DECODE_ERRORS))

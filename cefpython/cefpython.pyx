@@ -54,6 +54,23 @@
 #   Disadvantage: when calling python callback from the C++ class 
 #   declared in Cython there is no easy way to propagate the python
 #   exceptions when they occur during execution of the callback.
+#
+# - | cdef char* other_c_string = py_string
+#   This is a very fast operation after which other_c_string points 
+#   to the byte string buffer of the Python string itself. It is 
+#   tied to the life time of the Python string. When the Python 
+#   string is garbage collected, the pointer becomes invalid.
+#
+# - Do not define cpdef functions returning "cpp_bool":
+#   | cpdef cpp_bool myfunc() except *:
+#   This causes compiler warnings like this:
+#   | cefpython.cpp(26533) : warning C4800: 'int' : forcing value
+#   | to bool 'true' or 'false' (performance warning)
+#   Do instead declare "py_bool" as return type:
+#   | cpdef py_bool myufunc():
+#   Lots of these warnings results in ignoring them, but sometimes
+#   they are shown for a good reason, for example when you forget
+#   to return a value in a function.
 
 # Global variables.
 
@@ -145,8 +162,8 @@ def Initialize(applicationSettings=None):
         applicationSettings = {}
     if not "multi_threaded_message_loop" in applicationSettings:
         applicationSettings["multi_threaded_message_loop"] = False
-    if not "unicode_to_bytes_encoding" in applicationSettings:
-        applicationSettings["unicode_to_bytes_encoding"] = "utf-8"
+    if not "string_encoding" in applicationSettings:
+        applicationSettings["string_encoding"] = "utf-8"
     IF CEF_VERSION == 3:
         if not "single_process" in applicationSettings:
             applicationSettings["single_process"] = False
@@ -172,7 +189,7 @@ def Initialize(applicationSettings=None):
 def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
     Debug("CreateBrowserSync() called")
     assert IsThread(TID_UI), (
-            "cefpython.CreateBrowserSync() can only be called on UI thread")
+            "cefpython.CreateBrowserSync() may only be called on the UI thread")
 
     if not isinstance(windowInfo, WindowInfo):
         raise Exception("CreateBrowserSync() failed: windowInfo: invalid object")
