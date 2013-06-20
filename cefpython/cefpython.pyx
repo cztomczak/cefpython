@@ -46,6 +46,14 @@
 # - Supporting operators that are not yet supported:
 #   | CefRefPtr[T]& Assign "operator="(T* p)
 #   | cefBrowser.Assign(CefBrowser*)
+#
+# - Declaring C++ classes in Cython. Storing python callbacks
+#   in a C++ class using Py_INCREF, Py_DECREF. Calling from
+#   C++ using PyObject_CallMethod. 
+#   | http://stackoverflow.com/a/17070382/623622
+#   Disadvantage: when calling python callback from the C++ class 
+#   declared in Cython there is no easy way to propagate the python
+#   exceptions when they occur during execution of the callback.
 
 # Global variables.
 
