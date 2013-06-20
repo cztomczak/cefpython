@@ -77,8 +77,8 @@ cdef public cpp_bool RenderHandler_GetScreenPoint(
             if ret:
                 assert (screenCoordinates and len(screenCoordinates) == 2), (
                         "screenCoordinates not provided or invalid")
-                screenX = int(screenCoordinates[0])
-                screenY = int(screenCoordinates[1])
+                (&screenX)[0] = int(screenCoordinates[0])
+                (&screenY)[0] = int(screenCoordinates[1])
                 return True
             else:
                 return False

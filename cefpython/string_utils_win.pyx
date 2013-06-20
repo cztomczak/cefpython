@@ -13,7 +13,7 @@ cdef void CharToWidechar(char* charString, wchar_t* wideString, int wideSize
     if wideSize > 0 and copiedCharacters == 0:
         wideString[0] = <wchar_t>0
 
-cdef str WidecharToPyString(
+cdef py_string WidecharToPyString(
         wchar_t* wcharString):
     cdef int charBytes = WideCharToMultiByte(
             CP_UTF8, 0, wcharString, -1, NULL, 0, NULL, NULL)
@@ -28,6 +28,6 @@ cdef str WidecharToPyString(
     if copiedBytes == 0:
         charString[0] = <char>0;
 
-    cdef str pyString = CharToPyString(charString)
+    cdef py_string pyString = CharToPyString(charString)
     free(charString)
     return pyString

@@ -49,30 +49,39 @@ def GetApplicationPath(file=None):
         return path
     return str(file)
 
-def ExceptHook(type, value, traceObject):
-    import traceback, os, time
-    # This hook does the following: in case of exception display it,
-    # write to error.log, shutdown CEF and exit application.
-    error = "\n".join(traceback.format_exception(type, value, traceObject))
-    error_file = GetApplicationPath("error.log")
+def ExceptHook(excType, excValue, traceObject):
+    import traceback, os, time, codecs
+    # This hook does the following: in case of exception write it to
+    # the "error.log" file, display it to the console, shutdown CEF
+    # and exit application immediately by ignoring "finally" (_exit()).
+    errorMsg = "\n".join(traceback.format_exception(excType, excValue,
+            traceObject))
+    errorFile = GetApplicationPath("error.log")
     try:
-        with open(error_file, "a") as file:
-            file.write("\n[%s] %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), error))
+        appEncoding = cefpython.g_applicationSettings["string_encoding"]
     except:
-        # If this is an example run from
-        # /usr/local/lib/python2.7/dist-packages/cefpython1/examples/
-        # then we might have not permission to write to that directory.
+        appEncoding = "utf-8"
+    if type(errorMsg) == bytes:
+        errorMsg = errorMsg.decode(encoding=appEncoding, errors="replace")
+    try:
+        with codecs.open(errorFile, mode="a", encoding=appEncoding) as fp:
+            fp.write("\n[%s] %s\n" % (
+                    time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
+    except:
         print("cefpython: WARNING: failed writing to error file: %s" % (
-                error_file))
-    print("\n"+error+"\n")
+                errorFile))
+    # Convert error message to ascii before printing, otherwise
+    # you may get error like this:
+    # | UnicodeEncodeError: 'charmap' codec can't encode characters
+    errorMsg = errorMsg.encode("ascii", errors="replace")
+    errorMsg = errorMsg.decode("ascii", errors="replace")
+    print("\n"+errorMsg+"\n")
     cefpython.QuitMessageLoop()
     cefpython.Shutdown()
-    # So that "finally" does not execute.
     os._exit(1)
 
 class MainFrame(wx.Frame):
     browser = None
-    initialized = False
     idleCount = 0
     mainPanel = None
 
@@ -241,11 +250,9 @@ class ContentFilterHandler:
         remainder.SetData("body h3 { color: orange; }")
 
 class ClientHandler:
-
     # --------------------------------------------------------------------------
     # RequestHandler
     # --------------------------------------------------------------------------
-
     contentFilter = None
 
     def OnBeforeBrowse(self, browser, frame, request, navType, isRedirect):

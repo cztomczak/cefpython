@@ -4,7 +4,9 @@
 
 #pragma once
 
-#if defined(OS_WIN)
+// OS_WIN is not defined on Windows when CEF is not included.
+// _WIN32 is defined on both 32bit and 64bit.
+#if defined(_WIN32)
 // FlipBufferUpsideDown and SwapBufferFromBgraToRgba
 // are Windows only, as off-screen rendering is not
 // supported on Linux. This code wouldn't compile on

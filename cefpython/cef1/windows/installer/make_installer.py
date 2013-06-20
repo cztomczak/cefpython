@@ -31,6 +31,8 @@ def main():
             + str(sys.version_info.major) + str(sys.version_info.minor)
             + ".pyd")
     vars["INSTALLER_DIR"] = os.getcwd()
+    vars["WX_SUBPACKAGE_DIR"] = os.path.realpath(os.getcwd()+r"\..\.."
+            "\wx-subpackage")
 
     print("Reading template: %s" % TEMPLATE_FILE)
 

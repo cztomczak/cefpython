@@ -12,14 +12,6 @@ assert (BITS == "32bit" or BITS == "64bit")
 # Stop on first error, otherwise hundreds of errors appear in the console.
 Options.fast_fail = True
 
-# Since Cython 0.18 it is required to set string encoding
-if sys.version_info.major < 3:
-    C_STRING_TYPE = "str"
-    C_STRING_ENCODING = "utf8"
-else:
-    C_STRING_TYPE = "unicode"
-    C_STRING_ENCODING = "utf8"
-
 # Written to cython_includes/compile_time_constants.pxi
 CEF_VERSION = 1
 
@@ -34,6 +26,7 @@ def CompileTimeConstants():
         # A way around Python 3.2 bug: UNAME_SYSNAME is not set.
         fd.write('DEF UNAME_SYSNAME = "%s"\n' % platform.uname()[0])
         fd.write('DEF CEF_VERSION = %s\n' % CEF_VERSION)
+        fd.write('DEF PY_MAJOR_VERSION = %s\n' % sys.version_info.major)
 
 CompileTimeConstants()
 
@@ -43,8 +36,9 @@ ext_modules = [Extension(
     ["cefpython.pyx"],
 
     cython_directives={
-        "c_string_type": C_STRING_TYPE,
-        "c_string_encoding": C_STRING_ENCODING,
+        # Any conversion to unicode must be explicit using .decode().
+        "c_string_type": "bytes",
+        "c_string_encoding": "utf-8",
     },
 
     language='c++',

@@ -41,6 +41,9 @@ def QuitMessageLoop():
 def Shutdown():
     return None
 
+def GetModuleDirectory():
+    return ""
+
 #
 # Settings
 #
@@ -63,7 +66,7 @@ ApplicationSettings = {
     "product_version": "",
     "resources_dir_path": "",
     "session_storage_quota": 5*1024*1024,
-    "unicode_to_bytes_encoding": "utf-8",
+    "string_encoding": "utf-8",
     "uncaught_exception_stack_size": 0,
     "user_agent": "",
 }

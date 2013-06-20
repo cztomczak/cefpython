@@ -3,12 +3,16 @@
 
 #-------------------------------------------------------------------------------
 
-def ExceptHook(type, value, traceObject):
+def ExceptHook(excType, excValue, traceObject):
     import traceback, os
-    # This hook does the following: in case of exception display it,
-    # write to error.log, shutdown CEF and exit application.
-    error = "\n".join(traceback.format_exception(type, value, traceObject))
-    print("\n"+error+"\n")
+    errorMsg = "\n".join(traceback.format_exception(
+            excType, excValue, traceObject))
+    if type(errorMsg) == bytes:
+        errorMsg = errorMsg.decode(encoding="ascii", errors="replace")
+    else:
+        errorMsg = errorMsg.encode("ascii", errors="replace")
+        errorMsg = errorMsg.decode("ascii", errors="replace")
+    print("\n"+errorMsg+"\n")
     #cefpython.QuitMessageLoop()
     #cefpython.Shutdown()
     # So that "finally" does not execute.

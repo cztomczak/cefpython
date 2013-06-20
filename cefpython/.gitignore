@@ -36,3 +36,5 @@ cefpython_py27.pyd
 cefpython_py32.pyd
 cefpython_py27.so
 cefpython_py32.so
+
+cython_includes/compile_time_constants.pxi

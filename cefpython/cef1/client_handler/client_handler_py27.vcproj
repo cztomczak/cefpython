@@ -150,6 +150,22 @@
 				RelativePath=".\client_handler.h"
 				>
 			</File>
+			<File
+				RelativePath=".\content_filter_handler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cookie_visitor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\download_handler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\web_request_client.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -164,6 +180,22 @@
 			>
 			<File
 				RelativePath=".\client_handler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\content_filter_handler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cookie_visitor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\download_handler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\web_request_client.cpp"
 				>
 			</File>
 		</Filter>

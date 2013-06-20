@@ -4,6 +4,10 @@
 
 #pragma once
 
+#if defined(_WIN32)
+#include "../windows/stdint.h"
+#endif
+
 #include "cefpython_public_api.h"
 
 class ContentFilterHandler : public CefContentFilter
