@@ -107,7 +107,8 @@ class MainFrame(wx.Frame):
     def CreateMenu(self):
         filemenu = wx.Menu()
         filemenu.Append(1, "Open")
-        filemenu.Append(2, "Exit")
+        exit = filemenu.Append(2, "Exit")
+        self.Bind(wx.EVT_MENU, self.OnClose, exit)
         aboutmenu = wx.Menu()
         aboutmenu.Append(1, "CEF Python")
         menubar = wx.MenuBar()

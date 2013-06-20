@@ -74,15 +74,19 @@ class MainFrame(wx.Frame):
     browser = None
     initialized = False
     idleCount = 0
-    box = None
+    mainPanel = None
 
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
                           title='wxPython example', size=(800,600))
         self.CreateMenu()
 
+        # Cannot attach browser to the main frame as this will cause
+        # the menu not to work.
+        self.mainPanel = wx.Panel(self)
+
         windowInfo = cefpython.WindowInfo()
-        windowInfo.SetAsChild(self.GetGtkWidget())
+        windowInfo.SetAsChild(self.mainPanel.GetGtkWidget())
         # Linux requires adding "file://" for local files,
         # otherwise /home/some will be replaced as http://home/some
         self.browser = cefpython.CreateBrowserSync(
@@ -107,7 +111,8 @@ class MainFrame(wx.Frame):
     def CreateMenu(self):
         filemenu = wx.Menu()
         filemenu.Append(1, "Open")
-        filemenu.Append(2, "Exit")
+        exit = filemenu.Append(2, "Exit")
+        self.Bind(wx.EVT_MENU, self.OnClose, exit)
         aboutmenu = wx.Menu()
         aboutmenu.Append(1, "CEF Python")
         menubar = wx.MenuBar()
