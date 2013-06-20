@@ -104,6 +104,10 @@ Source: "wxpython.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignore
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\*.pyc";
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\*.pyc";
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\*.log";
+Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\wx\*.pyc";
+Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\wx\*.log";
+Type: files; Name: "{app}\%(PACKAGE_NAME)s\wx\*.pyc";
+Type: files; Name: "{app}\%(PACKAGE_NAME)s\wx\*.log";
 
 [Code]
 
