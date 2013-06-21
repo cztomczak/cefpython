@@ -23,7 +23,8 @@ def main():
     parser.add_argument("-v", "--version", help="cefpython version",
             required=True)
     args = parser.parse_args()
-    assert re.search(r"^v\d+$", args.version), "Invalid version string"
+    assert re.search(r"^(v\d+)|(\d+\.\d+)$", args.version), (
+            "Invalid version string")
 
     vars = {}
     vars["APP_VERSION"] = args.version
