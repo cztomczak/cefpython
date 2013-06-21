@@ -105,6 +105,8 @@ cdef void SetApplicationSettings(
                 cefString = new CefString(&cefAppSettings.cache_path)
                 PyToCefStringPointer(appSettings[key], cefString)
                 del cefString
+            elif key == "persist_session_cookies":
+                cefAppSettings.persist_session_cookies = bool(appSettings[key])
             elif key == "user_agent":
                 cefString = new CefString(&cefAppSettings.user_agent)
                 PyToCefStringPointer(appSettings[key], cefString)
@@ -151,6 +153,8 @@ cdef void SetApplicationSettings(
                 cefAppSettings.command_line_args_disabled = bool(appSettings[key])
             elif key == "remote_debugging_port":
                 cefAppSettings.remote_debugging_port = int(appSettings[key])
+            elif key == "ignore_certificate_errors":
+                cefAppSettings.ignore_certificate_errors = bool(appSettings[key])
             else:
                 raise Exception("Invalid appSettings key: %s" % key)
 

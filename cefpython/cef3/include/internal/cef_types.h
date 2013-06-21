@@ -198,6 +198,16 @@ typedef struct _cef_settings_t {
   cef_string_t cache_path;
 
   ///
+  // To persist session cookies (cookies without an expiry date or validity
+  // interval) by default when using the global cookie manager set this value to
+  // true. Session cookies are generally intended to be transient and most Web
+  // browsers do not persist them. A |cache_path| value must also be specified to
+  // enable this feature. Also configurable using the "persist-session-cookies"
+  // command-line switch.
+  ///
+  bool persist_session_cookies;
+
+  ///
   // Value that will be returned as the User-Agent HTTP header. If empty the
   // default User-Agent string will be used. Also configurable using the
   // "user-agent" command-line switch.
@@ -316,6 +326,15 @@ typedef struct _cef_settings_t {
   // switch.
   ///
   int context_safety_implementation;
+
+  ///
+  // Set to true (1) to ignore errors related to invalid SSL certificates.
+  // Enabling this setting can lead to potential security vulnerabilities like
+  // "man in the middle" attacks. Applications that load content from the
+  // internet should not enable this setting. Also configurable using the
+  // "ignore-certificate-errors" command-line switch.
+  ///
+  bool ignore_certificate_errors;
 } cef_settings_t;
 
 ///
@@ -740,6 +759,22 @@ enum cef_errorcode_t {
 };
 
 ///
+// "Verb" of a drag-and-drop operation as negotiated between the source and
+// destination. These constants match their equivalents in WebCore's
+// DragActions.h and should not be renumbered.
+///
+enum cef_drag_operations_mask_t {
+    DRAG_OPERATION_NONE    = 0,
+    DRAG_OPERATION_COPY    = 1,
+    DRAG_OPERATION_LINK    = 2,
+    DRAG_OPERATION_GENERIC = 4,
+    DRAG_OPERATION_PRIVATE = 8,
+    DRAG_OPERATION_MOVE    = 16,
+    DRAG_OPERATION_DELETE  = 32,
+    DRAG_OPERATION_EVERY   = UINT_MAX
+};
+
+///
 // V8 access control values.
 ///
 enum cef_v8_accesscontrol_t {
@@ -952,6 +987,62 @@ enum cef_jsdialog_type_t {
   JSDIALOGTYPE_CONFIRM,
   JSDIALOGTYPE_PROMPT,
 };
+
+///
+// Screen information used when window rendering is disabled. This structure is
+// passed as a parameter to CefRenderHandler::GetScreenInfo and should be filled
+// in by the client.
+///
+typedef struct _cef_screen_info_t {
+  ///
+  // Device scale factor. Specifies the ratio between physical and logical
+  // pixels.
+  ///
+  float device_scale_factor;
+
+  ///
+  // The screen depth in bits per pixel.
+  ///
+  int depth;
+
+  ///
+  // The bits per color component. This assumes that the colors are balanced
+  // equally.
+  ///
+  int depth_per_component;
+
+  ///
+  // This can be true for black and white printers.
+  ///
+  bool is_monochrome;
+
+  ///
+  // This is set from the rcMonitor member of MONITORINFOEX, to whit:
+  //   "A RECT structure that specifies the display monitor rectangle,
+  //   expressed in virtual-screen coordinates. Note that if the monitor
+  //   is not the primary display monitor, some of the rectangle's
+  //   coordinates may be negative values."
+  //
+  // The |rect| and |available_rect| properties are used to determine the
+  // available surface for rendering popup views.
+  ///
+  cef_rect_t rect;
+
+  ///
+  // This is set from the rcWork member of MONITORINFOEX, to whit:
+  //   "A RECT structure that specifies the work area rectangle of the
+  //   display monitor that can be used by applications, expressed in
+  //   virtual-screen coordinates. Windows uses this rectangle to
+  //   maximize an application on the monitor. The rest of the area in
+  //   rcMonitor contains system windows such as the task bar and side
+  //   bars. Note that if the monitor is not the primary display monitor,
+  //   some of the rectangle's coordinates may be negative values".
+  //
+  // The |rect| and |available_rect| properties are used to determine the
+  // available surface for rendering popup views.
+  ///
+  cef_rect_t available_rect;
+} cef_screen_info_t;
 
 ///
 // Supported menu IDs. Non-English translations can be provided for the

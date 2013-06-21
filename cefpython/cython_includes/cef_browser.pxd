@@ -87,7 +87,7 @@ cdef extern from "include/cef_browser.h":
 
         cdef cppclass CefBrowserHost(CefBase):
 
-            void CloseBrowser()
+            void CloseBrowser(cpp_bool force_close)
             void ParentWindowWillClose()
             CefRefPtr[CefBrowser] GetBrowser()
             void SetFocus(cpp_bool enable)
@@ -103,6 +103,14 @@ cdef extern from "include/cef_browser.h":
             #                 const std::vector<CefString>& accept_types,
             #                 CefRefPtr<CefRunFileDialogCallback> callback) =0;
             # typedef cef_file_dialog_mode_t FileDialogMode;
+
+            void StartDownload(const CefString& url)
+            void SetMouseCursorChangeDisabled(cpp_bool disabled)
+            cpp_bool IsMouseCursorChangeDisabled()
+            cpp_bool IsWindowRenderingDisabled()
+            void WasResized()
+            void WasHidden(cpp_bool hidden)
+            void NotifyScreenInfoChanged()
 
         cdef cppclass CefBrowser(CefBase):
 

@@ -254,16 +254,24 @@ class CefBrowserHost : public virtual CefBase {
   ///
   // Call this method before destroying a contained browser window. This method
   // performs any internal cleanup that may be needed before the browser window
-  // is destroyed.
+  // is destroyed. See CefLifeSpanHandler::DoClose() documentation for
+  // additional usage information.
   ///
   /*--cef()--*/
   virtual void ParentWindowWillClose() =0;
 
   ///
-  // Closes this browser window.
+  // Request that the browser close. The JavaScript 'onbeforeunload' event will
+  // be fired. If |force_close| is false the event handler, if any, will be
+  // allowed to prompt the user and the user can optionally cancel the close.
+  // If |force_close| is true the prompt will not be displayed and the close
+  // will proceed. Results in a call to CefLifeSpanHandler::DoClose() if the
+  // event handler allows the close or if |force_close| is true. See
+  // CefLifeSpanHandler::DoClose() documentation for additional usage
+  // information.
   ///
   /*--cef()--*/
-  virtual void CloseBrowser() =0;
+  virtual void CloseBrowser(bool force_close) =0;
 
   ///
   // Set focus for the browser window. If |enable| is true focus will be set to
@@ -340,6 +348,24 @@ class CefBrowserHost : public virtual CefBase {
                              CefRefPtr<CefRunFileDialogCallback> callback) =0;
 
   ///
+  // Download the file at |url| using CefDownloadHandler.
+  ///
+  /*--cef()--*/
+  virtual void StartDownload(const CefString& url) =0;
+
+  ///
+  // Set whether mouse cursor change is disabled.
+  ///
+  /*--cef()--*/
+  virtual void SetMouseCursorChangeDisabled(bool disabled) =0;
+
+  ///
+  // Returns true if mouse cursor change is disabled.
+  ///
+  /*--cef()--*/
+  virtual bool IsMouseCursorChangeDisabled() =0;
+
+  ///
   // Returns true if window rendering is disabled.
   ///
   /*--cef()--*/
@@ -353,6 +379,25 @@ class CefBrowserHost : public virtual CefBase {
   ///
   /*--cef()--*/
   virtual void WasResized() =0;
+
+  ///
+  // Notify the browser that it has been hidden or shown. Layouting and
+  // CefRenderHandler::OnPaint notification will stop when the browser is
+  // hidden. This method is only used when window rendering is disabled.
+  ///
+  /*--cef()--*/
+  virtual void WasHidden(bool hidden) =0;
+
+  ///
+  // Send a notification to the browser that the screen info has changed. The
+  // browser will then call CefRenderHandler::GetScreenInfo to update the
+  // screen information with the new values. This simulates moving the webview
+  // window from one display to another, or changing the properties of the
+  // current display. This method is only used when window rendering is
+  // disabled.
+  ///
+  /*--cef()--*/
+  virtual void NotifyScreenInfoChanged() =0;
 
   ///
   // Invalidate the |dirtyRect| region of the view. The browser will call
@@ -407,6 +452,26 @@ class CefBrowserHost : public virtual CefBase {
   ///
   /*--cef()--*/
   virtual void SendCaptureLostEvent() =0;
+
+  ///
+  // Get the NSTextInputContext implementation for enabling IME on Mac when
+  // window rendering is disabled.
+  ///
+  /*--cef(default_retval=NULL)--*/
+  virtual CefTextInputContext GetNSTextInputContext() =0;
+
+  ///
+  // Handles a keyDown event prior to passing it through the NSTextInputClient
+  // machinery.
+  ///
+  /*--cef()--*/
+  virtual void HandleKeyEventBeforeTextInputClient(CefEventHandle keyEvent) =0;
+
+  ///
+  // Performs any additional actions after NSTextInputClient handles the event.
+  ///
+  /*--cef()--*/
+  virtual void HandleKeyEventAfterTextInputClient(CefEventHandle keyEvent) =0;
 };
 
 #endif  // CEF_INCLUDE_CEF_BROWSER_H_

@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2013 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,42 +34,87 @@
 // tools directory for more information.
 //
 
-#ifndef CEF_INCLUDE_CEF_CALLBACK_H_
-#define CEF_INCLUDE_CEF_CALLBACK_H_
+#ifndef CEF_INCLUDE_CEF_DRAG_DATA_H_
+#define CEF_INCLUDE_CEF_DRAG_DATA_H_
 #pragma once
 
 #include "include/cef_base.h"
+#include <vector>
 
 ///
-// Generic callback interface used for asynchronous continuation.
+// Class used to represent drag data. The methods of this class may be called
+// on any thread.
 ///
 /*--cef(source=library)--*/
-class CefCallback : public virtual CefBase {
+class CefDragData : public virtual CefBase {
  public:
   ///
-  // Continue processing.
-  ///
-  /*--cef(capi_name=cont)--*/
-  virtual void Continue() =0;
-
-  ///
-  // Cancel processing.
+  // Returns true if the drag data is a link.
   ///
   /*--cef()--*/
-  virtual void Cancel() =0;
-};
+  virtual bool IsLink() =0;
 
-///
-// Generic callback interface used for asynchronous completion.
-///
-/*--cef(source=client)--*/
-class CefCompletionHandler : public virtual CefBase {
- public:
   ///
-  // Method that will be called once the task is complete.
+  // Returns true if the drag data is a text or html fragment.
   ///
   /*--cef()--*/
-  virtual void OnComplete() =0;
+  virtual bool IsFragment() =0;
+
+  ///
+  // Returns true if the drag data is a file.
+  ///
+  /*--cef()--*/
+  virtual bool IsFile() =0;
+
+  ///
+  // Return the link URL that is being dragged.
+  ///
+  /*--cef()--*/
+  virtual CefString GetLinkURL() =0;
+
+  ///
+  // Return the title associated with the link being dragged.
+  ///
+  /*--cef()--*/
+  virtual CefString GetLinkTitle() =0;
+
+  ///
+  // Return the metadata, if any, associated with the link being dragged.
+  ///
+  /*--cef()--*/
+  virtual CefString GetLinkMetadata() =0;
+
+  ///
+  // Return the plain text fragment that is being dragged.
+  ///
+  /*--cef()--*/
+  virtual CefString GetFragmentText() =0;
+
+  ///
+  // Return the text/html fragment that is being dragged.
+  ///
+  /*--cef()--*/
+  virtual CefString GetFragmentHtml() =0;
+
+  ///
+  // Return the base URL that the fragment came from. This value is used for
+  // resolving relative URLs and may be empty.
+  ///
+  /*--cef()--*/
+  virtual CefString GetFragmentBaseURL() =0;
+
+  ///
+  // Return the name of the file being dragged out of the browser window.
+  ///
+  /*--cef()--*/
+  virtual CefString GetFileName() =0;
+
+  ///
+  // Retrieve the list of file names that are being dragged into the browser
+  // window.
+  ///
+  /*--cef()--*/
+  virtual bool GetFileNames(std::vector<CefString>& names) =0;
 };
 
-#endif  // CEF_INCLUDE_CEF_CALLBACK_H_
+#endif  // CEF_INCLUDE_CEF_DRAG_DATA_H_

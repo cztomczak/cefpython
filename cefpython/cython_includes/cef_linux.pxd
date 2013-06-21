@@ -6,6 +6,7 @@ include "compile_time_constants.pxi"
 
 from cef_types_linux cimport _cef_key_info_t
 from Cython.Shadow import void
+from cef_types_wrappers cimport CefStructBase
 
 cdef extern from "include/internal/cef_linux.h":
 
@@ -15,3 +16,8 @@ cdef extern from "include/internal/cef_linux.h":
 
     cdef cppclass CefWindowInfo:
         void SetAsChild(CefWindowHandle)
+
+    IF CEF_VERSION == 3:
+        cdef cppclass CefMainArgs(CefStructBase):
+            CefMainArgs()
+            CefMainArgs(int argc_arg, char** argv_arg)

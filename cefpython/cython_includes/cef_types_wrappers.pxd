@@ -44,6 +44,7 @@ cdef extern from "include/internal/cef_types_wrappers.h":
             cpp_bool multi_threaded_message_loop
             cpp_bool command_line_args_disabled
             cef_string_t cache_path
+            cpp_bool persist_session_cookies
             cef_string_t user_agent
             cef_string_t product_version
             cef_string_t locale
@@ -57,6 +58,7 @@ cdef extern from "include/internal/cef_types_wrappers.h":
             int remote_debugging_port
             int uncaught_exception_stack_size
             int context_safety_implementation # Not exposed.
+            cpp_bool ignore_certificate_errors
 
     IF CEF_VERSION == 1:
 

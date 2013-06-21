@@ -1,4 +1,4 @@
-// Copyright (c) 2009 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2010 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -28,68 +28,81 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#ifndef CEF_INCLUDE_INTERNAL_CEF_TYPES_WIN_H_
-#define CEF_INCLUDE_INTERNAL_CEF_TYPES_WIN_H_
+#ifndef CEF_INCLUDE_INTERNAL_CEF_TYPES_MAC_H_
+#define CEF_INCLUDE_INTERNAL_CEF_TYPES_MAC_H_
 #pragma once
 
 #include "include/internal/cef_build.h"
 
-#if defined(OS_WIN)
-#include <windows.h>
+#if defined(OS_MACOSX)
 #include "include/internal/cef_string.h"
+
+// Handle types.
+#ifdef __cplusplus
+#ifdef __OBJC__
+@class NSCursor;
+@class NSEvent;
+@class NSView;
+@class NSTextInputContext;
+#else
+class NSCursor;
+class NSEvent;
+struct NSView;
+class NSTextInputContext;
+#endif
+#define cef_cursor_handle_t NSCursor*
+#define cef_event_handle_t NSEvent*
+#define cef_window_handle_t NSView*
+#define cef_text_input_context_t NSTextInputContext*
+#else
+#define cef_cursor_handle_t void*
+#define cef_event_handle_t void*
+#define cef_window_handle_t void*
+#define cef_text_input_context_t void*
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Handle types.
-#define cef_cursor_handle_t HCURSOR
-#define cef_event_handle_t MSG*
-#define cef_window_handle_t HWND
-#define cef_text_input_context_t void*
-
 ///
 // Structure representing CefExecuteProcess arguments.
 ///
 typedef struct _cef_main_args_t {
-  HINSTANCE instance;
+  int argc;
+  char** argv;
 } cef_main_args_t;
 
 ///
-// Structure representing window information.
+// Class representing window information.
 ///
 typedef struct _cef_window_info_t {
-  // Standard parameters required by CreateWindowEx()
-  DWORD ex_style;
   cef_string_t window_name;
-  DWORD style;
   int x;
   int y;
   int width;
   int height;
-  cef_window_handle_t parent_window;
-  HMENU menu;
+  int hidden;
+
+  // NSView pointer for the parent view.
+  cef_window_handle_t parent_view;
 
   // If window rendering is disabled no browser window will be created. Set
-  // |parent_window| to be used for identifying monitor info
-  // (MonitorFromWindow). If |parent_window| is not provided the main screen
-  // monitor will be used.
-  BOOL window_rendering_disabled;
+  // |parent_view| to the window that will act as the parent for popup menus,
+  // dialog boxes, etc.
+  bool window_rendering_disabled;
 
   // Set to true to enable transparent painting.
-  // If window rendering is disabled and |transparent_painting| is set to true
-  // WebKit rendering will draw on a transparent background (RGBA=0x00000000).
-  // When this value is false the background will be white and opaque.
-  BOOL transparent_painting;
+  bool transparent_painting;
 
-  // Handle for the new browser window.
-  cef_window_handle_t window;
+  // NSView pointer for the new browser view.
+  cef_window_handle_t view;
 } cef_window_info_t;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // OS_WIN
+#endif  // OS_MACOSX
 
-#endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WIN_H_
+#endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_MAC_H_

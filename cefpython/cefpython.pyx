@@ -150,10 +150,13 @@ def Initialize(applicationSettings=None):
     cdef CefRefPtr[CefApp] cefApp
 
     IF CEF_VERSION == 3:
-        cdef HINSTANCE hInstance = GetModuleHandle(NULL)
-        cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
-        cdef int exitCode
-        exitCode = CefExecuteProcess(cefMainArgs, cefApp)
+        IF UNAME_SYSNAME == "Windows":
+            cdef HINSTANCE hInstance = GetModuleHandle(NULL)
+            cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
+        ELIF UNAME_SYSNAME == "Linux":
+            # TODO: use the CefMainArgs(int argc, char** argv) constructor.
+            cdef CefMainArgs cefMainArgs
+        cdef int exitCode = CefExecuteProcess(cefMainArgs, cefApp)
         Debug("CefExecuteProcess(): exitCode = %s" % exitCode)
         if exitCode >= 0:
             exit(exitCode)

@@ -185,10 +185,14 @@ class CookieManager:
         return g_globalCookieManager
 
     @staticmethod
-    def CreateManager(py_string path):
+    def CreateManager(py_string path, py_bool persistSessionCookies=False):
         cdef CefRefPtr[CefCookieManager] cefCookieManager
-        cefCookieManager = cef_cookie_static.CreateManager(
-                PyToCefStringValue(path))
+        IF CEF_VERSION == 1:
+            cefCookieManager = cef_cookie_static.CreateManager(
+                    PyToCefStringValue(path))
+        ELIF CEF_VERSION == 3:
+            cefCookieManager = cef_cookie_static.CreateManager(
+                    PyToCefStringValue(path), bool(persistSessionCookies))
         if <void*>cefCookieManager != NULL and cefCookieManager.get():
             return CreatePyCookieManager(cefCookieManager)
         return None
@@ -250,9 +254,14 @@ cdef class PyCookieManager:
                 &cef_cookie_manager_namespace.DeleteCookies, 
                 PyToCefStringValue(url), PyToCefStringValue(cookie_name)))
 
-    cpdef py_bool SetStoragePath(self, py_string path):
-        return self.cefCookieManager.get().SetStoragePath(
-                PyToCefStringValue(path))
+    cpdef py_bool SetStoragePath(self, py_string path, 
+            py_bool persistSessionCookies=False):
+        IF CEF_VERSION == 1:
+            return self.cefCookieManager.get().SetStoragePath(
+                    PyToCefStringValue(path))
+        ELIF CEF_VERSION == 3:
+            return self.cefCookieManager.get().SetStoragePath(
+                    PyToCefStringValue(path), bool(persistSessionCookies))
 
 # ------------------------------------------------------------------------------
 # PyCookieVisitor

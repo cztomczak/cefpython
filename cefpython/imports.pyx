@@ -109,6 +109,9 @@ ELIF UNAME_SYSNAME == "Darwin":
 ELIF UNAME_SYSNAME == "Linux":
     cimport cef_types_linux
 
+from cef_time cimport *
+from cef_drag cimport *
+
 IF CEF_VERSION == 1:
     from cef_v8 cimport *
     cimport cef_v8_static
@@ -131,9 +134,7 @@ IF CEF_VERSION == 1:
     cimport cef_cookie_static
     cimport cef_cookie_manager_namespace
     from cookie_visitor cimport *
-    from cef_time cimport *
     from cef_render_handler cimport *
-    from cef_drag cimport *
     from cef_drag_data cimport *
 
 IF UNAME_SYSNAME == "Windows":
