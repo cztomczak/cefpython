@@ -1,0 +1,6 @@
+*.pak
+cefclient
+*.so
+subprocess
+*.a
+*.o

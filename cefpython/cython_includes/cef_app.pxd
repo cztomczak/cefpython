@@ -15,6 +15,8 @@ from libcpp cimport bool as cpp_bool
 IF CEF_VERSION == 3:
     IF UNAME_SYSNAME == "Windows":
         from cef_win cimport CefMainArgs
+    ELIF UNAME_SYSNAME == "Linux":
+        from cef_linux cimport CefMainArgs
 
 cdef extern from "include/cef_app.h":
 

@@ -54,11 +54,12 @@ class CefSchemeHandlerFactory;
 // will cause the factory to match all domain names. The |domain_name| value
 // will be ignored for non-standard schemes. If |scheme_name| is a built-in
 // scheme and no handler is returned by |factory| then the built-in scheme
-// handler factory will be called. If |scheme_name| is a custom scheme the
-// CefRegisterCustomScheme() function should be called for that scheme.
+// handler factory will be called. If |scheme_name| is a custom scheme then
+// also implement the CefApp::OnRegisterCustomSchemes() method in all processes.
 // This function may be called multiple times to change or remove the factory
 // that matches the specified |scheme_name| and optional |domain_name|.
-// Returns false if an error occurs. This function may be called on any thread.
+// Returns false if an error occurs. This function may be called on any thread
+// in the browser process.
 ///
 /*--cef(optional_param=domain_name,optional_param=factory)--*/
 bool CefRegisterSchemeHandlerFactory(
@@ -68,7 +69,7 @@ bool CefRegisterSchemeHandlerFactory(
 
 ///
 // Clear all registered scheme handler factories. Returns false on error. This
-// function may be called on any thread.
+// function may be called on any thread in the browser process.
 ///
 /*--cef()--*/
 bool CefClearSchemeHandlerFactories();
@@ -142,11 +143,12 @@ class CefSchemeRegistrar : public virtual CefBase {
 class CefSchemeHandlerFactory : public virtual CefBase {
  public:
   ///
-  // Return a new resource handler instance to handle the request. |browser|
-  // and |frame| will be the browser window and frame respectively that
-  // originated the request or NULL if the request did not originate from a
-  // browser window (for example, if the request came from CefURLRequest). The
-  // |request| object passed to this method will not contain cookie data.
+  // Return a new resource handler instance to handle the request or an empty
+  // reference to allow default handling of the request. |browser| and |frame|
+  // will be the browser window and frame respectively that originated the
+  // request or NULL if the request did not originate from a browser window
+  // (for example, if the request came from CefURLRequest). The |request| object
+  // passed to this method will not contain cookie data.
   ///
   /*--cef(optional_param=browser,optional_param=frame)--*/
   virtual CefRefPtr<CefResourceHandler> Create(

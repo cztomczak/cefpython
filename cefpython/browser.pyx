@@ -233,7 +233,7 @@ cdef class PyBrowser:
         cpdef object ClearHistory(self):
             self.GetCefBrowser().get().ClearHistory()
 
-    cpdef py_void CloseBrowser(self):
+    cpdef py_void CloseBrowser(self, py_bool forceClose=False):
         # In cefclient/cefclient_win.cpp there is only
         # ParentWindowWillClose() called. CloseBrowser() is called
         # only for popups.
@@ -250,7 +250,7 @@ cdef class PyBrowser:
                 self.GetCefBrowser().get().CloseBrowser()
             ELIF CEF_VERSION == 3:
                 Debug("CefBrowserHost::CloseBrowser()")
-                self.GetCefBrowserHost().get().CloseBrowser()
+                self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
 
     IF CEF_VERSION == 1:
 
@@ -362,8 +362,11 @@ cdef class PyBrowser:
                     "Browser.IsPopupVisible() may only be called on UI thread")
             return self.GetCefBrowser().get().IsPopupVisible()
 
-        cpdef py_bool IsWindowRenderingDisabled(self):
+    cpdef py_bool IsWindowRenderingDisabled(self):
+        IF CEF_VERSION == 1:
             return self.GetCefBrowser().get().IsWindowRenderingDisabled()
+        ELIF CEF_VERSION == 3:
+            return self.GetCefBrowserHost().get().IsWindowRenderingDisabled()
 
     cpdef py_void Reload(self):
         self.GetCefBrowser().get().Reload()
@@ -580,3 +583,28 @@ cdef class PyBrowser:
 
         cpdef py_void SendCaptureLostEvent(self):
             self.GetCefBrowser().get().SendCaptureLostEvent()
+
+    IF CEF_VERSION == 3:
+        cpdef py_void StartDownload(self, py_string url):
+            self.GetCefBrowserHost().get().StartDownload(PyToCefStringValue(
+                    url))
+
+        cpdef py_void SetMouseCursorChangeDisabled(self, py_bool disabled):
+            self.GetCefBrowserHost().get().SetMouseCursorChangeDisabled(
+                    bool(disabled))
+
+        cpdef py_bool IsMouseCursorChangeDisabled(self):
+            return self.GetCefBrowserHost().get().IsMouseCursorChangeDisabled()
+
+        cpdef py_void WasResized(self):
+            self.GetCefBrowserHost().get().WasResized()
+
+        cpdef py_void WasHidden(self, py_bool hidden):
+            self.GetCefBrowserHost().get().WasHidden(bool(hidden))
+
+        cpdef py_void NotifyScreenInfoChanged(self):
+            self.GetCefBrowserHost().get().NotifyScreenInfoChanged()
+
+        # virtual CefTextInputContext GetNSTextInputContext() =0;
+        # virtual void HandleKeyEventBeforeTextInputClient(CefEventHandle keyEvent) =0;
+        # virtual void HandleKeyEventAfterTextInputClient(CefEventHandle keyEvent) =0;
