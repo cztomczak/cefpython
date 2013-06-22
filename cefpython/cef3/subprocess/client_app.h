@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "util.h"
 #include "include/cef_app.h"
 
 class ClientApp : public CefApp {
