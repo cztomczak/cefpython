@@ -175,6 +175,7 @@ if __name__ == '__main__':
         "browser_subprocess_path": "%s/%s" % (
             cefpython.GetModuleDirectory(), "subprocess")
     }
+    # print("browser_subprocess_path="+settings["browser_subprocess_path"])
     cefpython.Initialize(settings)
     print('wx.version=%s' % wx.version())
     app = MyApp(False)
