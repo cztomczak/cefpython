@@ -99,9 +99,9 @@ class MainFrame(wx.Frame):
         # otherwise /home/some will be replaced as http://home/some
         self.browser = cefpython.CreateBrowserSync(
             windowInfo,
-            # Flash will crash app in CEF 1 on Linux, setting
-            # plugins_disabled to True.
-            browserSettings={"plugins_disabled": True},
+            # If there are problems with Flash you can disable it here,
+            # by disabling all plugins.
+            browserSettings={"plugins_disabled": False},
             navigateUrl="file://"+GetApplicationPath("wxpython.html"))
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
