@@ -9,4 +9,4 @@ LIB = -L./../linux/setup/lib_64bit -L./../linux/setup/lib_32bit
 subprocess:
 	# Cython compiler options:
 	# -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-Bsymbolic-functions -Wl,-z,relro
-	g++ -fPIC $(INC) $(LIB) main.cpp -lcef_dll_wrapper -lcef -o subprocess -Wl,-rpath -Wl,./
+	g++ -fPIC $(INC) $(LIB) main.cpp -lcef_dll_wrapper -lcef -o subprocess -Wl,-rpath,.

@@ -25,3 +25,30 @@ setup(
         '*.pak',
     ]}
 )
+
+# ------------------------------------------------------------------------------
+# Chmod +x the subprocess and cefclient executables.
+# ------------------------------------------------------------------------------
+
+import sys
+import os
+import subprocess
+
+# Import the cefpython3 module from dist-packages/ directory.
+# We do not want to import from the local "cefpython3" directory.
+del sys.path[0]
+sys.path.append('')
+import cefpython3
+
+package_dir = os.path.dirname(cefpython3.__file__)
+# Make sure this is not a local package imported.
+assert not package_dir.startswith(os.path.dirname(os.path.abspath(__file__)))
+
+subprocess_exe = os.path.join(package_dir, "subprocess")
+cefclient_exe = os.path.join(package_dir, "cefclient")
+
+print("chmod +x " + subprocess_exe)
+subprocess.call("chmod +x "+subprocess_exe, shell=True)
+
+print("chmod +x " + cefclient_exe)
+subprocess.call("chmod +x "+cefclient_exe, shell=True)
