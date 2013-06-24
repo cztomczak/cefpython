@@ -11,7 +11,7 @@ if os.path.exists(libcef_so):
         raise Exception("Unsupported python version: %s" % sys.version)
 else:
     # Import from package
-    from cefpython1 import cefpython
+    from cefpython3 import cefpython
 
 import wx
 import time
