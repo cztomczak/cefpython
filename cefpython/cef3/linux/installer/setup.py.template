@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-    name='cefpython3',
+    name='cefpython3', # No spaces here, so that it works with deb packages.
     version='%(APP_VERSION)s',
     description='Python bindings for the Chromium Embedded Framework',
     license='BSD 3-Clause',
