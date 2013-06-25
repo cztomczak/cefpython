@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-    name='CEF Python 1',
+    name='cefpython1',
     version='%(APP_VERSION)s',
     description='Python bindings for the Chromium Embedded Framework',
     license='BSD 3-Clause',
