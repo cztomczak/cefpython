@@ -6,3 +6,11 @@ CEF revision:
     1273
 CEF repository url:
     http://chromiumembedded.googlecode.com/svn/branches/1453/cef1@1273
+
+----
+
+To convert revision back to version string use this url:
+http://src.chromium.org/viewvc/chrome/branches/xxxx/src/chrome/VERSION?revision=xxxx
+
+The latest version in given branch:
+http://src.chromium.org/viewvc/chrome/branches/xxxx/src/chrome/VERSION
