@@ -9,8 +9,8 @@ CEF repository url:
 
 ----
 
-To convert revision back to version string use this url:
+To convert chromium revision back to version string use this url:
 http://src.chromium.org/viewvc/chrome/branches/xxxx/src/chrome/VERSION?revision=xxxx
 
-The latest version in given branch:
+The latest chromium version in given branch:
 http://src.chromium.org/viewvc/chrome/branches/xxxx/src/chrome/VERSION
