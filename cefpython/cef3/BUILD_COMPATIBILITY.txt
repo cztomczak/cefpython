@@ -3,9 +3,9 @@ Chromium/CEF branch:
 Chromium release url:
     http://src.chromium.org/svn/releases/27.0.1453.110
 CEF revision:
-    1279
+    1290
 CEF repository url:
-    http://chromiumembedded.googlecode.com/svn/branches/1453/cef3@1279
+    http://chromiumembedded.googlecode.com/svn/branches/1453/cef3@1290
 
 ----
 
