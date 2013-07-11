@@ -23,6 +23,7 @@ import glob
 import os
 import re
 import shutil
+import sys
 
 def ExceptAllMissing(content):
 
@@ -60,7 +61,7 @@ mainfile = "cefpython.pyx"
 
 pyxfiles = glob.glob("../../../*.pyx")
 if not len(pyxfiles):
-    exit(1)
+    sys.exit(1)
 pyxfiles = [file for file in pyxfiles if file.find(mainfile) == -1]
 # Now, pyxfiles contains all pyx files except the mainfile (cefpython.pyx),
 # we do not fix includes in mainfile.
@@ -68,7 +69,7 @@ pyxfiles = [file for file in pyxfiles if file.find(mainfile) == -1]
 # So that this is the right directory we're in.
 if os.path.exists("setup"):
     print("Wrong directory, we should be inside setup!")
-    exit()
+    sys.exit(1)
 
 # Remove old pyx files in setup directory.
 oldpyxfiles = glob.glob("./*.pyx")
@@ -94,7 +95,7 @@ for pyxfile in pyxfiles:
         if lineNumber:
             print("WARNING: 'except *' missing in a cdef/cpdef function, "
                   "in file %s on line %d" % (os.path.basename(pyxfile), lineNumber))
-            exit(1)
+            sys.exit(1)
         # Do not remove the newline - so that line numbers are exact with originals.
         (content, subs) = re.subn(r"^include[\t ]+[\"'][^\"'\n\r]+[\"'][\t ]*", "", content, flags=re.MULTILINE)
         if subs:

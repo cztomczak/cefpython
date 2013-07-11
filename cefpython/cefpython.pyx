@@ -159,7 +159,7 @@ def Initialize(applicationSettings=None):
         cdef int exitCode = CefExecuteProcess(cefMainArgs, cefApp)
         Debug("CefExecuteProcess(): exitCode = %s" % exitCode)
         if exitCode >= 0:
-            exit(exitCode)
+            sys.exit(exitCode)
 
     if not applicationSettings:
         applicationSettings = {}

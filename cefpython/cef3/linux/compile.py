@@ -47,21 +47,21 @@ ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
-        exit()
+        sys.exit(1)
 
 os.chdir("./../cef3/client_handler/")
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
-        exit()
+        sys.exit(1)
 
 os.chdir("./../subprocess/")
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
-        exit()
+        sys.exit(1)
 subprocess_exe = "./../linux/binaries_%s/subprocess" % (BITS)
 shutil.copyfile("./subprocess", subprocess_exe)
 st = os.stat(subprocess_exe)
@@ -72,7 +72,7 @@ os.chmod(subprocess_exe, st.st_mode | stat.S_IEXEC)
 # if ret != 0:
 #     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
 #     if what != "y":
-#         exit()
+#         sys.exit(1)
 
 os.chdir("./../linux/")
 
