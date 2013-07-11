@@ -46,21 +46,21 @@ ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
-        exit()
+        sys.exit()
 
 os.chdir("./../cef1/client_handler/")
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
-        exit()
+        sys.exit()
 
 os.chdir("./../v8function_handler/")
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
-        exit()
+        sys.exit()
 
 os.chdir("./../linux/")
 

@@ -53,7 +53,7 @@ def ExceptHook(excType, excValue, traceObject):
     import traceback, os, time, codecs
     # This hook does the following: in case of exception write it to
     # the "error.log" file, display it to the console, shutdown CEF
-    # and exit application immediately by ignoring "finally" (_exit()).
+    # and exit application immediately by ignoring "finally" (os._exit()).
     errorMsg = "\n".join(traceback.format_exception(excType, excValue,
             traceObject))
     errorFile = GetApplicationPath("error.log")
