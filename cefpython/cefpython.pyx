@@ -139,13 +139,21 @@ IF CEF_VERSION == 1:
     include "javascript_callback.pyx"
     include "python_callback.pyx"
 
-# Client handler.
-cdef CefRefPtr[ClientHandler] g_clientHandler = (
-        <CefRefPtr[ClientHandler]?>new ClientHandler())
+# Try not to run any of the CEF code until Initialize() is called.
+# Do not allocate any memory on the heap until Initialize() is called,
+# that's why we're not instantiating the ClientHandler class here in
+# the declaration. CEF hooks up its own tcmalloc globally when the 
+# library is loaded, but the memory allocation implementation may still 
+# be changed by another library (wx/gtk) before Initialize() is called.
+cdef CefRefPtr[ClientHandler] g_clientHandler
 
 def Initialize(applicationSettings=None):
     Debug("-" * 60)
     Debug("Initialize() called")
+
+    global g_clientHandler
+    if not g_clientHandler.get():
+        g_clientHandler = <CefRefPtr[ClientHandler]?>new ClientHandler()
 
     cdef CefRefPtr[CefApp] cefApp
 
