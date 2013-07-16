@@ -8,8 +8,12 @@ cdef void SetCefWindowInfo(
         ) except *:
     if not windowInfo.windowType:
         raise Exception("WindowInfo: windowType is not set")
-    if not windowInfo.parentWindowHandle:
-        raise Exception("WindowInfo: parentWindowHandle is not set")
+    
+    # It is allowed to pass 0 as parentWindowHandle in OSR mode, but then 
+    # some things like context menus and plugins may not display correctly.
+    if windowInfo.windowType != "offscreen":
+        if not windowInfo.parentWindowHandle:
+            raise Exception("WindowInfo: parentWindowHandle is not set")
 
     IF UNAME_SYSNAME == "Windows":
         cdef RECT rect
@@ -87,7 +91,9 @@ cdef class WindowInfo:
         IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
 
             cpdef py_void SetAsOffscreen(self, WindowHandle parentWindowHandle):
-                if not WindowUtils.IsWindowHandle(parentWindowHandle):
+                # It is allowed to pass 0 as parentWindowHandle.
+                if parentWindowHandle and (
+                        not WindowUtils.IsWindowHandle(parentWindowHandle)):
                     raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
                 self.parentWindowHandle = parentWindowHandle
                 self.windowType = "offscreen"
