@@ -368,6 +368,9 @@ cdef class PyBrowser:
         ELIF CEF_VERSION == 3:
             return self.GetCefBrowserHost().get().IsWindowRenderingDisabled()
 
+    cpdef py_void Navigate(self, py_string url):
+        self.GetMainFrame().LoadUrl(url)
+
     cpdef py_void Reload(self):
         self.GetCefBrowser().get().Reload()
 
