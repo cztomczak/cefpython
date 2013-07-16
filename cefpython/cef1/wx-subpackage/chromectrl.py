@@ -134,8 +134,9 @@ class ChromeWindow(wx.Window):
         '''cleanup stuff'''
         if self._useTimer:
             self.timer.Stop()
-        else:
-            self.Unbind(wx.EVT_IDLE)
+        # Calling Unbind() is unnecessary and will cause problems on Windows 8, see:
+        # https://groups.google.com/d/topic/cefpython/iXE7e1ekArI/discussion
+        # | self.Unbind(wx.EVT_IDLE)
         self.browser.CloseBrowser()
 
     def _CreateTimer(self, millis):
