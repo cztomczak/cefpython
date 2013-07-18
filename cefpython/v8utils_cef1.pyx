@@ -171,9 +171,10 @@ cdef CefRefPtr[CefV8Value] PyToV8Value(
     elif pyValueType == int:
         return cef_v8_static.CreateInt(int(pyValue))
     elif pyValueType == long:
-        # If should probably be "-2147483648"? But when changing to -2147483648
-        # then getting a C++ warning from Cython: "unary minus operator applied
-        # to unsigned type, result still unsigned". -2147483648..2147483647 is int32.
+        # Int32 range is -2147483648..2147483647, we've increased the
+        # minimum size by one as Cython was throwing a warning:
+        # "unary minus operator applied to unsigned type, result still 
+        # unsigned".
         if pyValue <= 2147483647 and pyValue >= -2147483647:
             return cef_v8_static.CreateInt(int(pyValue))
         else:
