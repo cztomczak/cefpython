@@ -42,6 +42,7 @@ cdef public void V8ContextHandler_OnContextCreated(
 
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser.SetUserData("__v8ContextCreated", True)
         pyFrame = GetPyFrame(cefFrame)
 
         javascriptBindings = pyBrowser.GetJavascriptBindings()

@@ -2,57 +2,52 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# CefV8 Objects, Arrays and Functions can be created only inside V8 context,
-# you need to call CefV8Context::Enter() and CefV8Context::Exit():
+# CefV8 Objects, Arrays and Functions can be created or modified only 
+# inside V8 context, you need to call CefV8Context::Enter() and 
+# CefV8Context::Exit(), see:
 # http://code.google.com/p/chromiumembedded/issues/detail?id=203
-# Entering context should be done for Frame::CallFunction().
 
-# Arrays, objects and functions may only be created, modified and,
-# in the case of functions, executed, if V8 is inside a context.
+cdef list CefV8StackTraceToPython(CefRefPtr[CefV8StackTrace] cefTrace):
+    cdef int frameNumber
+    cdef int frameCount = cefTrace.get().GetFrameCount()
+    cdef CefRefPtr[CefV8StackFrame] cefFrame
+    cdef CefV8StackFrame* framePtr
+    cdef list pyTrace = []
 
-IF CEF_VERSION == 1:
+    for frameNumber in range(0, frameCount):
+        cefFrame = cefTrace.get().GetFrame(frameNumber)
+        framePtr = cefFrame.get()
+        pyFrame = {}
+        pyFrame["script"] = CefToPyString(framePtr.GetScriptName())
+        pyFrame["scriptOrSourceUrl"] = CefToPyString(
+                framePtr.GetScriptNameOrSourceURL())
+        pyFrame["function"] = CefToPyString(framePtr.GetFunctionName())
+        pyFrame["line"] = framePtr.GetLineNumber()
+        pyFrame["column"] = framePtr.GetColumn()
+        pyFrame["isEval"] = framePtr.IsEval()
+        pyFrame["isConstructor"] = framePtr.IsConstructor()
+        pyTrace.append(pyFrame)
 
-    cdef list CefV8StackTraceToPython(CefRefPtr[CefV8StackTrace] cefTrace):
-        cdef int frameNumber
-        cdef int frameCount = cefTrace.get().GetFrameCount()
-        cdef CefRefPtr[CefV8StackFrame] cefFrame
-        cdef CefV8StackFrame* framePtr
-        cdef list pyTrace = []
+    return pyTrace
 
-        for frameNumber in range(0, frameCount):
-            cefFrame = cefTrace.get().GetFrame(frameNumber)
-            framePtr = cefFrame.get()
-            pyFrame = {}
-            pyFrame["script"] = CefToPyString(framePtr.GetScriptName())
-            pyFrame["scriptOrSourceUrl"] = CefToPyString(
-                    framePtr.GetScriptNameOrSourceURL())
-            pyFrame["function"] = CefToPyString(framePtr.GetFunctionName())
-            pyFrame["line"] = framePtr.GetLineNumber()
-            pyFrame["column"] = framePtr.GetColumn()
-            pyFrame["isEval"] = framePtr.IsEval()
-            pyFrame["isConstructor"] = framePtr.IsConstructor()
-            pyTrace.append(pyFrame)
+cpdef list GetJavascriptStackTrace(int frameLimit=100):
+    assert IsThread(TID_UI), (
+            "cefpython.GetJavascriptStackTrace() may only be called on the UI thread")
+    cdef CefRefPtr[CefV8StackTrace] cefTrace = (
+            cef_v8_stack_trace.GetCurrent(frameLimit))
+    return CefV8StackTraceToPython(cefTrace)
 
-        return pyTrace
-
-    cpdef list GetJavascriptStackTrace(int frameLimit=100):
-        assert IsThread(TID_UI), (
-                "cefpython.GetJavascriptStackTrace() may only be called on the UI thread")
-        cdef CefRefPtr[CefV8StackTrace] cefTrace = (
-                cef_v8_stack_trace.GetCurrent(frameLimit))
-        return CefV8StackTraceToPython(cefTrace)
-
-    cpdef str FormatJavascriptStackTrace(list stackTrace):
-        cdef str formatted = ""
-        cdef dict frame
-        for frameNumber, frame in enumerate(stackTrace):
-            formatted += "\t[%s] %s() in %s on line %s (col:%s)\n" % (
-                    frameNumber,
-                    frame["function"],
-                    frame["scriptOrSourceUrl"],
-                    frame["line"],
-                    frame["column"])
-        return formatted
+cpdef str FormatJavascriptStackTrace(list stackTrace):
+    cdef str formatted = ""
+    cdef dict frame
+    for frameNumber, frame in enumerate(stackTrace):
+        formatted += "\t[%s] %s() in %s on line %s (col:%s)\n" % (
+                frameNumber,
+                frame["function"],
+                frame["scriptOrSourceUrl"],
+                frame["line"],
+                frame["column"])
+    return formatted
 
 cdef object V8ToPyValue(
         CefRefPtr[CefV8Value] v8Value,

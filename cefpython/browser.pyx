@@ -214,6 +214,10 @@ cdef class PyBrowser:
 
         cpdef py_void SetJavascriptBindings(self, JavascriptBindings bindings):
             self.javascriptBindings = bindings
+            if self.GetUserData("__v8ContextCreated"):
+                Debug("Browser.SetJavascriptBindings(): v8 context already"
+                        "created, calling Rebind()")
+                self.javascriptBindings.Rebind()
 
         cpdef JavascriptBindings GetJavascriptBindings(self):
             return self.javascriptBindings

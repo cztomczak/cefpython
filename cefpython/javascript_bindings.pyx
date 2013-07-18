@@ -97,7 +97,7 @@ cdef class JavascriptBindings:
         cdef PyBrowser pyBrowser
         cdef PyFrame pyFrame
 
-        for frameId in self.__frames:
+        for frameId in self.frames:
             pyBrowser = self.frames[frameId][0]
             pyFrame = self.frames[frameId][1]
             cefBrowser = pyBrowser.GetCefBrowser()
