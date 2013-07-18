@@ -46,6 +46,10 @@
 # - Supporting operators that are not yet supported:
 #   | CefRefPtr[T]& Assign "operator="(T* p)
 #   | cefBrowser.Assign(CefBrowser*)
+#   In the same way you can import function with a different name, this one
+#   imports a static method Create() while adding a prefix "CefProcessMessage_":
+#   | cdef extern from ".." namespace "CefProcessMessage":
+#   |   static CefRefPtr[CefProcessMessage] CefProcessMessage_Create(..) "Create()"(..)
 #
 # - Declaring C++ classes in Cython. Storing python callbacks
 #   in a C++ class using Py_INCREF, Py_DECREF. Calling from
@@ -132,9 +136,9 @@ IF CEF_VERSION == 1:
     include "download_handler.pyx"
 
 IF CEF_VERSION == 1:
-    include "v8context_handler.pyx"
-    include "v8function_handler.pyx"
-    include "v8utils.pyx"
+    include "v8context_handler_cef1.pyx"
+    include "v8function_handler_cef1.pyx"
+    include "v8utils_cef1.pyx"
     include "javascript_bindings.pyx"
     include "javascript_callback.pyx"
     include "python_callback.pyx"
