@@ -26,7 +26,6 @@ if sys.version_info.major == 2:
 else:
     from urllib.request import pathname2url as urllib_pathname2url
 
-from Cython.Shadow import void
 from cpython.version cimport PY_MAJOR_VERSION
 import weakref
 

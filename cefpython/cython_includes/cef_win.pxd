@@ -5,7 +5,6 @@
 include "compile_time_constants.pxi"
 
 from windows cimport HWND, RECT, HINSTANCE, HCURSOR
-from Cython.Shadow import void
 from cef_types_wrappers cimport CefStructBase
 from cef_string cimport CefString
 from cef_types_win cimport _cef_key_info_t

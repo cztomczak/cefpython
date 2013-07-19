@@ -6,7 +6,6 @@ from cef_string cimport cef_string_t
 from libcpp cimport bool as cpp_bool
 from cef_time cimport cef_time_t
 from libcpp.vector cimport vector as cpp_vector
-from Cython.Shadow import void
 from cef_string cimport CefString
 from cef_ptr cimport CefRefPtr
 
