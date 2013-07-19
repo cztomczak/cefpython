@@ -47,9 +47,9 @@
 #   | CefRefPtr[T]& Assign "operator="(T* p)
 #   | cefBrowser.Assign(CefBrowser*)
 #   In the same way you can import function with a different name, this one
-#   imports a static method Create() while adding a prefix "CefProcessMessage_":
-#   | cdef extern from ".." namespace "CefProcessMessage":
-#   |   static CefRefPtr[CefProcessMessage] CefProcessMessage_Create(..) "Create()"(..)
+#   imports a static method Create() while adding a prefix "CefSome_":
+#   | cdef extern from "..":
+#   |   static CefRefPtr[CefSome] CefSome_Create "CefSome::Create"()
 #
 # - Declaring C++ classes in Cython. Storing python callbacks
 #   in a C++ class using Py_INCREF, Py_DECREF. Calling from
@@ -75,6 +75,10 @@
 #   Lots of these warnings results in ignoring them, but sometimes
 #   they are shown for a good reason, for example when you forget
 #   to return a value in a function.
+#
+# - Always import bool from libcpp as cpp_bool, if you import it as
+#   "bool" in a pxd file, then Cython will complain about bool casts
+#   like "bool(1)" being invalid, in pyx files.
 
 # Global variables.
 
@@ -134,14 +138,15 @@ IF CEF_VERSION == 1:
     include "drag_data.pyx"
     include "drag_handler.pyx"
     include "download_handler.pyx"
-
-IF CEF_VERSION == 1:
     include "v8context_handler_cef1.pyx"
     include "v8function_handler_cef1.pyx"
     include "v8utils_cef1.pyx"
     include "javascript_bindings.pyx"
     include "javascript_callback.pyx"
     include "python_callback.pyx"
+
+IF CEF_VERSION == 3:
+    include "process_message_utils.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,

@@ -139,3 +139,6 @@ IF CEF_VERSION == 1:
 IF UNAME_SYSNAME == "Windows":
     IF CEF_VERSION == 1:
         from http_authentication cimport *
+
+IF CEF_VERSION == 3:
+    from cef_values cimport *

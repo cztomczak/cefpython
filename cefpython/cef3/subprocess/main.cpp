@@ -2,7 +2,7 @@
 // License: New BSD License.
 // Website: http://code.google.com/p/cefpython/
 
-#include "client_app.h"
+#include "cefpython_app.h"
 
 #if defined(OS_WIN)
 
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
 #endif
 
-	CefRefPtr<ClientApp> app(new ClientApp);
+	CefRefPtr<CefPythonApp> app(new CefPythonApp);
 	int exitCode = CefExecuteProcess(mainArgs, app.get());
 	return exitCode;
 }
