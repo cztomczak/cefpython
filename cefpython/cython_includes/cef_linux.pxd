@@ -5,7 +5,6 @@
 include "compile_time_constants.pxi"
 
 from cef_types_linux cimport _cef_key_info_t
-from Cython.Shadow import void
 from cef_types_wrappers cimport CefStructBase
 
 cdef extern from "include/internal/cef_linux.h":

@@ -4,7 +4,6 @@
 
 from cef_ptr cimport CefRefPtr
 from cef_stream cimport CefStreamReader
-from Cython.Shadow import void
 from cef_string cimport CefString
 
 cdef extern from "include/cef_stream.h" namespace "CefStreamReader":

@@ -5,7 +5,6 @@
 from cef_base cimport CefBase
 from cef_ptr cimport CefRefPtr
 from cef_string cimport CefString
-from Cython.Shadow import void
 from cef_types cimport cef_weburlrequest_flags_t, cef_postdataelement_type_t
 from libcpp.vector cimport vector as cpp_vector
 from libcpp cimport bool as cpp_bool

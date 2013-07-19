@@ -6,7 +6,6 @@ from libcpp cimport bool as cpp_bool
 from stddef cimport wchar_t
 from libcpp.string cimport string as cpp_string
 from wstring cimport wstring as cpp_wstring
-from Cython.Shadow import void
 
 cdef extern from "include/internal/cef_string.h":
     ctypedef struct cef_string_t:
@@ -23,4 +22,3 @@ cdef extern from "include/internal/cef_string.h":
         cpp_wstring ToWString()
         char* c_str()
         size_t length()
-        
