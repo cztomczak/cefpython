@@ -28,7 +28,7 @@ UsePreviousGroup = yes
 
 SourceDir = %(BINARIES_DIR)s
 OutputDir = %(INSTALLER_DIR)s\Output
-OutputBaseFilename = %(PACKAGE_NAME)s_%(APP_VERSION)s_py%(PYTHON_VERSION_NODOT)s_win32_installer
+OutputBaseFilename = %(PACKAGE_NAME)s-%(APP_VERSION)s-win32-py%(PYTHON_VERSION_NODOT)s
 
 UninstallFilesDir = {app}\%(PACKAGE_NAME)s
 LicenseFile = %(BINARIES_DIR)s\LICENSE.txt
