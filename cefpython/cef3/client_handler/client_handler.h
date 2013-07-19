@@ -10,7 +10,8 @@
 
 #include "cefpython_public_api.h"
 
-class ClientHandler : public CefClient
+class ClientHandler : 
+		public CefClient
 {
 public:
   ClientHandler(){}
