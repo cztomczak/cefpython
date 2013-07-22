@@ -167,6 +167,7 @@ def Initialize(applicationSettings=None):
     cdef CefRefPtr[CefApp] cefApp
 
     IF CEF_VERSION == 3:
+        cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
         IF UNAME_SYSNAME == "Windows":
             cdef HINSTANCE hInstance = GetModuleHandle(NULL)
             cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)

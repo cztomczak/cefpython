@@ -43,6 +43,8 @@ print("Compiling C++ projects")
 # make should succeed.
 
 os.chdir("./../../cpp_utils/")
+subprocess.call("rm -f *.o *.a", shell=True)
+
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
@@ -50,6 +52,8 @@ if ret != 0:
         sys.exit(1)
 
 os.chdir("./../cef3/client_handler/")
+subprocess.call("rm -f *.o *.a", shell=True)
+
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
@@ -57,6 +61,15 @@ if ret != 0:
         sys.exit(1)
 
 os.chdir("./../subprocess/")
+subprocess.call("rm -f *.o *.a", shell=True)
+subprocess.call("rm -f subprocess", shell=True)
+
+ret = subprocess.call("make -f Makefile-libcefpythonapp", shell=True)
+if ret != 0:
+    what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
+    if what != "y":
+        sys.exit(1)
+
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
@@ -66,6 +79,8 @@ subprocess_exe = "./../linux/binaries_%s/subprocess" % (BITS)
 shutil.copyfile("./subprocess", subprocess_exe)
 st = os.stat(subprocess_exe)
 os.chmod(subprocess_exe, st.st_mode | stat.S_IEXEC)
+
+
 
 # os.chdir("./../v8function_handler/")
 # ret = subprocess.call("make -f Makefile", shell=True)

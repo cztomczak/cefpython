@@ -4,6 +4,15 @@
 
 #include "cefpython_app.h"
 
+/*
+void DebugLog(const char* szString)
+{
+  FILE* pFile = fopen("debug.log", "a");
+  fprintf(pFile, "%s\n",szString);
+  fclose(pFile);
+}
+*/
+
 #if defined(OS_WIN)
 
 #include <windows.h>
