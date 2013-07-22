@@ -104,6 +104,8 @@ class MainFrame(wx.Frame):
             browserSettings={"plugins_disabled": False},
             navigateUrl="file://"+GetApplicationPath("wxpython.html"))
 
+        print("Seting up javascript bindings now..")
+
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         if USE_EVT_IDLE:
             # Bind EVT_IDLE only for the main application frame.

@@ -17,6 +17,9 @@ from cef_platform cimport CefKeyInfo
 IF CEF_VERSION == 1:
     from cef_types_wrappers cimport CefRect
 
+IF CEF_VERSION == 3:
+    from cef_process_message cimport CefProcessMessage, CefProcessId
+
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo
 ELIF UNAME_SYSNAME == "Linux":
@@ -133,8 +136,8 @@ cdef extern from "include/cef_browser.h":
 
             # CefRefPtr<CefFrame> GetFrame(int64 identifier) =0;
             # virtual CefRefPtr<CefClient> GetClient() =0;
-            # virtual bool SendProcessMessage(CefProcessId target_process,
-            #                           CefRefPtr<CefProcessMessage> message) =0;
+            cpp_bool SendProcessMessage(CefProcessId target_process,
+                                        CefRefPtr[CefProcessMessage] message)
 
         # class CefRunFileDialogCallback : public virtual CefBase {
         #    virtual void OnFileDialogDismissed(
