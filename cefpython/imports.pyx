@@ -142,3 +142,4 @@ IF UNAME_SYSNAME == "Windows":
 
 IF CEF_VERSION == 3:
     from cef_values cimport *
+    from cefpython_app cimport *

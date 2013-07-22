@@ -65,6 +65,7 @@ ext_modules = [Extension(
         r'./lib_%s' % BITS,
         # r'./../../v8function_handler/',
         r'./../../client_handler/',
+        r'./../../subprocess/', # libcefpythonapp
         r'./../../../cpp_utils/'
     ],
 
@@ -72,6 +73,7 @@ ext_modules = [Extension(
         'cef_dll_wrapper',
         # 'v8function_handler',
         'client_handler',
+        'cefpythonapp',
         'cpp_utils'
     ],
 

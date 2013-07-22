@@ -5,77 +5,103 @@
 #pragma once
 
 #include "include/cef_app.h"
+#include <stdio.h>
 
-// CefPythonApp class is also instantiated in cefpython.pyx for the 
-// browser process.
+// CefPythonApp class is instantiated in subprocess and in 
+// cefpython.pyx for the browser process, so the code is shared.
+// Using printf() in CefRenderProcessHandler won't work, use
+// the DebugLog() function instead, it will write the message
+// to the "debug.log" file.
 
 ///
 // Implement this interface to provide handler implementations. Methods will be
 // called by the process and/or thread indicated.
 ///
 /*--cef(source=client,no_debugct_check)--*/
-class CefPythonApp : public CefApp {
+class CefPythonApp : 
+        public CefApp,
+        public CefBrowserProcessHandler,
+        public CefRenderProcessHandler {
  public:
-  ///
-  // Provides an opportunity to view and/or modify command-line arguments before
-  // processing by CEF and Chromium. The |process_type| value will be empty for
-  // the browser process. Do not keep a reference to the CefCommandLine object
-  // passed to this method. The CefSettings.command_line_args_disabled value
-  // can be used to start with an empty command-line object. Any values
-  // specified in CefSettings that equate to command-line arguments will be set
-  // before this method is called. Be cautious when using this method to modify
-  // command-line arguments for non-browser processes as this may result in
-  // undefined behavior including crashes.
-  ///
-  /*--cef(optional_param=process_type)--*/
   virtual void OnBeforeCommandLineProcessing(
       const CefString& process_type,
-      CefRefPtr<CefCommandLine> command_line) {
-  }
+      CefRefPtr<CefCommandLine> command_line) OVERRIDE;
 
-  ///
-  // Provides an opportunity to register custom schemes. Do not keep a reference
-  // to the |registrar| object. This method is called on the main thread for
-  // each process and the registered schemes should be the same across all
-  // processes.
-  ///
-  /*--cef()--*/
   virtual void OnRegisterCustomSchemes(
-      CefRefPtr<CefSchemeRegistrar> registrar) {
-  }
+      CefRefPtr<CefSchemeRegistrar> registrar) OVERRIDE;
 
-  ///
-  // Return the handler for resource bundle events. If
-  // CefSettings.pack_loading_disabled is true a handler must be returned. If no
-  // handler is returned resources will be loaded from pack files. This method
-  // is called by the browser and render processes on multiple threads.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler() 
+        OVERRIDE;
 
-  ///
-  // Return the handler for functionality specific to the browser process. This
-  // method is called on multiple threads in the browser process.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler()
+        OVERRIDE;
 
-  ///
-  // Return the handler for functionality specific to the render process. This
-  // method is called on the render process main thread.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() {
-    return NULL;
-  }
-};
+  virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() 
+        OVERRIDE;
 
-class ClientApp : public CefApp {
-public:
-private:
-  IMPLEMENT_REFCOUNTING(ClientApp); 
+  // ---------------------------------------------------------------------------
+  // CefBrowserProcessHandler
+  // ---------------------------------------------------------------------------
+
+  virtual void OnContextInitialized() OVERRIDE;
+
+  virtual void OnBeforeChildProcessLaunch(
+      CefRefPtr<CefCommandLine> command_line) OVERRIDE;
+
+  virtual void OnRenderProcessThreadCreated(
+      CefRefPtr<CefListValue> extra_info) OVERRIDE;
+
+  // ---------------------------------------------------------------------------
+  // CefRenderProcessHandler
+  // ---------------------------------------------------------------------------
+
+  virtual void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) 
+        OVERRIDE;
+
+  virtual void OnWebKitInitialized()
+        OVERRIDE;
+
+  virtual void OnBrowserCreated(CefRefPtr<CefBrowser> browser)
+        OVERRIDE;
+
+  virtual void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
+        OVERRIDE;
+
+  virtual bool OnBeforeNavigation(CefRefPtr<CefBrowser> browser,
+                                  CefRefPtr<CefFrame> frame,
+                                  CefRefPtr<CefRequest> request,
+                                  cef_navigation_type_t navigation_type,
+                                  bool is_redirect)
+        OVERRIDE;
+
+  virtual void OnContextCreated(CefRefPtr<CefBrowser> browser,
+                                CefRefPtr<CefFrame> frame,
+                                CefRefPtr<CefV8Context> context)
+        OVERRIDE;
+
+  virtual void OnContextReleased(CefRefPtr<CefBrowser> browser,
+                                 CefRefPtr<CefFrame> frame,
+                                 CefRefPtr<CefV8Context> context)
+        OVERRIDE;
+
+  virtual void OnUncaughtException(CefRefPtr<CefBrowser> browser,
+                                   CefRefPtr<CefFrame> frame,
+                                   CefRefPtr<CefV8Context> context,
+                                   CefRefPtr<CefV8Exception> exception,
+                                   CefRefPtr<CefV8StackTrace> stackTrace)
+        OVERRIDE;
+
+  virtual void OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser,
+                                    CefRefPtr<CefFrame> frame,
+                                    CefRefPtr<CefDOMNode> node)
+        OVERRIDE;
+
+  virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                        CefProcessId source_process,
+                                        CefRefPtr<CefProcessMessage> message)
+        OVERRIDE;
+
+protected:
+  // Include the default reference counting implementation.
+  IMPLEMENT_REFCOUNTING(CefPythonApp); 
 };
