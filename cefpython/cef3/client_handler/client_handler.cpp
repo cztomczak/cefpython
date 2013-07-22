@@ -9,6 +9,6 @@ bool ClientHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message) {
     std::string name = message.get()->GetName().ToString();
-    printf("ClientHandler::OnProcessMessageReceived(): %s\n", name.c_str());
+    printf("Browser: OnProcessMessageReceived(): %s\n", name.c_str());
     return false;
 }

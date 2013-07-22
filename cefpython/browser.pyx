@@ -615,3 +615,10 @@ cdef class PyBrowser:
         # virtual CefTextInputContext GetNSTextInputContext() =0;
         # virtual void HandleKeyEventBeforeTextInputClient(CefEventHandle keyEvent) =0;
         # virtual void HandleKeyEventAfterTextInputClient(CefEventHandle keyEvent) =0;
+
+        cdef cpp_bool SendProcessMessage(self, cef_process_id_t targetProcess, 
+                py_string name) except *:
+            cdef CefRefPtr[CefProcessMessage] msg = CefProcessMessage_Create(
+                    PyToCefStringValue(name))
+            return self.GetCefBrowser().get().SendProcessMessage(targetProcess, 
+                    msg)

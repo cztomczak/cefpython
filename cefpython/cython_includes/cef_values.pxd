@@ -9,8 +9,9 @@ from libcpp.vector cimport vector
 from cef_types cimport cef_value_type_t
 
 cdef extern from "include/cef_values.h":
-    CefRefPtr[CefDictionaryValue] CefDictionaryValue_Create "CefDictionaryValue::Create"()
-    CefRefPtr[CefListValue] CefListValue_Create "CefListValue::Create"()
+    cdef CefRefPtr[CefDictionaryValue] CefDictionaryValue_Create \
+            "CefDictionaryValue::Create"()
+    cdef CefRefPtr[CefListValue] CefListValue_Create "CefListValue::Create"()
 
 cdef extern from "include/cef_values.h":
     cdef cppclass CefBinaryValue:
