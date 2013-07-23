@@ -70,6 +70,9 @@ from libc.stdlib cimport atoi
 from libc.stdint cimport uint64_t
 from libc.stdint cimport uintptr_t
 
+# Also defined in cef_types.
+ctypedef long long int64
+
 cimport ctime
 
 IF UNAME_SYSNAME == "Windows":

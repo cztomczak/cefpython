@@ -147,6 +147,7 @@ IF CEF_VERSION == 1:
 
 IF CEF_VERSION == 3:
     include "process_message_utils.pyx"
+    include "v8context_handler_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,
@@ -241,13 +242,12 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
     cdef PyBrowser pyBrowser = GetPyBrowser(cefBrowser)
     pyBrowser.SetUserData("__outerWindowHandle", int(windowInfo.parentWindowHandle))
 
-    IF CEF_VERSION == 3:
+    # IF CEF_VERSION == 3:
         # Test whether process message sent before renderer thread is created
         # will be delivered - OK.
         # Debug("Sending 'CreateBrowserSync() done' message to the Renderer")
         # assert pyBrowser.SendProcessMessage(cef_types.PID_RENDERER, 
         #        "CreateBrowserSync() done")
-        pass
 
     return pyBrowser
 
