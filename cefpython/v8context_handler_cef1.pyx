@@ -40,6 +40,8 @@ cdef public void V8ContextHandler_OnContextCreated(
     cdef py_string functionName
     cdef py_string objectName
 
+    cdef object clientCallback
+
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
         pyBrowser.SetUserData("__v8ContextCreated", True)
@@ -48,12 +50,6 @@ cdef public void V8ContextHandler_OnContextCreated(
         javascriptBindings = pyBrowser.GetJavascriptBindings()
         if not javascriptBindings:
             return
-
-        if pyFrame.IsMain():
-            javascriptBindings.AddFrame(pyBrowser, pyFrame)
-        else:
-            if javascriptBindings.GetBindToFrames():
-                javascriptBindings.AddFrame(pyBrowser, pyFrame)
 
         javascriptFunctions = javascriptBindings.GetFunctions()
         javascriptProperties = javascriptBindings.GetProperties()
@@ -114,6 +110,12 @@ cdef public void V8ContextHandler_OnContextCreated(
                     PyToCefString(methodName, cefMethodName)
                     v8Object.get().SetValue(
                             cefMethodName, v8Method, V8_PROPERTY_ATTRIBUTE_NONE)
+
+        # User defined callback.
+        clientCallback = pyBrowser.GetClientCallback("OnContextCreated")
+        if clientCallback:
+            clientCallback(pyBrowser, pyFrame)
+
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -125,13 +127,13 @@ cdef public void V8ContextHandler_OnContextReleased(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
-    cdef JavascriptBindings javascriptBindings
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
         pyFrame = GetPyFrame(cefFrame)
-        javascriptBindings = pyBrowser.GetJavascriptBindings()
-        if javascriptBindings:
-            javascriptBindings.RemoveFrame(pyBrowser, pyFrame)
+        # User defined callback.
+        clientCallback = pyBrowser.GetClientCallback("OnContextReleased")
+        if clientCallback:
+            clientCallback(pyBrowser, pyFrame)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

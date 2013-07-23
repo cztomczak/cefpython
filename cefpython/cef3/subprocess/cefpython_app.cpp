@@ -6,8 +6,10 @@
 #include "util.h"
 #include <stdio.h>
 
-void DebugLog(const char* szString)
+// Declared "inline" to get rid of the "already defined" errors when linking.
+inline void DebugLog(const char* szString)
 {
+  // TODO: get the log_file option from CefSettings.
   FILE* pFile = fopen("debug.log", "a");
   fprintf(pFile, "cefpython_app: %s\n", szString);
   fclose(pFile);
@@ -97,14 +99,24 @@ void CefPythonApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefV8Context> context) {
     DebugLog("OnContextCreated() called");
-    CefRefPtr<CefProcessMessage> msg = CefProcessMessage::Create(
+    CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(
             "OnContextCreated");
-    browser.get()->SendProcessMessage(PID_BROWSER, msg);
+    CefRefPtr<CefListValue> args = message.get()->GetArgumentList();
+    // TODO: losing int64 precision
+    args.get()->SetInt(0, (int)(frame.get()->GetIdentifier()));
+    browser.get()->SendProcessMessage(PID_BROWSER, message);
 }
 
 void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
                                      CefRefPtr<CefFrame> frame,
                                      CefRefPtr<CefV8Context> context) {
+    DebugLog("OnContextReleased() called");
+    CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(
+            "OnContextReleased");
+    CefRefPtr<CefListValue> args = message.get()->GetArgumentList();
+    // TODO: losing int64 precision
+    args.get()->SetInt(0, (int)(frame.get()->GetIdentifier()));
+    browser.get()->SendProcessMessage(PID_BROWSER, message);
 }
 
 void CefPythonApp::OnUncaughtException(CefRefPtr<CefBrowser> browser,
@@ -130,4 +142,14 @@ bool CefPythonApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     std::string name = message.get()->GetName().ToString();
     printf("Renderer: OnProcessMessageReceived(): %s\n", name.c_str());
     return false;
+}
+
+void DoJavascriptBindings(CefRefPtr<CefBrowser> browser,
+                        CefRefPtr<CefFrame> frame,
+                        CefRefPtr<CefV8Context> context) {
+
+}
+
+void RedoJavascriptBindings(CefRefPtr<CefBrowser> browser) {
+
 }

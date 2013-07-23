@@ -152,7 +152,8 @@ cdef class PyBrowser:
             self.allowedClientCallbacks += ["OnKeyEvent"]
 
             # CefV8ContextHandler.
-            self.allowedClientCallbacks += ["OnUncaughtException"]
+            self.allowedClientCallbacks += ["OnContextCreated",
+                    "OnContextReleased" ,"OnUncaughtException"]
 
             # CefRequestHandler.
             self.allowedClientCallbacks += ["OnBeforeBrowse",
@@ -281,6 +282,11 @@ cdef class PyBrowser:
         PyToCefString(name, cefName)
         return GetPyFrame(self.GetCefBrowser().get().GetFrame(cefName))
 
+    IF CEF_VERSION == 3:
+        cpdef object GetFrameByIdentifier(self, object identifier):
+            return GetPyFrame(self.GetCefBrowser().get().GetFrame(
+                    <long long>long(identifier)))
+
     cpdef list GetFrameNames(self):
         assert IsThread(TID_UI), (
                 "Browser.GetFrameNames() may only be called on the UI thread")
@@ -294,6 +300,15 @@ cdef class PyBrowser:
             names.append(CefToPyString(cefString))
             preinc(iterator)
         return names
+
+    cpdef list GetFrames(self):
+        cdef list names = self.GetFrameNames()
+        cdef PyFrame frame
+        cdef list frames = []
+        for name in names:
+            frame = self.GetFrame(name)
+            frames.append(frame)
+        return frames
 
     cpdef int GetIdentifier(self) except *:
         return self.GetCefBrowser().get().GetIdentifier()
@@ -349,7 +364,6 @@ cdef class PyBrowser:
         return self.GetCefBrowser().get().HasDocument()
 
     IF CEF_VERSION == 1:
-
         cpdef py_void HidePopup(self):
             self.GetCefBrowser().get().HidePopup()
 
@@ -360,7 +374,6 @@ cdef class PyBrowser:
         return self.GetCefBrowser().get().IsPopup()
 
     IF CEF_VERSION == 1:
-
         cpdef py_bool IsPopupVisible(self):
             assert IsThread(TID_UI), (
                     "Browser.IsPopupVisible() may only be called on UI thread")

@@ -13,6 +13,7 @@ from libcpp.vector cimport vector as cpp_vector
 from cef_frame cimport CefFrame
 cimport cef_types
 from cef_platform cimport CefKeyInfo
+from cef_types cimport int64
 
 IF CEF_VERSION == 1:
     from cef_types_wrappers cimport CefRect
@@ -122,6 +123,7 @@ cdef extern from "include/cef_browser.h":
             cpp_bool CanGoForward()
             CefRefPtr[CefFrame] GetFocusedFrame()
             CefRefPtr[CefFrame] GetFrame(CefString& name)
+            CefRefPtr[CefFrame] GetFrame(int64 identifier)
             void GetFrameNames(cpp_vector[CefString]& names)
             CefRefPtr[CefFrame] GetMainFrame()
             void GoBack()

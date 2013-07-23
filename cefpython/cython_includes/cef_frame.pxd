@@ -10,6 +10,7 @@ from cef_string cimport CefString
 from libcpp cimport bool as cpp_bool
 from cef_ptr cimport CefRefPtr
 from cef_v8 cimport CefV8Context
+from cef_browser cimport CefBrowser
 
 cdef extern from "include/cef_frame.h":
 
@@ -39,6 +40,8 @@ cdef extern from "include/cef_frame.h":
             cpp_bool IsFocused()
             CefString GetName()
             # virtual void VisitDOM(CefRefPtr<CefDOMVisitor> visitor) =0;
+            CefRefPtr[CefFrame] GetParent()
+            CefRefPtr[CefBrowser] GetBrowser()
 
     ELIF CEF_VERSION == 3:
 
@@ -65,5 +68,7 @@ cdef extern from "include/cef_frame.h":
             cpp_bool IsFocused()
             CefString GetName()
             # virtual void VisitDOM(CefRefPtr<CefDOMVisitor> visitor) =0;
+            CefRefPtr[CefFrame] GetParent()
+            CefRefPtr[CefBrowser] GetBrowser()
 
 
