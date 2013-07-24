@@ -4,8 +4,8 @@
 
 cdef class JavascriptBindings:
     # By default binding only to top frame.
-    cdef public int bindToFrames
-    cdef public int bindToPopups
+    cdef public cpp_bool bindToFrames
+    cdef public cpp_bool bindToPopups
     cdef public dict functions
     cdef public dict properties
     cdef public dict objects
@@ -15,8 +15,8 @@ cdef class JavascriptBindings:
         self.properties = {}
         self.objects = {}
     
-        self.bindToFrames = int(bindToFrames)
-        self.bindToPopups = int(bindToPopups)
+        self.bindToFrames = bool(bindToFrames)
+        self.bindToPopups = bool(bindToPopups)
 
     cpdef py_bool GetBindToFrames(self):
         return bool(self.bindToFrames)
@@ -116,23 +116,23 @@ cdef class JavascriptBindings:
             # In CEF Python 3 due to its multi-process architecture 
             # Rebind() is used for both first-time binding and rebinding.
             cdef PyBrowser pyBrowser
-            cdef list functions
+            cdef dict functions
             cdef dict properties
             cdef dict objects
-            cdef list methods
+            cdef dict methods
             global g_pyBrowsers
             for browserId, pyBrowser in g_pyBrowsers.iteritems():
                 # Send to the Renderer process: functions, properties,
                 # objects and its methods, bindToFrames.
-                functions = []
+                functions = {}
                 for funcName in self.functions:
-                    functions.append(funcName)
+                    functions[funcName] = None
                 properties = self.properties
                 objects = {}
                 for objectName in self.objects:
-                    methods = []
+                    methods = {}
                     for methodName in self.objects[objectName]:
-                        methods.append(methodName)
+                        methods[methodName] = None
                 pyBrowser.SendProcessMessage(cef_types.PID_RENDERER, 
                         "DoJavascriptBindings", [{
                                 "functions": functions,

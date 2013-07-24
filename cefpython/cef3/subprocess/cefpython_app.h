@@ -24,8 +24,7 @@ class CefPythonApp :
         public CefBrowserProcessHandler,
         public CefRenderProcessHandler {
  public:
-  CefPythonApp()
-    : v8FunctionHandler_(new V8FunctionHandler()) {
+  CefPythonApp() {
   }
 
   virtual void OnBeforeCommandLineProcessing(
@@ -118,6 +117,9 @@ class CefPythonApp :
 
   virtual void RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
+  virtual bool BindedFunctionExists(CefRefPtr<CefBrowser> browser, 
+                                    const CefString& funcName) OVERRIDE;
+
   virtual void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser) 
                                             OVERRIDE;
   
@@ -125,10 +127,8 @@ class CefPythonApp :
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefV8Context> context) OVERRIDE;
 
-
 protected:
   std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;
-  CefRefPtr<CefV8Handler> v8FunctionHandler_;
 
 private:
   // Include the default reference counting implementation.

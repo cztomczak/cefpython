@@ -144,7 +144,8 @@ void CefPythonApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
         if (frame->IsMain()) {
             DoJavascriptBindingsForFrame(browser, frame, context);
         } else {
-            if (jsBindings->GetType("bindToFrames") == VTYPE_BOOL
+            if (jsBindings->HasKey("bindToFrames")
+                    && jsBindings->GetType("bindToFrames") == VTYPE_BOOL
                     && jsBindings->GetBool("bindToFrames")) {
                 DoJavascriptBindingsForFrame(browser, frame, context);
             }
@@ -231,6 +232,52 @@ void CefPythonApp::RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser) {
     }
 }
 
+bool CefPythonApp::BindedFunctionExists(CefRefPtr<CefBrowser> browser, 
+                                        const CefString& funcName) {
+    CefRefPtr<CefDictionaryValue> jsBindings = GetJavascriptBindings(browser);
+    if (!jsBindings.get()) {
+        return false;
+    }
+    std::string strFuncName = funcName.ToString();
+    size_t dotPosition = strFuncName.find(".");
+    if (std::string::npos != dotPosition) {
+        // This is a method call, funcName == "object.method".
+        CefString objectName(strFuncName.substr(0, dotPosition));
+        CefString methodName(strFuncName.substr(dotPosition, std::string::npos));
+        if (!(jsBindings->HasKey("objects")
+                && jsBindings->GetType("objects") == VTYPE_DICTIONARY)) {
+            DebugLog("Renderer: BindedFunctionExists() FAILED: "\
+                    "objects dictionary not found");
+            return false;
+        }
+        CefRefPtr<CefDictionaryValue> objects = \
+                jsBindings->GetDictionary("objects");
+        if (objects->HasKey(objectName)) {
+            if (!(objects->GetType(objectName) == VTYPE_DICTIONARY)) {
+                DebugLog("Renderer: BindedFunctionExists() FAILED: "\
+                    "objects dictionary has invalid type");
+                return false;
+            }
+            CefRefPtr<CefDictionaryValue> methods = \
+                    objects->GetDictionary(objectName);
+            return methods->HasKey(methodName);
+        } else {
+            return false;
+        }
+    } else {
+        // This is a function call.
+        if (!(jsBindings->HasKey("functions")
+                && jsBindings->GetType("functions") == VTYPE_DICTIONARY)) {
+            DebugLog("Renderer: BindedFunctionExists() FAILED: "\
+                    "functions dictionary not found");
+            return false;
+        }
+        CefRefPtr<CefDictionaryValue> functions = \
+                jsBindings->GetDictionary("functions");
+        return functions->HasKey(funcName);
+    }
+}
+
 void CefPythonApp::DoJavascriptBindingsForBrowser(
                         CefRefPtr<CefBrowser> browser) {
     // get frame
@@ -246,7 +293,8 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
         return;
     }
     std::vector<int64> frameIds;
-    if (jsBindings->GetType("bindToFrames") == VTYPE_BOOL
+    if (jsBindings->HasKey("bindToFrames")
+            && jsBindings->GetType("bindToFrames") == VTYPE_BOOL
             && jsBindings->GetBool("bindToFrames")) {
         browser->GetFrameIdentifiers(frameIds);
     } else {
@@ -277,16 +325,28 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         return;
     }
     DebugLog("Renderer: DoJavascriptBindingsForFrame(): bindings are set");
-    if (!(jsBindings->GetType("functions") == VTYPE_LIST
+    if (!(jsBindings->HasKey("functions")
+            && jsBindings->GetType("functions") == VTYPE_DICTIONARY
+            && jsBindings->HasKey("properties")
             && jsBindings->GetType("properties") == VTYPE_DICTIONARY
+            && jsBindings->HasKey("objects")
             && jsBindings->GetType("objects") == VTYPE_DICTIONARY
+            && jsBindings->HasKey("bindToFrames")
             && jsBindings->GetType("bindToFrames") == VTYPE_BOOL)) {
         DebugLog("Renderer: DoJavascriptBindingsForFrame() FAILED: " \
                 "invalid data [1]");
         return;
     }
+    // A context must be explicitly entered before creating a
+    // V8 Object, Array, Function or Date asynchronously.
+    bool enteredContext = false;
+    if (!context->IsSame(CefV8Context::GetCurrentContext())) {
+        enteredContext = true;
+        context->Enter();
+    }
     // TODO: properties, objects, other frames.
-    CefRefPtr<CefListValue> functions = jsBindings->GetList("functions");
+    CefRefPtr<CefDictionaryValue> functions = \
+            jsBindings->GetDictionary("functions");
     CefRefPtr<CefDictionaryValue> properties = \
             jsBindings->GetDictionary("properties");
     CefRefPtr<CefDictionaryValue> objects = \
@@ -297,20 +357,29 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
             && objects->IsValid())) {
         DebugLog("Renderer: DoJavascriptBindingsForFrame() FAILED: " \
                 "invalid data [2]");
+        if (enteredContext)
+            context->Exit();
         return;
     }
     CefRefPtr<CefV8Value> v8Window = context->GetGlobal();
     CefRefPtr<CefV8Value> v8Function;
+    CefRefPtr<CefV8Handler> v8FunctionHandler(new V8FunctionHandler(this));
     // FUNCTIONS.
-    for (unsigned int i = 0; i < functions->GetSize(); i++) {
-        if (functions->GetType(i) != VTYPE_STRING) {
-            DebugLog("Renderer: DoJavascriptBindingsForFrame() FAILED: " \
-                "invalid data [3]");
-            return;
-        }
-        CefString funcName = functions->GetString(i);
-        v8Function = CefV8Value::CreateFunction(funcName, v8FunctionHandler_);
+    std::vector<CefString> functionsVector;
+    if (!functions->GetKeys(functionsVector)) {
+        DebugLog("Renderer: DoJavascriptBindingsForFrame(): " \
+                "functions->GetKeys() FAILED");
+        if (enteredContext)
+            context->Exit();
+        return;
+    }
+    for (std::vector<CefString>::iterator it = functionsVector.begin(); \
+            it != functionsVector.end(); ++it) {
+        CefString funcName = *it;
+        v8Function = CefV8Value::CreateFunction(funcName, v8FunctionHandler);
         v8Window->SetValue(funcName, v8Function, 
                 V8_PROPERTY_ATTRIBUTE_NONE);
     }
+    if (enteredContext)
+        context->Exit();
 }

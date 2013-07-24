@@ -106,6 +106,7 @@ class MainFrame(wx.Frame):
 
         jsBindings = cefpython.JavascriptBindings(
             bindToFrames=False, bindToPopups=False)
+        jsBindings.SetFunction("PyPrint", PyPrint)
         jsBindings.SetObject("external", JavascriptBindings(self.browser))
         self.browser.SetJavascriptBindings(jsBindings)
 
@@ -132,6 +133,9 @@ class MainFrame(wx.Frame):
 
     def OnIdle(self, event):
         cefpython.MessageLoopWork()
+
+def PyPrint(message):
+    print(message)
 
 class JavascriptBindings:
     mainBrowser = None
