@@ -10,10 +10,8 @@
 
 cdef public void V8ContextHandler_OnContextCreated(
         CefRefPtr[CefBrowser] cefBrowser,
-        int64 frameIdentifier
+        CefRefPtr[CefFrame] cefFrame
         ) except * with gil:
-    cdef CefRefPtr[CefFrame] cefFrame = cefBrowser.get().GetFrame(
-            frameIdentifier)
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
@@ -32,10 +30,8 @@ cdef public void V8ContextHandler_OnContextCreated(
 
 cdef public void V8ContextHandler_OnContextReleased(
         CefRefPtr[CefBrowser] cefBrowser,
-        int64 frameIdentifier
+        CefRefPtr[CefFrame] cefFrame
         ) except * with gil:
-    cdef CefRefPtr[CefFrame] cefFrame = cefBrowser.get().GetFrame(
-            frameIdentifier)
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback

@@ -82,10 +82,58 @@ cdef dict CefDictionaryValueToPyDict(
             raise Exception("Unknown value type = %s" % valueType)
     return ret
 
-cdef py_void PyListToCefListValue(
+cdef CefRefPtr[CefListValue] PyListToCefListValue(
+        list pyList,
+        int nestingLevel=0) except *:
+    if nestingLevel > 8:
+        raise Exception("PyListToCefListValue(): max nesting level (8)"
+                " exceeded")
+    cdef type valueType
+    cdef CefRefPtr[CefListValue] ret = CefListValue_Create()
+    for index, value in enumerate(pyList):
+        valueType = type(value)
+        if valueType == type(None):
+            ret.get().SetNull(index)
+        elif valueType == bool:
+            ret.get().SetBool(index, bool(value))
+        elif valueType == int:
+            ret.get().SetInt(index, int(value))
+        elif valueType == long:
+            # Int32 range is -2147483648..2147483647, we've increased the
+            # minimum size by one as Cython was throwing a warning:
+            # "unary minus operator applied to unsigned type, result still 
+            # unsigned".
+            if value <= 2147483647 and value >= -2147483647:
+                ret.get().SetInt(index, int(value))
+            else:
+                # Long values become strings.
+                ret.get().SetString(index, PyToCefStringValue(str(value)))
+        elif valueType == float:
+            ret.get().SetDouble(index, float(value))
+        elif valueType == bytes or valueType == unicode:
+            ret.get().SetString(index, PyToCefStringValue(str(value)))
+        elif valueType == dict:
+            ret.get().SetDictionary(index, PyDictToCefDictionaryValue(value,
+                    nestingLevel + 1))
+        elif valueType == list:
+            ret.get().SetList(index, PyListToCefListValue(value, 
+                    nestingLevel + 1))
+        elif valueType == type:
+            ret.get().SetString(index, PyToCefStringValue(str(value)))
+        else:
+            # Raising an exception probably not a good idea, why
+            # terminate application when we can cast it to string,
+            # the data may contain some non-standard object that is 
+            # probably redundant, but casting to string will do no harm.
+            ret.get().SetString(index, PyToCefStringValue(str(value)))
+    return ret
+
+cdef void PyListToExistingCefListValue(
         list pyList,
         CefRefPtr[CefListValue] cefListValue,
-        int nestingLevel=0):
+        int nestingLevel=0) except *:
+    # When sending process messages you must use an existing
+    # CefListValue, see browser.pyx > SendProcessMessage().
     if nestingLevel > 8:
         raise Exception("PyListToCefListValue(): max nesting level (8)"
                 " exceeded")
@@ -114,11 +162,12 @@ cdef py_void PyListToCefListValue(
         elif valueType == bytes or valueType == unicode:
             cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
         elif valueType == dict:
-            cefListValue.get().SetDictionary(index, PyDictToCefDictionaryValue(
-                    value, nestingLevel + 1))
+            cefListValue.get().SetDictionary(index, PyDictToCefDictionaryValue(value,
+                    nestingLevel + 1))
         elif valueType == list:
             newCefListValue = CefListValue_Create()
-            PyListToCefListValue(value, newCefListValue, nestingLevel + 1)
+            PyListToExistingCefListValue(value, newCefListValue, 
+                    nestingLevel + 1)
             cefListValue.get().SetList(index, newCefListValue)
         elif valueType == type:
             cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
@@ -128,7 +177,6 @@ cdef py_void PyListToCefListValue(
             # the data may contain some non-standard object that is 
             # probably redundant, but casting to string will do no harm.
             cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
-    return None
 
 cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
         dict pyDict,
@@ -137,12 +185,12 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
         raise Exception("PyDictToCefDictionaryValue(): max nesting level (8)"
                 " exceeded")
     cdef type valueType
-    cdef CefRefPtr[CefListValue] newCefListValue
     cdef CefRefPtr[CefDictionaryValue] ret = CefDictionaryValue_Create()
     cdef CefString cefKey
+    cdef object value
     for pyKey in pyDict:
-        valueType = type(value)
         value = pyDict[pyKey]
+        valueType = type(value)
         PyToCefString(pyKey, cefKey)
         if valueType == type(None):
             ret.get().SetNull(cefKey)
@@ -168,9 +216,8 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
             ret.get().SetDictionary(cefKey, PyDictToCefDictionaryValue(
                     value, nestingLevel + 1))
         elif valueType == list:
-            newCefListValue = CefListValue_Create()
-            PyListToCefListValue(value, newCefListValue, nestingLevel + 1)
-            ret.get().SetList(cefKey, newCefListValue)
+            ret.get().SetList(cefKey, PyListToCefListValue(value, 
+                    nestingLevel + 1))
         elif valueType == type:
             ret.get().SetString(cefKey, PyToCefStringValue(str(value)))
         else:

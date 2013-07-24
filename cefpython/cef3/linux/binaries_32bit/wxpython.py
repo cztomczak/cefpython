@@ -104,6 +104,11 @@ class MainFrame(wx.Frame):
             browserSettings={"plugins_disabled": False},
             navigateUrl="file://"+GetApplicationPath("wxpython.html"))
 
+        jsBindings = cefpython.JavascriptBindings(
+            bindToFrames=False, bindToPopups=False)
+        jsBindings.SetObject("external", JavascriptBindings(self.browser))
+        self.browser.SetJavascriptBindings(jsBindings)
+
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         if USE_EVT_IDLE:
             # Bind EVT_IDLE only for the main application frame.
@@ -127,6 +132,15 @@ class MainFrame(wx.Frame):
 
     def OnIdle(self, event):
         cefpython.MessageLoopWork()
+
+class JavascriptBindings:
+    mainBrowser = None
+    
+    def __init__(self, mainBrowser):
+        self.mainBrowser = mainBrowser
+
+    def Print(self, message):
+        print(message)
 
 class MyApp(wx.App):
     timer = None

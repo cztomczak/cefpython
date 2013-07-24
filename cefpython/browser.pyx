@@ -102,8 +102,7 @@ cdef class PyBrowser:
 
     cdef public dict clientCallbacks
     cdef public list allowedClientCallbacks
-    IF CEF_VERSION == 1:
-        cdef public JavascriptBindings javascriptBindings
+    cdef public JavascriptBindings javascriptBindings
     cdef public dict userData
 
     # Properties used by ToggleFullscreen().
@@ -211,17 +210,18 @@ cdef class PyBrowser:
     cpdef dict GetClientCallbacksDict(self):
         return self.clientCallbacks
 
-    IF CEF_VERSION == 1:
-
-        cpdef py_void SetJavascriptBindings(self, JavascriptBindings bindings):
-            self.javascriptBindings = bindings
+    cpdef py_void SetJavascriptBindings(self, JavascriptBindings bindings):
+        self.javascriptBindings = bindings
+        IF CEF_VERSION == 1:
             if self.GetUserData("__v8ContextCreated"):
                 Debug("Browser.SetJavascriptBindings(): v8 context already"
                         "created, calling Rebind()")
                 self.javascriptBindings.Rebind()
+        ELIF CEF_VERSION == 3:
+            self.javascriptBindings.Rebind()
 
-        cpdef JavascriptBindings GetJavascriptBindings(self):
-            return self.javascriptBindings
+    cpdef JavascriptBindings GetJavascriptBindings(self):
+        return self.javascriptBindings
 
     # --------------
     # CEF API.
@@ -629,9 +629,24 @@ cdef class PyBrowser:
         # virtual void HandleKeyEventBeforeTextInputClient(CefEventHandle keyEvent) =0;
         # virtual void HandleKeyEventAfterTextInputClient(CefEventHandle keyEvent) =0;
 
-        cdef cpp_bool SendProcessMessage(self, cef_process_id_t targetProcess, 
-                py_string name) except *:
-            cdef CefRefPtr[CefProcessMessage] msg = CefProcessMessage_Create(
-                    PyToCefStringValue(name))
-            return self.GetCefBrowser().get().SendProcessMessage(targetProcess, 
-                    msg)
+        cdef void SendProcessMessage(self, cef_process_id_t targetProcess, 
+                py_string messageName, list pyArguments
+                ) except *:
+            cdef CefRefPtr[CefProcessMessage] message = \
+                    CefProcessMessage_Create(PyToCefStringValue(messageName))
+            # This does not work, no idea why, the CEF implementation
+            # seems not to allow it, both Assign() and swap() do not work:
+            # | message.get().GetArgumentList().Assign(arguments.get())
+            # | message.get().GetArgumentList().swap(arguments)
+            cdef CefRefPtr[CefListValue] messageArguments = \
+                    message.get().GetArgumentList()
+            PyListToExistingCefListValue(pyArguments, messageArguments)
+            Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
+                    messageName, 
+                    message.get().GetArgumentList().get().GetSize()))
+            cdef cpp_bool success = \
+                    self.GetCefBrowser().get().SendProcessMessage(
+                            targetProcess, message)
+            if not success:
+                raise Exception("Browser.SendProcessMessage() failed: "\
+                        "messageName=%s" % messageName)

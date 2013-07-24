@@ -111,20 +111,35 @@ cdef class JavascriptBindings:
                     V8ContextHandler_OnContextCreated(cefBrowser, cefFrame, v8Context)
                     if not sameContext:
                         assert v8Context.get().Exit(), "v8Context.Exit() failed"
-
     ELIF CEF_VERSION == 3:
         cpdef py_void Rebind(self):
-            # Rebind may also be used for first-time bindings, in
-            # a case when v8 process/thread was created too fast,
-            # see Browser.SetJavascriptBindings() that checks whether
-            # OnContextCreated() event already happened, if so it will
-            # call Rebind() to do the javascript bindings.
+            # In CEF Python 3 due to its multi-process architecture 
+            # Rebind() is used for both first-time binding and rebinding.
             cdef PyBrowser pyBrowser
+            cdef list functions
+            cdef dict properties
+            cdef dict objects
+            cdef list methods
             global g_pyBrowsers
-            for pyBrowser in g_pyBrowsers:
-                # Send to renderer process: properties, functions,
+            for browserId, pyBrowser in g_pyBrowsers.iteritems():
+                # Send to the Renderer process: functions, properties,
                 # objects and its methods, bindToFrames.
-                pass
+                functions = []
+                for funcName in self.functions:
+                    functions.append(funcName)
+                properties = self.properties
+                objects = {}
+                for objectName in self.objects:
+                    methods = []
+                    for methodName in self.objects[objectName]:
+                        methods.append(methodName)
+                pyBrowser.SendProcessMessage(cef_types.PID_RENDERER, 
+                        "DoJavascriptBindings", [{
+                                "functions": functions,
+                                "properties": properties,
+                                "objects": objects,
+                                "bindToFrames": self.bindToFrames
+                                }])
 
     cpdef dict GetProperties(self):
         return self.properties

@@ -104,7 +104,10 @@ class MainFrame(wx.Frame):
             browserSettings={"plugins_disabled": False},
             navigateUrl="file://"+GetApplicationPath("wxpython.html"))
 
-        print("Seting up javascript bindings now..")
+        jsBindings = cefpython.JavascriptBindings(
+            bindToFrames=False, bindToPopups=False)
+        jsBindings.SetObject("external", JavascriptBindings(self.browser))
+        self.browser.SetJavascriptBindings(jsBindings)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         if USE_EVT_IDLE:
@@ -129,6 +132,15 @@ class MainFrame(wx.Frame):
 
     def OnIdle(self, event):
         cefpython.MessageLoopWork()
+
+class JavascriptBindings:
+    mainBrowser = None
+    
+    def __init__(self, mainBrowser):
+        self.mainBrowser = mainBrowser
+
+    def Print(self, message):
+        print(message)
 
 class MyApp(wx.App):
     timer = None
@@ -168,7 +180,7 @@ if __name__ == '__main__':
     cefpython.g_debug = True
     cefpython.g_debugFile = GetApplicationPath("debug.log")
     settings = {
-        "log_severity": cefpython.LOGSEVERITY_INFO,
+        "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
         "log_file": GetApplicationPath("debug.log"),
         "release_dcheck_enabled": True, # Enable only when debugging.
         # This directories must be set on Linux

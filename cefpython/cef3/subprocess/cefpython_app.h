@@ -5,7 +5,8 @@
 #pragma once
 
 #include "include/cef_app.h"
-#include <stdio.h>
+#include "v8function_handler.h"
+#include <map>
 
 // CefPythonApp class is instantiated in subprocess and in 
 // cefpython.pyx for the browser process, so the code is shared.
@@ -23,6 +24,10 @@ class CefPythonApp :
         public CefBrowserProcessHandler,
         public CefRenderProcessHandler {
  public:
+  CefPythonApp()
+    : v8FunctionHandler_(new V8FunctionHandler()) {
+  }
+
   virtual void OnBeforeCommandLineProcessing(
       const CefString& process_type,
       CefRefPtr<CefCommandLine> command_line) OVERRIDE;
@@ -101,7 +106,31 @@ class CefPythonApp :
                                         CefRefPtr<CefProcessMessage> message)
         OVERRIDE;
 
+  // ---------------------------------------------------------------------------
+  // Javascript bindings
+  // ---------------------------------------------------------------------------
+
+  virtual void SetJavascriptBindings(CefRefPtr<CefBrowser> browser,
+                                    CefRefPtr<CefDictionaryValue> data) 
+                                    OVERRIDE;
+  virtual CefRefPtr<CefDictionaryValue> GetJavascriptBindings(
+                                    CefRefPtr<CefBrowser> browser) OVERRIDE;
+
+  virtual void RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser) OVERRIDE;
+
+  virtual void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser) 
+                                            OVERRIDE;
+  
+  virtual void DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
+                                    CefRefPtr<CefFrame> frame,
+                                    CefRefPtr<CefV8Context> context) OVERRIDE;
+
+
 protected:
+  std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;
+  CefRefPtr<CefV8Handler> v8FunctionHandler_;
+
+private:
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(CefPythonApp); 
 };

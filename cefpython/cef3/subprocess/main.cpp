@@ -5,10 +5,12 @@
 #include "cefpython_app.h"
 
 /*
-// Declared "inline" to get rid of the "already defined" errors when linking.
+// Defined as "inline" to get rid of the "already defined" errors
+// when linking.
 inline void DebugLog(const char* szString)
 {
   // TODO: get the log_file option from CefSettings.
+  printf("cefpython: %s\n", szString);
   FILE* pFile = fopen("debug.log", "a");
   fprintf(pFile, "cefpython_app: %s\n", szString);
   fclose(pFile);

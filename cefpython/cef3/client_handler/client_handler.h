@@ -137,7 +137,7 @@ public:
                                         CefRefPtr<CefProcessMessage> message)
                                         OVERRIDE;
 
-protected:
+private:
    
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(ClientHandler);
