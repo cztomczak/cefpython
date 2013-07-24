@@ -1,3 +1,9 @@
+# -g - extra debug information
+# -O1 - more precise backtraces
+# -fPIC - required when using -shared option
+# -Wall - show important warnings
+# -Werror - treat warnings as errors
+
 CC = g++
 CCFLAGS = -g
 

@@ -76,11 +76,10 @@ if ret != 0:
     if what != "y":
         sys.exit(1)
 subprocess_exe = "./../linux/binaries_%s/subprocess" % (BITS)
-shutil.copyfile("./subprocess", subprocess_exe)
-st = os.stat(subprocess_exe)
-os.chmod(subprocess_exe, st.st_mode | stat.S_IEXEC)
-
-
+if os.path.exists("./subprocess"):
+    shutil.copyfile("./subprocess", subprocess_exe)
+    st = os.stat(subprocess_exe)
+    os.chmod(subprocess_exe, st.st_mode | stat.S_IEXEC)
 
 # os.chdir("./../v8function_handler/")
 # ret = subprocess.call("make -f Makefile", shell=True)

@@ -4,14 +4,16 @@
 #pragma warning(disable:4190)
 #endif
 
+// To be able to use 'public' declarations you need to include Python.h and cefpython.h.
+// This include must be before including CEF, otherwise you get errors like:
+// | /usr/include/python2.7/pyconfig.h:1161:0: warning: "_POSIX_C_SOURCE" redefined
+#include "Python.h"
+
 // All the imports that are required when including "cefpython.h".
 #include "include/cef_client.h"
 // #include "include/cef_web_urlrequest.h"
 // #include "include/cef_cookie.h"
 #include "util.h"
-
-// To be able to use 'public' declarations you need to include Python.h and cefpython.h.
-#include "Python.h"
 
 // Python 3.2 fix - DL_IMPORT is not defined in Python.h
 #ifndef DL_IMPORT /* declarations for DLL import/export */

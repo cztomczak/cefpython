@@ -12,8 +12,9 @@
   #endif
 #endif
 
-__PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextCreated(CefRefPtr<CefBrowser>, int64);
-__PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextReleased(CefRefPtr<CefBrowser>, int64);
+__PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>);
+__PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextReleased(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>);
+__PYX_EXTERN_C DL_IMPORT(void) V8FunctionHandler_Execute(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString &, CefRefPtr<CefListValue>);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 

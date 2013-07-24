@@ -120,6 +120,8 @@ IF UNAME_SYSNAME == "Windows":
 ELIF UNAME_SYSNAME == "Linux":
     include "window_utils_linux.pyx"
 
+include "javascript_bindings.pyx"
+
 IF CEF_VERSION == 1:
     include "load_handler.pyx"
     include "keyboard_handler.pyx"
@@ -141,13 +143,13 @@ IF CEF_VERSION == 1:
     include "v8context_handler_cef1.pyx"
     include "v8function_handler_cef1.pyx"
     include "v8utils_cef1.pyx"
-    include "javascript_bindings.pyx"
     include "javascript_callback.pyx"
     include "python_callback.pyx"
 
 IF CEF_VERSION == 3:
     include "process_message_utils.pyx"
     include "v8context_handler_cef3.pyx"
+    include "v8function_handler_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,
@@ -246,7 +248,7 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
         # Test whether process message sent before renderer thread is created
         # will be delivered - OK.
         # Debug("Sending 'CreateBrowserSync() done' message to the Renderer")
-        # assert pyBrowser.SendProcessMessage(cef_types.PID_RENDERER, 
+        # pyBrowser.SendProcessMessage(cef_types.PID_RENDERER, 
         #        "CreateBrowserSync() done")
 
     return pyBrowser
