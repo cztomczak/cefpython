@@ -7,6 +7,7 @@
 // To be able to use 'public' declarations you need to include Python.h and cefpython.h.
 // This include must be before including CEF, otherwise you get errors like:
 // | /usr/include/python2.7/pyconfig.h:1161:0: warning: "_POSIX_C_SOURCE" redefined
+// This file needs to be included first before CEF.
 #include "Python.h"
 
 // All the imports that are required when including "cefpython.h".

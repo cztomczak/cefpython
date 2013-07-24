@@ -53,12 +53,12 @@ bool ClientHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
         if (args->GetSize() == 3
                 && args->GetType(0) == VTYPE_INT // frameId
                 && args->GetType(1) == VTYPE_STRING // funcName
-                && args->GetType(2) == VTYPE_LIST) { // funcArgs
+                && args->GetType(2) == VTYPE_LIST) { // funcArguments
             int64 frameId = args->GetInt(0);
-            CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
             CefString funcName = args->GetString(1);
-            CefRefPtr<CefListValue> funcArgs = args->GetList(2);
-            V8FunctionHandler_Execute(browser, frame, funcName, funcArgs);
+            CefRefPtr<CefListValue> funcArguments = args->GetList(2);
+            CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
+            V8FunctionHandler_Execute(browser, frame, funcName, funcArguments);
             return true;
         } else {
             DebugLog("Browser: OnProcessMessageReceived(): invalid arguments," \
