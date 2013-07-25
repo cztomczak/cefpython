@@ -40,7 +40,7 @@ cdef class PyFrame:
     def __init__(self):
         pass
 
-    def CallFunction(self, *args):
+    def ExecuteFunction(self, *args):
         # No need to enter V8 context as we're calling javascript
         # asynchronously using ExecuteJavascript() function.
         funcName = args[0]
@@ -51,6 +51,10 @@ cdef class PyFrame:
             code += json.dumps(args[i])
         code += ")"
         self.ExecuteJavascript(code)
+
+    def CallFunction(self, *args):
+        # DEPRECATED.
+        self.ExecuteFunction(*args)
 
     # Synchronous javascript calls won't be supported as CEF 3
     # does not support it, so supporting it in CEF 1 is probably

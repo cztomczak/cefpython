@@ -13,6 +13,9 @@ cdef list CefListValueToPyList(
     cdef int size = cefListValue.get().GetSize()
     cdef cef_types.cef_value_type_t valueType
     cdef list ret = []
+    cdef CefRefPtr[CefBinaryValue] binaryValue
+    cdef cef_types.uint32 uint32_value
+    cdef cef_types.int64 int64_value
     for index in range(0, size):
         valueType = cefListValue.get().GetType(index)
         if valueType == cef_types.VTYPE_NULL:
@@ -25,8 +28,6 @@ cdef list CefListValueToPyList(
             ret.append(cefListValue.get().GetDouble(index))
         elif valueType == cef_types.VTYPE_STRING:
             ret.append(CefToPyString(cefListValue.get().GetString(index)))
-        elif valueType == cef_types.VTYPE_BINARY:
-            raise Exception("VTYPE_BINARY not supported")
         elif valueType == cef_types.VTYPE_DICTIONARY:
             ret.append(CefDictionaryValueToPyDict(
                     cefListValue.get().GetDictionary(index),
@@ -35,8 +36,21 @@ cdef list CefListValueToPyList(
             ret.append(CefListValueToPyList(
                     cefListValue.get().GetList(index), 
                     nestingLevel + 1))
+        elif valueType == cef_types.VTYPE_BINARY:
+            binaryValue = cefListValue.get().GetBinary(index)
+            if binaryValue.get().GetSize() == sizeof(uint32_value):
+                binaryValue.get().GetData(
+                        &uint32_value, sizeof(uint32_value), 0)
+                ret.append(uint32_value)
+            elif binaryValue.get().GetSize() == sizeof(int64_value):
+                binaryValue.get().GetData(
+                        &int64_value, sizeof(int64_value), 0)
+                ret.append(int64_value)
+            else:
+                raise Exception("Unknown binary value, size=%s" % \
+                        binaryValue.get().GetSize())
         else:
-            raise Exception("Unknown value type = %s" % valueType)
+            raise Exception("Unknown value type=%s" % valueType)
     return ret
 
 cdef dict CefDictionaryValueToPyDict(
@@ -53,6 +67,9 @@ cdef dict CefDictionaryValueToPyDict(
     cdef cpp_vector[CefString].iterator iterator = keyList.begin()
     cdef CefString cefKey
     cdef py_string pyKey
+    cdef CefRefPtr[CefBinaryValue] binaryValue
+    cdef cef_types.uint32 uint32_value
+    cdef cef_types.int64 int64_value
     while iterator != keyList.end():
         cefKey = deref(iterator)
         pyKey = CefToPyString(cefKey)
@@ -68,8 +85,6 @@ cdef dict CefDictionaryValueToPyDict(
             ret[pyKey] = cefDictionaryValue.get().GetDouble(cefKey)
         elif valueType == cef_types.VTYPE_STRING:
             ret[pyKey] = CefToPyString(cefDictionaryValue.get().GetString(cefKey))
-        elif valueType == cef_types.VTYPE_BINARY:
-            raise Exception("VTYPE_BINARY not supported")
         elif valueType == cef_types.VTYPE_DICTIONARY:
             ret[pyKey] = CefDictionaryValueToPyDict(
                     cefDictionaryValue.get().GetDictionary(cefKey),
@@ -78,6 +93,19 @@ cdef dict CefDictionaryValueToPyDict(
             ret[pyKey] = CefListValueToPyList(
                     cefDictionaryValue.get().GetList(cefKey), 
                     nestingLevel + 1)
+        elif valueType == cef_types.VTYPE_BINARY:
+            binaryValue = cefDictionaryValue.get().GetBinary(cefKey)
+            if binaryValue.get().GetSize() == sizeof(uint32_value):
+                binaryValue.get().GetData(
+                        &uint32_value, sizeof(uint32_value), 0)
+                ret[pyKey] = uint32_value
+            elif binaryValue.get().GetSize() == sizeof(int64_value):
+                binaryValue.get().GetData(
+                        &int64_value, sizeof(int64_value), 0)
+                ret[pyKey] = int64_value
+            else:
+                raise Exception("Unknown binary value, size=%s" % \
+                        binaryValue.get().GetSize())
         else:
             raise Exception("Unknown value type = %s" % valueType)
     return ret

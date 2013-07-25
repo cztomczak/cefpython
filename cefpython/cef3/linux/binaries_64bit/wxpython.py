@@ -105,9 +105,13 @@ class MainFrame(wx.Frame):
             navigateUrl="file://"+GetApplicationPath("wxpython.html"))
 
         jsBindings = cefpython.JavascriptBindings(
-            bindToFrames=False, bindToPopups=False)
+            bindToFrames=False, bindToPopups=True)
         jsBindings.SetFunction("PyPrint", PyPrint)
-        jsBindings.SetObject("external", JavascriptBindings(self.browser))
+        jsBindings.SetProperty("pyProperty", "This was set in Python")
+        jsBindings.SetProperty("pyConfig", ["This was set in Python",
+                {"name": "Nested dictionary", "isNested": True},
+                [1,"2", None]])
+        jsBindings.SetObject("external", JavascriptExternal(self.browser))
         self.browser.SetJavascriptBindings(jsBindings)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
@@ -137,7 +141,7 @@ class MainFrame(wx.Frame):
 def PyPrint(message):
     print(message)
 
-class JavascriptBindings:
+class JavascriptExternal:
     mainBrowser = None
     
     def __init__(self, mainBrowser):
@@ -145,6 +149,12 @@ class JavascriptBindings:
 
     def Print(self, message):
         print(message)
+
+    def TestAllTypes(self, *args):
+        print(args)
+
+    def ExecuteFunction(self, *args):
+        self.mainBrowser.GetMainFrame().ExecuteFunction(*args)
 
 class MyApp(wx.App):
     timer = None

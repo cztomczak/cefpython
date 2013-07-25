@@ -9,13 +9,18 @@ from libcpp.vector cimport vector
 from cef_types cimport cef_value_type_t
 
 cdef extern from "include/cef_values.h":
-    cdef CefRefPtr[CefDictionaryValue] CefDictionaryValue_Create \
-            "CefDictionaryValue::Create"()
-    cdef CefRefPtr[CefListValue] CefListValue_Create "CefListValue::Create"()
+    cdef CefRefPtr[CefBinaryValue] CefBinaryValue_Create \
+        "CefBinaryValue::Create"()
 
-cdef extern from "include/cef_values.h":
     cdef cppclass CefBinaryValue:
-        pass
+        cpp_bool IsValid()
+        cpp_bool IsOwned()
+        CefRefPtr[CefBinaryValue] Copy()
+        size_t GetSize()
+        size_t GetData(void* buffer, size_t buffer_size, size_t data_offset)
+        
+    cdef CefRefPtr[CefDictionaryValue] CefDictionaryValue_Create \
+        "CefDictionaryValue::Create"()
 
     cdef cppclass CefDictionaryValue:
         cpp_bool IsValid()
@@ -43,6 +48,8 @@ cdef extern from "include/cef_values.h":
         cpp_bool SetBinary(const CefString& key, CefRefPtr[CefBinaryValue] value)
         cpp_bool SetDictionary(const CefString& key, CefRefPtr[CefDictionaryValue] value)
         cpp_bool SetList(const CefString& key, CefRefPtr[CefListValue] value)
+
+    cdef CefRefPtr[CefListValue] CefListValue_Create "CefListValue::Create"()
 
     cdef cppclass CefListValue:
         cpp_bool IsValid()

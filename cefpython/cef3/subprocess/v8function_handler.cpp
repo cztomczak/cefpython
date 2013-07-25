@@ -18,19 +18,23 @@ inline void DebugLog(const char* szString)
   fclose(pFile);
 }
 
-bool V8FunctionHandler::Execute(const CefString& funcName,
-                        CefRefPtr<CefV8Value> object,
+bool V8FunctionHandler::Execute(const CefString& functionName,
+                        CefRefPtr<CefV8Value> thisObject,
                         const CefV8ValueList& v8Arguments,
-                        CefRefPtr<CefV8Value>& retval,
+                        CefRefPtr<CefV8Value>& returnValue,
                         CefString& exception) {
     DebugLog("Renderer: V8FunctionHandler::Execute()");
     CefRefPtr<CefV8Context> context =  CefV8Context::GetCurrentContext();
     CefRefPtr<CefBrowser> browser = context.get()->GetBrowser();
-    CefRefPtr<CefFrame> frame = context.get()->GetFrame();    
-    if (!cefPythonApp_->BindedFunctionExists(browser, funcName)) {
-        return false;
+    CefRefPtr<CefFrame> frame = context.get()->GetFrame();
+    if (!cefPythonApp_->BindedFunctionExists(browser, functionName)) {
+        exception = std::string("cefpython: " \
+                "V8FunctionHandler::Execute() FAILED: " \
+                "function does not exist: ").append(functionName).append("()");
+        // Must return true for the exception to be thrown.
+        return true;
     }
-    CefRefPtr<CefListValue> funcArguments = V8ValueListToCefListValue(
+    CefRefPtr<CefListValue> functionArguments = V8ValueListToCefListValue(
             v8Arguments);
     // TODO: losing int64 precision here.
     int frameId = (int)frame->GetIdentifier();
@@ -38,9 +42,9 @@ bool V8FunctionHandler::Execute(const CefString& funcName,
         "V8FunctionHandler::Execute");
     CefRefPtr<CefListValue> messageArguments = processMessage->GetArgumentList();
     messageArguments->SetInt(0, frameId);
-    messageArguments->SetString(1, funcName);
-    messageArguments->SetList(2, funcArguments);
+    messageArguments->SetString(1, functionName);
+    messageArguments->SetList(2, functionArguments);
     browser->SendProcessMessage(PID_BROWSER, processMessage);
-    retval = CefV8Value::CreateNull();
+    returnValue = CefV8Value::CreateNull();
     return true;
 }

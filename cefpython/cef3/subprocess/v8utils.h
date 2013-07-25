@@ -6,7 +6,20 @@
 #include "include/cef_values.h"
 
 CefRefPtr<CefListValue> V8ValueListToCefListValue(
-        const CefV8ValueList& v8List) {
-    // TODO.
-    return CefListValue::Create();
-}
+        const CefV8ValueList& v8List);
+
+void V8ValueAppendToCefListValue(const CefRefPtr<CefV8Value> v8Value, 
+                           CefRefPtr<CefListValue> listValue,
+                           int nestingLevel=0);
+
+CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
+                                    const CefRefPtr<CefV8Value> v8Object,
+                                    int nestingLevel=0);
+
+CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
+        CefRefPtr<CefDictionaryValue> dictValue,
+        int nestingLevel=0);
+
+CefRefPtr<CefV8Value> CefListValueToV8Value(
+        CefRefPtr<CefListValue> listValue,
+        int nestingLevel=0);

@@ -58,6 +58,15 @@ cdef class JavascriptBindings:
             if methodName in self.objects[objectName]:
                 return self.objects[objectName][methodName]
 
+    cpdef object GetFunctionOrMethod(self, py_string name):
+        # Name can be "someFunc" or "object.someMethod".
+        cdef list words
+        if "." in name:
+            words = name.split(".")
+            return self.GetObjectMethod(words[0], words[1])
+        else:
+            return self.GetFunction(name)
+
     cpdef py_void SetProperty(self, py_string name, object value):
         cdef object allowed = self.IsValueAllowedRecursively(value) # returns True or string.
         if allowed is not True:
@@ -133,6 +142,7 @@ cdef class JavascriptBindings:
                     methods = {}
                     for methodName in self.objects[objectName]:
                         methods[methodName] = None
+                    objects[objectName] = methods
                 pyBrowser.SendProcessMessage(cef_types.PID_RENDERER, 
                         "DoJavascriptBindings", [{
                                 "functions": functions,

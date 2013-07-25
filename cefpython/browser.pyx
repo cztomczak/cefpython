@@ -57,23 +57,21 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
 
     cdef WindowHandle openerHandle
     cdef dict clientCallbacks
-    IF CEF_VERSION == 1:
-        cdef JavascriptBindings javascriptBindings
+    cdef JavascriptBindings javascriptBindings
     cdef PyBrowser tempPyBrowser
 
-    if pyBrowser.IsPopup() and (
-    not pyBrowser.GetUserData("__outerWindowHandle")):
+    if pyBrowser.IsPopup() and \
+            not pyBrowser.GetUserData("__outerWindowHandle"):
         openerHandle = pyBrowser.GetOpenerWindowHandle()
         for id, tempPyBrowser in g_pyBrowsers.items():
             if tempPyBrowser.GetWindowHandle() == openerHandle:
                 clientCallbacks = tempPyBrowser.GetClientCallbacksDict()
                 if clientCallbacks:
                     pyBrowser.SetClientCallbacksDict(clientCallbacks)
-                IF CEF_VERSION == 1:
-                    javascriptBindings = tempPyBrowser.GetJavascriptBindings()
-                    if javascriptBindings:
-                        if javascriptBindings.GetBindToPopups():
-                            pyBrowser.SetJavascriptBindings(javascriptBindings)
+                javascriptBindings = tempPyBrowser.GetJavascriptBindings()
+                if javascriptBindings:
+                    if javascriptBindings.GetBindToPopups():
+                        pyBrowser.SetJavascriptBindings(javascriptBindings)
     return pyBrowser
 
 cpdef PyBrowser GetBrowserByWindowHandle(WindowHandle windowHandle):
