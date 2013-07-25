@@ -82,6 +82,7 @@ cdef object V8ToPyValue(
     elif v8ValuePtr.IsBool():
         return v8ValuePtr.GetBoolValue()
     elif v8ValuePtr.IsDate():
+        # TODO: convert it to string with no error.
         raise Exception("V8ToPyValue() failed: Date object is not supported, "
                 "you are not allowed to pass it from Javascript to Python.")
     elif v8ValuePtr.IsInt():

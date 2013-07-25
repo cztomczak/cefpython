@@ -42,13 +42,36 @@ Accelerated layers</a><br>
 
 <h3>Javascript bindings</h3>
 <a href="javascript:PyPrint('printing in python console from js')">
-        PyPrint('printing in python console from js')</a>
+        PyPrint('printing in python console from js')</a><br>
+<a href="javascript:window.alert(window.pyProperty)">
+        window.alert(window.pyProperty)</a><br>
+<a href="javascript:window.alert(JSON.stringify(window.pyConfig))">
+        window.alert(JSON.stringify(window.pyConfig))</a><br>
+<a href="javascript:external.Print('printing again from js')">
+        external.Print('printing again from js')</a><br>
+<a href="javascript:external.TestAllTypes(undefined, null, true, 1, 
+        ((1<<31)>>>0), 2.14, 'Date not yet supported', 'string', 
+        {key1: 1, key2: 2}, {key1: {'key1.1': 'nested object'}, 'key1.2': [1]},
+        [1, 2], [1, [2.1, 'nested array']], [{key1: [{}]}])">
+        external.TestAllTypes</a>
+        <small>(undefined, null, true, 1, 
+        ((1&lt;&lt;31)>>>0), 2.14, 'Date not yet supported', 'string', 
+        {key1: 1, key2: 2}, {key1: {'key1.1': 'nested object'}, 'key1.2': [1]},
+        [1, 2], [1, [2.1, 'nested array']], [{key1: [{}]}])</small>
+        <br>
+<script>
+function JavascriptAlert(message) { window.alert(message); }
+</script>
+<pre>
+&lt;script&gt;
+function JavascriptAlert(message) { window.alert(message); }
+&lt;/script&gt;
+</pre>
+<a href="javascript:external.ExecuteFunction('JavascriptAlert', 
+        'python called from js and then js called from python')">
+        external.ExecuteFunction('JavascriptAlert', 
+        'python called from js and then js called from python')</a>
 
-
-
-<br><br><br><br><br><br><br><br>
-<br><br><br><br><br><br><br><br>
-<br><br><br><br><br><br><br><br>
 
 </body>
 </html>

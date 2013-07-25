@@ -105,8 +105,13 @@ class MainFrame(wx.Frame):
             navigateUrl="file://"+GetApplicationPath("wxpython.html"))
 
         jsBindings = cefpython.JavascriptBindings(
-            bindToFrames=False, bindToPopups=False)
-        jsBindings.SetObject("external", JavascriptBindings(self.browser))
+            bindToFrames=False, bindToPopups=True)
+        jsBindings.SetFunction("PyPrint", PyPrint)
+        jsBindings.SetProperty("pyProperty", "This was set in Python")
+        jsBindings.SetProperty("pyConfig", ["This was set in Python",
+                {"name": "Nested dictionary", "isNested": True},
+                [1,"2", None]])
+        jsBindings.SetObject("external", JavascriptExternal(self.browser))
         self.browser.SetJavascriptBindings(jsBindings)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
@@ -133,7 +138,10 @@ class MainFrame(wx.Frame):
     def OnIdle(self, event):
         cefpython.MessageLoopWork()
 
-class JavascriptBindings:
+def PyPrint(message):
+    print(message)
+
+class JavascriptExternal:
     mainBrowser = None
     
     def __init__(self, mainBrowser):
@@ -141,6 +149,12 @@ class JavascriptBindings:
 
     def Print(self, message):
         print(message)
+
+    def TestAllTypes(self, *args):
+        print(args)
+
+    def ExecuteFunction(self, *args):
+        self.mainBrowser.GetMainFrame().ExecuteFunction(*args)
 
 class MyApp(wx.App):
     timer = None
@@ -180,7 +194,7 @@ if __name__ == '__main__':
     cefpython.g_debug = True
     cefpython.g_debugFile = GetApplicationPath("debug.log")
     settings = {
-        "log_severity": cefpython.LOGSEVERITY_INFO,
+        "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
         "log_file": GetApplicationPath("debug.log"),
         "release_dcheck_enabled": True, # Enable only when debugging.
         # This directories must be set on Linux

@@ -41,6 +41,8 @@ cdef extern from "include/internal/cef_types.h":
             TID_RENDERER
 
     ctypedef long long int64
+    ctypedef unsigned int uint32
+    ctypedef int int32
 
     # LoadHandler > OnLoadError - ErrorCode.
 
