@@ -33,12 +33,21 @@ cdef class PyFrame:
     cdef CefRefPtr[CefFrame] cefFrame
 
     cdef CefRefPtr[CefFrame] GetCefFrame(self) except *:
+        # Do not call IsValid() here, if the frame does not exist
+        # then no big deal, no reason to crash the application.
+        # The CEF calls will fail, but they also won't cause crash.
         if <void*>self.cefFrame != NULL and self.cefFrame.get():
             return self.cefFrame
         raise Exception("PyFrame.GetCefFrame() failed: CefFrame was destroyed")
 
     def __init__(self):
         pass
+
+    cpdef cpp_bool IsValid(self) except *:
+        if <void*>self.cefFrame != NULL and self.cefFrame.get() \
+                and self.cefFrame.get().IsValid():
+            return True
+        return False
 
     def ExecuteFunction(self, *args):
         # No need to enter V8 context as we're calling javascript
@@ -53,7 +62,7 @@ cdef class PyFrame:
         self.ExecuteJavascript(code)
 
     def CallFunction(self, *args):
-        # DEPRECATED.
+        # DEPRECATED name.
         self.ExecuteFunction(*args)
 
     # Synchronous javascript calls won't be supported as CEF 3
@@ -213,3 +222,9 @@ cdef class PyFrame:
 
     cpdef py_void ViewSource(self):
         self.GetCefFrame().get().ViewSource()
+
+    cpdef PyFrame GetParent(self):
+        return GetPyFrame(self.GetCefFrame().get().GetParent())
+
+    cpdef PyBrowser GetBrowser(self):
+        return GetPyBrowser(self.GetCefFrame().get().GetBrowser())

@@ -15,9 +15,7 @@ from cef_browser cimport CefBrowser
 cdef extern from "include/cef_frame.h":
 
     IF CEF_VERSION == 1:
-
         cdef cppclass CefFrame(CefBase):
-
             void ExecuteJavaScript(CefString& jsCode, CefString& scriptUrl, int startLine)
             CefString GetURL()
             int64 GetIdentifier()
@@ -44,9 +42,8 @@ cdef extern from "include/cef_frame.h":
             CefRefPtr[CefBrowser] GetBrowser()
 
     ELIF CEF_VERSION == 3:
-
         cdef cppclass CefFrame(CefBase):
-
+            cpp_bool IsValid()
             void ExecuteJavaScript(CefString& jsCode, CefString& scriptUrl, int startLine)
             CefString GetURL()
             int64 GetIdentifier()
@@ -70,5 +67,3 @@ cdef extern from "include/cef_frame.h":
             # virtual void VisitDOM(CefRefPtr<CefDOMVisitor> visitor) =0;
             CefRefPtr[CefFrame] GetParent()
             CefRefPtr[CefBrowser] GetBrowser()
-
-

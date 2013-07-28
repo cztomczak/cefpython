@@ -34,7 +34,8 @@ cdef public void V8FunctionHandler_Execute(
             # Raise a javascript exception in that frame.
             pyFrame.ExecuteJavascript("throw '%s';" % jsErrorMessage)
             return
-        functionArguments = CefListValueToPyList(cefFunctionArguments)
+        functionArguments = CefListValueToPyList(cefBrowser, 
+                cefFunctionArguments)
         returnValue = function(*functionArguments)
         if returnValue != None:
             Debug("V8FunctionHandler_Execute() WARNING: function returned" \
