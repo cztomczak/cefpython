@@ -2,7 +2,33 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+# -----------------------------------------------------------------------------
+# CEF values to Python values
+# -----------------------------------------------------------------------------
+
+cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser, 
+        py_string pyString):
+    # A javascript callback from the Renderer process is sent as a string.
+    # TODO: this could be sent using CefBinaryNamedString in the future,
+    #       see this topic "Sending custom data types using process messaging":
+    #       http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10881
+    cdef py_string cefPythonMessageHash = "####cefpython####"
+    cdef JavascriptCallback jsCallback
+    cdef py_string jsonData
+    cdef object message
+    if pyString.startswith(cefPythonMessageHash):
+        jsonData = pyString[len(cefPythonMessageHash):]
+        message = json.loads(jsonData)
+        if message and type(message) == dict and message.has_key("what") \
+                and message["what"] == "javascript-callback":
+            jsCallback = CreateJavascriptCallback(
+                    message["callbackId"], cefBrowser, 
+                    message["frameId"], message["functionName"])
+            return jsCallback
+    return pyString
+
 cdef list CefListValueToPyList(
+        CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefListValue] cefListValue,
         int nestingLevel=0):
     assert cefListValue.get().IsValid(), "cefListValue is invalid"
@@ -16,6 +42,7 @@ cdef list CefListValueToPyList(
     cdef CefRefPtr[CefBinaryValue] binaryValue
     cdef cef_types.uint32 uint32_value
     cdef cef_types.int64 int64_value
+    cdef object originallyString
     for index in range(0, size):
         valueType = cefListValue.get().GetType(index)
         if valueType == cef_types.VTYPE_NULL:
@@ -27,14 +54,20 @@ cdef list CefListValueToPyList(
         elif valueType == cef_types.VTYPE_DOUBLE:
             ret.append(cefListValue.get().GetDouble(index))
         elif valueType == cef_types.VTYPE_STRING:
-            ret.append(CefToPyString(cefListValue.get().GetString(index)))
+            originallyString = CefToPyString(
+                    cefListValue.get().GetString(index))
+            originallyString = CheckForCefPythonMessageHash(cefBrowser,
+                    originallyString)
+            ret.append(originallyString)
         elif valueType == cef_types.VTYPE_DICTIONARY:
             ret.append(CefDictionaryValueToPyDict(
+                    cefBrowser,
                     cefListValue.get().GetDictionary(index),
                     nestingLevel + 1))
         elif valueType == cef_types.VTYPE_LIST:
             ret.append(CefListValueToPyList(
-                    cefListValue.get().GetList(index), 
+                    cefBrowser,
+                    cefListValue.get().GetList(index),
                     nestingLevel + 1))
         elif valueType == cef_types.VTYPE_BINARY:
             binaryValue = cefListValue.get().GetBinary(index)
@@ -54,6 +87,7 @@ cdef list CefListValueToPyList(
     return ret
 
 cdef dict CefDictionaryValueToPyDict(
+        CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefDictionaryValue] cefDictionaryValue,
         int nestingLevel=0):
     assert cefDictionaryValue.get().IsValid(), "cefDictionaryValue is invalid"
@@ -70,6 +104,7 @@ cdef dict CefDictionaryValueToPyDict(
     cdef CefRefPtr[CefBinaryValue] binaryValue
     cdef cef_types.uint32 uint32_value
     cdef cef_types.int64 int64_value
+    cdef object originallyString
     while iterator != keyList.end():
         cefKey = deref(iterator)
         pyKey = CefToPyString(cefKey)
@@ -84,14 +119,20 @@ cdef dict CefDictionaryValueToPyDict(
         elif valueType == cef_types.VTYPE_DOUBLE:
             ret[pyKey] = cefDictionaryValue.get().GetDouble(cefKey)
         elif valueType == cef_types.VTYPE_STRING:
-            ret[pyKey] = CefToPyString(cefDictionaryValue.get().GetString(cefKey))
+            originallyString = CefToPyString(
+                    cefDictionaryValue.get().GetString(cefKey))
+            originallyString = CheckForCefPythonMessageHash(cefBrowser,
+                    originallyString)
+            ret[pyKey] = originallyString
         elif valueType == cef_types.VTYPE_DICTIONARY:
             ret[pyKey] = CefDictionaryValueToPyDict(
+                    cefBrowser,
                     cefDictionaryValue.get().GetDictionary(cefKey),
                     nestingLevel + 1)
         elif valueType == cef_types.VTYPE_LIST:
             ret[pyKey] = CefListValueToPyList(
-                    cefDictionaryValue.get().GetList(cefKey), 
+                    cefBrowser,
+                    cefDictionaryValue.get().GetList(cefKey),
                     nestingLevel + 1)
         elif valueType == cef_types.VTYPE_BINARY:
             binaryValue = cefDictionaryValue.get().GetBinary(cefKey)
@@ -109,6 +150,10 @@ cdef dict CefDictionaryValueToPyDict(
         else:
             raise Exception("Unknown value type = %s" % valueType)
     return ret
+
+# -----------------------------------------------------------------------------
+# Python values to CEF values
+# -----------------------------------------------------------------------------
 
 cdef CefRefPtr[CefListValue] PyListToCefListValue(
         list pyList,

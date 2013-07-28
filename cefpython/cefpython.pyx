@@ -143,13 +143,14 @@ IF CEF_VERSION == 1:
     include "v8context_handler_cef1.pyx"
     include "v8function_handler_cef1.pyx"
     include "v8utils_cef1.pyx"
-    include "javascript_callback.pyx"
+    include "javascript_callback_cef1.pyx"
     include "python_callback.pyx"
 
 IF CEF_VERSION == 3:
     include "process_message_utils.pyx"
     include "v8context_handler_cef3.pyx"
     include "v8function_handler_cef3.pyx"
+    include "javascript_callback_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,

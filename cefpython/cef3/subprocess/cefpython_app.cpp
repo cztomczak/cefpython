@@ -5,20 +5,11 @@
 #include "cefpython_app.h"
 #include "util.h"
 #include "include/cef_runnable.h"
-#include <stdio.h>
+#include "DebugLog.h"
 #include <vector>
 #include "v8utils.h"
-
-// Defined as "inline" to get rid of the "already defined" errors
-// when linking.
-inline void DebugLog(const char* szString)
-{
-  // TODO: get the log_file option from CefSettings.
-  printf("cefpython: %s\n", szString);
-  FILE* pFile = fopen("debug.log", "a");
-  fprintf(pFile, "cefpython_app: %s\n", szString);
-  fclose(pFile);
-}
+#include "javascript_callback.h"
+#include "python_callback.h"
 
 // -----------------------------------------------------------------------------
 // CefApp
@@ -168,6 +159,9 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
     //       casting it to int for now.
     args->SetInt(0, (int)(frame->GetIdentifier()));
     browser->SendProcessMessage(PID_BROWSER, message);
+    // Clear javascript callbacks.
+    RemoveJavascriptCallbacksForFrame(frame);
+    RemovePythonCallbacksForFrame(frame);
 }
 
 void CefPythonApp::OnUncaughtException(CefRefPtr<CefBrowser> browser,
@@ -194,8 +188,8 @@ bool CefPythonApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     std::string logMessage = "Renderer: OnProcessMessageReceived(): ";
     logMessage.append(messageName.c_str());
     DebugLog(logMessage.c_str());
+    CefRefPtr<CefListValue> args = message->GetArgumentList();
     if (messageName == "DoJavascriptBindings") {
-        CefRefPtr<CefListValue> args = message->GetArgumentList();
         if (args->GetSize() == 1 
                 && args->GetType(0) == VTYPE_DICTIONARY
                 && args->GetDictionary(0)->IsValid()) {
@@ -208,8 +202,26 @@ bool CefPythonApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                     " messageName=DoJavascriptBindings");
             return false;
         }
+    } else if (messageName == "ExecuteJavascriptCallback") {
+        if (args->GetType(0) == VTYPE_INT) {
+            int jsCallbackId = args->GetInt(0);
+            CefRefPtr<CefListValue> jsArgs;
+            if (args->IsReadOnly()) {
+                jsArgs = args->Copy();
+            } else {
+                jsArgs = args;
+            }
+            // Remove jsCallbackId.
+            jsArgs->Remove(0);
+            ExecuteJavascriptCallback(jsCallbackId, jsArgs);
+        } else {
+            DebugLog("Renderer: OnProcessMessageReceived: invalid arguments," \
+                    "expected first argument to be a javascript callback " \
+                    "(int)");
+            return false;
+        }
     }
-    return false;
+    return true;
 }
 
 void CefPythonApp::SetJavascriptBindings(CefRefPtr<CefBrowser> browser,

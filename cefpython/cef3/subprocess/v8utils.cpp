@@ -3,17 +3,12 @@
 // Website: http://code.google.com/p/cefpython/
 
 #include "v8utils.h"
+#include "javascript_callback.h"
+#include "DebugLog.h"
 
-// Defined as "inline" to get rid of the "already defined" errors
-// when linking.
-inline void DebugLog(const char* szString)
-{
-  // TODO: get the log_file option from CefSettings.
-  printf("cefpython: %s\n", szString);
-  FILE* pFile = fopen("debug.log", "a");
-  fprintf(pFile, "cefpython_app: %s\n", szString);
-  fclose(pFile);
-}
+// ----------------------------------------------------------------------------
+// V8 values to CEF values.
+// ----------------------------------------------------------------------------
 
 CefRefPtr<CefListValue> V8ValueListToCefListValue(
         const CefV8ValueList& v8List) {
@@ -27,7 +22,7 @@ CefRefPtr<CefListValue> V8ValueListToCefListValue(
     return listValue;
 }
 
-void V8ValueAppendToCefListValue(const CefRefPtr<CefV8Value> v8Value, 
+void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value, 
                                  CefRefPtr<CefListValue> listValue,
                                  int nestingLevel) {
     if (!v8Value->IsValid()) {
@@ -72,19 +67,33 @@ void V8ValueAppendToCefListValue(const CefRefPtr<CefV8Value> v8Value,
                     nestingLevel + 1);
         }
         listValue->SetList(listValue->GetSize(), newListValue);
-    } else if (v8Value->IsObject()) {
-        // Check for IsObject() must happen after the IsArray() check.
-        listValue->SetDictionary(listValue->GetSize(), V8ObjectToCefDictionaryValue(
-                v8Value, nestingLevel + 1));
     } else if (v8Value->IsFunction()) {
-        listValue->SetNull(listValue->GetSize());
+        // Check for IsFunction() must happen before the IsObject() check.
+        if (CefV8Context::InContext()) {
+            CefRefPtr<CefV8Context> context = \
+                    CefV8Context::GetCurrentContext();
+            CefRefPtr<CefFrame> frame = context->GetFrame();
+            std::string strCallbackId = PutJavascriptCallback(frame, v8Value);
+            /* strCallbackId = '####cefpython####' \
+                               '{"what"=>"javascript-callback", ..}' */
+            listValue->SetString(listValue->GetSize(), strCallbackId);
+        } else {
+            listValue->SetNull(listValue->GetSize());
+            DebugLog("V8ValueAppendToCefListValue() FAILED: not in V8 context"
+                    " , FATAL ERROR!");
+        }
+    } else if (v8Value->IsObject()) {
+        // Check for IsObject() must happen after the IsArray()
+        // and IsFunction() checks.
+        listValue->SetDictionary(listValue->GetSize(), 
+                V8ObjectToCefDictionaryValue(v8Value, nestingLevel + 1));
     } else {
         DebugLog("V8ValueAppendToCefListValue() FAILED: unknown V8 type");
     }
 }
 
 CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
-                                    const CefRefPtr<CefV8Value> v8Object,
+                                    CefRefPtr<CefV8Value> v8Object,
                                     int nestingLevel) {
     if (!v8Object->IsValid()) {
         DebugLog("V8ObjectToCefDictionaryValue(): IsValid() FAILED");
@@ -142,18 +151,37 @@ CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
                         nestingLevel + 1);
             }
             ret->SetList(key, newListValue);
+        } else if (v8Value->IsFunction()) {
+            // Check for IsFunction() must happen before the IsObject() check.
+            if (CefV8Context::InContext()) {
+                CefRefPtr<CefV8Context> context = \
+                        CefV8Context::GetCurrentContext();
+                CefRefPtr<CefFrame> frame = context->GetFrame();
+                std::string strCallbackId = PutJavascriptCallback(
+                        frame, v8Value);
+                /* strCallbackId = '####cefpython####' \
+                                   '{"what"=>"javascript-callback", ..}' */
+                ret->SetString(key, strCallbackId);
+            } else {
+                ret->SetNull(key);
+                DebugLog("V8ObjectToCefDictionaryValue() FAILED: " \
+                        "not in V8 context FATAL ERROR!");
+            }
         } else if (v8Value->IsObject()) {
-            // Check for IsObject() must happen after the IsArray() check.
+            // Check for IsObject() must happen after the IsArray()
+            // and IsFunction() checks.
             ret->SetDictionary(key, 
                     V8ObjectToCefDictionaryValue(v8Value, nestingLevel + 1));
-        } else if (v8Value->IsFunction()) {
-            ret->SetNull(key);
         } else {
             DebugLog("V8ObjectToCefDictionaryValue() FAILED: unknown V8 type");
         }
     }
     return ret;
 }
+
+// ----------------------------------------------------------------------------
+// CEF values to V8 values.
+// ----------------------------------------------------------------------------
 
 CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
         CefRefPtr<CefDictionaryValue> dictValue,
@@ -282,4 +310,16 @@ CefRefPtr<CefV8Value> CefListValueToV8Value(
         }
     }
     return ret;
+}
+
+CefV8ValueList CefListValueToCefV8ValueList(
+        CefRefPtr<CefListValue> listValue) {
+    // CefV8ValueList = typedef std::vector<CefRefPtr<CefV8Value> >
+    CefV8ValueList v8ValueVector;
+    CefRefPtr<CefV8Value> v8List = CefListValueToV8Value(listValue);
+    int v8ListLength = v8List->GetArrayLength();
+    for (int i = 0; i < v8ListLength; ++i) {
+        v8ValueVector.push_back(v8List->GetValue(i));
+    }
+    return v8ValueVector;
 }

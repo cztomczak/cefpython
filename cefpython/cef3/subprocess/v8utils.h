@@ -23,3 +23,6 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
 CefRefPtr<CefV8Value> CefListValueToV8Value(
         CefRefPtr<CefListValue> listValue,
         int nestingLevel=0);
+
+CefV8ValueList CefListValueToCefV8ValueList(
+        CefRefPtr<CefListValue> listValue);

@@ -6,17 +6,7 @@
 #include "v8function_handler.h"
 #include "v8utils.h"
 #include "cefpython_app.h"
-
-// Defined as "inline" to get rid of the "already defined" errors
-// when linking.
-inline void DebugLog(const char* szString)
-{
-  // TODO: get the log_file option from CefSettings.
-  printf("cefpython: %s\n", szString);
-  FILE* pFile = fopen("debug.log", "a");
-  fprintf(pFile, "cefpython_app: %s\n", szString);
-  fclose(pFile);
-}
+#include "DebugLog.h"
 
 bool V8FunctionHandler::Execute(const CefString& functionName,
                         CefRefPtr<CefV8Value> thisObject,

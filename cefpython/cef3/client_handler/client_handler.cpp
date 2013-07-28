@@ -4,22 +4,14 @@
 
 #include "client_handler.h"
 #include "cefpython_public_api.h"
-#include <stdio.h>
-
-// Defined as "inline" to get rid of the "already defined" errors
-// when linking.
-inline void DebugLog(const char* szString)
-{
-  // TODO: get the log_file option from CefSettings.
-  printf("cefpython: %s\n", szString);
-  FILE* pFile = fopen("debug.log", "a");
-  fprintf(pFile, "cefpython_app: %s\n", szString);
-  fclose(pFile);
-}
+#include "DebugLog.h"
 
 bool ClientHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message) {
+    if (source_process != PID_RENDERER) {
+        return false;
+    }
     std::string messageName = message->GetName().ToString();
     std::string logMessage = "Browser: OnProcessMessageReceived(): ";
     logMessage.append(messageName.c_str());
