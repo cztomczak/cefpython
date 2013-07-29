@@ -17,46 +17,61 @@ bool ClientHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     logMessage.append(messageName.c_str());
     DebugLog(logMessage.c_str());
     if (messageName == "OnContextCreated") {
-        CefRefPtr<CefListValue> args = message->GetArgumentList();
-        if (args->GetSize() == 1 && args->GetType(0) == VTYPE_INT) {
-            int64 frameId = args->GetInt(0);
+        CefRefPtr<CefListValue> arguments = message->GetArgumentList();
+        if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_INT) {
+            int64 frameId = arguments->GetInt(0);
             CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
             V8ContextHandler_OnContextCreated(browser, frame);
             return true;
         } else {
-            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments," \
-                    " messageName=OnContextCreated");
+            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
+                    ", messageName = OnContextCreated");
             return false;
         }
     } else if (messageName == "OnContextReleased") {
-        CefRefPtr<CefListValue> args = message->GetArgumentList();
-        if (args->GetSize() == 1 && args->GetType(0) == VTYPE_INT) {
-            int64 frameId = args->GetInt(0);
-            CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
-            V8ContextHandler_OnContextReleased(browser, frame);
+        CefRefPtr<CefListValue> arguments = message->GetArgumentList();
+        if (arguments->GetSize() == 2 \
+                && arguments->GetType(0) == VTYPE_INT \
+                && arguments->GetType(1) == VTYPE_INT) {
+            int browserId = arguments->GetInt(0);
+            int64 frameId = arguments->GetInt(1);
+            V8ContextHandler_OnContextReleased(browserId, frameId);
             return true;
         } else {
-            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments," \
-                    " messageName=OnContextReleased");
+            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
+                    ", messageName = OnContextReleased");
             return false;
         }
     } else if (messageName == "V8FunctionHandler::Execute") {
-        CefRefPtr<CefListValue> args = message->GetArgumentList();
-        if (args->GetSize() == 3
-                && args->GetType(0) == VTYPE_INT // frameId
-                && args->GetType(1) == VTYPE_STRING // funcName
-                && args->GetType(2) == VTYPE_LIST) { // funcArguments
-            int64 frameId = args->GetInt(0);
-            CefString funcName = args->GetString(1);
-            CefRefPtr<CefListValue> funcArguments = args->GetList(2);
+        CefRefPtr<CefListValue> arguments = message->GetArgumentList();
+        if (arguments->GetSize() == 3
+                && arguments->GetType(0) == VTYPE_INT // frameId
+                && arguments->GetType(1) == VTYPE_STRING // funcName
+                && arguments->GetType(2) == VTYPE_LIST) { // funcArguments
+            int64 frameId = arguments->GetInt(0);
+            CefString funcName = arguments->GetString(1);
+            CefRefPtr<CefListValue> funcArguments = arguments->GetList(2);
             CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
             V8FunctionHandler_Execute(browser, frame, funcName, funcArguments);
             return true;
         } else {
-            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments," \
-                    " messageName=V8FunctionHandler::Execute");
+            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
+                    ", messageName = V8FunctionHandler::Execute");
             return false;
         }
+    } else if (messageName == "OnBrowserDestroyed") {
+        CefRefPtr<CefListValue> arguments = message->GetArgumentList();
+        if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_INT) {
+            int browserId = arguments->GetInt(0);
+            // NOT browser->GetIdentifier()!
+            ProcessMessage_OnBrowserDestroyed(browserId);
+            return true;
+        } else {
+            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
+                    ", messageName = OnBrowserDestroyed");
+            return false;
+        }
+        
     }
     return false;
 }

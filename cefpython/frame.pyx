@@ -4,6 +4,11 @@
 
 cdef dict g_pyFrames = {}
 
+cdef PyFrame GetPyFrameById(object frameId):
+    if g_pyFrames.has_key(frameId):
+        return g_pyFrames[frameId]
+    return None
+
 cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     global g_pyFrames
 
@@ -20,7 +25,8 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 
     for id, pyFrame in g_pyFrames.items():
         if not pyFrame.cefFrame.get():
-            Debug("GetPyFrame(): removing an empty CefFrame reference, frameId=%s" % id)
+            Debug("GetPyFrame(): removing an empty CefFrame reference, " \
+                    "frameId = %s" % id)
             del g_pyFrames[id]
 
     # Debug("GetPyFrame(): creating new PyFrame, frameId=%s" % frameId)
@@ -28,6 +34,12 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     pyFrame.cefFrame = cefFrame
     g_pyFrames[frameId] = pyFrame
     return pyFrame
+
+cdef void RemovePyFrame(int frameId) except *:
+    # Called from V8ContextHandler_OnContextReleased().
+    # TODO: call this function also in CEF 1, currently called only in CEF 3.
+    Debug("del g_pyFrames[%s]" % frameId)
+    del g_pyFrames[frameId]
 
 cdef class PyFrame:
     cdef CefRefPtr[CefFrame] cefFrame

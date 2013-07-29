@@ -131,6 +131,8 @@ cdef class JavascriptBindings:
             cdef dict methods
             global g_pyBrowsers
             for browserId, pyBrowser in g_pyBrowsers.iteritems():
+                if pyBrowser.GetJavascriptBindings() != self:
+                    continue
                 # Send to the Renderer process: functions, properties,
                 # objects and its methods, bindToFrames.
                 functions = {}
