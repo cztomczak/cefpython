@@ -156,6 +156,7 @@ cdef dict CefDictionaryValueToPyDict(
 # -----------------------------------------------------------------------------
 
 cdef CefRefPtr[CefListValue] PyListToCefListValue(
+        object frameId,
         list pyList,
         int nestingLevel=0) except *:
     if nestingLevel > 8:
@@ -163,6 +164,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
                 " exceeded")
     cdef type valueType
     cdef CefRefPtr[CefListValue] ret = CefListValue_Create()
+    cdef CefRefPtr[CefBinaryValue] binaryValue
     for index, value in enumerate(pyList):
         valueType = type(value)
         if valueType == type(None):
@@ -186,22 +188,26 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
         elif valueType == bytes or valueType == unicode:
             ret.get().SetString(index, PyToCefStringValue(str(value)))
         elif valueType == dict:
-            ret.get().SetDictionary(index, PyDictToCefDictionaryValue(value,
+            ret.get().SetDictionary(index, PyDictToCefDictionaryValue(frameId,
+                    value, nestingLevel + 1))
+        elif valueType == list or valueType == tuple:
+            if valueType == tuple:
+                value = list(value)
+            ret.get().SetList(index, PyListToCefListValue(frameId, value, 
                     nestingLevel + 1))
-        elif valueType == list:
-            ret.get().SetList(index, PyListToCefListValue(value, 
-                    nestingLevel + 1))
-        elif valueType == type:
-            ret.get().SetString(index, PyToCefStringValue(str(value)))
+        elif valueType == types.FunctionType or valueType == types.MethodType:
+            ret.get().SetBinary(index, PutPythonCallback(frameId, value))
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
             # the data may contain some non-standard object that is 
             # probably redundant, but casting to string will do no harm.
+            # This will handle the "type" type.
             ret.get().SetString(index, PyToCefStringValue(str(value)))
     return ret
 
 cdef void PyListToExistingCefListValue(
+        object frameId,
         list pyList,
         CefRefPtr[CefListValue] cefListValue,
         int nestingLevel=0) except *:
@@ -229,29 +235,35 @@ cdef void PyListToExistingCefListValue(
                 cefListValue.get().SetInt(index, int(value))
             else:
                 # Long values become strings.
-                cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
+                cefListValue.get().SetString(index, PyToCefStringValue(str(
+                        value)))
         elif valueType == float:
             cefListValue.get().SetDouble(index, float(value))
         elif valueType == bytes or valueType == unicode:
             cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
         elif valueType == dict:
-            cefListValue.get().SetDictionary(index, PyDictToCefDictionaryValue(value,
-                    nestingLevel + 1))
-        elif valueType == list:
+            cefListValue.get().SetDictionary(index, PyDictToCefDictionaryValue(
+                    frameId, value, nestingLevel + 1))
+        elif valueType == list or valueType == tuple:
+            if valueType == tuple:
+                value = list(value)
             newCefListValue = CefListValue_Create()
-            PyListToExistingCefListValue(value, newCefListValue, 
+            PyListToExistingCefListValue(frameId, value, newCefListValue, 
                     nestingLevel + 1)
             cefListValue.get().SetList(index, newCefListValue)
-        elif valueType == type:
-            cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
+        elif valueType == types.FunctionType or valueType == types.MethodType:
+            cefListValue.get().SetBinary(index, PutPythonCallback(
+                        frameId, value))
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
             # the data may contain some non-standard object that is 
             # probably redundant, but casting to string will do no harm.
+            # This will handle the "type" type.
             cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
 
 cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
+        object frameId,
         dict pyDict,
         int nestingLevel=0) except *:
     if nestingLevel > 8:
@@ -287,16 +299,19 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
             ret.get().SetString(cefKey, PyToCefStringValue(str(value)))
         elif valueType == dict:
             ret.get().SetDictionary(cefKey, PyDictToCefDictionaryValue(
-                    value, nestingLevel + 1))
-        elif valueType == list:
-            ret.get().SetList(cefKey, PyListToCefListValue(value, 
+                    frameId, value, nestingLevel + 1))
+        elif valueType == list or valueType == tuple:
+            if valueType == tuple:
+                value = list(value)
+            ret.get().SetList(cefKey, PyListToCefListValue(frameId, value, 
                     nestingLevel + 1))
-        elif valueType == type:
-            ret.get().SetString(cefKey, PyToCefStringValue(str(value)))
+        elif valueType == types.FunctionType or valueType == types.MethodType:
+            ret.get().SetBinary(cefKey, PutPythonCallback(frameId, value))
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
             # the data may contain some non-standard object that is 
             # probably redundant, but casting to string will do no harm.
+            # This will handle the "type" type.
             ret.get().SetString(cefKey, PyToCefStringValue(str(value)))
     return ret

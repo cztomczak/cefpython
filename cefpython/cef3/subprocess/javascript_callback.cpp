@@ -7,9 +7,10 @@
 #include <sstream>
 #include "DebugLog.h"
 #include "v8utils.h"
+#include "cefpython_app.h"
 
 template<typename T>
-std::string AnyToString(const T& value)
+inline std::string AnyToString(const T& value)
 {
     std::ostringstream oss;
     oss << value;
@@ -69,8 +70,10 @@ bool ExecuteJavascriptCallback(int callbackId, CefRefPtr<CefListValue> args) {
     CefRefPtr<CefV8Value> v8ReturnValue = callback->ExecuteFunction(
             NULL, v8Arguments);
     if (v8ReturnValue.get()) {
+        context->Exit();
         return true;
     } else {
+        context->Exit();
         DebugLog("Renderer: ExecuteJavascriptCallback() FAILED: " \
                 "callback->ExecuteFunction() FAILED");
         return false;

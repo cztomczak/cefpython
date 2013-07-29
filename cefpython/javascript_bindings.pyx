@@ -145,8 +145,8 @@ cdef class JavascriptBindings:
                     for methodName in self.objects[objectName]:
                         methods[methodName] = None
                     objects[objectName] = methods
-                pyBrowser.SendProcessMessage(cef_types.PID_RENDERER, 
-                        "DoJavascriptBindings", [{
+                pyBrowser.SendProcessMessage(cef_types.PID_RENDERER,
+                        0, "DoJavascriptBindings", [{
                                 "functions": functions,
                                 "properties": properties,
                                 "objects": objects,

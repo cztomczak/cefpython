@@ -10,7 +10,7 @@ from cef_types cimport cef_value_type_t
 
 cdef extern from "include/cef_values.h":
     cdef CefRefPtr[CefBinaryValue] CefBinaryValue_Create \
-        "CefBinaryValue::Create"()
+        "CefBinaryValue::Create"(const void* data, size_t data_size)
 
     cdef cppclass CefBinaryValue:
         cpp_bool IsValid()

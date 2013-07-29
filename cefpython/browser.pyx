@@ -657,7 +657,7 @@ cdef class PyBrowser:
         # virtual void HandleKeyEventAfterTextInputClient(CefEventHandle keyEvent) =0;
 
         cdef void SendProcessMessage(self, cef_process_id_t targetProcess, 
-                py_string messageName, list pyArguments
+                object frameId, py_string messageName, list pyArguments
                 ) except *:
             cdef CefRefPtr[CefProcessMessage] message = \
                     CefProcessMessage_Create(PyToCefStringValue(messageName))
@@ -667,7 +667,8 @@ cdef class PyBrowser:
             # | message.get().GetArgumentList().swap(arguments)
             cdef CefRefPtr[CefListValue] messageArguments = \
                     message.get().GetArgumentList()
-            PyListToExistingCefListValue(pyArguments, messageArguments)
+            PyListToExistingCefListValue(frameId, pyArguments, 
+                    messageArguments)
             Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
                     messageName, 
                     message.get().GetArgumentList().get().GetSize()))

@@ -9,7 +9,7 @@
 #include <vector>
 #include "v8utils.h"
 #include "javascript_callback.h"
-#include "python_callback.h"
+#include "v8function_handler.h"
 
 CefRefPtr<CefBrowser> g_mainBrowser;
 
@@ -187,9 +187,13 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
                                      CefRefPtr<CefV8Context> context) {
     DebugLog("Renderer: OnContextReleased()");
     if (g_mainBrowser.get()) {
-        CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(
-                "OnContextReleased");
-        CefRefPtr<CefListValue> arguments = message->GetArgumentList();
+        CefRefPtr<CefProcessMessage> message;
+        CefRefPtr<CefListValue> arguments;
+        // --------------------------------------------------------------------
+        // 1. Send "OnContextReleased" message.
+        // --------------------------------------------------------------------
+        message = CefProcessMessage::Create("OnContextReleased");
+        arguments = message->GetArgumentList();
         arguments->SetInt(0, browser->GetIdentifier());
         // TODO: losing int64 precision, the solution is to convert
         //       it to string and then in the Browser process back
@@ -201,6 +205,14 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
         // when this is not the main frame? It could fail, so
         // it is more reliable to always use the main browser.
         g_mainBrowser->SendProcessMessage(PID_BROWSER, message);
+        // --------------------------------------------------------------------
+        // 2. Remove python callbacks for a frame.
+        // --------------------------------------------------------------------
+        message = CefProcessMessage::Create("RemovePythonCallbacksForFrame");
+        arguments = message->GetArgumentList();
+        // TODO: int64 precision lost
+        arguments->SetInt(0, (int)(frame->GetIdentifier()));
+        g_mainBrowser->SendProcessMessage(PID_BROWSER, message);
     } else {
         DebugLog("Renderer: OnContextReleased(): ERROR: main browser not " \
                 "found, cannot send process message to the browser process " \
@@ -209,7 +221,6 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
     }
     // Clear javascript callbacks.
     RemoveJavascriptCallbacksForFrame(frame);
-    RemovePythonCallbacksForFrame(frame);
 }
 
 void CefPythonApp::OnUncaughtException(CefRefPtr<CefBrowser> browser,
@@ -424,7 +435,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     }
     CefRefPtr<CefV8Value> v8Window = context->GetGlobal();
     CefRefPtr<CefV8Value> v8Function;
-    CefRefPtr<CefV8Handler> v8FunctionHandler(new V8FunctionHandler(this));
+    CefRefPtr<CefV8Handler> v8FunctionHandler(new V8FunctionHandler(this, 0));
     // FUNCTIONS.
     std::vector<CefString> functionsVector;
     if (!functions->GetKeys(functionsVector)) {

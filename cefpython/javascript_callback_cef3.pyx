@@ -26,6 +26,7 @@ cdef class JavascriptCallback:
             if browser:
                 browser.SendProcessMessage(
                         cef_types.PID_RENDERER,
+                        self.frame.GetIdentifier(),
                         "ExecuteJavascriptCallback", 
                         [self.callbackId] + list(args))
             else:

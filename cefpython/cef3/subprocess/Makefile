@@ -18,4 +18,4 @@ subprocess:
 	# -fPIC is required only for libraries included by Cython.
 	g++ -Wall -Werror $(INC) $(LIB) main.cpp cefpython_app.cpp \
 		v8function_handler.cpp v8utils.cpp javascript_callback.cpp \
-		python_callback.cpp -lcef_dll_wrapper -lcef -o subprocess -Wl,-rpath,.
+		-lcef_dll_wrapper -lcef -o subprocess -Wl,-rpath,.

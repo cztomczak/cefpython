@@ -168,6 +168,16 @@ class JavascriptExternal:
                 {"nested object":None}]], \
                 {"nested list next":[{"deeply nested object":1}]})
 
+    def TestPythonCallback(self, jsCallback):
+        jsCallback.Call(self.PyCallback)
+
+    def PyCallback(self, *args):
+        message = "PyCallback() was executed successfully! Arguments: %s" \
+                % str(args)
+        print(message)
+        self.mainBrowser.GetMainFrame().ExecuteJavascript(
+                "window.alert(\"%s\")" % message)
+
 class MyApp(wx.App):
     timer = None
     timerID = 1

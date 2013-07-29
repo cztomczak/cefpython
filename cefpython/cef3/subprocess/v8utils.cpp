@@ -5,6 +5,8 @@
 #include "v8utils.h"
 #include "javascript_callback.h"
 #include "DebugLog.h"
+#include "cefpython_app.h"
+#include <sstream>
 
 // ----------------------------------------------------------------------------
 // V8 values to CEF values.
@@ -183,6 +185,111 @@ CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
 // CEF values to V8 values.
 // ----------------------------------------------------------------------------
 
+// TODO: send callbackId using CefBinaryNamedValue, see:
+// http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10881
+struct PythonCallback {
+    int callbackId;
+    char uniqueCefBinaryValueSize[16];
+};
+
+template<typename T>
+inline std::string AnyToString(const T& value)
+{
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
+
+CefV8ValueList CefListValueToCefV8ValueList(
+        CefRefPtr<CefListValue> listValue) {
+    // CefV8ValueList = typedef std::vector<CefRefPtr<CefV8Value> >
+    CefV8ValueList v8ValueVector;
+    CefRefPtr<CefV8Value> v8List = CefListValueToV8Value(listValue);
+    int v8ListLength = v8List->GetArrayLength();
+    for (int i = 0; i < v8ListLength; ++i) {
+        v8ValueVector.push_back(v8List->GetValue(i));
+    }
+    return v8ValueVector;
+}
+
+CefRefPtr<CefV8Value> CefListValueToV8Value(
+        CefRefPtr<CefListValue> listValue,
+        int nestingLevel) {
+    if (!listValue->IsValid()) {
+        DebugLog("CefListValueToV8Value() FAILED: " \
+                "CefDictionaryValue is invalid");
+        return CefV8Value::CreateNull();
+    }
+    if (nestingLevel > 8) {
+        DebugLog("CefListValueToV8Value(): WARNING: " \
+            "max nesting level (8) exceeded");
+        return CefV8Value::CreateNull();
+    }
+    int listSize = listValue->GetSize();
+    CefRefPtr<CefV8Value> ret = CefV8Value::CreateArray(listSize);
+    CefRefPtr<CefBinaryValue> binaryValue;
+    PythonCallback pyCallback;
+    CefRefPtr<CefV8Handler> v8FunctionHandler;
+    for (int key = 0; key < listSize; ++key) {
+        cef_value_type_t valueType = listValue->GetType(key);
+        bool success;
+        std::string callbackName = "python_callback_";
+        if (valueType == VTYPE_NULL) {
+            success = ret->SetValue(key, 
+                    CefV8Value::CreateNull());
+        } else if (valueType == VTYPE_BOOL) {
+            success = ret->SetValue(key, 
+                    CefV8Value::CreateBool(listValue->GetBool(key)));
+        } else if (valueType == VTYPE_INT) {
+            success = ret->SetValue(key, 
+                    CefV8Value::CreateInt(listValue->GetInt(key)));
+        } else if (valueType == VTYPE_DOUBLE) {
+            success = ret->SetValue(key, 
+                    CefV8Value::CreateDouble(listValue->GetDouble(key)));
+        } else if (valueType == VTYPE_STRING) {
+            success = ret->SetValue(key,
+                    CefV8Value::CreateString(listValue->GetString(key)));
+        } else if (valueType == VTYPE_BINARY) {
+            binaryValue = listValue->GetBinary(key);
+            if (binaryValue->GetSize() == sizeof(pyCallback)) {
+                binaryValue->GetData(&pyCallback, sizeof(pyCallback), 0);
+                v8FunctionHandler = new V8FunctionHandler(
+                        NULL, pyCallback.callbackId);
+                // You must provide a function name to 
+                // CefV8Value::CreateFunction(), otherwise it fails.
+                callbackName.append(AnyToString(pyCallback.callbackId));
+                success = ret->SetValue(key,
+                                CefV8Value::CreateFunction(
+                                        callbackName, v8FunctionHandler));
+            } else {
+                DebugLog("CefListValueToV8Value(): WARNING: " \
+                        "unknown binary value, setting value to null");
+                success = ret->SetValue(key, CefV8Value::CreateNull());
+            }
+        } else if (valueType == VTYPE_DICTIONARY) {
+            success = ret->SetValue(key,
+                    CefDictionaryValueToV8Value(
+                            listValue->GetDictionary(key),
+                            nestingLevel + 1));
+        } else if (valueType == VTYPE_LIST) {
+            success = ret->SetValue(key,
+                    CefListValueToV8Value(
+                            listValue->GetList(key),
+                            nestingLevel + 1));
+        } else {
+            DebugLog("CefListValueToV8Value(): WARNING: " \
+                    "unknown type, setting value to null");
+            success = ret->SetValue(key,
+                    CefV8Value::CreateNull());
+        }
+        if (!success) {
+            DebugLog("CefListValueToV8Value(): WARNING: " \
+                    "ret->SetValue() failed");
+        }
+    }
+    return ret;
+}
+
 CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
         CefRefPtr<CefDictionaryValue> dictValue,
         int nestingLevel) {
@@ -203,11 +310,15 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
         return CefV8Value::CreateNull();
     }
     CefRefPtr<CefV8Value> ret = CefV8Value::CreateObject(NULL);
+    CefRefPtr<CefBinaryValue> binaryValue;
+    PythonCallback pyCallback;
+    CefRefPtr<CefV8Handler> v8FunctionHandler;
     for (std::vector<CefString>::iterator it = keys.begin(); \
             it != keys.end(); ++it) {
         CefString key = *it;
         cef_value_type_t valueType = dictValue->GetType(key);
         bool success;
+        std::string callbackName = "python_callback_";
         if (valueType == VTYPE_NULL) {
             success = ret->SetValue(key, 
                     CefV8Value::CreateNull(), 
@@ -228,6 +339,26 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
             success = ret->SetValue(key,
                     CefV8Value::CreateString(dictValue->GetString(key)),
                     V8_PROPERTY_ATTRIBUTE_NONE);
+        } else if (valueType == VTYPE_BINARY) {
+            binaryValue = dictValue->GetBinary(key);
+            if (binaryValue->GetSize() == sizeof(pyCallback)) {
+                binaryValue->GetData(&pyCallback, sizeof(pyCallback), 0);
+                v8FunctionHandler = new V8FunctionHandler(
+                        NULL, pyCallback.callbackId);
+                // You must provide a function name to 
+                // CefV8Value::CreateFunction(), otherwise it fails.
+                callbackName.append(AnyToString(pyCallback.callbackId));
+                success = ret->SetValue(key, 
+                                CefV8Value::CreateFunction(
+                                        callbackName, v8FunctionHandler),
+                                V8_PROPERTY_ATTRIBUTE_NONE);
+            } else {
+                DebugLog("CefListValueToV8Value(): WARNING: " \
+                        "unknown binary value, setting value to null");
+                success = ret->SetValue(key, 
+                        CefV8Value::CreateNull(),
+                        V8_PROPERTY_ATTRIBUTE_NONE);
+            }
         } else if (valueType == VTYPE_DICTIONARY) {
             success = ret->SetValue(key,
                     CefDictionaryValueToV8Value(
@@ -241,85 +372,16 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
                             nestingLevel + 1),
                     V8_PROPERTY_ATTRIBUTE_NONE);
         } else {
-            DebugLog("CefDictionaryValueToV8Value() WARNING: " \
+            DebugLog("CefDictionaryValueToV8Value(): WARNING: " \
                     "unknown type, setting value to null");
             success = ret->SetValue(key,
                     CefV8Value::CreateNull(),
                     V8_PROPERTY_ATTRIBUTE_NONE);
         }
         if (!success) {
-            DebugLog("CefDictionaryValueToV8Value() WARNING: " \
+            DebugLog("CefDictionaryValueToV8Value(): WARNING: " \
                     "ret->SetValue() failed");
         }
     }
     return ret;
-}
-
-CefRefPtr<CefV8Value> CefListValueToV8Value(
-        CefRefPtr<CefListValue> listValue,
-        int nestingLevel) {
-    if (!listValue->IsValid()) {
-        DebugLog("CefListValueToV8Value() FAILED: " \
-                "CefDictionaryValue is invalid");
-        return CefV8Value::CreateNull();
-    }
-    if (nestingLevel > 8) {
-        DebugLog("CefListValueToV8Value(): WARNING: " \
-            "max nesting level (8) exceeded");
-        return CefV8Value::CreateNull();
-    }
-    int listSize = listValue->GetSize();
-    CefRefPtr<CefV8Value> ret = CefV8Value::CreateArray(listSize);
-    for (int key = 0; key < listSize; ++key) {
-        cef_value_type_t valueType = listValue->GetType(key);
-        bool success;
-        if (valueType == VTYPE_NULL) {
-            success = ret->SetValue(key, 
-                    CefV8Value::CreateNull());
-        } else if (valueType == VTYPE_BOOL) {
-            success = ret->SetValue(key, 
-                    CefV8Value::CreateBool(listValue->GetBool(key)));
-        } else if (valueType == VTYPE_INT) {
-            success = ret->SetValue(key, 
-                    CefV8Value::CreateInt(listValue->GetInt(key)));
-        } else if (valueType == VTYPE_DOUBLE) {
-            success = ret->SetValue(key, 
-                    CefV8Value::CreateDouble(listValue->GetDouble(key)));
-        } else if (valueType == VTYPE_STRING) {
-            success = ret->SetValue(key,
-                    CefV8Value::CreateString(listValue->GetString(key)));
-        } else if (valueType == VTYPE_DICTIONARY) {
-            success = ret->SetValue(key,
-                    CefDictionaryValueToV8Value(
-                            listValue->GetDictionary(key),
-                            nestingLevel + 1));
-        } else if (valueType == VTYPE_LIST) {
-            success = ret->SetValue(key,
-                    CefListValueToV8Value(
-                            listValue->GetList(key),
-                            nestingLevel + 1));
-        } else {
-            DebugLog("CefListValueToV8Value() WARNING: " \
-                    "unknown type, setting value to null");
-            success = ret->SetValue(key,
-                    CefV8Value::CreateNull());
-        }
-        if (!success) {
-            DebugLog("CefListValueToV8Value() WARNING: " \
-                    "ret->SetValue() failed");
-        }
-    }
-    return ret;
-}
-
-CefV8ValueList CefListValueToCefV8ValueList(
-        CefRefPtr<CefListValue> listValue) {
-    // CefV8ValueList = typedef std::vector<CefRefPtr<CefV8Value> >
-    CefV8ValueList v8ValueVector;
-    CefRefPtr<CefV8Value> v8List = CefListValueToV8Value(listValue);
-    int v8ListLength = v8List->GetArrayLength();
-    for (int i = 0; i < v8ListLength; ++i) {
-        v8ValueVector.push_back(v8List->GetValue(i));
-    }
-    return v8ValueVector;
 }
