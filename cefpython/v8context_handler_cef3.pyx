@@ -29,20 +29,36 @@ cdef public void V8ContextHandler_OnContextCreated(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void V8ContextHandler_OnContextReleased(
-        CefRefPtr[CefBrowser] cefBrowser,
-        CefRefPtr[CefFrame] cefFrame
+        int browserId,
+        int64 frameId
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
     try:
+        # Due to multi-process architecture in CEF 3, this function won't
+        # get called for the main frame in main browser. To send a message
+        # from the renderer process a parent browser is used. If this was
+        # a main frame then this would mean that the browser is being 
+        # destroyed, thus we can't send a process message using this browser.
+        # There is no guarantee that this will get called for frames in the
+        # main browser, if the browser is destroyed shortly after the frames
+        # were released.
         Debug("V8ContextHandler_OnContextReleased()")
-        pyBrowser = GetPyBrowser(cefBrowser)
-        pyFrame = GetPyFrame(cefFrame)
-        # User defined callback.
-        clientCallback = pyBrowser.GetClientCallback("OnContextReleased")
-        if clientCallback:
-            clientCallback(pyBrowser, pyFrame)
+        pyBrowser = GetPyBrowserById(browserId)
+        pyFrame = GetPyFrameById(frameId)
+        if pyBrowser and pyFrame:
+            clientCallback = pyBrowser.GetClientCallback("OnContextReleased")
+            if clientCallback:
+                clientCallback(pyBrowser, pyFrame)
+        else:
+            if not pyBrowser:
+                Debug("V8ContextHandler_OnContextReleased() WARNING: " \
+                        "pyBrowser not found")
+            if not pyFrame:
+                Debug("V8ContextHandler_OnContextReleased() WARNING: " \
+                        "pyFrame not found")
+        RemovePyFrame(frameId)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
