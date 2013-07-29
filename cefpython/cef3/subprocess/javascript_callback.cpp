@@ -85,10 +85,17 @@ void RemoveJavascriptCallbacksForFrame(CefRefPtr<CefFrame> frame) {
     int64 frameId = frame->GetIdentifier();
     while (it != g_jsCallbackMap.end()) {
         if (it->second.first->GetIdentifier() == frameId) {
-            g_jsCallbackMap.erase(it);
+            // Pass current iterator and increment it after passing
+            // to the function, but before erase() is called, this 
+            // is important for it to work in a loop. You can't do this:
+            // | if (..) erase(it);
+            // | ++it;
+            // This would cause an infinite loop.
+            g_jsCallbackMap.erase(it++);
             DebugLog("Renderer: RemoveJavascriptCallbacksForFrame(): " \
                     "removed js callback from the map");
+        } else {
+            ++it;
         }
-        ++it;
     }
 }
