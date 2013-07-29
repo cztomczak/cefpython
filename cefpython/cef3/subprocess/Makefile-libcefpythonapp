@@ -12,7 +12,7 @@ CC = g++
 CCFLAGS = -g -fPIC -Wall -Werror
 
 SRC = cefpython_app.cpp v8function_handler.cpp v8utils.cpp \
-        javascript_callback.cpp python_callback.cpp
+        javascript_callback.cpp
 OBJ = $(SRC:.cpp=.o)
 OUT = libcefpythonapp.a
 

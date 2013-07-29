@@ -73,5 +73,81 @@ function JavascriptAlert(message) { window.alert(message); }
         'python called from js and then js called from python')</a>
 
 
+
+<h3>Javascript callbacks</h3>
+<script>
+function JSCallback(arg1) {
+    window.alert(arg1)
+}
+</script>
+<pre>
+&lt;script&gt;
+function JSCallback(arg1) {
+    window.alert(arg1)
+}
+&lt;/script&gt;
+</pre>
+<pre>
+def TestJSCallback(self, jsCallback):
+    print("jsCallback.GetFunctionName() = %s" % jsCallback.GetFunctionName())
+    print("jsCallback.GetFrame().GetIdentifier() = %s" % \
+            jsCallback.GetFrame().GetIdentifier())
+    jsCallback.Call("This message was sent from python using js callback")
+</pre>    
+<a href="javascript:external.TestJSCallback(JSCallback)">
+        external.TestJSCallback(JSCallback)</a>
+<script>
+function JSCallback2() {
+    window.alert(JSON.stringify(arguments))
+}
+</script>
+<pre>
+&lt;script&gt;
+function JSCallback2() {
+    window.alert(JSON.stringify(arguments))
+}
+&lt;/script&gt;
+</pre>
+<pre>
+def TestJSCallbackComplexArguments(self, jsObject):
+    jsCallback = jsObject["myCallback"];
+    jsCallback.Call(1, None, 2.14, "string", ["list", ["nested list", \
+            {"nested object":None}]], \
+            {"nested list next":[{"deeply nested object":1}]})
+</pre>
+<a href="javascript:external.TestJSCallbackComplexArguments(
+                {'myCallback':JSCallback2})">
+        external.TestJSCallbackComplexArguments({"myCallback": JSCallback2})
+        </a>
+
+
+
+<h3>Python callbacks</h3>
+<script>
+function JSCallback3(pyCallback) {
+    pyCallback(1, 2.14, "string", [1, [2, {"key": "value"}]], {"list": [1,2]});
+}
+</script>
+<pre>
+&lt;script&gt;
+function JSCallback3(pyCallback) {
+    pyCallback(1, 2.14, "string", [1, [2, {"key": "value"}]], {"list": [1,2]});
+}
+&lt;/script&gt;
+</pre>
+<pre>
+def TestPythonCallback(self, jsCallback):
+    jsCallback.Call(PyCallback)
+
+def PyCallback(self, *args):
+        message = "PyCallback() was executed successfully! Arguments: %s" \
+                % str(args)
+        print(message)
+        self.mainBrowser.GetMainFrame().ExecuteJavascript(
+                "window.alert(\"%s\")" % message)
+</pre>
+<a href="javascript:external.TestPythonCallback(JSCallback3)">
+        external.TestPythonCallback(JSCallback3)</a>
+
 </body>
 </html>

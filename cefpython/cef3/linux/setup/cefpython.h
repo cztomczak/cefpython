@@ -16,6 +16,8 @@ __PYX_EXTERN_C DL_IMPORT(void) ProcessMessage_OnBrowserDestroyed(int);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextReleased(int, int64);
 __PYX_EXTERN_C DL_IMPORT(void) V8FunctionHandler_Execute(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString &, CefRefPtr<CefListValue>);
+__PYX_EXTERN_C DL_IMPORT(void) RemovePythonCallbacksForFrame(int);
+__PYX_EXTERN_C DL_IMPORT(bool) ExecutePythonCallback(CefRefPtr<CefBrowser>, int, CefRefPtr<CefListValue>);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 

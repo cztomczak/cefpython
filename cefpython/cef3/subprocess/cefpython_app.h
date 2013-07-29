@@ -3,9 +3,7 @@
 // Website: http://code.google.com/p/cefpython/
 
 #pragma once
-
 #include "include/cef_app.h"
-#include "v8function_handler.h"
 #include <map>
 
 // CefPythonApp class is instantiated in subprocess and in 

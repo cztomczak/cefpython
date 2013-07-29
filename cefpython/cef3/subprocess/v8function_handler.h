@@ -3,7 +3,6 @@
 // Website: http://code.google.com/p/cefpython/
 
 #pragma once
-
 #include "include/cef_v8.h"
 #include "util.h"
 
@@ -12,8 +11,10 @@ class CefPythonApp;
 class V8FunctionHandler 
         : public CefV8Handler {
 public:
-    V8FunctionHandler(CefRefPtr<CefPythonApp> cefPythonApp)
-            : cefPythonApp_(cefPythonApp) {
+    V8FunctionHandler(CefRefPtr<CefPythonApp> cefPythonApp,
+                      int pythonCallbackId)
+            : cefPythonApp_(cefPythonApp),
+              pythonCallbackId_(pythonCallbackId) {
     }
     virtual bool Execute(const CefString& name,
                         CefRefPtr<CefV8Value> object,
@@ -22,6 +23,7 @@ public:
                         CefString& exception) OVERRIDE;
 protected:
     CefRefPtr<CefPythonApp> cefPythonApp_;
+    int pythonCallbackId_;
 private:
   IMPLEMENT_REFCOUNTING(V8FunctionHandler);
 };

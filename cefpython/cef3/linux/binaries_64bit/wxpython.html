@@ -120,5 +120,34 @@ def TestJSCallbackComplexArguments(self, jsObject):
         external.TestJSCallbackComplexArguments({"myCallback": JSCallback2})
         </a>
 
+
+
+<h3>Python callbacks</h3>
+<script>
+function JSCallback3(pyCallback) {
+    pyCallback(1, 2.14, "string", [1, [2, {"key": "value"}]], {"list": [1,2]});
+}
+</script>
+<pre>
+&lt;script&gt;
+function JSCallback3(pyCallback) {
+    pyCallback(1, 2.14, "string", [1, [2, {"key": "value"}]], {"list": [1,2]});
+}
+&lt;/script&gt;
+</pre>
+<pre>
+def TestPythonCallback(self, jsCallback):
+    jsCallback.Call(PyCallback)
+
+def PyCallback(self, *args):
+        message = "PyCallback() was executed successfully! Arguments: %s" \
+                % str(args)
+        print(message)
+        self.mainBrowser.GetMainFrame().ExecuteJavascript(
+                "window.alert(\"%s\")" % message)
+</pre>
+<a href="javascript:external.TestPythonCallback(JSCallback3)">
+        external.TestPythonCallback(JSCallback3)</a>
+
 </body>
 </html>

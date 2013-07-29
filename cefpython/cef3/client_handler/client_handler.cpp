@@ -46,13 +46,13 @@ bool ClientHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
         CefRefPtr<CefListValue> arguments = message->GetArgumentList();
         if (arguments->GetSize() == 3
                 && arguments->GetType(0) == VTYPE_INT // frameId
-                && arguments->GetType(1) == VTYPE_STRING // funcName
-                && arguments->GetType(2) == VTYPE_LIST) { // funcArguments
+                && arguments->GetType(1) == VTYPE_STRING // functionName
+                && arguments->GetType(2) == VTYPE_LIST) { // functionArguments
             int64 frameId = arguments->GetInt(0);
-            CefString funcName = arguments->GetString(1);
-            CefRefPtr<CefListValue> funcArguments = arguments->GetList(2);
+            CefString functionName = arguments->GetString(1);
+            CefRefPtr<CefListValue> functionArguments = arguments->GetList(2);
             CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
-            V8FunctionHandler_Execute(browser, frame, funcName, funcArguments);
+            V8FunctionHandler_Execute(browser, frame, functionName, functionArguments);
             return true;
         } else {
             DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
@@ -71,7 +71,31 @@ bool ClientHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                     ", messageName = OnBrowserDestroyed");
             return false;
         }
-        
+    } else if (messageName == "ExecutePythonCallback") {
+        CefRefPtr<CefListValue> arguments = message->GetArgumentList();
+        if (arguments->GetSize() == 2
+                && arguments->GetType(0) == VTYPE_INT // callbackId
+                && arguments->GetType(1) == VTYPE_LIST) { // functionArguments
+            int callbackId = arguments->GetInt(0);
+            CefRefPtr<CefListValue> functionArguments = arguments->GetList(1);
+            ExecutePythonCallback(browser, callbackId, functionArguments);
+            return true;
+        } else {
+            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
+                    ", messageName = ExecutePythonCallback");
+            return false;
+        }
+    } else if (messageName == "RemovePythonCallbacksForFrame") {
+        CefRefPtr<CefListValue> arguments = message->GetArgumentList();
+        if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_INT) {
+            int frameId = arguments->GetInt(0);
+            RemovePythonCallbacksForFrame(frameId);
+            return true;
+        } else {
+            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
+                    ", messageName = ExecutePythonCallback");
+            return false;
+        }
     }
     return false;
 }

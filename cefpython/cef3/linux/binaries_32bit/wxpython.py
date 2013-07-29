@@ -156,6 +156,28 @@ class JavascriptExternal:
     def ExecuteFunction(self, *args):
         self.mainBrowser.GetMainFrame().ExecuteFunction(*args)
 
+    def TestJSCallback(self, jsCallback):
+        print("jsCallback.GetFunctionName() = %s" % jsCallback.GetFunctionName())
+        print("jsCallback.GetFrame().GetIdentifier() = %s" % \
+                jsCallback.GetFrame().GetIdentifier())
+        jsCallback.Call("This message was sent from python using js callback")
+
+    def TestJSCallbackComplexArguments(self, jsObject):
+        jsCallback = jsObject["myCallback"];
+        jsCallback.Call(1, None, 2.14, "string", ["list", ["nested list", \
+                {"nested object":None}]], \
+                {"nested list next":[{"deeply nested object":1}]})
+
+    def TestPythonCallback(self, jsCallback):
+        jsCallback.Call(self.PyCallback)
+
+    def PyCallback(self, *args):
+        message = "PyCallback() was executed successfully! Arguments: %s" \
+                % str(args)
+        print(message)
+        self.mainBrowser.GetMainFrame().ExecuteJavascript(
+                "window.alert(\"%s\")" % message)
+
 class MyApp(wx.App):
     timer = None
     timerID = 1
