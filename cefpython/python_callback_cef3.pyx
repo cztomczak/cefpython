@@ -12,11 +12,14 @@ cdef struct PythonCallback:
     char uniqueCefBinaryValueSize[16]
 
 cdef CefRefPtr[CefBinaryValue] PutPythonCallback(
+        object browserId,
         object frameId, 
         object function
         ) except *:
     global g_pythonCallbacks
     global g_pythonCallbackMaxId
+    if not browserId:
+        raise Exception("PutPythonCallback() FAILED: browserId is empty")
     if not frameId:
         raise Exception("PutPythonCallback() FAILED: frameId is empty")
     cdef PythonCallback pyCallback
@@ -24,7 +27,8 @@ cdef CefRefPtr[CefBinaryValue] PutPythonCallback(
     pyCallback.callbackId = g_pythonCallbackMaxId
     cdef CefRefPtr[CefBinaryValue] binaryValue = CefBinaryValue_Create(
             &pyCallback, sizeof(pyCallback))
-    g_pythonCallbacks[g_pythonCallbackMaxId] = (frameId, function)
+    # [0] browserId, [1] frameId, [2] function.
+    g_pythonCallbacks[g_pythonCallbackMaxId] = (browserId, frameId, function)
     return binaryValue
 
 cdef public void RemovePythonCallbacksForFrame(
@@ -35,7 +39,7 @@ cdef public void RemovePythonCallbacksForFrame(
     try:
         global g_pythonCallbacks
         for callbackId, value in g_pythonCallbacks.iteritems():
-            if value[0] == frameId:
+            if value[1] == frameId:
                 toRemove.append(callbackId)
         for callbackId in toRemove:
             del g_pythonCallbacks[callbackId]
@@ -45,6 +49,19 @@ cdef public void RemovePythonCallbacksForFrame(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef void RemovePythonCallbacksForBrowser(
+        int browserId) except *:
+    cdef list toRemove = []
+    global g_pythonCallbacks
+    for callbackId, value in g_pythonCallbacks.iteritems():
+        if value[0] == browserId:
+            toRemove.append(callbackId)
+    for callbackId in toRemove:
+        del g_pythonCallbacks[callbackId]
+        Debug("RemovePythonCallbacksForBrowser(): " \
+                "removed python callback, callbackId = %s" \
+                % callbackId)
 
 cdef public cpp_bool ExecutePythonCallback(
         CefRefPtr[CefBrowser] cefBrowser,
@@ -57,7 +74,8 @@ cdef public cpp_bool ExecutePythonCallback(
     try:
         global g_pythonCallbacks
         if g_pythonCallbacks.has_key(callbackId):
-            function = g_pythonCallbacks[callbackId][1]
+            # [0] browserId, [1] frameId, [2] function.
+            function = g_pythonCallbacks[callbackId][2]
             functionArguments = CefListValueToPyList(
                     cefBrowser, cefFunctionArguments)
             returnValue = function(*functionArguments)

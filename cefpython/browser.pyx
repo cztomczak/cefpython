@@ -79,29 +79,16 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
                         pyBrowser.SetJavascriptBindings(javascriptBindings)
     return pyBrowser
 
-cdef public void ProcessMessage_OnBrowserDestroyed(
-        int browserId
-        ) except * with gil:
-    # CefRenderProcessHandler::OnBrowserDestroyed() sends a process 
-    # message to the browser process. The browser is probably already
-    # destroyed in the renderer process when this message arrives to
-    # the browser process.
-    # --
-    # Due to multi-process architecture in CEF 3, this function won't
-    # get called for the main browser, to send a message from the 
-    # renderer a parent browser is used, as you can't send a process
-    # message to a browser that is being destroyed.
-    try:
-        RemovePyBrowser(browserId)
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
 cdef void RemovePyBrowser(int browserId) except *:
-    # Called from ProcessMessage_OnBrowserDestroyed().
+    # Called from LifespanHandler_OnBeforeClose().
     # TODO: call this function also in CEF 1, currently called only in CEF 3.
-    Debug("del g_pyBrowsers[%s]" % browserId)
-    del g_pyBrowsers[browserId]
+    global g_pyBrowsers
+    if g_pyBrowsers.has_key(browserId):
+        Debug("del g_pyBrowsers[%s]" % browserId)
+        del g_pyBrowsers[browserId]
+    else:
+        Debug("RemovePyBrowser() FAILED: browser not found, id = %s" \
+                % browserId)
 
 cpdef PyBrowser GetBrowserByWindowHandle(WindowHandle windowHandle):
     cdef PyBrowser pyBrowser
@@ -667,8 +654,8 @@ cdef class PyBrowser:
             # | message.get().GetArgumentList().swap(arguments)
             cdef CefRefPtr[CefListValue] messageArguments = \
                     message.get().GetArgumentList()
-            PyListToExistingCefListValue(frameId, pyArguments, 
-                    messageArguments)
+            PyListToExistingCefListValue(self.GetIdentifier(), frameId,
+                    pyArguments, messageArguments)
             Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
                     messageName, 
                     message.get().GetArgumentList().get().GetSize()))
