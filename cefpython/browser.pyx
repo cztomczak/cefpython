@@ -200,10 +200,12 @@ cdef class PyBrowser:
     cpdef py_void SetClientCallback_CEF3(self, 
             py_string name, object callback):
         if not self.allowedClientCallbacks:
-            # CefDisplayHandler.
+            # CefDisplayHandler
             self.allowedClientCallbacks += ["OnLoadingStateChange",
                     "OnAddressChange", "OnTitleChange", "OnTooltip",
                     "OnStatusMessage", "OnConsoleMessage"]
+            # CefKeyboardHandler
+            self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"];
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
                             "callback: %s" % name)

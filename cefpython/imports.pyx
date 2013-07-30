@@ -39,6 +39,8 @@ ctypedef object py_string
 ctypedef object py_void
 ctypedef long WindowHandle
 
+from python_h cimport *
+
 from cpython cimport bool as py_bool
 from libcpp cimport bool as cpp_bool
 

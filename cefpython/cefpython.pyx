@@ -124,7 +124,7 @@ include "javascript_bindings.pyx"
 
 IF CEF_VERSION == 1:
     include "load_handler.pyx"
-    include "keyboard_handler.pyx"
+    include "keyboard_handler_cef1.pyx"
     include "virtual_keys.pyx"
     include "request.pyx"
     include "web_request.pyx"
@@ -154,6 +154,7 @@ IF CEF_VERSION == 3:
     include "python_callback_cef3.pyx"
     include "lifespan_handler_cef3.pyx"
     include "display_handler_cef3.pyx"
+    include "keyboard_handler_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,
