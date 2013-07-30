@@ -12,7 +12,8 @@
 
 class ClientHandler : 
 		public CefClient,
-        public CefLifeSpanHandler
+        public CefLifeSpanHandler,
+        public CefDisplayHandler
 {
 public:
   ClientHandler(){}
@@ -41,7 +42,7 @@ public:
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE {
-    return NULL;
+    return this;
   }
 
   ///
@@ -256,6 +257,70 @@ public:
   ///
   /*--cef()--*/
   virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
+
+  // --------------------------------------------------------------------------
+  // CefDisplayHandler
+  // --------------------------------------------------------------------------
+
+  ///
+  // Implement this interface to handle events related to browser display state.
+  // The methods of this class will be called on the UI thread.
+  ///
+
+  ///
+  // Called when the loading state has changed.
+  ///
+  /*--cef()--*/
+  virtual void OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
+                                    bool isLoading,
+                                    bool canGoBack,
+                                    bool canGoForward) OVERRIDE;
+
+  ///
+  // Called when a frame's address has changed.
+  ///
+  /*--cef()--*/
+  virtual void OnAddressChange(CefRefPtr<CefBrowser> browser,
+                               CefRefPtr<CefFrame> frame,
+                               const CefString& url) OVERRIDE;
+
+  ///
+  // Called when the page title changes.
+  ///
+  /*--cef(optional_param=title)--*/
+  virtual void OnTitleChange(CefRefPtr<CefBrowser> browser,
+                             const CefString& title) OVERRIDE;
+
+  ///
+  // Called when the browser is about to display a tooltip. |text| contains the
+  // text that will be displayed in the tooltip. To handle the display of the
+  // tooltip yourself return true. Otherwise, you can optionally modify |text|
+  // and then return false to allow the browser to display the tooltip.
+  // When window rendering is disabled the application is responsible for
+  // drawing tooltips and the return value is ignored.
+  ///
+  /*--cef(optional_param=text)--*/
+  virtual bool OnTooltip(CefRefPtr<CefBrowser> browser,
+                         CefString& text) OVERRIDE;
+
+  ///
+  // Called when the browser receives a status message. |text| contains the text
+  // that will be displayed in the status message and |type| indicates the
+  // status message type.
+  ///
+  /*--cef(optional_param=value)--*/
+  virtual void OnStatusMessage(CefRefPtr<CefBrowser> browser,
+                               const CefString& value) OVERRIDE;
+
+  ///
+  // Called to display a console message. Return true to stop the message from
+  // being output to the console.
+  ///
+  /*--cef(optional_param=message,optional_param=source)--*/
+  virtual bool OnConsoleMessage(CefRefPtr<CefBrowser> browser,
+                                const CefString& message,
+                                const CefString& source,
+                                int line) OVERRIDE;
 
 private:
    

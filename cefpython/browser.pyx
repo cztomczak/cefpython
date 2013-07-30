@@ -156,47 +156,57 @@ cdef class PyBrowser:
             free(self.imageBuffer)
 
     cpdef py_void SetClientCallback(self, py_string name, object callback):
+        IF CEF_VERSION == 1:
+            self.SetClientCallback_CEF1(name, callback)
+        ELIF CEF_VERSION == 3:
+            self.SetClientCallback_CEF3(name, callback)
+
+    cpdef py_void SetClientCallback_CEF1(self, 
+            py_string name, object callback):
         if not self.allowedClientCallbacks:
             # CefLoadHandler.
             self.allowedClientCallbacks += ["OnLoadEnd", "OnLoadError",
                     "OnLoadStart"]
-
             # CefKeyboardHandler.
             self.allowedClientCallbacks += ["OnKeyEvent"]
-
             # CefV8ContextHandler.
             self.allowedClientCallbacks += ["OnContextCreated",
                     "OnContextReleased" ,"OnUncaughtException"]
-
             # CefRequestHandler.
             self.allowedClientCallbacks += ["OnBeforeBrowse",
                     "OnBeforeResourceLoad", "OnResourceRedirect",
                     "OnResourceResponse", "OnProtocolExecution",
                     "GetDownloadHandler", "GetAuthCredentials",
                     "GetCookieManager"]
-
             # CefDisplayHandler.
             self.allowedClientCallbacks += ["OnAddressChange",
                     "OnConsoleMessage", "OnContentsSizeChange",
                     "OnNavStateChange", "OnStatusMessage", "OnTitleChange",
                     "OnTooltip"]
-
             # LifespanHandler.
             self.allowedClientCallbacks += ["DoClose", "OnAfterCreated",
                     "OnBeforeClose", "RunModal"]
-
             # RenderHandler
             self.allowedClientCallbacks += ["GetViewRect", "GetScreenRect",
                     "GetScreenPoint", "OnPopupShow", "OnPopupSize",
                     "OnPaint", "OnCursorChange"]
-
             # DragHandler
             self.allowedClientCallbacks += ["OnDragStart", "OnDragEnter"]
-
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
                             "callback: %s" % name)
+        self.clientCallbacks[name] = callback
 
+    cpdef py_void SetClientCallback_CEF3(self, 
+            py_string name, object callback):
+        if not self.allowedClientCallbacks:
+            # CefDisplayHandler.
+            self.allowedClientCallbacks += ["OnLoadingStateChange",
+                    "OnAddressChange", "OnTitleChange", "OnTooltip",
+                    "OnStatusMessage", "OnConsoleMessage"]
+        if name not in self.allowedClientCallbacks:
+            raise Exception("Browser.SetClientCallback() failed: unknown "
+                            "callback: %s" % name)
         self.clientCallbacks[name] = callback
 
     cpdef py_void SetClientHandler(self, object clientHandler):

@@ -104,6 +104,8 @@ class MainFrame(wx.Frame):
             browserSettings={"plugins_disabled": False},
             navigateUrl="file://"+GetApplicationPath("wxpython.html"))
 
+        self.browser.SetClientHandler(ClientHandler())
+
         jsBindings = cefpython.JavascriptBindings(
             bindToFrames=False, bindToPopups=True)
         jsBindings.SetFunction("PyPrint", PyPrint)
@@ -177,6 +179,40 @@ class JavascriptExternal:
         print(message)
         self.mainBrowser.GetMainFrame().ExecuteJavascript(
                 "window.alert(\"%s\")" % message)
+
+class ClientHandler:
+    # -------------------------------------------------------------------------
+    # DisplayHandler
+    # -------------------------------------------------------------------------
+    def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
+            canGoForward):
+        print("ClientHandler::OnLoadingStateChange()")
+        print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
+                % (isLoading, canGoBack, canGoForward))
+
+    def OnAddressChange(self, browser, frame, url):
+        print("ClientHandler::OnAddressChange()")
+        print("url = %s" % url)
+
+    def OnTitleChange(self, browser, title):
+        print("ClientHandler::OnTitleChange()")
+        print("title = %s" % title)
+
+    def OnTooltip(self, browser, text):
+        print("ClientHandler::OnTooltip()")
+        print("text = %s")
+        # OnTooltip seems not to work on Linux, reported bug on the CEF forum:
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10898
+
+    def OnStatusMessage(self, browser, value):
+        print("ClientHandler::OnStatusMessage()")
+        print("value = %s" % value)
+
+    def OnConsoleMessage(self, browser, message, source, line):
+        print("ClientHandler::OnConsoleMessage()")
+        print("message = %s" % message)
+        print("source = %s" % source)
+        print("line = %s" % line)
 
 class MyApp(wx.App):
     timer = None

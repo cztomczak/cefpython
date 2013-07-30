@@ -149,5 +149,41 @@ def PyCallback(self, *args):
 <a href="javascript:external.TestPythonCallback(JSCallback3)">
         external.TestPythonCallback(JSCallback3)</a>
 
+
+
+<h3>Display handler</h3>
+
+See messages in the console.
+
+<pre>
+def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
+        canGoForward):
+    print("ClientHandler::OnLoadingStateChange()")
+    print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
+            % (isLoading, canGoBack, canGoForward))
+
+def OnAddressChange(self, browser, frame, url):
+    print("ClientHandler::OnAddressChange()")
+    print("url = %s" % url)
+
+def OnTitleChange(self, browser, title):
+    print("ClientHandler::OnTitleChange()")
+    print("title = %s" % title)
+
+def OnTooltip(self, browser, text):
+    print("ClientHandler::OnTooltip()")
+    print("text = %s")
+
+def OnStatusMessage(self, browser, value):
+    print("ClientHandler::OnStatusMessage()")
+    print("value = %s" % value)
+
+def OnConsoleMessage(self, browser, message, source, line):
+    print("ClientHandler::OnConsoleMessage()")
+    print("message = %s" % message)
+    print("source = %s" % source)
+    print("line = %s" % line)
+</pre>
+
 </body>
 </html>

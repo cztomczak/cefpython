@@ -214,3 +214,88 @@ void ClientHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
     REQUIRE_UI_THREAD();
     LifespanHandler_OnBeforeClose(browser);
 }
+
+// --------------------------------------------------------------------------
+// CefDisplayHandler
+// --------------------------------------------------------------------------
+
+///
+// Implement this interface to handle events related to browser display state.
+// The methods of this class will be called on the UI thread.
+///
+
+///
+// Called when the loading state has changed.
+///
+/*--cef()--*/
+void ClientHandler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
+                                bool isLoading,
+                                bool canGoBack,
+                                bool canGoForward) {
+    REQUIRE_UI_THREAD();
+    DisplayHandler_OnLoadingStateChange(browser, isLoading, canGoBack,
+            canGoForward);
+}
+
+///
+// Called when a frame's address has changed.
+///
+/*--cef()--*/
+void ClientHandler::OnAddressChange(CefRefPtr<CefBrowser> browser,
+                           CefRefPtr<CefFrame> frame,
+                           const CefString& url) {
+    REQUIRE_UI_THREAD();
+    DisplayHandler_OnAddressChange(browser, frame, url);
+}
+
+///
+// Called when the page title changes.
+///
+/*--cef(optional_param=title)--*/
+void ClientHandler::OnTitleChange(CefRefPtr<CefBrowser> browser,
+                         const CefString& title) {
+    REQUIRE_UI_THREAD();
+    DisplayHandler_OnTitleChange(browser, title);
+}
+
+///
+// Called when the browser is about to display a tooltip. |text| contains the
+// text that will be displayed in the tooltip. To handle the display of the
+// tooltip yourself return true. Otherwise, you can optionally modify |text|
+// and then return false to allow the browser to display the tooltip.
+// When window rendering is disabled the application is responsible for
+// drawing tooltips and the return value is ignored.
+///
+/*--cef(optional_param=text)--*/
+bool ClientHandler::OnTooltip(CefRefPtr<CefBrowser> browser,
+                     CefString& text) {
+    REQUIRE_UI_THREAD();
+    return DisplayHandler_OnTooltip(browser, text);
+    // return false;
+}
+
+///
+// Called when the browser receives a status message. |text| contains the text
+// that will be displayed in the status message and |type| indicates the
+// status message type.
+///
+/*--cef(optional_param=value)--*/
+void ClientHandler::OnStatusMessage(CefRefPtr<CefBrowser> browser,
+                           const CefString& value) {
+    REQUIRE_UI_THREAD();
+    DisplayHandler_OnStatusMessage(browser, value);
+}
+
+///
+// Called to display a console message. Return true to stop the message from
+// being output to the console.
+///
+/*--cef(optional_param=message,optional_param=source)--*/
+bool ClientHandler::OnConsoleMessage(CefRefPtr<CefBrowser> browser,
+                            const CefString& message,
+                            const CefString& source,
+                            int line) {
+    REQUIRE_UI_THREAD();
+    return DisplayHandler_OnConsoleMessage(browser, message, source, line);
+    // return false;
+}
