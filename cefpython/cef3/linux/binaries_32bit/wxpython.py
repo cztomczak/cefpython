@@ -17,6 +17,7 @@ import wx
 import time
 import re
 import uuid
+import platform
 
 # Which method to use for message loop processing.
 #   EVT_IDLE - wx application has priority (default)
@@ -198,9 +199,9 @@ class ClientHandler:
         print("ClientHandler::OnTitleChange()")
         print("title = %s" % title)
 
-    def OnTooltip(self, browser, text):
+    def OnTooltip(self, browser, textOut):
         print("ClientHandler::OnTooltip()")
-        print("text = %s")
+        print("text = %s" % textOut[0])
         # OnTooltip seems not to work on Linux, reported bug on the CEF forum:
         # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10898
 
@@ -213,6 +214,22 @@ class ClientHandler:
         print("message = %s" % message)
         print("source = %s" % source)
         print("line = %s" % line)
+
+    # -------------------------------------------------------------------------
+    # KeyboardHandler
+    # -------------------------------------------------------------------------
+    def OnPreKeyEvent(self, browser, event, eventHandle, 
+            isKeyboardShortcutOut):
+        print("ClientHandler::OnPreKeyEvent()")
+
+    def OnKeyEvent(self, browser, event, eventHandle):
+        print("ClientHandler::OnKeyEvent()")
+        print("native_key_code = %s" % event["native_key_code"])
+        if platform.system() == "Linux":
+            # F5 = 71
+            if event["native_key_code"] == 71:
+                print("F5 pressed! Reloading page..")
+                browser.ReloadIgnoreCache()
 
 class MyApp(wx.App):
     timer = None

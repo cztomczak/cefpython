@@ -185,5 +185,28 @@ def OnConsoleMessage(self, browser, message, source, line):
     print("line = %s" % line)
 </pre>
 
+
+
+
+<h3>Keyboard handler</h3>
+<p>
+    Click anywhere in the window first to set keyboard focus.
+    Next press F5 to reload the page.
+</p>
+<pre>
+def OnPreKeyEvent(self, browser, event, eventHandle, 
+        isKeyboardShortcutOut):
+    print("ClientHandler::OnPreKeyEvent()")
+
+def OnKeyEvent(self, browser, event, eventHandle):
+    print("ClientHandler::OnKeyEvent()")
+    print("native_key_code = %s" % event["native_key_code"])
+    if platform.system() == "Linux":
+        # F5 = 71
+        if event["native_key_code"] == 71:
+            print("F5 pressed! Reloading page..")
+            browser.ReloadIgnoreCache()
+</pre>
+
 </body>
 </html>

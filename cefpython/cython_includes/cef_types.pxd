@@ -3,6 +3,10 @@
 # Website: http://code.google.com/p/cefpython/
 
 include "compile_time_constants.pxi"
+from libcpp cimport bool as cpp_bool
+
+IF UNAME_SYSNAME == "Windows":
+    from stddef cimport wchar_t
 
 cdef extern from "include/internal/cef_types.h":
 
@@ -43,6 +47,11 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef long long int64
     ctypedef unsigned int uint32
     ctypedef int int32
+
+    IF UNAME_SYSNAME == "Windows":
+        ctypedef wchar_t char16
+    ELSE:
+        ctypedef unsigned short char16
 
     # LoadHandler > OnLoadError - ErrorCode.
 
@@ -214,3 +223,35 @@ cdef extern from "include/internal/cef_types.h":
             VTYPE_DICTIONARY,
             VTYPE_LIST,
 
+    IF CEF_VERSION == 3:
+        ctypedef void* CefEventHandle
+        ctypedef enum cef_key_event_type_t:
+            KEYEVENT_RAWKEYDOWN = 0,
+            KEYEVENT_KEYDOWN,
+            KEYEVENT_KEYUP,
+            KEYEVENT_CHAR
+        ctypedef struct _cef_key_event_t:
+            cef_key_event_type_t type
+            uint32 modifiers
+            int windows_key_code
+            int native_key_code
+            int is_system_key
+            char16 character
+            char16 unmodified_character
+            cpp_bool focus_on_editable_field
+        ctypedef _cef_key_event_t CefKeyEvent
+        enum cef_event_flags_t:
+            EVENTFLAG_NONE                = 0,
+            EVENTFLAG_CAPS_LOCK_ON        = 1 << 0,
+            EVENTFLAG_SHIFT_DOWN          = 1 << 1,
+            EVENTFLAG_CONTROL_DOWN        = 1 << 2,
+            EVENTFLAG_ALT_DOWN            = 1 << 3,
+            EVENTFLAG_LEFT_MOUSE_BUTTON   = 1 << 4,
+            EVENTFLAG_MIDDLE_MOUSE_BUTTON = 1 << 5,
+            EVENTFLAG_RIGHT_MOUSE_BUTTON  = 1 << 6,
+            # Mac OS-X command key.
+            EVENTFLAG_COMMAND_DOWN        = 1 << 7,
+            EVENTFLAG_NUM_LOCK_ON         = 1 << 8,
+            EVENTFLAG_IS_KEY_PAD          = 1 << 9,
+            EVENTFLAG_IS_LEFT             = 1 << 10,
+            EVENTFLAG_IS_RIGHT            = 1 << 11,

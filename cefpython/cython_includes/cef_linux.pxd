@@ -20,3 +20,4 @@ cdef extern from "include/internal/cef_linux.h":
         cdef cppclass CefMainArgs(CefStructBase):
             CefMainArgs()
             CefMainArgs(int argc_arg, char** argv_arg)
+

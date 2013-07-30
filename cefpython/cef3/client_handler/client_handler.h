@@ -13,7 +13,8 @@
 class ClientHandler : 
 		public CefClient,
         public CefLifeSpanHandler,
-        public CefDisplayHandler
+        public CefDisplayHandler,
+        public CefKeyboardHandler
 {
 public:
   ClientHandler(){}
@@ -93,7 +94,7 @@ public:
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() OVERRIDE {
-    return NULL;
+    return this;
   }
 
   ///
@@ -321,6 +322,37 @@ public:
                                 const CefString& message,
                                 const CefString& source,
                                 int line) OVERRIDE;
+
+  // --------------------------------------------------------------------------
+  // CefKeyboardHandler
+  // --------------------------------------------------------------------------
+
+  ///
+  // Implement this interface to handle events related to keyboard input. The
+  // methods of this class will be called on the UI thread.
+  ///
+
+  // Called before a keyboard event is sent to the renderer. |event| contains
+  // information about the keyboard event. |os_event| is the operating system
+  // event message, if any. Return true if the event was handled or false
+  // otherwise. If the event will be handled in OnKeyEvent() as a keyboard
+  // shortcut set |is_keyboard_shortcut| to true and return false.
+  /*--cef()--*/
+  virtual bool OnPreKeyEvent(CefRefPtr<CefBrowser> browser,
+                             const CefKeyEvent& event,
+                             CefEventHandle os_event,
+                             bool* is_keyboard_shortcut) OVERRIDE;
+
+  ///
+  // Called after the renderer and JavaScript in the page has had a chance to
+  // handle the event. |event| contains information about the keyboard event.
+  // |os_event| is the operating system event message, if any. Return true if
+  // the keyboard event was handled or false otherwise.
+  ///
+  /*--cef()--*/
+  virtual bool OnKeyEvent(CefRefPtr<CefBrowser> browser,
+                          const CefKeyEvent& event,
+                          CefEventHandle os_event) OVERRIDE;
 
 private:
    

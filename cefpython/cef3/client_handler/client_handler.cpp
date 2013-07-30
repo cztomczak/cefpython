@@ -299,3 +299,43 @@ bool ClientHandler::OnConsoleMessage(CefRefPtr<CefBrowser> browser,
     return DisplayHandler_OnConsoleMessage(browser, message, source, line);
     // return false;
 }
+
+// ----------------------------------------------------------------------------
+// CefKeyboardHandler
+// ----------------------------------------------------------------------------
+
+///
+// Implement this interface to handle events related to keyboard input. The
+// methods of this class will be called on the UI thread.
+///
+
+// Called before a keyboard event is sent to the renderer. |event| contains
+// information about the keyboard event. |os_event| is the operating system
+// event message, if any. Return true if the event was handled or false
+// otherwise. If the event will be handled in OnKeyEvent() as a keyboard
+// shortcut set |is_keyboard_shortcut| to true and return false.
+/*--cef()--*/
+bool ClientHandler::OnPreKeyEvent(CefRefPtr<CefBrowser> browser,
+                         const CefKeyEvent& event,
+                         CefEventHandle os_event,
+                         bool* is_keyboard_shortcut) {
+    REQUIRE_UI_THREAD();
+    return KeyboardHandler_OnPreKeyEvent(browser, event, os_event,
+            is_keyboard_shortcut);
+    // Default: return false;
+}
+
+///
+// Called after the renderer and JavaScript in the page has had a chance to
+// handle the event. |event| contains information about the keyboard event.
+// |os_event| is the operating system event message, if any. Return true if
+// the keyboard event was handled or false otherwise.
+///
+/*--cef()--*/
+bool ClientHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser,
+                      const CefKeyEvent& event,
+                      CefEventHandle os_event) {
+    REQUIRE_UI_THREAD();
+    return KeyboardHandler_OnKeyEvent(browser, event, os_event);
+    // Default: return false;
+}
