@@ -132,7 +132,7 @@ IF CEF_VERSION == 1:
     include "content_filter.pyx"
     include "request_handler.pyx"
     include "response.pyx"
-    include "display_handler.pyx"
+    include "display_handler_cef1.pyx"
     include "lifespan_handler_cef1.pyx"
     IF UNAME_SYSNAME == "Windows":
         # Off-screen rendering currently supported only on Windows.
@@ -153,6 +153,7 @@ IF CEF_VERSION == 3:
     include "javascript_callback_cef3.pyx"
     include "python_callback_cef3.pyx"
     include "lifespan_handler_cef3.pyx"
+    include "display_handler_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,
