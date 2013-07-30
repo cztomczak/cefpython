@@ -11,8 +11,6 @@
 #include "javascript_callback.h"
 #include "v8function_handler.h"
 
-CefRefPtr<CefBrowser> g_mainBrowser;
-
 // -----------------------------------------------------------------------------
 // CefApp
 // -----------------------------------------------------------------------------
@@ -85,45 +83,11 @@ void CefPythonApp::OnWebKitInitialized() {
 }
 
 void CefPythonApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
-    // TODO: keep a list of all browsers, for sending the message
-    //       about browser being destroyed use the first browser 
-    //       from that list. See this topic: 
-    //       http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10893
-    // --
-    // The g_mainBrowser is not guaranteed to be the "main" browser,
-    // it is just the first browser being created, that in most cases
-    // should be the main browser. We will need it later to send
-    // a process message about other browsers being destroyed.
-    if (!g_mainBrowser.get()) {
-        g_mainBrowser = browser;
-    }
 }
 
 void CefPythonApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser) {
     DebugLog("Renderer: OnBrowserDestroyed()");
     RemoveJavascriptBindings(browser);
-    // TODO: keep a list of all browsers, for sending the message
-    //       about browser being destroyed use the first browser 
-    //       from that list. See this topic: 
-    //       http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10893
-    if (g_mainBrowser.get() && g_mainBrowser->IsSame(browser)) {
-        g_mainBrowser = NULL;
-    } else {
-        // OnBrowserDestroyed process message is not sent for 
-        // the main browser.
-        if (g_mainBrowser.get()) {
-            CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(
-                    "OnBrowserDestroyed");
-            CefRefPtr<CefListValue> arguments = message->GetArgumentList();
-            arguments->SetInt(0, browser->GetIdentifier());
-            g_mainBrowser->SendProcessMessage(PID_BROWSER, message);
-        } else {
-            DebugLog("Renderer: OnBrowserDestroyed(): ERROR: main browser not " \
-                    "found, cannot send process message to the browser process " \
-                    "about browser being destroyed. This will cause memory leaks" \
-                    " and possibly other errors that could crash application.");
-        }
-    }
 }
 
 bool CefPythonApp::OnBeforeNavigation(CefRefPtr<CefBrowser> browser,
@@ -186,40 +150,39 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
                                      CefRefPtr<CefFrame> frame,
                                      CefRefPtr<CefV8Context> context) {
     DebugLog("Renderer: OnContextReleased()");
-    if (g_mainBrowser.get()) {
-        CefRefPtr<CefProcessMessage> message;
-        CefRefPtr<CefListValue> arguments;
-        // --------------------------------------------------------------------
-        // 1. Send "OnContextReleased" message.
-        // --------------------------------------------------------------------
-        message = CefProcessMessage::Create("OnContextReleased");
-        arguments = message->GetArgumentList();
-        arguments->SetInt(0, browser->GetIdentifier());
-        // TODO: losing int64 precision, the solution is to convert
-        //       it to string and then in the Browser process back
-        //       from string to int64. But it is rather unlikely
-        //       that number of frames will exceed int range, so
-        //       casting it to int for now.
-        arguments->SetInt(1, (int)(frame->GetIdentifier()));
-        // Should we send the message using current "browser"
-        // when this is not the main frame? It could fail, so
-        // it is more reliable to always use the main browser.
-        g_mainBrowser->SendProcessMessage(PID_BROWSER, message);
-        // --------------------------------------------------------------------
-        // 2. Remove python callbacks for a frame.
-        // --------------------------------------------------------------------
-        message = CefProcessMessage::Create("RemovePythonCallbacksForFrame");
-        arguments = message->GetArgumentList();
-        // TODO: int64 precision lost
-        arguments->SetInt(0, (int)(frame->GetIdentifier()));
-        g_mainBrowser->SendProcessMessage(PID_BROWSER, message);
-    } else {
-        DebugLog("Renderer: OnContextReleased(): ERROR: main browser not " \
-                "found, cannot send process message to the browser process " \
-                "about frame being destroyed. This will cause memory leaks" \
-                " and possibly other errors that could crash application.");
-    }
-    // Clear javascript callbacks.
+    CefRefPtr<CefProcessMessage> message;
+    CefRefPtr<CefListValue> arguments;    
+    // ------------------------------------------------------------------------
+    // 1. Send "OnContextReleased" message.
+    // ------------------------------------------------------------------------
+    message = CefProcessMessage::Create("OnContextReleased");
+    arguments = message->GetArgumentList();
+    arguments->SetInt(0, browser->GetIdentifier());
+    // TODO: losing int64 precision, the solution is to convert
+    //       it to string and then in the Browser process back
+    //       from string to int64. But it is rather unlikely
+    //       that number of frames will exceed int range, so
+    //       casting it to int for now.
+    arguments->SetInt(1, (int)(frame->GetIdentifier()));
+    // Should we send the message using current "browser"
+    // when this is not the main frame? It could fail, so
+    // it is more reliable to always use the main browser.
+    browser->SendProcessMessage(PID_BROWSER, message);
+    // ------------------------------------------------------------------------
+    // 2. Remove python callbacks for a frame.
+    // ------------------------------------------------------------------------
+    // If this is the main frame then the message won't arrive
+    // to the browser process, as browser is being destroyed,
+    // but it doesn't matter because in LifespanHandler_BeforeClose()
+    // we're calling RemovePythonCallbacksForBrowser().
+    message = CefProcessMessage::Create("RemovePythonCallbacksForFrame");
+    arguments = message->GetArgumentList();
+    // TODO: int64 precision lost
+    arguments->SetInt(0, (int)(frame->GetIdentifier()));
+    browser->SendProcessMessage(PID_BROWSER, message);
+    // ------------------------------------------------------------------------
+    // 3. Clear javascript callbacks.
+    // ------------------------------------------------------------------------
     RemoveJavascriptCallbacksForFrame(frame);
 }
 

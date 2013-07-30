@@ -19,6 +19,8 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     cdef PyFrame pyFrame
     # long long
     cdef object frameId = cefFrame.get().GetIdentifier()
+    cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
+    assert (frameId and browserId), "frameId or browserId empty"
 
     if frameId in g_pyFrames:
         return g_pyFrames[frameId]
@@ -30,7 +32,7 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
             del g_pyFrames[id]
 
     # Debug("GetPyFrame(): creating new PyFrame, frameId=%s" % frameId)
-    pyFrame = PyFrame()
+    pyFrame = PyFrame(browserId, frameId)
     pyFrame.cefFrame = cefFrame
     g_pyFrames[frameId] = pyFrame
     return pyFrame
@@ -38,11 +40,31 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 cdef void RemovePyFrame(int frameId) except *:
     # Called from V8ContextHandler_OnContextReleased().
     # TODO: call this function also in CEF 1, currently called only in CEF 3.
-    Debug("del g_pyFrames[%s]" % frameId)
-    del g_pyFrames[frameId]
+    global g_pyFrames
+    if g_pyFrames.has_key(frameId):
+        Debug("del g_pyFrames[%s]" % frameId)
+        del g_pyFrames[frameId]
+    else:
+        Debug("RemovePyFrame() FAILED: frame not found, id = %s" % frameId)
+
+cdef void RemovePyFramesForBrowser(int browserId) except *:
+    # Called from LifespanHandler_BeforeClose().
+    # TODO: call this function also in CEF 1, currently called only in CEF 3.
+    cdef list toRemove = []
+    cdef object frameId
+    cdef PyFrame pyFrame
+    global g_pyFrames
+    for frameId, pyFrame in g_pyFrames.iteritems():
+        if pyFrame.GetBrowserIdentifier() == browserId:
+            toRemove.append(frameId)
+    for frameId in toRemove:
+        Debug("del g_pyFrames[%s]" % frameId)
+        del g_pyFrames[frameId]
 
 cdef class PyFrame:
     cdef CefRefPtr[CefFrame] cefFrame
+    cdef int browserId
+    cdef object frameId
 
     cdef CefRefPtr[CefFrame] GetCefFrame(self) except *:
         # Do not call IsValid() here, if the frame does not exist
@@ -52,8 +74,9 @@ cdef class PyFrame:
             return self.cefFrame
         raise Exception("PyFrame.GetCefFrame() failed: CefFrame was destroyed")
 
-    def __init__(self):
-        pass
+    def __init__(self, int browserId, int frameId):
+        self.browserId = browserId
+        self.frameId = frameId
 
     cpdef cpp_bool IsValid(self) except *:
         if <void*>self.cefFrame != NULL and self.cefFrame.get() \
@@ -122,7 +145,16 @@ cdef class PyFrame:
         pass
 
     cpdef object GetIdentifier(self):
-        return self.GetCefFrame().get().GetIdentifier()
+        # It is better to save browser and frame identifiers during
+        # browser instantiation. When freeing PyBrowser and PyFrame
+        # we need these identifiers. CefFrame and CefBrowser may already
+        # be freed and calling methods on these objects may fail, this
+        # may or may not include GetIdentifier() method, but let's be sure.
+        return self.frameId
+        # OFF: return self.GetCefFrame().get().GetIdentifier()
+
+    cpdef int GetBrowserIdentifier(self) except *:
+        return self.browserId
 
     cpdef str GetName(self):
 

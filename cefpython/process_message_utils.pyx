@@ -156,6 +156,7 @@ cdef dict CefDictionaryValueToPyDict(
 # -----------------------------------------------------------------------------
 
 cdef CefRefPtr[CefListValue] PyListToCefListValue(
+        int browserId,
         object frameId,
         list pyList,
         int nestingLevel=0) except *:
@@ -188,15 +189,16 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
         elif valueType == bytes or valueType == unicode:
             ret.get().SetString(index, PyToCefStringValue(str(value)))
         elif valueType == dict:
-            ret.get().SetDictionary(index, PyDictToCefDictionaryValue(frameId,
-                    value, nestingLevel + 1))
+            ret.get().SetDictionary(index, PyDictToCefDictionaryValue(
+                    browserId, frameId, value, nestingLevel + 1))
         elif valueType == list or valueType == tuple:
             if valueType == tuple:
                 value = list(value)
-            ret.get().SetList(index, PyListToCefListValue(frameId, value, 
-                    nestingLevel + 1))
+            ret.get().SetList(index, PyListToCefListValue(
+                    browserId, frameId, value, nestingLevel + 1))
         elif valueType == types.FunctionType or valueType == types.MethodType:
-            ret.get().SetBinary(index, PutPythonCallback(frameId, value))
+            ret.get().SetBinary(index, PutPythonCallback(
+                    browserId, frameId, value))
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
@@ -207,6 +209,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
     return ret
 
 cdef void PyListToExistingCefListValue(
+        int browserId,
         object frameId,
         list pyList,
         CefRefPtr[CefListValue] cefListValue,
@@ -243,17 +246,17 @@ cdef void PyListToExistingCefListValue(
             cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
         elif valueType == dict:
             cefListValue.get().SetDictionary(index, PyDictToCefDictionaryValue(
-                    frameId, value, nestingLevel + 1))
+                    browserId, frameId, value, nestingLevel + 1))
         elif valueType == list or valueType == tuple:
             if valueType == tuple:
                 value = list(value)
             newCefListValue = CefListValue_Create()
-            PyListToExistingCefListValue(frameId, value, newCefListValue, 
-                    nestingLevel + 1)
+            PyListToExistingCefListValue(browserId, frameId, value, 
+                    newCefListValue, nestingLevel + 1)
             cefListValue.get().SetList(index, newCefListValue)
         elif valueType == types.FunctionType or valueType == types.MethodType:
             cefListValue.get().SetBinary(index, PutPythonCallback(
-                        frameId, value))
+                        browserId, frameId, value))
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
@@ -263,6 +266,7 @@ cdef void PyListToExistingCefListValue(
             cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
 
 cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
+        int browserId,
         object frameId,
         dict pyDict,
         int nestingLevel=0) except *:
@@ -299,14 +303,15 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
             ret.get().SetString(cefKey, PyToCefStringValue(str(value)))
         elif valueType == dict:
             ret.get().SetDictionary(cefKey, PyDictToCefDictionaryValue(
-                    frameId, value, nestingLevel + 1))
+                    browserId, frameId, value, nestingLevel + 1))
         elif valueType == list or valueType == tuple:
             if valueType == tuple:
                 value = list(value)
-            ret.get().SetList(cefKey, PyListToCefListValue(frameId, value, 
-                    nestingLevel + 1))
+            ret.get().SetList(cefKey, PyListToCefListValue(
+                    browserId, frameId, value, nestingLevel + 1))
         elif valueType == types.FunctionType or valueType == types.MethodType:
-            ret.get().SetBinary(cefKey, PutPythonCallback(frameId, value))
+            ret.get().SetBinary(cefKey, PutPythonCallback(
+                    browserId, frameId, value))
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
