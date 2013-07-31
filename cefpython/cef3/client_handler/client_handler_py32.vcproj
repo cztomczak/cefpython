@@ -149,6 +149,10 @@
 				RelativePath=".\client_handler.h"
 				>
 			</File>
+            <File
+                RelativePath=".\cookie_visitor.h"
+                >
+            </File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -165,6 +169,10 @@
 				RelativePath=".\client_handler.cpp"
 				>
 			</File>
+            <File
+                RelativePath=".\cookie_visitor.cpp"
+                >
+            </File>
 		</Filter>
 	</Files>
 	<Globals>

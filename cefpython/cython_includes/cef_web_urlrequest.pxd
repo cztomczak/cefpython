@@ -5,7 +5,7 @@
 from cef_base cimport CefBase
 from cef_ptr cimport CefRefPtr
 cimport cef_types
-from cef_request cimport CefRequest
+from cef_request_cef1 cimport CefRequest
 
 cdef extern from "include/cef_web_urlrequest.h":
     cdef cppclass CefWebURLRequest(CefBase):

@@ -208,5 +208,187 @@ def OnKeyEvent(self, browser, event, eventHandle):
             browser.ReloadIgnoreCache()
 </pre>
 
+
+
+
+<h3>Request handler</h3>
+<pre>
+def OnBeforeResourceLoad(self, browser, frame, request):
+    print("RequestHandler::OnBeforeResourceLoad()")
+    print("url = %s" % request.GetUrl())
+    return False
+</pre>
+See messages in the console.
+
+<pre>
+def OnResourceRedirect(self, browser, frame, oldUrl, newUrlOut):
+    print("RequestHandler::OnResourceRedirect()")
+    print("old url = %s" % oldUrl)
+    print("new url = %s" % newUrlOut[0])
+</pre>
+Try this:
+<a href="http://tinyurl.com/google404redirect">
+    http://tinyurl.com/google404redirect</a>    
+
+<pre>
+def GetAuthCredentials(self, browser, frame, isProxy, host, port, realm,
+        scheme, callback):
+    print("RequestHandler::GetAuthCredentials()")
+    print("host = %s" % host)
+    print("realm = %s" % realm)
+    callback.Continue(username="test", password="test")
+    return True
+</pre>
+Try this:
+<a href="http://browserspy.dk/password-ok.php">
+    http://browserspy.dk/password-ok.php</a>
+
+<pre>
+def OnQuotaRequest(self, browser, originUrl, newSize, callback):
+    print("RequestHandler::OnQuotaRequest()")
+    print("origin url = %s" % originUrl)
+    print("new size = %s" % newSize)
+    callback.Continue(True)
+    return True
+</pre>
+<pre>
+&lt;script&gt;
+function DoRequestQuota() {
+    // Request Quota (only for File System API)  
+    try {
+        navigator.webkitPersistentStorage.requestQuota(PERSISTENT, 1024*1024,
+                function(bytes){ window.alert("Granted bytes: "+bytes);},
+                function(error){ window.alert(error); });
+    } catch(e) {
+        navigator.webkitPersistentStorage.requestQuota(1024*1024,
+                function(bytes){ window.alert("Granted bytes: "+bytes);},
+                function(error){ window.alert(error); });
+    }
+}
+&lt;/script&gt;
+</pre>
+<script>
+function DoRequestQuota() {
+    // Request Quota (only for File System API)  
+    try {
+        navigator.webkitPersistentStorage.requestQuota(PERSISTENT, 1024*1024,
+                function(bytes){ window.alert("Granted bytes: "+bytes);},
+                function(error){ window.alert(error); });
+    } catch(e) {
+        navigator.webkitPersistentStorage.requestQuota(1024*1024,
+                function(bytes){ window.alert("Granted bytes: "+bytes);},
+                function(error){ window.alert(error); });
+    }
+}
+</script>
+Try this: 
+<a href="https://googledrive.com/host/0B1di2XiBBfacMnhRRkI1YlotUEk/requestquota.html">
+    https://googledrive.com/host/0B1di2XiBBfacMnhRRkI1YlotUEk/requestquota.html</a>
+
+<pre>
+def OnProtocolExecution(self, browser, url, allowExecutionOut):
+    # This callback seems not to work on Linux, see here:
+    # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+    print("RequestHandler::OnProtocolExecution()")
+    print("url = %s" % url)
+    if url.startswith("magnet:"):
+        print("Magnet link allowed!")
+        allowExecutionOut[0] = True
+</pre>
+Try this:
+<a href="magnet:?xt=urn:btih:a4224b45b27f436374391379cc5c7e629e2e5189">
+    magnet:?xt=urn:btih:a4224b45b27f436374391379cc5c7e629e2e5189</a>
+
+<pre>
+def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
+    # This callback seems not to work on Linux, reported here:
+    # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+    print("RequestHandler::OnBeforePluginLoad()")
+    print("url = %s" % url)
+    print("policy url = %s" % policyUrl)
+    print("info.GetName() = %s" % info.GetName())
+    print("info.GetPath() = %s" % info.GetPath())
+    print("info.GetVersion() = %s" % info.GetVersion())
+    print("info.GetDescription() = %s" % info.GetDescription())
+    # False to allow, True to block plugin.
+    return False
+</pre>
+If you have Flash installed then you should already see a message
+in the console.
+
+<pre>
+def _OnCertificateError(self, certError, requestUrl, callback):
+    print("RequestHandler::OnCertificateError()")
+    print("certError = %s" % certError)
+    print("requestUrl = %s" % requestUrl)
+    if requestUrl.startswith(
+            "https://sage.math.washington.edu:8091/do-not-allow"):
+        print("Not allowed!")
+        return False
+    if requestUrl.startswith(
+            "https://sage.math.washington.edu:8091/hudson/job/"):
+        print("Allowed!")
+        callback.Continue(True)
+        return True
+    return False
+</pre>
+This won't be allowed:
+<a href="https://sage.math.washington.edu:8091/do-not-allow">
+    https://sage.math.washington.edu:8091/do-not-allow</a>
+<br>
+This will be allowed:
+<a href="https://sage.math.washington.edu:8091/hudson/job/cython-docs/">
+    https://sage.math.washington.edu:8091/hudson/job/cython-docs/</a>
+
+
+<h3>Cookie tests</h3>
+
+See messages in the console.
+
+<pre>
+def GetCookieManager(self, browser, mainUrl):
+    # Create unique cookie manager for each browser.
+    # Buggy IO thread callbacks, need to update to revision 1306, see:
+    # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+    cookieManager = browser.GetUserData("cookieManager")
+    if cookieManager:
+        return cookieManager
+    else:
+        cookieManager = cefpython.CookieManager.CreateManager("")
+        browser.SetUserData("cookieManager", cookieManager)
+        return cookieManager
+</pre>
+
+RequestHandler.GetCookieManager() - an example of having an unique
+cookie manager for each browser. Visit 
+<a href="http://www.html-kit.com/tools/cookietester/">
+    http://www.html-kit.com/tools/cookietester/</a> and set some cookie,
+then go back to this page using the context menu and open a 
+<a href="javascript:window.open('http://www.html-kit.com/tools/cookietester/')">
+    new popup window</a>, the cookie should not appear in the popup browser window.
+<br><br>
+
+CookieManager.VisitAllCookies() - visit all cookies: 
+<a href="javascript:external.VisitAllCookies()">external.VisitAllCookies()</a>
+(note: visit some http:// webpage first, otherwise cookie manager is not
+yet created)
+<br><br>
+
+CookieManager.VisitUrlCookies("http://www.html-kit.com/tools/cookietester/")
+- visit a subset of cookies given the url, test:
+<a href="javascript:external.VisitUrlCookies()">external.VisitUrlCookies()</a>
+<br><br>
+
+CookieManager.SetCookie("http://www.html-kit.com/tools/cookietester/",
+    {name:"Created_Via_Python", value:"yeah really"}) - create the cookie: 
+    <a href="javascript:external.SetCookie()">external.SetCookie()</a>
+<br><br>
+
+CookieManager.DeleteCookies() - delete the single cookie previously created 
+via SetCookie(): <a href="javascript:external.DeleteCookies()">
+    external.DeleteCookies()</a>
+<br><br>
+
+
 </body>
 </html>

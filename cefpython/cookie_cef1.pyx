@@ -180,7 +180,7 @@ class CookieManager:
         global g_globalCookieManager
         cdef CefRefPtr[CefCookieManager] cefCookieManager
         if not g_globalCookieManager:
-            cefCookieManager = cef_cookie_static.GetGlobalManager()
+            cefCookieManager = CefCookieManager_GetGlobalManager()
             g_globalCookieManager = CreatePyCookieManager(cefCookieManager)
         return g_globalCookieManager
 
@@ -188,10 +188,10 @@ class CookieManager:
     def CreateManager(py_string path, py_bool persistSessionCookies=False):
         cdef CefRefPtr[CefCookieManager] cefCookieManager
         IF CEF_VERSION == 1:
-            cefCookieManager = cef_cookie_static.CreateManager(
+            cefCookieManager = CefCookieManager_CreateManager(
                     PyToCefStringValue(path))
         ELIF CEF_VERSION == 3:
-            cefCookieManager = cef_cookie_static.CreateManager(
+            cefCookieManager = CefCookieManager_CreateManager(
                     PyToCefStringValue(path), bool(persistSessionCookies))
         if <void*>cefCookieManager != NULL and cefCookieManager.get():
             return CreatePyCookieManager(cefCookieManager)

@@ -1,6 +1,12 @@
+include "compile_time_constants.pxi"
+
 from libcpp cimport bool as cpp_bool
 from cef_string cimport CefString
-from cef_cookie cimport CefCookie
+
+IF CEF_VERSION == 1:
+    from cef_cookie_cef1 cimport CefCookie
+ELIF CEF_VERSION == 3:
+    from cef_cookie_cef3 cimport CefCookie
 
 # We need to pass C++ class methods by reference to a function,
 # it is not possible with such syntax:

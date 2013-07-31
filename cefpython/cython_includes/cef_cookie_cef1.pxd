@@ -21,7 +21,10 @@ cdef extern from "include/cef_cookie.h":
         cef_time_t last_access
         cpp_bool has_expires
         cef_time_t expires
-
+    cdef CefRefPtr[CefCookieManager] CefCookieManager_GetGlobalManager \
+            "CefCookieManager::GetGlobalManager"()
+    cdef CefRefPtr[CefCookieManager] CefCookieManager_CreateManager \
+            "CefCookieManager::CreateManager"(const CefString& path)
     cdef cppclass CefCookieManager:
         void SetSupportedSchemes(const cpp_vector[CefString]& schemes)
         cpp_bool VisitAllCookies(CefRefPtr[CefCookieVisitor] visitor)
