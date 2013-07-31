@@ -90,6 +90,8 @@ g_debugFile = None
 # https://groups.google.com/d/topic/cython-users/0dw3UASh7HY/discussion
 g_applicationSettings = {}
 
+cdef dict g_globalClientCallbacks = {}
+
 # All .pyx files need to be included here.
 
 include "cython_includes/compile_time_constants.pxi"
@@ -104,9 +106,6 @@ include "time_utils.pyx"
 include "window_info.pyx"
 include "browser.pyx"
 include "frame.pyx"
-
-IF CEF_VERSION == 1:
-    include "cookie.pyx"
 
 include "settings.pyx"
 IF UNAME_SYSNAME == "Windows":
@@ -123,14 +122,15 @@ ELIF UNAME_SYSNAME == "Linux":
 include "javascript_bindings.pyx"
 
 IF CEF_VERSION == 1:
+    include "cookie_cef1.pyx"
     include "load_handler.pyx"
     include "keyboard_handler_cef1.pyx"
     include "virtual_keys.pyx"
-    include "request.pyx"
+    include "request_cef1.pyx"
     include "web_request.pyx"
     include "stream.pyx"
     include "content_filter.pyx"
-    include "request_handler.pyx"
+    include "request_handler_cef1.pyx"
     include "response.pyx"
     include "display_handler_cef1.pyx"
     include "lifespan_handler_cef1.pyx"
@@ -155,6 +155,10 @@ IF CEF_VERSION == 3:
     include "lifespan_handler_cef3.pyx"
     include "display_handler_cef3.pyx"
     include "keyboard_handler_cef3.pyx"
+    include "web_plugin_info_cef3.pyx"
+    include "request_cef3.pyx"
+    include "request_handler_cef3.pyx"
+    include "cookie_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,
@@ -288,3 +292,18 @@ def QuitMessageLoop():
 def Shutdown():
     Debug("Shutdown()")
     CefShutdown()
+
+cpdef py_void SetGlobalClientCallback(py_string name, object callback):
+    global g_globalClientCallbacks
+    if name in ["OnCertificateError", "OnBeforePluginLoad"]:
+        g_globalClientCallbacks[name] = callback
+    else:
+        raise Exception("SetGlobalClientCallback() failed: " \
+                "invalid callback name = %s" % name)
+
+cpdef object GetGlobalClientCallback(py_string name):
+    global g_globalClientCallbacks
+    if g_globalClientCallbacks.has_key(name):
+        return g_globalClientCallbacks[name]
+    else:
+        return None

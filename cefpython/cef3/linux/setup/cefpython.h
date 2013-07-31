@@ -26,6 +26,15 @@ __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnStatusMessage(CefRefPtr<CefBrows
 __PYX_EXTERN_C DL_IMPORT(bool) DisplayHandler_OnConsoleMessage(CefRefPtr<CefBrowser>, CefString const &, CefString const &, int);
 __PYX_EXTERN_C DL_IMPORT(bool) KeyboardHandler_OnPreKeyEvent(CefRefPtr<CefBrowser>, CefKeyEvent const &, CefEventHandle, bool *);
 __PYX_EXTERN_C DL_IMPORT(bool) KeyboardHandler_OnKeyEvent(CefRefPtr<CefBrowser>, CefKeyEvent const &, CefEventHandle);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforeResourceLoad(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefRequest>);
+__PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnResourceRedirect(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString const &, CefString &);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_GetAuthCredentials(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, bool, CefString const &, int, CefString const &, CefString const &, CefRefPtr<CefAuthCallback>);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnQuotaRequest(CefRefPtr<CefBrowser>, CefString const &, int64, CefRefPtr<CefQuotaCallback>);
+__PYX_EXTERN_C DL_IMPORT(CefRefPtr<CefCookieManager>) RequestHandler_GetCookieManager(CefRefPtr<CefBrowser>, CefString const &);
+__PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnProtocolExecution(CefRefPtr<CefBrowser>, CefString const &, bool &);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforePluginLoad(CefRefPtr<CefBrowser>, CefString const &, CefString const &, CefRefPtr<CefWebPluginInfo>);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnCertificateError(int, CefString const &, CefRefPtr<CefAllowCertificateErrorCallback>);
+__PYX_EXTERN_C DL_IMPORT(bool) CookieVisitor_Visit(int, CefCookie const &, int, int, bool &);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 

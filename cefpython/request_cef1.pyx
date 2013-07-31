@@ -21,8 +21,7 @@ class Request:
 
     @staticmethod
     def CreateRequest():
-        cdef CefRefPtr[CefRequest] cefRequest = (
-                cef_request_static.CreateRequest())
+        cdef CefRefPtr[CefRequest] cefRequest = CefRequest_Create()
         cdef PyRequest pyRequest = CreatePyRequest(cefRequest)
         return pyRequest
 
@@ -119,18 +118,15 @@ cdef class PyRequest:
         if type(pyPostData) == list:
             for pyElement in pyPostData:
                 if pyElement.startswith('--'):
-                    postDataElement = (
-                            cef_request_static.CreatePostDataElement())
+                    postDataElement = CefPostDataElement_Create()
                     postDataElement.get().SetToBytes(len(pyElement), 
                             <char*>pyElement)
                 elif pyElement.startswith('@'):
-                    postDataElement = (
-                            cef_request_static.CreatePostDataElement())
+                    postDataElement = CefPostDataElement_Create()
                     PyToCefString(pyElement[1:], sfile)
                     postDataElement.get().SetToFile(sfile)
                 elif not pyElement:
-                    postDataElement = (
-                            cef_request_static.CreatePostDataElement())
+                    postDataElement = CefPostDataElement_Create()
                     postDataElement.get().SetToEmpty()
                 else:
                     raise Exception("Invalid element in postData: %s" % (
@@ -139,8 +135,7 @@ cdef class PyRequest:
         elif type(pyPostData) == dict:
             pyElement = urllib.urlencode(pyPostData)
             pyElement = str(pyElement)
-            postDataElement = (
-                    cef_request_static.CreatePostDataElement())
+            postDataElement = CefPostDataElement_Create()
             postDataElement.get().SetToBytes(len(pyElement), <char*>pyElement)
             postData.get().AddElement(postDataElement)
         else:

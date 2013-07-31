@@ -105,7 +105,12 @@ class MainFrame(wx.Frame):
             browserSettings={"plugins_disabled": False},
             navigateUrl="file://"+GetApplicationPath("wxpython.html"))
 
-        self.browser.SetClientHandler(ClientHandler())
+        clientHandler = ClientHandler()
+        self.browser.SetClientHandler(clientHandler)
+        cefpython.SetGlobalClientCallback("OnCertificateError",
+                clientHandler._OnCertificateError)
+        cefpython.SetGlobalClientCallback("OnBeforePluginLoad",
+                clientHandler._OnBeforePluginLoad)
 
         jsBindings = cefpython.JavascriptBindings(
             bindToFrames=False, bindToPopups=True)
@@ -181,36 +186,96 @@ class JavascriptExternal:
         self.mainBrowser.GetMainFrame().ExecuteJavascript(
                 "window.alert(\"%s\")" % message)
 
+    # -------------------------------------------------------------------------
+    # Cookies
+    # -------------------------------------------------------------------------
+    cookieVisitor = None
+
+    def VisitAllCookies(self):
+        # Need to keep the reference alive.
+        self.cookieVisitor = CookieVisitor()
+        cookieManager = self.mainBrowser.GetUserData("cookieManager")
+        if not cookieManager:
+            print("\nCookie manager not yet created! Visit http website first")
+            return
+        cookieManager.VisitAllCookies(self.cookieVisitor)
+
+    def VisitUrlCookies(self):
+        # Need to keep the reference alive.
+        self.cookieVisitor = CookieVisitor()
+        cookieManager = self.mainBrowser.GetUserData("cookieManager")
+        if not cookieManager:
+            print("\nCookie manager not yet created! Visit http website first")
+            return
+        cookieManager.VisitUrlCookies(
+            "http://www.html-kit.com/tools/cookietester/",
+            False, self.cookieVisitor)
+        # .www.html-kit.com
+
+    def SetCookie(self):
+        cookieManager = self.mainBrowser.GetUserData("cookieManager")
+        if not cookieManager:
+            print("\nCookie manager not yet created! Visit http website first")
+            return
+        cookie = cefpython.Cookie()
+        cookie.SetName("Created_Via_Python")
+        cookie.SetValue("yeah really")
+        cookieManager.SetCookie("http://www.html-kit.com/tools/cookietester/",
+                cookie)
+        print("\nCookie created! Visit html-kit cookietester to see it")
+
+    def DeleteCookies(self):
+        cookieManager = self.mainBrowser.GetUserData("cookieManager")
+        if not cookieManager:
+            print("\nCookie manager not yet created! Visit http website first")
+            return
+        cookieManager.DeleteCookies(
+                "http://www.html-kit.com/tools/cookietester/",
+                "Created_Via_Python")
+        print("\nCookie deleted! Visit html-kit cookietester to see the result")
+
+class CookieVisitor:
+    def Visit(self, cookie, count, total, deleteCookie):
+        if count == 0:
+            print("\nCookieVisitor.Visit(): total cookies: %s" % total)
+        print("\nCookieVisitor.Visit(): cookie:")
+        print(cookie.Get())
+        # True to continue visiting cookies
+        return True
+
 class ClientHandler:
     # -------------------------------------------------------------------------
     # DisplayHandler
     # -------------------------------------------------------------------------
     def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
             canGoForward):
-        print("ClientHandler::OnLoadingStateChange()")
+        print("DisplayHandler::OnLoadingStateChange()")
         print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
                 % (isLoading, canGoBack, canGoForward))
 
     def OnAddressChange(self, browser, frame, url):
-        print("ClientHandler::OnAddressChange()")
+        print("DisplayHandler::OnAddressChange()")
         print("url = %s" % url)
 
     def OnTitleChange(self, browser, title):
-        print("ClientHandler::OnTitleChange()")
+        print("DisplayHandler::OnTitleChange()")
         print("title = %s" % title)
 
     def OnTooltip(self, browser, textOut):
-        print("ClientHandler::OnTooltip()")
+        print("DisplayHandler::OnTooltip()")
         print("text = %s" % textOut[0])
         # OnTooltip seems not to work on Linux, reported bug on the CEF forum:
         # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10898
 
     def OnStatusMessage(self, browser, value):
-        print("ClientHandler::OnStatusMessage()")
+        if not value:
+            # Do not notify in the console about empty statuses.
+            return
+        print("DisplayHandler::OnStatusMessage()")
         print("value = %s" % value)
 
     def OnConsoleMessage(self, browser, message, source, line):
-        print("ClientHandler::OnConsoleMessage()")
+        print("DisplayHandler::OnConsoleMessage()")
         print("message = %s" % message)
         print("source = %s" % source)
         print("line = %s" % line)
@@ -220,16 +285,93 @@ class ClientHandler:
     # -------------------------------------------------------------------------
     def OnPreKeyEvent(self, browser, event, eventHandle, 
             isKeyboardShortcutOut):
-        print("ClientHandler::OnPreKeyEvent()")
+        print("KeyboardHandler::OnPreKeyEvent()")
 
     def OnKeyEvent(self, browser, event, eventHandle):
-        print("ClientHandler::OnKeyEvent()")
+        print("KeyboardHandler::OnKeyEvent()")
         print("native_key_code = %s" % event["native_key_code"])
         if platform.system() == "Linux":
             # F5 = 71
             if event["native_key_code"] == 71:
                 print("F5 pressed! Reloading page..")
                 browser.ReloadIgnoreCache()
+
+    # -------------------------------------------------------------------------
+    # RequestHandler
+    # -------------------------------------------------------------------------
+    def OnBeforeResourceLoad(self, browser, frame, request):
+        print("RequestHandler::OnBeforeResourceLoad()")
+        print("url = %s" % request.GetUrl())
+        return False
+
+    def OnResourceRedirect(self, browser, frame, oldUrl, newUrlOut):
+        print("RequestHandler::OnResourceRedirect()")
+        print("old url = %s" % oldUrl)
+        print("new url = %s" % newUrlOut[0])
+
+    def GetAuthCredentials(self, browser, frame, isProxy, host, port, realm,
+            scheme, callback):
+        print("RequestHandler::GetAuthCredentials()")
+        print("host = %s" % host)
+        print("realm = %s" % realm)
+        callback.Continue(username="test", password="test")
+        return True
+
+    def OnQuotaRequest(self, browser, originUrl, newSize, callback):
+        print("RequestHandler::OnQuotaRequest()")
+        print("origin url = %s" % originUrl)
+        print("new size = %s" % newSize)
+        callback.Continue(True)
+        return True
+
+    def GetCookieManager(self, browser, mainUrl):
+        # Create unique cookie manager for each browser.
+        # Buggy IO thread callbacks, need to update to revision 1306, see:
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+        cookieManager = browser.GetUserData("cookieManager")
+        if cookieManager:
+            return cookieManager
+        else:
+            cookieManager = cefpython.CookieManager.CreateManager("")
+            browser.SetUserData("cookieManager", cookieManager)
+            return cookieManager
+
+    def OnProtocolExecution(self, browser, url, allowExecutionOut):
+        # This callback seems not to work on Linux, see here:
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+        print("RequestHandler::OnProtocolExecution()")
+        print("url = %s" % url)
+        if url.startswith("magnet:"):
+            print("Magnet link allowed!")
+            allowExecutionOut[0] = True
+
+    def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
+        # This callback seems not to work on Linux, reported here:
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+        print("RequestHandler::OnBeforePluginLoad()")
+        print("url = %s" % url)
+        print("policy url = %s" % policyUrl)
+        print("info.GetName() = %s" % info.GetName())
+        print("info.GetPath() = %s" % info.GetPath())
+        print("info.GetVersion() = %s" % info.GetVersion())
+        print("info.GetDescription() = %s" % info.GetDescription())
+        # False to allow, True to block plugin.
+        return False
+
+    def _OnCertificateError(self, certError, requestUrl, callback):
+        print("RequestHandler::OnCertificateError()")
+        print("certError = %s" % certError)
+        print("requestUrl = %s" % requestUrl)
+        if requestUrl.startswith(
+                "https://sage.math.washington.edu:8091/do-not-allow"):
+            print("Not allowed!")
+            return False
+        if requestUrl.startswith(
+                "https://sage.math.washington.edu:8091/hudson/job/"):
+            print("Allowed!")
+            callback.Continue(True)
+            return True
+        return False
 
 class MyApp(wx.App):
     timer = None

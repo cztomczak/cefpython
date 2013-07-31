@@ -339,3 +339,161 @@ bool ClientHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser,
     return KeyboardHandler_OnKeyEvent(browser, event, os_event);
     // Default: return false;
 }
+
+// --------------------------------------------------------------------------
+// CefRequestHandler
+// --------------------------------------------------------------------------
+
+///
+// Implement this interface to handle events related to browser requests. The
+// methods of this class will be called on the thread indicated.
+///
+
+///
+// Called on the IO thread before a resource request is loaded. The |request|
+// object may be modified. To cancel the request return true otherwise return
+// false.
+///
+/*--cef()--*/
+bool ClientHandler::OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
+                                CefRefPtr<CefFrame> frame,
+                                CefRefPtr<CefRequest> request) {
+    REQUIRE_IO_THREAD();
+    return RequestHandler_OnBeforeResourceLoad(browser, frame, request);
+    // Default: return false;
+}
+
+///
+// Called on the IO thread before a resource is loaded. To allow the resource
+// to load normally return NULL. To specify a handler for the resource return
+// a CefResourceHandler object. The |request| object should not be modified in
+// this callback.
+///
+/*--cef()--*/
+CefRefPtr<CefResourceHandler> ClientHandler::GetResourceHandler(
+                                            CefRefPtr<CefBrowser> browser,
+                                            CefRefPtr<CefFrame> frame,
+                                            CefRefPtr<CefRequest> request) {
+    REQUIRE_IO_THREAD();
+    // Not yet implemented.
+    return NULL;
+}
+
+///
+// Called on the IO thread when a resource load is redirected. The |old_url|
+// parameter will contain the old URL. The |new_url| parameter will contain
+// the new URL and can be changed if desired.
+///
+/*--cef()--*/
+void ClientHandler::OnResourceRedirect(CefRefPtr<CefBrowser> browser,
+                              CefRefPtr<CefFrame> frame,
+                              const CefString& old_url,
+                              CefString& new_url) {
+    REQUIRE_IO_THREAD();
+    RequestHandler_OnResourceRedirect(browser, frame, old_url, new_url);
+}
+
+///
+// Called on the IO thread when the browser needs credentials from the user.
+// |isProxy| indicates whether the host is a proxy server. |host| contains the
+// hostname and |port| contains the port number. Return true to continue the
+// request and call CefAuthCallback::Continue() when the authentication
+// information is available. Return false to cancel the request.
+///
+/*--cef(optional_param=realm)--*/
+bool ClientHandler::GetAuthCredentials(CefRefPtr<CefBrowser> browser,
+                              CefRefPtr<CefFrame> frame,
+                              bool isProxy,
+                              const CefString& host,
+                              int port,
+                              const CefString& realm,
+                              const CefString& scheme,
+                              CefRefPtr<CefAuthCallback> callback) {
+    REQUIRE_IO_THREAD();
+    return RequestHandler_GetAuthCredentials(browser, frame, isProxy, host, 
+            port, realm, scheme, callback);
+    // Default: return false;
+}
+
+///
+// Called on the IO thread when JavaScript requests a specific storage quota
+// size via the webkitStorageInfo.requestQuota function. |origin_url| is the
+// origin of the page making the request. |new_size| is the requested quota
+// size in bytes. Return true and call CefQuotaCallback::Continue() either in
+// this method or at a later time to grant or deny the request. Return false
+// to cancel the request.
+///
+/*--cef(optional_param=realm)--*/
+bool ClientHandler::OnQuotaRequest(CefRefPtr<CefBrowser> browser,
+                          const CefString& origin_url,
+                          int64 new_size,
+                          CefRefPtr<CefQuotaCallback> callback) {
+    REQUIRE_IO_THREAD();
+    return RequestHandler_OnQuotaRequest(browser, origin_url, new_size,
+            callback);
+    // Default: return false;
+}
+
+///
+// Called on the IO thread to retrieve the cookie manager. |main_url| is the
+// URL of the top-level frame. Cookies managers can be unique per browser or
+// shared across multiple browsers. The global cookie manager will be used if
+// this method returns NULL.
+///
+/*--cef()--*/
+CefRefPtr<CefCookieManager> ClientHandler::GetCookieManager(
+                                              CefRefPtr<CefBrowser> browser,
+                                              const CefString& main_url) {
+    REQUIRE_IO_THREAD();
+    return RequestHandler_GetCookieManager(browser, main_url);
+    // Default: return NULL.
+}
+
+///
+// Called on the UI thread to handle requests for URLs with an unknown
+// protocol component. Set |allow_os_execution| to true to attempt execution
+// via the registered OS protocol handler, if any.
+// SECURITY WARNING: YOU SHOULD USE THIS METHOD TO ENFORCE RESTRICTIONS BASED
+// ON SCHEME, HOST OR OTHER URL ANALYSIS BEFORE ALLOWING OS EXECUTION.
+///
+/*--cef()--*/
+void ClientHandler::OnProtocolExecution(CefRefPtr<CefBrowser> browser,
+                               const CefString& url,
+                               bool& allow_os_execution) {
+    REQUIRE_UI_THREAD();
+    RequestHandler_OnProtocolExecution(browser, url, allow_os_execution);
+}
+
+///
+// Called on the browser process IO thread before a plugin is loaded. Return
+// true to block loading of the plugin.
+///
+/*--cef(optional_param=url,optional_param=policy_url)--*/
+bool ClientHandler::OnBeforePluginLoad(CefRefPtr<CefBrowser> browser,
+                              const CefString& url,
+                              const CefString& policy_url,
+                              CefRefPtr<CefWebPluginInfo> info) {
+    REQUIRE_IO_THREAD();
+    return RequestHandler_OnBeforePluginLoad(browser, url, policy_url, info);
+    // Default: return false;
+}
+
+///
+// Called on the UI thread to handle requests for URLs with an invalid
+// SSL certificate. Return true and call CefAllowCertificateErrorCallback::
+// Continue() either in this method or at a later time to continue or cancel
+// the request. Return false to cancel the request immediately. If |callback|
+// is empty the error cannot be recovered from and the request will be
+// canceled automatically. If CefSettings.ignore_certificate_errors is set
+// all invalid certificates will be accepted without calling this method.
+///
+/*--cef()--*/
+bool ClientHandler::OnCertificateError(
+                      cef_errorcode_t cert_error,
+                      const CefString& request_url,
+                      CefRefPtr<CefAllowCertificateErrorCallback> callback) {
+    REQUIRE_UI_THREAD();
+    return RequestHandler_OnCertificateError(
+            cert_error, request_url, callback);
+    // Default: return false;
+}

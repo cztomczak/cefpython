@@ -39,7 +39,7 @@ ctypedef object py_string
 ctypedef object py_void
 ctypedef long WindowHandle
 
-from python_h cimport *
+from cpython cimport PyLong_FromVoidPtr
 
 from cpython cimport bool as py_bool
 from libcpp cimport bool as cpp_bool
@@ -118,8 +118,7 @@ IF CEF_VERSION == 1:
     cimport cef_v8_static
     cimport cef_v8_stack_trace
     from v8function_handler cimport *
-    from cef_request cimport *
-    cimport cef_request_static
+    from cef_request_cef1 cimport *
     from cef_web_urlrequest cimport *
     cimport cef_web_urlrequest_static
     from web_request_client cimport *
@@ -131,8 +130,7 @@ IF CEF_VERSION == 1:
     from content_filter_handler cimport *
     from cef_download_handler cimport *
     from download_handler cimport *
-    from cef_cookie cimport *
-    cimport cef_cookie_static
+    from cef_cookie_cef1 cimport *
     cimport cef_cookie_manager_namespace
     from cookie_visitor cimport *
     from cef_render_handler cimport *
@@ -146,3 +144,9 @@ IF CEF_VERSION == 3:
     from cef_values cimport *
     from cefpython_app cimport *
     from cef_process_message cimport *
+    from cef_web_plugin_cef3 cimport *
+    from cef_request_handler_cef3 cimport *
+    from cef_request_cef3 cimport *
+    from cef_cookie_cef3 cimport *
+    cimport cef_cookie_manager_namespace
+    from cookie_visitor cimport *

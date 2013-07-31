@@ -206,6 +206,13 @@ cdef class PyBrowser:
                     "OnStatusMessage", "OnConsoleMessage"]
             # CefKeyboardHandler
             self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"];
+            # CefRequestHandler
+            # Note: "OnCertificateError" and "OnBeforePluginLoad" must be 
+            # set using cefpython.SetGlobalClientCallback()
+            self.allowedClientCallbacks += ["OnBeforeResourceLoad",
+                    "OnResourceRedirect", "GetAuthCredentials",
+                    "OnQuotaRequest", "GetCookieManager",
+                    "OnProtocolExecution"]
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
                             "callback: %s" % name)

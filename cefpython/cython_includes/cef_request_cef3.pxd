@@ -5,7 +5,7 @@
 from cef_base cimport CefBase
 from cef_ptr cimport CefRefPtr
 from cef_string cimport CefString
-from cef_types cimport cef_weburlrequest_flags_t, cef_postdataelement_type_t
+from cef_types cimport cef_urlrequest_flags_t, cef_postdataelement_type_t
 from libcpp.vector cimport vector as cpp_vector
 from libcpp cimport bool as cpp_bool
 from multimap cimport multimap as cpp_multimap
@@ -13,9 +13,11 @@ from multimap cimport multimap as cpp_multimap
 cdef extern from "include/cef_request.h":
     # This types won't be visible in pyx files!
     ctypedef cpp_multimap[CefString, CefString] HeaderMap
-    ctypedef cef_weburlrequest_flags_t CefRequestFlags
+    # ctypedef cef_urlrequest_flags_t CefRequestFlags
 
+    cdef CefRefPtr[CefRequest] CefRequest_Create "CefRequest::Create"()
     cdef cppclass CefRequest(CefBase):
+        cpp_bool IsReadOnly()
         CefString GetURL()
         void SetURL(CefString& url)
         CefString GetMethod()
@@ -28,14 +30,17 @@ cdef extern from "include/cef_request.h":
                 CefString& method,
                 CefRefPtr[CefPostData] postData,
                 HeaderMap& headerMap)
-        CefRequestFlags GetFlags()
-        void SetFlags(CefRequestFlags flags)
+        int GetFlags()
+        void SetFlags(int flags)
         CefString GetFirstPartyForCookies()
         void SetFirstPartyForCookies(CefString& url)
 
     ctypedef cpp_vector[CefRefPtr[CefPostDataElement]] ElementVector
 
+    cdef CefRefPtr[CefPostData] CefPostData_Create \
+            "CefPostData::Create"()
     cdef cppclass CefPostData(CefBase):
+        cpp_bool IsReadOnly()
         size_t GetElementCount()
         void GetElements(ElementVector& elements)
         cpp_bool RemoveElement(CefRefPtr[CefPostDataElement] element)
@@ -44,7 +49,10 @@ cdef extern from "include/cef_request.h":
 
     ctypedef cef_postdataelement_type_t ElementType
 
+    cdef CefRefPtr[CefPostDataElement] CefPostDataElement_Create \
+            "CefPostDataElement::Create"()
     cdef cppclass CefPostDataElement(CefBase):
+        cpp_bool IsReadOnly()
         void SetToEmpty()
         void SetToFile(CefString& fileName)
         void SetToBytes(size_t size, void* bytes)

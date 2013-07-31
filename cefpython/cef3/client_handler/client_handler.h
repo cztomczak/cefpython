@@ -14,7 +14,8 @@ class ClientHandler :
 		public CefClient,
         public CefLifeSpanHandler,
         public CefDisplayHandler,
-        public CefKeyboardHandler
+        public CefKeyboardHandler,
+        public CefRequestHandler
 {
 public:
   ClientHandler(){}
@@ -126,7 +127,7 @@ public:
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE {
-    return NULL;
+    return this;
   }
 
   ///
@@ -353,6 +354,128 @@ public:
   virtual bool OnKeyEvent(CefRefPtr<CefBrowser> browser,
                           const CefKeyEvent& event,
                           CefEventHandle os_event) OVERRIDE;
+
+  // --------------------------------------------------------------------------
+  // CefRequestHandler
+  // --------------------------------------------------------------------------
+
+  ///
+  // Implement this interface to handle events related to browser requests. The
+  // methods of this class will be called on the thread indicated.
+  ///
+
+  ///
+  // Called on the IO thread before a resource request is loaded. The |request|
+  // object may be modified. To cancel the request return true otherwise return
+  // false.
+  ///
+  /*--cef()--*/
+  virtual bool OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
+                                    CefRefPtr<CefFrame> frame,
+                                    CefRefPtr<CefRequest> request) OVERRIDE;
+
+  ///
+  // Called on the IO thread before a resource is loaded. To allow the resource
+  // to load normally return NULL. To specify a handler for the resource return
+  // a CefResourceHandler object. The |request| object should not be modified in
+  // this callback.
+  ///
+  /*--cef()--*/
+  virtual CefRefPtr<CefResourceHandler> GetResourceHandler(
+      CefRefPtr<CefBrowser> browser,
+      CefRefPtr<CefFrame> frame,
+      CefRefPtr<CefRequest> request) OVERRIDE;
+
+  ///
+  // Called on the IO thread when a resource load is redirected. The |old_url|
+  // parameter will contain the old URL. The |new_url| parameter will contain
+  // the new URL and can be changed if desired.
+  ///
+  /*--cef()--*/
+  virtual void OnResourceRedirect(CefRefPtr<CefBrowser> browser,
+                                  CefRefPtr<CefFrame> frame,
+                                  const CefString& old_url,
+                                  CefString& new_url) OVERRIDE;
+
+  ///
+  // Called on the IO thread when the browser needs credentials from the user.
+  // |isProxy| indicates whether the host is a proxy server. |host| contains the
+  // hostname and |port| contains the port number. Return true to continue the
+  // request and call CefAuthCallback::Continue() when the authentication
+  // information is available. Return false to cancel the request.
+  ///
+  /*--cef(optional_param=realm)--*/
+  virtual bool GetAuthCredentials(CefRefPtr<CefBrowser> browser,
+                                  CefRefPtr<CefFrame> frame,
+                                  bool isProxy,
+                                  const CefString& host,
+                                  int port,
+                                  const CefString& realm,
+                                  const CefString& scheme,
+                                  CefRefPtr<CefAuthCallback> callback) 
+                                  OVERRIDE;
+
+  ///
+  // Called on the IO thread when JavaScript requests a specific storage quota
+  // size via the webkitStorageInfo.requestQuota function. |origin_url| is the
+  // origin of the page making the request. |new_size| is the requested quota
+  // size in bytes. Return true and call CefQuotaCallback::Continue() either in
+  // this method or at a later time to grant or deny the request. Return false
+  // to cancel the request.
+  ///
+  /*--cef(optional_param=realm)--*/
+  virtual bool OnQuotaRequest(CefRefPtr<CefBrowser> browser,
+                              const CefString& origin_url,
+                              int64 new_size,
+                              CefRefPtr<CefQuotaCallback> callback) OVERRIDE;
+
+  ///
+  // Called on the IO thread to retrieve the cookie manager. |main_url| is the
+  // URL of the top-level frame. Cookies managers can be unique per browser or
+  // shared across multiple browsers. The global cookie manager will be used if
+  // this method returns NULL.
+  ///
+  /*--cef()--*/
+  virtual CefRefPtr<CefCookieManager> GetCookieManager(
+      CefRefPtr<CefBrowser> browser,
+      const CefString& main_url) OVERRIDE;
+
+  ///
+  // Called on the UI thread to handle requests for URLs with an unknown
+  // protocol component. Set |allow_os_execution| to true to attempt execution
+  // via the registered OS protocol handler, if any.
+  // SECURITY WARNING: YOU SHOULD USE THIS METHOD TO ENFORCE RESTRICTIONS BASED
+  // ON SCHEME, HOST OR OTHER URL ANALYSIS BEFORE ALLOWING OS EXECUTION.
+  ///
+  /*--cef()--*/
+  virtual void OnProtocolExecution(CefRefPtr<CefBrowser> browser,
+                                   const CefString& url,
+                                   bool& allow_os_execution) OVERRIDE;
+
+  ///
+  // Called on the browser process IO thread before a plugin is loaded. Return
+  // true to block loading of the plugin.
+  ///
+  /*--cef(optional_param=url,optional_param=policy_url)--*/
+  virtual bool OnBeforePluginLoad(CefRefPtr<CefBrowser> browser,
+                                  const CefString& url,
+                                  const CefString& policy_url,
+                                  CefRefPtr<CefWebPluginInfo> info) OVERRIDE;
+
+  ///
+  // Called on the UI thread to handle requests for URLs with an invalid
+  // SSL certificate. Return true and call CefAllowCertificateErrorCallback::
+  // Continue() either in this method or at a later time to continue or cancel
+  // the request. Return false to cancel the request immediately. If |callback|
+  // is empty the error cannot be recovered from and the request will be
+  // canceled automatically. If CefSettings.ignore_certificate_errors is set
+  // all invalid certificates will be accepted without calling this method.
+  ///
+  /*--cef()--*/
+  virtual bool OnCertificateError(
+      cef_errorcode_t cert_error,
+      const CefString& request_url,
+      CefRefPtr<CefAllowCertificateErrorCallback> callback) OVERRIDE;
 
 private:
    

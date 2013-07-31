@@ -210,6 +210,23 @@ cdef extern from "include/internal/cef_types.h":
           WUR_STATE_ERROR = 5,
           WUR_STATE_ABORT = 6,
 
+    IF CEF_VERSION == 3:
+        enum cef_postdataelement_type_t:
+            PDE_TYPE_EMPTY  = 0,
+            PDE_TYPE_BYTES,
+            PDE_TYPE_FILE,
+            
+        enum cef_urlrequest_flags_t:
+            UR_FLAG_NONE                      = 0,
+            UR_FLAG_SKIP_CACHE                = 1 << 0,
+            UR_FLAG_ALLOW_CACHED_CREDENTIALS  = 1 << 1,
+            UR_FLAG_ALLOW_COOKIES             = 1 << 2,
+            UR_FLAG_REPORT_UPLOAD_PROGRESS    = 1 << 3,
+            UR_FLAG_REPORT_LOAD_TIMING        = 1 << 4,
+            UR_FLAG_REPORT_RAW_HEADERS        = 1 << 5,
+            UR_FLAG_NO_DOWNLOAD_DATA          = 1 << 6,
+            UR_FLAG_NO_RETRY_ON_5XX           = 1 << 7,
+
     # CefListValue, CefDictionaryValue - types.
     IF CEF_VERSION == 3:
         enum cef_value_type_t:
