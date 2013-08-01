@@ -337,8 +337,9 @@ class ClientHandler:
             return cookieManager
 
     def OnProtocolExecution(self, browser, url, allowExecutionOut):
-        # This callback seems not to work on Linux, see here:
-        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+        # There's no default implementation for OnProtocolExecution on Linux,
+        # you have to make OS system call on your own. You probably also need
+        # to use LoadHandler::OnLoadError() when implementing this on Linux.
         print("RequestHandler::OnProtocolExecution()")
         print("url = %s" % url)
         if url.startswith("magnet:"):
