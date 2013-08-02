@@ -6,6 +6,7 @@ include "compile_time_constants.pxi"
 
 from cef_types_linux cimport _cef_key_info_t
 from cef_types_wrappers cimport CefStructBase
+from libcpp cimport bool as cpp_bool
 
 cdef extern from "include/internal/cef_linux.h":
 
@@ -15,6 +16,8 @@ cdef extern from "include/internal/cef_linux.h":
 
     cdef cppclass CefWindowInfo:
         void SetAsChild(CefWindowHandle)
+        void SetAsOffScreen(CefWindowHandle)
+        void SetTransparentPainting(cpp_bool)
 
     IF CEF_VERSION == 3:
         cdef cppclass CefMainArgs(CefStructBase):

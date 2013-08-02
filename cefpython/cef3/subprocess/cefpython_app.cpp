@@ -33,7 +33,6 @@ CefRefPtr<CefBrowserProcessHandler> CefPythonApp::GetBrowserProcessHandler() {
 }
 
 CefRefPtr<CefRenderProcessHandler> CefPythonApp::GetRenderProcessHandler() {
-    DebugLog("Renderer: GetRenderProcessHandler()");
     return this;
 }
 
