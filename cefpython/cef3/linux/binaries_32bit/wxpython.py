@@ -262,14 +262,20 @@ class ClientHandler:
         print("title = %s" % title)
 
     def OnTooltip(self, browser, textOut):
+        # OnTooltip does not work on Linux, will be fixed in next
+        # CEF release, see Issue 783:
+        # https://code.google.com/p/chromiumembedded/issues/detail?id=783
         print("DisplayHandler::OnTooltip()")
         print("text = %s" % textOut[0])
-        # OnTooltip seems not to work on Linux, reported bug on the CEF forum:
-        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10898
 
+    statusMessageCount = 0
     def OnStatusMessage(self, browser, value):
         if not value:
             # Do not notify in the console about empty statuses.
+            return
+        self.statusMessageCount += 1
+        if self.statusMessageCount > 3:
+            # Do not spam too much.
             return
         print("DisplayHandler::OnStatusMessage()")
         print("value = %s" % value)
@@ -301,13 +307,13 @@ class ClientHandler:
     # -------------------------------------------------------------------------
     def OnBeforeResourceLoad(self, browser, frame, request):
         print("RequestHandler::OnBeforeResourceLoad()")
-        print("url = %s" % request.GetUrl())
+        print("url = %s" % request.GetUrl()[:70])
         return False
 
     def OnResourceRedirect(self, browser, frame, oldUrl, newUrlOut):
         print("RequestHandler::OnResourceRedirect()")
-        print("old url = %s" % oldUrl)
-        print("new url = %s" % newUrlOut[0])
+        print("old url = %s" % oldUrl[:70])
+        print("new url = %s" % newUrlOut[0][:70])
 
     def GetAuthCredentials(self, browser, frame, isProxy, host, port, realm,
             scheme, callback):
@@ -326,7 +332,8 @@ class ClientHandler:
 
     def GetCookieManager(self, browser, mainUrl):
         # Create unique cookie manager for each browser.
-        # Buggy IO thread callbacks, need to update to revision 1306, see:
+        # --
+        # Buggy implementation in CEF, reported here:
         # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
         cookieManager = browser.GetUserData("cookieManager")
         if cookieManager:
@@ -347,8 +354,8 @@ class ClientHandler:
             allowExecutionOut[0] = True
 
     def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
-        # This callback seems not to work on Linux, reported here:
-        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+        # Plugins are loaded on demand, only when website requires it,
+        # the same plugin may be called multiple times.
         print("RequestHandler::OnBeforePluginLoad()")
         print("url = %s" % url)
         print("policy url = %s" % policyUrl)

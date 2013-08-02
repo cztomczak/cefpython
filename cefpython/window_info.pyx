@@ -27,29 +27,28 @@ cdef void SetCefWindowInfo(
                 rect.right = int(windowInfo.windowRect[2])
                 rect.bottom = int(windowInfo.windowRect[3])
             else:
-                GetClientRect(<HWND><int>windowInfo.parentWindowHandle, &rect)
-            cefWindowInfo.SetAsChild(<HWND><int>windowInfo.parentWindowHandle, rect)
+                GetClientRect(
+                        <CefWindowHandle>windowInfo.parentWindowHandle, &rect)
+            cefWindowInfo.SetAsChild(
+                    <CefWindowHandle>windowInfo.parentWindowHandle, rect)
         ELIF UNAME_SYSNAME == "Darwin":
-            raise Exception("WindowInfo.SetAsChild() not yet implemented on Mac")
+            raise Exception("WindowInfo.SetAsChild() not implemented on Mac")
         ELIF UNAME_SYSNAME == "Linux":
-            cefWindowInfo.SetAsChild(<CefWindowHandle><WindowHandle>windowInfo.parentWindowHandle)
+            cefWindowInfo.SetAsChild(
+                    <CefWindowHandle>windowInfo.parentWindowHandle)
 
     IF UNAME_SYSNAME == "Windows":
         if windowInfo.windowType == "popup":
             PyToCefString(windowInfo.windowName, cefString)
-            cefWindowInfo.SetAsPopup(<HWND><int>windowInfo.parentWindowHandle, cefString)
+            cefWindowInfo.SetAsPopup(
+                    <CefWindowHandle>windowInfo.parentWindowHandle, cefString)
 
-    IF CEF_VERSION == 1:
-        IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
-            if windowInfo.windowType == "offscreen":
-                cefWindowInfo.SetAsOffScreen(<HWND><int>windowInfo.parentWindowHandle)
-
-    IF CEF_VERSION == 1:
-        IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
-            cefWindowInfo.SetTransparentPainting(int(windowInfo.transparentPainting))
-    ELIF CEF_VERSION == 3:
-        IF UNAME_SYSNAME == "Windows":
-            cefWindowInfo.SetTransparentPainting(int(windowInfo.transparentPainting))
+    IF not (CEF_VERSION == 1 and UNAME_SYSNAME == "Linux"):
+        if windowInfo.windowType == "offscreen":
+            cefWindowInfo.SetAsOffScreen(
+                    <CefWindowHandle>windowInfo.parentWindowHandle)
+        cefWindowInfo.SetTransparentPainting(
+                int(windowInfo.transparentPainting))
 
 cdef class WindowInfo:
     cdef public str windowType
@@ -61,51 +60,46 @@ cdef class WindowInfo:
     def __init__(self):
         self.transparentPainting = False
 
-    cpdef py_void SetAsChild(self, WindowHandle parentWindowHandle, list windowRect=None):
+    cpdef py_void SetAsChild(self, WindowHandle parentWindowHandle,
+            list windowRect=None):
         if not WindowUtils.IsWindowHandle(parentWindowHandle):
-            raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
-
+            raise Exception("Invalid parentWindowHandle: %s" \
+                    % parentWindowHandle)
         self.windowType = "child"
         self.parentWindowHandle = parentWindowHandle
-
         IF UNAME_SYSNAME == "Darwin":
             if not windowRect:
-                raise Exception("WindowInfo.SetAsChild() failed: windowRect is required")
-
+                raise Exception("WindowInfo.SetAsChild() failed: " \
+                        "windowRect is required")
         if windowRect:
             if type(windowRect) == list and len(windowRect) == 4:
-                self.windowRect = [windowRect[0], windowRect[1], windowRect[2], windowRect[3]]
+                self.windowRect = [windowRect[0], windowRect[1], 
+                                   windowRect[2], windowRect[3]]
             else:
-                raise Exception("WindowInfo.SetAsChild() failed: windowRect: invalid value")
+                raise Exception("WindowInfo.SetAsChild() failed: " \
+                        "windowRect: invalid value")
 
     IF UNAME_SYSNAME == "Windows":
-
-        cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle, py_string windowName):
+        cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle, 
+                py_string windowName):
             if not WindowUtils.IsWindowHandle(parentWindowHandle):
-                raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
+                raise Exception("Invalid parentWindowHandle: %s" \
+                        % parentWindowHandle)
             self.parentWindowHandle = parentWindowHandle
             self.windowType = "popup"
             self.windowName = str(windowName)
 
-    IF CEF_VERSION == 1:
-        IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
-
-            cpdef py_void SetAsOffscreen(self, WindowHandle parentWindowHandle):
-                # It is allowed to pass 0 as parentWindowHandle.
-                if parentWindowHandle and (
-                        not WindowUtils.IsWindowHandle(parentWindowHandle)):
-                    raise Exception("Invalid parentWindowHandle: %s" % parentWindowHandle)
-                self.parentWindowHandle = parentWindowHandle
-                self.windowType = "offscreen"
-
-    IF CEF_VERSION == 1:
-        IF UNAME_SYSNAME == "Windows" or UNAME_SYSNAME == "Darwin":
-
-            cpdef py_void SetTransparentPainting(self, py_bool transparentPainting):
-                self.transparentPainting = transparentPainting
-
-    ELIF CEF_VERSION == 3:
-        IF UNAME_SYSNAME == "Windows":
-
-            cpdef py_void SetTransparentPainting(self, py_bool transparentPainting):
-                self.transparentPainting = transparentPainting
+    IF not (CEF_VERSION == 1 and UNAME_SYSNAME == "Linux"):
+        cpdef py_void SetAsOffscreen(self, 
+                WindowHandle parentWindowHandle):
+            # It is allowed to pass 0 as parentWindowHandle.
+            if parentWindowHandle and \
+                    not WindowUtils.IsWindowHandle(parentWindowHandle):
+                raise Exception("Invalid parentWindowHandle: %s" \
+                        % parentWindowHandle)
+            self.parentWindowHandle = parentWindowHandle
+            self.windowType = "offscreen"
+            
+        cpdef py_void SetTransparentPainting(self, 
+                py_bool transparentPainting):
+            self.transparentPainting = transparentPainting

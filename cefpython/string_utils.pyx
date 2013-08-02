@@ -12,14 +12,17 @@ BYTES_DECODE_ERRORS = "replace"
 # should be unicode by default, if bytes is required make it
 # explicit").
 
-cdef py_string CharToPyString(
-        const char* charString):
-    if PY_MAJOR_VERSION < 3:
-        return <bytes>charString
-    else:
-        return <unicode>((<bytes>charString).decode(
-                g_applicationSettings["string_encoding"],
-                errors=BYTES_DECODE_ERRORS))
+IF UNAME_SYSNAME == "Windows":
+    # Added IF UNAME_SYSNAME to get rid of compiler warning of
+    # function being unused on Linux.
+    cdef py_string CharToPyString(
+            const char* charString):
+        if PY_MAJOR_VERSION < 3:
+            return <bytes>charString
+        else:
+            return <unicode>((<bytes>charString).decode(
+                    g_applicationSettings["string_encoding"],
+                    errors=BYTES_DECODE_ERRORS))
 
 cdef py_string CefToPyString(
         ConstCefString& cefString):

@@ -212,11 +212,11 @@ cdef class PyCookieManager:
             schemesVector.push_back(PyToCefStringValue(scheme))
         self.cefCookieManager.get().SetSupportedSchemes(schemesVector)
 
-    cdef cpp_bool ValidateUserCookieVisitor(self, object userCookieVisitor
-            ) except *:
+    cdef py_void ValidateUserCookieVisitor(self, object userCookieVisitor):
         if userCookieVisitor and hasattr(userCookieVisitor, "Visit") and (
                 callable(getattr(userCookieVisitor, "Visit"))):
-            return True
+            # OK.
+            return
         raise Exception("CookieVisitor object is missing Visit() method")
 
     cpdef py_bool VisitAllCookies(self, object userCookieVisitor):

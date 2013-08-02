@@ -99,18 +99,6 @@ cpdef PyBrowser GetBrowserByWindowHandle(WindowHandle windowHandle):
             return pyBrowser
     return None
 
-IF CEF_VERSION == 3:
-
-    cdef CefRefPtr[CefBrowserHost] GetCefBrowserHost(
-            CefRefPtr[CefBrowser] cefBrowser) except *:
-        cdef CefRefPtr[CefBrowserHost] cefBrowserHost = (
-                cefBrowser.get().GetHost())
-        if <void*>cefBrowserHost != NULL and cefBrowserHost.get():
-            return cefBrowserHost
-        raise Exception("GetCefBrowserHost() failed: this method of "
-                        "Browser object can only be called in the "
-                        "browser process.")
-
 cdef class PyBrowser:
     cdef CefRefPtr[CefBrowser] cefBrowser
 

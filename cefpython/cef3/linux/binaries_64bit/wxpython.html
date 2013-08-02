@@ -175,7 +175,14 @@ def OnTooltip(self, browser, text):
     print("text = %s")
 
 def OnStatusMessage(self, browser, value):
-    print("ClientHandler::OnStatusMessage()")
+    if not value:
+        # Do not notify in the console about empty statuses.
+        return
+    self.statusMessageCount += 1
+    if self.statusMessageCount > 3:
+        # Do not spam too much.
+        return
+    print("DisplayHandler::OnStatusMessage()")
     print("value = %s" % value)
 
 def OnConsoleMessage(self, browser, message, source, line):
@@ -215,7 +222,7 @@ def OnKeyEvent(self, browser, event, eventHandle):
 <pre>
 def OnBeforeResourceLoad(self, browser, frame, request):
     print("RequestHandler::OnBeforeResourceLoad()")
-    print("url = %s" % request.GetUrl())
+    print("url = %s" % request.GetUrl()[:70])
     return False
 </pre>
 See messages in the console.
@@ -223,8 +230,8 @@ See messages in the console.
 <pre>
 def OnResourceRedirect(self, browser, frame, oldUrl, newUrlOut):
     print("RequestHandler::OnResourceRedirect()")
-    print("old url = %s" % oldUrl)
-    print("new url = %s" % newUrlOut[0])
+    print("old url = %s" % oldUrl[:70])
+    print("new url = %s" % newUrlOut[0][:70])
 </pre>
 Try this:
 <a href="http://tinyurl.com/google404redirect">
@@ -287,8 +294,9 @@ Try this:
 
 <pre>
 def OnProtocolExecution(self, browser, url, allowExecutionOut):
-    # This callback seems not to work on Linux, see here:
-    # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+    # There's no default implementation for OnProtocolExecution on Linux,
+    # you have to make OS system call on your own. You probably also need
+    # to use LoadHandler::OnLoadError() when implementing this on Linux.
     print("RequestHandler::OnProtocolExecution()")
     print("url = %s" % url)
     if url.startswith("magnet:"):
@@ -301,8 +309,8 @@ Try this:
 
 <pre>
 def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
-    # This callback seems not to work on Linux, reported here:
-    # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+    # Plugins are loaded on demand, only when website requires it,
+    # the same plugin may be called multiple times.
     print("RequestHandler::OnBeforePluginLoad()")
     print("url = %s" % url)
     print("policy url = %s" % policyUrl)
@@ -313,8 +321,9 @@ def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
     # False to allow, True to block plugin.
     return False
 </pre>
-If you have Flash installed then you should already see a message
-in the console.
+Try OnBeforePluginLoad() with Flash:
+<a href="http://www.adobe.com/software/flash/about/">
+    http://www.adobe.com/software/flash/about/</a>
 
 <pre>
 def _OnCertificateError(self, certError, requestUrl, callback):
@@ -346,9 +355,10 @@ This will be allowed:
 See messages in the console.
 
 <pre>
-def GetCookieManager(self, browser, mainUrl):
+ def GetCookieManager(self, browser, mainUrl):
     # Create unique cookie manager for each browser.
-    # Buggy IO thread callbacks, need to update to revision 1306, see:
+    # --
+    # Buggy implementation in CEF, reported here:
     # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
     cookieManager = browser.GetUserData("cookieManager")
     if cookieManager:
