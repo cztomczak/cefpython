@@ -41,3 +41,5 @@ cython_includes/compile_time_constants.pxi
 
 debug_32bit/
 debug_64bit/
+libcef_debug/
+libcef_release/

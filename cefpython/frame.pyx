@@ -4,10 +4,12 @@
 
 cdef dict g_pyFrames = {}
 
-cdef PyFrame GetPyFrameById(object frameId):
-    if g_pyFrames.has_key(frameId):
-        return g_pyFrames[frameId]
-    return None
+IF CEF_VERSION == 3:
+    # Unused function warning in CEF 1.
+    cdef PyFrame GetPyFrameById(object frameId):
+        if g_pyFrames.has_key(frameId):
+            return g_pyFrames[frameId]
+        return None
 
 cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     global g_pyFrames
@@ -37,29 +39,31 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     g_pyFrames[frameId] = pyFrame
     return pyFrame
 
-cdef void RemovePyFrame(int frameId) except *:
-    # Called from V8ContextHandler_OnContextReleased().
-    # TODO: call this function also in CEF 1, currently called only in CEF 3.
-    global g_pyFrames
-    if g_pyFrames.has_key(frameId):
-        Debug("del g_pyFrames[%s]" % frameId)
-        del g_pyFrames[frameId]
-    else:
-        Debug("RemovePyFrame() FAILED: frame not found, id = %s" % frameId)
+IF CEF_VERSION == 3:
+    # Unused function warning in CEF 1.
+    cdef void RemovePyFrame(int frameId) except *:
+        # Called from V8ContextHandler_OnContextReleased().
+        # TODO: call this function also in CEF 1.
+        global g_pyFrames
+        if g_pyFrames.has_key(frameId):
+            Debug("del g_pyFrames[%s]" % frameId)
+            del g_pyFrames[frameId]
+        else:
+            Debug("RemovePyFrame() FAILED: frame not found, id = %s" % frameId)
 
-cdef void RemovePyFramesForBrowser(int browserId) except *:
-    # Called from LifespanHandler_BeforeClose().
-    # TODO: call this function also in CEF 1, currently called only in CEF 3.
-    cdef list toRemove = []
-    cdef object frameId
-    cdef PyFrame pyFrame
-    global g_pyFrames
-    for frameId, pyFrame in g_pyFrames.iteritems():
-        if pyFrame.GetBrowserIdentifier() == browserId:
-            toRemove.append(frameId)
-    for frameId in toRemove:
-        Debug("del g_pyFrames[%s]" % frameId)
-        del g_pyFrames[frameId]
+    cdef void RemovePyFramesForBrowser(int browserId) except *:
+        # Called from LifespanHandler_BeforeClose().
+        # TODO: call this function also in CEF 1.
+        cdef list toRemove = []
+        cdef object frameId
+        cdef PyFrame pyFrame
+        global g_pyFrames
+        for frameId, pyFrame in g_pyFrames.iteritems():
+            if pyFrame.GetBrowserIdentifier() == browserId:
+                toRemove.append(frameId)
+        for frameId in toRemove:
+            Debug("del g_pyFrames[%s]" % frameId)
+            del g_pyFrames[frameId]
 
 cdef class PyFrame:
     cdef CefRefPtr[CefFrame] cefFrame
@@ -78,11 +82,12 @@ cdef class PyFrame:
         self.browserId = browserId
         self.frameId = frameId
 
-    cpdef cpp_bool IsValid(self) except *:
-        if <void*>self.cefFrame != NULL and self.cefFrame.get() \
-                and self.cefFrame.get().IsValid():
-            return True
-        return False
+    IF CEF_VERSION == 3:
+        cpdef cpp_bool IsValid(self) except *:
+            if <void*>self.cefFrame != NULL and self.cefFrame.get() \
+                    and self.cefFrame.get().IsValid():
+                return True
+            return False
 
     def ExecuteFunction(self, *args):
         # No need to enter V8 context as we're calling javascript

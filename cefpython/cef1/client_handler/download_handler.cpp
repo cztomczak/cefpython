@@ -9,6 +9,8 @@ bool DownloadHandler::ReceivedData(
         void* data,
         int data_size
         ) {
+    // Multiple downloads at the same time?
+    AutoLock lock_scope(this);
     REQUIRE_UI_THREAD();
     if (data_size == 0)
         return true;
@@ -16,6 +18,8 @@ bool DownloadHandler::ReceivedData(
 }
 
 void DownloadHandler::Complete() {
+    // Multiple downloads at the same time?
+    AutoLock lock_scope(this);
     REQUIRE_UI_THREAD();
     DownloadHandler_Complete(downloadHandlerId_);
 }

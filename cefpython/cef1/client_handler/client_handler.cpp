@@ -147,6 +147,8 @@ bool ClientHandler::GetDownloadHandler(
       const CefString& fileName,
       int64 contentLength,
       CefRefPtr<CefDownloadHandler>& handler) {
+  // Multiple downloads at the same time?
+  AutoLock lock_scope(this);
   REQUIRE_UI_THREAD();
   return RequestHandler_GetDownloadHandler(browser, mimeType, fileName, 
       contentLength, handler);

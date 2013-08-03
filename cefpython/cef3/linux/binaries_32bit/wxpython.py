@@ -334,7 +334,7 @@ class ClientHandler:
         # Create unique cookie manager for each browser.
         # --
         # Buggy implementation in CEF, reported here:
-        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10901
+        # https://code.google.com/p/chromiumembedded/issues/detail?id=1043
         cookieManager = browser.GetUserData("cookieManager")
         if cookieManager:
             return cookieManager
