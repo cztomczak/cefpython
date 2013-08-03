@@ -86,7 +86,7 @@ class CefLoadHandler : public virtual CefBase {
   /*--cef(optional_param=errorText)--*/
   virtual void OnLoadError(CefRefPtr<CefBrowser> browser,
                            CefRefPtr<CefFrame> frame,
-                           ErrorCode errorCode,
+                           cef_errorcode_t errorCode,
                            const CefString& errorText,
                            const CefString& failedUrl) {}
 
@@ -96,7 +96,7 @@ class CefLoadHandler : public virtual CefBase {
   ///
   /*--cef()--*/
   virtual void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
-                                         TerminationStatus status) {}
+                                         cef_termination_status_t status) {}
 
   ///
   // Called when a plugin has crashed. |plugin_path| is the path of the plugin

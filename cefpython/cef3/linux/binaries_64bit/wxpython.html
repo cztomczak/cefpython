@@ -400,5 +400,61 @@ via SetCookie(): <a href="javascript:external.DeleteCookies()">
 <br><br>
 
 
+
+
+<h3>Load Handler</h3>
+<pre>
+def OnLoadStart(self, browser, frame):
+    print("LoadHandler::OnLoadStart()")
+    print("frame url = %s" % frame.GetUrl()[:70])
+</pre>
+See messages in the console.
+
+<pre>
+def OnLoadEnd(self, browser, frame, httpStatusCode):
+    print("LoadHandler::OnLoadEnd()")
+    print("frame url = %s" % frame.GetUrl()[:70])
+    # For file:// urls the status code = 0
+    print("http status code = %s" % httpStatusCode)
+</pre>
+See messages in the console.
+
+<pre>
+def OnLoadError(self, browser, frame, errorCode, errorTextList, failedUrl):
+    print("LoadHandler::OnLoadError()")
+    print("frame url = %s" % frame.GetUrl()[:70])
+    print("error code = %s" % errorCode)
+    print("error text = %s" % errorTextList[0])
+    print("failed url = %s" % failedUrl)
+    customErrorMessage = "My custom error message!"
+    frame.LoadUrl("data:text/html,%s" % customErrorMessage)
+</pre>
+Try this: 
+<a href="http://www.non-existent.nono/">
+    http://www.non-existent.nono/</a>
+
+<pre>
+def OnRendererProcessTerminated(self, browser, status):
+    print("LoadHandler::OnRendererProcessTerminated()")
+    statuses = {
+        cefpython.TS_ABNORMAL_TERMINATION: "TS_ABNORMAL_TERMINATION",
+        cefpython.TS_PROCESS_WAS_KILLED: "TS_PROCESS_WAS_KILLED",
+        cefpython.TS_PROCESS_CRASHED: "TS_PROCESS_CRASHED"
+    }
+    statusName = "Unknown"
+    if status in statuses:
+        statusName = statuses[status]
+    print("status = %s" % statusName)
+</pre>
+Try to terminate the "subprocess.exe" renderer process through 
+process/task manager.
+
+<pre>
+def OnPluginCrashed(self, browser, pluginPath):
+    print("LoadHandler::OnPluginCrashed()")
+    print("plugin path = %s" % pluginPath)
+</pre>
+No test for that yet.
+
 </body>
 </html>
