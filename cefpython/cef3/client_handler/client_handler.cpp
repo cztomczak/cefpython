@@ -497,3 +497,81 @@ bool ClientHandler::OnCertificateError(
             cert_error, request_url, callback);
     // Default: return false;
 }
+
+// --------------------------------------------------------------------------
+// CefLoadHandler
+// --------------------------------------------------------------------------
+
+///
+// Implement this interface to handle events related to browser load status. 
+// The methods of this class will be called on the UI thread.
+///
+
+///
+// Called when the browser begins loading a frame. The |frame| value will
+// never be empty -- call the IsMain() method to check if this frame is the
+// main frame. Multiple frames may be loading at the same time. Sub-frames may
+// start or continue loading after the main frame load has ended. This method
+// may not be called for a particular frame if the load request for that frame
+// fails.
+///
+/*--cef()--*/
+void ClientHandler::OnLoadStart(CefRefPtr<CefBrowser> browser,
+                       CefRefPtr<CefFrame> frame) {
+    REQUIRE_UI_THREAD();
+    LoadHandler_OnLoadStart(browser, frame);
+}
+
+///
+// Called when the browser is done loading a frame. The |frame| value will
+// never be empty -- call the IsMain() method to check if this frame is the
+// main frame. Multiple frames may be loading at the same time. Sub-frames may
+// start or continue loading after the main frame load has ended. This method
+// will always be called for all frames irrespective of whether the request
+// completes successfully.
+///
+/*--cef()--*/
+void ClientHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,
+                     CefRefPtr<CefFrame> frame,
+                     int httpStatusCode) {
+    REQUIRE_UI_THREAD();
+    LoadHandler_OnLoadEnd(browser, frame, httpStatusCode);
+}
+
+///
+// Called when the browser fails to load a resource. |errorCode| is the error
+// code number, |errorText| is the error text and and |failedUrl| is the URL
+// that failed to load. See net\base\net_error_list.h for complete
+// descriptions of the error codes.
+///
+/*--cef(optional_param=errorText)--*/
+void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,
+                       CefRefPtr<CefFrame> frame,
+                       cef_errorcode_t errorCode,
+                       const CefString& errorText,
+                       const CefString& failedUrl) {
+    REQUIRE_UI_THREAD();
+    LoadHandler_OnLoadError(browser, frame, errorCode, errorText, failedUrl);
+}
+
+///
+// Called when the render process terminates unexpectedly. |status| indicates
+// how the process terminated.
+///
+/*--cef()--*/
+void ClientHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
+                                     cef_termination_status_t status) {
+    REQUIRE_UI_THREAD();
+    LoadHandler_OnRendererProcessTerminated(browser, status);
+}
+
+///
+// Called when a plugin has crashed. |plugin_path| is the path of the plugin
+// that crashed.
+///
+/*--cef()--*/
+void ClientHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
+                           const CefString& plugin_path) {
+    REQUIRE_UI_THREAD();
+    LoadHandler_OnPluginCrashed(browser, plugin_path);
+}

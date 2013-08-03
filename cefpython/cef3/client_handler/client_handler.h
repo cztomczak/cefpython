@@ -15,7 +15,8 @@ class ClientHandler :
         public CefLifeSpanHandler,
         public CefDisplayHandler,
         public CefKeyboardHandler,
-        public CefRequestHandler
+        public CefRequestHandler,
+        public CefLoadHandler
 {
 public:
   ClientHandler(){}
@@ -111,7 +112,7 @@ public:
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE {
-    return NULL;
+    return this;
   }
 
   ///
@@ -476,6 +477,70 @@ public:
       cef_errorcode_t cert_error,
       const CefString& request_url,
       CefRefPtr<CefAllowCertificateErrorCallback> callback) OVERRIDE;
+
+  // --------------------------------------------------------------------------
+  // CefLoadHandler
+  // --------------------------------------------------------------------------
+
+  ///
+  // Implement this interface to handle events related to browser load status. 
+  // The methods of this class will be called on the UI thread.
+  ///
+
+  ///
+  // Called when the browser begins loading a frame. The |frame| value will
+  // never be empty -- call the IsMain() method to check if this frame is the
+  // main frame. Multiple frames may be loading at the same time. Sub-frames may
+  // start or continue loading after the main frame load has ended. This method
+  // may not be called for a particular frame if the load request for that frame
+  // fails.
+  ///
+  /*--cef()--*/
+  virtual void OnLoadStart(CefRefPtr<CefBrowser> browser,
+                           CefRefPtr<CefFrame> frame) OVERRIDE;
+
+  ///
+  // Called when the browser is done loading a frame. The |frame| value will
+  // never be empty -- call the IsMain() method to check if this frame is the
+  // main frame. Multiple frames may be loading at the same time. Sub-frames may
+  // start or continue loading after the main frame load has ended. This method
+  // will always be called for all frames irrespective of whether the request
+  // completes successfully.
+  ///
+  /*--cef()--*/
+  virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser,
+                         CefRefPtr<CefFrame> frame,
+                         int httpStatusCode) OVERRIDE;
+
+  ///
+  // Called when the browser fails to load a resource. |errorCode| is the error
+  // code number, |errorText| is the error text and and |failedUrl| is the URL
+  // that failed to load. See net\base\net_error_list.h for complete
+  // descriptions of the error codes.
+  ///
+  /*--cef(optional_param=errorText)--*/
+  virtual void OnLoadError(CefRefPtr<CefBrowser> browser,
+                           CefRefPtr<CefFrame> frame,
+                           cef_errorcode_t errorCode,
+                           const CefString& errorText,
+                           const CefString& failedUrl) OVERRIDE;
+
+  ///
+  // Called when the render process terminates unexpectedly. |status| indicates
+  // how the process terminated.
+  ///
+  /*--cef()--*/
+  virtual void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
+                                         cef_termination_status_t status) 
+                                         OVERRIDE;
+
+  ///
+  // Called when a plugin has crashed. |plugin_path| is the path of the plugin
+  // that crashed.
+  ///
+  /*--cef()--*/
+  virtual void OnPluginCrashed(CefRefPtr<CefBrowser> browser,
+                               const CefString& plugin_path) OVERRIDE;
 
 private:
    

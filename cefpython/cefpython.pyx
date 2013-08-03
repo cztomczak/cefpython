@@ -123,7 +123,7 @@ include "javascript_bindings.pyx"
 
 IF CEF_VERSION == 1:
     include "cookie_cef1.pyx"
-    include "load_handler.pyx"
+    include "load_handler_cef1.pyx"
     include "keyboard_handler_cef1.pyx"
     include "virtual_keys.pyx"
     include "request_cef1.pyx"
@@ -145,6 +145,7 @@ IF CEF_VERSION == 1:
     include "v8utils_cef1.pyx"
     include "javascript_callback_cef1.pyx"
     include "python_callback_cef1.pyx"
+    include "network_error_cef1.pyx"
 
 IF CEF_VERSION == 3:
     include "process_message_utils.pyx"
@@ -159,6 +160,8 @@ IF CEF_VERSION == 3:
     include "request_cef3.pyx"
     include "request_handler_cef3.pyx"
     include "cookie_cef3.pyx"
+    include "load_handler_cef3.pyx"
+    include "network_error_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,

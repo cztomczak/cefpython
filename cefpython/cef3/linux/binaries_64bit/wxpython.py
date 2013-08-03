@@ -381,6 +381,44 @@ class ClientHandler:
             return True
         return False
 
+    # -------------------------------------------------------------------------
+    # LoadHandler
+    # -------------------------------------------------------------------------
+    def OnLoadStart(self, browser, frame):
+        print("LoadHandler::OnLoadStart()")
+        print("frame url = %s" % frame.GetUrl()[:70])
+
+    def OnLoadEnd(self, browser, frame, httpStatusCode):
+        print("LoadHandler::OnLoadEnd()")
+        print("frame url = %s" % frame.GetUrl()[:70])
+        # For file:// urls the status code = 0
+        print("http status code = %s" % httpStatusCode)
+
+    def OnLoadError(self, browser, frame, errorCode, errorTextList, failedUrl):
+        print("LoadHandler::OnLoadError()")
+        print("frame url = %s" % frame.GetUrl()[:70])
+        print("error code = %s" % errorCode)
+        print("error text = %s" % errorTextList[0])
+        print("failed url = %s" % failedUrl)
+        customErrorMessage = "My custom error message!"
+        frame.LoadUrl("data:text/html,%s" % customErrorMessage)
+
+    def OnRendererProcessTerminated(self, browser, status):
+        print("LoadHandler::OnRendererProcessTerminated()")
+        statuses = {
+            cefpython.TS_ABNORMAL_TERMINATION: "TS_ABNORMAL_TERMINATION",
+            cefpython.TS_PROCESS_WAS_KILLED: "TS_PROCESS_WAS_KILLED",
+            cefpython.TS_PROCESS_CRASHED: "TS_PROCESS_CRASHED"
+        }
+        statusName = "Unknown"
+        if status in statuses:
+            statusName = statuses[status]
+        print("status = %s" % statusName)
+
+    def OnPluginCrashed(self, browser, pluginPath):
+        print("LoadHandler::OnPluginCrashed()")
+        print("plugin path = %s" % pluginPath)
+
 class MyApp(wx.App):
     timer = None
     timerID = 1
