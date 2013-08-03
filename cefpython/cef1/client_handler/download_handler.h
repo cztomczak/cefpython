@@ -25,4 +25,6 @@ public:
 protected:
   // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(DownloadHandler);
+  // Include the default locking implementation.
+  IMPLEMENT_LOCKING(DownloadHandler);
 };

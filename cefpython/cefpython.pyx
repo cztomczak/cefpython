@@ -144,7 +144,7 @@ IF CEF_VERSION == 1:
     include "v8function_handler_cef1.pyx"
     include "v8utils_cef1.pyx"
     include "javascript_callback_cef1.pyx"
-    include "python_callback.pyx"
+    include "python_callback_cef1.pyx"
 
 IF CEF_VERSION == 3:
     include "process_message_utils.pyx"

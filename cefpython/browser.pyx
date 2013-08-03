@@ -18,10 +18,12 @@ IF CEF_VERSION == 1:
 
 cdef dict g_pyBrowsers = {}
 
-cdef PyBrowser GetPyBrowserById(int browserId):
-    if g_pyBrowsers.has_key(browserId):
-        return g_pyBrowsers[browserId]
-    return None
+IF CEF_VERSION == 3:
+    # Unused function warning in CEF 1.
+    cdef PyBrowser GetPyBrowserById(int browserId):
+        if g_pyBrowsers.has_key(browserId):
+            return g_pyBrowsers[browserId]
+        return None
 
 cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
     global g_pyBrowsers
@@ -79,16 +81,18 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
                         pyBrowser.SetJavascriptBindings(javascriptBindings)
     return pyBrowser
 
-cdef void RemovePyBrowser(int browserId) except *:
-    # Called from LifespanHandler_OnBeforeClose().
-    # TODO: call this function also in CEF 1, currently called only in CEF 3.
-    global g_pyBrowsers
-    if g_pyBrowsers.has_key(browserId):
-        Debug("del g_pyBrowsers[%s]" % browserId)
-        del g_pyBrowsers[browserId]
-    else:
-        Debug("RemovePyBrowser() FAILED: browser not found, id = %s" \
-                % browserId)
+IF CEF_VERSION == 3:
+    # Unused function warning in CEF 1.
+    cdef void RemovePyBrowser(int browserId) except *:
+        # Called from LifespanHandler_OnBeforeClose().
+        # TODO: call this function also in CEF 1.
+        global g_pyBrowsers
+        if g_pyBrowsers.has_key(browserId):
+            Debug("del g_pyBrowsers[%s]" % browserId)
+            del g_pyBrowsers[browserId]
+        else:
+            Debug("RemovePyBrowser() FAILED: browser not found, id = %s" \
+                    % browserId)
 
 cpdef PyBrowser GetBrowserByWindowHandle(WindowHandle windowHandle):
     cdef PyBrowser pyBrowser
