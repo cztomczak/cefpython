@@ -90,6 +90,7 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
         listValue->SetDictionary(listValue->GetSize(), 
                 V8ObjectToCefDictionaryValue(v8Value, nestingLevel + 1));
     } else {
+        listValue->SetNull(listValue->GetSize());
         DebugLog("V8ValueAppendToCefListValue() FAILED: unknown V8 type");
     }
 }
@@ -175,6 +176,7 @@ CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
             ret->SetDictionary(key, 
                     V8ObjectToCefDictionaryValue(v8Value, nestingLevel + 1));
         } else {
+            ret->SetNull(key);
             DebugLog("V8ObjectToCefDictionaryValue() FAILED: unknown V8 type");
         }
     }
