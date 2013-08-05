@@ -5,13 +5,20 @@
 #pragma once
 #include <stdio.h>
 
+extern bool g_debug;
+extern std::string g_logFile;
+
 // Defined as "inline" to get rid of the "already defined" errors
 // when linking.
 inline void DebugLog(const char* szString)
 {
-  // TODO: get the log_file option from CefSettings.
-  printf("cefpython: %s\n", szString);
-  FILE* pFile = fopen("debug.log", "a");
-  fprintf(pFile, "cefpython_app: %s\n", szString);
-  fclose(pFile);
+    if (!g_debug)
+        return;
+    // TODO: get the log_file option from CefSettings.
+    printf("cefpython: %s\n", szString);
+    if (g_logFile.length()) {
+        FILE* pFile = fopen(g_logFile.c_str(), "a");
+        fprintf(pFile, "cefpython_app: %s\n", szString);
+        fclose(pFile);
+    }
 }

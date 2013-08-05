@@ -267,25 +267,24 @@ cdef class PyBrowser:
         cpdef object ClearHistory(self):
             self.GetCefBrowser().get().ClearHistory()
 
-    cpdef py_void CloseBrowser(self, py_bool forceClose=False):
-        # In cefclient/cefclient_win.cpp there is only
-        # ParentWindowWillClose() called. CloseBrowser() is called
-        # only for popups.
-        if self.GetUserData("__outerWindowHandle"):
-            IF CEF_VERSION == 1:
-                Debug("CefBrowser::ParentWindowWillClose()")
-                self.GetCefBrowser().get().ParentWindowWillClose()
-            ELIF CEF_VERSION == 3:
-                Debug("CefBrowserHost::ParentWindowWillClose()")
-                self.GetCefBrowserHost().get().ParentWindowWillClose()
-        else:
-            IF CEF_VERSION == 1:
-                Debug("CefBrowser::CloseBrowser()")
-                self.GetCefBrowser().get().CloseBrowser()
-            ELIF CEF_VERSION == 3:
-                Debug("CefBrowserHost::CloseBrowser()")
-                self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
+    cpdef py_void ParentWindowWillClose(self):
+        IF CEF_VERSION == 1:
+            self.GetCefBrowser().get().ParentWindowWillClose()
+        ELIF CEF_VERSION == 3:
+            self.GetCefBrowserHost().get().ParentWindowWillClose()
 
+    cpdef py_void CloseBrowser(self, py_bool forceClose=False):
+        IF CEF_VERSION == 1:
+            Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
+            self.GetCefBrowser().get().CloseBrowser(bool(forceClose))
+        ELIF CEF_VERSION == 3:
+            # ParentWindowWillClose() should be called by user when
+            # implementing LifespanHandler::DoClose().
+            # | Debug("CefBrowser::ParentWindowWillClose()")
+            # | self.GetCefBrowserHost().get().ParentWindowWillClose()
+            Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
+            self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
+        
     IF CEF_VERSION == 1:
 
         cpdef py_void CloseDevTools(self):
