@@ -28,15 +28,15 @@ UsePreviousGroup = yes
 
 SourceDir = %(BINARIES_DIR)s
 OutputDir = %(INSTALLER_DIR)s\Output
-OutputBaseFilename = %(PACKAGE_NAME)s_%(APP_VERSION)s_py%(PYTHON_VERSION_NODOT)s_win32_installer
+OutputBaseFilename = %(PACKAGE_NAME)s-%(APP_VERSION)s-win32-py%(PYTHON_VERSION_NODOT)s
 
 UninstallFilesDir = {app}\%(PACKAGE_NAME)s
 LicenseFile = %(BINARIES_DIR)s\LICENSE.txt
 
 [Icons]
 
-Name: "{group}\Examples"; Filename: "{app}\%(PACKAGE_NAME)s\examples"
-Name: "{group}\Uninstall Package"; Filename: "{uninstallexe}"
+Name: "{group}\Examples"; Filename: "{app}\%(PACKAGE_NAME)s\examples";
+Name: "{group}\Uninstall Package"; Filename: "{uninstallexe}";
 
 [Run]
 
@@ -56,6 +56,26 @@ Source: "Microsoft.VC90.CRT.manifest"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags:
 Source: "README.txt"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
 Source: "subprocess.exe"; DestDir: "{app}\%(PACKAGE_NAME)s"; Flags: ignoreversion;
 
+; ------------------------------------------------------------------------------
+; wx subpackage
+; ------------------------------------------------------------------------------
+
+Source: "%(WX_SUBPACKAGE_DIR)s\*.py"; DestDir: "{app}\%(PACKAGE_NAME)s\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\*.txt"; DestDir: "{app}\%(PACKAGE_NAME)s\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\images\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s\wx\images"; Flags: ignoreversion;
+
+; ------------------------------------------------------------------------------
+; wx examples
+; ------------------------------------------------------------------------------
+
+Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
+
+; ------------------------------------------------------------------------------
+; examples
+; ------------------------------------------------------------------------------
+
 Source: "cefwindow.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "example.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "example.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
@@ -71,6 +91,16 @@ Type: files; Name: "{app}\%(PACKAGE_NAME)s\*.pyc";
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\*.pyc";
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\*.log";
 Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\__pycache__"
+Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\wx\*.pyc";
+Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\wx\*.log";
+Type: files; Name: "{app}\%(PACKAGE_NAME)s\wx\*.pyc";
+Type: files; Name: "{app}\%(PACKAGE_NAME)s\wx\*.log";
+
+; Issue 67 - remaining files in the wx/ and examples/wx/ directories:
+; https://code.google.com/p/cefpython/issues/detail?id=67
+; Just delete them all:
+Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\examples\wx"
+Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\wx"
 
 [Code]
 

@@ -9,7 +9,7 @@
 #   -Wl,-z,relro
 
 CC = g++
-CCFLAGS = -g -fPIC -Wall -Werror
+CCFLAGS = -g -fPIC -Wall -Werror -DBROWSER_PROCESS
 
 SRC = cefpython_app.cpp v8function_handler.cpp v8utils.cpp \
         javascript_callback.cpp

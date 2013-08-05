@@ -40,6 +40,7 @@ __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnLoadEnd(CefRefPtr<CefBrowser>, CefR
 __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnLoadError(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, enum cef_errorcode_t, CefString const &, CefString const &);
 __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnRendererProcessTerminated(CefRefPtr<CefBrowser>, enum cef_termination_status_t);
 __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnPluginCrashed(CefRefPtr<CefBrowser>, CefString const &);
+__PYX_EXTERN_C DL_IMPORT(void) BrowserProcessHandler_OnRenderProcessThreadCreated(CefRefPtr<CefListValue>);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 

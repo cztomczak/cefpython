@@ -2,6 +2,13 @@
 // License: New BSD License.
 // Website: http://code.google.com/p/cefpython/
 
+// BROWSER_PROCESS macro is defined when compiling the libcefpythonapp library.
+// RENDERER_PROCESS macro is define when compiling the subprocess executable.
+
+#ifdef BROWSER_PROCESS
+#include "cefpython_public_api.h"
+#endif
+
 #include "cefpython_app.h"
 #include "util.h"
 #include "include/cef_runnable.h"
@@ -10,6 +17,9 @@
 #include "v8utils.h"
 #include "javascript_callback.h"
 #include "v8function_handler.h"
+
+bool g_debug = false;
+std::string g_logFile = "debug.log";
 
 // -----------------------------------------------------------------------------
 // CefApp
@@ -62,7 +72,11 @@ void CefPythonApp::OnRenderProcessThreadCreated(
     // The equivalent in Cython is:
     // | extra_info.Assign(mylist.get())
     REQUIRE_IO_THREAD();
-    DebugLog("Browser: OnRenderProcessThreadCreated()");
+#ifdef BROWSER_PROCESS
+    // This is included only in the Browser process, when building
+    // the libcefpythonapp library.
+    BrowserProcessHandler_OnRenderProcessThreadCreated(extra_info);
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -76,6 +90,14 @@ void CefPythonApp::OnRenderProcessThreadCreated(
 // reference to |extra_info| outside of this method.
 ///
 void CefPythonApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) {
+    if (extra_info->GetType(0) == VTYPE_BOOL) {
+        // printf("!! CefPythonApp::OnRenderThreadCreated(): g_debug OK\n");
+        g_debug = extra_info->GetBool(0);
+    }
+    if (extra_info->GetType(1) == VTYPE_STRING) {
+        // printf("!! CefPythonApp::OnRenderThreadCreated(): g_logFile OK\n");
+        g_logFile = extra_info->GetString(1).ToString();
+    }
 }
 
 void CefPythonApp::OnWebKitInitialized() {

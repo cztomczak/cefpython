@@ -80,8 +80,8 @@ def main():
     print("Creating examples dir in package dir")
     os.mkdir(package_dir+"/examples/")
 
-    # print("Creating wx dir in package dir")
-    # os.mkdir(package_dir+"/wx/")
+    print("Creating wx dir in package dir")
+    os.mkdir(package_dir+"/wx/")
 
     print("Moving example scripts from package dir to examples dir")
     examples = glob.glob(package_dir+"/*.py")
@@ -96,14 +96,14 @@ def main():
     ret = os.system("mv "+package_dir+"/*.html "+package_dir+"/examples/")
     assert ret == 0
 
-    # print("Copying wx-subpackage to wx dir in package dir")
-    # wx_subpackage_dir = os.path.abspath(installer_dir+"/../../wx-subpackage/")
-    # ret = os.system("cp -rf "+wx_subpackage_dir+"/* "+package_dir+"/wx/")
-    # assert ret == 0
+    print("Copying wx-subpackage to wx dir in package dir")
+    wx_subpackage_dir = os.path.abspath(installer_dir+"/../../wx-subpackage/")
+    ret = os.system("cp -rf "+wx_subpackage_dir+"/* "+package_dir+"/wx/")
+    assert ret == 0
 
-    # print("Moving wx examples from wx/examples to examples/wx")
-    # shutil.move(package_dir+"/wx/examples", package_dir+"/wx/wx/")
-    # shutil.move(package_dir+"/wx/wx/", package_dir+"/examples/")
+    print("Moving wx examples from wx/examples to examples/wx")
+    shutil.move(package_dir+"/wx/examples", package_dir+"/wx/wx/")
+    shutil.move(package_dir+"/wx/wx/", package_dir+"/examples/")
 
     print("Copying package dir examples to setup dir")
     ret = os.system("cp -rf "+package_dir+"/examples/ "+setup_dir+"/examples/")

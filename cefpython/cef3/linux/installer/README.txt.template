@@ -11,6 +11,11 @@
        cd examples/
        python wxpython.py
 
+       cd wx/
+       python sample1.py
+       python sample2.py
+       python sample3.py
+
 Note:
     Examples directory can also be found in the cefpython3 package directory:
     /usr/local/lib/python2.7/dist-packages/cefpython3/examples/

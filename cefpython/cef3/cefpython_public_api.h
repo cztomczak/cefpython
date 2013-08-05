@@ -1,5 +1,9 @@
 // d:\cefpython\src\setup/cefpython.h(22) : warning C4190: 'RequestHandler_GetCookieManager'
 // has C-linkage specified, but returns UDT 'CefRefPtr<T>' which is incompatible with C
+
+#ifndef CEFPYTHON_PUBLIC_API_H
+#define CEFPYTHON_PUBLIC_API_H
+
 #if defined(OS_WIN)
 #pragma warning(disable:4190)
 #endif
@@ -30,4 +34,7 @@
 
 #if defined(OS_LINUX)
 #include "linux/setup/cefpython.h"
+#endif
+
+// CEFPYTHON_PUBLIC_API_H
 #endif

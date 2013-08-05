@@ -14,8 +14,10 @@ INC = -I./../ -I/usr/include/python2.7 -I/usr/include/gtk-2.0 \
 LIB = -L./../linux/setup/lib_64bit -L./../linux/setup/lib_32bit \
 	-L./../linux/binaries_64bit -L./../linux/binaries_32bit
 
+CCFLAGS = -g -Wall -Werror -DRENDERER_PROCESS
+
 subprocess:
 	# -fPIC is required only for libraries included by Cython.
-	g++ -Wall -Werror $(INC) $(LIB) main.cpp cefpython_app.cpp \
+	g++ $(CCFLAGS) $(INC) $(LIB) main.cpp cefpython_app.cpp \
 		v8function_handler.cpp v8utils.cpp javascript_callback.cpp \
 		-lcef_dll_wrapper -lcef -o subprocess -Wl,-rpath,.

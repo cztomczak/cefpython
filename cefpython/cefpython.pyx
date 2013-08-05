@@ -162,6 +162,7 @@ IF CEF_VERSION == 3:
     include "cookie_cef3.pyx"
     include "load_handler_cef3.pyx"
     include "network_error_cef3.pyx"
+    include "browser_process_handler_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,
