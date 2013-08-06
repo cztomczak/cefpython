@@ -1,13 +1,13 @@
 Chromium Embedded Framework (CEF) Standard Binary Distribution for Linux
 -------------------------------------------------------------------------------
 
-Date:             June 21, 2013
+Date:             August 06, 2013
 
-CEF Version:      3.1453.1279
-CEF URL:          http://chromiumembedded.googlecode.com/svn/branches/1453/cef3@1279
+CEF Version:      3.1453.1352
+CEF URL:          http://chromiumembedded.googlecode.com/svn/branches/1453/cef3@1352
 
-Chromium Verison: 27.0.1453.110
-Chromium URL:     http://src.chromium.org/svn/branches/1453/src@202711
+Chromium Verison: 27.0.1453.116
+Chromium URL:     http://src.chromium.org/svn/branches/1453/src@206485
 
 This distribution contains all components necessary to build and distribute an
 application using CEF on the Linux platform. Please see the LICENSING
@@ -81,6 +81,10 @@ Optional components:
   Note: Contains WebKit image and inspector resources. Pack file loading can be
   disabled completely using CefSettings.pack_loading_disabled. The resources
   directory path can be customized using CefSettings.resources_dir_path.
+
+* FFmpeg audio and video support
+    libffmpegsumo.so
+  Note: Without this component HTML5 audio and video will not function.
 
 
 LICENSING
