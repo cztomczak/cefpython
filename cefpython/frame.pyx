@@ -41,7 +41,7 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 
 IF CEF_VERSION == 3:
     # Unused function warning in CEF 1.
-    cdef void RemovePyFrame(int frameId) except *:
+    cdef void RemovePyFrame(object frameId) except *:
         # Called from V8ContextHandler_OnContextReleased().
         # TODO: call this function also in CEF 1.
         global g_pyFrames
@@ -83,7 +83,7 @@ cdef class PyFrame:
         self.frameId = frameId
 
     IF CEF_VERSION == 3:
-        cpdef cpp_bool IsValid(self) except *:
+        cpdef py_bool IsValid(self):
             if <void*>self.cefFrame != NULL and self.cefFrame.get() \
                     and self.cefFrame.get().IsValid():
                 return True

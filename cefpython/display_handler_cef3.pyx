@@ -115,7 +115,7 @@ cdef public cpp_bool DisplayHandler_OnConsoleMessage(
         callback = pyBrowser.GetClientCallback("OnConsoleMessage")
         if callback:
             returnValue = callback(pyBrowser, pyMessage, pySource, line)
-            return returnValue
+            return bool(returnValue)
         return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()

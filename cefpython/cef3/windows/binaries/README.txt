@@ -1,18 +1,17 @@
-Chromium Embedded Framework (CEF) Binary Distribution
+Chromium Embedded Framework (CEF) Standard Binary Distribution for Windows
 -------------------------------------------------------------------------------
 
-Date:             February 09, 2013
+Date:             August 06, 2013
 
-CEF Version:      3.1364.1094
-CEF URL:          https://chromiumembedded.googlecode.com/svn/branches/1364/cef3@1094
+CEF Version:      3.1453.1352
+CEF URL:          http://chromiumembedded.googlecode.com/svn/branches/1453/cef3@1352
 
-Chromium Verison: 25.0.1364.68
-Chromium URL:     http://src.chromium.org/svn/branches/1364/src@180609
-
+Chromium Verison: 27.0.1453.116
+Chromium URL:     http://src.chromium.org/svn/branches/1453/src@206485
 
 This distribution contains all components necessary to build and distribute an
-application using CEF. Please see the LICENSING section of this document for
-licensing terms and conditions.
+application using CEF on the Windows platform. Please see the LICENSING
+section of this document for licensing terms and conditions.
 
 
 CONTENTS
@@ -21,23 +20,25 @@ CONTENTS
 cefclient   Contains the cefclient sample application configured to build
             using the files in this distribution.
 
-Debug       Contains libcef.dll and other components required to run the debug
-            version of CEF-based applications. Also acts as the build target for
-            the Debug build of cefclient.
-
-docs        Contains C++ API documentation generated from the CEF header files.
+Debug       Contains libcef.dll, libcef.lib and other components required to
+            build and run the debug version of CEF-based applications. By
+            default these files should be placed in the same directory as the
+            executable and will be copied there as part of the build process.
 
 include     Contains all required CEF header files.
-
-lib         Contains Debug and Release versions of the libcef.lib library file
-            that all CEF-based applications must link against.
 
 libcef_dll  Contains the source code for the libcef_dll_wrapper static library
             that all applications using the CEF C++ API must link against.
 
-Release     Contains libcef.dll and other components required to run the release
-            version of CEF-based applications. Also acts as the build target for
-            the Release build of cefclient.
+Release     Contains libcef.dll, libcef.lib and other components required to
+            build and run the release version of CEF-based applications. By
+            default these files should be placed in the same directory as the
+            executable and will be copied there as part of the build process.
+
+Resources   Contains resources required by libcef.dll. By default these files
+            should be placed in the same directory as libcef.dll. By default
+            these files should be placed in the same directory as libcef.dll
+            and will be copied there as part of the build process.
 
 
 USAGE
@@ -100,8 +101,8 @@ Optional components:
   Note: Without this component HTML5 audio and video will not function.
 
 * Angle and Direct3D support
-    d3dcompiler_43.dll
-    d3dx9_43.dll
+    d3dcompiler_43.dll (required for Windows XP)
+    d3dcompiler_46.dll (required for Windows Vista and newer)
     libEGL.dll
     libGLESv2.dll
   Note: Without these components HTML5 accelerated content like 2D canvas, 3D

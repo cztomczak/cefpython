@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="client_handler_py27"
-	ProjectGUID="{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}"
-	RootNamespace="client_handler_py27"
+	Name="libcefpythonapp_py32"
+	ProjectGUID="{1CBCCE4A-EF20-4718-B9A2-9254B770012B}"
+	RootNamespace="libcefpythonapp_py32"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release_py27"
-			IntermediateDirectory="Release_py27"
+			OutputDirectory="Release_libcefpythonapp_py32"
+			IntermediateDirectory="Release_libcefpythonapp_py32"
 			ConfigurationType="4"
 			>
 			<Tool
@@ -39,8 +39,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../;$(PYTHON_INCLUDE_PATH);C:\Python27\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;"
+				AdditionalIncludeDirectories="../;$(PYTHON_INCLUDE_PATH);C:\Python32\include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;BROWSER_PROCESS;"
 				ExceptionHandling="1"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -86,13 +86,21 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\client_handler.h"
+				RelativePath=".\cefpython_app.h"
 				>
 			</File>
-            <File
-                RelativePath=".\cookie_visitor.h"
-                >
-            </File>
+			<File
+				RelativePath=".\javascript_callback.h"
+				>
+			</File>
+			<File
+				RelativePath=".\v8function_handler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\v8utils.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -106,13 +114,21 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\client_handler.cpp"
+				RelativePath=".\cefpython_app.cpp"
 				>
 			</File>
-            <File
-                RelativePath=".\cookie_visitor.cpp"
-                >
-            </File>
+			<File
+				RelativePath=".\javascript_callback.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\v8function_handler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\v8utils.cpp"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

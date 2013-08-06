@@ -115,7 +115,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="../"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;RENDERER_PROCESS;"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -177,7 +177,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\cefpython_app.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\javascript_callback.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\v8function_handler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\v8utils.cpp"
 				>
 			</File>
 		</Filter>
@@ -187,7 +203,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\client_app.h"
+				RelativePath=".\cefpython_app.h"
+				>
+			</File>
+			<File
+				RelativePath=".\javascript_callback.h"
+				>
+			</File>
+			<File
+				RelativePath=".\v8function_handler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\v8utils.h"
 				>
 			</File>
 		</Filter>

@@ -2,7 +2,6 @@
 // License: New BSD License.
 // Website: http://code.google.com/p/cefpython/
 
-#include "cefpython_public_api.h"
 #include "cefpython_app.h"
 #include "v8utils.h"
 #include "DebugLog.h"

@@ -120,12 +120,12 @@ ELIF UNAME_SYSNAME == "Linux":
     include "window_utils_linux.pyx"
 
 include "javascript_bindings.pyx"
+include "virtual_keys.pyx"
 
 IF CEF_VERSION == 1:
     include "cookie_cef1.pyx"
     include "load_handler_cef1.pyx"
     include "keyboard_handler_cef1.pyx"
-    include "virtual_keys.pyx"
     include "request_cef1.pyx"
     include "web_request.pyx"
     include "stream.pyx"

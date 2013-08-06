@@ -150,18 +150,21 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
                     pyAuthCallback)
             return bool(returnValue)
         else:
+            # TODO: port it from CEF 1, copy the cef1/http_authentication/.
+            # --
             # Default implementation for Windows.
-            IF UNAME_SYSNAME == "Windows":
-                returnValue = HttpAuthenticationDialog(
-                        pyBrowser,
-                        pyIsProxy, pyHost, pyPort, pyRealm, pyScheme,
-                        pyUsernameOut, pyPasswordOut)
-                if returnValue:
-                    pyAuthCallback.Continue(pyUsernameOut[0], pyPasswordOut[0])
-                    return True
-                return False
-            ELSE:
-                return False
+            # IF UNAME_SYSNAME == "Windows":
+            #     returnValue = HttpAuthenticationDialog(
+            #             pyBrowser,
+            #             pyIsProxy, pyHost, pyPort, pyRealm, pyScheme,
+            #             pyUsernameOut, pyPasswordOut)
+            #     if returnValue:
+            #         pyAuthCallback.Continue(pyUsernameOut[0], pyPasswordOut[0])
+            #         return True
+            #     return False
+            # ELSE:
+            #     return False
+            return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -260,7 +263,7 @@ cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
         if clientCallback:
             returnValue = clientCallback(pyBrowser, CefToPyString(cefUrl),
                     CefToPyString(cefPolicyUrl), pyInfo)
-            return returnValue
+            return bool(returnValue)
         else:
             return False
     except:
@@ -280,7 +283,7 @@ cdef public cpp_bool RequestHandler_OnCertificateError(
             returnValue = clientCallback(certError, 
                     CefToPyString(cefRequestUrl),
                     CreatePyAllowCertificateErrorCallback(cefCertCallback))
-            return returnValue
+            return bool(returnValue)
         else:
             return False
     except:

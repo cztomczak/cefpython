@@ -4,9 +4,7 @@
 
 include "compile_time_constants.pxi"
 from libcpp cimport bool as cpp_bool
-
-IF UNAME_SYSNAME == "Windows":
-    from stddef cimport wchar_t
+from libc.stddef cimport wchar_t
 
 cdef extern from "include/internal/cef_types.h":
 

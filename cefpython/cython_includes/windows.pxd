@@ -2,7 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from stddef cimport wchar_t
+from libc.stddef cimport wchar_t
 
 cdef extern from *:
     ctypedef char const_char "const char"

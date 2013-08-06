@@ -59,7 +59,7 @@ cdef public cpp_bool KeyboardHandler_OnPreKeyEvent(
                     pyIsKeyboardShortcutOut)
             cefIsKeyboardShortcut[0] = \
                     <cpp_bool>bool(pyIsKeyboardShortcutOut[0])
-            return returnValue
+            return bool(returnValue)
         return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
@@ -81,7 +81,7 @@ cdef public cpp_bool KeyboardHandler_OnKeyEvent(
         if callback:
             returnValue = callback(pyBrowser, pyEvent,
                     <object>PyLong_FromVoidPtr(cefEventHandle))
-            return returnValue
+            return bool(returnValue)
         return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()

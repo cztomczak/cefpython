@@ -1,3 +1,9 @@
+# Copyright (c) 2012-2013 The CEF Python authors. All rights reserved.
+# License: New BSD License.
+# Website: http://code.google.com/p/cefpython/
+
+# Create a Windows package installer.
+
 import sys
 import os
 import platform
@@ -16,7 +22,7 @@ def main():
     parser.add_argument("-v", "--version", help="cefpython version",
             required=True)
     args = parser.parse_args()
-    assert re.search(r"^(\d+\.\d+)$", args.version), (
+    assert re.search(r"^\d+\.\d+$", args.version), (
             "Invalid version string")
 
     vars = {}

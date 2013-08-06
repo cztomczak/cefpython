@@ -108,22 +108,20 @@ class CefPythonApp :
   // ---------------------------------------------------------------------------
 
   virtual void SetJavascriptBindings(CefRefPtr<CefBrowser> browser,
-                                    CefRefPtr<CefDictionaryValue> data) 
-                                    OVERRIDE;
+                                    CefRefPtr<CefDictionaryValue> data);
   virtual CefRefPtr<CefDictionaryValue> GetJavascriptBindings(
-                                    CefRefPtr<CefBrowser> browser) OVERRIDE;
+                                    CefRefPtr<CefBrowser> browser);
 
-  virtual void RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser) OVERRIDE;
+  virtual void RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser);
 
   virtual bool BindedFunctionExists(CefRefPtr<CefBrowser> browser, 
-                                    const CefString& funcName) OVERRIDE;
+                                    const CefString& funcName);
 
-  virtual void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser) 
-                                            OVERRIDE;
+  virtual void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser);
   
   virtual void DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
-                                    CefRefPtr<CefV8Context> context) OVERRIDE;
+                                    CefRefPtr<CefV8Context> context);
 
 protected:
   std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;

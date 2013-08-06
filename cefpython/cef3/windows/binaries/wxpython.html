@@ -151,7 +151,6 @@ def PyCallback(self, *args):
 
 
 
-
 <h3>Display handler</h3>
 
 <pre>
@@ -220,9 +219,6 @@ Try this:
     http://patik.com/code/console-log-polyfill/</a>
 
 
-
-
-
 <h3>Keyboard handler</h3>
 <p>
     Press F5 to reload the page.<br>
@@ -236,11 +232,17 @@ def OnPreKeyEvent(self, browser, event, eventHandle,
     print("ClientHandler::OnPreKeyEvent()")
 
 def OnKeyEvent(self, browser, event, eventHandle):
-    print("ClientHandler::OnKeyEvent()")
-    print("native_key_code = %s" % event["native_key_code"])
+    print("KeyboardHandler::OnKeyEvent()")
     if platform.system() == "Linux":
+        print("native_key_code = %s" % event["native_key_code"])
         # F5 = 71
         if event["native_key_code"] == 71:
+            print("F5 pressed! Reloading page..")
+            browser.ReloadIgnoreCache()
+    elif platform.system() == "Windows":
+        print("windows_key_code = %s" % event["windows_key_code"])
+        # F5 = VK_F5
+        if event["windows_key_code"] == cefpython.VK_F5:
             print("F5 pressed! Reloading page..")
             browser.ReloadIgnoreCache()
 </pre>
@@ -336,6 +338,9 @@ def OnProtocolExecution(self, browser, url, allowExecutionOut):
 Try this:
 <a href="magnet:?xt=urn:btih:a4224b45b27f436374391379cc5c7e629e2e5189">
     magnet:?xt=urn:btih:a4224b45b27f436374391379cc5c7e629e2e5189</a>
+<br>
+(After you see the custom error message you have to hit
+twice the Back from the context menu, to get back to this page)
 
 <pre>
 def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
@@ -459,7 +464,6 @@ def OnLoadError(self, browser, frame, errorCode, errorTextList, failedUrl):
     customErrorMessage = "My custom error message!"
     frame.LoadUrl("data:text/html,%s" % customErrorMessage)
 </pre>
-
 Try this: 
 <a href="http://www.non-existent.nono/">
     http://www.non-existent.nono/</a>

@@ -1,3 +1,9 @@
+# Copyright (c) 2012-2013 The CEF Python authors. All rights reserved.
+# License: New BSD License.
+# Website: http://code.google.com/p/cefpython/
+
+# Create a Windows package installer.
+
 import sys
 import os
 import platform
@@ -16,7 +22,7 @@ def main():
     parser.add_argument("-v", "--version", help="cefpython version",
             required=True)
     args = parser.parse_args()
-    assert re.search(r"^v\d+$", args.version), "Invalid version string"
+    assert re.search(r"^\d+\.\d+$", args.version), "Invalid version string"
 
     vars = {}
     vars["PACKAGE_NAME"] = "cefpython3"
@@ -31,6 +37,8 @@ def main():
             + str(sys.version_info.major) + str(sys.version_info.minor)
             + ".pyd")
     vars["INSTALLER_DIR"] = os.getcwd()
+    vars["WX_SUBPACKAGE_DIR"] = os.path.realpath(os.getcwd()+r"\..\.."
+            "\wx-subpackage")
 
     print("Reading template: %s" % TEMPLATE_FILE)
 

@@ -3,7 +3,7 @@
 # Website: http://code.google.com/p/cefpython/
 
 from libcpp cimport bool as cpp_bool
-from stddef cimport wchar_t
+from libc.stddef cimport wchar_t
 from libcpp.string cimport string as cpp_string
 from wstring cimport wstring as cpp_wstring
 
