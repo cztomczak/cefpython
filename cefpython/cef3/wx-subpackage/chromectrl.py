@@ -228,15 +228,18 @@ class ChromeCtrl(wx.Panel):
         if self.chromeWindow.GetBrowser().CanGoBack():
             self.chromeWindow.GetBrowser().GoBack()
         self.UpdateButtonsState()
+        self.chromeWindow.GetBrowser().SetFocus(True)
 
     def OnRight(self, event):
         if self.chromeWindow.GetBrowser().CanGoForward():
             self.chromeWindow.GetBrowser().GoForward()
         self.UpdateButtonsState()
+        self.chromeWindow.GetBrowser().SetFocus(True)
 
     def OnReload(self, event):
         self.chromeWindow.GetBrowser().Reload()
         self.UpdateButtonsState()
+        self.chromeWindow.GetBrowser().SetFocus(True)
 
     def UpdateButtonsState(self):
         self.navigationBar.backBtn.Enable(
@@ -316,9 +319,9 @@ def Initialize(settings=None):
                 cefpython.GetModuleDirectory() + "/locales"
         if not "resources_dir_path" in settings:
             settings["resources_dir_path"] = cefpython.GetModuleDirectory()
-        if not "browser_subprocess_path" in settings: 
-            settings["browser_subprocess_path"] = \
-                "%s/%s" % (cefpython.GetModuleDirectory(), "subprocess")
+    if not "browser_subprocess_path" in settings: 
+        settings["browser_subprocess_path"] = \
+            "%s/%s" % (cefpython.GetModuleDirectory(), "subprocess")
 
     # DEBUGGING options:
     # ------------------

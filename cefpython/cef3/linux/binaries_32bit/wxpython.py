@@ -1,5 +1,12 @@
 # An example of embedding CEF browser in wxPython on Linux.
 
+# Important: 
+#   On Linux importing the cefpython module must be 
+#   the very first in your application. This is because CEF makes 
+#   a global tcmalloc hook for memory allocation/deallocation. 
+#   See Issue 73 that is to provide CEF builds with tcmalloc disabled:
+#   https://code.google.com/p/cefpython/issues/detail?id=73
+
 import ctypes, os, sys
 libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so')
 if os.path.exists(libcef_so):
@@ -262,8 +269,8 @@ class ClientHandler:
         print("title = %s" % title)
 
     def OnTooltip(self, browser, textOut):
-        # OnTooltip does not work on Linux, will be fixed in next
-        # CEF release, see Issue 783:
+        # OnTooltip not yet implemented (both Linux and Windows), 
+        # will be fixed in next CEF release, see Issue 783:
         # https://code.google.com/p/chromiumembedded/issues/detail?id=783
         print("DisplayHandler::OnTooltip()")
         print("text = %s" % textOut[0])

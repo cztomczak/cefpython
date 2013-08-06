@@ -153,27 +153,45 @@ def PyCallback(self, *args):
 
 <h3>Display handler</h3>
 
-See messages in the console.
-
 <pre>
 def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
         canGoForward):
     print("ClientHandler::OnLoadingStateChange()")
     print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
             % (isLoading, canGoBack, canGoForward))
+</pre>
 
+See messages in the console during loading of a webpage.
+
+<pre>
 def OnAddressChange(self, browser, frame, url):
     print("ClientHandler::OnAddressChange()")
     print("url = %s" % url)
+</pre>
 
+See messages in the console during loading of a webpage.
+
+<pre>
 def OnTitleChange(self, browser, title):
     print("ClientHandler::OnTitleChange()")
     print("title = %s" % title)
+</pre>
 
-def OnTooltip(self, browser, text):
-    print("ClientHandler::OnTooltip()")
-    print("text = %s")
+See messages in the console during loading of a webpage.
 
+<pre>
+def OnTooltip(self, browser, textOut):
+    # OnTooltip not yet implemented (both Linux and Windows), 
+    # will be fixed in next CEF release, see Issue 783:
+    # https://code.google.com/p/chromiumembedded/issues/detail?id=783
+    print("DisplayHandler::OnTooltip()")
+    print("text = %s" % textOut[0])
+</pre>
+
+See messages in the console when hovering over a google logo:
+<a href="http://www.google.com/">http://www.google.com/</a>
+
+<pre>
 def OnStatusMessage(self, browser, value):
     if not value:
         # Do not notify in the console about empty statuses.
@@ -184,7 +202,11 @@ def OnStatusMessage(self, browser, value):
         return
     print("DisplayHandler::OnStatusMessage()")
     print("value = %s" % value)
+</pre>
 
+See messages in the console when hovering over links.
+
+<pre>
 def OnConsoleMessage(self, browser, message, source, line):
     print("ClientHandler::OnConsoleMessage()")
     print("message = %s" % message)
@@ -192,13 +214,19 @@ def OnConsoleMessage(self, browser, message, source, line):
     print("line = %s" % line)
 </pre>
 
+Try this: 
+<a href="http://patik.com/code/console-log-polyfill/">
+    http://patik.com/code/console-log-polyfill/</a>
+
 
 
 
 <h3>Keyboard handler</h3>
 <p>
-    Click anywhere in the window first to set keyboard focus.
-    Next press F5 to reload the page.
+    Press F5 to reload the page.<br>
+    On Linux it is required to click anywhere in the window first 
+    so that keyboard focus is set. See Issue 77 in the CEF Python
+    Issue Tracker.
 </p>
 <pre>
 def OnPreKeyEvent(self, browser, event, eventHandle, 
@@ -429,9 +457,13 @@ def OnLoadError(self, browser, frame, errorCode, errorTextList, failedUrl):
     customErrorMessage = "My custom error message!"
     frame.LoadUrl("data:text/html,%s" % customErrorMessage)
 </pre>
+
 Try this: 
 <a href="http://www.non-existent.nono/">
     http://www.non-existent.nono/</a>
+<br>
+(After you see the custom error message you have to hit
+twice the Back from the context menu, to get back to this page)
 
 <pre>
 def OnRendererProcessTerminated(self, browser, status):

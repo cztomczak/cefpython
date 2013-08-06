@@ -110,8 +110,9 @@ def CefAdvanced():
     browserSettings["universal_access_from_file_urls_allowed"] = True
     browserSettings["file_access_from_file_urls_allowed"] = True
 
-    windowHandle = cefwindow.CreateWindow(title="CEF Python 3 Example", className="cefpython3_example",
-                    width=1024, height=768, icon="icon.ico", windowProc=wndproc)
+    windowHandle = cefwindow.CreateWindow(title="CEF Python 3 example", 
+            className="cefpython3_example", width=800, height=600, 
+            icon="icon.ico", windowProc=wndproc)
     windowInfo = cefpython.WindowInfo()
     windowInfo.SetAsChild(windowHandle)
     browser = cefpython.CreateBrowserSync(windowInfo, browserSettings,

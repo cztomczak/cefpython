@@ -4,8 +4,8 @@
 
 cdef class JavascriptBindings:
     # By default binding only to top frame.
-    cdef public cpp_bool bindToFrames
-    cdef public cpp_bool bindToPopups
+    cdef public py_bool bindToFrames
+    cdef public py_bool bindToPopups
     cdef public dict functions
     cdef public dict properties
     cdef public dict objects

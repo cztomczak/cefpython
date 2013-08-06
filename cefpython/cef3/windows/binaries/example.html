@@ -2,50 +2,53 @@
 <html>
 <head>
     <meta charset=utf-8>
-    <title>CefAdvanced</title>
+    <title>CEF Python 3 example (utf-8: ąś)</title>
     <style>
-    body { font: 13px Segoe UI, Arial; }
-    pre { background: #ddd; }
+    body { font: 13px Segoe UI, Arial; line-height: 1.4em; }
+    pre { background: #ddd; font: 12px Consolas, Courier New; }
     </style>
 </head>
 <body>
 
-Welcome to <b>CEF Python 3</b> - bindings for the Chromium Embedded Framework.
-<br><br>
 
-Project's website: <a href="http://code.google.com/p/cefpython/">
-http://code.google.com/p/cefpython/</a><br>
 
-Wiki documentation: <a href="http://code.google.com/p/cefpython/wiki/API">
-http://code.google.com/p/cefpython/wiki/</a><br>
+<p>Use mouse context menu to go Back/Forward in history navigation.</p>
 
-Support forum: <a href="https://groups.google.com/group/cefpython?hl=en">
-https://groups.google.com/group/cefpython?hl=en</a><br>
+
+
+<h3>Google Search</h3>
+<a href="http://www.google.com/">http://www.google.com/</a>
+
+
 
 <h3>User agent</h3>
-    <script>document.write(navigator.userAgent)</script>
+<script>document.write(navigator.userAgent)</script>
 
-<h3>Keyboard and mouse shortcuts</h3>
-    <ul>
-        <li>Press backspace to go Back in history.
-        <li>Use context menu in right mouse button to go Back/Forward or view the sources.
-    </ul>
 
-<h3>HTML5 video & accelerated content</h3>
-    <a href="http://www.youtube.com/watch?v=siOHh0uzcuY&html5=True">
-    HTML 5 video</a><br>
-    <a href="http://mudcu.be/labs/JS1k/BreathingGalaxies.html">
-    Accelerated canvas</a><br>
-    <a href="http://www.webkit.org/blog-files/3d-transforms/poster-circle.html">
-    Accelerated layers</a><br>
 
-<h3>Popups</h3>
-    <a href="javascript:window.open('example.html', '', 'width=600,height=400')">
-    window.open('example.html', '', 'width=600,height=400')</a>
+<h3>Popup</h3>
+<a href="javascript:window.open('example.html')">
+    window.open('example.html')</a>
 
-<br><br><br><br><br><br><br><br>
-<br><br><br><br><br><br><br><br>
-<br><br><br><br><br><br><br><br>
+
+
+<h3>HTML5 video and accelerated content</h3>
+<a href="http://www.youtube.com/watch?v=siOHh0uzcuY&html5=True">
+HTML 5 video</a><br>
+<a href="http://mudcu.be/labs/JS1k/BreathingGalaxies.html">
+Accelerated canvas</a><br>
+<a href="http://www.webkit.org/blog-files/3d-transforms/poster-circle.html">
+Accelerated layers</a><br>
+
+
+
+<h3>Advanced example</h3>
+
+See the wxpython.py script for an advanced usage of CEF Python 3
+features - including javascript bindings, js and python callbacks,
+client handlers and others.
+
+
 
 </body>
 </html>

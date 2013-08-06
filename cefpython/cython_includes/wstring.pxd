@@ -1,4 +1,4 @@
-from stddef cimport wchar_t
+from libc.stddef cimport wchar_t
 from libcpp.string cimport string
 
 cdef extern from *:

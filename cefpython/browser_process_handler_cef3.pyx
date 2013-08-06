@@ -12,7 +12,7 @@ cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
         logFile = "debug.log"
         if "log_file" in g_applicationSettings:
             logFile = g_applicationSettings["log_file"]
-        extra_info.get().SetBool(0, g_debug)
+        extra_info.get().SetBool(0, bool(g_debug))
         extra_info.get().SetString(1, PyToCefStringValue(logFile))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
