@@ -19,7 +19,7 @@ cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
     if pyString.startswith(cefPythonMessageHash):
         jsonData = pyString[len(cefPythonMessageHash):]
         message = json.loads(jsonData)
-        if message and type(message) == dict and message.has_key("what") \
+        if message and type(message) == dict and ("what" in message) \
                 and message["what"] == "javascript-callback":
             jsCallback = CreateJavascriptCallback(
                     message["callbackId"], cefBrowser, 

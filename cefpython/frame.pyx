@@ -7,7 +7,7 @@ cdef dict g_pyFrames = {}
 IF CEF_VERSION == 3:
     # Unused function warning in CEF 1.
     cdef PyFrame GetPyFrameById(object frameId):
-        if g_pyFrames.has_key(frameId):
+        if frameId in g_pyFrames:
             return g_pyFrames[frameId]
         return None
 
@@ -45,7 +45,7 @@ IF CEF_VERSION == 3:
         # Called from V8ContextHandler_OnContextReleased().
         # TODO: call this function also in CEF 1.
         global g_pyFrames
-        if g_pyFrames.has_key(frameId):
+        if frameId in g_pyFrames:
             Debug("del g_pyFrames[%s]" % frameId)
             del g_pyFrames[frameId]
         else:

@@ -247,10 +247,10 @@ class World(DirectObject):
                 self.keyInfo(ord(key)), 0)
 
     def onButtonDownOrUp(self, keyType, key):
-        if self.modifierKeys.has_key(key):
+        if key in self.modifierKeys:
             self.keyModifiers |= self.modifierKeys[key]
         else:
-            if self.translateKeys.has_key(key):
+            if key in self.translateKeys:
                 self.browser.SendKeyEvent(keyType,
                         self.keyInfo(self.translateKeys[key]),
                         self.keyModifiers)
