@@ -142,6 +142,7 @@ class MainFrame(wx.Frame):
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         if USE_EVT_IDLE:
+            print("Using EVT_IDLE to execute the CEF message loop work")
             # Bind EVT_IDLE only for the main application frame.
             self.Bind(wx.EVT_IDLE, self.OnIdle)
 
@@ -455,6 +456,7 @@ class MyApp(wx.App):
 
     def OnInit(self):
         if not USE_EVT_IDLE:
+            print("Using TIMER to execute the CEF message loop work")
             self.CreateTimer()
         frame = MainFrame()
         self.SetTopWindow(frame)
@@ -471,7 +473,7 @@ class MyApp(wx.App):
         wx.EVT_TIMER(self, self.timerID, self.OnTimer)
 
     def OnTimer(self, event):
-        cefpython.SingleMessageLoop()
+        cefpython.MessageLoopWork()
 
     def OnExit(self):
         # When app.MainLoop() returns, MessageLoopWork() should
