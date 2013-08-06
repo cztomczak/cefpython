@@ -307,7 +307,7 @@ cpdef py_void SetGlobalClientCallback(py_string name, object callback):
 
 cpdef object GetGlobalClientCallback(py_string name):
     global g_globalClientCallbacks
-    if g_globalClientCallbacks.has_key(name):
+    if name in g_globalClientCallbacks:
         return g_globalClientCallbacks[name]
     else:
         return None

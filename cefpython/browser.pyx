@@ -21,7 +21,7 @@ cdef dict g_pyBrowsers = {}
 IF CEF_VERSION == 3:
     # Unused function warning in CEF 1.
     cdef PyBrowser GetPyBrowserById(int browserId):
-        if g_pyBrowsers.has_key(browserId):
+        if browserId in g_pyBrowsers:
             return g_pyBrowsers[browserId]
         return None
 
@@ -87,7 +87,7 @@ IF CEF_VERSION == 3:
         # Called from LifespanHandler_OnBeforeClose().
         # TODO: call this function also in CEF 1.
         global g_pyBrowsers
-        if g_pyBrowsers.has_key(browserId):
+        if browserId in g_pyBrowsers:
             Debug("del g_pyBrowsers[%s]" % browserId)
             del g_pyBrowsers[browserId]
         else:

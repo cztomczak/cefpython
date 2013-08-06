@@ -73,7 +73,7 @@ cdef public cpp_bool ExecutePythonCallback(
     cdef object returnValue
     try:
         global g_pythonCallbacks
-        if g_pythonCallbacks.has_key(callbackId):
+        if callbackId in g_pythonCallbacks:
             # [0] browserId, [1] frameId, [2] function.
             function = g_pythonCallbacks[callbackId][2]
             functionArguments = CefListValueToPyList(
