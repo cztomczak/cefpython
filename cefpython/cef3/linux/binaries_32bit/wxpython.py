@@ -99,7 +99,10 @@ class MainFrame(wx.Frame):
 
         # Cannot attach browser to the main frame as this will cause
         # the menu not to work.
-        self.mainPanel = wx.Panel(self)
+        # --
+        # You also have to set the wx.WANTS_CHARS style for
+        # all parent panels/controls, if it's deeply embedded.
+        self.mainPanel = wx.Panel(self, style=wx.WANTS_CHARS)
 
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(self.mainPanel.GetGtkWidget())

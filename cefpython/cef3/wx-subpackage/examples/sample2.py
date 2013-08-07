@@ -33,7 +33,11 @@ class MainFrame(wx.Frame):
             self.tree.AppendItem(self.root, url)
         self.tree.Expand(self.root)
 
-        self.tabs = fnb.FlatNotebook(self, wx.ID_ANY, agwStyle=fnb.FNB_NODRAG | fnb.FNB_X_ON_TAB)
+        self.tabs = fnb.FlatNotebook(self, wx.ID_ANY,
+                agwStyle=fnb.FNB_NODRAG | fnb.FNB_X_ON_TAB)
+        # You also have to set the wx.WANTS_CHARS style for
+        # all parent panels/controls, if it's deeply embedded.
+        self.tabs.SetWindowStyleFlag(wx.WANTS_CHARS)
 
     def layoutComponents(self):
         sizer = wx.BoxSizer(wx.HORIZONTAL)

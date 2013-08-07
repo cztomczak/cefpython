@@ -32,7 +32,7 @@ import platform
 # It seems that Flash content behaves better when using a timer.
 USE_EVT_IDLE = True
 
-TEST_EMBEDDING_IN_PANEL = False
+TEST_EMBEDDING_IN_PANEL = True
 
 def GetApplicationPath(file=None):
     import re, os, platform
@@ -103,7 +103,9 @@ class MainFrame(wx.Frame):
 
         if TEST_EMBEDDING_IN_PANEL:
             print("Embedding in a wx.Panel!")
-            self.mainPanel = wx.Panel(self)
+            # You also have to set the wx.WANTS_CHARS style for
+            # all parent panels/controls, if it's deeply embedded.
+            self.mainPanel = wx.Panel(self, style=wx.WANTS_CHARS)
 
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(self.GetHandleForBrowser())

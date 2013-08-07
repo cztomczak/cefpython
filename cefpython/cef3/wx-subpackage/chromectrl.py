@@ -177,7 +177,9 @@ class ChromeCtrl(wx.Panel):
     def __init__(self, parent, url="", useTimer=False,
                  timerMillis=DEFAULT_TIMER_MILLIS, hasNavBar=True,
                  *args, **kwargs):
-        wx.Panel.__init__(self, parent, *args, **kwargs)
+        # You also have to set the wx.WANTS_CHARS style for
+        # all parent panels/controls, if it's deeply embedded.
+        wx.Panel.__init__(self, parent, style=wx.WANTS_CHARS, *args, **kwargs)
 
         self.chromeWindow = ChromeWindow(self, url=str(url), useTimer=useTimer)
         sizer = wx.BoxSizer(wx.VERTICAL)
