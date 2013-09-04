@@ -165,6 +165,10 @@ class JavascriptExternal:
     def __init__(self, mainBrowser):
         self.mainBrowser = mainBrowser
 
+    def CreateAnotherBrowser(self):
+        frame = MainFrame()
+        frame.Show()
+
     def Print(self, message):
         print(message)
 
