@@ -74,7 +74,6 @@ cdef extern from "include/cef_browser.h":
                           int width, int height, void* buffer)
 
             # Sending mouse/key events.
-
             void SendKeyEvent(cef_types.cef_key_type_t type,
                     CefKeyInfo& keyInfo, int modifiers)
             void SendMouseClickEvent(int x, int y,
@@ -115,6 +114,18 @@ cdef extern from "include/cef_browser.h":
             void WasResized()
             void WasHidden(cpp_bool hidden)
             void NotifyScreenInfoChanged()
+
+            # Sending mouse/key events.
+            void SendKeyEvent(cef_types.CefKeyEvent)
+            void SendMouseClickEvent(cef_types.CefMouseEvent,
+                    cef_types.cef_mouse_button_type_t type,
+                    cpp_bool mouseUp, int clickCount)
+            void SendMouseMoveEvent(cef_types.CefMouseEvent, \
+                    cpp_bool mouseLeave)
+            void SendMouseWheelEvent(cef_types.CefMouseEvent, int deltaX, \
+                    int deltaY)
+            void SendFocusEvent(cpp_bool setFocus)
+            void SendCaptureLostEvent()
 
         cdef cppclass CefBrowser(CefBase):
 

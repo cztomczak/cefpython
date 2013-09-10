@@ -157,7 +157,12 @@ cdef extern from "include/internal/cef_types_wrappers.h":
             cef_state_t developer_tools
 
     IF CEF_VERSION == 1:
+        cdef cppclass CefRect:
+            int x, y, width, height
+            CefRect()
+            CefRect(int x, int y, int width, int height)
 
+    ELIF CEF_VERSION == 3:
         cdef cppclass CefRect:
             int x, y, width, height
             CefRect()

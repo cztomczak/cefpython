@@ -99,8 +99,11 @@ from cef_frame cimport *
 
 # cannot cimport *, that would cause name conflicts with constants.
 cimport cef_types
-IF CEF_VERSION == 1:
-    ctypedef cef_types.cef_paint_element_type_t PaintElementType
+ctypedef cef_types.cef_paint_element_type_t PaintElementType
+IF CEF_VERSION == 3:
+    from cef_types cimport CefKeyEvent
+    from cef_types cimport CefMouseEvent
+    from cef_types cimport CefScreenInfo
 
 # cannot cimport *, name conflicts
 IF UNAME_SYSNAME == "Windows":

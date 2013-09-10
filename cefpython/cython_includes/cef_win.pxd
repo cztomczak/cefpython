@@ -16,9 +16,9 @@ cdef extern from "include/internal/cef_win.h":
 
     cdef cppclass CefWindowInfo:
         void SetAsChild(HWND, RECT)
-        void SetAsOffScreen(HWND)
         void SetAsPopup(HWND, CefString&)
         void SetTransparentPainting(int)
+        void SetAsOffScreen(HWND)
 
     IF CEF_VERSION == 3:
         cdef cppclass CefMainArgs(CefStructBase):
