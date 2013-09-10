@@ -16,7 +16,8 @@ class ClientHandler :
         public CefDisplayHandler,
         public CefKeyboardHandler,
         public CefRequestHandler,
-        public CefLoadHandler
+        public CefLoadHandler,
+        public CefRenderHandler
 {
 public:
   ClientHandler(){}
@@ -120,7 +121,7 @@ public:
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE {
-    return NULL;
+    return this;
   }
 
   ///
@@ -541,6 +542,98 @@ public:
   /*--cef()--*/
   virtual void OnPluginCrashed(CefRefPtr<CefBrowser> browser,
                                const CefString& plugin_path) OVERRIDE;
+
+  // --------------------------------------------------------------------------
+  // CefRenderHandler
+  // --------------------------------------------------------------------------
+
+  ///
+  // Implement this interface to handle events when window rendering is disabled.
+  // The methods of this class will be called on the UI thread.
+  ///
+
+  ///
+  // Called to retrieve the root window rectangle in screen coordinates. Return
+  // true if the rectangle was provided.
+  ///
+  /*--cef()--*/
+  virtual bool GetRootScreenRect(CefRefPtr<CefBrowser> browser,
+                                 CefRect& rect) OVERRIDE;
+
+  ///
+  // Called to retrieve the view rectangle which is relative to screen
+  // coordinates. Return true if the rectangle was provided.
+  ///
+  /*--cef()--*/
+  virtual bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect)
+      OVERRIDE;
+
+  ///
+  // Called to retrieve the translation from view coordinates to actual screen
+  // coordinates. Return true if the screen coordinates were provided.
+  ///
+  /*--cef()--*/
+  virtual bool GetScreenPoint(CefRefPtr<CefBrowser> browser,
+                              int viewX,
+                              int viewY,
+                              int& screenX,
+                              int& screenY) OVERRIDE;
+
+  ///
+  // Called to allow the client to fill in the CefScreenInfo object with
+  // appropriate values. Return true if the |screen_info| structure has been
+  // modified.
+  //
+  // If the screen info rectangle is left empty the rectangle from GetViewRect
+  // will be used. If the rectangle is still empty or invalid popups may not be
+  // drawn correctly.
+  ///
+  /*--cef()--*/
+  virtual bool GetScreenInfo(CefRefPtr<CefBrowser> browser,
+                             CefScreenInfo& screen_info) OVERRIDE;
+
+  ///
+  // Called when the browser wants to show or hide the popup widget. The popup
+  // should be shown if |show| is true and hidden if |show| is false.
+  ///
+  /*--cef()--*/
+  virtual void OnPopupShow(CefRefPtr<CefBrowser> browser,
+                           bool show) OVERRIDE;
+
+  ///
+  // Called when the browser wants to move or resize the popup widget. |rect|
+  // contains the new location and size.
+  ///
+  /*--cef()--*/
+  virtual void OnPopupSize(CefRefPtr<CefBrowser> browser,
+                           const CefRect& rect) OVERRIDE;
+
+  ///
+  // Called when an element should be painted. |type| indicates whether the
+  // element is the view or the popup widget. |buffer| contains the pixel data
+  // for the whole image. |dirtyRects| contains the set of rectangles that need
+  // to be repainted. On Windows |buffer| will be |width|*|height|*4 bytes
+  // in size and represents a BGRA image with an upper-left origin.
+  ///
+  /*--cef()--*/
+  virtual void OnPaint(CefRefPtr<CefBrowser> browser,
+                       PaintElementType type,
+                       const RectList& dirtyRects,
+                       const void* buffer,
+                       int width, int height) OVERRIDE;
+
+  ///
+  // Called when the browser window's cursor has changed.
+  ///
+  /*--cef()--*/
+  virtual void OnCursorChange(CefRefPtr<CefBrowser> browser,
+                              CefCursorHandle cursor) OVERRIDE;
+
+  ///
+  // Called when the scroll offset has changed.
+  ///
+  /*--cef()--*/
+  virtual void OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
 private:
    

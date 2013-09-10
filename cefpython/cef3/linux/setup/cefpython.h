@@ -41,6 +41,16 @@ __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnLoadError(CefRefPtr<CefBrowser>, Ce
 __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnRendererProcessTerminated(CefRefPtr<CefBrowser>, enum cef_termination_status_t);
 __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnPluginCrashed(CefRefPtr<CefBrowser>, CefString const &);
 __PYX_EXTERN_C DL_IMPORT(void) BrowserProcessHandler_OnRenderProcessThreadCreated(CefRefPtr<CefListValue>);
+__PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_GetRootScreenRect(CefRefPtr<CefBrowser>, CefRect &);
+__PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_GetViewRect(CefRefPtr<CefBrowser>, CefRect &);
+__PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_GetScreenRect(CefRefPtr<CefBrowser>, CefRect &);
+__PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_GetScreenPoint(CefRefPtr<CefBrowser>, int, int, int &, int &);
+__PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_GetScreenInfo(CefRefPtr<CefBrowser>, CefScreenInfo &);
+__PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnPopupShow(CefRefPtr<CefBrowser>, bool);
+__PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnPopupSize(CefRefPtr<CefBrowser>, CefRect const &);
+__PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnPaint(CefRefPtr<CefBrowser>, cef_paint_element_type_t, std::vector<CefRect> &, void const *, int, int);
+__PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle);
+__PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnScrollOffsetChanged(CefRefPtr<CefBrowser>);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 

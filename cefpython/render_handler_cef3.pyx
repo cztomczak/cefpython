@@ -6,6 +6,33 @@
 PET_VIEW = cef_types.PET_VIEW
 PET_POPUP = cef_types.PET_POPUP
 
+cdef public cpp_bool RenderHandler_GetRootScreenRect(
+        CefRefPtr[CefBrowser] cefBrowser,
+        CefRect& cefRect
+        ) except * with gil:
+    cdef PyBrowser pyBrowser
+    cdef list pyRect = []
+    cdef py_bool ret
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        callback = pyBrowser.GetClientCallback("GetRootScreenRect")
+        if callback:
+            ret = callback(pyBrowser, pyRect)
+            if ret:
+                assert (pyRect and len(pyRect) == 4), "rectangle not provided"
+                cefRect.x = pyRect[0]
+                cefRect.y = pyRect[1]
+                cefRect.width = pyRect[2]
+                cefRect.height = pyRect[3]
+                return True
+            else:
+                return False
+        else:
+            return False
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
 cdef public cpp_bool RenderHandler_GetViewRect(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRect& cefRect
@@ -88,6 +115,13 @@ cdef public cpp_bool RenderHandler_GetScreenPoint(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
+cdef public cpp_bool RenderHandler_GetScreenInfo(
+        CefRefPtr[CefBrowser] cefBrowser,
+        CefScreenInfo& cefScreenInfo
+        ) except * with gil:
+    # Not yet implemented.
+    return False
+
 cdef public void RenderHandler_OnPopupShow(
         CefRefPtr[CefBrowser] cefBrowser,
         cpp_bool show
@@ -104,7 +138,7 @@ cdef public void RenderHandler_OnPopupShow(
 
 cdef public void RenderHandler_OnPopupSize(
         CefRefPtr[CefBrowser] cefBrowser,
-        CefRect& cefRect
+        const CefRect& cefRect
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef list pyRect
@@ -122,11 +156,15 @@ cdef public void RenderHandler_OnPaint(
         CefRefPtr[CefBrowser] cefBrowser,
         cef_types.cef_paint_element_type_t paintElementType,
         cpp_vector[CefRect]& cefDirtyRects,
-        void* cefBuffer
+        const void* cefBuffer,
+        int width,
+        int height
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef list pyDirtyRects = []
     cdef list pyRect
+    # TODO: cefDirtyRects should be const, but const_iterator is
+    #       not yet implemented in libcpp.vector.
     cdef cpp_vector[CefRect].iterator iterator
     cdef CefRect cefRect
     cdef PaintBuffer paintBuffer
@@ -140,12 +178,16 @@ cdef public void RenderHandler_OnPaint(
             pyDirtyRects.append(pyRect)
             preinc(iterator)
 
-        (width, height) = pyBrowser.GetSize(paintElementType)
+        # In CEF 1 width and height were fetched using GetSize(),
+        # but in CEF 3 they are passed as arguments to OnPaint().
+        # OFF: | (width, height) = pyBrowser.GetSize(paintElementType)
+
         paintBuffer = CreatePaintBuffer(cefBuffer, width, height)
 
         callback = pyBrowser.GetClientCallback("OnPaint")
         if callback:
-            callback(pyBrowser, paintElementType, pyDirtyRects, paintBuffer)
+            callback(pyBrowser, paintElementType, pyDirtyRects, paintBuffer,
+                width, height)
         else:
             return
     except:
@@ -161,7 +203,20 @@ cdef public void RenderHandler_OnCursorChange(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("OnCursorChange")
         if callback:
-            callback(pyBrowser, <int>cursor)
+            callback(pyBrowser, <uintptr_t>cursor)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public void RenderHandler_OnScrollOffsetChanged(
+        CefRefPtr[CefBrowser] cefBrowser
+        ) except * with gil:
+    cdef PyBrowser pyBrowser
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        callback = pyBrowser.GetClientCallback("OnScrollOffsetChanged")
+        if callback:
+            callback(pyBrowser)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

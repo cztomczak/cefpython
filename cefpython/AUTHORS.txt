@@ -10,3 +10,4 @@ Contributors (in order of first commit):
     Rokas Stupuras <roxaz911@@gmail.com>
     Greg Kacy <grkacy@@gmail.com>
     Thomas Dähling <thomas@@ccpgames.com>
+    Dominique Burnand <dominique.burnand@@rentouch.ch>

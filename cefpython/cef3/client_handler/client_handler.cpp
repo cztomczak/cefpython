@@ -575,3 +575,123 @@ void ClientHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
     REQUIRE_UI_THREAD();
     LoadHandler_OnPluginCrashed(browser, plugin_path);
 }
+
+// ----------------------------------------------------------------------------
+// CefRenderHandler
+// ----------------------------------------------------------------------------
+
+///
+// Implement this interface to handle events when window rendering is disabled.
+// The methods of this class will be called on the UI thread.
+///
+
+///
+// Called to retrieve the root window rectangle in screen coordinates. Return
+// true if the rectangle was provided.
+///
+/*--cef()--*/
+bool ClientHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
+                             CefRect& rect) {
+    REQUIRE_UI_THREAD();
+    return RenderHandler_GetRootScreenRect(browser, rect); 
+}
+
+///
+// Called to retrieve the view rectangle which is relative to screen
+// coordinates. Return true if the rectangle was provided.
+///
+/*--cef()--*/
+bool ClientHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) {
+    REQUIRE_UI_THREAD();
+    return RenderHandler_GetViewRect(browser, rect);
+}
+
+///
+// Called to retrieve the translation from view coordinates to actual screen
+// coordinates. Return true if the screen coordinates were provided.
+///
+/*--cef()--*/
+bool ClientHandler::GetScreenPoint(CefRefPtr<CefBrowser> browser,
+                          int viewX,
+                          int viewY,
+                          int& screenX,
+                          int& screenY) { 
+    REQUIRE_UI_THREAD();
+    return RenderHandler_GetScreenPoint(browser, viewX, viewY, screenX,
+            screenY);
+}
+
+///
+// Called to allow the client to fill in the CefScreenInfo object with
+// appropriate values. Return true if the |screen_info| structure has been
+// modified.
+//
+// If the screen info rectangle is left empty the rectangle from GetViewRect
+// will be used. If the rectangle is still empty or invalid popups may not be
+// drawn correctly.
+///
+/*--cef()--*/
+bool ClientHandler::GetScreenInfo(CefRefPtr<CefBrowser> browser,
+                         CefScreenInfo& screen_info) { 
+    REQUIRE_UI_THREAD();
+    return RenderHandler_GetScreenInfo(browser, screen_info);
+}
+
+///
+// Called when the browser wants to show or hide the popup widget. The popup
+// should be shown if |show| is true and hidden if |show| is false.
+///
+/*--cef()--*/
+void ClientHandler::OnPopupShow(CefRefPtr<CefBrowser> browser,
+                       bool show) {
+    REQUIRE_UI_THREAD();
+    RenderHandler_OnPopupShow(browser, show);
+}
+
+///
+// Called when the browser wants to move or resize the popup widget. |rect|
+// contains the new location and size.
+///
+/*--cef()--*/
+void ClientHandler::OnPopupSize(CefRefPtr<CefBrowser> browser,
+                       const CefRect& rect) {
+    REQUIRE_UI_THREAD();
+    RenderHandler_OnPopupSize(browser, rect);
+}
+
+///
+// Called when an element should be painted. |type| indicates whether the
+// element is the view or the popup widget. |buffer| contains the pixel data
+// for the whole image. |dirtyRects| contains the set of rectangles that need
+// to be repainted. On Windows |buffer| will be |width|*|height|*4 bytes
+// in size and represents a BGRA image with an upper-left origin.
+///
+/*--cef()--*/
+void ClientHandler::OnPaint(CefRefPtr<CefBrowser> browser,
+                   PaintElementType type,
+                   const RectList& dirtyRects,
+                   const void* buffer,
+                   int width, int height) {
+    REQUIRE_UI_THREAD();
+    RenderHandler_OnPaint(browser, type, const_cast<RectList&>(dirtyRects), \
+            buffer, width, height);
+};
+
+///
+// Called when the browser window's cursor has changed.
+///
+/*--cef()--*/
+void ClientHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
+                          CefCursorHandle cursor) {
+    REQUIRE_UI_THREAD();
+    RenderHandler_OnCursorChange(browser, cursor);
+}
+
+///
+// Called when the scroll offset has changed.
+///
+/*--cef()--*/
+void ClientHandler::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser) {
+    REQUIRE_UI_THREAD();
+    RenderHandler_OnScrollOffsetChanged(browser);
+}

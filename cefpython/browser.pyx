@@ -7,11 +7,17 @@ IF CEF_VERSION == 1:
     KEYTYPE_KEYUP = cef_types.KT_KEYUP
     KEYTYPE_KEYDOWN = cef_types.KT_KEYDOWN
     KEYTYPE_CHAR = cef_types.KT_CHAR
+ELIF CEF_VERSION == 3:
+    # cef_key_type_t, SendKeyEvent().
+    KEYTYPE_KEYUP = cef_types.KEYEVENT_RAWKEYDOWN
+    KEYTYPE_KEYDOWN = cef_types.KEYEVENT_KEYDOWN
+    KEYTYPE_CHAR = cef_types.KEYEVENT_CHAR
 
-    # cef_mouse_button_type_t, SendMouseClickEvent().
-    MOUSEBUTTON_LEFT = cef_types.MBT_LEFT
-    MOUSEBUTTON_MIDDLE = cef_types.MBT_MIDDLE
-    MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
+# Both CEF 1 and CEF 3.
+# cef_mouse_button_type_t, SendMouseClickEvent().
+MOUSEBUTTON_LEFT = cef_types.MBT_LEFT
+MOUSEBUTTON_MIDDLE = cef_types.MBT_MIDDLE
+MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
 
 # If you try to keep PyBrowser() objects inside cpp_vector you will
 # get segmentation faults, as they will be garbage collected.
@@ -192,23 +198,28 @@ cdef class PyBrowser:
     cpdef py_void SetClientCallback_CEF3(self, 
             py_string name, object callback):
         if not self.allowedClientCallbacks:
-            # CefDisplayHandler
+            # DisplayHandler
             self.allowedClientCallbacks += ["OnLoadingStateChange",
                     "OnAddressChange", "OnTitleChange", "OnTooltip",
                     "OnStatusMessage", "OnConsoleMessage"]
-            # CefKeyboardHandler
+            # KeyboardHandler
             self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"];
-            # CefRequestHandler
+            # RequestHandler
             # Note: "OnCertificateError" and "OnBeforePluginLoad" must be 
             # set using cefpython.SetGlobalClientCallback()
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
                     "OnQuotaRequest", "GetCookieManager",
                     "OnProtocolExecution"]
-            # CefLoadHandler
+            # LoadHandler
             self.allowedClientCallbacks += ["OnLoadStart", "OnLoadEnd",
                     "OnLoadError", "OnRendererProcessTerminated",
                     "OnPluginCrashed"]
+            # RenderHandler
+            self.allowedClientCallbacks += ["GetRootScreenRect",
+                    "GetViewRect", "GetScreenPoint", "GetScreenInfo",
+                    "OnPopupShow", "OnPopupSize", "OnPaint", "OnCursorChange",
+                    "OnScrollOffsetChanged"]
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
                             "callback: %s" % name)
@@ -560,7 +571,6 @@ cdef class PyBrowser:
             self.GetCefBrowser().get().Invalidate(cefRect)
 
     IF CEF_VERSION == 1 and UNAME_SYSNAME == "Windows":
-
         cpdef PaintBuffer GetImage(self, PaintElementType paintElementType,
                                int width, int height):
             assert IsThread(TID_UI), (
@@ -587,9 +597,7 @@ cdef class PyBrowser:
                 return None
 
     # Sending mouse/key events.
-
     IF CEF_VERSION == 1:
-
         cpdef py_void SendKeyEvent(self, cef_types.cef_key_type_t keyType,
                 tuple keyInfo, int modifiers):
             cdef CefKeyInfo cefKeyInfo
@@ -631,6 +639,84 @@ cdef class PyBrowser:
 
         cpdef py_void SendCaptureLostEvent(self):
             self.GetCefBrowser().get().SendCaptureLostEvent()
+    
+    ELIF CEF_VERSION == 3:
+        cpdef py_void SendKeyEvent(self, dict pyEvent):
+            cdef CefKeyEvent cefEvent
+            if "type" in pyEvent:
+                cefEvent.type = int(pyEvent["type"])
+            if "modifiers" in pyEvent:
+                cefEvent.modifiers = long(pyEvent["modifiers"])
+            if ("windows_key_code" in pyEvent) and UNAME_SYSNAME == "Windows":
+                cefEvent.windows_key_code = int(pyEvent["windows_key_code"])
+            if "native_key_code" in pyEvent:
+                cefEvent.native_key_code = int(pyEvent["native_key_code"])
+            if "is_system_key" in pyEvent:
+                cefEvent.is_system_key = bool(pyEvent["is_system_key"])
+            if "character" in pyEvent:
+                cefEvent.character = int(pyEvent["character"])
+            if "unmodified_character" in pyEvent:
+                cefEvent.unmodified_character = \
+                        int(pyEvent["unmodified_character"])
+            if "focus_on_editable_field" in pyEvent:
+                cefEvent.focus_on_editable_field = \
+                        bool(pyEvent["focus_on_editable_field"])
+            self.GetCefBrowserHost().get().SendKeyEvent(cefEvent)
+        
+        cpdef py_void SendMouseClickEvent(self, x, y,
+                cef_types.cef_mouse_button_type_t mouseButtonType,
+                py_bool mouseUp, int clickCount):
+            cdef CefMouseEvent mouseEvent
+            mouseEvent.x = x
+            mouseEvent.y = y
+            """
+            TODO: allow to pass modifiers which represents
+                  bit flags describing any pressed modifier keys.
+                  See cef_event_flags_t for values.
+            enum cef_event_flags_t {
+                EVENTFLAG_NONE                = 0,
+                EVENTFLAG_CAPS_LOCK_ON        = 1 << 0,
+                EVENTFLAG_SHIFT_DOWN          = 1 << 1,
+                EVENTFLAG_CONTROL_DOWN        = 1 << 2,
+                EVENTFLAG_ALT_DOWN            = 1 << 3,
+                EVENTFLAG_LEFT_MOUSE_BUTTON   = 1 << 4,
+                EVENTFLAG_MIDDLE_MOUSE_BUTTON = 1 << 5,
+                EVENTFLAG_RIGHT_MOUSE_BUTTON  = 1 << 6,
+                // Mac OS-X command key.
+                EVENTFLAG_COMMAND_DOWN        = 1 << 7,
+                EVENTFLAG_NUM_LOCK_ON         = 1 << 8,
+                EVENTFLAG_IS_KEY_PAD          = 1 << 9,
+                EVENTFLAG_IS_LEFT             = 1 << 10,
+                EVENTFLAG_IS_RIGHT            = 1 << 11,
+            """
+            mouseEvent.modifiers = 0
+            self.GetCefBrowserHost().get().SendMouseClickEvent(mouseEvent,
+                    mouseButtonType, bool(mouseUp), clickCount)
+
+        cpdef py_void SendMouseMoveEvent(self, int x, int y,
+                py_bool mouseLeave):
+            cdef CefMouseEvent mouseEvent
+            mouseEvent.x = x
+            mouseEvent.y = y
+            mouseEvent.modifiers = 0
+            self.GetCefBrowserHost().get().SendMouseMoveEvent(mouseEvent,
+                    bool(mouseLeave))
+
+        cpdef py_void SendMouseWheelEvent(self, int x, int y,
+                int deltaX, int deltaY):
+            cdef CefMouseEvent mouseEvent
+            mouseEvent.x = x
+            mouseEvent.y = y
+            mouseEvent.modifiers = 0
+            self.GetCefBrowserHost().get().SendMouseWheelEvent(mouseEvent,
+                    deltaX, deltaY)
+        
+        cpdef py_void SendFocusEvent(self, py_bool setFocus):
+            self.GetCefBrowserHost().get().SendFocusEvent(bool(setFocus))
+
+        cpdef py_void SendCaptureLostEvent(self):
+            self.GetCefBrowserHost().get().SendCaptureLostEvent()
+    # ENDIF CEF_VERSION == 3 / Sending mouse/key events.
 
     IF CEF_VERSION == 3:
         cpdef py_void StartDownload(self, py_string url):

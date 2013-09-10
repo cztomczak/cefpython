@@ -147,6 +147,10 @@
 				RelativePath=".\PaintBuffer.h"
 				>
 			</File>
+            <File
+                RelativePath=".\stdint_win.h"
+                >
+            </File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

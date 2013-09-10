@@ -103,14 +103,13 @@ IF UNAME_SYSNAME == "Windows":
     include "string_utils_win.pyx"
 include "time_utils.pyx"
 
-include "window_info.pyx"
 include "browser.pyx"
 include "frame.pyx"
 
 include "settings.pyx"
 IF UNAME_SYSNAME == "Windows":
     # Off-screen rendering currently supported only on Windows
-    include "paint_buffer.pyx"
+    include "paint_buffer_cef1.pyx"
 
 IF UNAME_SYSNAME == "Windows":
     include "window_utils_win.pyx"
@@ -123,6 +122,7 @@ include "javascript_bindings.pyx"
 include "virtual_keys.pyx"
 
 IF CEF_VERSION == 1:
+    include "window_info_cef1.pyx"
     include "cookie_cef1.pyx"
     include "load_handler_cef1.pyx"
     include "keyboard_handler_cef1.pyx"
@@ -136,7 +136,7 @@ IF CEF_VERSION == 1:
     include "lifespan_handler_cef1.pyx"
     IF UNAME_SYSNAME == "Windows":
         # Off-screen rendering currently supported only on Windows.
-        include "render_handler.pyx"
+        include "render_handler_cef1.pyx"
     include "drag_data.pyx"
     include "drag_handler.pyx"
     include "download_handler.pyx"
@@ -148,6 +148,7 @@ IF CEF_VERSION == 1:
     include "network_error_cef1.pyx"
 
 IF CEF_VERSION == 3:
+    include "window_info_cef3.pyx"
     include "process_message_utils.pyx"
     include "v8context_handler_cef3.pyx"
     include "v8function_handler_cef3.pyx"
@@ -163,6 +164,8 @@ IF CEF_VERSION == 3:
     include "load_handler_cef3.pyx"
     include "network_error_cef3.pyx"
     include "browser_process_handler_cef3.pyx"
+    include "paint_buffer_cef3.pyx"
+    include "render_handler_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,

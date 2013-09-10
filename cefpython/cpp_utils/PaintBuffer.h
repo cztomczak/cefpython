@@ -7,20 +7,21 @@
 // OS_WIN is not defined on Windows when CEF is not included.
 // _WIN32 is defined on both 32bit and 64bit.
 #if defined(_WIN32)
-// FlipBufferUpsideDown and SwapBufferFromBgraToRgba
-// are Windows only, as off-screen rendering is not
-// supported on Linux. This code wouldn't compile on
-// Linux as there is no __int32 type.
-
 #include "windows.h"
-#include "stdio.h"
+#include "stdint_win.h"
+#include <stdio.h>
+#elif defined(__linux__)
+#include <stdint.h>
+#include <string.h>
+#endif
 
-void FlipBufferUpsideDown(void* _dest, void* _src, int width, int height) {
+void FlipBufferUpsideDown(void* _dest, const void* _src, int width, int height \
+        ) {
   // In CEF the buffer passed to Browser.GetImage() & RenderHandler.OnPaint()
   // has upper-left origin, but some libraries like Panda3D require
   // bottom-left origin.
-  __int32* dest = (__int32*)_dest;
-  __int32* src = (__int32*)_src;
+  int32_t* dest = (int32_t*)_dest;
+  int32_t* src = (int32_t*)_src;
   unsigned int tb;
   int length = width*height;
   for (int y = 0; y < height; y++) {
@@ -29,11 +30,12 @@ void FlipBufferUpsideDown(void* _dest, void* _src, int width, int height) {
   }
 }
 
-void SwapBufferFromBgraToRgba(void* _dest, void* _src, int width, int height) {
-  __int32* dest = (__int32*)_dest;
-  __int32* src = (__int32*)_src;
-  __int32 rgba;
-  __int32 bgra;
+void SwapBufferFromBgraToRgba(void* _dest, const void* _src, int width, \
+        int height) {
+  int32_t* dest = (int32_t*)_dest;
+  int32_t* src = (int32_t*)_src;
+  int32_t rgba;
+  int32_t bgra;
   int length = width*height;
   for (int i = 0; i < length; i++) {
     bgra = src[i];
@@ -44,5 +46,3 @@ void SwapBufferFromBgraToRgba(void* _dest, void* _src, int width, int height) {
     dest[i] = rgba;
   }
 }
-
-#endif
