@@ -30,6 +30,13 @@ Use mouse context menu to go Back/Forward in history navigation.
 
 
 
+<h3>Create another browser</h3>
+<a href="javascript:external.CreateAnotherBrowser()">
+    external.CreateAnotherBrowser()</a>
+
+
+
+
 <h3>HTML5 video and accelerated content</h3>
 <a href="http://www.youtube.com/watch?v=siOHh0uzcuY&html5=True">
 HTML 5 video</a><br>
@@ -151,7 +158,6 @@ def PyCallback(self, *args):
 
 
 
-
 <h3>Display handler</h3>
 
 <pre>
@@ -218,7 +224,6 @@ def OnConsoleMessage(self, browser, message, source, line):
 Try this: 
 <a href="http://patik.com/code/console-log-polyfill/">
     http://patik.com/code/console-log-polyfill/</a>
-
 
 
 
@@ -489,6 +494,16 @@ def OnPluginCrashed(self, browser, pluginPath):
     print("plugin path = %s" % pluginPath)
 </pre>
 No test for that yet.
+
+
+
+
+<h3>Other tests</h3>
+
+<ul>
+    <li><a href="javascript:external.GoBack()">external.GoBack()</a>
+    <li><a href="javascript:external.GoForward()">external.GoForward()</a>
+</ul>
 
 </body>
 </html>
