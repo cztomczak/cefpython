@@ -134,7 +134,16 @@ class CefBrowser(Widget):
         # and the GetViewRect will be called again. This time the render
         # handler callbacks will be available, it will work fine from
         # this point.
-        self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings, navigateUrl="about:blank")
+        # --
+        # Do not use "about:blank" as navigateUrl - this will cause
+        # the GoBack() and GoForward() methods to not work.
+        # --
+        # TODO: get rid of the hard-coded path. Use the __file__ variable
+        #       to get the current directory. Using a path to a non-existent
+        #       local html file seems to not cause any problems, so it can
+        #       stay for a moment.
+        self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings, 
+                navigateUrl="file:///home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/empty2.html")
         
         #set focus
         self.browser.SendFocusEvent(True)
@@ -146,7 +155,18 @@ class CefBrowser(Widget):
         #Call WasResized() => force cef to call GetViewRect() and OnPaint afterwards
         self.browser.WasResized() 
         
-        #Load desired start URL
+        # Load desired start URL
+        # TODO: let the local html file "empty.html" to finish loading,
+        #       call the LoadUrl() method with a 100ms delay. In the 
+        #       empty.html you could add a "Loading.." text, this would
+        #       event useful, user would see some message instead of the
+        #       blank page. Sometimes the lag can cause the website to
+        #       load for a few seconds and user would be seeing only a
+        #       white screen and wonder of what is happening. The other
+        #       solution would be to change the mouse cursor to loading
+        #       state - but this won't work in touch screen devices? As
+        #       there is no cursor there. In wxpython there is the 
+        #       wx.CallLater() method, is there anything similar in Kivy?
         self.browser.GetMainFrame().LoadUrl(start_url)
                 
         #Clock.schedule_interval(self.press_key, 5)
@@ -214,6 +234,7 @@ class ClientHandler:
         
 
     def OnPaint(self, browser, paintElementType, dirtyRects, buffer, width, height):        
+        print "OnPaint()"
         if paintElementType != cefpython.PET_VIEW:
             print "Popups aren't implemented yet"
             return
@@ -229,11 +250,14 @@ class ClientHandler:
     
 
     def GetViewRect(self, browser, rect):
+        print "GetViewRect()"
         width, height = self.texture.size
         rect.append(0)
         rect.append(0)
         rect.append(width)
         rect.append(height)
+        print width
+        print height
         return True
         
 
