@@ -125,6 +125,15 @@ class CefBrowser(Widget):
         
         #Create Broswer and naviagte to empty page <= OnPaint won't get called yet
         browserSettings = {}
+        # The render handler callbacks are not yet set, thus an 
+        # error report will be thrown in the console (when release
+        # DCHECKS are enabled), however don't worry, it is harmless.
+        # This is happening because calling GetViewRect will return 
+        # false. That's why it is initially navigating to "about:blank".
+        # Later, a real url will be loaded using the LoadUrl() method 
+        # and the GetViewRect will be called again. This time the render
+        # handler callbacks will be available, it will work fine from
+        # this point.
         self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings, navigateUrl="about:blank")
         
         #set focus
