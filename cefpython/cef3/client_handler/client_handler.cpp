@@ -562,6 +562,7 @@ void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,
 void ClientHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                      cef_termination_status_t status) {
     REQUIRE_UI_THREAD();
+    DebugLog("Browser: OnRenderProcessTerminated()");
     LoadHandler_OnRendererProcessTerminated(browser, status);
 }
 

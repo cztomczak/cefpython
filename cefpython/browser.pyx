@@ -3,15 +3,13 @@
 # Website: http://code.google.com/p/cefpython/
 
 IF CEF_VERSION == 1:
-    # cef_key_type_t, SendKeyEvent().
-    KEYTYPE_KEYUP = cef_types.KT_KEYUP
+    # In CEF 1 there are both KT_KEYDOWN and KEYEVENT_KEYDOWN, and
+    # these are different constants, making a bit of confusion. 
+    # In CEF 1 KT_ is for SendKeyEvent, KEYEVENT_ is for OnKeyEvent().
+    # In CEF 3 there are only KEYEVENT_* constants.
     KEYTYPE_KEYDOWN = cef_types.KT_KEYDOWN
+    KEYTYPE_KEYUP = cef_types.KT_KEYUP
     KEYTYPE_CHAR = cef_types.KT_CHAR
-ELIF CEF_VERSION == 3:
-    # cef_key_type_t, SendKeyEvent().
-    KEYTYPE_KEYUP = cef_types.KEYEVENT_RAWKEYDOWN
-    KEYTYPE_KEYDOWN = cef_types.KEYEVENT_KEYDOWN
-    KEYTYPE_CHAR = cef_types.KEYEVENT_CHAR
 
 # Both CEF 1 and CEF 3.
 # cef_mouse_button_type_t, SendMouseClickEvent().
