@@ -14,6 +14,7 @@ from kivy.graphics.texture import Texture
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
+from kivy.base import EventLoop
 
 ####CEF IMPORT ####
 import ctypes, os, sys
@@ -59,6 +60,7 @@ class BrowserLayout(BoxLayout):
 
 
 class CefBrowser(Widget):
+    
     '''Represent a browser widget for kivy, which can be used like a normal widget.
     '''
     def __init__(self, start_url='http://www.google.com', **kwargs):
@@ -105,8 +107,9 @@ class CefBrowser(Widget):
             
         #configure cef
         cefpython.g_debug = True
+        cefpython.g_debugFile = "debug.log"
         settings = {"log_severity": cefpython.LOGSEVERITY_INFO,
-                #"log_file": GetApplicationPath("debug.log"),
+                "log_file": "debug.log",
                 "release_dcheck_enabled": True, # Enable only when debugging.
                 # This directories must be set on Linux
                 "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
@@ -137,13 +140,8 @@ class CefBrowser(Widget):
         # --
         # Do not use "about:blank" as navigateUrl - this will cause
         # the GoBack() and GoForward() methods to not work.
-        # --
-        # TODO: get rid of the hard-coded path. Use the __file__ variable
-        #       to get the current directory. Using a path to a non-existent
-        #       local html file seems to not cause any problems, so it can
-        #       stay for a moment.
         self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings, 
-                navigateUrl="file:///home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/empty2.html")
+                navigateUrl=start_url)
         
         #set focus
         self.browser.SendFocusEvent(True)
@@ -151,29 +149,89 @@ class CefBrowser(Widget):
         #Create RenderHandler (in ClientHandler)
         CH = ClientHandler(self.texture, self)
         self.browser.SetClientHandler(CH)
+
+        jsBindings = cefpython.JavascriptBindings(
+            bindToFrames=True, bindToPopups=True)
+        jsBindings.SetFunction("__kivy__request_keyboard", 
+                self.request_keyboard)
+        jsBindings.SetFunction("__kivy__release_keyboard",
+                self.release_keyboard)
+        self.browser.SetJavascriptBindings(jsBindings)
         
         #Call WasResized() => force cef to call GetViewRect() and OnPaint afterwards
         self.browser.WasResized() 
-        
-        # Load desired start URL
-        # TODO: let the local html file "empty.html" to finish loading,
-        #       call the LoadUrl() method with a 100ms delay. In the 
-        #       empty.html you could add a "Loading.." text, this would
-        #       event useful, user would see some message instead of the
-        #       blank page. Sometimes the lag can cause the website to
-        #       load for a few seconds and user would be seeing only a
-        #       white screen and wonder of what is happening. The other
-        #       solution would be to change the mouse cursor to loading
-        #       state - but this won't work in touch screen devices? As
-        #       there is no cursor there. In wxpython there is the 
-        #       wx.CallLater() method, is there anything similar in Kivy?
-        self.browser.GetMainFrame().LoadUrl(start_url)
-                
-        #Clock.schedule_interval(self.press_key, 5)
-        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
-        self._keyboard.bind(on_key_down=self.press_key)
+
+        # The browserWidget instance is required in OnLoadingStateChange().
+        self.browser.SetUserData("browserWidget", self)
+
+
+    def request_keyboard(self):
+        print("request_keyboard()")
+        self._keyboard = EventLoop.window.request_keyboard(
+                self.release_keyboard, self)
+        self._keyboard.bind(on_key_down=self.on_key_down)
+        self._keyboard.bind(on_key_up=self.on_key_up)
+
+
+    def release_keyboard(self):
+        if not self._keyboard:
+            return
+        print("release_keyboard()")
+        self._keyboard.unbind(on_key_down=self.on_key_down)
+        self._keyboard.unbind(on_key_up=self.on_key_up)
+        self._keyboard.release()
+
     
-    
+    def on_key_down(self, keyboard, keycode, text, modifiers):
+        # Notes:
+        # - right alt modifier is not sent by Kivy 
+        #   (Polish characters don't work)
+        print("on_key_down(): keycode = %s modifiers = %s" % (
+                keycode, modifiers))
+        if keycode[0] == 27:
+            # On escape release the keyboard, see the injected
+            # javascript in OnLoadStart().
+            self.browser.GetFocusedFrame().ExecuteJavascript(
+                    "__kivy__on_escape()")
+            return
+        cefModifiers = cefpython.EVENTFLAG_NONE
+        if "shift" in modifiers:
+            cefModifiers |= cefpython.EVENTFLAG_SHIFT_DOWN
+        if "ctrl" in modifiers:
+            cefModifiers |= cefpython.EVENTFLAG_CONTROL_DOWN
+        if "alt" in modifiers:
+            cefModifiers |= cefpython.EVENTFLAG_ALT_DOWN
+        if "capslock" in modifiers:
+            cefModifiers |= cefpython.EVENTFLAG_CAPS_LOCK_ON
+        # print("on_key_down(): cefModifiers = %s" % cefModifiers)
+        keyEvent = {
+                "type": cefpython.KEYEVENT_RAWKEYDOWN,
+                "native_key_code": keycode[0],
+                "modifiers": cefModifiers
+                }
+        # print("keydown keyEvent: %s" % keyEvent)
+        self.browser.SendKeyEvent(keyEvent)
+
+
+    def on_key_up(self, keyboard, keycode):
+        # print("on_key_up(): keycode = %s" % (keycode,))
+        cefModifiers = cefpython.EVENTFLAG_NONE
+        keyEvent = {
+                "type": cefpython.KEYEVENT_KEYUP,
+                "native_key_code": keycode[0],
+                "modifiers": cefModifiers
+                }
+        # print("keyup keyEvent: %s" % keyEvent)
+        self.browser.SendKeyEvent(keyEvent)
+        keyEvent = {
+                "type": cefpython.KEYEVENT_CHAR,
+                "native_key_code": keycode[0],
+                "modifiers": cefModifiers
+                }
+        # print("char keyEvent: %s" % keyEvent)
+        self.browser.SendKeyEvent(keyEvent)
+
+
     def go_forward(self):
         '''Going to forward in browser history
         '''
@@ -186,15 +244,6 @@ class CefBrowser(Widget):
         '''
         print "go back"
         self.browser.GoBack()
-    
-    
-    def _keyboard_closed(self, *kwargs):
-        pass
-    
-    
-    def press_key(self, wid, key, *kwargs):
-        #print "key pressed",  key[0]
-        self.browser.SendKeyEvent(cefpython.KEYTYPE_CHAR, key[0])
     
     
     def on_touch_down(self, touch, *kwargs):
@@ -225,16 +274,66 @@ class CefBrowser(Widget):
         touch.ungrab(self)
 
 
-
 class ClientHandler:
 
     def __init__(self, texture, parent):
         self.texture = texture
         self.parent = parent
-        
 
+
+    def OnLoadStart(self, browser, frame):
+        print("OnLoadStart(): injecting focus listeners for text controls")
+        # The logic is similar to the one found in kivy-berkelium:
+        # https://github.com/kivy/kivy-berkelium/blob/master/berkelium/__init__.py
+        jsCode = """
+            var __kivy__keyboard_requested = false;
+            function __kivy__keyboard_interval() {
+                var element = document.activeElement;
+                if (!element) {
+                    return;
+                }
+                var tag = element.tagName;
+                var type = element.type;
+                // <input> with an empty type is a text type by default!
+                if (tag == "INPUT" && (type == "" || type == "text" 
+                        || type == "password") || tag == "TEXTAREA") {
+                    if (!__kivy__keyboard_requested) {
+                        __kivy__request_keyboard();
+                        __kivy__keyboard_requested = true;
+                    }
+                    return;
+                }
+                if (__kivy__keyboard_requested) {
+                    __kivy__release_keyboard();
+                    __kivy__keyboard_requested = false;
+                }
+            }
+            function __kivy__on_escape() {
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
+                if (__kivy__keyboard_requested) {
+                    __kivy__release_keyboard();
+                    __kivy__keyboard_requested = false;
+                }
+            }
+            setInterval(__kivy__keyboard_interval, 13);
+        """
+        frame.ExecuteJavascript(jsCode, 
+                "kivy_.py > ClientHandler > OnLoadStart")
+
+    
+    def OnLoadingStateChange(self, browser, isLoading, canGoBack,
+            canGoForward):
+        print("OnLoadingStateChange(): isLoading = %s" % isLoading)
+        if isLoading and browser.GetUserData("browserWidget"):
+            # Release keyboard when navigating to a new page.
+            browser.GetUserData("browserWidget").release_keyboard()
+            pass
+
+    
     def OnPaint(self, browser, paintElementType, dirtyRects, buffer, width, height):        
-        print "OnPaint()"
+        # print "OnPaint()"
         if paintElementType != cefpython.PET_VIEW:
             print "Popups aren't implemented yet"
             return
@@ -250,16 +349,12 @@ class ClientHandler:
     
 
     def GetViewRect(self, browser, rect):
-        print "GetViewRect()"
         width, height = self.texture.size
         rect.append(0)
         rect.append(0)
         rect.append(width)
         rect.append(height)
-        print width
-        print height
         return True
-        
 
 
 if __name__ == '__main__':

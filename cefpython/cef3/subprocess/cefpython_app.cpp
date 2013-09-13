@@ -362,8 +362,25 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
     | for (std::vector<int64>::iterator it = v.begin(); it != v.end(); ++it) {
     |     CefRefPtr<CefFrame> frame = browser->GetFrame(*it);
     */
+    if (!frameIds.size()) {
+        DebugLog("Renderer: DoJavascriptBindingsForBrowser() FAILED: " \
+                "frameIds.size() == 0");
+        return;
+    }
     for (std::vector<int>::size_type i = 0; i != frameIds.size(); i++) {
+        if (frameIds[i] <= 0) {
+            // Frame not yet created, race condition / bug in CEF.
+            DebugLog("Renderer: DoJavascriptBindingsForBrowser() WARNING: " \
+                "frameId <= 0");
+            printf("cefpython: Renderer: frameId = %li\n", frameIds[i]);
+            continue;
+        }
         CefRefPtr<CefFrame> frame = browser->GetFrame(frameIds[i]);
+        if (!frame.get()) {
+            DebugLog("Renderer: DoJavascriptBindingsForBrowser() WARNING: " \
+                    "GetFrame() failed");
+            continue;
+        }
         CefRefPtr<CefV8Context> context = frame->GetV8Context();
         CefRefPtr<CefTaskRunner> taskRunner = context->GetTaskRunner();
         taskRunner->PostTask(NewCefRunnableMethod(
