@@ -10,6 +10,7 @@
 
        cd examples/
        python wxpython.py
+       python kivy_.py
 
        cd wx/
        python sample1.py
