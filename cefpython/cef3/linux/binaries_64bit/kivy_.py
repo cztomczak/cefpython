@@ -76,16 +76,31 @@ class CefBrowser(Widget):
         
         #Workaround for flexible size:
         #start browser when the height has changed (done by layout)
-        #This has to be done like this because I wasn't able to change the texture size
+        #This has to be done like this because I wasn't able to change 
+        #the texture size
         #until runtime without core-dump.
         self.bind(size = self.size_changed)
-            
     
+
+    starting = True
     def size_changed(self, *kwargs):
         '''When the height of the cefbrowser widget got changed, create the browser
         '''
-        if self.height != 100:
-            self.start_cef(self.start_url)
+        if self.starting:
+            if self.height != 100:
+                self.start_cef(self.start_url)
+                self.starting = False
+        else:
+            self.texture = Texture.create(
+                size=self.size, colorfmt='rgba', bufferfmt='ubyte')
+            self.texture.flip_vertical()
+            with self.canvas:
+                Color(1, 1, 1)
+                # This will cause segmentation fault:
+                # | self.rect = Rectangle(size=self.size, texture=self.texture)
+                # Update only the size:
+                self.rect.size = self.size
+            self.browser.WasResized()
 
    
     def _cef_mes(self, *kwargs):
@@ -105,12 +120,13 @@ class CefBrowser(Widget):
         '''Starts CEF. 
         '''
         # create texture & add it to canvas
-        self.texture = Texture.create(size=self.size, colorfmt='rgba', bufferfmt='ubyte')
+        self.texture = Texture.create(
+                size=self.size, colorfmt='rgba', bufferfmt='ubyte')
         self.texture.flip_vertical()
         with self.canvas:
             Color(1, 1, 1)
             self.rect = Rectangle(size=self.size, texture=self.texture)
-            
+
         #configure cef
         cefpython.g_debug = True
         cefpython.g_debugFile = "debug.log"
@@ -153,7 +169,7 @@ class CefBrowser(Widget):
         self.browser.SendFocusEvent(True)
         
         #Create RenderHandler (in ClientHandler)
-        CH = ClientHandler(self.texture, self)
+        CH = ClientHandler(self)
         self.browser.SetClientHandler(CH)
 
         jsBindings = cefpython.JavascriptBindings(
@@ -452,15 +468,14 @@ class CefBrowser(Widget):
 
 class ClientHandler:
 
-    def __init__(self, texture, parent):
-        self.texture = texture
-        self.parent = parent
+    def __init__(self, browserWidget):
+        self.browserWidget = browserWidget
 
 
     def OnLoadStart(self, browser, frame):
-        print("OnLoadStart(): injecting focus listeners for text controls")
         browserWidget = browser.GetUserData("browserWidget")
         if browserWidget and browserWidget.keyboard_mode == "local":
+            print("OnLoadStart(): injecting focus listeners for text controls")
             # The logic is similar to the one found in kivy-berkelium:
             # https://github.com/kivy/kivy-berkelium/blob/master/berkelium/__init__.py
             jsCode = """
@@ -511,7 +526,8 @@ class ClientHandler:
             pass
 
     
-    def OnPaint(self, browser, paintElementType, dirtyRects, buffer, width, height):        
+    def OnPaint(self, browser, paintElementType, dirtyRects, buffer, width, 
+            height):        
         # print "OnPaint()"
         if paintElementType != cefpython.PET_VIEW:
             print "Popups aren't implemented yet"
@@ -521,18 +537,20 @@ class ClientHandler:
         buffer = buffer.GetString(mode="bgra", origin="top-left")
         
         #update texture of canvas rectangle
-        self.texture.blit_buffer(buffer, colorfmt='bgra', bufferfmt='ubyte')
-        self.parent._update_rect()
+        self.browserWidget.texture.blit_buffer(buffer, colorfmt='bgra', 
+                bufferfmt='ubyte')
+        self.browserWidget._update_rect()
                 
         return True
     
 
     def GetViewRect(self, browser, rect):
-        width, height = self.texture.size
+        width, height = self.browserWidget.texture.size
         rect.append(0)
         rect.append(0)
         rect.append(width)
         rect.append(height)
+        # print("GetViewRect(): %s x %s" % (width, height))
         return True
 
 
