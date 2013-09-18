@@ -69,7 +69,7 @@ class CefBrowser(Widget):
     
     '''Represent a browser widget for kivy, which can be used like a normal widget.
     '''
-    def __init__(self, start_url='http://www.google.com', **kwargs):
+    def __init__(self, start_url='http://www.google.com/', **kwargs):
         super(CefBrowser, self).__init__(**kwargs)
         
         self.start_url = start_url
@@ -88,7 +88,7 @@ class CefBrowser(Widget):
         '''
         if self.starting:
             if self.height != 100:
-                self.start_cef(self.start_url)
+                self.start_cef()
                 self.starting = False
         else:
             self.texture = Texture.create(
@@ -116,7 +116,7 @@ class CefBrowser(Widget):
         self.rect.texture = self.texture
    
             
-    def start_cef(self, start_url='http://google.com'):
+    def start_cef(self):
         '''Starts CEF. 
         '''
         # create texture & add it to canvas
@@ -163,22 +163,14 @@ class CefBrowser(Widget):
         # Do not use "about:blank" as navigateUrl - this will cause
         # the GoBack() and GoForward() methods to not work.
         self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings, 
-                navigateUrl=start_url)
+                navigateUrl=self.start_url)
         
         #set focus
         self.browser.SendFocusEvent(True)
         
-        #Create RenderHandler (in ClientHandler)
-        CH = ClientHandler(self)
-        self.browser.SetClientHandler(CH)
-
-        jsBindings = cefpython.JavascriptBindings(
-            bindToFrames=True, bindToPopups=True)
-        jsBindings.SetFunction("__kivy__request_keyboard", 
-                self.request_keyboard)
-        jsBindings.SetFunction("__kivy__release_keyboard",
-                self.release_keyboard)
-        self.browser.SetJavascriptBindings(jsBindings)
+        self._client_handler = ClientHandler(self)
+        self.browser.SetClientHandler(self._client_handler)
+        self.set_js_bindings()
         
         #Call WasResized() => force cef to call GetViewRect() and OnPaint afterwards
         self.browser.WasResized() 
@@ -189,6 +181,38 @@ class CefBrowser(Widget):
         if self.keyboard_mode == "global":
             self.request_keyboard()
 
+        # Clock.schedule_once(self.change_url, 5)
+    
+    
+    _client_handler = None
+    _js_bindings = None
+
+    def set_js_bindings(self):
+        # When browser.Navigate() is called, some bug appears in CEF
+        # that makes CefRenderProcessHandler::OnBrowserDestroyed()
+        # is being called. This destroys the javascript bindings in
+        # the Render process. We have to make the js bindings again,
+        # after the call to Navigate() when OnLoadingStateChange()
+        # is called with isLoading=False. Problem reported here:
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11009
+
+        if not self._js_bindings:
+            self._js_bindings = cefpython.JavascriptBindings(
+                bindToFrames=True, bindToPopups=True)
+            self._js_bindings.SetFunction("__kivy__request_keyboard", 
+                    self.request_keyboard)
+            self._js_bindings.SetFunction("__kivy__release_keyboard",
+                    self.release_keyboard)
+
+        self.browser.SetJavascriptBindings(self._js_bindings)
+    
+
+    def change_url(self, *kwargs):
+        self.browser.Navigate("http://www.google.com/")
+        self._client_handler._reset_js_bindings = True
+
+
+    _keyboard = None
 
     def request_keyboard(self):
         print("request_keyboard()")
@@ -202,6 +226,10 @@ class CefBrowser(Widget):
         self.is_ctrl2 = False
         self.is_alt1 = False
         self.is_alt2 = False
+        # Browser lost its focus after the LoadURL() and the 
+        # OnBrowserDestroyed() callback bug. This will only work
+        # when keyboard mode is local.
+        self.browser.SendFocusEvent(True)
 
 
     def release_keyboard(self):
@@ -468,6 +496,8 @@ class CefBrowser(Widget):
 
 class ClientHandler:
 
+    _reset_js_bindings = False
+
     def __init__(self, browserWidget):
         self.browserWidget = browserWidget
 
@@ -509,16 +539,29 @@ class ClientHandler:
                         __kivy__keyboard_requested = false;
                     }
                 }
-                setInterval(__kivy__keyboard_interval, 13);
+                setInterval(__kivy__keyboard_interval, 100);
             """
             frame.ExecuteJavascript(jsCode, 
                     "kivy_.py > ClientHandler > OnLoadStart")
+
+
+    def OnLoadEnd(self, browser, frame, httpStatusCode):
+        # Browser lost its focus after the LoadURL() and the 
+        # OnBrowserDestroyed() callback bug. When keyboard mode
+        # is local the fix is in the request_keyboard() method.
+        # Call it from OnLoadEnd only when keyboard mode is global.
+        browserWidget = browser.GetUserData("browserWidget")
+        if browserWidget and browserWidget.keyboard_mode == "global":
+            browser.SendFocusEvent(True)
 
     
     def OnLoadingStateChange(self, browser, isLoading, canGoBack,
             canGoForward):
         print("OnLoadingStateChange(): isLoading = %s" % isLoading)
         browserWidget = browser.GetUserData("browserWidget")
+        if self._reset_js_bindings and not isLoading:
+            if browserWidget:
+                browserWidget.set_js_bindings()
         if isLoading and browserWidget \
                 and browserWidget.keyboard_mode == "local":
             # Release keyboard when navigating to a new page.

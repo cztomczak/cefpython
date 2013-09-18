@@ -354,6 +354,10 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
             && jsBindings->GetType("bindToFrames") == VTYPE_BOOL
             && jsBindings->GetBool("bindToFrames")) {
         browser->GetFrameIdentifiers(frameIds);
+        // CEF BUG: frameIds contain just one frame with frameId=0
+        if (frameIds.size() == 1 && frameIds[0] == 0) {
+            frameIds.push_back(browser->GetMainFrame()->GetIdentifier());
+        }
     } else {
         frameIds.push_back(browser->GetMainFrame()->GetIdentifier());
     }
