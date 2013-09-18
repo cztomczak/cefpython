@@ -84,6 +84,14 @@ def main():
     print("Creating examples dir in package dir")
     os.mkdir(package_dir+"/examples/")
 
+    print("Moving kivy-select-boxes dir to examples dir")
+    shutil.move(package_dir+"/kivy-select-boxes", 
+            package_dir+"/examples/kivy-select-boxes")
+
+    #kivy_select_boxes_dir = package_dir+"/examples/kivy-select-boxes/"
+    #ret = os.system("cp -rf "+kivy_select_boxes_dir+"/* "+package_dir+"/wx/")
+    #assert ret == 0
+
     print("Creating wx dir in package dir")
     os.mkdir(package_dir+"/wx/")
 
