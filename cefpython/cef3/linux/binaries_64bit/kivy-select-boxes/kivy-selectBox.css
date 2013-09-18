@@ -1,0 +1,186 @@
+/* 
+    IMPORTANT:
+    1. DO NOT USE DOUBLE QUOTES HERE! 
+       This file contents is included on page using document.write:
+       | (DQ = double quote)
+       | document.write(DQ<style type=text/css>%(css_content)s</style>DQ);
+    2. Each attribute must end with a semicolon, as newlines are removed
+       from this file.
+*/
+
+/* Dropdown control */
+.__kivy__selectBox-dropdown {
+    min-width: 150px;
+    position: relative;
+    border: solid 1px #BBB;
+    line-height: 1.5;
+    text-decoration: none;
+    text-align: left;
+    color: #000;
+    outline: none;
+    vertical-align: middle;
+    background: #F2F2F2;
+    background: -moz-linear-gradient(top, #F8F8F8 1%, #E1E1E1 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(1%, #F8F8F8), color-stop(100%, #E1E1E1));
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#F8F8F8', endColorstr='#E1E1E1', GradientType=0);
+    -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, .75);
+    -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, .75);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .75);
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    display: inline-block;
+    cursor: default;
+}
+
+.__kivy__selectBox-dropdown:focus,
+.__kivy__selectBox-dropdown:focus .__kivy__selectBox-arrow {
+    border-color: #666;
+}
+
+.__kivy__selectBox-dropdown.__kivy__selectBox-menuShowing-bottom {
+    -moz-border-radius-bottomleft: 0;
+    -moz-border-radius-bottomright: 0;
+    -webkit-border-bottom-left-radius: 0;
+    -webkit-border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.__kivy__selectBox-dropdown.__kivy__selectBox-menuShowing-top {
+    -moz-border-radius-topleft: 0;
+    -moz-border-radius-topright: 0;
+    -webkit-border-top-left-radius: 0;
+    -webkit-border-top-right-radius: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.__kivy__selectBox-dropdown .__kivy__selectBox-label {
+    padding: 2px 8px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.__kivy__selectBox-dropdown .__kivy__selectBox-arrow {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 23px;
+    height: 100%;
+    background: url(data:image/gif;base64,R0lGODlhCQAOAIABAAAAAP///yH5BAEAAAEALAAAAAAJAA4AAAIXjAOnwIrcDJxvQoez3tUmn0jUEjmhUQAAOw==) 50% center no-repeat;
+    border-left: solid 1px #BBB;
+}
+
+/* Dropdown menu */
+.__kivy__selectBox-dropdown-menu {
+    position: absolute;
+    z-index: 99999;
+    max-height: 200px;
+    min-height: 1em;
+    border: solid 1px #BBB; /* should be the same border width as .__kivy__selectBox-dropdown */
+    background: #FFF;
+    -moz-box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+    -webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Inline control */
+.__kivy__selectBox-inline {
+    min-width: 150px;
+    outline: none;
+    border: solid 1px #BBB;
+    background: #FFF;
+    display: inline-block;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    overflow: auto;
+}
+
+.__kivy__selectBox-inline:focus {
+    border-color: #666;
+}
+
+/* Options */
+.__kivy__selectBox-options,
+.__kivy__selectBox-options LI,
+.__kivy__selectBox-options LI A {
+    list-style: none;
+    display: block;
+    cursor: default;
+    padding: 0;
+    margin: 0;
+}
+
+.__kivy__selectBox-options.__kivy__selectBox-options-top{
+    border-bottom:none;
+	margin-top:1px;
+	-moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.__kivy__selectBox-options.__kivy__selectBox-options-bottom{
+	border-top:none;
+    -moz-border-radius-bottomleft: 5px;
+    -moz-border-radius-bottomright: 5px;
+    -webkit-border-bottom-left-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.__kivy__selectBox-options LI A {
+    line-height: 1.5;
+    padding: 0 .5em;
+    white-space: nowrap;
+    overflow: hidden;
+    background: 6px center no-repeat;
+}
+
+.__kivy__selectBox-options LI.__kivy__selectBox-hover A {
+    background-color: #EEE;
+}
+
+.__kivy__selectBox-options LI.__kivy__selectBox-disabled A {
+    color: #888;
+    background-color: transparent;
+}
+
+.__kivy__selectBox-options LI.__kivy__selectBox-selected A {
+    background-color: #C8DEF4;
+}
+
+.__kivy__selectBox-options .__kivy__selectBox-optgroup {
+    color: #666;
+    background: #EEE;
+    font-weight: bold;
+    line-height: 1.5;
+    padding: 0 .3em;
+    white-space: nowrap;
+}
+
+/* Disabled state */
+.__kivy__selectBox.__kivy__selectBox-disabled {
+    color: #888 !important;
+}
+
+.__kivy__selectBox-dropdown.__kivy__selectBox-disabled .__kivy__selectBox-arrow {
+    opacity: .5;
+    filter: alpha(opacity=50);
+    border-color: #666;
+}
+
+.__kivy__selectBox-inline.__kivy__selectBox-disabled {
+    color: #888 !important;
+}
+
+.__kivy__selectBox-inline.__kivy__selectBox-disabled .__kivy__selectBox-options A {
+    background-color: transparent !important;
+}

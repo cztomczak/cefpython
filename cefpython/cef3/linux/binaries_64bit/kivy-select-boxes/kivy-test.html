@@ -1,0 +1,131 @@
+<html>
+<head>
+    <script src="kivy-selectBox.js"></script>
+    <link type="text/css" rel="stylesheet" href="kivy-selectBox.css">
+</head>
+<body>
+
+Some &lt;select&gt; element from JIRA:<br>
+(click submit to test the post data sent)<br><br>
+
+
+<form action="http://www.posttestserver.com/post.php" method="POST">
+
+<select id="resolution" class="select" name="resolution">
+<option selected="selected" value="-1">Please select...</option>
+<option value="1"> Fixed </option>
+<option value="2"> Won't Fix </option>
+<option value="5"> Cannot Reproduce </option>
+<option value="8"> By Design </option>
+<option value="3"> Duplicate </option>
+<option value="4"> Incomplete </option>
+<option value="6"> Unresolved </option>
+<option value="7"> Done </option>
+</select>
+
+<input type=submit>
+
+</form>
+
+<p>With Fixed as "selected":</p>
+
+<select id="resolution2" class="select" name="resolution2">
+<option value="-1">Please select...</option>
+<option selected="selected" value="1"> Fixed </option>
+<option value="2"> Won't Fix </option>
+<option value="5"> Cannot Reproduce </option>
+<option value="8"> By Design </option>
+<option value="3"> Duplicate </option>
+<option value="4"> Incomplete </option>
+<option value="6"> Unresolved </option>
+<option value="7"> Done </option>
+</select>
+
+<p>Add new &lt;select&gt; element dynamically on a page:<br>
+    (select boxes are checked every second on a page,<br>
+    you should see a normal select element transforming<br>
+    into js select box a moment after you click the button)</p>
+
+<textarea id="dynamically" cols=80 rows=10>
+    &lt;select id="resolution" class="select" name="resolution"&gt;
+    &lt;option selected="selected" value="-1"&gt;Please select...&lt;/option&gt;
+    &lt;option value="1"&gt; Fixed &lt;/option&gt;
+    &lt;option value="2"&gt; Won't Fix &lt;/option&gt;
+    &lt;option value="5"&gt; Cannot Reproduce &lt;/option&gt;
+    &lt;option value="8"&gt; By Design &lt;/option&gt;
+    &lt;option value="3"&gt; Duplicate &lt;/option&gt;
+    &lt;option value="4"&gt; Incomplete &lt;/option&gt;
+    &lt;option value="6"&gt; Unresolved &lt;/option&gt;
+    &lt;option value="7"&gt; Done &lt;/option&gt;
+    &lt;/select&gt;
+</textarea>
+
+<input type=button onclick="add_dynamically()" value="Add dynamically">
+
+<div id="add-here"></div>
+
+<br><br>
+
+<script>
+function add_dynamically() {
+    __kivy__jQuery("#add-here").append(__kivy__jQuery("#dynamically").val());
+}
+</script>
+
+<p>Test interaction with other webpages that already use some other<br>
+    javascript boxes library. 
+</p>
+
+    <p>These links need to be opened in the kivy_.py example:</p>
+
+<ul>
+<li>
+    <a href="http://www.bulgaria-web-developers.com/projects/javascript/selectbox/">
+    http://www.bulgaria-web-developers.com/projects/javascript/selectbox/</a>
+<li><a href="http://harvesthq.github.io/chosen/">
+    http://harvesthq.github.io/chosen/</a>
+<li><a href="http://ivaynberg.github.io/select2/">
+    http://ivaynberg.github.io/select2/</a>
+</ul>
+
+<p>Some libraries that are not well-designed will display<br>
+    the select element twice, take a look at this for example:<br><p>
+
+<a href="http://adam.co/lab/jquery/customselect/">
+    http://adam.co/lab/jquery/customselect/</a> (open in kivy_.py example)
+
+<p>
+Although, it will still be functional, just with a display glitch.
+</p>
+
+<p>The following code was added to the
+    SelectBox library to transform &lt;select&gt; element into
+    js box only if it's visible on a webpage:</p>
+
+<pre>
+    // This should fix interaction with other js boxes libraries,
+    // so that the select element does not appear twice.
+    if (!$(select).is(":visible")) {
+        return;
+    }
+</pre>
+
+Also this code gives one second to other select box libraries<br>
+to do their stuff, before we start ours:
+
+<pre>
+    __kivy__jQuery(document).ready(function() {
+    // Transform select elements only after a second,
+    // this will give time other select boxes libraries
+    // included on a webpage to their stuff first.
+    window.setInterval(function(){
+        __kivy__jQuery(document).ready(function() { 
+            __kivy__jQuery("select").__kivy__selectBox(); 
+        });
+    }, 1000);
+});
+</pre>
+
+
+</body>
+</html>
