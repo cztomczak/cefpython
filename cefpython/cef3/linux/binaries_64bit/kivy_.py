@@ -502,7 +502,38 @@ class ClientHandler:
         self.browserWidget = browserWidget
 
 
+    def _fix_select_boxes(self, frame):
+        # See: http://marcj.github.io/jquery-selectBox/
+        # Cannot use "file://" urls to load local resources, error:
+        # | Not allowed to load local resource
+        print("_fix_select_boxes()")
+        resources_dir = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "kivy-select-boxes")
+        js_file = os.path.join(resources_dir, "kivy-selectBox.js")
+        js_content = ""
+        with open(js_file, "r") as myfile:
+            js_content = myfile.read()
+        css_file = os.path.join(resources_dir, "kivy-selectBox.css")
+        css_content = ""
+        with open(css_file, "r") as myfile:
+            css_content = myfile.read()
+        css_content = css_content.replace("\r", "")
+        css_content = css_content.replace("\n", "")
+        jsCode = """
+            %(js_content)s
+            var head = document.getElementsByTagName('head')[0];
+            var style = document.createElement('style');
+            style.type = 'text/css';
+            style.appendChild(document.createTextNode("%(css_content)s"));
+            head.appendChild(style);
+        """ % locals()
+        frame.ExecuteJavascript(jsCode, 
+                "kivy_.py > ClientHandler > OnLoadStart > _fix_select_boxes()")
+
+
     def OnLoadStart(self, browser, frame):
+        self._fix_select_boxes(frame);
         browserWidget = browser.GetUserData("browserWidget")
         if browserWidget and browserWidget.keyboard_mode == "local":
             print("OnLoadStart(): injecting focus listeners for text controls")
