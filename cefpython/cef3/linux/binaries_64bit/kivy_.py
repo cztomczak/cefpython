@@ -510,6 +510,10 @@ class ClientHandler:
         resources_dir = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
                 "kivy-select-boxes")
+        if not os.path.exists(resources_dir):
+            print("The kivy-select-boxes directory does not exist, " \
+                    "select boxes fix won't be applied.")
+            return
         js_file = os.path.join(resources_dir, "kivy-selectBox.js")
         js_content = ""
         with open(js_file, "r") as myfile:
