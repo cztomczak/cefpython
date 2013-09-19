@@ -188,14 +188,6 @@ class CefBrowser(Widget):
     _js_bindings = None
 
     def set_js_bindings(self):
-        # When browser.Navigate() is called, some bug appears in CEF
-        # that makes CefRenderProcessHandler::OnBrowserDestroyed()
-        # is being called. This destroys the javascript bindings in
-        # the Render process. We have to make the js bindings again,
-        # after the call to Navigate() when OnLoadingStateChange()
-        # is called with isLoading=False. Problem reported here:
-        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11009
-
         if not self._js_bindings:
             self._js_bindings = cefpython.JavascriptBindings(
                 bindToFrames=True, bindToPopups=True)
@@ -203,7 +195,6 @@ class CefBrowser(Widget):
                     self.request_keyboard)
             self._js_bindings.SetFunction("__kivy__release_keyboard",
                     self.release_keyboard)
-
         self.browser.SetJavascriptBindings(self._js_bindings)
     
 
@@ -513,8 +504,6 @@ class CefBrowser(Widget):
 
 
 class ClientHandler:
-
-    _reset_js_bindings = False
 
     def __init__(self, browserWidget):
         self.browserWidget = browserWidget
