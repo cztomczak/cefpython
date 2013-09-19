@@ -64,7 +64,7 @@ class CefBrowser(Widget):
     # Keyboard mode: "global" or "local".
     # 1. Global mode forwards keys to CEF all the time.
     # 2. Local mode forwards keys to CEF only when an editable
-    #    control is focused (input type=text or textarea).
+    #    control is focused (input type=text|password or textarea).
     keyboard_mode = "global"
     
     '''Represent a browser widget for kivy, which can be used like a normal widget.
@@ -208,9 +208,25 @@ class CefBrowser(Widget):
     
 
     def change_url(self, *kwargs):
-        self.browser.Navigate("http://www.google.com/")
-        self._client_handler._reset_js_bindings = True
+        # Doing a javascript redirect instead of Navigate()
+        # solves the js bindings error. The url here need to
+        # be preceded with "http://". Calling StopLoad()
+        # might be a good idea before making the js navigation.
+        
+        self.browser.StopLoad()
+        self.browser.GetMainFrame().ExecuteJavascript(
+               "window.location='http://www.youtube.com/'")
 
+        # Do not use Navigate() or GetMainFrame()->LoadURL(),
+        # as it causes the js bindings to be removed. There is
+        # a bug in CEF, that happens after a call to Navigate().
+        # The OnBrowserDestroyed() callback is fired and causes 
+        # the js bindings to be removed. See this topic for more 
+        # details:
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11009
+
+        # OFF:
+        # | self.browser.Navigate("http://www.youtube.com/")
 
     _keyboard = None
 
@@ -226,13 +242,15 @@ class CefBrowser(Widget):
         self.is_ctrl2 = False
         self.is_alt1 = False
         self.is_alt2 = False
-        # Browser lost its focus after the LoadURL() and the 
-        # OnBrowserDestroyed() callback bug. This will only work
-        # when keyboard mode is local.
+        # Not sure if it is still required to send the focus
+        # (some earlier bug), but it shouldn't hurt to call it.
         self.browser.SendFocusEvent(True)
 
 
     def release_keyboard(self):
+        # When using local keyboard mode, do all the request
+        # and releases of the keyboard through js bindings,
+        # otherwise some focus problems arise.
         self.is_shift1 = False
         self.is_shift2 = False
         self.is_ctrl1 = False
@@ -594,15 +612,6 @@ class ClientHandler:
             canGoForward):
         print("OnLoadingStateChange(): isLoading = %s" % isLoading)
         browserWidget = browser.GetUserData("browserWidget")
-        if self._reset_js_bindings and not isLoading:
-            if browserWidget:
-                browserWidget.set_js_bindings()
-                self._reset_js_bindings = False
-        if isLoading and browserWidget \
-                and browserWidget.keyboard_mode == "local":
-            # Release keyboard when navigating to a new page.
-            browserWidget.release_keyboard()
-            pass
 
     
     def OnPaint(self, browser, paintElementType, dirtyRects, buffer, width, 
