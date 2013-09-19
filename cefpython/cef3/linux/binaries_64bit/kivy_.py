@@ -6,19 +6,14 @@
 # In this example kivy-lang is used to declare the layout which
 # contains two buttons (back, forward) and the browser view.
 
-from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.graphics import Color, Rectangle, GraphicException
-from kivy.clock import Clock
-from kivy.graphics.texture import Texture
-from kivy.core.window import Window
-from kivy.lang import Builder
-from kivy.uix.boxlayout import BoxLayout
-from kivy.base import EventLoop
-
-####CEF IMPORT ####
+# On Linux importing the cefpython module must be the very 
+# first in your application. This is because CEF makes a global
+# tcmalloc hook for memory allocation/deallocation. See Issue 73
+# that is to provide CEF builds with tcmalloc hook disabled:
+# https://code.google.com/p/cefpython/issues/detail?id=73
 import ctypes, os, sys
-libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'libcef.so')
+libcef_so = os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), 'libcef.so')
 if os.path.exists(libcef_so):
     # Import local module
     ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
@@ -30,6 +25,15 @@ else:
     # Import from package
     from cefpython3 import cefpython
 
+from kivy.app import App
+from kivy.uix.widget import Widget
+from kivy.graphics import Color, Rectangle, GraphicException
+from kivy.clock import Clock
+from kivy.graphics.texture import Texture
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.uix.boxlayout import BoxLayout
+from kivy.base import EventLoop
 
 ####Kivy APP ####
 Builder.load_string("""
