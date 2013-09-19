@@ -521,7 +521,26 @@ class ClientHandler:
 
 
     def _fix_select_boxes(self, frame):
-        # See: http://marcj.github.io/jquery-selectBox/
+        # This is just a temporary fix, until proper Popup widgets
+        # painting is implemented (PET_POPUP in OnPaint). Currently 
+        # there is no way to obtain a native window handle (GtkWindow 
+        # pointer) in Kivy, and this may cause things like context menus,
+        # select boxes and plugins not to display correctly. Although,
+        # this needs to be tested. The popup widget buffers are
+        # available in a separate paint buffer, so they could positioned
+        # freely so that it doesn't go out of the window. So the native
+        # window handle might not necessarily be required to make it work
+        # in most cases (99.9%). Though, this still needs testing to confirm.
+        # --
+        # See this topic on the CEF Forum regarding the NULL window handle:
+        # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10851
+        # --
+        # See also a related topic on the Kivy-users group:
+        # https://groups.google.com/d/topic/kivy-users/WdEQyHI5vTs/discussion
+        # --
+        # The javascript select boxes library used: 
+        # http://marcj.github.io/jquery-selectBox/
+        # --
         # Cannot use "file://" urls to load local resources, error:
         # | Not allowed to load local resource
         print("_fix_select_boxes()")
