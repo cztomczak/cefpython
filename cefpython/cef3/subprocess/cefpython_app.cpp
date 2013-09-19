@@ -14,6 +14,7 @@
 #include "include/cef_runnable.h"
 #include "DebugLog.h"
 #include <vector>
+#include <algorithm>
 #include "v8utils.h"
 #include "javascript_callback.h"
 #include "v8function_handler.h"
@@ -350,36 +351,54 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
         return;
     }
     std::vector<int64> frameIds;
+    std::vector<CefString> frameNames;
     if (jsBindings->HasKey("bindToFrames")
             && jsBindings->GetType("bindToFrames") == VTYPE_BOOL
             && jsBindings->GetBool("bindToFrames")) {
-        browser->GetFrameIdentifiers(frameIds);
-        // CEF BUG: frameIds contain just one frame with frameId=0
-        if (frameIds.size() == 1 && frameIds[0] == 0) {
-            frameIds.push_back(browser->GetMainFrame()->GetIdentifier());
+        // GetFrameIdentifiers() is buggy, returns always a vector
+        // filled with zeroes (as of revision 1448). Use GetFrameNames()
+        // instead.
+        browser->GetFrameNames(frameNames);
+        for (std::vector<CefString>::iterator it = frameNames.begin(); \
+                it != frameNames.end(); ++it) {
+            CefRefPtr<CefFrame> frame = browser->GetFrame(*it);
+            if (frame.get()) {
+                frameIds.push_back(frame->GetIdentifier());
+                // | printf("GetFrameNames(): frameId = %lu\n", 
+                // |         frame->GetIdentifier());
+            }
         }
-    } else {
+    }
+    // BUG in CEF: 
+    //   GetFrameNames() does not return the main frame (as of revision 1448).
+    //   Make it work for the future when this bug gets fixed.
+    std::vector<int64>::iterator find_it = std::find(
+            frameIds.begin(), frameIds.end(), 
+            browser->GetMainFrame()->GetIdentifier());
+    if (find_it == frameIds.end()) {
+        // Main frame not found in frameIds vector, add it now.
+        // | printf("Adding main frame to frameIds: %lu\n",
+        // |         browser->GetMainFrame()->GetIdentifier());
         frameIds.push_back(browser->GetMainFrame()->GetIdentifier());
     }
-    /*
-    Another way:
-    | for (std::vector<int64>::iterator it = v.begin(); it != v.end(); ++it) {
-    |     CefRefPtr<CefFrame> frame = browser->GetFrame(*it);
-    */
     if (!frameIds.size()) {
         DebugLog("Renderer: DoJavascriptBindingsForBrowser() FAILED: " \
                 "frameIds.size() == 0");
         return;
     }
-    for (std::vector<int>::size_type i = 0; i != frameIds.size(); i++) {
-        if (frameIds[i] <= 0) {
-            // Frame not yet created, race condition / bug in CEF.
+    for (std::vector<int64>::iterator it = frameIds.begin(); \
+            it != frameIds.end(); ++it) {
+        if (*it <= 0) {
+            // GetFrameIdentifiers() bug that returned a vector
+            // filled with zeros. This problem was fixed by using'
+            // GetFrameNames() so this block of code should not
+            // be executed anymore.
             DebugLog("Renderer: DoJavascriptBindingsForBrowser() WARNING: " \
                 "frameId <= 0");
-            printf("cefpython: Renderer: frameId = %li\n", frameIds[i]);
+            printf("cefpython: Renderer: frameId = %li\n", *it);
             continue;
         }
-        CefRefPtr<CefFrame> frame = browser->GetFrame(frameIds[i]);
+        CefRefPtr<CefFrame> frame = browser->GetFrame(*it);
         if (!frame.get()) {
             DebugLog("Renderer: DoJavascriptBindingsForBrowser() WARNING: " \
                     "GetFrame() failed");
