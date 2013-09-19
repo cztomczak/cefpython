@@ -593,6 +593,7 @@ class ClientHandler:
         if self._reset_js_bindings and not isLoading:
             if browserWidget:
                 browserWidget.set_js_bindings()
+                self._reset_js_bindings = False
         if isLoading and browserWidget \
                 and browserWidget.keyboard_mode == "local":
             # Release keyboard when navigating to a new page.
