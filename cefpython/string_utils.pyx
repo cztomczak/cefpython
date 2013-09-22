@@ -45,10 +45,17 @@ cdef void PyToCefString(
         py_string pyString,
         CefString& cefString
         ) except *:
-    if type(pyString) == unicode:
-        pyString = <bytes>(pyString.encode(
-                g_applicationSettings["string_encoding"],
-                errors=UNICODE_ENCODE_ERRORS))
+    if PY_MAJOR_VERSION < 3:
+        if type(pyString) == unicode:
+            pyString = <bytes>(pyString.encode(
+                    g_applicationSettings["string_encoding"],
+                    errors=UNICODE_ENCODE_ERRORS))
+    else:
+        # The unicode type is not defined in Python 3.
+        if type(pyString) == str:
+            pyString = <bytes>(pyString.encode(
+                    g_applicationSettings["string_encoding"],
+                    errors=UNICODE_ENCODE_ERRORS))
     cdef cpp_string cppString = pyString
     # Using cefString.FromASCII() will result in DCHECK failures
     # when a non-ascii character is encountered.
@@ -71,10 +78,11 @@ cdef void PyToCefStringPointer(
                     g_applicationSettings["string_encoding"],
                     errors=UNICODE_ENCODE_ERRORS))
     else:
-        if type(pyString) != bytes:
+        # The unicode type is not defined in Python 3.
+        if type(pyString) == str:
             pyString = <bytes>(pyString.encode(
-                g_applicationSettings["string_encoding"],
-                errors=UNICODE_ENCODE_ERRORS))
+                    g_applicationSettings["string_encoding"],
+                    errors=UNICODE_ENCODE_ERRORS))
 
     cdef cpp_string cppString = pyString
     # When used cefString.FromASCII(), a DCHECK failed

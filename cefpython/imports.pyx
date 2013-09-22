@@ -127,7 +127,7 @@ IF CEF_VERSION == 1:
     from web_request_client cimport *
     from cef_stream cimport *
     cimport cef_stream_static
-    from cef_response cimport *
+    from cef_response_cef1 cimport *
     from cef_stream cimport *
     from cef_content_filter cimport *
     from content_filter_handler cimport *
@@ -153,3 +153,7 @@ IF CEF_VERSION == 3:
     from cef_cookie_cef3 cimport *
     cimport cef_cookie_manager_namespace
     from cookie_visitor cimport *
+    from cef_callback_cef3 cimport *
+    from cef_response_cef3 cimport *
+    from cef_resource_handler_cef3 cimport *
+    from resource_handler_cef3 cimport *

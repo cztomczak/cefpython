@@ -6,6 +6,14 @@ TID_UI = cef_types.TID_UI
 TID_IO = cef_types.TID_IO
 TID_FILE = cef_types.TID_FILE
 
+cpdef py_bool IsString(object maybeString):
+    # In Python 2.7 string types are: 1) str/bytes 2) unicode.
+    # In Python 3 string types are: 1) bytes 2) str
+    if type(maybeString) == bytes or type(maybeString) == str \
+            or (PY_MAJOR_VERSION < 3 and type(maybeString) == unicode):
+        return True
+    return False
+
 cpdef py_bool IsThread(int threadID):
     return bool(CefCurrentlyOn(<CefThreadId>threadID))
 

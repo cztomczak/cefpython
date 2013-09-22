@@ -186,7 +186,9 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
                 ret.get().SetString(index, PyToCefStringValue(str(value)))
         elif valueType == float:
             ret.get().SetDouble(index, float(value))
-        elif valueType == bytes or valueType == unicode:
+        elif valueType == bytes or valueType == str \
+                or (PY_MAJOR_VERSION < 3 and valueType == unicode):
+            # The unicode type is not defined in Python 3.
             ret.get().SetString(index, PyToCefStringValue(str(value)))
         elif valueType == dict:
             ret.get().SetDictionary(index, PyDictToCefDictionaryValue(
@@ -242,7 +244,9 @@ cdef void PyListToExistingCefListValue(
                         value)))
         elif valueType == float:
             cefListValue.get().SetDouble(index, float(value))
-        elif valueType == bytes or valueType == unicode:
+        elif valueType == bytes or valueType == str \
+                or (PY_MAJOR_VERSION < 3 and valueType == unicode):
+            # The unicode type is not defined in Python 3.
             cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
         elif valueType == dict:
             cefListValue.get().SetDictionary(index, PyDictToCefDictionaryValue(
@@ -299,7 +303,9 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
                 ret.get().SetString(cefKey, PyToCefStringValue(str(value)))
         elif valueType == float:
             ret.get().SetDouble(cefKey, float(value))
-        elif valueType == bytes or valueType == unicode:
+        elif valueType == bytes or valueType == str \
+                or (PY_MAJOR_VERSION < 3 and valueType == unicode):
+            # The unicode type is not defined in Python 3.
             ret.get().SetString(cefKey, PyToCefStringValue(str(value)))
         elif valueType == dict:
             ret.get().SetDictionary(cefKey, PyDictToCefDictionaryValue(

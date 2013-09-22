@@ -194,9 +194,10 @@ cdef class JavascriptBindings:
                 if valueType2 is not True:
                     return valueType2.__name__
             return True
-        elif valueType == str:
+        elif valueType == str or valueType == bytes:
             return True
-        elif valueType == unicode:
+        elif PY_MAJOR_VERSION < 3 and valueType == unicode:
+            # The unicode type is not defined in Python 3.
             return True
         elif valueType == tuple:
             return True

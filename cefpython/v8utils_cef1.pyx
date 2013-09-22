@@ -209,7 +209,9 @@ cdef CefRefPtr[CefV8Value] PyToV8Value(
                     PyToV8Value(value, v8Context, nestingLevel+1),
                     V8_PROPERTY_ATTRIBUTE_NONE)
         return v8Value
-    elif pyValueType == bytes or pyValueType == unicode:
+    elif pyValueType == bytes or pyValueType == str \
+            or (PY_MAJOR_VERSION < 3 and pyValueType == unicode):
+        # The unicode type is not defined in Python 3.
         PyToCefString(pyValue, cefString)
         return cef_v8_static.CreateString(cefString)
     elif pyValueType == type:

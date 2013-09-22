@@ -12,5 +12,6 @@ bool CookieVisitor::Visit(
         bool& deleteCookie
         ) {
     REQUIRE_IO_THREAD();
-    return CookieVisitor_Visit(cookieVisitorId_, cookie, count, total, deleteCookie);
+    return CookieVisitor_Visit(cookieVisitorId_, cookie, count, total, 
+            deleteCookie);
 }

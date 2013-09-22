@@ -131,7 +131,7 @@ IF CEF_VERSION == 1:
     include "stream.pyx"
     include "content_filter.pyx"
     include "request_handler_cef1.pyx"
-    include "response.pyx"
+    include "response_cef1.pyx"
     include "display_handler_cef1.pyx"
     include "lifespan_handler_cef1.pyx"
     IF UNAME_SYSNAME == "Windows":
@@ -166,6 +166,9 @@ IF CEF_VERSION == 3:
     include "browser_process_handler_cef3.pyx"
     include "paint_buffer_cef3.pyx"
     include "render_handler_cef3.pyx"
+    include "callback_cef3.pyx"
+    include "resource_handler_cef3.pyx"
+    include "response_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,
