@@ -16,7 +16,7 @@ cpdef py_bool SaveImage(self, py_string filePath,
         return False
 
     # The charFilePath pointer is tied to the lifetime 
-    # of the filePath string.
+    # of the filePath string. strlen() is a C function.
     cdef char* charFilePath = filePath
     cdef int filePathLength = strlen(charFilePath)
     cdef wchar_t* widecharFilePath = <wchar_t*>calloc(
