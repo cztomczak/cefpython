@@ -75,7 +75,7 @@ cdef public cpp_bool DownloadHandler_ReceivedData(
         if pyDownloadHandler:
             callback = pyDownloadHandler.GetCallback("OnData")
             if callback:
-                ret = callback(VoidPtrToStr(data, data_size))
+                ret = callback(VoidPtrToString(data, data_size))
                 return bool(ret)
         return False
     except:

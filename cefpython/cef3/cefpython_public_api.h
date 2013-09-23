@@ -16,8 +16,7 @@
 
 // All the imports that are required when including "cefpython.h".
 #include "include/cef_client.h"
-// #include "include/cef_web_urlrequest.h"
-// #include "include/cef_cookie.h"
+#include "include/cef_urlrequest.h"
 #include "util.h"
 
 // Python 3.2 fix - DL_IMPORT is not defined in Python.h

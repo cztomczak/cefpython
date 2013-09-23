@@ -88,7 +88,7 @@ cdef class PyRequest:
                 bytesCount = postDataElement.get().GetBytesCount()
                 voidData = <void*>malloc(bytesCount)
                 postDataElement.get().GetBytes(bytesCount, voidData)
-                pyData = VoidPtrToStr(voidData, bytesCount)
+                pyData = VoidPtrToString(voidData, bytesCount)
                 free(voidData)
                 if (pyData.startswith('--') or retMultipart):
                     # Content-Type: multipart/form-data
