@@ -127,7 +127,7 @@ IF CEF_VERSION == 1:
     include "load_handler_cef1.pyx"
     include "keyboard_handler_cef1.pyx"
     include "request_cef1.pyx"
-    include "web_request.pyx"
+    include "web_request_cef1.pyx"
     include "stream.pyx"
     include "content_filter.pyx"
     include "request_handler_cef1.pyx"
@@ -169,6 +169,7 @@ IF CEF_VERSION == 3:
     include "callback_cef3.pyx"
     include "resource_handler_cef3.pyx"
     include "response_cef3.pyx"
+    include "web_request_cef3.pyx"
 
 # Try not to run any of the CEF code until Initialize() is called.
 # Do not allocate any memory on the heap until Initialize() is called,

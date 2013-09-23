@@ -122,9 +122,9 @@ IF CEF_VERSION == 1:
     cimport cef_v8_stack_trace
     from v8function_handler cimport *
     from cef_request_cef1 cimport *
-    from cef_web_urlrequest cimport *
-    cimport cef_web_urlrequest_static
-    from web_request_client cimport *
+    from cef_web_urlrequest_cef1 cimport *
+    cimport cef_web_urlrequest_static_cef1
+    from web_request_client_cef1 cimport *
     from cef_stream cimport *
     cimport cef_stream_static
     from cef_response_cef1 cimport *
@@ -157,3 +157,5 @@ IF CEF_VERSION == 3:
     from cef_response_cef3 cimport *
     from cef_resource_handler_cef3 cimport *
     from resource_handler_cef3 cimport *
+    from cef_urlrequest_cef3 cimport *
+    from web_request_client_cef3 cimport *

@@ -96,6 +96,10 @@
                 RelativePath=".\resource_handler.h"
                 >
             </File>
+            <File
+                RelativePath=".\web_request_client.h"
+                >
+            </File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -118,6 +122,10 @@
             </File>
             <File
                 RelativePath=".\resource_handler.cpp"
+                >
+            </File>
+            <File
+                RelativePath=".\web_request_client.cpp"
                 >
             </File>
 		</Filter>

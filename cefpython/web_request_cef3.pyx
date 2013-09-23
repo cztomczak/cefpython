@@ -2,6 +2,9 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+# (The comments below were from CEF 1 usage, the problems described
+#  might not be an issue in CEF 3 anymore, test it TODO)
+#
 # TODO: fix CefWebURLRequest memory corruption and restore weakrefs
 # for PyWebRequest object. Right now getting memory corruption
 # when CefRefPtr[CefWebURLRequest] is released after the request
@@ -21,22 +24,20 @@
 cdef object g_pyWebRequests = {}
 cdef int g_webRequestMaxId = 0
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # WebRequest
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Static methods are not allowed in cdef classes,
 # that's why we need a wrapper for PyWebRequest.
 
 class WebRequest:
-    State = {
-        "Unsent": cef_types.WUR_STATE_UNSENT,
-        "Started": cef_types.WUR_STATE_STARTED,
-        "HeadersReceived": cef_types.WUR_STATE_HEADERS_RECEIVED,
-        "Loading": cef_types.WUR_STATE_LOADING,
-        "Done": cef_types.WUR_STATE_DONE,
-        "Error": cef_types.WUR_STATE_ERROR,
-        "Abort": cef_types.WUR_STATE_ABORT,
+    Status = {
+        "Unknown": cef_types.UR_UNKNOWN,
+        "Success": cef_types.UR_SUCCESS,
+        "Pending": cef_types.UR_IO_PENDING,
+        "Canceled": cef_types.UR_CANCELED,
+        "Failed": cef_types.UR_FAILED,
     }
     
     def __init__(self):
@@ -44,14 +45,28 @@ class WebRequest:
                 "use WebRequest.CreateWebRequest() static method")
 
     @staticmethod
-    def CreateWebRequest(request, webRequestClient):
+    def ValidateClient(webRequestClient):
+        cdef list methods = ["OnRequestComplete", "OnUploadProgress",
+            "OnDownloadProgress", "OnDownloadData"]
+        for method in methods:
+            if webRequestClient and hasattr(webRequestClient, method) \
+                    and callable(getattr(webRequestClient, method)):
+                # Okay.
+                continue
+            else:
+                raise Exception("WebRequestClient object is missing method: " \
+                        "%s" % method)
+
+    @staticmethod
+    def Create(request, webRequestClient):
         if not isinstance(request, PyRequest):
             raise Exception("Invalid request object")
+        WebRequest.ValidateClient(webRequestClient)
         return CreatePyWebRequest(request, webRequestClient)
 
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # PyWebRequest
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 cdef PyWebRequest CreatePyWebRequest(PyRequest request, 
         object webRequestClient):
@@ -70,7 +85,7 @@ cdef PyWebRequest GetPyWebRequest(int webRequestId):
 cdef class PyWebRequest:
     # cdef object __weakref__ # see g_pyWebRequests
     cdef int webRequestId
-    cdef CefRefPtr[CefWebURLRequest] requester
+    cdef CefRefPtr[CefURLRequest] cefWebRequest
     cdef object pyWebRequestClient
 
     def __init__(self, PyRequest pyRequest, object pyWebRequestClient):
@@ -81,129 +96,110 @@ cdef class PyWebRequest:
                 <CefRefPtr[WebRequestClient]?>new WebRequestClient(
                         self.webRequestId))
         self.pyWebRequestClient = pyWebRequestClient
-        self.requester = <CefRefPtr[CefWebURLRequest]?>(
-                cef_web_urlrequest_static.CreateWebURLRequest(
-                        pyRequest.cefRequest, 
-                        <CefRefPtr[CefWebURLRequestClient]?>(
-                                cppWebRequestClient)))
+        self.cefWebRequest = <CefRefPtr[CefURLRequest]?>(CefURLRequest_Create(\
+                pyRequest.cefRequest, \
+                <CefRefPtr[CefURLRequestClient]?>(cppWebRequestClient)))
 
     cdef object GetCallback(self, str funcName):
         if hasattr(self.pyWebRequestClient, funcName) and (
                 callable(getattr(self.pyWebRequestClient, funcName))):
             return getattr(self.pyWebRequestClient, funcName)
 
+    cpdef PyRequest GetRequest(self):
+        cdef CefRefPtr[CefRequest] cefRequest = \
+                self.cefWebRequest.get().GetRequest()
+        cdef PyRequest pyRequest = CreatePyRequest(cefRequest)
+        return pyRequest
+
+    cpdef int GetRequestStatus(self) except *:
+        return self.cefWebRequest.get().GetRequestStatus()
+
+    cpdef int GetRequestError(self) except *:
+        return self.cefWebRequest.get().GetRequestError()
+
+    cpdef PyResponse GetResponse(self):
+        cdef CefRefPtr[CefResponse] cefResponse = \
+                self.cefWebRequest.get().GetResponse()
+        cdef PyResponse pyResponse
+        # CefResponse may be NULL.
+        if cefResponse.get():
+            pyResponse = CreatePyResponse(cefResponse)
+            return pyResponse
+        return None
+
     cpdef py_void Cancel(self):
-        self.requester.get().Cancel()
+        self.cefWebRequest.get().Cancel()
 
-    cpdef int GetState(self) except *:
-        return <int>self.requester.get().GetState()
-
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # WebRequestClient
-# ------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-cdef public void WebRequestClient_OnStateChange(
-        int webRequestId, 
-        CefRefPtr[CefWebURLRequest] requester,
-        cef_types.cef_weburlrequest_state_t state
+cdef public void WebRequestClient_OnUploadProgress(
+        int webRequestId,
+        CefRefPtr[CefURLRequest] cefWebRequest,
+        cef_types.uint64 current,
+        cef_types.uint64 total
         ) except * with gil:
     cdef PyWebRequest webRequest
-    cdef object callback
+    cdef object userCallback
     try:
         webRequest = GetPyWebRequest(webRequestId)
         if webRequest:
-            callback = webRequest.GetCallback("OnStateChange")
-            if callback:
-                callback(webRequest, <int>state)
+            userCallback = webRequest.GetCallback("OnUploadProgress")
+            if userCallback:
+                userCallback(webRequest, current, total)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace) 
+
+cdef public void WebRequestClient_OnDownloadProgress(
+        int webRequestId,
+        CefRefPtr[CefURLRequest] cefWebRequest,
+        cef_types.uint64 current,
+        cef_types.uint64 total
+        ) except * with gil:
+    cdef PyWebRequest webRequest
+    cdef object userCallback
+    try:
+        webRequest = GetPyWebRequest(webRequestId)
+        if webRequest:
+            userCallback = webRequest.GetCallback("OnDownloadProgress")
+            if userCallback:
+                userCallback(webRequest, current, total)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace) 
+
+cdef public void WebRequestClient_OnDownloadData(
+        int webRequestId,
+        CefRefPtr[CefURLRequest] cefWebRequest,
+        const void* data,
+        size_t dataLength
+        ) except * with gil:
+    cdef PyWebRequest webRequest
+    cdef object userCallback
+    try:
+        webRequest = GetPyWebRequest(webRequestId)
+        if webRequest:
+            userCallback = webRequest.GetCallback("OnDownloadData")
+            if userCallback:
+                userCallback(webRequest, VoidPtrToString(data, dataLength))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public void WebRequestClient_OnRedirect(
+cdef public void WebRequestClient_OnRequestComplete(
         int webRequestId,
-        CefRefPtr[CefWebURLRequest] requester,
-        CefRefPtr[CefRequest] request,
-        CefRefPtr[CefResponse] response
+        CefRefPtr[CefURLRequest] cefWebRequest
         ) except * with gil:
     cdef PyWebRequest webRequest
-    cdef object callback
+    cdef object userCallback
     try:
         webRequest = GetPyWebRequest(webRequestId)
         if webRequest:
-            callback = webRequest.GetCallback("OnRedirect")
-            if callback:
-                callback(webRequest, webRequest.pyRequest,
-                        CreatePyResponse(response))
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public void WebRequestClient_OnHeadersReceived(
-        int webRequestId,
-        CefRefPtr[CefWebURLRequest] requester,
-        CefRefPtr[CefResponse] response
-        ) except * with gil:
-    cdef PyWebRequest webRequest
-    cdef object callback
-    try:
-        webRequest = GetPyWebRequest(webRequestId)
-        if webRequest:
-            callback = webRequest.GetCallback("OnHeadersReceived")
-            if callback:
-                callback(webRequest, CreatePyResponse(response))
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public void WebRequestClient_OnProgress(
-        int webRequestId,
-        CefRefPtr[CefWebURLRequest] requester,
-        uint64_t bytesSent, 
-        uint64_t totalBytesToBeSent
-        ) except * with gil:
-    cdef PyWebRequest webRequest
-    cdef object callback
-    try:
-        webRequest = GetPyWebRequest(webRequestId)
-        if webRequest:
-            callback = webRequest.GetCallback("OnProgress")
-            if callback:
-                callback(webRequest, bytesSent, totalBytesToBeSent)
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public void WebRequestClient_OnData(
-        int webRequestId,
-        CefRefPtr[CefWebURLRequest] requester,
-        void* data, 
-        int dataLength
-        ) except * with gil:
-    cdef PyWebRequest webRequest
-    cdef object callback
-    try:
-        webRequest = GetPyWebRequest(webRequestId)
-        if webRequest:
-            callback = webRequest.GetCallback("OnData")
-            if callback:
-                callback(webRequest, VoidPtrToStr(data, dataLength))
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public void WebRequestClient_OnError(
-        int webRequestId,
-        CefRefPtr[CefWebURLRequest] requester,
-        int errorCode
-        ) except * with gil:
-    cdef PyWebRequest webRequest
-    cdef object callback
-    try:
-        webRequest = GetPyWebRequest(webRequestId)
-        if webRequest:
-            callback = webRequest.GetCallback("OnError")
-            if callback:
-                callback(webRequest, errorCode)
+            userCallback = webRequest.GetCallback("OnRequestComplete")
+            if userCallback:
+                userCallback(webRequest)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

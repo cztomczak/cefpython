@@ -26,9 +26,10 @@ cdef extern from "include/internal/cef_types.h":
             TID_IO,
             TID_RENDERER
 
-    ctypedef long long int64
     ctypedef unsigned int uint32
     ctypedef int int32
+    ctypedef long long int64
+    ctypedef unsigned long long uint64
 
     IF UNAME_SYSNAME == "Windows":
         ctypedef wchar_t char16
@@ -208,3 +209,11 @@ cdef extern from "include/internal/cef_types.h":
         cef_rect_t rect
         cef_rect_t available_rect
     ctypedef cef_screen_info_t CefScreenInfo
+
+    # CefURLRequest.GetStatus()
+    enum cef_urlrequest_status_t:
+        UR_UNKNOWN = 0
+        UR_SUCCESS
+        UR_IO_PENDING
+        UR_CANCELED
+        UR_FAILED

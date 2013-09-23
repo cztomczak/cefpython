@@ -89,7 +89,7 @@ cdef public void ContentFilterHandler_ProcessData(
             callback = contentFilter.GetCallback("OnData")
             if callback:
                 pyStreamReader = PyStreamReader()
-                callback(VoidPtrToStr(data, data_size), pyStreamReader)
+                callback(VoidPtrToString(data, data_size), pyStreamReader)
                 if pyStreamReader.HasCefStreamReader():
                     substitute_data.swap(pyStreamReader.GetCefStreamReader())
     except:

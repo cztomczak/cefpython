@@ -89,7 +89,7 @@ cdef void PyToCefStringPointer(
     # when passed a unicode string.
     cefString.FromString(cppString)
 
-cdef py_string VoidPtrToStr(const void* data, size_t dataLength):
+cdef py_string VoidPtrToString(const void* data, size_t dataLength):
     if PY_MAJOR_VERSION < 3:
         return <bytes>((<char*>data)[:dataLength])
     else:

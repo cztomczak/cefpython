@@ -58,6 +58,10 @@ __PYX_EXTERN_C DL_IMPORT(bool) ResourceHandler_ReadResponse(int, void *, int, in
 __PYX_EXTERN_C DL_IMPORT(bool) ResourceHandler_CanGetCookie(int, CefCookie const &);
 __PYX_EXTERN_C DL_IMPORT(bool) ResourceHandler_CanSetCookie(int, CefCookie const &);
 __PYX_EXTERN_C DL_IMPORT(void) ResourceHandler_Cancel(int);
+__PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnUploadProgress(int, CefRefPtr<CefURLRequest>, uint64, uint64);
+__PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnDownloadProgress(int, CefRefPtr<CefURLRequest>, uint64, uint64);
+__PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnDownloadData(int, CefRefPtr<CefURLRequest>, void const *, size_t);
+__PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnRequestComplete(int, CefRefPtr<CefURLRequest>);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 
