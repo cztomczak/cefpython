@@ -72,7 +72,9 @@ class ClientHandler:
         # Non-english characters are not displaying correctly.
         # This is a bug in CEF. A quick fix is to get the charset
         # from response headers and insert <meta charset> into
-        # the html page.
+        # the html page. 
+        # Bug reported on the CEF C++ Forum:
+        # http://www.magpcss.org/ceforum/viewtopic.php?p=18401#p18401
         if FIX_ENCODING_BUG:
             contentType = response.GetHeader("Content-Type")
             if contentType:
