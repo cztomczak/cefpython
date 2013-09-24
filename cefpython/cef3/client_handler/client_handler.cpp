@@ -375,8 +375,7 @@ CefRefPtr<CefResourceHandler> ClientHandler::GetResourceHandler(
                                             CefRefPtr<CefFrame> frame,
                                             CefRefPtr<CefRequest> request) {
     REQUIRE_IO_THREAD();
-    // Not yet implemented.
-    return NULL;
+    return RequestHandler_GetResourceHandler(browser, frame, request);
 }
 
 ///

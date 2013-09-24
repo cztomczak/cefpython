@@ -2,26 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# (The comments below were from CEF 1 usage, the problems described
-#  might not be an issue in CEF 3 anymore, test it TODO)
-#
-# TODO: fix CefWebURLRequest memory corruption and restore weakrefs
-# for PyWebRequest object. Right now getting memory corruption
-# when CefRefPtr[CefWebURLRequest] is released after the request
-# is completed. The memory corruption manifests itself with the
-# "Segmentation Fault" error message or the strange "C function 
-# name could not be determined in the current C stack frame".
-# See this topic on cython-users group:
-# https://groups.google.com/d/topic/cython-users/FJZwHhqaCSI/discussion
-# After CefWebURLRequest memory corruption is fixed restore weakrefs:
-# 1. cdef object g_pyWebRequests = weakref.WeakValueDictionary()
-# 2. Add property "cdef object __weakref__" in PyWebRequest
-# When using normal dictionary for g_pyWebRequest then the memory
-# corruption doesn't occur, but the PyWebRequest and CefWebURLRequest
-# objects are never released, thus you have memory leaks, for now 
-# there is no other solution. See this topic on the CEF Forum:
-# http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10710
-cdef object g_pyWebRequests = {}
+cdef object g_pyWebRequests = weakref.WeakValueDictionary()
 cdef int g_webRequestMaxId = 0
 
 # -----------------------------------------------------------------------------
@@ -83,7 +64,7 @@ cdef PyWebRequest GetPyWebRequest(int webRequestId):
     return None
 
 cdef class PyWebRequest:
-    # cdef object __weakref__ # see g_pyWebRequests
+    cdef object __weakref__ # see g_pyWebRequests
     cdef int webRequestId
     cdef CefRefPtr[CefURLRequest] cefWebRequest
     cdef object pyWebRequestClient
