@@ -155,18 +155,9 @@ cdef public cpp_bool ResourceHandler_ReadResponse(
                 pyBytesRead = int(bytesReadOut[0])
                 if dataOut[0] and IsString(dataOut[0]):
                     # The tempData pointer is tied to the lifetime 
-                    # of dataOut[0] string. strlen() is a C function.
+                    # of dataOut[0] string.
                     tempData = dataOut[0]
-                    tempDataLength = strlen(tempData)
-                    if tempDataLength > bytesToRead:
-                        raise Exception("ResourceHandler.ReadResponse() " \
-                                "FAILED: dataOut length is greater than " \
-                                "bytesToRead")
-                    if pyBytesRead != tempDataLength:
-                        raise Exception("ResourceHandler.ReadResponse() " \
-                                "FAILED: dataOut length is not equal to " \
-                                "bytesReadOut")
-                    memcpy(cefDataOut, tempData, tempDataLength)
+                    memcpy(cefDataOut, tempData, len(dataOut[0]))
                     assert pyBytesRead >= 0, "bytesReadOut < 0"
                     (&cefBytesRead)[0] = pyBytesRead
                     # True should be returned now.

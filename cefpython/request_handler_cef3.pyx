@@ -84,8 +84,6 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-
-
 cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
@@ -112,7 +110,6 @@ cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
-
 
 cdef public void RequestHandler_OnResourceRedirect(
         CefRefPtr[CefBrowser] cefBrowser,
