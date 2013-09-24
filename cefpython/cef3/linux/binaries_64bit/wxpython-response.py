@@ -220,9 +220,6 @@ class WebRequestClient:
     _dataLength = -1
     _response = None
 
-    def WebRequestClient(self, resourceHandler):
-        self._resourceHandler = resourceHandler
-    
     def OnUploadProgress(self, webRequest, current, total):
         pass
 
