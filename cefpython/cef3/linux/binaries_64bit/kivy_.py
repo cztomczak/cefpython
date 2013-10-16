@@ -556,11 +556,11 @@ class ClientHandler:
         css_content = css_content.replace("\n", "")
         jsCode = """
             %(js_content)s
-            var head = document.getElementsByTagName('head')[0];
-            var style = document.createElement('style');
-            style.type = 'text/css';
-            style.appendChild(document.createTextNode("%(css_content)s"));
-            head.appendChild(style);
+            var __kivy_temp_head = document.getElementsByTagName('head')[0];
+            var __kivy_temp_style = document.createElement('style');
+            __kivy_temp_style.type = 'text/css';
+            __kivy_temp_style.appendChild(document.createTextNode("%(css_content)s"));
+            __kivy_temp_head.appendChild(__kivy_temp_style);
         """ % locals()
         frame.ExecuteJavascript(jsCode, 
                 "kivy_.py > ClientHandler > OnLoadStart > _fix_select_boxes()")
