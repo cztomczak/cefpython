@@ -57,3 +57,22 @@ void WebRequestClient::OnDownloadData(CefRefPtr<CefURLRequest> request,
                           size_t data_length) {
     WebRequestClient_OnDownloadData(webRequestId_, request, data, data_length);
 }
+
+///
+// Called on the IO thread when the browser needs credentials from the user.
+// |isProxy| indicates whether the host is a proxy server. |host| contains the
+// hostname and |port| contains the port number. Return true to continue the
+// request and call CefAuthCallback::Continue() when the authentication
+// information is available. Return false to cancel the request. This method
+// will only be called for requests initiated from the browser process.
+///
+/*--cef(optional_param=realm)--*/
+bool WebRequestClient::GetAuthCredentials(bool isProxy,
+                                const CefString& host,
+                                int port,
+                                const CefString& realm,
+                                const CefString& scheme,
+                                CefRefPtr<CefAuthCallback> callback) {
+    // Not yet implemented.
+    return false;
+}

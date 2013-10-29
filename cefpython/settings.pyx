@@ -424,11 +424,6 @@ cdef void SetBrowserSettings(
                 else:
                     cefBrowserSettings.text_area_resize = (
                             cef_types.STATE_ENABLED)
-            elif key == "page_cache_disabled":
-                if browserSettings[key]:
-                    cefBrowserSettings.page_cache = cef_types.STATE_DISABLED
-                else:
-                    cefBrowserSettings.page_cache = cef_types.STATE_ENABLED
             elif key == "tab_to_links_disabled":
                 if browserSettings[key]:
                     cefBrowserSettings.tab_to_links = cef_types.STATE_DISABLED
@@ -469,13 +464,6 @@ cdef void SetBrowserSettings(
                             cef_types.STATE_DISABLED)
                 else:
                     cefBrowserSettings.accelerated_compositing = (
-                            cef_types.STATE_ENABLED)
-            elif key == "developer_tools_disabled":
-                if browserSettings[key]:
-                    cefBrowserSettings.developer_tools = (
-                            cef_types.STATE_DISABLED)
-                else:
-                    cefBrowserSettings.developer_tools = (
                             cef_types.STATE_ENABLED)
             else:
                 raise Exception("Invalid browserSettings key: %s" % key)

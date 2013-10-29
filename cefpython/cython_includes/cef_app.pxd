@@ -36,3 +36,6 @@ cdef extern from "include/cef_app.h":
     cdef void CefQuitMessageLoop()
     cdef void CefShutdown()
 
+    IF CEF_VERSION == 3:
+        cdef void CefSetOSModalLoop(cpp_bool osModalLoop)
+

@@ -127,6 +127,11 @@ cdef extern from "include/cef_browser.h":
             void SendFocusEvent(cpp_bool setFocus)
             void SendCaptureLostEvent()
 
+            void Find(int identifier, const CefString& searchText, cpp_bool forward,
+                    cpp_bool matchCase, cpp_bool findNext)
+            void StopFinding(cpp_bool clearSelection)
+            void Print()
+
         cdef cppclass CefBrowser(CefBase):
 
             CefRefPtr[CefBrowserHost] GetHost()

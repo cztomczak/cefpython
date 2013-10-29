@@ -299,11 +299,15 @@ cdef class PyBrowser:
         cpdef py_void CloseDevTools(self):
             self.GetCefBrowser().get().CloseDevTools()
 
-        cpdef py_void Find(self, int searchId, py_string searchText,
-                           py_bool forward, py_bool matchCase,
-                           py_bool findNext):
-            cdef CefString cefSearchText
-            PyToCefString(searchText, cefSearchText)
+    cpdef py_void Find(self, int searchId, py_string searchText,
+                       py_bool forward, py_bool matchCase,
+                       py_bool findNext):
+        cdef CefString cefSearchText
+        PyToCefString(searchText, cefSearchText)
+        IF CEF_VERSION == 3:
+            self.GetCefBrowserHost().get().Find(searchId, cefSearchText,
+                    bool(forward), bool(matchCase), bool(findNext))
+        ELIF CEF_VERSION == 1:
             self.GetCefBrowser().get().Find(searchId, cefSearchText,
                     bool(forward), bool(matchCase), bool(findNext))
 
@@ -425,6 +429,10 @@ cdef class PyBrowser:
     cpdef py_void Navigate(self, py_string url):
         self.GetMainFrame().LoadUrl(url)
 
+    IF CEF_VERSION == 3:
+        cpdef py_void Print(self):
+            self.GetCefBrowserHost().get().Print()
+
     cpdef py_void Reload(self):
         self.GetCefBrowser().get().Reload()
 
@@ -454,9 +462,10 @@ cdef class PyBrowser:
     cpdef py_void StopLoad(self):
         self.GetCefBrowser().get().StopLoad()
 
-    IF CEF_VERSION == 1:
-
-        cpdef py_void StopFinding(self, py_bool clearSelection):
+    cpdef py_void StopFinding(self, py_bool clearSelection):
+        IF CEF_VERSION == 3:
+            self.GetCefBrowserHost().get().StopFinding(bool(clearSelection))
+        ELIF CEF_VERSION == 1:
             self.GetCefBrowser().get().StopFinding(bool(clearSelection))
 
     cpdef py_void ToggleFullscreen(self):
