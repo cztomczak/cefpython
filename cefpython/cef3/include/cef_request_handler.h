@@ -38,6 +38,7 @@
 #define CEF_INCLUDE_CEF_REQUEST_HANDLER_H_
 #pragma once
 
+#include "include/cef_auth_callback.h"
 #include "include/cef_base.h"
 #include "include/cef_browser.h"
 #include "include/cef_cookie.h"
@@ -46,28 +47,6 @@
 #include "include/cef_response.h"
 #include "include/cef_request.h"
 #include "include/cef_web_plugin.h"
-
-///
-// Callback interface used for asynchronous continuation of authentication
-// requests.
-///
-/*--cef(source=library)--*/
-class CefAuthCallback : public virtual CefBase {
- public:
-  ///
-  // Continue the authentication request.
-  ///
-  /*--cef(capi_name=cont)--*/
-  virtual void Continue(const CefString& username,
-                        const CefString& password) =0;
-
-  ///
-  // Cancel the authentication request.
-  ///
-  /*--cef()--*/
-  virtual void Cancel() =0;
-};
-
 
 ///
 // Callback interface used for asynchronous continuation of quota requests.
@@ -113,6 +92,24 @@ class CefAllowCertificateErrorCallback : public virtual CefBase {
 /*--cef(source=client)--*/
 class CefRequestHandler : public virtual CefBase {
  public:
+  ///
+  // Called on the UI thread before browser navigation. Return true to cancel
+  // the navigation or false to allow the navigation to proceed. The |request|
+  // object cannot be modified in this callback.
+  // CefDisplayHandler::OnLoadingStateChange will be called twice in all cases.
+  // If the navigation is allowed CefLoadHandler::OnLoadStart and
+  // CefLoadHandler::OnLoadEnd will be called. If the navigation is canceled
+  // CefLoadHandler::OnLoadError will be called with an |errorCode| value of
+  // ERR_ABORTED.
+  ///
+  /*--cef()--*/
+  virtual bool OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
+                              CefRefPtr<CefFrame> frame,
+                              CefRefPtr<CefRequest> request,
+                              bool is_redirect) {
+    return false;
+  }
+
   ///
   // Called on the IO thread before a resource request is loaded. The |request|
   // object may be modified. To cancel the request return true otherwise return

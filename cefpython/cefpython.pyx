@@ -304,6 +304,9 @@ def Shutdown():
     Debug("Shutdown()")
     CefShutdown()
 
+def SetOsModalLoop(py_bool modalLoop):
+    CefSetOSModalLoop(bool(modalLoop))
+
 cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     global g_globalClientCallbacks
     if name in ["OnCertificateError", "OnBeforePluginLoad"]:

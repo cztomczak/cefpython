@@ -146,7 +146,6 @@ cdef extern from "include/internal/cef_types_wrappers.h":
             cef_state_t image_loading
             cef_state_t image_shrink_standalone_to_fit
             cef_state_t text_area_resize
-            cef_state_t page_cache
             cef_state_t tab_to_links
             cef_state_t author_and_user_styles
             cef_state_t local_storage
@@ -154,7 +153,6 @@ cdef extern from "include/internal/cef_types_wrappers.h":
             cef_state_t application_cache
             cef_state_t webgl
             cef_state_t accelerated_compositing
-            cef_state_t developer_tools
 
     IF CEF_VERSION == 1:
         cdef cppclass CefRect:
