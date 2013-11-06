@@ -89,9 +89,14 @@ class ChromeWindow(wx.Window):
     Standalone CEF component. The class provides facilites for interacting
     with wx message loop
     """
-    def __init__(self, parent, url="", useTimer=False,
-                 timerMillis=DEFAULT_TIMER_MILLIS,  size=(-1, -1),
-                 *args, **kwargs):
+    def __init__(self, parent, url="", useTimer=None,
+                 timerMillis=DEFAULT_TIMER_MILLIS, browserSettings=None,
+                 size=(-1, -1), *args, **kwargs):
+        if platform.system() == "Linux" and useTimer == None:
+            # On Linux OnIdle does not work correctly, must use timer.
+            useTimer = True
+        useTimer = bool(useTimer)
+
         wx.Window.__init__(self, parent, id=wx.ID_ANY, size=size,
                            *args, **kwargs)
         # On Linux absolute file urls need to start with "file://"
@@ -109,8 +114,8 @@ class ChromeWindow(wx.Window):
         else:
             raise Exception("Unsupported OS")
         
-        # TODO: allow for custom browser settings for the ChromeWindow
-        browserSettings = {}
+        if not browserSettings:
+            browserSettings = {}
 
         # Disable plugins:
         # | browserSettings["plugins_disabled"] = True
@@ -170,18 +175,37 @@ class ChromeWindow(wx.Window):
         if onLoadStart or onLoadEnd:
             self.GetBrowser().SetClientHandler(
                 CallbackClientHandler(onLoadStart, onLoadEnd))
+
+        browser = self.GetBrowser()
+        if cefpython.g_debug:
+            print("***** ChromeCtrl: LoadUrl() self: %s" % self)
+            print("***** ChromeCtrl: browser: %s" % browser)
+            print("***** ChromeCtrl: browser id: %s" % browser.GetIdentifier())
+            print("***** ChromeCtrl: mainframe: %s" % browser.GetMainFrame())
+            print("***** ChromeCtrl: mainframe id: %s" % \
+                    browser.GetMainFrame().GetIdentifier())
         self.GetBrowser().GetMainFrame().LoadUrl(url)
+
+        #wx.CallLater(100, browser.ReloadIgnoreCache)
+        #wx.CallLater(200, browser.GetMainFrame().LoadUrl, url)
 
 
 class ChromeCtrl(wx.Panel):
-    def __init__(self, parent, url="", useTimer=False,
-                 timerMillis=DEFAULT_TIMER_MILLIS, hasNavBar=True,
+    def __init__(self, parent, url="", useTimer=None,
+                 timerMillis=DEFAULT_TIMER_MILLIS, 
+                 browserSettings=None, hasNavBar=True,
                  *args, **kwargs):
+        if platform.system() == "Linux" and useTimer == None:
+            # On Linux OnIdle does not work correctly, must use timer.
+            useTimer = True
+        useTimer = bool(useTimer)
+
         # You also have to set the wx.WANTS_CHARS style for
         # all parent panels/controls, if it's deeply embedded.
         wx.Panel.__init__(self, parent, style=wx.WANTS_CHARS, *args, **kwargs)
 
-        self.chromeWindow = ChromeWindow(self, url=str(url), useTimer=useTimer)
+        self.chromeWindow = ChromeWindow(self, url=str(url), useTimer=useTimer,
+                browserSettings=browserSettings)
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.navigationBar = None
         if hasNavBar:
@@ -280,30 +304,30 @@ class DefaultClientHandler(object):
     def OnLoadEnd(self, browser, frame, httpStatusCode):
         self.parentCtrl.OnLoadEnd(browser, frame, httpStatusCode)
 
-    def OnLoadError(self, browser, frame, errorCode, failedUrl, errorText):
+    def OnLoadError(self, browser, frame, errorCode, errorText, failedUrl):
         # TODO
-        print("ERROR LOADING URL : %s" % failedUrl)
+        print("***** ChromeCtrl: ERROR LOADING URL : %s" % failedUrl)
 
 class CallbackClientHandler(object):
     def __init__(self, onLoadStart=None, onLoadEnd=None):
-        self.onLoadStart = onLoadStart
-        self.onLoadEnd = onLoadEnd
+        self._onLoadStart = onLoadStart
+        self._onLoadEnd = onLoadEnd
 
     def OnLoadStart(self, browser, frame):
-        if self.onLoadStart and frame.GetUrl() != "about:blank":
-            self.onLoadStart(browser, frame)
+        if self._onLoadStart and frame.GetUrl() != "about:blank":
+            self._onLoadStart(browser, frame)
 
     def OnLoadEnd(self, browser, frame, httpStatusCode):
-        if self.onLoadEnd and frame.GetUrl() != "about:blank":
-            self.onLoadEnd(browser, frame, httpStatusCode)
+        if self._onLoadEnd and frame.GetUrl() != "about:blank":
+            self._onLoadEnd(browser, frame, httpStatusCode)
 
-    def OnLoadError(self, browser, frame, errorCode, failedUrl, errorText):
+    def OnLoadError(self, browser, frame, errorCode, errorText, failedUrl):
         # TODO
-        print("ERROR LOADING URL : %s" % failedUrl)
+        print("***** ChromeCtrl: ERROR LOADING URL : %s, %s" % (failedUrl, frame.GetUrl()))
 
 #-------------------------------------------------------------------------------
 
-def Initialize(settings=None):
+def Initialize(settings=None, debug=False):
     """Initializes CEF, We should do it before initializing wx
        If no settings passed a default is used
     """
@@ -327,11 +351,14 @@ def Initialize(settings=None):
 
     # DEBUGGING options:
     # ------------------
-    # cefpython.g_debug = True
-    # cefpython.g_debugFile = "debug.log"
-    # settings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE
-    # settings["log_file"] = "debug.log" # Set to "" to disable.
-    # settings["release_dcheck_enabled"] = True
+    if debug:
+        cefpython.g_debug = True
+        cefpython.g_debugFile = "debug.log"
+        settings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE
+        settings["log_file"] = "debug.log" # Set to "" to disable.
+        settings["release_dcheck_enabled"] = True
+    else:
+        cefpython.g_debug = False
         
     cefpython.Initialize(settings)
 
