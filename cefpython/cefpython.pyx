@@ -107,7 +107,7 @@ include "browser.pyx"
 include "frame.pyx"
 
 include "settings.pyx"
-IF UNAME_SYSNAME == "Windows":
+IF UNAME_SYSNAME == "Windows" and CEF_VERSION == 1:
     # Off-screen rendering currently supported only on Windows
     include "paint_buffer_cef1.pyx"
 
