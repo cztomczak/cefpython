@@ -89,14 +89,9 @@ class ChromeWindow(wx.Window):
     Standalone CEF component. The class provides facilites for interacting
     with wx message loop
     """
-    def __init__(self, parent, url="", useTimer=None,
+    def __init__(self, parent, url="", useTimer=True,
                  timerMillis=DEFAULT_TIMER_MILLIS, browserSettings=None,
                  size=(-1, -1), *args, **kwargs):
-        if platform.system() == "Linux" and useTimer == None:
-            # On Linux OnIdle does not work correctly, must use timer.
-            useTimer = True
-        useTimer = bool(useTimer)
-
         wx.Window.__init__(self, parent, id=wx.ID_ANY, size=size,
                            *args, **kwargs)
         # On Linux absolute file urls need to start with "file://"
@@ -126,22 +121,29 @@ class ChromeWindow(wx.Window):
         if platform.system() == "Windows":
             self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
             self.Bind(wx.EVT_SIZE, self.OnSize)
+        
         if useTimer:
             self.timerID = 1
             self._CreateTimer(timerMillis)
         else:
             self.Bind(wx.EVT_IDLE, self.OnIdle)
+
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
         self._useTimer = useTimer
 
-    def __del__(self):
-        '''cleanup stuff'''
+    def OnClose(self, event):
         if self._useTimer:
             self.timer.Stop()
-        # Calling Unbind() is unnecessary and will cause problems on Windows 8:
-        # https://groups.google.com/d/topic/cefpython/iXE7e1ekArI/discussion
-        # | self.Unbind(wx.EVT_IDLE)
-        # CloseBrowser() parameter: forceClose=True
-        self.browser.CloseBrowser(True)
+        else:
+            try:
+                self.Unbind(wx.EVT_IDLE)
+            except:
+                # Calling Unbind() may cause problems on Windows 8:
+                # https://groups.google.com/d/topic/cefpython/iXE7e1ekArI/discussion
+                # (it was causing problems in __del__, this might not
+                #  be true anymore in OnClose, but still let's make sure)
+                pass
+        self.browser.ParentWindowWillClose()
 
     def _CreateTimer(self, millis):
         self.timer = wx.Timer(self, self.timerID)
@@ -191,15 +193,10 @@ class ChromeWindow(wx.Window):
 
 
 class ChromeCtrl(wx.Panel):
-    def __init__(self, parent, url="", useTimer=None,
+    def __init__(self, parent, url="", useTimer=True,
                  timerMillis=DEFAULT_TIMER_MILLIS, 
                  browserSettings=None, hasNavBar=True,
                  *args, **kwargs):
-        if platform.system() == "Linux" and useTimer == None:
-            # On Linux OnIdle does not work correctly, must use timer.
-            useTimer = True
-        useTimer = bool(useTimer)
-
         # You also have to set the wx.WANTS_CHARS style for
         # all parent panels/controls, if it's deeply embedded.
         wx.Panel.__init__(self, parent, style=wx.WANTS_CHARS, *args, **kwargs)

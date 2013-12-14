@@ -129,7 +129,7 @@ begin
 
                     MsgBox('No installation of Python %(PYTHON_VERSION)s '
                            + 'found in registry.' + #13 + 'Be sure to enter '
-                           + 'a pathname that places CEF Python 3 on the '
+                           + 'a pathname that places Python on the '
                            + 'PYTHONPATH',
                            mbConfirmation, MB_OK);
                     PythonDir := 'C:\Python';
@@ -154,14 +154,8 @@ begin
     Result := False;
     if FileExists(FileName) then begin
         Result := True;
-        ResultCode := MsgBox('A prior CEF Python 3 installation was found in '
-                + 'this directory.  It' + #13 + 'is recommended that it be '
-                + 'uninstalled first.' + #13#13 + 'Should I do it?',
-                mbConfirmation, MB_YESNO);
-        if ResultCode = IDYES then begin
-            Exec(FileName, '/SILENT', WizardDirValue(), SW_SHOWNORMAL,
-                 ewWaitUntilTerminated, ResultCode);
-        end;
+        Exec(FileName, '/SILENT', WizardDirValue(), SW_SHOWNORMAL,
+             ewWaitUntilTerminated, ResultCode);
     end;
 end;
 

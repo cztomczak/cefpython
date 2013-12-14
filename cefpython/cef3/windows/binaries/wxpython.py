@@ -27,10 +27,24 @@ import uuid
 import platform
 
 # Which method to use for message loop processing.
-#   EVT_IDLE - wx application has priority (default)
-#   EVT_TIMER - cef browser has priority
+#   EVT_IDLE - wx application has priority
+#   EVT_TIMER - cef browser has priority (default)
 # It seems that Flash content behaves better when using a timer.
-USE_EVT_IDLE = True
+# Not sure if using EVT_IDLE is correct, it doesn't work on Linux,
+# on Windows it works fine, but read the comment below.
+"""
+See comment by Robin Dunn:
+https://groups.google.com/d/msg/wxpython-users/hcNdMEx8u48/MD5Jgbm_k1kJ
+-------------------------------------------------------------------------------
+EVT_IDLE events are not sent continuously while the application is idle. 
+They are sent (normally once) when the app *becomes* idle, which 
+usually means when the event queue has just been emptied.  If you want 
+EVT_IDLE events to be sent continuously then you need to call 
+event.RequestMore() from the handler. Be careful however as that will 
+cause your application to consume 100% of the CPU if there is no limits.
+-------------------------------------------------------------------------------
+"""
+USE_EVT_IDLE = False # If False then Timer will be used.
 
 TEST_EMBEDDING_IN_PANEL = True
 
@@ -167,11 +181,14 @@ class MainFrame(wx.Frame):
         cefpython.WindowUtils.OnSize(self.GetHandleForBrowser(), 0, 0, 0)
 
     def OnClose(self, event):
-        self.browser.CloseBrowser()
+        print("MainFrame.OnClose()")
+        self.browser.ParentWindowWillClose()
         self.Destroy()
 
     def OnIdle(self, event):
         cefpython.MessageLoopWork()
+        # See the comment at the top of the file by Robin Dunn.
+        # | event.RequestMore()
 
 def PyPrint(message):
     print(message)
