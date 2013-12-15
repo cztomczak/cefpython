@@ -40,7 +40,7 @@ Name: "{group}\Uninstall Package"; Filename: "{uninstallexe}";
 
 [Run]
 
-Filename: "{app}\%(PACKAGE_NAME)s\examples"; Flags: postinstall shellexec;
+Filename: "{app}\%(PACKAGE_NAME)s\examples"; Flags: postinstall skipifsilent shellexec;
 
 [Files]
 
