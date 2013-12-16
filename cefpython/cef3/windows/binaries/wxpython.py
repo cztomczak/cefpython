@@ -288,29 +288,31 @@ class CookieVisitor:
         return True
 
 class ClientHandler:
+
     # -------------------------------------------------------------------------
     # DisplayHandler
     # -------------------------------------------------------------------------
+
     def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
             canGoForward):
         print("DisplayHandler::OnLoadingStateChange()")
-        print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
+        print("  isLoading = %s, canGoBack = %s, canGoForward = %s" \
                 % (isLoading, canGoBack, canGoForward))
 
     def OnAddressChange(self, browser, frame, url):
         print("DisplayHandler::OnAddressChange()")
-        print("url = %s" % url)
+        print("  url = %s" % url)
 
     def OnTitleChange(self, browser, title):
         print("DisplayHandler::OnTitleChange()")
-        print("title = %s" % title)
+        print("  title = %s" % title)
 
     def OnTooltip(self, browser, textOut):
         # OnTooltip not yet implemented (both Linux and Windows), 
         # will be fixed in next CEF release, see Issue 783:
         # https://code.google.com/p/chromiumembedded/issues/detail?id=783
         print("DisplayHandler::OnTooltip()")
-        print("text = %s" % textOut[0])
+        print("  text = %s" % textOut[0])
 
     statusMessageCount = 0
     def OnStatusMessage(self, browser, value):
@@ -322,17 +324,18 @@ class ClientHandler:
             # Do not spam too much.
             return
         print("DisplayHandler::OnStatusMessage()")
-        print("value = %s" % value)
+        print("  value = %s" % value)
 
     def OnConsoleMessage(self, browser, message, source, line):
         print("DisplayHandler::OnConsoleMessage()")
-        print("message = %s" % message)
-        print("source = %s" % source)
-        print("line = %s" % line)
+        print("  message = %s" % message)
+        print("  source = %s" % source)
+        print("  line = %s" % line)
 
     # -------------------------------------------------------------------------
     # KeyboardHandler
     # -------------------------------------------------------------------------
+
     def OnPreKeyEvent(self, browser, event, eventHandle, 
             isKeyboardShortcutOut):
         print("KeyboardHandler::OnPreKeyEvent()")
@@ -340,43 +343,44 @@ class ClientHandler:
     def OnKeyEvent(self, browser, event, eventHandle):
         print("KeyboardHandler::OnKeyEvent()")
         if platform.system() == "Linux":
-            print("native_key_code = %s" % event["native_key_code"])
+            print("  native_key_code = %s" % event["native_key_code"])
             # F5 = 71
             if event["native_key_code"] == 71:
-                print("F5 pressed! Reloading page..")
+                print("  F5 pressed! Reloading page..")
                 browser.ReloadIgnoreCache()
         elif platform.system() == "Windows":
-            print("windows_key_code = %s" % event["windows_key_code"])
+            print("  windows_key_code = %s" % event["windows_key_code"])
             # F5 = VK_F5
             if event["windows_key_code"] == cefpython.VK_F5:
-                print("F5 pressed! Reloading page..")
+                print("  F5 pressed! Reloading page..")
                 browser.ReloadIgnoreCache()
 
     # -------------------------------------------------------------------------
     # RequestHandler
     # -------------------------------------------------------------------------
+
     def OnBeforeResourceLoad(self, browser, frame, request):
         print("RequestHandler::OnBeforeResourceLoad()")
-        print("url = %s" % request.GetUrl()[:70])
+        print("  url = %s" % request.GetUrl()[:70])
         return False
 
     def OnResourceRedirect(self, browser, frame, oldUrl, newUrlOut):
         print("RequestHandler::OnResourceRedirect()")
-        print("old url = %s" % oldUrl[:70])
-        print("new url = %s" % newUrlOut[0][:70])
+        print("  old url = %s" % oldUrl[:70])
+        print("  new url = %s" % newUrlOut[0][:70])
 
     def GetAuthCredentials(self, browser, frame, isProxy, host, port, realm,
             scheme, callback):
         print("RequestHandler::GetAuthCredentials()")
-        print("host = %s" % host)
-        print("realm = %s" % realm)
+        print("  host = %s" % host)
+        print("  realm = %s" % realm)
         callback.Continue(username="test", password="test")
         return True
 
     def OnQuotaRequest(self, browser, originUrl, newSize, callback):
         print("RequestHandler::OnQuotaRequest()")
-        print("origin url = %s" % originUrl)
-        print("new size = %s" % newSize)
+        print("  origin url = %s" % originUrl)
+        print("  new size = %s" % newSize)
         callback.Continue(True)
         return True
 
@@ -398,35 +402,35 @@ class ClientHandler:
         # you have to make OS system call on your own. You probably also need
         # to use LoadHandler::OnLoadError() when implementing this on Linux.
         print("RequestHandler::OnProtocolExecution()")
-        print("url = %s" % url)
+        print("  url = %s" % url)
         if url.startswith("magnet:"):
-            print("Magnet link allowed!")
+            print("  Magnet link allowed!")
             allowExecutionOut[0] = True
 
     def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
         # Plugins are loaded on demand, only when website requires it,
         # the same plugin may be called multiple times.
         print("RequestHandler::OnBeforePluginLoad()")
-        print("url = %s" % url)
-        print("policy url = %s" % policyUrl)
-        print("info.GetName() = %s" % info.GetName())
-        print("info.GetPath() = %s" % info.GetPath())
-        print("info.GetVersion() = %s" % info.GetVersion())
-        print("info.GetDescription() = %s" % info.GetDescription())
+        print("  url = %s" % url)
+        print("  policy url = %s" % policyUrl)
+        print("  info.GetName() = %s" % info.GetName())
+        print("  info.GetPath() = %s" % info.GetPath())
+        print("  info.GetVersion() = %s" % info.GetVersion())
+        print("  info.GetDescription() = %s" % info.GetDescription())
         # False to allow, True to block plugin.
         return False
 
     def _OnCertificateError(self, certError, requestUrl, callback):
         print("RequestHandler::OnCertificateError()")
-        print("certError = %s" % certError)
-        print("requestUrl = %s" % requestUrl)
+        print("  certError = %s" % certError)
+        print("  requestUrl = %s" % requestUrl)
         if requestUrl.startswith(
                 "https://sage.math.washington.edu:8091/do-not-allow"):
-            print("Not allowed!")
+            print("  Not allowed!")
             return False
         if requestUrl.startswith(
                 "https://sage.math.washington.edu:8091/hudson/job/"):
-            print("Allowed!")
+            print("  Allowed!")
             callback.Continue(True)
             return True
         return False
@@ -434,22 +438,23 @@ class ClientHandler:
     # -------------------------------------------------------------------------
     # LoadHandler
     # -------------------------------------------------------------------------
+
     def OnLoadStart(self, browser, frame):
         print("LoadHandler::OnLoadStart()")
-        print("frame url = %s" % frame.GetUrl()[:70])
+        print("  frame url = %s" % frame.GetUrl()[:70])
 
     def OnLoadEnd(self, browser, frame, httpStatusCode):
         print("LoadHandler::OnLoadEnd()")
-        print("frame url = %s" % frame.GetUrl()[:70])
+        print("  frame url = %s" % frame.GetUrl()[:70])
         # For file:// urls the status code = 0
-        print("http status code = %s" % httpStatusCode)
+        print("  http status code = %s" % httpStatusCode)
 
     def OnLoadError(self, browser, frame, errorCode, errorTextList, failedUrl):
         print("LoadHandler::OnLoadError()")
-        print("frame url = %s" % frame.GetUrl()[:70])
-        print("error code = %s" % errorCode)
-        print("error text = %s" % errorTextList[0])
-        print("failed url = %s" % failedUrl)
+        print("  frame url = %s" % frame.GetUrl()[:70])
+        print("  error code = %s" % errorCode)
+        print("  error text = %s" % errorTextList[0])
+        print("  failed url = %s" % failedUrl)
         customErrorMessage = "My custom error message!"
         frame.LoadUrl("data:text/html,%s" % customErrorMessage)
 
@@ -463,11 +468,24 @@ class ClientHandler:
         statusName = "Unknown"
         if status in statuses:
             statusName = statuses[status]
-        print("status = %s" % statusName)
+        print("  status = %s" % statusName)
 
     def OnPluginCrashed(self, browser, pluginPath):
         print("LoadHandler::OnPluginCrashed()")
-        print("plugin path = %s" % pluginPath)
+        print("  plugin path = %s" % pluginPath)
+
+    # -------------------------------------------------------------------------
+    # LifespanHandler
+    # -------------------------------------------------------------------------
+
+    # Empty place-holders: popupFeatures, windowInfo, client, browserSettings.
+    def OnBeforePopup(self, browser, frame, targetUrl, targetFrameName,
+            popupFeatures, windowInfo, client, browserSettings, noJavascriptAccess):
+        print("LifespanHandler::OnBeforePopup()")
+        print("  targetUrl = %s" % targetUrl)
+        allowPopups = True
+        return not allowPopups
+
 
 class MyApp(wx.App):
     timer = None

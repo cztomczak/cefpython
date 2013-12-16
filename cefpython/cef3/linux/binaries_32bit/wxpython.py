@@ -264,9 +264,11 @@ class CookieVisitor:
         return True
 
 class ClientHandler:
+    
     # -------------------------------------------------------------------------
     # DisplayHandler
     # -------------------------------------------------------------------------
+
     def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
             canGoForward):
         print("DisplayHandler::OnLoadingStateChange()")
@@ -309,6 +311,7 @@ class ClientHandler:
     # -------------------------------------------------------------------------
     # KeyboardHandler
     # -------------------------------------------------------------------------
+
     def OnPreKeyEvent(self, browser, event, eventHandle, 
             isKeyboardShortcutOut):
         print("KeyboardHandler::OnPreKeyEvent()")
@@ -325,6 +328,7 @@ class ClientHandler:
     # -------------------------------------------------------------------------
     # RequestHandler
     # -------------------------------------------------------------------------
+
     def OnBeforeResourceLoad(self, browser, frame, request):
         print("RequestHandler::OnBeforeResourceLoad()")
         print("url = %s" % request.GetUrl()[:70])
@@ -404,6 +408,7 @@ class ClientHandler:
     # -------------------------------------------------------------------------
     # LoadHandler
     # -------------------------------------------------------------------------
+
     def OnLoadStart(self, browser, frame):
         print("LoadHandler::OnLoadStart()")
         print("frame url = %s" % frame.GetUrl()[:70])
@@ -438,6 +443,19 @@ class ClientHandler:
     def OnPluginCrashed(self, browser, pluginPath):
         print("LoadHandler::OnPluginCrashed()")
         print("plugin path = %s" % pluginPath)
+
+    # -------------------------------------------------------------------------
+    # LifespanHandler
+    # -------------------------------------------------------------------------
+
+    # Empty place-holders: popupFeatures, windowInfo, client, browserSettings.
+    def OnBeforePopup(self, browser, frame, targetUrl, targetFrameName,
+            popupFeatures, windowInfo, client, browserSettings, noJavascriptAccess):
+        print("LifespanHandler::OnBeforePopup()")
+        print("targetUrl = %s" % targetUrl)
+        allowPopups = True
+        return not allowPopups
+
 
 class MyApp(wx.App):
     timer = None

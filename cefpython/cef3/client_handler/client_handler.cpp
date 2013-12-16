@@ -118,7 +118,11 @@ bool ClientHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
                          CefRefPtr<CefClient>& client,
                          CefBrowserSettings& settings,
                          bool* no_javascript_access) {
-    return false;
+    REQUIRE_IO_THREAD();
+    // Note: passing popupFeatures is not yet supported.
+    return LifespanHandler_OnBeforePopup(browser, frame, target_url,
+            target_frame_name, NULL, windowInfo, client, settings,
+            no_javascript_access);
 }
 
 ///
