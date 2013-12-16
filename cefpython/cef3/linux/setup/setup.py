@@ -35,6 +35,9 @@ ext_modules = [Extension(
     "cefpython_py%s" % PYTHON_VERSION,
     ["cefpython.pyx"],
 
+    # Ignore the warning in the console:
+    # > C:\Python27\lib\distutils\extension.py:133: UserWarning: 
+    # > Unknown Extension options: 'cython_directives' warnings.warn(msg)
     cython_directives={
         # Any conversion to unicode must be explicit using .decode().
         "c_string_type": "bytes",

@@ -213,6 +213,8 @@ cdef class PyBrowser:
             self.allowedClientCallbacks += ["OnLoadStart", "OnLoadEnd",
                     "OnLoadError", "OnRendererProcessTerminated",
                     "OnPluginCrashed"]
+            # LifespanHandler
+            self.allowedClientCallbacks += ["OnBeforePopup"]
             # RenderHandler
             self.allowedClientCallbacks += ["GetRootScreenRect",
                     "GetViewRect", "GetScreenPoint", "GetScreenInfo",
