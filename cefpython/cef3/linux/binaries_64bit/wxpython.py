@@ -330,6 +330,11 @@ class ClientHandler:
     # RequestHandler
     # -------------------------------------------------------------------------
 
+    def OnBeforeBrowse(self, browser, frame, request, isRedirect):
+        print("RequestHandler::OnBeforeBrowse()")
+        print("url = %s" % request.GetUrl()[:70])
+        return False
+
     def OnBeforeResourceLoad(self, browser, frame, request):
         print("RequestHandler::OnBeforeResourceLoad()")
         print("url = %s" % request.GetUrl()[:70])

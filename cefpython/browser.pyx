@@ -208,7 +208,8 @@ cdef class PyBrowser:
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
                     "OnQuotaRequest", "GetCookieManager",
-                    "OnProtocolExecution", "GetResourceHandler"]
+                    "OnProtocolExecution", "GetResourceHandler",
+                    "OnBeforeBrowse"]
             # LoadHandler
             self.allowedClientCallbacks += ["OnLoadStart", "OnLoadEnd",
                     "OnLoadError", "OnRendererProcessTerminated",

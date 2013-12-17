@@ -368,9 +368,8 @@ bool ClientHandler::OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
                           CefRefPtr<CefFrame> frame,
                           CefRefPtr<CefRequest> request,
                           bool is_redirect) {
-    // Not yet implemented.
     REQUIRE_UI_THREAD();
-    return false;
+    return RequestHandler_OnBeforeBrowse(browser, frame, request, is_redirect);
 }
 
 ///
