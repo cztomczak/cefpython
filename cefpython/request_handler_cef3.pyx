@@ -84,6 +84,34 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
+cdef public cpp_bool RequestHandler_OnBeforeBrowse(
+        CefRefPtr[CefBrowser] cefBrowser,
+        CefRefPtr[CefFrame] cefFrame,
+        CefRefPtr[CefRequest] cefRequest,
+        cpp_bool cefIsRedirect
+        ) except * with gil:
+    cdef PyBrowser pyBrowser
+    cdef PyFrame pyFrame
+    cdef PyRequest pyRequest
+    cdef py_bool pyIsRedirect
+    cdef object clientCallback
+    cdef py_bool returnValue
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        pyFrame = GetPyFrame(cefFrame)
+        pyRequest = CreatePyRequest(cefRequest)
+        pyIsRedirect = bool(cefIsRedirect)
+        clientCallback = pyBrowser.GetClientCallback("OnBeforeBrowse")
+        if clientCallback:
+            returnValue = clientCallback(pyBrowser, pyFrame, pyRequest,
+                                         pyIsRedirect)
+            return bool(returnValue)
+        else:
+            return False
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
 cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,

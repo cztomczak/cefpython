@@ -28,6 +28,7 @@ __PYX_EXTERN_C DL_IMPORT(bool) DisplayHandler_OnConsoleMessage(CefRefPtr<CefBrow
 __PYX_EXTERN_C DL_IMPORT(bool) KeyboardHandler_OnPreKeyEvent(CefRefPtr<CefBrowser>, CefKeyEvent const &, CefEventHandle, bool *);
 __PYX_EXTERN_C DL_IMPORT(bool) KeyboardHandler_OnKeyEvent(CefRefPtr<CefBrowser>, CefKeyEvent const &, CefEventHandle);
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforeResourceLoad(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefRequest>);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforeBrowse(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefRequest>, bool);
 __PYX_EXTERN_C DL_IMPORT(CefRefPtr<CefResourceHandler>) RequestHandler_GetResourceHandler(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefRequest>);
 __PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnResourceRedirect(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString const &, CefString &);
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_GetAuthCredentials(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, bool, CefString const &, int, CefString const &, CefString const &, CefRefPtr<CefAuthCallback>);
