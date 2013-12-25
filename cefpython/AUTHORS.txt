@@ -11,3 +11,5 @@ Contributors (in order of first commit):
     Greg Kacy <grkacy@@gmail.com>
     Thomas Dähling <thomas@@ccpgames.com>
     Dominique Burnand <dominique.burnand@@rentouch.ch>
+    Greg Farrell <gregfarrell.org@@gmail.com>
+    Finn Hughes <finn.hughes1@@gmail.com>
