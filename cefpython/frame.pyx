@@ -5,7 +5,8 @@
 cdef dict g_pyFrames = {}
 
 IF CEF_VERSION == 3:
-    # Unused function warning in CEF 1.
+    # The IF condition above is required otherwise you will see
+    # "Unused function" warning in CEF 1.
     cdef PyFrame GetPyFrameById(object frameId):
         if frameId in g_pyFrames:
             return g_pyFrames[frameId]
@@ -13,26 +14,21 @@ IF CEF_VERSION == 3:
 
 cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     global g_pyFrames
-
     if <void*>cefFrame == NULL or not cefFrame.get():
         Debug("GetPyFrame(): returning None")
         return
-
     cdef PyFrame pyFrame
     # long long
     cdef object frameId = cefFrame.get().GetIdentifier()
     cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
     assert (frameId and browserId), "frameId or browserId empty"
-
     if frameId in g_pyFrames:
         return g_pyFrames[frameId]
-
     for id, pyFrame in g_pyFrames.items():
         if not pyFrame.cefFrame.get():
             Debug("GetPyFrame(): removing an empty CefFrame reference, " \
                     "frameId = %s" % id)
             del g_pyFrames[id]
-
     # Debug("GetPyFrame(): creating new PyFrame, frameId=%s" % frameId)
     pyFrame = PyFrame(browserId, frameId)
     pyFrame.cefFrame = cefFrame
@@ -162,37 +158,35 @@ cdef class PyFrame:
         return self.browserId
 
     cpdef str GetName(self):
-
         return CefToPyString(self.GetCefFrame().get().GetName())
 
     IF CEF_VERSION == 1:
-
         cpdef object GetProperty(self, py_string name):
             assert IsThread(TID_UI), (
                     "Frame.GetProperty() may only be called on the UI thread")
-
             cdef CefRefPtr[CefV8Context] v8Context = self.GetCefFrame().get().GetV8Context()
             cdef CefRefPtr[CefV8Value] window = v8Context.get().GetGlobal()
-
             cdef CefString cefPropertyName
             PyToCefString(name, cefPropertyName)
-
             cdef CefRefPtr[CefV8Value] v8Value = window.get().GetValue(cefPropertyName)
             return V8ToPyValue(v8Value, v8Context)
 
-    IF CEF_VERSION == 1:
-
         cpdef str GetSource(self):
-            IF CEF_VERSION == 1:
-                assert IsThread(TID_UI), (
-                        "Frame.GetSource() may only be called on the UI thread")
+            assert IsThread(TID_UI), (
+                    "Frame.GetSource() may only be called on the UI thread")
             return CefToPyString(self.GetCefFrame().get().GetSource())
 
         cpdef str GetText(self):
-            IF CEF_VERSION == 1:
-                assert IsThread(TID_UI), (
-                        "Frame.GetText() may only be called on the UI thread")
+            assert IsThread(TID_UI), (
+                    "Frame.GetText() may only be called on the UI thread")
             return CefToPyString(self.GetCefFrame().get().GetText())
+
+    IF CEF_VERSION == 3:
+        cpdef py_void GetSource(self, object userStringVisitor):
+            self.GetCefFrame().get().GetSource(CreateStringVisitor(userStringVisitor))
+
+        cpdef py_void GetText(self, object userStringVisitor):
+            self.GetCefFrame().get().GetText(CreateStringVisitor(userStringVisitor))
 
     cpdef str GetUrl(self):
         return CefToPyString(self.GetCefFrame().get().GetURL())
@@ -206,7 +200,7 @@ cdef class PyFrame:
     cpdef py_bool IsMain(self):
         return self.GetCefFrame().get().IsMain()
 
-    cpdef  py_void LoadRequest(self):
+    cpdef py_void LoadRequest(self):
         pass
 
     cpdef py_void LoadString(self, py_string value, py_string url):
@@ -236,33 +230,26 @@ cdef class PyFrame:
         self.GetCefFrame().get().SelectAll()
 
     IF CEF_VERSION == 1:
-
         cpdef py_void SetProperty(self, py_string name, object value):
             assert IsThread(TID_UI), (
                     "Frame.SetProperty() may only be called on the UI thread")
-
             if not JavascriptBindings.IsValueAllowed(value):
                 valueType = JavascriptBindings.__IsValueAllowed(value)
                 raise Exception("Frame.SetProperty() failed: name=%s, "
                         "not allowed type: %s (this may be a type of a nested value)"
                         % (name, valueType))
-
             cdef CefRefPtr[CefV8Context] v8Context = self.GetCefFrame().get().GetV8Context()
             cdef CefRefPtr[CefV8Value] window = v8Context.get().GetGlobal()
-
             cdef CefString cefPropertyName
             PyToCefString(name, cefPropertyName)
-
             cdef cpp_bool sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
             if not sameContext:
                 Debug("Frame.SetProperty(): inside a different context, calling v8Context.Enter()")
                 assert v8Context.get().Enter(), "v8Context.Enter() failed"
-
             window.get().SetValue(
                     cefPropertyName,
                     PyToV8Value(value, v8Context),
                     V8_PROPERTY_ATTRIBUTE_NONE)
-
             if not sameContext:
                 assert v8Context.get().Exit(), "v8Context.Exit() failed"
 

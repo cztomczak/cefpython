@@ -161,6 +161,7 @@ IF CEF_VERSION == 3:
     include "request_cef3.pyx"
     include "request_handler_cef3.pyx"
     include "cookie_cef3.pyx"
+    include "string_visitor_cef3.pyx"
     include "load_handler_cef3.pyx"
     include "network_error_cef3.pyx"
     include "browser_process_handler_cef3.pyx"

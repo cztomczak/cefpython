@@ -100,6 +100,10 @@
                 RelativePath=".\web_request_client.h"
                 >
             </File>
+            <File
+                RelativePath=".\string_visitor.h"
+                >
+            </File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -126,6 +130,10 @@
             </File>
             <File
                 RelativePath=".\web_request_client.cpp"
+                >
+            </File>
+            <File
+                RelativePath=".\string_visitor.cpp"
                 >
             </File>
 		</Filter>
