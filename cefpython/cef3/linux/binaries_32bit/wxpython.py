@@ -161,6 +161,7 @@ def PyPrint(message):
 
 class JavascriptExternal:
     mainBrowser = None
+    stringVisitor = None
     
     def __init__(self, mainBrowser):
         self.mainBrowser = mainBrowser
@@ -205,6 +206,18 @@ class JavascriptExternal:
         print(message)
         self.mainBrowser.GetMainFrame().ExecuteJavascript(
                 "window.alert(\"%s\")" % message)
+
+    def GetSource(self):
+        # Must keep a strong reference to the StringVisitor object
+        # during the visit.
+        self.stringVisitor = StringVisitor()
+        self.mainBrowser.GetMainFrame().GetSource(self.stringVisitor)
+
+    def GetText(self):
+        # Must keep a strong reference to the StringVisitor object
+        # during the visit.
+        self.stringVisitor = StringVisitor()
+        self.mainBrowser.GetMainFrame().GetText(self.stringVisitor)
 
     # -------------------------------------------------------------------------
     # Cookies
@@ -253,6 +266,13 @@ class JavascriptExternal:
                 "http://www.html-kit.com/tools/cookietester/",
                 "Created_Via_Python")
         print("\nCookie deleted! Visit html-kit cookietester to see the result")
+
+class StringVisitor:
+    def Visit(self, string):
+        print("\nStringVisitor.Visit(): string:")
+        print("--------------------------------")
+        print(string)
+        print("--------------------------------")
 
 class CookieVisitor:
     def Visit(self, cookie, count, total, deleteCookie):

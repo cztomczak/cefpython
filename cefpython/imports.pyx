@@ -151,8 +151,10 @@ IF CEF_VERSION == 3:
     from cef_request_handler_cef3 cimport *
     from cef_request_cef3 cimport *
     from cef_cookie_cef3 cimport *
+    from cef_string_visitor cimport *
     cimport cef_cookie_manager_namespace
     from cookie_visitor cimport *
+    from string_visitor cimport *
     from cef_callback_cef3 cimport *
     from cef_response_cef3 cimport *
     from cef_resource_handler_cef3 cimport *

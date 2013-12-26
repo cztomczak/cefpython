@@ -11,6 +11,7 @@ from libcpp cimport bool as cpp_bool
 from cef_ptr cimport CefRefPtr
 from cef_v8 cimport CefV8Context
 from cef_browser cimport CefBrowser
+from cef_string_visitor cimport CefStringVisitor
 
 cdef extern from "include/cef_frame.h":
 
@@ -59,8 +60,8 @@ cdef extern from "include/cef_frame.h":
             void SelectAll()
             void ViewSource()
             # void Print()
-            # CefString GetSource()
-            # CefString GetText()
+            void GetSource(CefRefPtr[CefStringVisitor] visitor)
+            void GetText(CefRefPtr[CefStringVisitor] visitor)
             void LoadString(CefString& string_val, CefString& url)
             cpp_bool IsFocused()
             CefString GetName()
