@@ -1,6 +1,34 @@
 from distutils.core import setup
+from distutils.command.install import install as _install
+import sys
+import os
+import subprocess
+
+def my_post_install():
+    """ Chmod +x the subprocess and cefclient executables. """
+    # We do not want to import from the local "cefpython3" directory.
+    # Import the cefpython3 module from dist-packages/ directory.
+    del sys.path[0]
+    sys.path.append('')
+    import cefpython3
+    package_dir = os.path.dirname(cefpython3.__file__)
+    # Make sure this is not a local package imported.
+    assert not package_dir.startswith(
+            os.path.dirname(os.path.abspath(__file__)))
+    subprocess_exe = os.path.join(package_dir, "subprocess")
+    cefclient_exe = os.path.join(package_dir, "cefclient")
+    print("chmod +x " + subprocess_exe)
+    subprocess.call("chmod +x "+subprocess_exe, shell=True)
+    print("chmod +x " + cefclient_exe)
+    subprocess.call("chmod +x "+cefclient_exe, shell=True)
+
+class install(_install):
+    def run(self):
+        _install.run(self)
+        my_post_install()
 
 setup(
+    cmdclass={'install': install},
     name='cefpython3', # No spaces here, so that it works with deb packages.
     version='%(APP_VERSION)s',
     description='Python bindings for the Chromium Embedded Framework',
@@ -29,30 +57,3 @@ setup(
         '*.pak',
     ]}
 )
-
-# ------------------------------------------------------------------------------
-# Chmod +x the subprocess and cefclient executables.
-# ------------------------------------------------------------------------------
-
-import sys
-import os
-import subprocess
-
-# Import the cefpython3 module from dist-packages/ directory.
-# We do not want to import from the local "cefpython3" directory.
-del sys.path[0]
-sys.path.append('')
-import cefpython3
-
-package_dir = os.path.dirname(cefpython3.__file__)
-# Make sure this is not a local package imported.
-assert not package_dir.startswith(os.path.dirname(os.path.abspath(__file__)))
-
-subprocess_exe = os.path.join(package_dir, "subprocess")
-cefclient_exe = os.path.join(package_dir, "cefclient")
-
-print("chmod +x " + subprocess_exe)
-subprocess.call("chmod +x "+subprocess_exe, shell=True)
-
-print("chmod +x " + cefclient_exe)
-subprocess.call("chmod +x "+cefclient_exe, shell=True)
