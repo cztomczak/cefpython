@@ -1,0 +1,3 @@
+[DEFAULT]
+Depends: libnss3-1d, libnspr4-0d
+XS-Python-Version: 2.7

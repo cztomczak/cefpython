@@ -53,7 +53,6 @@ cpdef str GetNavigateUrl(py_string url):
     return str(url)
 
 IF CEF_VERSION == 1:
-
     cpdef py_bool IsKeyModifier(int key, int modifiers):
         if key == KEY_NONE:
             # Same as: return (KEY_CTRL & modifiers) != KEY_CTRL
@@ -63,7 +62,12 @@ IF CEF_VERSION == 1:
         return (key & modifiers) == key
 
 cpdef str GetModuleDirectory():
-    import re, os
+    import re, os, platform
+    if platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):
+        # cefpython3 package __init__.py sets CEFPYTHON3_PATH.
+        # When cefpython3 is installed as debian package, this
+        # env variable is the only way of getting valid path.
+        return os.getenv("CEFPYTHON3_PATH")
     if hasattr(sys, "frozen"):
         path = os.path.dirname(sys.executable)
     elif "__file__" in globals():

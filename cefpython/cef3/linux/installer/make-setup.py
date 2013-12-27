@@ -15,7 +15,6 @@ import glob
 
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
-
 PACKAGE_NAME = "cefpython3"
 
 README_TEMPLATE = os.getcwd()+r"/README.txt.template"
