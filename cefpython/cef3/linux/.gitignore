@@ -4,3 +4,4 @@ cefclient
 subprocess
 *.a
 *.o
+files/

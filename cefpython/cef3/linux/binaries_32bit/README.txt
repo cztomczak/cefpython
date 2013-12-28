@@ -1,7 +1,7 @@
 Chromium Embedded Framework (CEF) Standard Binary Distribution for Linux
 -------------------------------------------------------------------------------
 
-Date:             October 29, 2013
+Date:             December 28, 2013
 
 CEF Version:      3.1547.1491
 CEF URL:          http://chromiumembedded.googlecode.com/svn/branches/1547/cef3@1491
