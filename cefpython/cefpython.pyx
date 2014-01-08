@@ -53,16 +53,16 @@
 #
 # - Declaring C++ classes in Cython. Storing python callbacks
 #   in a C++ class using Py_INCREF, Py_DECREF. Calling from
-#   C++ using PyObject_CallMethod. 
+#   C++ using PyObject_CallMethod.
 #   | http://stackoverflow.com/a/17070382/623622
-#   Disadvantage: when calling python callback from the C++ class 
+#   Disadvantage: when calling python callback from the C++ class
 #   declared in Cython there is no easy way to propagate the python
 #   exceptions when they occur during execution of the callback.
 #
 # - | cdef char* other_c_string = py_string
-#   This is a very fast operation after which other_c_string points 
-#   to the byte string buffer of the Python string itself. It is 
-#   tied to the life time of the Python string. When the Python 
+#   This is a very fast operation after which other_c_string points
+#   to the byte string buffer of the Python string itself. It is
+#   tied to the life time of the Python string. When the Python
 #   string is garbage collected, the pointer becomes invalid.
 #
 # - Do not define cpdef functions returning "cpp_bool":
@@ -172,21 +172,19 @@ IF CEF_VERSION == 3:
     include "response_cef3.pyx"
     include "web_request_cef3.pyx"
 
+# Linux issue:
+# ------------
 # Try not to run any of the CEF code until Initialize() is called.
-# Do not allocate any memory on the heap until Initialize() is called,
-# that's why we're not instantiating the ClientHandler class here in
-# the declaration. CEF hooks up its own tcmalloc globally when the 
-# library is loaded, but the memory allocation implementation may still 
-# be changed by another library (wx/gtk) before Initialize() is called.
-cdef CefRefPtr[ClientHandler] g_clientHandler
+# Do not allocate any memory on the heap until Initialize() is called.
+# CEF hooks up its own tcmalloc globally when the library is loaded,
+# but the memory allocation implementation may still be changed by
+# another library (wx/gtk) before Initialize() is called.
+# See Issue 73:
+# https://code.google.com/p/cefpython/issues/detail?id=73
 
 def Initialize(applicationSettings=None):
     Debug("-" * 60)
     Debug("Initialize() called")
-
-    global g_clientHandler
-    if not g_clientHandler.get():
-        g_clientHandler = <CefRefPtr[ClientHandler]?>new ClientHandler()
 
     cdef CefRefPtr[CefApp] cefApp
 
@@ -198,7 +196,9 @@ def Initialize(applicationSettings=None):
         ELIF UNAME_SYSNAME == "Linux":
             # TODO: use the CefMainArgs(int argc, char** argv) constructor.
             cdef CefMainArgs cefMainArgs
-        cdef int exitCode = CefExecuteProcess(cefMainArgs, cefApp)
+        cdef int exitCode = 1
+        with nogil:
+            exitCode = CefExecuteProcess(cefMainArgs, cefApp)
         Debug("CefExecuteProcess(): exitCode = %s" % exitCode)
         if exitCode >= 0:
             sys.exit(exitCode)
@@ -224,11 +224,14 @@ def Initialize(applicationSettings=None):
     Debug("CefInitialize()")
     cdef cpp_bool ret
     IF CEF_VERSION == 1:
-        ret = CefInitialize(cefApplicationSettings, cefApp)
+        with nogil:
+            ret = CefInitialize(cefApplicationSettings, cefApp)
     ELIF CEF_VERSION == 3:
-        ret = CefInitialize(cefMainArgs, cefApplicationSettings, cefApp)
+        with nogil:
+            ret = CefInitialize(cefMainArgs, cefApplicationSettings, cefApp)
 
-    if not ret: Debug("CefInitialize() failed")
+    if not ret:
+        Debug("CefInitialize() failed")
     return ret
 
 def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
@@ -251,10 +254,13 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
     PyToCefString(navigateUrl, cefNavigateUrl)
 
     Debug("CefBrowser::CreateBrowserSync()")
-    global g_clientHandler
-    cdef CefRefPtr[CefBrowser] cefBrowser = cef_browser_static.CreateBrowserSync(
-            cefWindowInfo, <CefRefPtr[CefClient]?>g_clientHandler, cefNavigateUrl,
-            cefBrowserSettings)
+    cdef CefRefPtr[ClientHandler] clientHandler =\
+            <CefRefPtr[ClientHandler]?>new ClientHandler()
+    cdef CefRefPtr[CefBrowser] cefBrowser
+    with nogil:
+        cefBrowser = cef_browser_static.CreateBrowserSync(
+                cefWindowInfo, <CefRefPtr[CefClient]?>clientHandler,
+                cefNavigateUrl, cefBrowserSettings)
 
     if <void*>cefBrowser == NULL:
         Debug("CefBrowser::CreateBrowserSync() failed")
@@ -269,7 +275,7 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
         # Test whether process message sent before renderer thread is created
         # will be delivered - OK.
         # Debug("Sending 'CreateBrowserSync() done' message to the Renderer")
-        # pyBrowser.SendProcessMessage(cef_types.PID_RENDERER, 
+        # pyBrowser.SendProcessMessage(cef_types.PID_RENDERER,
         #        "CreateBrowserSync() done")
 
     return pyBrowser
@@ -299,14 +305,18 @@ def SingleMessageLoop():
 
 def QuitMessageLoop():
     Debug("QuitMessageLoop()")
-    CefQuitMessageLoop()
+    with nogil:
+        CefQuitMessageLoop()
 
 def Shutdown():
     Debug("Shutdown()")
-    CefShutdown()
+    with nogil:
+        CefShutdown()
 
 def SetOsModalLoop(py_bool modalLoop):
-    CefSetOSModalLoop(bool(modalLoop))
+    cdef cpp_bool cefModalLoop = bool(modalLoop)
+    with nogil:
+        CefSetOSModalLoop(cefModalLoop)
 
 cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     global g_globalClientCallbacks

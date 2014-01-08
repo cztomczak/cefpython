@@ -24,18 +24,18 @@ cdef extern from "include/cef_app.h":
         pass
 
     IF CEF_VERSION == 3:
-        cdef int CefExecuteProcess(CefMainArgs& args, CefRefPtr[CefApp] application)
+        cdef int CefExecuteProcess(CefMainArgs& args, CefRefPtr[CefApp] application) nogil
 
     IF CEF_VERSION == 1:
-        cdef cpp_bool CefInitialize(CefSettings&, CefRefPtr[CefApp])
+        cdef cpp_bool CefInitialize(CefSettings&, CefRefPtr[CefApp]) nogil
     ELIF CEF_VERSION == 3:
-        cdef cpp_bool CefInitialize(CefMainArgs&, CefSettings&, CefRefPtr[CefApp])
+        cdef cpp_bool CefInitialize(CefMainArgs&, CefSettings&, CefRefPtr[CefApp]) nogil
 
     cdef void CefRunMessageLoop() nogil
     cdef void CefDoMessageLoopWork() nogil
-    cdef void CefQuitMessageLoop()
-    cdef void CefShutdown()
+    cdef void CefQuitMessageLoop() nogil
+    cdef void CefShutdown() nogil
 
     IF CEF_VERSION == 3:
-        cdef void CefSetOSModalLoop(cpp_bool osModalLoop)
+        cdef void CefSetOSModalLoop(cpp_bool osModalLoop) nogil
 

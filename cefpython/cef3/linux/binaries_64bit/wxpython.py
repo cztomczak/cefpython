@@ -1,9 +1,9 @@
 # An example of embedding CEF browser in wxPython on Linux.
 
-# Important: 
-#   On Linux importing the cefpython module must be 
-#   the very first in your application. This is because CEF makes 
-#   a global tcmalloc hook for memory allocation/deallocation. 
+# Important:
+#   On Linux importing the cefpython module must be
+#   the very first in your application. This is because CEF makes
+#   a global tcmalloc hook for memory allocation/deallocation.
 #   See Issue 73 that is to provide CEF builds with tcmalloc disabled:
 #   https://code.google.com/p/cefpython/issues/detail?id=73
 
@@ -162,7 +162,7 @@ def PyPrint(message):
 class JavascriptExternal:
     mainBrowser = None
     stringVisitor = None
-    
+
     def __init__(self, mainBrowser):
         self.mainBrowser = mainBrowser
 
@@ -289,7 +289,7 @@ class ClientHandler:
     # DisplayHandler
     # -------------------------------------------------------------------------
 
-    def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
+    def OnLoadingStateChange(self, browser, isLoading, canGoBack,
             canGoForward):
         print("DisplayHandler::OnLoadingStateChange()")
         print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
@@ -304,7 +304,7 @@ class ClientHandler:
         print("title = %s" % title)
 
     def OnTooltip(self, browser, textOut):
-        # OnTooltip not yet implemented (both Linux and Windows), 
+        # OnTooltip not yet implemented (both Linux and Windows),
         # will be fixed in next CEF release, see Issue 783:
         # https://code.google.com/p/chromiumembedded/issues/detail?id=783
         print("DisplayHandler::OnTooltip()")
@@ -332,7 +332,7 @@ class ClientHandler:
     # KeyboardHandler
     # -------------------------------------------------------------------------
 
-    def OnPreKeyEvent(self, browser, event, eventHandle, 
+    def OnPreKeyEvent(self, browser, event, eventHandle,
             isKeyboardShortcutOut):
         print("KeyboardHandler::OnPreKeyEvent()")
 
@@ -433,7 +433,7 @@ class ClientHandler:
     # -------------------------------------------------------------------------
     # LoadHandler
     # -------------------------------------------------------------------------
-    
+
     def OnLoadStart(self, browser, frame):
         print("LoadHandler::OnLoadStart()")
         print("frame url = %s" % frame.GetUrl()[:70])
@@ -516,8 +516,11 @@ class MyApp(wx.App):
             self.timer.Stop()
 
 if __name__ == '__main__':
+    # Intercept python exceptions. Exit app immediately when exception
+    # happens on any of the threads.
     sys.excepthook = ExceptHook
-    cefpython.g_debug = False
+    # Set to False to disable cefpython debug messages in console.
+    cefpython.g_debug = True
     cefpython.g_debugFile = GetApplicationPath("debug.log")
     settings = {
         "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
