@@ -24,13 +24,13 @@ IF CEF_VERSION == 1:
             CefWindowInfo&,
             CefRefPtr[CefClient],
             CefString&,
-            CefBrowserSettings&)
+            CefBrowserSettings&) nogil
 
         cdef CefRefPtr[CefBrowser] CreateBrowserSync(
             CefWindowInfo&,
             CefRefPtr[CefClient],
             CefString&,
-            CefBrowserSettings&)
+            CefBrowserSettings&) nogil
 
 ELIF CEF_VERSION == 3:
 
@@ -41,10 +41,10 @@ ELIF CEF_VERSION == 3:
             CefWindowInfo&,
             CefRefPtr[CefClient],
             CefString&,
-            CefBrowserSettings&)
+            CefBrowserSettings&) nogil
 
         cdef CefRefPtr[CefBrowser] CreateBrowserSync(
             CefWindowInfo&,
             CefRefPtr[CefClient],
             CefString&,
-            CefBrowserSettings&)
+            CefBrowserSettings&) nogil

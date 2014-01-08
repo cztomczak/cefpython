@@ -36,11 +36,11 @@ import platform
 See comment by Robin Dunn:
 https://groups.google.com/d/msg/wxpython-users/hcNdMEx8u48/MD5Jgbm_k1kJ
 -------------------------------------------------------------------------------
-EVT_IDLE events are not sent continuously while the application is idle. 
-They are sent (normally once) when the app *becomes* idle, which 
-usually means when the event queue has just been emptied.  If you want 
-EVT_IDLE events to be sent continuously then you need to call 
-event.RequestMore() from the handler. Be careful however as that will 
+EVT_IDLE events are not sent continuously while the application is idle.
+They are sent (normally once) when the app *becomes* idle, which
+usually means when the event queue has just been emptied.  If you want
+EVT_IDLE events to be sent continuously then you need to call
+event.RequestMore() from the handler. Be careful however as that will
 cause your application to consume 100% of the CPU if there is no limits.
 -------------------------------------------------------------------------------
 """
@@ -196,7 +196,7 @@ def PyPrint(message):
 class JavascriptExternal:
     mainBrowser = None
     stringVisitor = None
-    
+
     def __init__(self, mainBrowser):
         self.mainBrowser = mainBrowser
 
@@ -313,7 +313,7 @@ class ClientHandler:
     # DisplayHandler
     # -------------------------------------------------------------------------
 
-    def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
+    def OnLoadingStateChange(self, browser, isLoading, canGoBack,
             canGoForward):
         print("DisplayHandler::OnLoadingStateChange()")
         print("  isLoading = %s, canGoBack = %s, canGoForward = %s" \
@@ -328,7 +328,7 @@ class ClientHandler:
         print("  title = %s" % title)
 
     def OnTooltip(self, browser, textOut):
-        # OnTooltip not yet implemented (both Linux and Windows), 
+        # OnTooltip not yet implemented (both Linux and Windows),
         # will be fixed in next CEF release, see Issue 783:
         # https://code.google.com/p/chromiumembedded/issues/detail?id=783
         print("DisplayHandler::OnTooltip()")
@@ -356,7 +356,7 @@ class ClientHandler:
     # KeyboardHandler
     # -------------------------------------------------------------------------
 
-    def OnPreKeyEvent(self, browser, event, eventHandle, 
+    def OnPreKeyEvent(self, browser, event, eventHandle,
             isKeyboardShortcutOut):
         print("KeyboardHandler::OnPreKeyEvent()")
 
@@ -544,8 +544,11 @@ class MyApp(wx.App):
             self.timer.Stop()
 
 if __name__ == '__main__':
+    # Intercept python exceptions. Exit app immediately when exception
+    # happens on any of the threads.
     sys.excepthook = ExceptHook
-    cefpython.g_debug = False
+    # Set to False to disable cefpython debug messages in console.
+    cefpython.g_debug = True
     cefpython.g_debugFile = GetApplicationPath("debug.log")
     settings = {}
     settings["log_file"] = GetApplicationPath("debug.log") # "" to disable
