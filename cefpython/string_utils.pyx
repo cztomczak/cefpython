@@ -2,7 +2,12 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# @TODO: make this configurable through ApplicationSettings.
+# TODO: cleanup the code in string_utils.pyx and string_utils_win.pyx,
+#       see this topic for a review of the code in this file, see the
+#       posts by Stefan Behnel:
+#       https://groups.google.com/d/topic/cython-users/VICzhVn-zPw/discussion
+
+# TODO: make this configurable through ApplicationSettings.
 UNICODE_ENCODE_ERRORS = "replace"
 BYTES_DECODE_ERRORS = "replace"
 

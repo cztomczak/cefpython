@@ -31,6 +31,12 @@ import weakref
 
 # We should allow multiple string types: str, unicode, bytes.
 # PyToCefString() can handle them all.
+# Important:
+#   If you set it to basestring, Cython will accept exactly(!)
+#   str/unicode in Py2 and str in Py3. This won't work in Py3
+#   as we might want to pass bytes as well. Also it will
+#   reject string subtypes, so using it in publi API functions
+#   would be a bad idea.
 ctypedef object py_string
 
 # You can't use "void" along with cpdef function returning None, it is planned to be

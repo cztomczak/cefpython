@@ -17,6 +17,11 @@ cpdef py_bool IsString(object maybeString):
 cpdef py_bool IsThread(int threadID):
     return bool(CefCurrentlyOn(<CefThreadId>threadID))
 
+# TODO: this function needs to accept unicode strings, use the
+#       logic from wxpython.py/ExceptHook to handle printing
+#       unicode strings and writing them to file (codecs.open).
+#       This change is required to work with Cython 0.20.
+
 cpdef object Debug(str msg):
     if not g_debug:
         return
@@ -29,7 +34,7 @@ cpdef object Debug(str msg):
         except:
             print("cefpython: WARNING: failed writing to debug file: %s" % (
                     g_debugFile))
-                    
+
 
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":
@@ -75,7 +80,7 @@ cpdef str GetModuleDirectory():
     else:
         path = os.getcwd()
     if platform.system() == "Windows":
-        # On linux this regexp would give: 
+        # On linux this regexp would give:
         # "\/home\/czarek\/cefpython\/cefpython\/cef1\/linux\/binaries"
         path = re.sub(r"[/\\]+", re.escape(os.sep), path)
     path = re.sub(r"[/\\]+$", "", path)
