@@ -6,7 +6,7 @@
 # CEF values to Python values
 # -----------------------------------------------------------------------------
 
-cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser, 
+cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
         py_string pyString):
     # A javascript callback from the Renderer process is sent as a string.
     # TODO: this could be sent using CefBinaryNamedString in the future,
@@ -22,7 +22,7 @@ cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
         if message and type(message) == dict and ("what" in message) \
                 and message["what"] == "javascript-callback":
             jsCallback = CreateJavascriptCallback(
-                    message["callbackId"], cefBrowser, 
+                    message["callbackId"], cefBrowser,
                     message["frameId"], message["functionName"])
             return jsCallback
     return pyString
@@ -177,7 +177,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
         elif valueType == long:
             # Int32 range is -2147483648..2147483647, we've increased the
             # minimum size by one as Cython was throwing a warning:
-            # "unary minus operator applied to unsigned type, result still 
+            # "unary minus operator applied to unsigned type, result still
             # unsigned".
             if value <= 2147483647 and value >= -2147483647:
                 ret.get().SetInt(index, int(value))
@@ -204,7 +204,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
-            # the data may contain some non-standard object that is 
+            # the data may contain some non-standard object that is
             # probably redundant, but casting to string will do no harm.
             # This will handle the "type" type.
             ret.get().SetString(index, PyToCefStringValue(str(value)))
@@ -234,7 +234,7 @@ cdef void PyListToExistingCefListValue(
         elif valueType == long:
             # Int32 range is -2147483648..2147483647, we've increased the
             # minimum size by one as Cython was throwing a warning:
-            # "unary minus operator applied to unsigned type, result still 
+            # "unary minus operator applied to unsigned type, result still
             # unsigned".
             if value <= 2147483647 and value >= -2147483647:
                 cefListValue.get().SetInt(index, int(value))
@@ -255,7 +255,7 @@ cdef void PyListToExistingCefListValue(
             if valueType == tuple:
                 value = list(value)
             newCefListValue = CefListValue_Create()
-            PyListToExistingCefListValue(browserId, frameId, value, 
+            PyListToExistingCefListValue(browserId, frameId, value,
                     newCefListValue, nestingLevel + 1)
             cefListValue.get().SetList(index, newCefListValue)
         elif valueType == types.FunctionType or valueType == types.MethodType:
@@ -264,7 +264,7 @@ cdef void PyListToExistingCefListValue(
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
-            # the data may contain some non-standard object that is 
+            # the data may contain some non-standard object that is
             # probably redundant, but casting to string will do no harm.
             # This will handle the "type" type.
             cefListValue.get().SetString(index, PyToCefStringValue(str(value)))
@@ -294,7 +294,7 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
         elif valueType == long:
             # Int32 range is -2147483648..2147483647, we've increased the
             # minimum size by one as Cython was throwing a warning:
-            # "unary minus operator applied to unsigned type, result still 
+            # "unary minus operator applied to unsigned type, result still
             # unsigned".
             if value <= 2147483647 and value >= -2147483647:
                 ret.get().SetInt(cefKey, int(value))
@@ -321,7 +321,7 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
-            # the data may contain some non-standard object that is 
+            # the data may contain some non-standard object that is
             # probably redundant, but casting to string will do no harm.
             # This will handle the "type" type.
             ret.get().SetString(cefKey, PyToCefStringValue(str(value)))

@@ -46,6 +46,6 @@ copy "%~dp0..\subprocess\Release\subprocess.exe" "%~dp0binaries\subprocess.exe"
 
 cd binaries
 
-call python "example.py"
+call python "wxpython.py"
 
 pause
