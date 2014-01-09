@@ -4,6 +4,9 @@ from Cython.Distutils import build_ext
 import sys
 import platform
 from Cython.Compiler import Options
+import Cython
+
+print("Cython version: %s" % Cython.__version__)
 
 # Stop on first error, otherwise hundreds of errors appear in the console.
 Options.fast_fail = True
@@ -50,7 +53,7 @@ ext_modules = [Extension(
     ["cefpython.pyx"],
 
     # Ignore the warning in the console:
-    # > C:\Python27\lib\distutils\extension.py:133: UserWarning: 
+    # > C:\Python27\lib\distutils\extension.py:133: UserWarning:
     # > Unknown Extension options: 'cython_directives' warnings.warn(msg)
     cython_directives={
         # Any conversion to unicode must be explicit using .decode().
@@ -59,11 +62,11 @@ ext_modules = [Extension(
     },
 
     language='c++',
-    
+
     include_dirs=[
-        r'./../', 
-        r'./../../', 
-        r'./../../../', 
+        r'./../',
+        r'./../../',
+        r'./../../../',
         r'./../../../cython_includes/'],
 
     library_dirs=[

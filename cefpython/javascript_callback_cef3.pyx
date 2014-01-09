@@ -27,7 +27,7 @@ cdef class JavascriptCallback:
                 browser.SendProcessMessage(
                         cef_types.PID_RENDERER,
                         self.frame.GetIdentifier(),
-                        "ExecuteJavascriptCallback", 
+                        "ExecuteJavascriptCallback",
                         [self.callbackId] + list(args))
             else:
                 Debug("JavascriptCallback.Call() FAILED: browser not found, " \
