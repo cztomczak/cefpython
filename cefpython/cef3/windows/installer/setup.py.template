@@ -1,0 +1,41 @@
+from distutils.core import setup
+from distutils.command.install import install as _install
+import sys
+import os
+import subprocess
+
+def my_post_install():
+    pass
+
+class install(_install):
+    def run(self):
+        _install.run(self)
+        my_post_install()
+
+setup(
+    cmdclass={'install': install},
+    name='cefpython3', # No spaces here, so that it works with deb packages.
+    version='%(APP_VERSION)s',
+    description='Python bindings for the Chromium Embedded Framework',
+    license='BSD 3-Clause',
+    author='Czarek Tomczak',
+    author_email='czarek.tomczak@gmail.com',
+    url='http://code.google.com/p/cefpython/',
+    packages=['cefpython3', 'cefpython3.wx'],
+    package_data={'cefpython3': [
+        'examples/*.py',
+        'examples/*.html',
+        'examples/wx/*.py',
+        'examples/wx/*.html',
+        'examples/wx/*.png',
+        'locales/*.pak',
+        'wx/*.txt',
+        'wx/images/*.png',
+        '*.txt',
+        'cefclient.exe',
+        'subprocess.exe',
+        '*.pyd',
+        '*.dll',
+        '*.pak',
+    ]}
+)
