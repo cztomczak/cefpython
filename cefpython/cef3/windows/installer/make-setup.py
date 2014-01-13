@@ -73,9 +73,9 @@ def main():
 
     installer_dir = os.path.dirname(os.path.abspath(__file__))
 
-    pyVersion = str(sys.version_info.major) + str(sys.version_info.minor)
+    pyVersion = str(sys.version_info.major) +"."+ str(sys.version_info.minor)
     setup_dir = installer_dir+"/"+PACKAGE_NAME+"-"+vars["APP_VERSION"]\
-            +"-win"+BITS_NUMBER+"-py"+pyVersion+"-setup"
+            +".win"+BITS_NUMBER+"-py"+pyVersion+"-setup"
     print("Creating setup dir: "+setup_dir)
     os.mkdir(setup_dir)
 
