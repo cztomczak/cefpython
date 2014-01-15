@@ -34,7 +34,7 @@ cdef void SetApplicationSettings(
         # cefString.FromASCII(<char*>settings[key])
 
         IF CEF_VERSION == 1:
-            if key == "string_encoding":
+            if key == "string_encoding" or key == "debug":
                 # cefpython internal option
                 continue
             elif key == "multi_threaded_message_loop":
@@ -96,7 +96,7 @@ cdef void SetApplicationSettings(
                 raise Exception("Invalid appSettings key: %s" % key)
 
         ELIF CEF_VERSION == 3:
-            if key == "string_encoding":
+            if key == "string_encoding" or key == "debug":
                 # cefpython internal option
                 continue
             elif key == "multi_threaded_message_loop":

@@ -519,10 +519,8 @@ if __name__ == '__main__':
     # Intercept python exceptions. Exit app immediately when exception
     # happens on any of the threads.
     sys.excepthook = ExceptHook
-    # Set to False to disable cefpython debug messages in console.
-    cefpython.g_debug = True
-    cefpython.g_debugFile = GetApplicationPath("debug.log")
     settings = {
+        "debug": True, # cefpython debug messages in console and in log_file
         "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
         "log_file": GetApplicationPath("debug.log"), # Set to "" to disable.
         "release_dcheck_enabled": True, # Enable only when debugging.
@@ -532,8 +530,16 @@ if __name__ == '__main__':
         "browser_subprocess_path": "%s/%s" % (
             cefpython.GetModuleDirectory(), "subprocess")
     }
-    # print("browser_subprocess_path="+settings["browser_subprocess_path"])
-    cefpython.Initialize(settings)
+    # See Chromium switches:
+    # https://src.chromium.org/svn/trunk/src/chrome/common/chrome_switches.cc
+    # See CEF switches:
+    # https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/libcef/common/cef_switches.cc
+    switches = {
+        # "proxy-server": "socks5://127.0.0.1:8888",
+        # "enable-media-stream": "",
+        # "--invalid-switch": "" -> Invalid switch name
+    }
+    cefpython.Initialize(settings, switches)
     print('wx.version=%s' % wx.version())
     app = MyApp(False)
     app.MainLoop()

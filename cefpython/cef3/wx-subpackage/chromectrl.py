@@ -100,7 +100,7 @@ class ChromeWindow(wx.Window):
             if url.startswith("/"):
                 url = "file://" + url
         self.url = url
-        
+
         windowInfo = cefpython.WindowInfo()
         if platform.system() == "Windows":
             windowInfo.SetAsChild(self.GetHandle())
@@ -108,7 +108,7 @@ class ChromeWindow(wx.Window):
             windowInfo.SetAsChild(self.GetGtkWidget())
         else:
             raise Exception("Unsupported OS")
-        
+
         if not browserSettings:
             browserSettings = {}
 
@@ -121,7 +121,7 @@ class ChromeWindow(wx.Window):
         if platform.system() == "Windows":
             self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
             self.Bind(wx.EVT_SIZE, self.OnSize)
-        
+
         if useTimer:
             self.timerID = 1
             self._CreateTimer(timerMillis)
@@ -194,7 +194,7 @@ class ChromeWindow(wx.Window):
 
 class ChromeCtrl(wx.Panel):
     def __init__(self, parent, url="", useTimer=True,
-                 timerMillis=DEFAULT_TIMER_MILLIS, 
+                 timerMillis=DEFAULT_TIMER_MILLIS,
                  browserSettings=None, hasNavBar=True,
                  *args, **kwargs):
         # You also have to set the wx.WANTS_CHARS style for
@@ -280,10 +280,10 @@ class ChromeCtrl(wx.Panel):
     def OnLoadEnd(self, browser, frame, httpStatusCode):
         if self.navigationBar:
             # In CEF 3 the CanGoBack() and CanGoForward() methods
-            # sometimes do work, sometimes do not, when called from 
+            # sometimes do work, sometimes do not, when called from
             # the OnLoadStart event. That's why we're calling it again
-            # here. This is still not perfect as OnLoadEnd() is not 
-            # guaranteed to get called for all types of pages. See the 
+            # here. This is still not perfect as OnLoadEnd() is not
+            # guaranteed to get called for all types of pages. See the
             # cefpython documentation:
             # https://code.google.com/p/cefpython/wiki/LoadHandler
             # OnDomReady() would be perfect, but is still not implemented.
@@ -342,21 +342,18 @@ def Initialize(settings=None, debug=False):
                 cefpython.GetModuleDirectory() + "/locales"
         if not "resources_dir_path" in settings:
             settings["resources_dir_path"] = cefpython.GetModuleDirectory()
-    if not "browser_subprocess_path" in settings: 
+    if not "browser_subprocess_path" in settings:
         settings["browser_subprocess_path"] = \
             "%s/%s" % (cefpython.GetModuleDirectory(), "subprocess")
 
     # DEBUGGING options:
     # ------------------
     if debug:
-        cefpython.g_debug = True
-        cefpython.g_debugFile = "debug.log"
+        settings["debug"] = True # cefpython messages in console and log_file
         settings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE
         settings["log_file"] = "debug.log" # Set to "" to disable.
         settings["release_dcheck_enabled"] = True
-    else:
-        cefpython.g_debug = False
-        
+
     cefpython.Initialize(settings)
 
 def Shutdown():

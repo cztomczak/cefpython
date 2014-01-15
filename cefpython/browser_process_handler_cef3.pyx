@@ -5,15 +5,20 @@
 cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
         CefRefPtr[CefListValue] extra_info
         ) except * with gil:
-    global g_debug
-    global g_applicationSettings
-    cdef py_string logFile
     try:
-        logFile = "debug.log"
-        if "log_file" in g_applicationSettings:
-            logFile = g_applicationSettings["log_file"]
-        extra_info.get().SetBool(0, bool(g_debug))
-        extra_info.get().SetString(1, PyToCefStringValue(logFile))
+        # Keys 0 and 1 are already set in C++ code - to pass debug options.
+        pass
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public void BrowserProcessHandler_OnBeforeChildProcessLaunch(
+        CefRefPtr[CefCommandLine] cefCommandLine
+        ) except * with gil:
+    global g_commandLineSwitches
+    try:
+        AppendSwitchesToCommandLine(cefCommandLine, g_commandLineSwitches)
+        Debug("BrowserProcessHandler_OnBeforeChildProcessLaunch()")
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

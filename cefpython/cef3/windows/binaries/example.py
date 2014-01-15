@@ -79,18 +79,15 @@ def ExceptHook(excType, excValue, traceObject):
     cefpython.Shutdown()
     os._exit(1)
 
-def InitDebugging():
-    # Whether to print & log debug messages
-    if DEBUG:
-        cefpython.g_debug = True
-        cefpython.g_debugFile = GetApplicationPath("debug.log")
-        cefwindow.g_debug = True
-
 def CefAdvanced():
     sys.excepthook = ExceptHook
     InitDebugging()
 
     appSettings = dict()
+    if DEBUG:
+        # cefpython debug messages in console and in log_file
+        appSettings["debug"] = True
+        cefwindow.g_debug = True
     appSettings["log_file"] = GetApplicationPath("debug.log")
     appSettings["log_severity"] = cefpython.LOGSEVERITY_INFO
     appSettings["release_dcheck_enabled"] = True # Enable only when debugging
@@ -110,8 +107,8 @@ def CefAdvanced():
     browserSettings["universal_access_from_file_urls_allowed"] = True
     browserSettings["file_access_from_file_urls_allowed"] = True
 
-    windowHandle = cefwindow.CreateWindow(title="CEF Python 3 example", 
-            className="cefpython3_example", width=800, height=600, 
+    windowHandle = cefwindow.CreateWindow(title="CEF Python 3 example",
+            className="cefpython3_example", width=800, height=600,
             icon="icon.ico", windowProc=wndproc)
     windowInfo = cefpython.WindowInfo()
     windowInfo.SetAsChild(windowHandle)
