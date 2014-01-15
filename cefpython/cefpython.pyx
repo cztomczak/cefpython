@@ -83,12 +83,13 @@
 # Global variables.
 
 g_debug = False
-g_debugFile = None
+g_debugFile = "debug.log"
 
 # When put None here and assigned a local dictionary in Initialize(), later while
 # running app this global variable was garbage collected, see topic:
 # https://groups.google.com/d/topic/cython-users/0dw3UASh7HY/discussion
 g_applicationSettings = {}
+g_commandLineSwitches = {}
 
 cdef dict g_globalClientCallbacks = {}
 
@@ -171,6 +172,23 @@ IF CEF_VERSION == 3:
     include "resource_handler_cef3.pyx"
     include "response_cef3.pyx"
     include "web_request_cef3.pyx"
+    include "command_line.pyx"
+    include "app.pyx"
+
+cdef public void cefpython_GetDebugOptions(
+        cpp_bool* debug,
+        cpp_string* debugFile
+        ) except * with gil:
+    # Called from subprocess/cefpython_app.cpp -> CefPythonApp constructor.
+    global g_debug
+    global g_debugFile
+    cdef cpp_string cppString = g_debugFile
+    try:
+        debug[0] = <cpp_bool>bool(g_debug)
+        debugFile.assign(cppString)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 # Linux issue:
 # ------------
@@ -182,9 +200,28 @@ IF CEF_VERSION == 3:
 # See Issue 73:
 # https://code.google.com/p/cefpython/issues/detail?id=73
 
-def Initialize(applicationSettings=None):
+def Initialize(applicationSettings=None, commandLineSwitches=None):
+    if not applicationSettings:
+        applicationSettings = {}
+    # Debug settings need to be set before Debug() is called
+    # and before the CefPythonApp class is instantiated.
+    global g_debug
+    global g_debugFile
+    if "debug" in applicationSettings:
+        g_debug = bool(applicationSettings["debug"])
+    if "log_file" in applicationSettings:
+        g_debugFile = applicationSettings["log_file"]
+
     Debug("-" * 60)
     Debug("Initialize() called")
+
+    if not "multi_threaded_message_loop" in applicationSettings:
+        applicationSettings["multi_threaded_message_loop"] = False
+    if not "string_encoding" in applicationSettings:
+        applicationSettings["string_encoding"] = "utf-8"
+    IF CEF_VERSION == 3:
+        if not "single_process" in applicationSettings:
+            applicationSettings["single_process"] = False
 
     cdef CefRefPtr[CefApp] cefApp
 
@@ -203,23 +240,22 @@ def Initialize(applicationSettings=None):
         if exitCode >= 0:
             sys.exit(exitCode)
 
-    if not applicationSettings:
-        applicationSettings = {}
-    if not "multi_threaded_message_loop" in applicationSettings:
-        applicationSettings["multi_threaded_message_loop"] = False
-    if not "string_encoding" in applicationSettings:
-        applicationSettings["string_encoding"] = "utf-8"
-    IF CEF_VERSION == 3:
-        if not "single_process" in applicationSettings:
-            applicationSettings["single_process"] = False
-
-    # We must make a copy as applicationSettings is a reference only that might get destroyed.
+    # Make a copy as applicationSettings is a reference only
+    # that might get destroyed later.
     global g_applicationSettings
     for key in applicationSettings:
         g_applicationSettings[key] = copy.deepcopy(applicationSettings[key])
 
     cdef CefSettings cefApplicationSettings
     SetApplicationSettings(applicationSettings, &cefApplicationSettings)
+
+    if commandLineSwitches:
+        # Make a copy as commandLineSwitches is a reference only
+        # that might get destroyed later.
+        global g_commandLineSwitches
+        for key in commandLineSwitches:
+            g_commandLineSwitches[key] = copy.deepcopy(
+                    commandLineSwitches[key])
 
     Debug("CefInitialize()")
     cdef cpp_bool ret

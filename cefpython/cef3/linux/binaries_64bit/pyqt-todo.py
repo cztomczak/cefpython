@@ -17,7 +17,7 @@
 #4  0x00007fffe8136e4f in CefBrowserHost::CreateBrowserSync(CefWindowInfo const&, CefRefPtr<CefClient>, CefStringBase<CefStringTraitsUTF16> const&, CefStructBase<CefBrowserSettingsTraits> const&) ()
    from /home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/cefpython_py27.so
 #5  0x00007fffe8111cce in __pyx_pf_14cefpython_py27_16CreateBrowserSync (
-    __pyx_v_windowInfo=<cefpython_py27.WindowInfo at remote 0xdc7fb0>, 
+    __pyx_v_windowInfo=<cefpython_py27.WindowInfo at remote 0xdc7fb0>,
     __pyx_v_browserSettings=<optimized out>, __pyx_v_navigateUrl=
     'file:///home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/example.html', __pyx_self=<optimized out>) at cefpython.cpp:65142
 #6  0x00007fffe8114ea6 in __pyx_pw_14cefpython_py27_17CreateBrowserSync (
@@ -28,17 +28,17 @@
 # On Ubuntu install the "python-qt4" package.
 # Tested with version 4.9.1-2ubuntu1.
 
-# Important: 
-#   On Linux importing the cefpython module must be 
-#   the very first in your application. This is because CEF makes 
-#   a global tcmalloc hook for memory allocation/deallocation. 
+# Important:
+#   On Linux importing the cefpython module must be
+#   the very first in your application. This is because CEF makes
+#   a global tcmalloc hook for memory allocation/deallocation.
 #   See Issue 73 that is to provide CEF builds with tcmalloc disabled:
 #   https://code.google.com/p/cefpython/issues/detail?id=73
 
 import ctypes, os, sys
 libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)),\
         'libcef.so')
-# Import a local module if exists, otherwise import from 
+# Import a local module if exists, otherwise import from
 # an installed package.
 if os.path.exists(libcef_so):
     ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
@@ -170,15 +170,15 @@ class CefApplication(QtGui.QApplication):
         # 2. In onTimer() call MessageLoopWork() only when
         #    QtGui.QApplication.instance()->hasPendingEvents()
         #    returns False.
-        # But there is a bug in Qt, hasPendingEvents() returns 
+        # But there is a bug in Qt, hasPendingEvents() returns
         # always true.
-        # (The behavior described above was tested on Windows 
-        #  with pyqt 4.8, maybe this is not true anymore, 
+        # (The behavior described above was tested on Windows
+        #  with pyqt 4.8, maybe this is not true anymore,
         #  test it TODO)
         cefpython.MessageLoopWork()
 
     def stopTimer(self):
-        # Stop the timer after Qt message loop ended, calls to 
+        # Stop the timer after Qt message loop ended, calls to
         # MessageLoopWork() should not happen anymore.
         self.timer.stop()
 
@@ -187,10 +187,9 @@ if __name__ == '__main__':
     print("QtCore version: %s" % QtCore.qVersion())
 
     sys.excepthook = ExceptHook
-    cefpython.g_debug = True
-    cefpython.g_debugFile = GetApplicationPath("debug.log")
 
     settings = {}
+    settings["debug"] = True # cefpython messages in console and in log_file
     settings["log_file"] = GetApplicationPath("debug.log")
     settings["log_severity"] = cefpython.LOGSEVERITY_INFO
     settings["release_dcheck_enabled"] = True # Enable only when debugging
@@ -198,7 +197,7 @@ if __name__ == '__main__':
     settings["resources_dir_path"] = cefpython.GetModuleDirectory()
     settings["browser_subprocess_path"] = "%s/%s" % (
             cefpython.GetModuleDirectory(), "subprocess")
-    
+
     cefpython.Initialize(settings)
 
     app = CefApplication(sys.argv)

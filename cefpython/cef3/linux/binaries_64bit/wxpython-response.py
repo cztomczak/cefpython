@@ -1,5 +1,5 @@
 # This example implements a custom "_OnResourceResponse" callback
-# that emulates reading response by utilizing Resourcehandler 
+# that emulates reading response by utilizing Resourcehandler
 # and WebRequest.
 
 FIX_ENCODING_BUG = True
@@ -7,10 +7,10 @@ BROWSER_DEFAULT_ENCODING = "utf-8"
 
 # An example of embedding CEF browser in wxPython on Linux.
 
-# Important: 
-#   On Linux importing the cefpython module must be 
-#   the very first in your application. This is because CEF makes 
-#   a global tcmalloc hook for memory allocation/deallocation. 
+# Important:
+#   On Linux importing the cefpython module must be
+#   the very first in your application. This is because CEF makes
+#   a global tcmalloc hook for memory allocation/deallocation.
 #   See Issue 73 that is to provide CEF builds with tcmalloc disabled:
 #   https://code.google.com/p/cefpython/issues/detail?id=73
 
@@ -35,7 +35,7 @@ import platform
 import shutil
 
 class ClientHandler:
-    
+
     # RequestHandler.GetResourceHandler()
     def GetResourceHandler(self, browser, frame, request):
         # Called on the IO thread before a resource is loaded.
@@ -72,7 +72,7 @@ class ClientHandler:
         # Non-english characters are not displaying correctly.
         # This is a bug in CEF. A quick fix is to get the charset
         # from response headers and insert <meta charset> into
-        # the html page. 
+        # the html page.
         # Bug reported on the CEF C++ Forum:
         # http://www.magpcss.org/ceforum/viewtopic.php?p=18401#p18401
         if FIX_ENCODING_BUG:
@@ -101,7 +101,7 @@ class ClientHandler:
     # 1. Add reference in GetResourceHandler()
     # 2. Release reference in ResourceHandler.ReadResponse()
     #    after request is completed.
-    
+
     _resourceHandlers = {}
     _resourceHandlerMaxId = 0
 
@@ -118,8 +118,8 @@ class ClientHandler:
                     "not found, id = %s" % (resHandler._resourceHandlerId))
 
 class ResourceHandler:
-    
-    # The methods of this class will always be called 
+
+    # The methods of this class will always be called
     # on the IO thread.
 
     _resourceHandlerId = None
@@ -131,17 +131,17 @@ class ResourceHandler:
     _webRequest = None
     _webRequestClient = None
     _offsetRead = 0
-    
+
     def ProcessRequest(self, request, callback):
         print("ProcessRequest()")
         # 1. Start the request using WebRequest
         # 2. Return True to handle the request
-        # 3. Once response headers are ready call 
+        # 3. Once response headers are ready call
         #    callback.Continue()
         self._responseHeadersReadyCallback = callback
         self._webRequestClient = WebRequestClient()
         self._webRequestClient._resourceHandler = self
-        # To skip cache: 
+        # To skip cache:
         # | request.SetFlags(cefpython.Request.Flags["SkipCache"])
         # Must keep a strong reference to the WebRequest() object.
         self._webRequest = cefpython.WebRequest.Create(
@@ -150,17 +150,17 @@ class ResourceHandler:
 
     def GetResponseHeaders(self, response, responseLengthOut, redirectUrlOut):
         print("GetResponseHeaders()")
-        # 1. If the response length is not known set 
-        #    responseLengthOut[0] to -1 and ReadResponse() 
+        # 1. If the response length is not known set
+        #    responseLengthOut[0] to -1 and ReadResponse()
         #    will be called until it returns False.
-        # 2. If the response length is known set 
+        # 2. If the response length is known set
         #    responseLengthOut[0] to a positive value
-        #    and ReadResponse() will be called until it 
-        #    returns False or the specified number of bytes 
+        #    and ReadResponse() will be called until it
+        #    returns False or the specified number of bytes
         #    have been read.
-        # 3. Use the |response| object to set the mime type, 
-        #    http status code and other optional header values. 
-        # 4. To redirect the request to a new URL set 
+        # 3. Use the |response| object to set the mime type,
+        #    http status code and other optional header values.
+        # 4. To redirect the request to a new URL set
         #    redirectUrlOut[0] to the new url.
         assert self._webRequestClient._response, "Response object empty"
         wrcResponse = self._webRequestClient._response
@@ -178,12 +178,12 @@ class ResourceHandler:
 
     def ReadResponse(self, dataOut, bytesToRead, bytesReadOut, callback):
         # print("ReadResponse()")
-        # 1. If data is available immediately copy up to 
-        #    bytesToRead bytes into dataOut[0], set 
+        # 1. If data is available immediately copy up to
+        #    bytesToRead bytes into dataOut[0], set
         #    bytesReadOut[0] to the number of bytes copied,
         #    and return true.
-        # 2. To read the data at a later time set 
-        #    bytesReadOut[0] to 0, return true and call 
+        # 2. To read the data at a later time set
+        #    bytesReadOut[0] to 0, return true and call
         #    callback.Continue() when the data is available.
         # 3. To indicate response completion return false.
         if self._offsetRead < self._webRequestClient._dataLength:
@@ -198,14 +198,14 @@ class ResourceHandler:
         return False
 
     def CanGetCookie(self, cookie):
-        # Return true if the specified cookie can be sent 
-        # with the request or false otherwise. If false 
-        # is returned for any cookie then no cookies will 
+        # Return true if the specified cookie can be sent
+        # with the request or false otherwise. If false
+        # is returned for any cookie then no cookies will
         # be sent with the request.
         return True
 
     def CanSetCookie(self, cookie):
-        # Return true if the specified cookie returned 
+        # Return true if the specified cookie returned
         # with the response can be set or false otherwise.
         return True
 
@@ -242,7 +242,7 @@ class WebRequestClient:
         print("error code = %s" % webRequest.GetRequestError())
         # Emulate OnResourceResponse() in ClientHandler:
         self._response = webRequest.GetResponse()
-        # Are webRequest.GetRequest() and 
+        # Are webRequest.GetRequest() and
         # self._resourceHandler._request the same? What if
         # there was a redirect, what will GetUrl() return
         # for both of them?
@@ -411,9 +411,8 @@ class MyApp(wx.App):
 
 if __name__ == '__main__':
     sys.excepthook = ExceptHook
-    cefpython.g_debug = False
-    cefpython.g_debugFile = GetApplicationPath("debug.log")
     settings = {
+        "debug": False, # cefpython debug messages in console and in log_file
         "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
         "log_file": GetApplicationPath("debug.log"), # Set to "" to disable.
         "release_dcheck_enabled": True, # Enable only when debugging.

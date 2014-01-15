@@ -167,3 +167,4 @@ IF CEF_VERSION == 3:
     from resource_handler_cef3 cimport *
     from cef_urlrequest_cef3 cimport *
     from web_request_client_cef3 cimport *
+    from cef_command_line cimport *

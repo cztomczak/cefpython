@@ -6,7 +6,7 @@
 # In this example kivy-lang is used to declare the layout which
 # contains two buttons (back, forward) and the browser view.
 
-# On Linux importing the cefpython module must be the very 
+# On Linux importing the cefpython module must be the very
 # first in your application. This is because CEF makes a global
 # tcmalloc hook for memory allocation/deallocation. See Issue 73
 # that is to provide CEF builds with tcmalloc hook disabled:
@@ -60,7 +60,7 @@ class BrowserLayout(BoxLayout):
 
     def __init__(self, **kwargs):
         super(BrowserLayout, self).__init__(**kwargs)
-    
+
 
 
 class CefBrowser(Widget):
@@ -70,21 +70,21 @@ class CefBrowser(Widget):
     # 2. Local mode forwards keys to CEF only when an editable
     #    control is focused (input type=text|password or textarea).
     keyboard_mode = "global"
-    
+
     '''Represent a browser widget for kivy, which can be used like a normal widget.
     '''
     def __init__(self, start_url='http://www.google.com/', **kwargs):
         super(CefBrowser, self).__init__(**kwargs)
-        
+
         self.start_url = start_url
-        
+
         #Workaround for flexible size:
         #start browser when the height has changed (done by layout)
-        #This has to be done like this because I wasn't able to change 
+        #This has to be done like this because I wasn't able to change
         #the texture size
         #until runtime without core-dump.
         self.bind(size = self.size_changed)
-    
+
 
     starting = True
     def size_changed(self, *kwargs):
@@ -106,22 +106,22 @@ class CefBrowser(Widget):
                 self.rect.size = self.size
             self.browser.WasResized()
 
-   
+
     def _cef_mes(self, *kwargs):
         '''Get called every frame.
         '''
         cefpython.MessageLoopWork()
-        
-        
+
+
     def _update_rect(self, *kwargs):
-        '''Get called whenever the texture got updated. 
+        '''Get called whenever the texture got updated.
         => we need to reset the texture for the rectangle
         '''
         self.rect.texture = self.texture
-   
-            
+
+
     def start_cef(self):
-        '''Starts CEF. 
+        '''Starts CEF.
         '''
         # create texture & add it to canvas
         self.texture = Texture.create(
@@ -132,52 +132,52 @@ class CefBrowser(Widget):
             self.rect = Rectangle(size=self.size, texture=self.texture)
 
         #configure cef
-        cefpython.g_debug = True
-        cefpython.g_debugFile = "debug.log"
-        settings = {"log_severity": cefpython.LOGSEVERITY_INFO,
-                "log_file": "debug.log",
-                "release_dcheck_enabled": True, # Enable only when debugging.
-                # This directories must be set on Linux
-                "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
-                "resources_dir_path": cefpython.GetModuleDirectory(),
-                "browser_subprocess_path": "%s/%s" % (cefpython.GetModuleDirectory(), "subprocess")}
-        
+        settings = {
+            "debug": True, # cefpython debug messages in console and in log_file
+            "log_severity": cefpython.LOGSEVERITY_INFO,
+            "log_file": "debug.log",
+            "release_dcheck_enabled": True, # Enable only when debugging.
+            # This directories must be set on Linux
+            "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
+            "resources_dir_path": cefpython.GetModuleDirectory(),
+            "browser_subprocess_path": "%s/%s" % (cefpython.GetModuleDirectory(), "subprocess")}
+
         #start idle
         Clock.schedule_interval(self._cef_mes, 0)
-        
+
         #init CEF
         cefpython.Initialize(settings)
-       
+
         #WindowInfo offscreen flag
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsOffscreen(0)
-        
+
         #Create Broswer and naviagte to empty page <= OnPaint won't get called yet
         browserSettings = {}
-        # The render handler callbacks are not yet set, thus an 
+        # The render handler callbacks are not yet set, thus an
         # error report will be thrown in the console (when release
         # DCHECKS are enabled), however don't worry, it is harmless.
-        # This is happening because calling GetViewRect will return 
+        # This is happening because calling GetViewRect will return
         # false. That's why it is initially navigating to "about:blank".
-        # Later, a real url will be loaded using the LoadUrl() method 
+        # Later, a real url will be loaded using the LoadUrl() method
         # and the GetViewRect will be called again. This time the render
         # handler callbacks will be available, it will work fine from
         # this point.
         # --
         # Do not use "about:blank" as navigateUrl - this will cause
         # the GoBack() and GoForward() methods to not work.
-        self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings, 
+        self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings,
                 navigateUrl=self.start_url)
-        
+
         #set focus
         self.browser.SendFocusEvent(True)
-        
+
         self._client_handler = ClientHandler(self)
         self.browser.SetClientHandler(self._client_handler)
         self.set_js_bindings()
-        
+
         #Call WasResized() => force cef to call GetViewRect() and OnPaint afterwards
-        self.browser.WasResized() 
+        self.browser.WasResized()
 
         # The browserWidget instance is required in OnLoadingStateChange().
         self.browser.SetUserData("browserWidget", self)
@@ -186,8 +186,8 @@ class CefBrowser(Widget):
             self.request_keyboard()
 
         # Clock.schedule_once(self.change_url, 5)
-    
-    
+
+
     _client_handler = None
     _js_bindings = None
 
@@ -195,19 +195,19 @@ class CefBrowser(Widget):
         if not self._js_bindings:
             self._js_bindings = cefpython.JavascriptBindings(
                 bindToFrames=True, bindToPopups=True)
-            self._js_bindings.SetFunction("__kivy__request_keyboard", 
+            self._js_bindings.SetFunction("__kivy__request_keyboard",
                     self.request_keyboard)
             self._js_bindings.SetFunction("__kivy__release_keyboard",
                     self.release_keyboard)
         self.browser.SetJavascriptBindings(self._js_bindings)
-    
+
 
     def change_url(self, *kwargs):
         # Doing a javascript redirect instead of Navigate()
         # solves the js bindings error. The url here need to
         # be preceded with "http://". Calling StopLoad()
         # might be a good idea before making the js navigation.
-        
+
         self.browser.StopLoad()
         self.browser.GetMainFrame().ExecuteJavascript(
                "window.location='http://www.youtube.com/'")
@@ -215,8 +215,8 @@ class CefBrowser(Widget):
         # Do not use Navigate() or GetMainFrame()->LoadURL(),
         # as it causes the js bindings to be removed. There is
         # a bug in CEF, that happens after a call to Navigate().
-        # The OnBrowserDestroyed() callback is fired and causes 
-        # the js bindings to be removed. See this topic for more 
+        # The OnBrowserDestroyed() callback is fired and causes
+        # the js bindings to be removed. See this topic for more
         # details:
         # http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=11009
 
@@ -353,7 +353,7 @@ class CefBrowser(Widget):
     def translate_to_cef_keycode(self, keycode):
         # TODO: this works on Linux, but on Windows the key
         #       mappings will probably be different.
-        # TODO: what if the Kivy keyboard layout is changed 
+        # TODO: what if the Kivy keyboard layout is changed
         #       from qwerty to azerty? (F1 > options..)
         cef_keycode = keycode
         if self.is_alt2:
@@ -364,7 +364,7 @@ class CefBrowser(Widget):
                     # tilde
                     "96":172,
                     # 0-9 (48..57)
-                    "48":125, "49":185, "50":178, "51":179, "52":188, 
+                    "48":125, "49":185, "50":178, "51":179, "52":188,
                     "53":189, "54":190, "55":123, "56":91, "57":93,
                     # minus
                     "45":92,
@@ -385,7 +385,7 @@ class CefBrowser(Widget):
                     # tilde
                     "96":172,
                     # 0-9 (48..57)
-                    "48":176, "49":161, "50":2755, "51":163, "52":36, 
+                    "48":176, "49":161, "50":2755, "51":163, "52":36,
                     "53":2756, "54":2757, "55":2758, "56":2761, "57":177,
                     # minus
                     "45":191,
@@ -451,10 +451,10 @@ class CefBrowser(Widget):
             "13":65293,
             # PrScr, ScrLck, Pause
             "316":65377, "302":65300, "19":65299,
-            # Insert, Delete, 
-            # Home, End, 
+            # Insert, Delete,
+            # Home, End,
             # Pgup, Pgdn
-            "277":65379, "127":65535, 
+            "277":65379, "127":65535,
             "278":65360, "279":65367,
             "280":65365, "281":65366,
             # Arrows (left, up, right, down)
@@ -470,37 +470,37 @@ class CefBrowser(Widget):
         '''
         print "go forward"
         self.browser.GoForward()
-    
-    
+
+
     def go_back(self):
         '''Going back in browser history
         '''
         print "go back"
         self.browser.GoBack()
-    
-    
+
+
     def on_touch_down(self, touch, *kwargs):
         if not self.collide_point(*touch.pos):
             return
         touch.grab(self)
-        
+
         y = self.height-touch.pos[1]
         self.browser.SendMouseClickEvent(touch.x, y, cefpython.MOUSEBUTTON_LEFT,
                                          mouseUp=False, clickCount=1)
-    
-    
+
+
     def on_touch_move(self, touch, *kwargs):
         if touch.grab_current is not self:
             return
-        
+
         y = self.height-touch.pos[1]
         self.browser.SendMouseMoveEvent(touch.x, y, mouseLeave=False)
-        
-        
+
+
     def on_touch_up(self, touch, *kwargs):
         if touch.grab_current is not self:
             return
-        
+
         y = self.height-touch.pos[1]
         self.browser.SendMouseClickEvent(touch.x, y, cefpython.MOUSEBUTTON_LEFT,
                                          mouseUp=True, clickCount=1)
@@ -515,8 +515,8 @@ class ClientHandler:
 
     def _fix_select_boxes(self, frame):
         # This is just a temporary fix, until proper Popup widgets
-        # painting is implemented (PET_POPUP in OnPaint). Currently 
-        # there is no way to obtain a native window handle (GtkWindow 
+        # painting is implemented (PET_POPUP in OnPaint). Currently
+        # there is no way to obtain a native window handle (GtkWindow
         # pointer) in Kivy, and this may cause things like context menus,
         # select boxes and plugins not to display correctly. Although,
         # this needs to be tested. The popup widget buffers are
@@ -531,7 +531,7 @@ class ClientHandler:
         # See also a related topic on the Kivy-users group:
         # https://groups.google.com/d/topic/kivy-users/WdEQyHI5vTs/discussion
         # --
-        # The javascript select boxes library used: 
+        # The javascript select boxes library used:
         # http://marcj.github.io/jquery-selectBox/
         # --
         # Cannot use "file://" urls to load local resources, error:
@@ -562,7 +562,7 @@ class ClientHandler:
             __kivy_temp_style.appendChild(document.createTextNode("%(css_content)s"));
             __kivy_temp_head.appendChild(__kivy_temp_style);
         """ % locals()
-        frame.ExecuteJavascript(jsCode, 
+        frame.ExecuteJavascript(jsCode,
                 "kivy_.py > ClientHandler > OnLoadStart > _fix_select_boxes()")
 
 
@@ -582,7 +582,7 @@ class ClientHandler:
                     }
                     var tag = element.tagName;
                     var type = element.type;
-                    if (tag == "INPUT" && (type == "" || type == "text" 
+                    if (tag == "INPUT" && (type == "" || type == "text"
                             || type == "password") || tag == "TEXTAREA") {
                         if (!__kivy__keyboard_requested) {
                             __kivy__request_keyboard();
@@ -606,12 +606,12 @@ class ClientHandler:
                 }
                 setInterval(__kivy__keyboard_interval, 100);
             """
-            frame.ExecuteJavascript(jsCode, 
+            frame.ExecuteJavascript(jsCode,
                     "kivy_.py > ClientHandler > OnLoadStart")
 
 
     def OnLoadEnd(self, browser, frame, httpStatusCode):
-        # Browser lost its focus after the LoadURL() and the 
+        # Browser lost its focus after the LoadURL() and the
         # OnBrowserDestroyed() callback bug. When keyboard mode
         # is local the fix is in the request_keyboard() method.
         # Call it from OnLoadEnd only when keyboard mode is global.
@@ -619,30 +619,30 @@ class ClientHandler:
         if browserWidget and browserWidget.keyboard_mode == "global":
             browser.SendFocusEvent(True)
 
-    
+
     def OnLoadingStateChange(self, browser, isLoading, canGoBack,
             canGoForward):
         print("OnLoadingStateChange(): isLoading = %s" % isLoading)
         browserWidget = browser.GetUserData("browserWidget")
 
-    
-    def OnPaint(self, browser, paintElementType, dirtyRects, buffer, width, 
-            height):        
+
+    def OnPaint(self, browser, paintElementType, dirtyRects, buffer, width,
+            height):
         # print "OnPaint()"
         if paintElementType != cefpython.PET_VIEW:
             print "Popups aren't implemented yet"
             return
-        
+
         #update buffer
         buffer = buffer.GetString(mode="bgra", origin="top-left")
-        
+
         #update texture of canvas rectangle
-        self.browserWidget.texture.blit_buffer(buffer, colorfmt='bgra', 
+        self.browserWidget.texture.blit_buffer(buffer, colorfmt='bgra',
                 bufferfmt='ubyte')
         self.browserWidget._update_rect()
-                
+
         return True
-    
+
 
     def GetViewRect(self, browser, rect):
         width, height = self.browserWidget.texture.size
@@ -659,5 +659,5 @@ if __name__ == '__main__':
         def build(self):
             return BrowserLayout()
     CefBrowserApp().run()
-    
+
     cefpython.Shutdown()

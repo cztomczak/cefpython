@@ -45,6 +45,7 @@ __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnLoadError(CefRefPtr<CefBrowser>, Ce
 __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnRendererProcessTerminated(CefRefPtr<CefBrowser>, enum cef_termination_status_t);
 __PYX_EXTERN_C DL_IMPORT(void) LoadHandler_OnPluginCrashed(CefRefPtr<CefBrowser>, CefString const &);
 __PYX_EXTERN_C DL_IMPORT(void) BrowserProcessHandler_OnRenderProcessThreadCreated(CefRefPtr<CefListValue>);
+__PYX_EXTERN_C DL_IMPORT(void) BrowserProcessHandler_OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine>);
 __PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_GetRootScreenRect(CefRefPtr<CefBrowser>, CefRect &);
 __PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_GetViewRect(CefRefPtr<CefBrowser>, CefRect &);
 __PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_GetScreenRect(CefRefPtr<CefBrowser>, CefRect &);
@@ -65,6 +66,8 @@ __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnUploadProgress(int, CefRefPtr<
 __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnDownloadProgress(int, CefRefPtr<CefURLRequest>, uint64, uint64);
 __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnDownloadData(int, CefRefPtr<CefURLRequest>, void const *, size_t);
 __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnRequestComplete(int, CefRefPtr<CefURLRequest>);
+__PYX_EXTERN_C DL_IMPORT(void) App_OnBeforeCommandLineProcessing_BrowserProcess(CefRefPtr<CefCommandLine>);
+__PYX_EXTERN_C DL_IMPORT(void) cefpython_GetDebugOptions(bool *, std::string *);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 

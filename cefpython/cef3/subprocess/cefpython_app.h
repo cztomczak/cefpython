@@ -6,7 +6,7 @@
 #include "include/cef_app.h"
 #include <map>
 
-// CefPythonApp class is instantiated in subprocess and in 
+// CefPythonApp class is instantiated in subprocess and in
 // cefpython.pyx for the browser process, so the code is shared.
 // Using printf() in CefRenderProcessHandler won't work, use
 // the DebugLog() function instead, it will write the message
@@ -17,13 +17,12 @@
 // called by the process and/or thread indicated.
 ///
 /*--cef(source=client,no_debugct_check)--*/
-class CefPythonApp : 
+class CefPythonApp :
         public CefApp,
         public CefBrowserProcessHandler,
         public CefRenderProcessHandler {
  public:
-  CefPythonApp() {
-  }
+  CefPythonApp();
 
   virtual void OnBeforeCommandLineProcessing(
       const CefString& process_type,
@@ -32,13 +31,13 @@ class CefPythonApp :
   virtual void OnRegisterCustomSchemes(
       CefRefPtr<CefSchemeRegistrar> registrar) OVERRIDE;
 
-  virtual CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler() 
+  virtual CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler()
         OVERRIDE;
 
   virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler()
         OVERRIDE;
 
-  virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() 
+  virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler()
         OVERRIDE;
 
   // ---------------------------------------------------------------------------
@@ -57,7 +56,7 @@ class CefPythonApp :
   // CefRenderProcessHandler
   // ---------------------------------------------------------------------------
 
-  virtual void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) 
+  virtual void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info)
         OVERRIDE;
 
   virtual void OnWebKitInitialized()
@@ -114,19 +113,20 @@ class CefPythonApp :
 
   virtual void RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser);
 
-  virtual bool BindedFunctionExists(CefRefPtr<CefBrowser> browser, 
+  virtual bool BindedFunctionExists(CefRefPtr<CefBrowser> browser,
                                     const CefString& funcName);
 
   virtual void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser);
-  
+
   virtual void DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefV8Context> context);
 
 protected:
   std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;
+  std::string commandLineString_;
 
 private:
   // Include the default reference counting implementation.
-  IMPLEMENT_REFCOUNTING(CefPythonApp); 
+  IMPLEMENT_REFCOUNTING(CefPythonApp);
 };
