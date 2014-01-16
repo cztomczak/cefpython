@@ -43,7 +43,13 @@ void CefPythonApp::OnBeforeCommandLineProcessing(
         App_OnBeforeCommandLineProcessing_BrowserProcess(command_line);
     }
 #endif
-    std::string logMessage = "Command line: ";
+    std::string process_name = process_type.ToString();
+    if (process_name.empty()) {
+        process_name = "browser";
+    }
+    std::string logMessage = "Command line string for the ";
+    logMessage.append(process_name);
+    logMessage.append(" process: ");
     std::string clString = command_line->GetCommandLineString().ToString();
     logMessage.append(clString.c_str());
     // OnBeforeCommandLineProcessing() is called before
