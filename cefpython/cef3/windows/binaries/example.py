@@ -81,7 +81,6 @@ def ExceptHook(excType, excValue, traceObject):
 
 def CefAdvanced():
     sys.excepthook = ExceptHook
-    InitDebugging()
 
     appSettings = dict()
     if DEBUG:
