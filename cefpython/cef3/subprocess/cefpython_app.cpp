@@ -56,8 +56,8 @@ void CefPythonApp::OnBeforeCommandLineProcessing(
     // CefRenderHandler::OnRenderThreadCreated() which sets
     // the debug options. Thus debugging will always be Off
     // at the time this method is called. The fix for that
-    // is to keep the command line string in a global variable
-    // and call DebugLog later in OnRenderThreadCreated().
+    // is to keep the command line string somewhere and call
+    // DebugLog later in OnRenderThreadCreated().
     if (g_debug) {
         DebugLog(logMessage.c_str());
     } else {
