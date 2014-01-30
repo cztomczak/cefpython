@@ -4,7 +4,6 @@
 #--------------------------------------------------------------------------------
 
 from cefpython3 import cefpython
-from cefpython3.wx.utils import ExceptHook
 import os, sys, platform
 import wx
 import wx.lib.buttons as buttons
@@ -328,7 +327,6 @@ def Initialize(settings=None, debug=False):
     """Initializes CEF, We should do it before initializing wx
        If no settings passed a default is used
     """
-    sys.excepthook = ExceptHook
     if not settings:
         settings = {}
     if not "log_severity" in settings:
