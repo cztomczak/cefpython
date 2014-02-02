@@ -258,7 +258,7 @@ class ClientHandler:
             # no bindings in this window, error would be thrown.
             # Pressing F5 in Developer Tools seem to not refresh
             # the parent window.
-            if hasattr(browser, "javascriptRebindings"):
+            if browser.GetUserData("javascriptRebindings"):
                 browser.GetUserData("javascriptRebindings").Rebind()
             # This is not required, rebinding will work without refreshing page.
             browser.ReloadIgnoreCache()
@@ -394,7 +394,7 @@ class Python:
             arg2 = arg2.encode(encoding="utf-8")
         print("python.Test2(%s, '%s', '%s') called" % (arg1, arg2, arg3))
         # Testing nested return values.
-        return [1,2, [2.1, {'3': 3, '4': [5,6]}], "[unicode: ąś]", 
+        return [1,2, [2.1, {'3': 3, '4': [5,6]}], "[unicode: ąś]",
                 arg2_original, arg2]
 
     def PrintPyConfig(self):
@@ -418,7 +418,7 @@ class Python:
             else:
                 # Python 3.2 - there is no "unicode()" in python 3
                 jsCallback.Call(1, [2,3], ('tuple', 'tuple'),
-                        'unicode string [ąś]', 
+                        'unicode string [ąś]',
                         'bytes string [ąś]'.encode('utf-8'))
         else:
             raise Exception("python.TestJavascriptCallback() failed: "
