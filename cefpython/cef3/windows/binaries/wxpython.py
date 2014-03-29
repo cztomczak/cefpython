@@ -243,6 +243,10 @@ class JavascriptExternal:
         self.stringVisitor = StringVisitor()
         self.mainBrowser.GetMainFrame().GetText(self.stringVisitor)
 
+    def NewWindow(self):
+        frame = MainFrame()
+        frame.Show()
+
     # -------------------------------------------------------------------------
     # Cookies
     # -------------------------------------------------------------------------
