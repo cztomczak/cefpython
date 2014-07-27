@@ -174,18 +174,8 @@ def PyCallback(self, *args):
 <h3>Display handler</h3>
 
 <pre>
-def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
-        canGoForward):
-    print("ClientHandler::OnLoadingStateChange()")
-    print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
-            % (isLoading, canGoBack, canGoForward))
-</pre>
-
-See messages in the console during loading of a webpage.
-
-<pre>
 def OnAddressChange(self, browser, frame, url):
-    print("ClientHandler::OnAddressChange()")
+    print("DisplayHandler::OnAddressChange()")
     print("url = %s" % url)
 </pre>
 
@@ -193,7 +183,7 @@ See messages in the console during loading of a webpage.
 
 <pre>
 def OnTitleChange(self, browser, title):
-    print("ClientHandler::OnTitleChange()")
+    print("DisplayHandler::OnTitleChange()")
     print("title = %s" % title)
 </pre>
 
@@ -228,7 +218,7 @@ See messages in the console when hovering over links.
 
 <pre>
 def OnConsoleMessage(self, browser, message, source, line):
-    print("ClientHandler::OnConsoleMessage()")
+    print("DisplayHandler::OnConsoleMessage()")
     print("message = %s" % message)
     print("source = %s" % source)
     print("line = %s" % line)
@@ -249,7 +239,7 @@ Try this:
 <pre>
 def OnPreKeyEvent(self, browser, event, eventHandle, 
         isKeyboardShortcutOut):
-    print("ClientHandler::OnPreKeyEvent()")
+    print("KeyboardHandler::OnPreKeyEvent()")
 
 def OnKeyEvent(self, browser, event, eventHandle):
     print("KeyboardHandler::OnKeyEvent()")
@@ -404,6 +394,29 @@ This will be allowed:
 <a href="https://sage.math.washington.edu:8091/hudson/job/cython-docs/">
     https://sage.math.washington.edu:8091/hudson/job/cython-docs/</a>
 
+<pre>
+def OnRendererProcessTerminated(self, browser, status):
+    print("RequestHandler::OnRendererProcessTerminated()")
+    statuses = {
+        cefpython.TS_ABNORMAL_TERMINATION: "TS_ABNORMAL_TERMINATION",
+        cefpython.TS_PROCESS_WAS_KILLED: "TS_PROCESS_WAS_KILLED",
+        cefpython.TS_PROCESS_CRASHED: "TS_PROCESS_CRASHED"
+    }
+    statusName = "Unknown"
+    if status in statuses:
+        statusName = statuses[status]
+    print("status = %s" % statusName)
+</pre>
+Try to terminate the "subprocess.exe" renderer process through 
+process/task manager.
+
+<pre>
+def OnPluginCrashed(self, browser, pluginPath):
+    print("RequestHandler::OnPluginCrashed()")
+    print("plugin path = %s" % pluginPath)
+</pre>
+No test for that yet.
+
 
 <h3>Cookie tests</h3>
 
@@ -412,9 +425,9 @@ See messages in the console.
 <pre>
  def GetCookieManager(self, browser, mainUrl):
     # Create unique cookie manager for each browser.
-    # --
-    # Buggy implementation in CEF, reported here:
-    # https://code.google.com/p/chromiumembedded/issues/detail?id=1043
+    # You must set the "unique_request_context_per_browser"
+    # application setting to True for the cookie manager
+    # to work.
     cookieManager = browser.GetUserData("cookieManager")
     if cookieManager:
         return cookieManager
@@ -458,6 +471,17 @@ via SetCookie(): <a href="javascript:external.DeleteCookies()">
 
 
 <h3>Load Handler</h3>
+
+<pre>
+def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
+        canGoForward):
+    print("LoadHandler::OnLoadingStateChange()")
+    print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
+            % (isLoading, canGoBack, canGoForward))
+</pre>
+
+See messages in the console during loading of a webpage.
+
 <pre>
 def OnLoadStart(self, browser, frame):
     print("LoadHandler::OnLoadStart()")
@@ -491,28 +515,6 @@ Try this:
 (After you see the custom error message you have to hit
 twice the Back from the context menu, to get back to this page)
 
-<pre>
-def OnRendererProcessTerminated(self, browser, status):
-    print("LoadHandler::OnRendererProcessTerminated()")
-    statuses = {
-        cefpython.TS_ABNORMAL_TERMINATION: "TS_ABNORMAL_TERMINATION",
-        cefpython.TS_PROCESS_WAS_KILLED: "TS_PROCESS_WAS_KILLED",
-        cefpython.TS_PROCESS_CRASHED: "TS_PROCESS_CRASHED"
-    }
-    statusName = "Unknown"
-    if status in statuses:
-        statusName = statuses[status]
-    print("status = %s" % statusName)
-</pre>
-Try to terminate the "subprocess.exe" renderer process through 
-process/task manager.
-
-<pre>
-def OnPluginCrashed(self, browser, pluginPath):
-    print("LoadHandler::OnPluginCrashed()")
-    print("plugin path = %s" % pluginPath)
-</pre>
-No test for that yet.
 
 </body>
 </html>

@@ -168,3 +168,6 @@ IF CEF_VERSION == 3:
     from cef_urlrequest_cef3 cimport *
     from web_request_client_cef3 cimport *
     from cef_command_line cimport *
+    from cef_request_context cimport *
+    from cef_request_context_handler cimport *
+    from request_context_handler cimport *

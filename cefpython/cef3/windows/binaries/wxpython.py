@@ -317,12 +317,6 @@ class ClientHandler:
     # DisplayHandler
     # -------------------------------------------------------------------------
 
-    def OnLoadingStateChange(self, browser, isLoading, canGoBack,
-            canGoForward):
-        print("DisplayHandler::OnLoadingStateChange()")
-        print("  isLoading = %s, canGoBack = %s, canGoForward = %s" \
-                % (isLoading, canGoBack, canGoForward))
-
     def OnAddressChange(self, browser, frame, url):
         print("DisplayHandler::OnAddressChange()")
         print("  url = %s" % url)
@@ -415,9 +409,9 @@ class ClientHandler:
 
     def GetCookieManager(self, browser, mainUrl):
         # Create unique cookie manager for each browser.
-        # --
-        # Buggy implementation in CEF, reported here:
-        # https://code.google.com/p/chromiumembedded/issues/detail?id=1043
+        # You must set the "unique_request_context_per_browser"
+        # application setting to True for the cookie manager
+        # to work.
         cookieManager = browser.GetUserData("cookieManager")
         if cookieManager:
             return cookieManager
@@ -464,9 +458,31 @@ class ClientHandler:
             return True
         return False
 
+    def OnRendererProcessTerminated(self, browser, status):
+        print("RequestHandler::OnRendererProcessTerminated()")
+        statuses = {
+            cefpython.TS_ABNORMAL_TERMINATION: "TS_ABNORMAL_TERMINATION",
+            cefpython.TS_PROCESS_WAS_KILLED: "TS_PROCESS_WAS_KILLED",
+            cefpython.TS_PROCESS_CRASHED: "TS_PROCESS_CRASHED"
+        }
+        statusName = "Unknown"
+        if status in statuses:
+            statusName = statuses[status]
+        print("  status = %s" % statusName)
+
+    def OnPluginCrashed(self, browser, pluginPath):
+        print("RequestHandler::OnPluginCrashed()")
+        print("  plugin path = %s" % pluginPath)
+
     # -------------------------------------------------------------------------
     # LoadHandler
     # -------------------------------------------------------------------------
+
+    def OnLoadingStateChange(self, browser, isLoading, canGoBack,
+            canGoForward):
+        print("LoadHandler::OnLoadingStateChange()")
+        print("  isLoading = %s, canGoBack = %s, canGoForward = %s" \
+                % (isLoading, canGoBack, canGoForward))
 
     def OnLoadStart(self, browser, frame):
         print("LoadHandler::OnLoadStart()")
@@ -486,22 +502,6 @@ class ClientHandler:
         print("  failed url = %s" % failedUrl)
         customErrorMessage = "My custom error message!"
         frame.LoadUrl("data:text/html,%s" % customErrorMessage)
-
-    def OnRendererProcessTerminated(self, browser, status):
-        print("LoadHandler::OnRendererProcessTerminated()")
-        statuses = {
-            cefpython.TS_ABNORMAL_TERMINATION: "TS_ABNORMAL_TERMINATION",
-            cefpython.TS_PROCESS_WAS_KILLED: "TS_PROCESS_WAS_KILLED",
-            cefpython.TS_PROCESS_CRASHED: "TS_PROCESS_CRASHED"
-        }
-        statusName = "Unknown"
-        if status in statuses:
-            statusName = statuses[status]
-        print("  status = %s" % statusName)
-
-    def OnPluginCrashed(self, browser, pluginPath):
-        print("LoadHandler::OnPluginCrashed()")
-        print("  plugin path = %s" % pluginPath)
 
     # -------------------------------------------------------------------------
     # LifespanHandler
@@ -551,6 +551,8 @@ if __name__ == '__main__':
     # Intercept python exceptions. Exit app immediately when exception
     # happens on any of the threads.
     sys.excepthook = ExceptHook
+    
+    # Application settings
     settings = {}
     settings["debug"] = True # cefpython messages in console and in log_file
     settings["log_file"] = GetApplicationPath("debug.log") # "" to disable
@@ -558,16 +560,20 @@ if __name__ == '__main__':
     settings["release_dcheck_enabled"] = True # Enable only when debugging
     settings["browser_subprocess_path"] = \
             "%s/%s" % (cefpython.GetModuleDirectory(), "subprocess")
-    # See Chromium switches:
-    # https://src.chromium.org/svn/trunk/src/chrome/common/chrome_switches.cc
-    # See CEF switches:
-    # https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/libcef/common/cef_switches.cc
+    # This option is required for the GetCookieManager callback
+    # to work. It affects renderer processes, when this option
+    # is set to True. It will force a separate renderer process
+    # for each browser created using CreateBrowserSync.
+    settings["unique_request_context_per_browser"] = True;
+
+    # Command line switches set programmatically.
     switches = {
         # "log-severity": "verbose" # Overwrite the "log_severity" setting.
         # "proxy-server": "socks5://127.0.0.1:8888",
         # "enable-media-stream": "",
         # "--invalid-switch": "" -> Invalid switch name
     }
+
     cefpython.Initialize(settings, switches) # Initialize cefpython before wx.
     print('wx.version=%s' % wx.version())
     app = MyApp(False)

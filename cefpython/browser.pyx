@@ -92,6 +92,12 @@ IF CEF_VERSION == 3:
         # TODO: call this function also in CEF 1.
         global g_pyBrowsers
         if browserId in g_pyBrowsers:
+            if len(g_pyBrowsers) == 1:
+                # This is the last browser remaining.
+                if g_sharedRequestContext.get():
+                    # A similar release is done in Shutdown and CloseBrowser.
+                    Debug("RemovePyBrowser: releasing shared request context")
+                    g_sharedRequestContext.get().Release()
             Debug("del g_pyBrowsers[%s]" % browserId)
             del g_pyBrowsers[browserId]
         else:
@@ -157,6 +163,9 @@ cdef class PyBrowser:
         ELIF CEF_VERSION == 3:
             self.SetClientCallback_CEF3(name, callback)
 
+    # -------------------------------------------------------------------------
+    # CEF 1
+    # -------------------------------------------------------------------------
     cpdef py_void SetClientCallback_CEF1(self, 
             py_string name, object callback):
         if not self.allowedClientCallbacks:
@@ -174,6 +183,7 @@ cdef class PyBrowser:
                     "OnResourceResponse", "OnProtocolExecution",
                     "GetDownloadHandler", "GetAuthCredentials",
                     "GetCookieManager"]
+            
             # CefDisplayHandler.
             self.allowedClientCallbacks += ["OnAddressChange",
                     "OnConsoleMessage", "OnContentsSizeChange",
@@ -193,11 +203,14 @@ cdef class PyBrowser:
                             "callback: %s" % name)
         self.clientCallbacks[name] = callback
 
+    # -------------------------------------------------------------------------
+    # CEF 3
+    # -------------------------------------------------------------------------
     cpdef py_void SetClientCallback_CEF3(self, 
             py_string name, object callback):
         if not self.allowedClientCallbacks:
             # DisplayHandler
-            self.allowedClientCallbacks += ["OnLoadingStateChange",
+            self.allowedClientCallbacks += [
                     "OnAddressChange", "OnTitleChange", "OnTooltip",
                     "OnStatusMessage", "OnConsoleMessage"]
             # KeyboardHandler
@@ -207,13 +220,15 @@ cdef class PyBrowser:
             # set using cefpython.SetGlobalClientCallback()
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
-                    "OnQuotaRequest", "GetCookieManager",
-                    "OnProtocolExecution", "GetResourceHandler",
-                    "OnBeforeBrowse"]
-            # LoadHandler
-            self.allowedClientCallbacks += ["OnLoadStart", "OnLoadEnd",
-                    "OnLoadError", "OnRendererProcessTerminated",
+                    "OnQuotaRequest", "OnProtocolExecution", 
+                    "GetResourceHandler",
+                    "OnBeforeBrowse", "OnRendererProcessTerminated",
                     "OnPluginCrashed"]
+            # RequestContextHandler
+            self.allowedClientCallbacks += ["GetCookieManager"]
+            # LoadHandler
+            self.allowedClientCallbacks += ["OnLoadingStateChange", 
+                    "OnLoadStart", "OnLoadEnd", "OnLoadError"]
             # LifespanHandler
             self.allowedClientCallbacks += ["OnBeforePopup"]
             # RenderHandler
@@ -294,6 +309,13 @@ cdef class PyBrowser:
             # implementing LifespanHandler::DoClose().
             # | Debug("CefBrowser::ParentWindowWillClose()")
             # | self.GetCefBrowserHost().get().ParentWindowWillClose()
+            if len(g_pyBrowsers) == 1:
+                # This is the last browser remaining.
+                if g_sharedRequestContext.get():
+                    # A similar release is done in Shutdown 
+                    # and RemovePyBrowser.
+                    Debug("CloseBrowser: releasing shared request context")
+                    g_sharedRequestContext.get().Release()
             Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
             self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
         
