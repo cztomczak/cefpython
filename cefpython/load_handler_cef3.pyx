@@ -2,10 +2,22 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# cef_termination_status_t
-TS_ABNORMAL_TERMINATION = cef_types.TS_ABNORMAL_TERMINATION
-TS_PROCESS_WAS_KILLED = cef_types.TS_PROCESS_WAS_KILLED
-TS_PROCESS_CRASHED = cef_types.TS_PROCESS_CRASHED
+cdef public void LoadHandler_OnLoadingStateChange(
+        CefRefPtr[CefBrowser] cefBrowser,
+        cpp_bool isLoading,
+        cpp_bool canGoBack,
+        cpp_bool canGoForward
+        ) except * with gil:
+    cdef PyBrowser pyBrowser
+    cdef object callback
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        callback = pyBrowser.GetClientCallback("OnLoadingStateChange")
+        if callback:
+            callback(pyBrowser, isLoading, canGoBack, canGoForward)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void LoadHandler_OnLoadStart(
         CefRefPtr[CefBrowser] cefBrowser,
@@ -64,47 +76,6 @@ cdef public void LoadHandler_OnLoadError(
                     CefToPyString(cefFailedUrl))
             # Providing custom error messsage not yet supported in CEF 3.
             # | PyToCefString(errorTextOut[0], cefErrorText)
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public void LoadHandler_OnRendererProcessTerminated(
-        CefRefPtr[CefBrowser] cefBrowser,
-        cef_types.cef_termination_status_t cefStatus
-        ) except * with gil:
-    # TODO: proccess may crash during browser creation. Let this callback 
-    # to be set either through  cefpython.SetGlobalClientCallback() 
-    # or PyBrowser.SetClientCallback(). Modify the 
-    # PyBrowser.GetClientCallback() implementation to return a global 
-    # callback first if set.
-    cdef PyBrowser pyBrowser
-    cdef object clientCallback
-    try:
-        pyBrowser = GetPyBrowser(cefBrowser)
-        clientCallback = pyBrowser.GetClientCallback(
-                "OnRendererProcessTerminated")
-        if clientCallback:
-            clientCallback(pyBrowser, cefStatus)
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public void LoadHandler_OnPluginCrashed(
-        CefRefPtr[CefBrowser] cefBrowser,
-        const CefString& cefPluginPath
-        ) except * with gil:
-    # TODO: plugin may crash during browser creation. Let this callback 
-    # to be set either through  cefpython.SetGlobalClientCallback() 
-    # or PyBrowser.SetClientCallback(). Modify the 
-    # PyBrowser.GetClientCallback() implementation to return a global 
-    # callback first if set.
-    cdef PyBrowser pyBrowser
-    cdef object clientCallback
-    try:
-        pyBrowser = GetPyBrowser(cefBrowser)
-        clientCallback = pyBrowser.GetClientCallback("OnPluginCrashed")
-        if clientCallback:
-            clientCallback(pyBrowser, CefToPyString(cefPluginPath))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

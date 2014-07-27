@@ -166,18 +166,8 @@ def PyCallback(self, *args):
 <h3>Display handler</h3>
 
 <pre>
-def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
-        canGoForward):
-    print("ClientHandler::OnLoadingStateChange()")
-    print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
-            % (isLoading, canGoBack, canGoForward))
-</pre>
-
-See messages in the console during loading of a webpage.
-
-<pre>
 def OnAddressChange(self, browser, frame, url):
-    print("ClientHandler::OnAddressChange()")
+    print("DisplayHandler::OnAddressChange()")
     print("url = %s" % url)
 </pre>
 
@@ -185,7 +175,7 @@ See messages in the console during loading of a webpage.
 
 <pre>
 def OnTitleChange(self, browser, title):
-    print("ClientHandler::OnTitleChange()")
+    print("DisplayHandler::OnTitleChange()")
     print("title = %s" % title)
 </pre>
 
@@ -220,7 +210,7 @@ See messages in the console when hovering over links.
 
 <pre>
 def OnConsoleMessage(self, browser, message, source, line):
-    print("ClientHandler::OnConsoleMessage()")
+    print("DisplayHandler::OnConsoleMessage()")
     print("message = %s" % message)
     print("source = %s" % source)
     print("line = %s" % line)
@@ -243,10 +233,10 @@ Try this:
 <pre>
 def OnPreKeyEvent(self, browser, event, eventHandle, 
         isKeyboardShortcutOut):
-    print("ClientHandler::OnPreKeyEvent()")
+    print("KeyboardHandler::OnPreKeyEvent()")
 
 def OnKeyEvent(self, browser, event, eventHandle):
-    print("ClientHandler::OnKeyEvent()")
+    print("KeyboardHandler::OnKeyEvent()")
     print("native_key_code = %s" % event["native_key_code"])
     if platform.system() == "Linux":
         # F5 = 71
@@ -280,6 +270,8 @@ Try this:
 <pre>
 def GetAuthCredentials(self, browser, frame, isProxy, host, port, realm,
         scheme, callback):
+    # This callback is called on the IO thread, thus print messages
+    # may not be visible.
     print("RequestHandler::GetAuthCredentials()")
     print("host = %s" % host)
     print("realm = %s" % realm)
@@ -351,6 +343,8 @@ Try this:
 def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
     # Plugins are loaded on demand, only when website requires it,
     # the same plugin may be called multiple times.
+    # This callback is called on the IO thread, thus print messages
+    # may not be visible.
     print("RequestHandler::OnBeforePluginLoad()")
     print("url = %s" % url)
     print("policy url = %s" % policyUrl)
@@ -367,27 +361,51 @@ Try OnBeforePluginLoad() with Flash:
 
 <pre>
 def _OnCertificateError(self, certError, requestUrl, callback):
-    print("RequestHandler::OnCertificateError()")
-    print("certError = %s" % certError)
-    print("requestUrl = %s" % requestUrl)
+    print("[wxpython.py] RequestHandler::OnCertificateError()")
+    print("    certError = %s" % certError)
+    print("    requestUrl = %s" % requestUrl)
     if requestUrl.startswith(
-            "https://sage.math.washington.edu:8091/do-not-allow"):
-        print("Not allowed!")
+            "https://tv.eurosport.com/do-not-allow"):
+        print("    Not allowed!")
         return False
     if requestUrl.startswith(
-            "https://sage.math.washington.edu:8091/hudson/job/"):
-        print("Allowed!")
+            "https://tv.eurosport.com/"):
+        print("    Allowed!")
         callback.Continue(True)
         return True
     return False
 </pre>
-This won't be allowed:
-<a href="https://sage.math.washington.edu:8091/do-not-allow">
-    https://sage.math.washington.edu:8091/do-not-allow</a>
+This won't be allowed (click twice "Back" from context menu to return back
+here after visiting the url):<br>
+<a href="https://tv.eurosport.com/do-not-allow">
+    https://tv.eurosport.com/do-not-allow</a>
 <br>
-This will be allowed:
-<a href="https://sage.math.washington.edu:8091/hudson/job/cython-docs/">
-    https://sage.math.washington.edu:8091/hudson/job/cython-docs/</a>
+This will be allowed:<br>
+<a href="https://tv.eurosport.com/">
+    https://tv.eurosport.com/</a>
+
+<pre>
+def OnRendererProcessTerminated(self, browser, status):
+    print("RequestHandler::OnRendererProcessTerminated()")
+    statuses = {
+        cefpython.TS_ABNORMAL_TERMINATION: "TS_ABNORMAL_TERMINATION",
+        cefpython.TS_PROCESS_WAS_KILLED: "TS_PROCESS_WAS_KILLED",
+        cefpython.TS_PROCESS_CRASHED: "TS_PROCESS_CRASHED"
+    }
+    statusName = "Unknown"
+    if status in statuses:
+        statusName = statuses[status]
+    print("status = %s" % statusName)
+</pre>
+Try to terminate the "subprocess.exe" renderer process through 
+process/task manager.
+
+<pre>
+def OnPluginCrashed(self, browser, pluginPath):
+    print("RequestHandler::OnPluginCrashed()")
+    print("plugin path = %s" % pluginPath)
+</pre>
+No test for that yet.
 
 
 <h3>Cookie tests</h3>
@@ -395,11 +413,18 @@ This will be allowed:
 See messages in the console.
 
 <pre>
- def GetCookieManager(self, browser, mainUrl):
+def GetCookieManager(self, browser, mainUrl):
     # Create unique cookie manager for each browser.
-    # --
-    # Buggy implementation in CEF, reported here:
-    # https://code.google.com/p/chromiumembedded/issues/detail?id=1043
+    # You must set the "unique_request_context_per_browser"
+    # application setting to True for the cookie manager
+    # to work.
+    # Return None to have one global cookie manager for
+    # all CEF browsers.
+    print("[wxpython.py] RequestHandler::GetCookieManager()")
+    if not browser:
+        # The browser param may be empty in some exceptional
+        # case, see docs.
+        return None
     cookieManager = browser.GetUserData("cookieManager")
     if cookieManager:
         return cookieManager
@@ -410,13 +435,35 @@ See messages in the console.
 </pre>
 
 RequestHandler.GetCookieManager() - an example of having an unique
-cookie manager for each browser. Visit 
-<a href="http://www.html-kit.com/tools/cookietester/">
-    http://www.html-kit.com/tools/cookietester/</a> and set some cookie,
-then go back to this page using the context menu and open a 
-<a href="javascript:window.open('http://www.html-kit.com/tools/cookietester/')">
-    new popup window</a>, the cookie should not appear in the popup browser window.
-<br><br>
+cookie manager for each browser. 
+<ol>
+    <li>Visit the url below and set some cookies. Use "Back" from
+        context menu to get back here (you might have to click "Back"
+        multiple times).<br>
+        Visit it in the current browser:<br>
+        <a href="http://www.html-kit.com/tools/cookietester/">
+                http://www.html-kit.com/tools/cookietester/</a>
+        <br>
+        Or visit it in a js popup:<br>
+        <a href="javascript:window.open('http://www.html-kit.com/tools/cookietester/')">
+                javascript:window.open('http://www.html-kit.com/tools/cookietester/')</a>
+    </li>
+    <li>Open cookietester in a popup:<br>
+        <a href="javascript:external.CreateAnotherBrowser('http://www.html-kit.com/tools/cookietester/')">
+            javascript:external.CreateAnotherBrowser('http://www.html-kit.com/tools/cookietester/')</a>
+    </li>
+</ol>
+
+<p>
+Popup browsers created javascript's window.open share
+the same renderer process and request context. If you want
+to have separate cookie managers for popups created using
+window.open then you have to implement the
+LifespanHandler.`OnBeforePopup` callback. Return True in that
+callback to cancel popup creation and instead create the
+window on your own and embed browser in it. The CreateAnotherBrowser()
+function from the wxpython example does that.
+</p>
 
 CookieManager.VisitAllCookies() - visit all cookies: 
 <a href="javascript:external.VisitAllCookies()">external.VisitAllCookies()</a>
@@ -443,6 +490,17 @@ via SetCookie(): <a href="javascript:external.DeleteCookies()">
 
 
 <h3>Load Handler</h3>
+
+<pre>
+def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
+        canGoForward):
+    print("LoadHandler::OnLoadingStateChange()")
+    print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
+            % (isLoading, canGoBack, canGoForward))
+</pre>
+
+See messages in the console during loading of a webpage.
+
 <pre>
 def OnLoadStart(self, browser, frame):
     print("LoadHandler::OnLoadStart()")
@@ -476,29 +534,6 @@ Try this:
 <br>
 (After you see the custom error message you have to hit
 twice the Back from the context menu, to get back to this page)
-
-<pre>
-def OnRendererProcessTerminated(self, browser, status):
-    print("LoadHandler::OnRendererProcessTerminated()")
-    statuses = {
-        cefpython.TS_ABNORMAL_TERMINATION: "TS_ABNORMAL_TERMINATION",
-        cefpython.TS_PROCESS_WAS_KILLED: "TS_PROCESS_WAS_KILLED",
-        cefpython.TS_PROCESS_CRASHED: "TS_PROCESS_CRASHED"
-    }
-    statusName = "Unknown"
-    if status in statuses:
-        statusName = statuses[status]
-    print("status = %s" % statusName)
-</pre>
-Try to terminate the "subprocess.exe" renderer process through 
-process/task manager.
-
-<pre>
-def OnPluginCrashed(self, browser, pluginPath):
-    print("LoadHandler::OnPluginCrashed()")
-    print("plugin path = %s" % pluginPath)
-</pre>
-No test for that yet.
 
 
 

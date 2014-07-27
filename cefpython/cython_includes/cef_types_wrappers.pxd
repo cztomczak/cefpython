@@ -8,6 +8,7 @@ from libcpp cimport bool as cpp_bool
 from cef_string cimport cef_string_t
 IF CEF_VERSION == 3:
       from cef_types cimport cef_state_t
+      from cef_types cimport cef_color_t
 
 cdef extern from "include/internal/cef_types_wrappers.h":
 
@@ -59,6 +60,7 @@ cdef extern from "include/internal/cef_types_wrappers.h":
             int uncaught_exception_stack_size
             int context_safety_implementation # Not exposed.
             cpp_bool ignore_certificate_errors
+            cef_color_t background_color
 
     IF CEF_VERSION == 1:
 

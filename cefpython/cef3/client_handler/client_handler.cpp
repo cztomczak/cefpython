@@ -229,19 +229,6 @@ void ClientHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
 ///
 
 ///
-// Called when the loading state has changed.
-///
-/*--cef()--*/
-void ClientHandler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
-                                bool isLoading,
-                                bool canGoBack,
-                                bool canGoForward) {
-    REQUIRE_UI_THREAD();
-    DisplayHandler_OnLoadingStateChange(browser, isLoading, canGoBack,
-            canGoForward);
-}
-
-///
 // Called when a frame's address has changed.
 ///
 /*--cef()--*/
@@ -357,7 +344,7 @@ bool ClientHandler::OnKeyEvent(CefRefPtr<CefBrowser> browser,
 // Called on the UI thread before browser navigation. Return true to cancel
 // the navigation or false to allow the navigation to proceed. The |request|
 // object cannot be modified in this callback.
-// CefDisplayHandler::OnLoadingStateChange will be called twice in all cases.
+// CefLoadHandler::OnLoadingStateChange will be called twice in all cases.
 // If the navigation is allowed CefLoadHandler::OnLoadStart and
 // CefLoadHandler::OnLoadEnd will be called. If the navigation is canceled
 // CefLoadHandler::OnLoadError will be called with an |errorCode| value of
@@ -457,21 +444,6 @@ bool ClientHandler::OnQuotaRequest(CefRefPtr<CefBrowser> browser,
 }
 
 ///
-// Called on the IO thread to retrieve the cookie manager. |main_url| is the
-// URL of the top-level frame. Cookies managers can be unique per browser or
-// shared across multiple browsers. The global cookie manager will be used if
-// this method returns NULL.
-///
-/*--cef()--*/
-CefRefPtr<CefCookieManager> ClientHandler::GetCookieManager(
-                                              CefRefPtr<CefBrowser> browser,
-                                              const CefString& main_url) {
-    REQUIRE_IO_THREAD();
-    return RequestHandler_GetCookieManager(browser, main_url);
-    // Default: return NULL.
-}
-
-///
 // Called on the UI thread to handle requests for URLs with an unknown
 // protocol component. Set |allow_os_execution| to true to attempt execution
 // via the registered OS protocol handler, if any.
@@ -520,6 +492,29 @@ bool ClientHandler::OnCertificateError(
     // Default: return false;
 }
 
+///
+// Called when the render process terminates unexpectedly. |status| indicates
+// how the process terminated.
+///
+/*--cef()--*/
+void ClientHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
+                                     cef_termination_status_t status) {
+    REQUIRE_UI_THREAD();
+    DebugLog("Browser: OnRenderProcessTerminated()");
+    RequestHandler_OnRendererProcessTerminated(browser, status);
+}
+
+///
+// Called when a plugin has crashed. |plugin_path| is the path of the plugin
+// that crashed.
+///
+/*--cef()--*/
+void ClientHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
+                           const CefString& plugin_path) {
+    REQUIRE_UI_THREAD();
+    RequestHandler_OnPluginCrashed(browser, plugin_path);
+}
+
 // --------------------------------------------------------------------------
 // CefLoadHandler
 // --------------------------------------------------------------------------
@@ -528,6 +523,19 @@ bool ClientHandler::OnCertificateError(
 // Implement this interface to handle events related to browser load status. 
 // The methods of this class will be called on the UI thread.
 ///
+
+///
+// Called when the loading state has changed.
+///
+/*--cef()--*/
+void ClientHandler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
+                                bool isLoading,
+                                bool canGoBack,
+                                bool canGoForward) {
+    REQUIRE_UI_THREAD();
+    LoadHandler_OnLoadingStateChange(browser, isLoading, canGoBack,
+            canGoForward);
+}
 
 ///
 // Called when the browser begins loading a frame. The |frame| value will
@@ -574,29 +582,6 @@ void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,
                        const CefString& failedUrl) {
     REQUIRE_UI_THREAD();
     LoadHandler_OnLoadError(browser, frame, errorCode, errorText, failedUrl);
-}
-
-///
-// Called when the render process terminates unexpectedly. |status| indicates
-// how the process terminated.
-///
-/*--cef()--*/
-void ClientHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
-                                     cef_termination_status_t status) {
-    REQUIRE_UI_THREAD();
-    DebugLog("Browser: OnRenderProcessTerminated()");
-    LoadHandler_OnRendererProcessTerminated(browser, status);
-}
-
-///
-// Called when a plugin has crashed. |plugin_path| is the path of the plugin
-// that crashed.
-///
-/*--cef()--*/
-void ClientHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
-                           const CefString& plugin_path) {
-    REQUIRE_UI_THREAD();
-    LoadHandler_OnPluginCrashed(browser, plugin_path);
 }
 
 // ----------------------------------------------------------------------------

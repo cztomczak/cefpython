@@ -105,6 +105,10 @@
                 RelativePath=".\string_visitor.h"
                 >
             </File>
+            <File
+                RelativePath=".\request_context_handler.h"
+                >
+            </File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -135,6 +139,10 @@
             </File>
             <File
                 RelativePath=".\string_visitor.cpp"
+                >
+            </File>
+            <File
+                RelativePath=".\request_context_handler.cpp"
                 >
             </File>
 		</Filter>

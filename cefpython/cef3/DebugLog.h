@@ -15,10 +15,10 @@ inline void DebugLog(const char* szString)
     if (!g_debug)
         return;
     // TODO: get the log_file option from CefSettings.
-    printf("cefpython: %s\n", szString);
+    printf("[CEF Python] %s\n", szString);
     if (g_logFile.length()) {
         FILE* pFile = fopen(g_logFile.c_str(), "a");
-        fprintf(pFile, "cefpython_app: %s\n", szString);
+        fprintf(pFile, "[CEF Python] App: %s\n", szString);
         fclose(pFile);
     }
 }

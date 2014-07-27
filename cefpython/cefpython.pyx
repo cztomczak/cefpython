@@ -80,7 +80,13 @@
 #   "bool" in a pxd file, then Cython will complain about bool casts
 #   like "bool(1)" being invalid, in pyx files.
 
-# Global variables.
+# All .pyx files need to be included in this file.
+
+include "cython_includes/compile_time_constants.pxi"
+include "imports.pyx"
+
+# -----------------------------------------------------------------------------
+# Global variables
 
 g_debug = False
 g_debugFile = "debug.log"
@@ -93,10 +99,12 @@ g_commandLineSwitches = {}
 
 cdef dict g_globalClientCallbacks = {}
 
-# All .pyx files need to be included here.
+# If ApplicationSettings.unique_request_context_per_browser is False
+# then a shared request context is used for all browsers. Otherwise
+# a unique one is created for each call to CreateBrowserSync.
+cdef CefRefPtr[CefRequestContext] g_sharedRequestContext
 
-include "cython_includes/compile_time_constants.pxi"
-include "imports.pyx"
+# -----------------------------------------------------------------------------
 
 include "utils.pyx"
 include "string_utils.pyx"
@@ -190,15 +198,9 @@ cdef public void cefpython_GetDebugOptions(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-# Linux issue:
-# ------------
-# Try not to run any of the CEF code until Initialize() is called.
-# Do not allocate any memory on the heap until Initialize() is called.
-# CEF hooks up its own tcmalloc globally when the library is loaded,
-# but the memory allocation implementation may still be changed by
-# another library (wx/gtk) before Initialize() is called.
-# See Issue 73:
-# https://code.google.com/p/cefpython/issues/detail?id=73
+# If you've built custom binaries with tcmalloc hook enabled on
+# Linux, then do not to run any of the CEF code until Initialize()
+# is called. See Issue 73 in the CEF Python Issue Tracker.
 
 def Initialize(applicationSettings=None, commandLineSwitches=None):
     if not applicationSettings:
@@ -212,13 +214,19 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
     if "log_file" in applicationSettings:
         g_debugFile = applicationSettings["log_file"]
 
-    Debug("-" * 60)
     Debug("Initialize() called")
 
+    # CEF Python only options - default values.
+    if "debug" not in applicationSettings:
+        applicationSettings["debug"] = False
+    if "string_encoding" not in applicationSettings:
+        applicationSettings["string_encoding"] = "utf-8"
+    if "unique_request_context_per_browser" not in applicationSettings:
+        applicationSettings["unique_request_context_per_browser"] = False
+
+    # CEF options - default values.
     if not "multi_threaded_message_loop" in applicationSettings:
         applicationSettings["multi_threaded_message_loop"] = False
-    if not "string_encoding" in applicationSettings:
-        applicationSettings["string_encoding"] = "utf-8"
     IF CEF_VERSION == 3:
         if not "single_process" in applicationSettings:
             applicationSettings["single_process"] = False
@@ -270,7 +278,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
         Debug("CefInitialize() failed")
     return ret
 
-def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
+def CreateBrowserSync(windowInfo, browserSettings, navigateUrl, requestContext=None):
     Debug("CreateBrowserSync() called")
     assert IsThread(TID_UI), (
             "cefpython.CreateBrowserSync() may only be called on the UI thread")
@@ -293,16 +301,44 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateUrl):
     cdef CefRefPtr[ClientHandler] clientHandler =\
             <CefRefPtr[ClientHandler]?>new ClientHandler()
     cdef CefRefPtr[CefBrowser] cefBrowser
+
+    # Request context - part 1/2.
+    createSharedRequestContext = bool(not g_sharedRequestContext.get())
+    cdef CefRefPtr[CefRequestContext] cefRequestContext
+    cdef CefRefPtr[RequestContextHandler] requestContextHandler =\
+            <CefRefPtr[RequestContextHandler]?>new RequestContextHandler(\
+                    cefBrowser)
+    if g_applicationSettings["unique_request_context_per_browser"]:
+        cefRequestContext = CefRequestContext_CreateContext(\
+                <CefRefPtr[CefRequestContextHandler]?>requestContextHandler)
+    else:
+        if createSharedRequestContext:
+            cefRequestContext = CefRequestContext_CreateContext(\
+                    <CefRefPtr[CefRequestContextHandler]?>\
+                            requestContextHandler)
+            g_sharedRequestContext.Assign(cefRequestContext.get())
+        else:
+            cefRequestContext.Assign(g_sharedRequestContext.get())
+
+    # CEF browser creation.
     with nogil:
         cefBrowser = cef_browser_static.CreateBrowserSync(
                 cefWindowInfo, <CefRefPtr[CefClient]?>clientHandler,
-                cefNavigateUrl, cefBrowserSettings)
+                cefNavigateUrl, cefBrowserSettings,
+                cefRequestContext)
 
-    if <void*>cefBrowser == NULL:
+    if <void*>cefBrowser == NULL or not cefBrowser.get():
         Debug("CefBrowser::CreateBrowserSync() failed")
         return None
     else:
         Debug("CefBrowser::CreateBrowserSync() succeeded")
+
+    # Request context - part 2/2.
+    if g_applicationSettings["unique_request_context_per_browser"]:
+        requestContextHandler.get().SetBrowser(cefBrowser)
+    else:
+        if createSharedRequestContext:
+            requestContextHandler.get().SetBrowser(cefBrowser)
 
     cdef PyBrowser pyBrowser = GetPyBrowser(cefBrowser)
     pyBrowser.SetUserData("__outerWindowHandle", int(windowInfo.parentWindowHandle))
@@ -345,6 +381,11 @@ def QuitMessageLoop():
         CefQuitMessageLoop()
 
 def Shutdown():
+    if g_sharedRequestContext.get():
+        # A similar release is done in RemovePyBrowser and CloseBrowser.
+        # This one is probably redundant. Additional testing should be done.
+        Debug("Shutdown: releasing shared request context")
+        g_sharedRequestContext.get().Release()
     Debug("Shutdown()")
     with nogil:
         CefShutdown()

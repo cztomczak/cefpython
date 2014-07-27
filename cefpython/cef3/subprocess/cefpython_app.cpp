@@ -440,7 +440,7 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
             // be executed anymore.
             DebugLog("Renderer: DoJavascriptBindingsForBrowser() WARNING: " \
                 "frameId <= 0");
-            // printf("cefpython: Renderer: frameId = %lli\n", *it);
+            // printf("[CEF Python] Renderer: frameId = %lli\n", *it);
             continue;
         }
         CefRefPtr<CefFrame> frame = browser->GetFrame(*it);

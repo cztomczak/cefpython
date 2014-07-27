@@ -25,14 +25,14 @@ cpdef py_bool IsThread(int threadID):
 cpdef object Debug(str msg):
     if not g_debug:
         return
-    msg = "cefpython: "+str(msg)
+    msg = "[CEF Python] "+str(msg)
     print(msg)
     if g_debugFile:
         try:
             with open(g_debugFile, "a") as file:
                 file.write(msg+"\n")
         except:
-            print("cefpython: WARNING: failed writing to debug file: %s" % (
+            print("[CEF Python] WARNING: failed writing to debug file: %s" % (
                     g_debugFile))
 
 

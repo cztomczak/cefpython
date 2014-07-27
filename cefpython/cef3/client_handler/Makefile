@@ -12,7 +12,7 @@ CC = g++
 CCFLAGS = -g -fPIC -Wall -Werror
 
 SRC = client_handler.cpp cookie_visitor.cpp resource_handler.cpp \
-		web_request_client.cpp string_visitor.cpp
+		web_request_client.cpp string_visitor.cpp request_context_handler.cpp
 OBJ = $(SRC:.cpp=.o)
 OUT = libclient_handler.a
 

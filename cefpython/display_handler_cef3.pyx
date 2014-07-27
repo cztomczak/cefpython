@@ -2,23 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef public void DisplayHandler_OnLoadingStateChange(
-        CefRefPtr[CefBrowser] cefBrowser,
-        cpp_bool isLoading,
-        cpp_bool canGoBack,
-        cpp_bool canGoForward
-        ) except * with gil:
-    cdef PyBrowser pyBrowser
-    cdef object callback
-    try:
-        pyBrowser = GetPyBrowser(cefBrowser)
-        callback = pyBrowser.GetClientCallback("OnLoadingStateChange")
-        if callback:
-            callback(pyBrowser, isLoading, canGoBack, canGoForward)
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
 cdef public void DisplayHandler_OnAddressChange(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,

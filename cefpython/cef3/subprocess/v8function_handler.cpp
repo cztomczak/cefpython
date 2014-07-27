@@ -32,7 +32,7 @@ bool V8FunctionHandler::Execute(const CefString& functionName,
         if (!(cefPythonApp_.get() \
                 && cefPythonApp_->BindedFunctionExists( \
                         browser, functionName))) {
-            exception = std::string("cefpython: " \
+            exception = std::string("[CEF Python] " \
                     "V8FunctionHandler::Execute() FAILED: " \
                     "function does not exist: ").append(functionName) \
                     .append("()");

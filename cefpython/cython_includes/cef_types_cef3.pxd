@@ -217,3 +217,5 @@ cdef extern from "include/internal/cef_types.h":
         UR_IO_PENDING
         UR_CANCELED
         UR_FAILED
+
+    ctypedef uint32 cef_color_t
