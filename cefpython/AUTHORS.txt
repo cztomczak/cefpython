@@ -13,3 +13,4 @@ Contributors (in order of first commit):
     Dominique Burnand <dominique.burnand@@rentouch.ch>
     Greg Farrell <gregfarrell.org@@gmail.com>
     Finn Hughes <finn.hughes1@@gmail.com>
+    Marcelo Fernandez <fernandezm@@gmail.com>
