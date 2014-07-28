@@ -82,6 +82,8 @@ cimport ctime
 
 IF UNAME_SYSNAME == "Windows":
     from windows cimport *
+IF UNAME_SYSNAME == "Linux":
+    from linux cimport *
 
 from cpp_utils cimport *
 

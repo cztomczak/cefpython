@@ -1,32 +1,6 @@
-# This example is throwing segmentation faults when run on Linux,
-# the problem seems to be in a call to CreateBrowserSync(),
-# the backtrace leads to CefBrowserHostImpl::PlatformCreateWindow().
-# Full backtrace:
-"""
-0x00007ffff1ee52a0 in CefBrowserHostImpl::PlatformCreateWindow() ()
-   from /home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/libcef.so
-(gdb) backtrace
-#0  0x00007ffff1ee52a0 in CefBrowserHostImpl::PlatformCreateWindow() ()
-   from /home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/libcef.so
-#1  0x00007ffff1e24930 in CefBrowserHostImpl::Create(CefWindowInfo const&, CefStructBase<CefBrowserSettingsTraits> const&, CefRefPtr<CefClient>, content::WebContents*, scoped_refptr<CefBrowserInfo>, _GtkWidget*) ()
-   from /home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/libcef.so
-#2  0x00007ffff1e251ec in CefBrowserHost::CreateBrowserSync(CefWindowInfo const&, CefRefPtr<CefClient>, CefStringBase<CefStringTraitsUTF16> const&, CefStructBase<CefBrowserSettingsTraits> const&) ()
-   from /home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/libcef.so
-#3  0x00007ffff1dc9fec in cef_browser_host_create_browser_sync ()
-   from /home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/libcef.so
-#4  0x00007fffe8136e4f in CefBrowserHost::CreateBrowserSync(CefWindowInfo const&, CefRefPtr<CefClient>, CefStringBase<CefStringTraitsUTF16> const&, CefStructBase<CefBrowserSettingsTraits> const&) ()
-   from /home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/cefpython_py27.so
-#5  0x00007fffe8111cce in __pyx_pf_14cefpython_py27_16CreateBrowserSync (
-    __pyx_v_windowInfo=<cefpython_py27.WindowInfo at remote 0xdc7fb0>,
-    __pyx_v_browserSettings=<optimized out>, __pyx_v_navigateUrl=
-    'file:///home/czarek/cefpython/cefpython/cef3/linux/binaries_64bit/example.html', __pyx_self=<optimized out>) at cefpython.cpp:65142
-#6  0x00007fffe8114ea6 in __pyx_pw_14cefpython_py27_17CreateBrowserSync (
-"""
-
-# An example of embedding CEF Python in PyQt4 application.
-
-# On Ubuntu install the "python-qt4" package.
-# Tested with version 4.9.1-2ubuntu1.
+# An example of embedding the CEF browser in a PyQt4 application.
+# Tested with PyQt "4.9.1".
+# Command for installing PyQt4: "sudo apt-get install python-qt4".
 
 # The official CEF Python binaries come with tcmalloc hook
 # disabled. But if you've built custom binaries and kept tcmalloc
@@ -38,21 +12,19 @@
 import ctypes, os, sys
 libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)),\
         'libcef.so')
-# Import a local module if exists, otherwise import from
-# an installed package.
 if os.path.exists(libcef_so):
+    # Import local module
     ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
     if 0x02070000 <= sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
 else:
+    # Import from package
     from cefpython3 import cefpython
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
-
-TEST_RESPONSE_READING = False
 
 def GetApplicationPath(file=None):
     import re, os, platform
@@ -94,7 +66,7 @@ def ExceptHook(excType, excValue, traceObject):
             fp.write("\n[%s] %s\n" % (
                     time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
     except:
-        print("cefpython: WARNING: failed writing to error file: %s" % (
+        print("[wxpython.py] WARNING: failed writing to error file: %s" % (
                 errorFile))
     # Convert error message to ascii before printing, otherwise
     # you may get error like this:
@@ -126,31 +98,65 @@ class MainWindow(QtGui.QMainWindow):
         aboutmenu = menubar.addMenu("&About")
 
     def focusInEvent(self, event):
-        cefpython.WindowUtils.OnSetFocus(
-                int(self.centralWidget().winId()), 0, 0, 0)
+        # cefpython.WindowUtils.OnSetFocus(
+        #        int(self.centralWidget().winId()), 0, 0, 0)
+        pass
 
     def closeEvent(self, event):
         self.mainFrame.browser.CloseBrowser()
 
-class MainFrame(QtGui.QWidget):
+class MainFrame(QtGui.QX11EmbedContainer):
     browser = None
+    plug = None
 
     def __init__(self, parent=None):
         super(MainFrame, self).__init__(parent)
+        
+        # QX11EmbedContainer provides an X11 window. The CEF
+        # browser can be embedded only by providing a GtkWidget
+        # pointer. So we're embedding a GtkPlug inside the X11
+        # window. In latest CEF trunk it is possible to embed
+        # the CEF browser by providing X11 window id. So it will
+        # be possible to remove the GTK dependency from CEF
+        # Python in the future.
+        gtkPlugPtr = cefpython.WindowUtils.gtk_plug_new(\
+                int(self.winId()))
+        print("[pyqt.py] MainFrame: GDK Native Window id: "+str(self.winId()))
+        print("[pyqt.py] MainFrame: GTK Plug ptr: "+str(gtkPlugPtr))
+
+        """
+        Embedding GtkPlug is also possible with the pygtk module.
+        ---------------------------------------------------------
+        self.plug = gtk.Plug(self.winId())
+        import re
+        m = re.search("GtkPlug at 0x(\w+)", str(self.plug))
+        hexId = m.group(1)
+        gtkPlugPtr = int(hexId, 16)
+        ...
+        plug.show()
+        self.show()
+        ---------------------------------------------------------
+        """
+
         windowInfo = cefpython.WindowInfo()
-        windowInfo.SetAsChild(int(self.winId()))
+        # Need to pass to CEF the GtkWidget* pointer
+        windowInfo.SetAsChild(gtkPlugPtr)
         # Linux requires adding "file://" for local files,
         # otherwise /home/some will be replaced as http://home/some
         self.browser = cefpython.CreateBrowserSync(windowInfo,
                 browserSettings={},
                 navigateUrl="file://"+GetApplicationPath("example.html"))
+        
+        cefpython.WindowUtils.gtk_widget_show(gtkPlugPtr)
         self.show()
 
     def moveEvent(self, event):
-        cefpython.WindowUtils.OnSize(int(self.winId()), 0, 0, 0)
+        # cefpython.WindowUtils.OnSize(int(self.winId()), 0, 0, 0)
+        pass
 
     def resizeEvent(self, event):
-        cefpython.WindowUtils.OnSize(int(self.winId()), 0, 0, 0)
+        # cefpython.WindowUtils.OnSize(int(self.winId()), 0, 0, 0)
+        pass
 
 class CefApplication(QtGui.QApplication):
     timer = None
@@ -183,22 +189,39 @@ class CefApplication(QtGui.QApplication):
         self.timer.stop()
 
 if __name__ == '__main__':
-    print("PyQt version: %s" % QtCore.PYQT_VERSION_STR)
-    print("QtCore version: %s" % QtCore.qVersion())
+    print("[pyqt.py] PyQt version: %s" % QtCore.PYQT_VERSION_STR)
+    print("[pyqt.py] QtCore version: %s" % QtCore.qVersion())
 
+    # Intercept python exceptions. Exit app immediately when exception
+    # happens on any of the threads.
     sys.excepthook = ExceptHook
 
-    settings = {}
-    settings["debug"] = True # cefpython messages in console and in log_file
-    settings["log_file"] = GetApplicationPath("debug.log")
-    settings["log_severity"] = cefpython.LOGSEVERITY_INFO
-    settings["release_dcheck_enabled"] = True # Enable only when debugging
-    settings["locales_dir_path"] = cefpython.GetModuleDirectory()+"/locales"
-    settings["resources_dir_path"] = cefpython.GetModuleDirectory()
-    settings["browser_subprocess_path"] = "%s/%s" % (
-            cefpython.GetModuleDirectory(), "subprocess")
+    # Application settings
+    settings = {
+        "debug": True, # cefpython debug messages in console and in log_file
+        "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
+        "log_file": GetApplicationPath("debug.log"), # Set to "" to disable.
+        "release_dcheck_enabled": True, # Enable only when debugging.
+        # This directories must be set on Linux
+        "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
+        "resources_dir_path": cefpython.GetModuleDirectory(),
+        "browser_subprocess_path": "%s/%s" % (
+            cefpython.GetModuleDirectory(), "subprocess"),
+        # This option is required for the GetCookieManager callback
+        # to work. It affects renderer processes, when this option
+        # is set to True. It will force a separate renderer process
+        # for each browser created using CreateBrowserSync.
+        "unique_request_context_per_browser": True
+    }
 
-    cefpython.Initialize(settings)
+    # Command line switches set programmatically
+    switches = {
+        # "proxy-server": "socks5://127.0.0.1:8888",
+        # "enable-media-stream": "",
+        # "--invalid-switch": "" -> Invalid switch name
+    }
+
+    cefpython.Initialize(settings, switches)
 
     app = CefApplication(sys.argv)
     mainWindow = MainWindow()
