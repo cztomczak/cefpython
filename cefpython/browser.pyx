@@ -97,7 +97,7 @@ IF CEF_VERSION == 3:
                 if g_sharedRequestContext.get():
                     # A similar release is done in Shutdown and CloseBrowser.
                     Debug("RemovePyBrowser: releasing shared request context")
-                    g_sharedRequestContext.get().Release()
+                    g_sharedRequestContext.Assign(NULL)
             Debug("del g_pyBrowsers[%s]" % browserId)
             del g_pyBrowsers[browserId]
         else:
@@ -315,7 +315,7 @@ cdef class PyBrowser:
                     # A similar release is done in Shutdown 
                     # and RemovePyBrowser.
                     Debug("CloseBrowser: releasing shared request context")
-                    g_sharedRequestContext.get().Release()
+                    g_sharedRequestContext.Assign(NULL)
             Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
             self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
         
