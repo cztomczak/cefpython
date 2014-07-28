@@ -385,7 +385,7 @@ def Shutdown():
         # A similar release is done in RemovePyBrowser and CloseBrowser.
         # This one is probably redundant. Additional testing should be done.
         Debug("Shutdown: releasing shared request context")
-        g_sharedRequestContext.get().Release()
+        g_sharedRequestContext.Assign(NULL)
     Debug("Shutdown()")
     with nogil:
         CefShutdown()
