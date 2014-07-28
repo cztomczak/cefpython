@@ -55,6 +55,9 @@ cpdef str GetNavigateUrl(py_string url):
         # >> %E6%A1%8C%E9%9D%A2
         url = urllib_pathname2url(url)
         url = re.sub("^file%3A", "file:", url)
+        # Allow hash when loading urls. The pathname2url function
+        # replaced hashes with "%23" (Issue 114).
+        url = url.replace("%23", "#")
     return str(url)
 
 IF CEF_VERSION == 1:

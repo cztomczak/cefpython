@@ -98,6 +98,8 @@ class MainFrame(wx.Frame):
                 title='wxPython CEF 3 example', size=(800,600))
         if not url:
             url = "file://"+GetApplicationPath("wxpython.html")
+            # Test hash in url.
+            # url += "#test-hash"
 
         self.CreateMenu()
 
