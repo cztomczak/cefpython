@@ -141,9 +141,12 @@ class ResourceHandler:
         self._responseHeadersReadyCallback = callback
         self._webRequestClient = WebRequestClient()
         self._webRequestClient._resourceHandler = self
-        # To skip cache:
-        # | request.SetFlags(cefpython.Request.Flags["SkipCache"])
-        # Must keep a strong reference to the WebRequest() object.
+        # Need to set AllowCacheCredentials and AllowCookies for
+        # the cookies to work during POST requests (Issue 127).
+        # To skip cache set the SkipCache request flag.
+        request.SetFlags(cefpython.Request.Flags["AllowCachedCredentials"]\
+                | cefpython.Request.Flags["AllowCookies"])
+        # A strong reference to the WebRequest object must kept.
         self._webRequest = cefpython.WebRequest.Create(
                 request, self._webRequestClient)
         return True
