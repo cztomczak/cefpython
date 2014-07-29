@@ -656,6 +656,19 @@ class ClientHandler:
         return True
 
 
+    def OnJavascriptDialog(self, browser, originUrl, acceptLang, dialogType,
+                   messageText, defaultPromptText, callback,
+                   suppressMessage):
+        suppressMessage[0] = True
+        return False
+
+
+    def OnBeforeUnloadJavascriptDialog(self, browser, messageText, isReload,
+            callback):
+        callback.Continue(allow=True, userInput="")
+        return True
+
+
 if __name__ == '__main__':
     class CefBrowserApp(App):
         def build(self):

@@ -11,14 +11,14 @@ import ctypes, os, sys
 libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)),\
         'libcef.so')
 if os.path.exists(libcef_so):
-    # Import local module
+    # Import a local module
     ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
     if 0x02070000 <= sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
 else:
-    # Import from package
+    # Import an installed package
     from cefpython3 import cefpython
 
 import wx
@@ -26,6 +26,7 @@ import time
 import re
 import uuid
 import platform
+import inspect
 
 # Which method to use for message loop processing.
 #   EVT_IDLE - wx application has priority (default)
@@ -95,7 +96,7 @@ class MainFrame(wx.Frame):
 
     def __init__(self, url=None):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
-                title='wxPython CEF 3 example', size=(800,600))
+                title='wxPython CEF 3 example', size=(1024,768))
         if not url:
             url = "file://"+GetApplicationPath("wxpython.html")
             # Test hash in url.
@@ -136,6 +137,7 @@ class MainFrame(wx.Frame):
                 {"name": "Nested dictionary", "isNested": True},
                 [1,"2", None]])
         jsBindings.SetObject("external", JavascriptExternal(self.browser))
+        jsBindings.SetProperty("sources", GetSources())
         self.browser.SetJavascriptBindings(jsBindings)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
@@ -298,7 +300,6 @@ class CookieVisitor:
         return True
 
 class ClientHandler:
-
     # -------------------------------------------------------------------------
     # DisplayHandler
     # -------------------------------------------------------------------------
@@ -508,6 +509,39 @@ class ClientHandler:
         allowPopups = True
         return not allowPopups
 
+    # -------------------------------------------------------------------------
+    # JavascriptDialogHandler
+    # -------------------------------------------------------------------------
+
+    def OnJavascriptDialog(self, browser, originUrl, acceptLang, dialogType,
+                   messageText, defaultPromptText, callback,
+                   suppressMessage):
+        print("[wxpython.py] JavascriptDialogHandler::OnJavascriptDialog()")
+        print("    originUrl="+originUrl)
+        print("    acceptLang="+acceptLang)
+        print("    dialogType="+str(dialogType))
+        print("    messageText="+messageText)
+        print("    defaultPromptText="+defaultPromptText)
+        # If you want to suppress the javascript dialog:
+        # suppressMessage[0] = True
+        return False
+
+    def OnBeforeUnloadJavascriptDialog(self, browser, messageText, isReload,
+            callback):
+        print("[wxpython.py] OnBeforeUnloadJavascriptDialog()")
+        print("    messageText="+messageText)
+        print("    isReload="+str(isReload))
+        # Return True if the application will use a custom dialog:
+        #   callback.Continue(allow=True, userInput="")
+        #   return True
+        return False
+
+    def OnResetJavascriptDialogState(self, browser):
+        print("[wxpython.py] OnResetDialogState()")
+
+    def OnJavascriptDialogClosed(self, browser):
+        print("[wxpython.py] OnDialogClosed()")
+
 
 class MyApp(wx.App):
     timer = None
@@ -542,18 +576,51 @@ class MyApp(wx.App):
         if not USE_EVT_IDLE:
             self.timer.Stop()
 
+def GetSources():
+    # Get sources of all python functions and methods from this file.
+    # This is to provide sources preview to wxpython.html.
+    # The dictionary of functions is binded to "window.sources".
+    thisModule = sys.modules[__name__]
+    functions = inspect.getmembers(thisModule, inspect.isfunction)
+    classes = inspect.getmembers(thisModule, inspect.isclass)
+    sources = {}
+    for funcTuple in functions:
+        sources[funcTuple[0]] = inspect.getsource(funcTuple[1])
+    for classTuple in classes:
+        className = classTuple[0]
+        classObject = classTuple[1]
+        methods = inspect.getmembers(classObject)
+        for methodTuple in methods:
+            try:
+                sources[methodTuple[0]] = inspect.getsource(\
+                        methodTuple[1])
+            except:
+                pass
+    return sources
+
 if __name__ == '__main__':
+    print('[wxpython.py] wx.version=%s' % wx.version())
+
     # Intercept python exceptions. Exit app immediately when exception
     # happens on any of the threads.
     sys.excepthook = ExceptHook
+
+    # Application settings
     settings = {
-        "debug": True, # cefpython debug messages in console and in log_file
-        "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
-        "log_file": GetApplicationPath("debug.log"), # Set to "" to disable.
-        "release_dcheck_enabled": True, # Enable only when debugging.
-        # This directories must be set on Linux
+        # CEF Python debug messages in console and in log_file
+        "debug": True,
+        # Set it to LOGSEVERITY_VERBOSE for more details
+        "log_severity": cefpython.LOGSEVERITY_INFO,
+        # Set to "" to disable logging to a file
+        "log_file": GetApplicationPath("debug.log"),
+        # This should be enabled only when debugging
+        "release_dcheck_enabled": True,
+        # These directories must be set on Linux
         "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
         "resources_dir_path": cefpython.GetModuleDirectory(),
+        # The "subprocess" executable that launches the Renderer
+        # and GPU processes among others. You may rename that
+        # executable if you like.
         "browser_subprocess_path": "%s/%s" % (
             cefpython.GetModuleDirectory(), "subprocess"),
         # This option is required for the GetCookieManager callback
@@ -562,19 +629,22 @@ if __name__ == '__main__':
         # for each browser created using CreateBrowserSync.
         "unique_request_context_per_browser": True
     }
-    # See Chromium switches:
-    # https://src.chromium.org/svn/trunk/src/chrome/common/chrome_switches.cc
-    # See CEF switches:
-    # https://code.google.com/p/chromiumembedded/source/browse/trunk/cef3/libcef/common/cef_switches.cc
+    
+    # Command line switches set programmatically
     switches = {
         # "proxy-server": "socks5://127.0.0.1:8888",
+        # "no-proxy-server": "",
         # "enable-media-stream": "",
+        # "remote-debugging-port": "12345",
+        # "disable-gpu": "",
         # "--invalid-switch": "" -> Invalid switch name
     }
+    
     cefpython.Initialize(settings, switches)
-    print('[wxpython.py] wx.version=%s' % wx.version())
+    
     app = MyApp(False)
     app.MainLoop()
     # Let wx.App destructor do the cleanup before calling cefpython.Shutdown().
     del app
+    
     cefpython.Shutdown()

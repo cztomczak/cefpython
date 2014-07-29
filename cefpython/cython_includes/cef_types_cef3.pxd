@@ -219,3 +219,9 @@ cdef extern from "include/internal/cef_types.h":
         UR_FAILED
 
     ctypedef uint32 cef_color_t
+
+    # CefJSDialogHandler.OnJSDialog()
+    enum cef_jsdialog_type_t:
+        JSDIALOGTYPE_ALERT = 0,
+        JSDIALOGTYPE_CONFIRM,
+        JSDIALOGTYPE_PROMPT,
