@@ -67,6 +67,10 @@ __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnDownloadProgress(int, CefRefPt
 __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnDownloadData(int, CefRefPtr<CefURLRequest>, void const *, size_t);
 __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnRequestComplete(int, CefRefPtr<CefURLRequest>);
 __PYX_EXTERN_C DL_IMPORT(void) App_OnBeforeCommandLineProcessing_BrowserProcess(CefRefPtr<CefCommandLine>);
+__PYX_EXTERN_C DL_IMPORT(bool) JavascriptDialogHandler_OnJavascriptDialog(CefRefPtr<CefBrowser>, CefString const &, CefString const &, enum cef_jsdialog_type_t, CefString const &, CefString const &, CefRefPtr<CefJSDialogCallback>, bool &);
+__PYX_EXTERN_C DL_IMPORT(bool) JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(CefRefPtr<CefBrowser>, CefString const &, bool, CefRefPtr<CefJSDialogCallback>);
+__PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnResetJavascriptDialogState(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnJavascriptDialogClosed(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) cefpython_GetDebugOptions(bool *, std::string *);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
