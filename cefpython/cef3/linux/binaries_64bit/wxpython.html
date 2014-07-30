@@ -37,6 +37,8 @@ Use the mouse context menu to go Back/Forward in history navigation.
     <li><a href="#user-agent">User agent</a></li>
     <li><a href="#popups">Popups</a></li>
     <li><a href="#html5-video">HTML 5 video</a></li>
+    <li><a href="#browser-object">Browser object</a></li>
+    <li><a href="#frame-object">Frame object</a></li>
     <li><a href="#javascript-bindings">Javascript bindings</a></li>
     <li><a href="#javascript-callbacks">Javascript callbacks</a></li>
     <li><a href="#python-callbacks">Python callbacks</a></li>
@@ -46,7 +48,6 @@ Use the mouse context menu to go Back/Forward in history navigation.
     <li><a href="#cookie-tests">Cookie tests</a></li>
     <li><a href="#load-handler">Load handler</a></li>
     <li><a href="#javascript-dialog-handler">Javascript Dialog handler</a></li>
-    <li><a href="#other-tests">Other tests</a></li>
 </ol>
 
 <!-- ********************************************************************** -->
@@ -114,6 +115,37 @@ Accelerated canvas</a><br>
 
 <a href="http://www.webkit.org/blog-files/3d-transforms/poster-circle.html">
 Accelerated layers</a><br>
+
+<!-- ********************************************************************** -->
+<!-- Browser object -->
+<!-- ********************************************************************** -->
+
+<a name="browser-object"></a>
+<h2>Browser object</h2>
+
+Tests for the Browser object methods.
+
+<h3>GoBack</h3>
+<script>ShowSource("GoBack");</script>
+<a href="javascript:external.GoBack()">external.GoBack()</a>
+
+<h3>GoForward</h3>
+<script>ShowSource("GoForward");</script>
+<a href="javascript:external.GoForward()">external.GoForward()</a>
+
+<h3>LoadUrl, GetUrl</h3>
+<script>ShowSource("_Browser_LoadUrl");</script>
+<a href="javascript:window.open('data:text/html,Test#Browser.LoadUrl')">
+    window.open('data:text/html,Test#Browser.LoadUrl')</a>
+
+<!-- ********************************************************************** -->
+<!-- Frame object -->
+<!-- ********************************************************************** -->
+
+<a name="frame-object"></a>
+<h2>Frame object</h2>
+
+Tests for the Frame object methods. TODO.
 
 <!-- ********************************************************************** -->
 <!-- Javascript bindings -->
@@ -557,21 +589,6 @@ function TestOnBeforeUnloadJavascriptDialog() {
 
 <h3>OnJavascriptDialogClosed</h3>   
 <script>ShowSource("OnJavascriptDialogClosed");</script>
-
-<!-- ********************************************************************** -->
-<!-- Other tests -->
-<!-- ********************************************************************** -->
-
-<a name="other-tests"></a>
-<h2>Other tests</h2>
-
-<h3>GoBack</h3>
-<script>ShowSource("GoBack");</script>
-<a href="javascript:external.GoBack()">external.GoBack()</a>
-
-<h3>GoForward</h3>
-<script>ShowSource("GoForward");</script>
-<a href="javascript:external.GoForward()">external.GoForward()</a>
 
 <!-- ********************************************************************** -->
 <!-- Other -->

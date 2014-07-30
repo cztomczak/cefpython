@@ -4,13 +4,14 @@
 
 cdef dict g_pyFrames = {}
 
-IF CEF_VERSION == 3:
-    # The IF condition above is required otherwise you will see
-    # "Unused function" warning in CEF 1.
-    cdef PyFrame GetPyFrameById(object frameId):
-        if frameId in g_pyFrames:
-            return g_pyFrames[frameId]
-        return None
+cdef object GetUniqueFrameId(int browserId, object frameId):
+    return str(browserId) +"#"+ str(frameId)
+
+cdef PyFrame GetPyFrameById(int browserId, object frameId):
+    cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
+    if uniqueFrameId in g_pyFrames:
+        return g_pyFrames[uniqueFrameId]
+    return None
 
 cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     global g_pyFrames
@@ -22,44 +23,42 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     cdef object frameId = cefFrame.get().GetIdentifier()
     cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
     assert (frameId and browserId), "frameId or browserId empty"
-    if frameId in g_pyFrames:
-        return g_pyFrames[frameId]
-    for id, pyFrame in g_pyFrames.items():
+    cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
+    if uniqueFrameId in g_pyFrames:
+        return g_pyFrames[uniqueFrameId]
+    for uFid, pyFrame in g_pyFrames.items():
         if not pyFrame.cefFrame.get():
             Debug("GetPyFrame(): removing an empty CefFrame reference, " \
-                    "frameId = %s" % id)
-            del g_pyFrames[id]
+                    "uniqueFrameId = %s" % uniqueFrameId)
+            del g_pyFrames[uFid]
     # Debug("GetPyFrame(): creating new PyFrame, frameId=%s" % frameId)
     pyFrame = PyFrame(browserId, frameId)
     pyFrame.cefFrame = cefFrame
-    g_pyFrames[frameId] = pyFrame
+    g_pyFrames[uniqueFrameId] = pyFrame
     return pyFrame
 
-IF CEF_VERSION == 3:
-    # Unused function warning in CEF 1.
-    cdef void RemovePyFrame(object frameId) except *:
-        # Called from V8ContextHandler_OnContextReleased().
-        # TODO: call this function also in CEF 1.
-        global g_pyFrames
-        if frameId in g_pyFrames:
-            Debug("del g_pyFrames[%s]" % frameId)
-            del g_pyFrames[frameId]
-        else:
-            Debug("RemovePyFrame() FAILED: frame not found, id = %s" % frameId)
+cdef void RemovePyFrame(int browserId, object frameId) except *:
+    # Called from V8ContextHandler_OnContextReleased().
+    global g_pyFrames
+    cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
+    if uniqueFrameId in g_pyFrames:
+        Debug("del g_pyFrames[%s]" % uniqueFrameId)
+        del g_pyFrames[uniqueFrameId]
+    else:
+        Debug("RemovePyFrame() FAILED: uniqueFrameId = %s" % uniqueFrameId)
 
-    cdef void RemovePyFramesForBrowser(int browserId) except *:
-        # Called from LifespanHandler_BeforeClose().
-        # TODO: call this function also in CEF 1.
-        cdef list toRemove = []
-        cdef object frameId
-        cdef PyFrame pyFrame
-        global g_pyFrames
-        for frameId, pyFrame in g_pyFrames.iteritems():
-            if pyFrame.GetBrowserIdentifier() == browserId:
-                toRemove.append(frameId)
-        for frameId in toRemove:
-            Debug("del g_pyFrames[%s]" % frameId)
-            del g_pyFrames[frameId]
+cdef void RemovePyFramesForBrowser(int browserId) except *:
+    # Called from LifespanHandler_BeforeClose().
+    cdef list toRemove = []
+    cdef object uniqueFrameId
+    cdef PyFrame pyFrame
+    global g_pyFrames
+    for uniqueFrameId, pyFrame in g_pyFrames.iteritems():
+        if pyFrame.GetBrowserIdentifier() == browserId:
+            toRemove.append(uniqueFrameId)
+    for uniqueFrameId in toRemove:
+        Debug("del g_pyFrames[%s]" % uniqueFrameId)
+        del g_pyFrames[uniqueFrameId]
 
 cdef class PyFrame:
     cdef CefRefPtr[CefFrame] cefFrame
@@ -152,7 +151,6 @@ cdef class PyFrame:
         # be freed and calling methods on these objects may fail, this
         # may or may not include GetIdentifier() method, but let's be sure.
         return self.frameId
-        # OFF: return self.GetCefFrame().get().GetIdentifier()
 
     cpdef int GetBrowserIdentifier(self) except *:
         return self.browserId

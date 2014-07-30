@@ -46,7 +46,7 @@ cdef public void V8ContextHandler_OnContextReleased(
         # were released.
         Debug("V8ContextHandler_OnContextReleased()")
         pyBrowser = GetPyBrowserById(browserId)
-        pyFrame = GetPyFrameById(frameId)
+        pyFrame = GetPyFrameById(browserId, frameId)
         if pyBrowser and pyFrame:
             clientCallback = pyBrowser.GetClientCallback("OnContextReleased")
             if clientCallback:
@@ -58,7 +58,7 @@ cdef public void V8ContextHandler_OnContextReleased(
             if not pyFrame:
                 Debug("V8ContextHandler_OnContextReleased() WARNING: " \
                         "pyFrame not found")
-        RemovePyFrame(frameId)
+        RemovePyFrame(browserId, frameId)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
