@@ -40,6 +40,8 @@ setup(
     package_data={'cefpython3': [
         'examples/*.py',
         'examples/*.html',
+        'examples/*.js',
+        'examples/*.css',
         'examples/kivy-select-boxes/*.html',
         'examples/kivy-select-boxes/*.js',
         'examples/kivy-select-boxes/*.css',
