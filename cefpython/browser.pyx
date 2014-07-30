@@ -402,6 +402,9 @@ cdef class PyBrowser:
         else:
             return self.GetWindowHandle()
 
+    cpdef py_string GetUrl(self):
+        return self.GetMainFrame().GetUrl()
+
     cpdef object GetUserData(self, object key):
         if key in self.userData:
             return self.userData[key]
@@ -457,8 +460,11 @@ cdef class PyBrowser:
         ELIF CEF_VERSION == 3:
             return self.GetCefBrowserHost().get().IsWindowRenderingDisabled()
 
-    cpdef py_void Navigate(self, py_string url):
+    cpdef py_string LoadUrl(self, py_string url):
         self.GetMainFrame().LoadUrl(url)
+
+    cpdef py_void Navigate(self, py_string url):
+        self.LoadUrl(url)
 
     IF CEF_VERSION == 3:
         cpdef py_void Print(self):

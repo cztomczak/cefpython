@@ -28,6 +28,8 @@ import uuid
 import platform
 import inspect
 
+g_browserSettings = None
+
 # Which method to use for message loop processing.
 #   EVT_IDLE - wx application has priority (default)
 #   EVT_TIMER - cef browser has priority
@@ -119,10 +121,10 @@ class MainFrame(wx.Frame):
             windowInfo,
             # If there are problems with Flash you can disable it here,
             # by disabling all plugins.
-            browserSettings={"plugins_disabled": False},
+            browserSettings=g_browserSettings,
             navigateUrl=url)
 
-        clientHandler = ClientHandler()
+        clientHandler = ClientHandler(self.browser)
         self.browser.SetClientHandler(clientHandler)
         cefpython.SetGlobalClientCallback("OnCertificateError",
                 clientHandler._OnCertificateError)
@@ -316,6 +318,11 @@ class CookieVisitor:
         return True
 
 class ClientHandler:
+    mainBrowser = None
+
+    def __init__(self, browser):
+        self.mainBrowser = browser
+
     # -------------------------------------------------------------------------
     # DisplayHandler
     # -------------------------------------------------------------------------
@@ -376,18 +383,18 @@ class ClientHandler:
 
     def OnBeforeBrowse(self, browser, frame, request, isRedirect):
         print("[wxpython.py] RequestHandler::OnBeforeBrowse()")
-        print("    url = %s" % request.GetUrl()[:70])
+        print("    url = %s" % request.GetUrl()[:100])
         return False
 
     def OnBeforeResourceLoad(self, browser, frame, request):
         print("[wxpython.py] RequestHandler::OnBeforeResourceLoad()")
-        print("    url = %s" % request.GetUrl()[:70])
+        print("    url = %s" % request.GetUrl()[:100])
         return False
 
     def OnResourceRedirect(self, browser, frame, oldUrl, newUrlOut):
         print("[wxpython.py] RequestHandler::OnResourceRedirect()")
-        print("    old url = %s" % oldUrl[:70])
-        print("    new url = %s" % newUrlOut[0][:70])
+        print("    old url = %s" % oldUrl[:100])
+        print("    new url = %s" % newUrlOut[0][:100])
 
     def GetAuthCredentials(self, browser, frame, isProxy, host, port, realm,
             scheme, callback):
@@ -495,17 +502,23 @@ class ClientHandler:
 
     def OnLoadStart(self, browser, frame):
         print("[wxpython.py] LoadHandler::OnLoadStart()")
-        print("    frame url = %s" % frame.GetUrl()[:70])
+        print("    frame url = %s" % frame.GetUrl()[:100])
 
     def OnLoadEnd(self, browser, frame, httpStatusCode):
         print("[wxpython.py] LoadHandler::OnLoadEnd()")
-        print("    frame url = %s" % frame.GetUrl()[:70])
+        print("    frame url = %s" % frame.GetUrl()[:100])
         # For file:// urls the status code = 0
         print("    http status code = %s" % httpStatusCode)
+        # Tests for the Browser object methods
+        self._Browser_LoadUrl(browser)
+        
+    def _Browser_LoadUrl(self, browser):
+        if browser.GetUrl() == "data:text/html,Test#Browser.LoadUrl":
+             browser.LoadUrl("file://"+GetApplicationPath("wxpython.html"))
 
     def OnLoadError(self, browser, frame, errorCode, errorTextList, failedUrl):
         print("[wxpython.py] LoadHandler::OnLoadError()")
-        print("    frame url = %s" % frame.GetUrl()[:70])
+        print("    frame url = %s" % frame.GetUrl()[:100])
         print("    error code = %s" % errorCode)
         print("    error text = %s" % errorTextList[0])
         print("    failed url = %s" % failedUrl)
@@ -645,9 +658,19 @@ if __name__ == '__main__':
         # for each browser created using CreateBrowserSync.
         "unique_request_context_per_browser": True
     }
+
+    # Browser settings. You may have different settings for each
+    # browser, see the call to CreateBrowserSync.
+    g_browserSettings = {
+        # "plugins_disabled": True,
+         "file_access_from_file_urls_allowed": True,
+         "universal_access_from_file_urls_allowed": True,
+    }
     
     # Command line switches set programmatically
     switches = {
+         "allow-file-access-from-files": "",
+         "allow-file-access": "",
         # "proxy-server": "socks5://127.0.0.1:8888",
         # "no-proxy-server": "",
         # "enable-media-stream": "",
