@@ -373,8 +373,17 @@ class MainFrame(wx.Frame):
         self.SetMenuBar(menubar)
 
     def OnClose(self, event):
-        self.browser.CloseBrowser()
-        self.Destroy()
+        # In wx.chromectrl calling browser.CloseBrowser() and/or
+        # self.Destroy() in OnClose is causing crashes when embedding
+        # multiple browser tabs. The solution is to call only 
+        # browser.ParentWindowWillClose. Behavior of this example
+        # seems different as it extends wx.Frame, while ChromeWindow
+        # from chromectrl extends wx.Window. Calling CloseBrowser
+        # and Destroy does not cause crashes, but is not recommended.
+        # Call ParentWindowWillClose and event.Skip() instead. See 
+        # also Issue 107.
+        self.browser.ParentWindowWillClose()
+        event.Skip()
 
     def OnIdle(self, event):
         cefpython.MessageLoopWork()
@@ -415,7 +424,7 @@ class MyApp(wx.App):
 if __name__ == '__main__':
     sys.excepthook = ExceptHook
     settings = {
-        "debug": False # cefpython debug messages in console and in log_file
+        "debug": False, # cefpython debug messages in console and in log_file
         "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
         "log_file": GetApplicationPath("debug.log"), # Set to "" to disable.
         "release_dcheck_enabled": True, # Enable only when debugging.
