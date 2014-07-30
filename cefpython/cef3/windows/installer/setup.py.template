@@ -25,8 +25,12 @@ setup(
     package_data={'cefpython3': [
         'examples/*.py',
         'examples/*.html',
+        'examples/*.js',
+        'examples/*.css',
         'examples/wx/*.py',
         'examples/wx/*.html',
+        'examples/wx/*.js',
+        'examples/wx/*.css',
         'examples/wx/*.png',
         'locales/*.pak',
         'wx/*.txt',

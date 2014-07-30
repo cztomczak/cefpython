@@ -126,6 +126,8 @@ def main():
             continue
         os.rename(example, package_dir+"/examples/"+os.path.basename(example))
     glob_move(package_dir+"/*.html", package_dir+"/examples/")
+    glob_move(package_dir+"/*.css", package_dir+"/examples/")
+    glob_move(package_dir+"/*.js", package_dir+"/examples/")
 
     print("Copying wx-subpackage to wx dir in package dir")
     wx_subpackage_dir = os.path.abspath(installer_dir+"/../../wx-subpackage/")

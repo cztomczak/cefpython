@@ -69,6 +69,8 @@ Source: "%(WX_SUBPACKAGE_DIR)s\images\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s\w
 
 Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
 Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.js"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
+Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.css"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
 Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
 
 ; ------------------------------------------------------------------------------
@@ -78,6 +80,8 @@ Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s
 Source: "cefwindow.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "example.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "*.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+Source: "*.css"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+Source: "*.js"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "icon.ico"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "pygtk_.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "pyqt.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
