@@ -479,12 +479,25 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                 "invalid data [1]");
         return;
     }
+
     // A context must be explicitly entered before creating a
     // V8 Object, Array, Function or Date asynchronously.
-    bool enteredContext = false;
-    if (!context->IsSame(CefV8Context::GetCurrentContext())) {
-        enteredContext = true;
+    // NOTE: you cannot call CefV8Context::GetEnteredContext
+    //       or GetCurrentContext when CefV8Context::InContext
+    //       returns false, as it will result in crashes.
+    bool didEnterContext = false;
+    if (!CefV8Context::InContext()) {
+        if (!context->IsValid()) {
+            // BUG in CEF (Issue 130), the "context" provided by CEF may
+            // not be valid. May be a timing issue. Or may be caused by
+            // a redirect to a different origin and that creates a new
+            // renderer process.
+            DebugLog("Renderer: DoJavascriptBindingsForFrame() FAILED:"\
+                    " V8 context provided by CEF is invalid");
+            return;
+        }
         context->Enter();
+        didEnterContext = true;
     }
     CefRefPtr<CefDictionaryValue> functions = \
             jsBindings->GetDictionary("functions");
@@ -498,7 +511,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
             && objects->IsValid())) {
         DebugLog("Renderer: DoJavascriptBindingsForFrame() FAILED: " \
                 "invalid data [2]");
-        if (enteredContext)
+        if (didEnterContext)
             context->Exit();
         return;
     }
@@ -510,7 +523,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     if (!functions->GetKeys(functionsVector)) {
         DebugLog("Renderer: DoJavascriptBindingsForFrame(): " \
                 "functions->GetKeys() FAILED");
-        if (enteredContext)
+        if (didEnterContext)
             context->Exit();
         return;
     }
@@ -529,7 +542,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     if (!v8Properties->GetKeys(v8Keys)) {
         DebugLog("DoJavascriptBindingsForFrame() FAILED: " \
                 "v8Properties->GetKeys() failed");
-        if (enteredContext)
+        if (didEnterContext)
             context->Exit();
         return;
     }
@@ -544,7 +557,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     if (!objects->GetKeys(objectsVector)) {
         DebugLog("Renderer: DoJavascriptBindingsForFrame() FAILED: " \
                 "objects->GetKeys() failed");
-        if (enteredContext)
+        if (didEnterContext)
             context->Exit();
         return;
     }
@@ -557,7 +570,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         if (!(objects->GetType(objectName) == VTYPE_DICTIONARY)) {
             DebugLog("Renderer: DoJavascriptBindingsForFrame() FAILED: " \
                     "objects->GetType() != VTYPE_DICTIONARY");
-            if (enteredContext)
+            if (didEnterContext)
                 context->Exit();
             return;
         }
@@ -567,7 +580,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         if (!(methods->IsValid() && methods->GetKeys(methodsVector))) {
             DebugLog("Renderer: DoJavascriptBindingsForFrame() FAILED: " \
                     "methods->GetKeys() failed");
-            if (enteredContext)
+            if (didEnterContext)
                 context->Exit();
             return;
         }
@@ -584,6 +597,6 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         }
     }
     // END.
-    if (enteredContext)
+    if (didEnterContext)
         context->Exit();
 }
