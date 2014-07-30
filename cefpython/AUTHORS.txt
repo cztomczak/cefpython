@@ -14,3 +14,4 @@ Contributors (in order of first commit):
     Greg Farrell <gregfarrell.org@@gmail.com>
     Finn Hughes <finn.hughes1@@gmail.com>
     Marcelo Fernandez <fernandezm@@gmail.com>
+    Simon Hatt <9hatt2@@gmail.com>
