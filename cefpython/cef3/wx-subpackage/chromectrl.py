@@ -1,7 +1,7 @@
 # Additional and wx specific layer of abstraction for the cefpython
 # __author__ = "Greg Kacy <grkacy@gmail.com>"
 
-#--------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 from cefpython3 import cefpython
 import os, sys, platform
@@ -10,8 +10,43 @@ import wx.lib.buttons as buttons
 
 #-------------------------------------------------------------------------------
 
+# CEF Python application settings
+g_settings = None
+
+def Debug(msg):
+    if g_settings and "debug" in g_settings and g_settings["debug"]:
+        print("[chromectrl.py] "+msg)
+
+#-------------------------------------------------------------------------------
+
 # Default timer interval when timer used to service CEF message loop
 DEFAULT_TIMER_MILLIS = 10
+
+# A global timer for CEF message loop processing.
+g_messageLoopTimer = None
+
+def CreateMessageLoopTimer(timerMillis):
+    # This function gets called multiple times for each ChromeWindow
+    # instance.
+    global g_messageLoopTimer
+    Debug("CreateMesageLoopTimer")
+    if g_messageLoopTimer:
+        return
+    g_messageLoopTimer = wx.Timer()
+    g_messageLoopTimer.Start(timerMillis)
+    Debug("g_messageLoopTimer.GetId() = "\
+            +str(g_messageLoopTimer.GetId()))
+    wx.EVT_TIMER(g_messageLoopTimer, g_messageLoopTimer.GetId(),\
+            MessageLoopTimer)
+
+def MessageLoopTimer(event):
+    cefpython.MessageLoopWork()
+
+def DestroyMessageLoopTimer():
+    global g_messageLoopTimer
+    Debug("DestroyMessageLoopTimer")
+    g_messageLoopTimer.Stop()
+    g_messageLoopTimer = None
 
 #-------------------------------------------------------------------------------
 
@@ -121,19 +156,23 @@ class ChromeWindow(wx.Window):
             self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
             self.Bind(wx.EVT_SIZE, self.OnSize)
 
+        self._useTimer = useTimer
         if useTimer:
-            self.timerID = 1
-            self._CreateTimer(timerMillis)
+            CreateMessageLoopTimer(timerMillis)
         else:
+            # Currently multiple EVT_IDLE events might be registered
+            # when creating multiple ChromeWindow instances. This will
+            # result in calling CEF message loop work multiple times
+            # simultaneously causing performance penalties and possibly
+            # some unwanted behavior (CEF Python Issue 129).
+            Debug("WARNING: Using EVT_IDLE for CEF message  loop processing"\
+                    " is not recommended")
             self.Bind(wx.EVT_IDLE, self.OnIdle)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self._useTimer = useTimer
 
     def OnClose(self, event):
-        if self._useTimer:
-            self.timer.Stop()
-        else:
+        if not self._useTimer:
             try:
                 self.Unbind(wx.EVT_IDLE)
             except:
@@ -143,15 +182,6 @@ class ChromeWindow(wx.Window):
                 #  be true anymore in OnClose, but still let's make sure)
                 pass
         self.browser.ParentWindowWillClose()
-
-    def _CreateTimer(self, millis):
-        self.timer = wx.Timer(self, self.timerID)
-        self.timer.Start(millis) #
-        wx.EVT_TIMER(self, self.timerID, self.OnTimer)
-
-    def OnTimer(self, event):
-        """Service CEF message loop when useTimer is True"""
-        cefpython.MessageLoopWork()
 
     def OnIdle(self, event):
         """Service CEF message loop when useTimer is False"""
@@ -179,11 +209,11 @@ class ChromeWindow(wx.Window):
 
         browser = self.GetBrowser()
         if cefpython.g_debug:
-            print("***** ChromeCtrl: LoadUrl() self: %s" % self)
-            print("***** ChromeCtrl: browser: %s" % browser)
-            print("***** ChromeCtrl: browser id: %s" % browser.GetIdentifier())
-            print("***** ChromeCtrl: mainframe: %s" % browser.GetMainFrame())
-            print("***** ChromeCtrl: mainframe id: %s" % \
+            Debug("LoadUrl() self: %s" % self)
+            Debug("browser: %s" % browser)
+            Debug("browser id: %s" % browser.GetIdentifier())
+            Debug("mainframe: %s" % browser.GetMainFrame())
+            Debug("mainframe id: %s" % \
                     browser.GetMainFrame().GetIdentifier())
         self.GetBrowser().GetMainFrame().LoadUrl(url)
 
@@ -302,7 +332,7 @@ class DefaultClientHandler(object):
 
     def OnLoadError(self, browser, frame, errorCode, errorText, failedUrl):
         # TODO
-        print("***** ChromeCtrl: ERROR LOADING URL : %s" % failedUrl)
+        Debug("ERROR LOADING URL : %s" % failedUrl)
 
 class CallbackClientHandler(object):
     def __init__(self, onLoadStart=None, onLoadEnd=None):
@@ -319,7 +349,7 @@ class CallbackClientHandler(object):
 
     def OnLoadError(self, browser, frame, errorCode, errorText, failedUrl):
         # TODO
-        print("***** ChromeCtrl: ERROR LOADING URL : %s, %s" % (failedUrl, frame.GetUrl()))
+        Debug("ERROR LOADING URL : %s, %s" % (failedUrl, frame.GetUrl()))
 
 #-------------------------------------------------------------------------------
 
@@ -327,6 +357,7 @@ def Initialize(settings=None, debug=False):
     """Initializes CEF, We should do it before initializing wx
        If no settings passed a default is used
     """
+    global g_settings
     if not settings:
         settings = {}
     if not "log_severity" in settings:
@@ -352,8 +383,10 @@ def Initialize(settings=None, debug=False):
         settings["log_file"] = "debug.log" # Set to "" to disable.
         settings["release_dcheck_enabled"] = True
 
+    g_settings = settings
     cefpython.Initialize(settings)
 
 def Shutdown():
     """Shuts down CEF, should be called by app exiting code"""
+    DestroyMessageLoopTimer()
     cefpython.Shutdown()
