@@ -369,13 +369,38 @@ class ClientHandler:
         print("[wxpython.py] KeyboardHandler::OnPreKeyEvent()")
 
     def OnKeyEvent(self, browser, event, eventHandle):
+        if event["type"] == cefpython.KEYEVENT_KEYUP:
+            # OnKeyEvent is called twice for F5/Esc keys, with event
+            # type KEYEVENT_RAWKEYDOWN and KEYEVENT_KEYUP.
+            # Normal characters a-z should have KEYEVENT_CHAR.
+            return False
         print("[wxpython.py] KeyboardHandler::OnKeyEvent()")
-        print("    native_key_code = %s" % event["native_key_code"])
+        print("    type=%s" % event["type"])
+        print("    modifiers=%s" % event["modifiers"])
+        print("    windows_key_code=%s" % event["windows_key_code"])
+        print("    native_key_code=%s" % event["native_key_code"])
+        print("    is_system_key=%s" % event["is_system_key"])
+        print("    character=%s" % event["character"])
+        print("    unmodified_character=%s" % event["unmodified_character"])
+        print("    focus_on_editable_field=%s"\
+                % event["focus_on_editable_field"])
         if platform.system() == "Linux":
-            # F5 = 71
+            # F5
             if event["native_key_code"] == 71:
-                print("[wxpython.py] F5 pressed! Reloading page..")
+                print("[wxpython.py] F5 pressed, calling"\
+                        " browser.ReloadIgnoreCache()")
                 browser.ReloadIgnoreCache()
+                return True
+            # Escape
+            if event["native_key_code"] == 9:
+                print("[wxpython.py] Esc pressed, calling browser.StopLoad()")
+                browser.StopLoad()
+                return True
+        elif platform.system() == "Windows":
+            # F5 todo
+            # Escape todo
+            pass
+        return False
 
     # -------------------------------------------------------------------------
     # RequestHandler
@@ -522,6 +547,13 @@ class ClientHandler:
         print("    error code = %s" % errorCode)
         print("    error text = %s" % errorTextList[0])
         print("    failed url = %s" % failedUrl)
+        # Handle ERR_ABORTED error code, to handle the following cases:
+        # 1. Esc key was pressed which calls browser.StopLoad() in OnKeyEvent
+        # 2. Download of a file was aborted
+        if errorCode == cefpython.ERR_ABORTED:
+            print("[wxpython.py] LoadHandler::OnLoadError(): Ignoring load"\
+                    " error: Esc was pressed or file download was aborted")
+            return;
         customErrorMessage = "My custom error message!"
         frame.LoadUrl("data:text/html,%s" % customErrorMessage)
 
@@ -656,7 +688,10 @@ if __name__ == '__main__':
         # to work. It affects renderer processes, when this option
         # is set to True. It will force a separate renderer process
         # for each browser created using CreateBrowserSync.
-        "unique_request_context_per_browser": True
+        "unique_request_context_per_browser": True,
+        # Downloads are handled automatically. A default SaveAs file 
+        # dialog provided by OS will be displayed.
+        "downloads_enabled": True,
     }
 
     # Browser settings. You may have different settings for each
