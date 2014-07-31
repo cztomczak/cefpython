@@ -237,6 +237,18 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
         applicationSettings["unique_request_context_per_browser"] = False
     if "downloads_enabled" not in applicationSettings:
         applicationSettings["downloads_enabled"] = True
+    if "remote_debugging_port" not in applicationSettings:
+        applicationSettings["remote_debugging_port"] = 0
+
+    # Remote debugging port. If value is 0 we will generate a random
+    # port. To disable remote debugging set value to -1.
+    if applicationSettings["remote_debugging_port"] == 0:
+        # Generate a random port.  
+        applicationSettings["remote_debugging_port"] =\
+                random.randint(49152, 65535) 
+    elif applicationSettings["remote_debugging_port"] == -1:
+        # Disable remote debugging
+        applicationSettings["remote_debugging_port"] = 0
 
     # CEF options - default values.
     if not "multi_threaded_message_loop" in applicationSettings:

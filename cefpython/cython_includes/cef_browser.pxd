@@ -99,7 +99,7 @@ cdef extern from "include/cef_browser.h":
             double GetZoomLevel()
             void SetZoomLevel(double zoomLevel)
 
-            # virtual CefString GetDevToolsURL(bool http_scheme) =0;
+            CefString GetDevToolsURL(cpp_bool http_scheme)
             # virtual void RunFileDialog(FileDialogMode mode,
             #                 const CefString& title,
             #                 const CefString& default_file_name,

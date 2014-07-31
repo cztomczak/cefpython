@@ -15,6 +15,7 @@ import inspect # used by JavascriptBindings.__SetObjectMethods()
 import urllib
 import json
 import datetime
+import random
 
 if sys.version_info.major == 2:
     import urlparse

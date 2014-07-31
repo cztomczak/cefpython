@@ -246,6 +246,10 @@ class JavascriptExternal:
         self.stringVisitor = StringVisitor()
         self.mainBrowser.GetMainFrame().GetText(self.stringVisitor)
 
+    def ShowDevTools(self):
+        print("[wxpython.py] external.ShowDevTools called")
+        self.mainBrowser.ShowDevTools()
+
     # -------------------------------------------------------------------------
     # Cookies
     # -------------------------------------------------------------------------
@@ -395,6 +399,12 @@ class ClientHandler:
             if event["native_key_code"] == 9:
                 print("[wxpython.py] Esc pressed, calling browser.StopLoad()")
                 browser.StopLoad()
+                return True
+            # F12
+            if event["native_key_code"] == 96:
+                print("[wxpython.py] F12 pressed, calling"\
+                        " browser.ShowDevTools()")
+                browser.ShowDevTools()
                 return True
         elif platform.system() == "Windows":
             # F5 todo
@@ -692,6 +702,10 @@ if __name__ == '__main__':
         # Downloads are handled automatically. A default SaveAs file 
         # dialog provided by OS will be displayed.
         "downloads_enabled": True,
+        # Remote debugging port, required for Developer Tools support.
+        # A value of 0 will generate a random port. To disable devtools
+        # support set it to -1.
+        "remote_debugging_port": 0,
     }
 
     # Browser settings. You may have different settings for each

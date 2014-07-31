@@ -491,10 +491,18 @@ cdef class PyBrowser:
         ELIF CEF_VERSION == 3:
             self.GetCefBrowserHost().get().SetZoomLevel(zoomLevel)
 
-    IF CEF_VERSION == 1:
-
-        cpdef py_void ShowDevTools(self):
-            self.GetCefBrowser().get().ShowDevTools()
+    cpdef py_void ShowDevTools(self):
+        cdef CefString cefUrl = self.GetCefBrowserHost().get().GetDevToolsURL(\
+                True)
+        cdef py_string url = CefToPyString(cefUrl)
+        # Example url returned:
+        # | http://localhost:54008/devtools/devtools.html?ws=localhost:54008
+        # | /devtools/page/1538ed984a2a4a90e5ed941c7d142a12
+        # Let's replace "localhost" with "127.0.0.1", using the ip address
+        # is more reliable.
+        url = url.replace("localhost:", "127.0.0.1:")
+        jsCode = ("window.open('%s');" % url)
+        self.GetMainFrame().ExecuteJavascript(jsCode)
 
     cpdef py_void StopLoad(self):
         self.GetCefBrowser().get().StopLoad()
