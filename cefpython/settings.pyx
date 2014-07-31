@@ -105,7 +105,8 @@ cdef void SetApplicationSettings(
         ELIF CEF_VERSION == 3:
             if key == "string_encoding"\
                     or key == "debug"\
-                    or key == "unique_request_context_per_browser":
+                    or key == "unique_request_context_per_browser"\
+                    or key == "downloads_enabled":
                 # CEF Python only options. These are not to be found in CEF.
                 continue
             elif key == "multi_threaded_message_loop":

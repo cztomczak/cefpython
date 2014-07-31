@@ -66,6 +66,10 @@ cdef public void LoadHandler_OnLoadError(
     cdef list errorTextOut
     cdef object clientCallback
     try:
+        # If webpage loading or file download is aborted by user
+        # the error code will be ERR_ABORTED. In such cases calls
+        # to OnLoadError should be ignored and not handled by user
+        # scripts. The wxpython example implements such behavior.
         pyBrowser = GetPyBrowser(cefBrowser)
         pyFrame = GetPyFrame(cefFrame)
         errorTextOut = [CefToPyString(cefErrorText)]

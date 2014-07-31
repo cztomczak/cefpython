@@ -91,8 +91,8 @@ include "imports.pyx"
 g_debug = False
 g_debugFile = "debug.log"
 
-# When put None here and assigned a local dictionary in Initialize(), later while
-# running app this global variable was garbage collected, see topic:
+# When put None here and assigned a local dictionary in Initialize(), later 
+# while running app this global variable was garbage collected, see topic:
 # https://groups.google.com/d/topic/cython-users/0dw3UASh7HY/discussion
 g_applicationSettings = {}
 g_commandLineSwitches = {}
@@ -184,13 +184,14 @@ IF CEF_VERSION == 3:
     include "app.pyx"
     include "javascript_dialog_handler.pyx"
 
+# -----------------------------------------------------------------------------
+# Utility functions to provide settings to the C++ browser process code.
+
 cdef public void cefpython_GetDebugOptions(
         cpp_bool* debug,
         cpp_string* debugFile
         ) except * with gil:
     # Called from subprocess/cefpython_app.cpp -> CefPythonApp constructor.
-    global g_debug
-    global g_debugFile
     cdef cpp_string cppString = g_debugFile
     try:
         debug[0] = <cpp_bool>bool(g_debug)
@@ -198,6 +199,16 @@ cdef public void cefpython_GetDebugOptions(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public cpp_bool ApplicationSettings_GetBool(const char* key
+        ) except * with gil:
+    # Called from client_handler/client_handler.cpp for example
+    cdef py_string pyKey = CharToPyString(key)
+    if pyKey in g_applicationSettings:
+        return bool(g_applicationSettings[pyKey])
+    return False
+
+# -----------------------------------------------------------------------------
 
 # If you've built custom binaries with tcmalloc hook enabled on
 # Linux, then do not to run any of the CEF code until Initialize()
@@ -224,6 +235,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
         applicationSettings["string_encoding"] = "utf-8"
     if "unique_request_context_per_browser" not in applicationSettings:
         applicationSettings["unique_request_context_per_browser"] = False
+    if "downloads_enabled" not in applicationSettings:
+        applicationSettings["downloads_enabled"] = True
 
     # CEF options - default values.
     if not "multi_threaded_message_loop" in applicationSettings:

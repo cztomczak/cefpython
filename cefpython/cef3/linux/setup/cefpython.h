@@ -72,6 +72,7 @@ __PYX_EXTERN_C DL_IMPORT(bool) JavascriptDialogHandler_OnBeforeUnloadJavascriptD
 __PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnResetJavascriptDialogState(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnJavascriptDialogClosed(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) cefpython_GetDebugOptions(bool *, std::string *);
+__PYX_EXTERN_C DL_IMPORT(bool) ApplicationSettings_GetBool(char const *);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 

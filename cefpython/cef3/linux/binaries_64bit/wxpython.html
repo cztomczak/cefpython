@@ -5,7 +5,7 @@
     <title>wxPython CEF 3 example (utf-8: ąś)</title>
     <style>
     body { font: 13px Segoe UI, Arial; line-height: 1.4em; }
-    pre { background: #ddd; font: 12px Consolas, Courier New; }
+    pre { background: #eee; font: 12px Consolas, Courier New; }
     </style>
     <script>
     function ShowSource(func) {
@@ -37,6 +37,7 @@ Use the mouse context menu to go Back/Forward in history navigation.
     <li><a href="#user-agent">User agent</a></li>
     <li><a href="#popups">Popups</a></li>
     <li><a href="#html5-video">HTML 5 video</a></li>
+    <li><a href="#downloads">Downloads</a></li>
     <li><a href="#browser-object">Browser object</a></li>
     <li><a href="#frame-object">Frame object</a></li>
     <li><a href="#javascript-bindings">Javascript bindings</a></li>
@@ -117,6 +118,42 @@ Accelerated canvas</a><br>
 Accelerated layers</a><br>
 
 <!-- ********************************************************************** -->
+<!-- Downloads -->
+<!-- ********************************************************************** -->
+
+<a name="downloads"></a>
+<h2>Downloads</h2>
+
+Download sample Ubuntu wallpapers:<br>
+<a href="https://cefpython.googlecode.com/files/ubuntu-wallpapers2.zip">
+    https://cefpython.googlecode.com/files/ubuntu-wallpapers2.zip</a>
+
+<p>
+Notes: On Linux it seems that OnLoadError with errorCode = ERR_ABORTED
+is called even for successful downloads, you can ignore this behavior.
+The proper console messages about successful/aborted download originate
+from C++ Browser process code, these are:
+</p>
+
+<pre>Browser: About to download file: ubuntu-wallpapers2.zip
+Browser: Download completed, saved to: /Downloads/ubuntu-wallpapers2.zip
+</pre>
+
+If download was aborted the messages will be:
+
+<pre>Browser: About to download file: ubuntu-wallpapers2.zip
+Browser: Download was cancelled
+</pre>
+
+<p>
+Additionally on Linux there are more errors reported by Chromium
+about org.gnome.SessionManager.inhibit. These can be safely ignored as well.
+</p>
+
+A download handler with callbacks like `OnBeforeDownload` and
+`OnDownloadUpdated` may be exposed to CEF Python in the future.
+
+<!-- ********************************************************************** -->
 <!-- Browser object -->
 <!-- ********************************************************************** -->
 
@@ -137,6 +174,14 @@ Tests for the Browser object methods.
 <script>ShowSource("_Browser_LoadUrl");</script>
 <a href="javascript:window.open('data:text/html,Test#Browser.LoadUrl')">
     window.open('data:text/html,Test#Browser.LoadUrl')</a>
+
+<h3>ReloadIgnoreCache, StopLoad</h3>
+Press F5 to reload page and ignore cache.<br>
+Press Esc during webpage loading to abort.<br>
+<script>ShowSource("OnKeyEvent");</script>
+Also, when Esc is pressed OnLoadError may get called. See how abort
+of page loading or file download is handled:
+<script>ShowSource("OnLoadError");</script>
 
 <!-- ********************************************************************** -->
 <!-- Frame object -->

@@ -2,6 +2,8 @@
 // License: New BSD License.
 // Website: http://code.google.com/p/cefpython/
 
+// ClientHandler code is running in the Browser process only.
+
 #pragma once
 
 #if defined(_WIN32)
@@ -18,7 +20,8 @@ class ClientHandler :
         public CefRequestHandler,
         public CefLoadHandler,
         public CefRenderHandler,
-        public CefJSDialogHandler
+        public CefJSDialogHandler,
+        public CefDownloadHandler
 {
 public:
   ClientHandler(){}
@@ -56,7 +59,7 @@ public:
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefDownloadHandler> GetDownloadHandler() OVERRIDE {
-    return NULL;
+    return this;
   }
 
   ///
@@ -699,6 +702,42 @@ public:
   ///
   /*--cef()--*/
   virtual void OnDialogClosed(CefRefPtr<CefBrowser> browser) OVERRIDE;
+
+  // --------------------------------------------------------------------------
+  // CefDownloadHandler
+  // --------------------------------------------------------------------------
+
+  ///
+  // Class used to handle file downloads. The methods of this class will called
+  // on the browser process UI thread.
+  ///
+
+  ///
+  // Called before a download begins. |suggested_name| is the suggested name for
+  // the download file. By default the download will be canceled. Execute
+  // |callback| either asynchronously or in this method to continue the download
+  // if desired. Do not keep a reference to |download_item| outside of this
+  // method.
+  ///
+  /*--cef()--*/
+  virtual void OnBeforeDownload(
+      CefRefPtr<CefBrowser> browser,
+      CefRefPtr<CefDownloadItem> download_item,
+      const CefString& suggested_name,
+      CefRefPtr<CefBeforeDownloadCallback> callback) OVERRIDE;
+
+  ///
+  // Called when a download's status or progress information has been updated.
+  // This may be called multiple times before and after OnBeforeDownload().
+  // Execute |callback| either asynchronously or in this method to cancel the
+  // download if desired. Do not keep a reference to |download_item| outside of
+  // this method.
+  ///
+  /*--cef()--*/
+  virtual void OnDownloadUpdated(
+      CefRefPtr<CefBrowser> browser,
+      CefRefPtr<CefDownloadItem> download_item,
+      CefRefPtr<CefDownloadItemCallback> callback) OVERRIDE;
 
 
 private:

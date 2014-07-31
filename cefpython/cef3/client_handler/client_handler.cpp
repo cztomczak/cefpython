@@ -2,6 +2,8 @@
 // License: New BSD License.
 // Website: http://code.google.com/p/cefpython/
 
+// ClientHandler code is running in the Browser process only.
+
 #include "client_handler.h"
 #include "cefpython_public_api.h"
 #include "DebugLog.h"
@@ -776,3 +778,57 @@ void ClientHandler::OnDialogClosed(CefRefPtr<CefBrowser> browser) {
     return JavascriptDialogHandler_OnJavascriptDialogClosed(browser);
 }
 
+// ----------------------------------------------------------------------------
+// CefDownloadHandler
+// ----------------------------------------------------------------------------
+
+///
+// Class used to handle file downloads. The methods of this class will called
+// on the browser process UI thread.
+///
+
+///
+// Called before a download begins. |suggested_name| is the suggested name for
+// the download file. By default the download will be canceled. Execute
+// |callback| either asynchronously or in this method to continue the download
+// if desired. Do not keep a reference to |download_item| outside of this
+// method.
+///
+/*--cef()--*/
+void ClientHandler::OnBeforeDownload(CefRefPtr<CefBrowser> browser,
+                        CefRefPtr<CefDownloadItem> download_item,
+                        const CefString& suggested_name,
+                        CefRefPtr<CefBeforeDownloadCallback> callback) {
+    REQUIRE_UI_THREAD();
+    bool downloads_enabled = ApplicationSettings_GetBool("downloads_enabled");
+    if (downloads_enabled) {
+        std::string msg = "Browser: About to download file: ";
+        msg.append(suggested_name.ToString().c_str());
+        DebugLog(msg.c_str());
+        callback->Continue(suggested_name, true);
+    } else {
+        DebugLog("Browser: Tried to download file, but downloads are disabled");
+    }
+}
+
+///
+// Called when a download's status or progress information has been updated.
+// This may be called multiple times before and after OnBeforeDownload().
+// Execute |callback| either asynchronously or in this method to cancel the
+// download if desired. Do not keep a reference to |download_item| outside of
+// this method.
+///
+/*--cef()--*/
+void ClientHandler::OnDownloadUpdated(
+        CefRefPtr<CefBrowser> browser,
+        CefRefPtr<CefDownloadItem> download_item,
+        CefRefPtr<CefDownloadItemCallback> callback) {
+    REQUIRE_UI_THREAD();
+    if (download_item->IsComplete()) {
+        std::string msg = "Browser: Download completed, saved to: ";
+        msg.append(download_item->GetFullPath().ToString().c_str());
+        DebugLog(msg.c_str());
+    } else if (download_item->IsCanceled()) {
+        DebugLog("Browser: Download was cancelled");
+    }
+}
