@@ -1,6 +1,13 @@
 # Slightly more advanced sample illustrating the usage of CEFWindow class
 # __author__ = "Greg Kacy <grkacy@gmail.com>"
 
+# --WARNING--
+# TODO: There is something wrong with this example. On Linux
+#       CPU usage for the python process is 100% all the time.
+#       The other examples sample1.py / sample2.py do not
+#       show such behavior. It must have something to do
+#       with the wx controls used in this example.
+
 import wx
 import wx.lib.agw.flatnotebook as fnb
 import cefpython3.wx.chromectrl as chrome
