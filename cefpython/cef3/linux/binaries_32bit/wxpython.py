@@ -1,4 +1,6 @@
 # An example of embedding CEF browser in wxPython on Linux.
+# Tested with wxPython 2.8.12.1 (gtk2-unicode).
+# To install wxPython type "sudo apt-get install python-wxtools".
 
 # The official CEF Python binaries come with tcmalloc hook
 # disabled. But if you've built custom binaries and kept tcmalloc
