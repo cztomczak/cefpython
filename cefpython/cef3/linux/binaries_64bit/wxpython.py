@@ -706,6 +706,15 @@ if __name__ == '__main__':
         # A value of 0 will generate a random port. To disable devtools
         # support set it to -1.
         "remote_debugging_port": 0,
+        # Mouse context menu
+        "context_menu": {
+            "enabled": True,
+            "navigation": True, # Back, Forward, Reload
+            "print": True,
+            "view_source": True,
+            "external_browser": True, # Open in external browser
+            "devtools": True, # Developer Tools
+        },
     }
 
     # Browser settings. You may have different settings for each

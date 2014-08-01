@@ -12,6 +12,7 @@
   #endif
 #endif
 
+__PYX_EXTERN_C DL_IMPORT(void) PyBrowser_ShowDevTools(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextReleased(int, int64);
 __PYX_EXTERN_C DL_IMPORT(void) V8FunctionHandler_Execute(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString &, CefRefPtr<CefListValue>);
@@ -73,6 +74,7 @@ __PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnResetJavascriptDialogSt
 __PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnJavascriptDialogClosed(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) cefpython_GetDebugOptions(bool *, std::string *);
 __PYX_EXTERN_C DL_IMPORT(bool) ApplicationSettings_GetBool(char const *);
+__PYX_EXTERN_C DL_IMPORT(bool) ApplicationSettings_GetBoolFromDict(char const *, char const *);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 

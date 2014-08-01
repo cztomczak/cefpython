@@ -208,6 +208,19 @@ cdef public cpp_bool ApplicationSettings_GetBool(const char* key
         return bool(g_applicationSettings[pyKey])
     return False
 
+cdef public cpp_bool ApplicationSettings_GetBoolFromDict(const char* key1,
+        const char* key2) except * with gil:
+    cdef py_string pyKey1 = CharToPyString(key1)
+    cdef py_string pyKey2 = CharToPyString(key2)
+    cdef object dictValue # Yet to be checked whether it is `dict`
+    if pyKey1 in g_applicationSettings:
+        dictValue = g_applicationSettings[pyKey1]
+        if type(dictValue) != dict:
+            return False
+        if pyKey2 in dictValue:
+            return bool(dictValue[pyKey2])
+    return False
+
 # -----------------------------------------------------------------------------
 
 # If you've built custom binaries with tcmalloc hook enabled on
@@ -228,7 +241,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
 
     Debug("Initialize() called")
 
-    # CEF Python only options - default values.
+    # -------------------------------------------------------------------------
+    # CEF Python only options - default values
+
     if "debug" not in applicationSettings:
         applicationSettings["debug"] = False
     if "string_encoding" not in applicationSettings:
@@ -240,6 +255,15 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
     if "remote_debugging_port" not in applicationSettings:
         applicationSettings["remote_debugging_port"] = 0
 
+    # Mouse context menu
+    if "context_menu" not in applicationSettings:
+        applicationSettings["context_menu"] = {}
+    menuItems = ["enabled", "navigation", "print", "view_source",\
+            "external_browser", "devtools"]
+    for item in menuItems:
+        if item not in applicationSettings["context_menu"]:
+            applicationSettings["context_menu"][item] = True
+
     # Remote debugging port. If value is 0 we will generate a random
     # port. To disable remote debugging set value to -1.
     if applicationSettings["remote_debugging_port"] == 0:
@@ -249,6 +273,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
     elif applicationSettings["remote_debugging_port"] == -1:
         # Disable remote debugging
         applicationSettings["remote_debugging_port"] = 0
+
+    # -------------------------------------------------------------------------
 
     # CEF options - default values.
     if not "multi_threaded_message_loop" in applicationSettings:

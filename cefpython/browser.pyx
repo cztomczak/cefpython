@@ -113,6 +113,19 @@ cpdef PyBrowser GetBrowserByWindowHandle(WindowHandle windowHandle):
             return pyBrowser
     return None
 
+cdef public void PyBrowser_ShowDevTools(CefRefPtr[CefBrowser] cefBrowser
+        ) except * with gil:
+    # Called from ClientHandler::OnContextMenuCommand
+    cdef PyBrowser pyBrowser
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser.ShowDevTools()
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
+# -----------------------------------------------------------------------------
+
 cdef class PyBrowser:
     cdef CefRefPtr[CefBrowser] cefBrowser
 
@@ -499,7 +512,7 @@ cdef class PyBrowser:
         # | http://localhost:54008/devtools/devtools.html?ws=localhost:54008
         # | /devtools/page/1538ed984a2a4a90e5ed941c7d142a12
         # Let's replace "localhost" with "127.0.0.1", using the ip address
-        # is more reliable.
+        # which is more reliable.
         url = url.replace("localhost:", "127.0.0.1:")
         jsCode = ("window.open('%s');" % url)
         self.GetMainFrame().ExecuteJavascript(jsCode)
