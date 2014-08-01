@@ -1,4 +1,6 @@
 # An example of embedding CEF browser in wxPython on Linux.
+# Tested with wxPython 2.8.12.1 (gtk2-unicode).
+# To install wxPython type "sudo apt-get install python-wxtools".
 
 # The official CEF Python binaries come with tcmalloc hook
 # disabled. But if you've built custom binaries and kept tcmalloc
@@ -724,14 +726,12 @@ if __name__ == '__main__':
     # browser, see the call to CreateBrowserSync.
     g_browserSettings = {
         # "plugins_disabled": True,
-         "file_access_from_file_urls_allowed": True,
-         "universal_access_from_file_urls_allowed": True,
+        # "file_access_from_file_urls_allowed": True,
+        # "universal_access_from_file_urls_allowed": True,
     }
     
     # Command line switches set programmatically
     switches = {
-         "allow-file-access-from-files": "",
-         "allow-file-access": "",
         # "proxy-server": "socks5://127.0.0.1:8888",
         # "no-proxy-server": "",
         # "enable-media-stream": "",
