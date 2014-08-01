@@ -45,8 +45,12 @@ def MessageLoopTimer(event):
 def DestroyMessageLoopTimer():
     global g_messageLoopTimer
     Debug("DestroyMessageLoopTimer")
-    g_messageLoopTimer.Stop()
-    g_messageLoopTimer = None
+    if g_messageLoopTimer:
+        g_messageLoopTimer.Stop()
+        g_messageLoopTimer = None
+    else:
+        # There was no browser created during session.
+        Debug("DestroyMessageLoopTimer: timer not started")
 
 #-------------------------------------------------------------------------------
 
