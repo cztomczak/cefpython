@@ -1,11 +1,13 @@
+# An example of embedding CEF browser in wxPython on Linux.
+# Tested with wxPython 2.8.12.1 (gtk2-unicode).
+# To install wxPython type "sudo apt-get install python-wxtools".
+
 # This example implements a custom "_OnResourceResponse" callback
 # that emulates reading response by utilizing Resourcehandler
 # and WebRequest.
 
 FIX_ENCODING_BUG = True
 BROWSER_DEFAULT_ENCODING = "utf-8"
-
-# An example of embedding CEF browser in wxPython on Linux.
 
 # The official CEF Python binaries come with tcmalloc hook
 # disabled. But if you've built custom binaries and kept tcmalloc
