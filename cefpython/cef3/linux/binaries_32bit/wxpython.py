@@ -715,6 +715,9 @@ if __name__ == '__main__':
             "external_browser": True, # Open in external browser
             "devtools": True, # Developer Tools
         },
+        # See also OnCertificateError which allows you to ignore
+        # certificate errors for specific websites.
+        "ignore_certificate_errors": False,
     }
 
     # Browser settings. You may have different settings for each

@@ -51,6 +51,7 @@ Use the mouse context menu to go Back/Forward in history navigation.
     <li><a href="#cookie-tests">Cookie tests</a></li>
     <li><a href="#load-handler">Load handler</a></li>
     <li><a href="#javascript-dialog-handler">Javascript Dialog handler</a></li>
+    <li><a href="#other-tests">Other tests</a></li>
 </ol>
 
 <!-- ********************************************************************** -->
@@ -674,6 +675,25 @@ function TestOnBeforeUnloadJavascriptDialog() {
 
 <h3>OnJavascriptDialogClosed</h3>   
 <script>ShowSource("OnJavascriptDialogClosed");</script>
+
+<!-- ********************************************************************** -->
+<!-- Other tests -->
+<!-- ********************************************************************** -->
+
+<a name="other-tests"></a>
+<h2>Other tests</h2>
+
+<h3>HTTPS caching with SSL certificate errors</h3>
+Set ApplicationSettings["ignore_certificate_errors"] to True.
+
+<ul>
+    <li><a href="https://192.168.0.17/test.html">
+            https://192.168.0.17/test.html</a></li>
+    <li><a href="javascript:window.open('https://192.168.0.17/test.html')">
+            window.open('https://192.168.0.17/test.html')</a></li>
+    <li><a href="javascript:external.CreateAnotherBrowser('https://192.168.0.17/test.html')">
+            external.CreateAnotherBrowser('https://192.168.0.17/test.html')</a>
+</ul>
 
 <!-- ********************************************************************** -->
 <!-- Other -->
