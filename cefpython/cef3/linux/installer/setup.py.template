@@ -6,21 +6,34 @@ import subprocess
 
 def my_post_install():
     """ Chmod +x the subprocess and cefclient executables. """
-    # We do not want to import from the local "cefpython3" directory.
+    
+    # Do not import from the local "cefpython3" directory.
     # Import the cefpython3 module from dist-packages/ directory.
     del sys.path[0]
     sys.path.append('')
     import cefpython3
     package_dir = os.path.dirname(cefpython3.__file__)
+    
     # Make sure this is not a local package imported.
     assert not package_dir.startswith(
             os.path.dirname(os.path.abspath(__file__)))
+    
+    # Chmod 755 executable files
     subprocess_exe = os.path.join(package_dir, "subprocess")
     cefclient_exe = os.path.join(package_dir, "cefclient")
-    print("chmod +x " + subprocess_exe)
-    subprocess.call("chmod +x "+subprocess_exe, shell=True)
-    print("chmod +x " + cefclient_exe)
-    subprocess.call("chmod +x "+cefclient_exe, shell=True)
+    print("chmod 755 "+subprocess_exe)
+    subprocess.call("chmod 755 "+subprocess_exe, shell=True)
+    print("chmod 755 "+cefclient_exe)
+    subprocess.call("chmod 755 "+cefclient_exe, shell=True)
+    
+    # Also chmod 777 the examples directory as "debug.log" file
+    # is created when running examples.
+    examples = os.path.join(package_dir, "examples")
+    examples_wx = os.path.join(examples, "wx")
+    print("chmod 777 "+examples)
+    subprocess.call("chmod 777 "+examples, shell=True)
+    print("chmod 777 "+examples_wx)
+    subprocess.call("chmod 777 "+examples_wx, shell=True)
 
 class install(_install):
     def run(self):

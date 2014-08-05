@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Permissions for the executable files
+chmod 755 /usr/share/pyshared/cefpython3/cefclient
+chmod 755 /usr/share/pyshared/cefpython3/subprocess
+
+# Permissions for the examples - debug.log is created.
+# If you want to run the cefclient executable you may
+# also have to chmod 777 /usr/share/pyshared/cefpython3/.
+chmod 777 /usr/share/pyshared/cefpython3/examples/
+chmod 777 /usr/share/pyshared/cefpython3/examples/wx/
+
+# This creates symbolic links in /usr/lib/pymodules/.../cefpython3/
+# for all the files. This is no more required, as in make-deb.py
+# we're modify the deb archive and moving the /usr/lib/pyshared/.../
+# .so files to the /usr/share/pyshared/.../ directory. Read the
+# comments in make-deb.py why it needs to be done so.
+# Let's keep the creation of symlinks for backwards compatibility.
+if which update-python-modules >/dev/null 2>&1; then
+    update-python-modules  python-cefpython3.public
+fi

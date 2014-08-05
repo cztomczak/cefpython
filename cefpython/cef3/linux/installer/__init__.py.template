@@ -1,23 +1,30 @@
 import ctypes, os
 
 # If this is a debian package then package_dir is a symlink:
-#   /usr/lib/pymodules/python2.7/cefpython3
-# Cefpython3 files including executables are located in:
-#   /usr/share/pyshared/cefpython3
-# Cefpython3 .so libraries are located in:
-#   /usr/lib/pyshared/python2.7/cefpython3
+#   /usr/lib/pymodules/python2.7/cefpython3/
+# The real directory in which cefpython files are located is:
+#   /usr/share/pyshared/cefpython3/
 
+# Package dir will be /usr/lib/pymodules/python2.7/cefpython3/
+# when using the debian package. For the distutils setup it 
+# will be /usr/local/lib/python2.7/dist-packages/cefpython3/.
 package_dir = os.path.dirname(os.path.abspath(__file__))
 
-# This loads the libcef.so library for the main python executable.
+# This loads the libcef.so library for the python process.
 libcef_so = os.path.join(package_dir, "libcef.so")
 ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
 
-# Other .so libraries may also be required
+# Other .so libraries may also be required.
+# Loading the libffmpegsumo.so library is probably redundant to
+# load for the python process, as it shows from testing. It is
+# only loaded by the subprocess executable with the use of the
+# LD_LIBRARY_PATH env variable. But just to be sure let's load
+# it as well for future proof.
 libffmpegsumo_so = os.path.join(package_dir, "libffmpegsumo.so")
 ctypes.CDLL(libffmpegsumo_so, ctypes.RTLD_GLOBAL)
 
-# This loads the libcef.so library for the subprocess executable.
+# This will allow the subprocess executable to load the libcef.so
+# and libffmpeg.so libraries.
 os.environ["LD_LIBRARY_PATH"] = package_dir
 
 # This env variable will be returned by cefpython.GetModuleDirectory().
