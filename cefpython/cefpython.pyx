@@ -65,15 +65,17 @@
 #   tied to the life time of the Python string. When the Python
 #   string is garbage collected, the pointer becomes invalid.
 #
-# - Do not define cpdef functions returning "cpp_bool":
+# - When defining cpdef functions returning "cpp_bool":
 #   | cpdef cpp_bool myfunc() except *:
-#   This causes compiler warnings like this:
+#   Always do an additional cast when returning value, even when
+#   variable is defined as py_bool:
+#   | cdef py_bool returnValue
+#   | return bool(returnValue)
+#   Otherwise compiler warnings appear:
 #   | cefpython.cpp(26533) : warning C4800: 'int' : forcing value
 #   | to bool 'true' or 'false' (performance warning)
-#   Do instead declare "py_bool" as return type:
-#   | cpdef py_bool myufunc():
 #   Lots of these warnings results in ignoring them, but sometimes
-#   they are shown for a good reason, for example when you forget
+#   they are shown for a good reason. For example when you forget
 #   to return a value in a function.
 #
 # - Always import bool from libcpp as cpp_bool, if you import it as
@@ -122,10 +124,13 @@ IF UNAME_SYSNAME == "Windows" and CEF_VERSION == 1:
 
 IF UNAME_SYSNAME == "Windows":
     include "window_utils_win.pyx"
+    include "dpi_aware_win.pyx"
     IF CEF_VERSION == 1:
         include "http_authentication_win.pyx"
 ELIF UNAME_SYSNAME == "Linux":
     include "window_utils_linux.pyx"
+
+include "task.pyx"
 
 include "javascript_bindings.pyx"
 include "virtual_keys.pyx"
@@ -220,6 +225,20 @@ cdef public cpp_bool ApplicationSettings_GetBoolFromDict(const char* key1,
         if pyKey2 in dictValue:
             return bool(dictValue[pyKey2])
     return False
+
+cdef public cpp_string ApplicationSettings_GetString(const char* key
+        ) except * with gil:
+    cdef py_string pyKey = CharToPyString(key)
+    cdef cpp_string cppString
+    if pyKey in g_applicationSettings:
+        cppString = AnyToPyString(g_applicationSettings[pyKey])
+    return cppString
+
+cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
+    cdef py_string pyKey = CharToPyString(key)
+    if pyKey in g_commandLineSwitches:
+        return int(g_commandLineSwitches[pyKey])
+    return 0
 
 # -----------------------------------------------------------------------------
 
@@ -461,3 +480,4 @@ cpdef object GetGlobalClientCallback(py_string name):
         return g_globalClientCallbacks[name]
     else:
         return None
+

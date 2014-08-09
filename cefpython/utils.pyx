@@ -3,8 +3,22 @@
 # Website: http://code.google.com/p/cefpython/
 
 TID_UI = cef_types.TID_UI
-TID_IO = cef_types.TID_IO
+TID_DB = cef_types.TID_DB
 TID_FILE = cef_types.TID_FILE
+TID_FILE_USER_BLOCKING = cef_types.TID_FILE_USER_BLOCKING
+TID_PROCESS_LAUNCHER = cef_types.TID_PROCESS_LAUNCHER
+TID_CACHE = cef_types.TID_CACHE
+TID_IO = cef_types.TID_IO
+TID_RENDERER = cef_types.TID_RENDERER
+
+g_browserProcessThreads = [
+    TID_UI,
+    TID_DB,
+    TID_FILE,
+    TID_FILE_USER_BLOCKING,
+    TID_CACHE,
+    TID_IO,
+]
 
 cpdef py_bool IsString(object maybeString):
     # In Python 2.7 string types are: 1) str/bytes 2) unicode.
@@ -44,20 +58,42 @@ cpdef str GetSystemError():
         return ""
 
 cpdef str GetNavigateUrl(py_string url):
-    # Only local file paths: some.html, some/some.html, D:\, /var, file://
-    if re.search(r"^file:", url, re.I) or re.search(r"^[a-zA-Z]:", url) or (
-            not re.search(r"^[\w-]+:", url)):
+    # Encode local file paths so that CEF can load them correctly: 
+    # | some.html, some/some.html, D:\, /var, file://
+    if re.search(r"^file:", url, re.I) or \
+            re.search(r"^[a-zA-Z]:", url) or \
+            not re.search(r"^[\w-]+:", url):
+        
+        # Function pathname2url will complain if url starts with "file://".
+        # CEF may also change local urls to "file:///C:/" - three slashes.
+        is_file_protocol = False
+        file_prefix = ""
+        file_prefixes = ["file:///", "file://"]
+        for file_prefix in file_prefixes:
+            if url.startswith(file_prefix):
+                is_file_protocol = True
+                # Remove the file:// prefix
+                url = url[len(file_prefix):]
+                break
+
         # Need to encode chinese characters in local file paths,
-        # otherwise CEF will try to encode them by itself, but it
-        # won't work with python's string encoding, will encode as:
+        # otherwise CEF will try to encode them by itself. But it
+        # will fail in doing so. CEF will return the following string:
         # >> %EF%BF%97%EF%BF%80%EF%BF%83%EF%BF%A6
-        # but should be:
+        # But it should be:
         # >> %E6%A1%8C%E9%9D%A2
         url = urllib_pathname2url(url)
-        url = re.sub("^file%3A", "file:", url)
+        
+        if is_file_protocol:
+            url = "%s%s" % (file_prefix, url)
+        
+        # If it is C:\ then colon was encoded. Decode it back.
+        url = re.sub(r"^([a-zA-Z])%3A", r"\1:", url)
+        
         # Allow hash when loading urls. The pathname2url function
         # replaced hashes with "%23" (Issue 114).
         url = url.replace("%23", "#")
+
     return str(url)
 
 IF CEF_VERSION == 1:

@@ -1,14 +1,20 @@
-# An example of embedding CEF Python in PyQt4 application.
+# An example of embedding CEF browser in a PyQt4 application.
+# Tested with PyQt 4.10.3 (Qt 4.8.5).
 
 import platform
 if platform.architecture()[0] != "32bit":
     raise Exception("Architecture not supported: %s" % platform.architecture()[0])
 
+import platform
+if platform.architecture()[0] != "32bit":
+    raise Exception("Architecture not supported: %s" \
+            % platform.architecture()[0])
+
 import os, sys
 libcef_dll = os.path.join(os.path.dirname(os.path.abspath(__file__)),
         'libcef.dll')
 if os.path.exists(libcef_dll):
-    # Import the local module.
+    # Import a local module
     if 0x02070000 <= sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
     elif 0x03000000 <= sys.hexversion < 0x04000000:
@@ -16,14 +22,14 @@ if os.path.exists(libcef_dll):
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
 else:
-    # Import the package.
+    # Import an installed package
     from cefpython3 import cefpython
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
 def GetApplicationPath(file=None):
-    import re, os
+    import re, os, platform
     # If file is None return current directory without trailing slash.
     if file is None:
         file = ""
@@ -37,7 +43,8 @@ def GetApplicationPath(file=None):
         else:
             path = os.getcwd()
         path = path + os.sep + file
-        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+        if platform.system() == "Windows":
+            path = re.sub(r"[/\\]+", re.escape(os.sep), path)
         path = re.sub(r"[/\\]+$", "", path)
         return path
     return str(file)
@@ -61,7 +68,7 @@ def ExceptHook(excType, excValue, traceObject):
             fp.write("\n[%s] %s\n" % (
                     time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
     except:
-        print("cefpython: WARNING: failed writing to error file: %s" % (
+        print("[pyqt.py] WARNING: failed writing to error file: %s" % (
                 errorFile))
     # Convert error message to ascii before printing, otherwise
     # you may get error like this:
@@ -142,17 +149,34 @@ class CefApplication(QtGui.QApplication):
         self.timer.stop()
 
 if __name__ == '__main__':
-    print("PyQt version: %s" % QtCore.PYQT_VERSION_STR)
-    print("QtCore version: %s" % QtCore.qVersion())
+    print("[pyqt.py] PyQt version: %s" % QtCore.PYQT_VERSION_STR)
+    print("[pyqt.py] QtCore version: %s" % QtCore.qVersion())
 
+    # Intercept python exceptions. Exit app immediately when exception
+    # happens on any of the threads.
     sys.excepthook = ExceptHook
-    settings = {}
-    settings["log_file"] = GetApplicationPath("debug.log")
-    settings["log_severity"] = cefpython.LOGSEVERITY_INFO
-    settings["release_dcheck_enabled"] = True # Enable only when debugging
-    settings["browser_subprocess_path"] = "%s/%s" % (
-            cefpython.GetModuleDirectory(), "subprocess")
-    cefpython.Initialize(settings)
+
+    # Application settings
+    settings = {
+        "debug": True, # cefpython debug messages in console and in log_file
+        "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
+        "log_file": GetApplicationPath("debug.log"), # Set to "" to disable.
+        "release_dcheck_enabled": True, # Enable only when debugging.
+        # This directories must be set on Linux
+        "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
+        "resources_dir_path": cefpython.GetModuleDirectory(),
+        "browser_subprocess_path": "%s/%s" % (
+            cefpython.GetModuleDirectory(), "subprocess"),
+    }
+
+    # Command line switches set programmatically
+    switches = {
+        # "proxy-server": "socks5://127.0.0.1:8888",
+        # "enable-media-stream": "",
+        # "--invalid-switch": "" -> Invalid switch name
+    }
+
+    cefpython.Initialize(settings, switches)
 
     app = CefApplication(sys.argv)
     mainWindow = MainWindow()

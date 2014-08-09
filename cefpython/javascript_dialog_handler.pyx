@@ -60,8 +60,8 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
             returnValue = clientCallback(pyBrowser, pyOriginUrl, pyAcceptLang,
                     dialog_type, pyMessageText, pyDefaultPromptText,
                     pyCallback, pySuppressMessage)
-            (&suppress_message)[0] = <cpp_bool>bool(pySuppressMessage[0])
-            return returnValue
+            (&suppress_message)[0] = bool(pySuppressMessage[0])
+            return bool(returnValue)
         return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
@@ -91,7 +91,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(
         if clientCallback:
             returnValue = clientCallback(pyBrowser, pyMessageText, pyIsReload,\
                     pyCallback)
-            return returnValue
+            return bool(returnValue)
         return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()

@@ -7,10 +7,12 @@
 #include "client_handler.h"
 #include "cefpython_public_api.h"
 #include "DebugLog.h"
+#include "LOG_DEBUG.h"
 
 #if defined(OS_WIN)
 #include <Shellapi.h>
 #pragma comment(lib, "Shell32.lib")
+#include "dpi_aware.h"
 #elif defined(OS_LINUX)
 #include <unistd.h>
 #include <stdlib.h>
@@ -177,6 +179,15 @@ bool ClientHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 ///
 /*--cef()--*/
 void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
+#if defined(OS_WIN)
+    // High DPI support.
+    CefString auto_zooming = ApplicationSettings_GetString("auto_zooming");
+    if (!auto_zooming.empty()) {
+        LOG_DEBUG << "Browser: OnAfterCreated(): auto_zooming = "
+                << auto_zooming.ToString();
+        SetBrowserDpiSettings(browser, auto_zooming);
+    }
+#endif
 }
 
 ///
@@ -967,7 +978,7 @@ bool ClientHandler::OnContextMenuCommand(CefRefPtr<CefBrowser> browser,
                                 EventFlags event_flags) {
     if (command_id == _MENU_ID_OPEN_PAGE_IN_EXTERNAL_BROWSER) {
 #if defined(OS_WIN)
-        ShellExecute(0, L"open", params->GetPageUrl().ToWString().c_str(),
+        ShellExecuteA(0, "open", params->GetPageUrl().ToString().c_str(),
                 0, 0, SW_SHOWNORMAL);
 #elif defined(OS_LINUX)
         OpenInExternalBrowser(params->GetPageUrl().ToString());
@@ -975,7 +986,7 @@ bool ClientHandler::OnContextMenuCommand(CefRefPtr<CefBrowser> browser,
         return true;
     } else if (command_id == _MENU_ID_OPEN_FRAME_IN_EXTERNAL_BROWSER) {
 #if defined(OS_WIN)
-        ShellExecute(0, L"open", params->GetFrameUrl().ToWString().c_str(),
+        ShellExecuteA(0, "open", params->GetFrameUrl().ToString().c_str(),
                 0, 0, SW_SHOWNORMAL);
 #elif defined(OS_LINUX)
         OpenInExternalBrowser(params->GetFrameUrl().ToString());
