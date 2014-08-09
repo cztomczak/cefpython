@@ -13,6 +13,7 @@
 #include "util.h"
 #include "include/cef_runnable.h"
 #include "DebugLog.h"
+#include "LOG_DEBUG"
 #include <vector>
 #include <algorithm>
 #include "v8utils.h"
@@ -135,6 +136,13 @@ void CefPythonApp::OnRenderProcessThreadCreated(
 void CefPythonApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) {
     if (extra_info->GetType(0) == VTYPE_BOOL) {
         g_debug = extra_info->GetBool(0);
+        if (g_debug) {
+            FILELog::ReportingLevel() = logDEBUG;
+        } else {
+            // In reality this disables logging in LOG_DEBUG.h, as
+            // we're using only LOG_DEBUG macro.
+            FILELog::ReportingLevel() = logERROR;
+        }
     }
     if (extra_info->GetType(1) == VTYPE_STRING) {
         g_logFile = extra_info->GetString(1).ToString();

@@ -1,4 +1,4 @@
-# An example of embedding the CEF browser in a PyQt4 application.
+# An example of embedding CEF browser in a PyQt4 application.
 # Tested with PyQt "4.9.1".
 # Command for installing PyQt4: "sudo apt-get install python-qt4".
 
@@ -66,7 +66,7 @@ def ExceptHook(excType, excValue, traceObject):
             fp.write("\n[%s] %s\n" % (
                     time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
     except:
-        print("[wxpython.py] WARNING: failed writing to error file: %s" % (
+        print("[pyqt.py] WARNING: failed writing to error file: %s" % (
                 errorFile))
     # Convert error message to ascii before printing, otherwise
     # you may get error like this:
@@ -207,11 +207,6 @@ if __name__ == '__main__':
         "resources_dir_path": cefpython.GetModuleDirectory(),
         "browser_subprocess_path": "%s/%s" % (
             cefpython.GetModuleDirectory(), "subprocess"),
-        # This option is required for the GetCookieManager callback
-        # to work. It affects renderer processes, when this option
-        # is set to True. It will force a separate renderer process
-        # for each browser created using CreateBrowserSync.
-        "unique_request_context_per_browser": True
     }
 
     # Command line switches set programmatically
