@@ -69,8 +69,6 @@ Source: "%(WX_SUBPACKAGE_DIR)s\images\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s\w
 
 Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
 Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
-Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.js"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
-Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.css"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
 Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s\examples\wx"; Flags: ignoreversion;
 
 ; ------------------------------------------------------------------------------
