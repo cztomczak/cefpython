@@ -17,10 +17,8 @@ typedef enum PROCESS_DPI_AWARENESS {
     PROCESS_PER_MONITOR_DPI_AWARE = 2
 } PROCESS_DPI_AWARENESS;
 
-/*
 bool IsProcessDpiAware();
 PROCESS_DPI_AWARENESS GetProcessDpiAwareness();
-*/
 void SetProcessDpiAware();
 void GetSystemDpi(int* outx, int* outy);
 void GetDpiAwareWindowSize(int* width, int* height);

@@ -5,10 +5,6 @@
 class DpiAware:
 
     @staticmethod
-    def SetProcessDpiAware():
-        SetProcessDpiAware()
-
-    @staticmethod
     def GetSystemDpi():
         # Win7 DPI (Control Panel > Appearance and Personalization > Display):
         # text size Larger 150% => dpix/dpiy 144
@@ -32,3 +28,11 @@ class DpiAware:
         # Calculation for DPI < 96 is not yet supported.
         GetDpiAwareWindowSize(&width, &height)
         return (width, height)
+
+    @staticmethod
+    def IsProcessDpiAware():
+        return IsProcessDpiAware()
+
+    @staticmethod
+    def SetProcessDpiAware():
+        SetProcessDpiAware()

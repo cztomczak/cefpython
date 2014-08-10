@@ -75,33 +75,29 @@ Source: "%(WX_SUBPACKAGE_DIR)s\examples\*.png"; DestDir: "{app}\%(PACKAGE_NAME)s
 ; examples
 ; ------------------------------------------------------------------------------
 
-Source: "cefwindow.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
-Source: "example.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+Source: "*.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "*.html"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "*.css"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 Source: "*.js"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
-Source: "icon.ico"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
-Source: "pygtk_.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
-Source: "pyqt.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
-Source: "pyside.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
-Source: "wxpython.py"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
+Source: "*.ico"; DestDir: "{app}\%(PACKAGE_NAME)s\examples"; Flags: ignoreversion;
 
 [UninstallDelete]
 
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\*.pyc";
+Type: files; Name: "{app}\%(PACKAGE_NAME)s\*.log";
+Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\__pycache__"
+
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\*.pyc";
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\*.log";
-Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\__pycache__"
+Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\examples\__pycache__"
+
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\wx\*.pyc";
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\examples\wx\*.log";
+Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\examples\wx\__pycache__"
+
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\wx\*.pyc";
 Type: files; Name: "{app}\%(PACKAGE_NAME)s\wx\*.log";
-
-; Issue 67 - remaining files in the wx/ and examples/wx/ directories:
-; https://code.google.com/p/cefpython/issues/detail?id=67
-; Just delete them all:
-Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\examples\wx"
-Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\wx"
+Type: filesandordirs; Name: "{app}\%(PACKAGE_NAME)s\wx\__pycache__"
 
 [Code]
 

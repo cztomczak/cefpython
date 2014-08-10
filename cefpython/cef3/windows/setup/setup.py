@@ -86,6 +86,10 @@ ext_modules = [Extension(
         'cpp_utils',
     ],
 
+    extra_objects=[
+        "cefpython.res"
+    ],
+
     # /EHsc - using STL string, multimap and others that use C++ exceptions.
     extra_compile_args=['/EHsc'],
 
