@@ -273,6 +273,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
         applicationSettings["downloads_enabled"] = True
     if "remote_debugging_port" not in applicationSettings:
         applicationSettings["remote_debugging_port"] = 0
+    if "auto_zooming" not in applicationSettings:
+        if UNAME_SYSNAME == "Windows" and DpiAware.IsProcessDpiAware():
+            applicationSettings["auto_zooming"] = "system_dpi"
 
     # Mouse context menu
     if "context_menu" not in applicationSettings:

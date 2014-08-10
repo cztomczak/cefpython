@@ -13,7 +13,6 @@
 
 const int DEFAULT_DPIX = 96;
 
-/*
 bool IsProcessDpiAware() {
     typedef BOOL(WINAPI *IsProcessDPIAwarePtr)(VOID);
     IsProcessDPIAwarePtr is_process_dpi_aware_func =
@@ -60,7 +59,6 @@ PROCESS_DPI_AWARENESS GetProcessDpiAwareness() {
     }
     return PROCESS_DPI_UNAWARE;
 }
-*/
 
 void SetProcessDpiAware() {
     // Win8.1 supports monitor-specific DPI scaling, so it is
