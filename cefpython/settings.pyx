@@ -168,7 +168,8 @@ cdef void SetApplicationSettings(
             elif key == "ignore_certificate_errors":
                 cefAppSettings.ignore_certificate_errors = bool(appSettings[key])
             elif key == "background_color":
-                cefAppSettings.background_color = int(appSettings[key])
+                cefAppSettings.background_color = \
+                        <cef_types.uint32>int(appSettings[key])
             else:
                 raise Exception("Invalid appSettings key: %s" % key)
 
