@@ -107,7 +107,8 @@ cdef void SetApplicationSettings(
                     or key == "debug"\
                     or key == "unique_request_context_per_browser"\
                     or key == "downloads_enabled"\
-                    or key == "context_menu":
+                    or key == "context_menu" \
+                    or key == "auto_zooming":
                 # CEF Python only options. These are not to be found in CEF.
                 continue
             elif key == "multi_threaded_message_loop":
@@ -167,7 +168,8 @@ cdef void SetApplicationSettings(
             elif key == "ignore_certificate_errors":
                 cefAppSettings.ignore_certificate_errors = bool(appSettings[key])
             elif key == "background_color":
-                cefAppSettings.background_color = int(appSettings[key])
+                cefAppSettings.background_color = \
+                        <cef_types.uint32>int(appSettings[key])
             else:
                 raise Exception("Invalid appSettings key: %s" % key)
 
