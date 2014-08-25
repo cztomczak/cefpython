@@ -5,66 +5,288 @@
     <title>wxPython CEF 3 example (utf-8: ąś)</title>
     <style>
     body { font: 13px Segoe UI, Arial; line-height: 1.4em; }
-    pre { background: #ddd; font: 12px Consolas, Courier New; }
+    pre { background: #eee; font: 13px "Courier New"; }
     </style>
+    <script>
+    function ShowSource(func) {
+        if (!("sources" in window) || !(func in window.sources)) {
+            document.write("<pre style='color:red'>Source not found: "+
+                    ""+func+"</pre>");
+            return;
+        }
+        source = window.sources[func];
+        if (source.match(/^(    )/)) {
+            source = source.replace(/^(    )/g, "");
+            source = source.replace(/([\r\n])(    )/g, "$1");
+        }
+        source = source.replace(/</g, "&lt;");
+        source = source.replace(/>/g, "&gt;");
+        document.write("<pre><code class='language-python'>"+
+                ""+source+"</pre></code>");
+    }
+    </script>
+    <link href="prism.css" rel="stylesheet">
+    <script src="smoke.min.js"></script>
+    <script>
+    window.originalAlert = window.alert
+    window.alert = smoke.alert;
+    </script>
+    <link href="smoke.css" rel="stylesheet">
 </head>
 <body>
 
-Use mouse context menu to go Back/Forward in history navigation.
+Use the mouse context menu to go Back/Forward in history navigation.
 
+<h2>Table of contents</h2>
+<ol>
+    <li><a href="#google-search">Google search</a></li>
+    <li><a href="#user-agent">User agent</a></li>
+    <li><a href="#popups">Popups</a></li>
+    <li><a href="#html5-video">HTML 5 video</a></li>
+    <li><a href="#developer-tools">Developer Tools</a></li>
+    <li><a href="#downloads">Downloads</a></li>
+    <li><a href="#html-controls">HTML controls</a></li>
+    <li><a href="#browser-object">Browser object</a></li>
+    <li><a href="#frame-object">Frame object</a></li>
+    <li><a href="#javascript-bindings">Javascript bindings</a></li>
+    <li><a href="#javascript-callbacks">Javascript callbacks</a></li>
+    <li><a href="#python-callbacks">Python callbacks</a></li>
+    <li><a href="#display-handler">Display handler</a></li>
+    <li><a href="#keyboard-handler">Keyboard handler</a></li>
+    <li><a href="#request-handler">Request handler</a></li>
+    <li><a href="#cookie-tests">Cookie tests</a></li>
+    <li><a href="#load-handler">Load handler</a></li>
+    <li><a href="#javascript-dialog-handler">Javascript Dialog handler</a></li>
+    <li><a href="#other-tests">Other tests</a></li>
+</ol>
 
+<!-- ********************************************************************** -->
+<!-- Google search -->
+<!-- ********************************************************************** -->
 
-<h3>Google Search</h3>
+<a name="google-search"></a>
+<h2>Google search</h2>
+
 <a href="http://www.google.com/">http://www.google.com/</a>
 
 
+<!-- ********************************************************************** -->
+<!-- User agent -->
+<!-- ********************************************************************** -->
 
-<h3>User agent</h3>
+<a name="user-agent"></a>
+<h2>User agent</h2>
+
 <script>document.write(navigator.userAgent)</script>
 
 
+<!-- ********************************************************************** -->
+<!-- Popups -->
+<!-- ********************************************************************** -->
 
-<h3>Popup</h3>
-<a href="javascript:window.open('wxpython.html')">
-    window.open('wxpython.html')</a>
-<br>
-<a target=_blank href="wxpython.html">
-    wxpython.html (target=_blank)</a>
+<a name="popups"></a>
+<h2>Popups</h2>
 
-<br>
-<a href="javascript:external.NewWindow()">
-    external.NewWindow()</a>
+<ol>
+    <li><a href="javascript:window.open('wxpython.html')">
+            window.open('wxpython.html')</a>
+    </li>
+    <li><a target=_blank href="wxpython.html">
+            target=_blank href="wxpython.html"</a>
+    </li>
+    <li><a href="javascript:window.open('https://www.google.com/')">
+            window.open('https://www.google.com/')</a>
+    </li>
+</ol>
+
+There are problems with keyboard when allow CEF to create popup
+windows internally. To create popup window explicitilly, the
+LifespanHandler::OnBeforePopup callback was implemented. See its
+source:
+
+<script>ShowSource("OnBeforePopup");</script>
+<script>ShowSource("_CreatePopup");</script>
+
+<h3>CreateAnotherBrowser</h3>
+
+This will create a window on its own and embed browser in it.
+When using "window.open" the window is created implicitilly
+by CEF. You can intercept such popup creation using the
+OnBeforePopup callback in LifespanHandler. You can return
+True in OnBeforePopup and create popup window on your own
+using the CreateAnotherBrowser function.
+
+<script>ShowSource("CreateAnotherBrowser");</script>
+<a href="javascript:external.CreateAnotherBrowser()">
+            external.CreateAnotherBrowser()</a>
 
 
+<!-- ********************************************************************** -->
+<!-- HTML5 video and accelerated content -->
+<!-- ********************************************************************** -->
 
-<h3>HTML5 video and accelerated content</h3>
+<a name="html5-video"></a>
+<h2>HTML5 video and accelerated content</h2>
+
 <a href="http://www.youtube.com/watch?v=siOHh0uzcuY&html5=True">
 HTML 5 video</a><br>
+
 <a href="http://mudcu.be/labs/JS1k/BreathingGalaxies.html">
 Accelerated canvas</a><br>
+
 <a href="http://www.webkit.org/blog-files/3d-transforms/poster-circle.html">
 Accelerated layers</a><br>
 
+<!-- ********************************************************************** -->
+<!-- Developer Tools -->
+<!-- ********************************************************************** -->
 
+<a name="developer-tools"></a>
+<h2>Developer Tools</h2>
 
-<h3>Test forms</h3>
+You can open devtools popup window in a few different ways:
+<ol>
+    <li>Call Browser.ShowDevTools() method:
+        <a href="javascript:external.ShowDevTools()">
+            external.ShowDevTools()</a></li>
+    <li>Through mouse context menu</li>
+    <li>Through F12 key which is handled in KeyboardHandler.OnKeyEvent</li>
+</ol>
 
-<select><option>opt 1</option><option>opt 2</option></select>
+<!-- ********************************************************************** -->
+<!-- Downloads -->
+<!-- ********************************************************************** -->
+
+<a name="downloads"></a>
+<h2>Downloads</h2>
+
+Download sample Ubuntu wallpapers:<br>
+<a href="https://cefpython.googlecode.com/files/ubuntu-wallpapers2.zip">
+    https://cefpython.googlecode.com/files/ubuntu-wallpapers2.zip</a>
+
+<p>
+Notes: On Linux it seems that OnLoadError with errorCode = ERR_ABORTED
+is called even for successful downloads, you can ignore this behavior.
+The proper console messages about successful/aborted download originate
+from C++ Browser process code, these are:
+</p>
+
+<pre>Browser: About to download file: ubuntu-wallpapers2.zip
+Browser: Download completed, saved to: /Downloads/ubuntu-wallpapers2.zip
+</pre>
+
+If download was aborted the messages will be:
+
+<pre>Browser: About to download file: ubuntu-wallpapers2.zip
+Browser: Download was cancelled
+</pre>
+
+<p>
+Additionally on Linux there are more errors reported by Chromium
+about org.gnome.SessionManager.inhibit. These can be safely ignored as well.
+</p>
+
+A download handler with callbacks like `OnBeforeDownload` and
+`OnDownloadUpdated` may be exposed to CEF Python in the future.
+
+<!-- ********************************************************************** -->
+<!-- HTML controls -->
+<!-- ********************************************************************** -->
+
+<a name="html-controls"></a>
+<h2>HTML controls</h2>
+
+<h3>Textarea</h3>
+<textarea cols="40" rows="5"></textarea>
 <br>
-<input type=text>
+
+<h3>Inputs</h3>
+Text: <input type="text"><br>
+Password: <input type="password"><br>
+
+<h3>Select</h3>
+<select><option>Option 1</option><option>Option 2</option></select>
+
+<h3>Buttons</h3>
+Submit: <input type="submit"><br>
+Button: <input type="button" value="Button"><br>
+
+<!-- ********************************************************************** -->
+<!-- Browser object -->
+<!-- ********************************************************************** -->
+
+<a name="browser-object"></a>
+<h2>Browser object</h2>
+
+Tests for the Browser object methods.
+
+<h3>GoBack</h3>
+<script>ShowSource("GoBack");</script>
+<a href="javascript:external.GoBack()">external.GoBack()</a>
+
+<h3>GoForward</h3>
+<script>ShowSource("GoForward");</script>
+<a href="javascript:external.GoForward()">external.GoForward()</a>
+
+<h3>LoadUrl, GetUrl</h3>
+<script>ShowSource("_Browser_LoadUrl");</script>
+<a href="javascript:window.open('data:text/html,Test#Browser.LoadUrl')">
+    window.open('data:text/html,Test#Browser.LoadUrl')</a>
+
+<h3>ReloadIgnoreCache, StopLoad</h3>
+Press F5 to reload page and ignore cache.<br>
+Press Esc during webpage loading to abort.<br>
+<script>ShowSource("OnKeyEvent");</script>
+Also, when Esc is pressed OnLoadError may get called. See how abort
+of page loading or file download is handled:
+<script>ShowSource("OnLoadError");</script>
+
+<!-- ********************************************************************** -->
+<!-- Frame object -->
+<!-- ********************************************************************** -->
+
+<a name="frame-object"></a>
+<h2>Frame object</h2>
+
+Tests for the Frame object methods. TODO.
+
+<!-- ********************************************************************** -->
+<!-- Javascript bindings -->
+<!-- ********************************************************************** -->
+
+<a name="javascript-bindings"></a>
+<h2>Javascript bindings</h2>
+
+<h3>PyPrint</h3>
+<script>ShowSource("PyPrint");</script>
+<a href="javascript:window.PyPrint('printing in python console from js')">
+        window.PyPrint('printing in python console from js')</a>
 <br>
-<textarea></textarea>
 
+<h3>Window properties</h3>
 
-<h3>Javascript bindings</h3>
-<a href="javascript:PyPrint('printing in python console from js')">
-        PyPrint('printing in python console from js')</a><br>
+<pre><code class="language-python">jsBindings.SetProperty("pyProperty", "This was set in Python")
+jsBindings.SetProperty("pyConfig", ["This was set in Python",
+        {"name": "Nested dictionary", "isNested": True},
+        [1,"2", None]])
+</code></pre>
+
 <a href="javascript:window.alert(window.pyProperty)">
         window.alert(window.pyProperty)</a><br>
 <a href="javascript:window.alert(JSON.stringify(window.pyConfig))">
-        window.alert(JSON.stringify(window.pyConfig))</a><br>
+        window.alert(JSON.stringify(window.pyConfig))</a>
+<br>
+
+<h3>Print</h3>
+
+<script>ShowSource("Print");</script>
 <a href="javascript:external.Print('printing again from js')">
-        external.Print('printing again from js')</a><br>
+        external.Print('printing again from js')</a>
+<br>
+
+<h3>TestAllTypes</h3>
+
+<script>ShowSource("TestAllTypes");</script>
 <a href="javascript:external.TestAllTypes(undefined, null, true, 1, 
         ((1<<31)>>>0), 2.14, 'Date not yet supported', 'string', 
         {key1: 1, key2: 2}, {key1: {'key1.1': 'nested object'}, 'key1.2': [1]},
@@ -74,248 +296,186 @@ Accelerated layers</a><br>
         ((1&lt;&lt;31)>>>0), 2.14, 'Date not yet supported', 'string', 
         {key1: 1, key2: 2}, {key1: {'key1.1': 'nested object'}, 'key1.2': [1]},
         [1, 2], [1, [2.1, 'nested array']], [{key1: [{}]}])</small>
-        <br>
+<br>
+
+<h3>ExecuteFunction</h3>
+
 <script>
 function JavascriptAlert(message) { window.alert(message); }
 </script>
-<pre>
-&lt;script&gt;
+
+<pre><code class="language-javascript">&lt;script&gt;
 function JavascriptAlert(message) { window.alert(message); }
 &lt;/script&gt;
-</pre>
+</code></pre>
+
+<script>ShowSource("ExecuteFunction");</script>
 <a href="javascript:external.ExecuteFunction('JavascriptAlert', 
         'python called from js and then js called from python')">
         external.ExecuteFunction('JavascriptAlert', 
         'python called from js and then js called from python')</a>
+<br>
 
-<br><br>
+<h3>GetSource, GetText</h3>
+
+<script>ShowSource("Visit");</script>
+<script>ShowSource("GetSource");</script>
+<script>ShowSource("GetText");</script>
+
 <a href="javascript:external.GetSource()">
-        GetSource() to console</a><br>
+        external.GetSource()</a>
+<br>
 <a href="javascript:external.GetText()">
-        GetText() to console</a>
+        external.GetText()</a>
 
-<h3>Javascript callbacks</h3>
+<!-- ********************************************************************** -->
+<!-- Javascript callbacks -->
+<!-- ********************************************************************** -->
+
+<a name="javascript-callbacks"></a>
+<h2>Javascript callbacks</h2>
+
+<h3>TestJSCallback</h3>
+
 <script>
 function JSCallback(arg1) {
     window.alert(arg1)
 }
 </script>
-<pre>
-&lt;script&gt;
+
+<pre><code class="language-javascript">&lt;script&gt;
 function JSCallback(arg1) {
     window.alert(arg1)
 }
 &lt;/script&gt;
-</pre>
-<pre>
-def TestJSCallback(self, jsCallback):
-    print("jsCallback.GetFunctionName() = %s" % jsCallback.GetFunctionName())
-    print("jsCallback.GetFrame().GetIdentifier() = %s" % \
-            jsCallback.GetFrame().GetIdentifier())
-    jsCallback.Call("This message was sent from python using js callback")
-</pre>    
+</code></pre>
+
+<script>ShowSource("TestJSCallback");</script>
 <a href="javascript:external.TestJSCallback(JSCallback)">
         external.TestJSCallback(JSCallback)</a>
+
+<h3>TestJSCallbackComplexArguments</h3>
+
 <script>
 function JSCallback2() {
     window.alert(JSON.stringify(arguments))
 }
 </script>
-<pre>
-&lt;script&gt;
+
+<pre><code class="language-javascript">&lt;script&gt;
 function JSCallback2() {
     window.alert(JSON.stringify(arguments))
 }
 &lt;/script&gt;
-</pre>
-<pre>
-def TestJSCallbackComplexArguments(self, jsObject):
-    jsCallback = jsObject["myCallback"];
-    jsCallback.Call(1, None, 2.14, "string", ["list", ["nested list", \
-            {"nested object":None}]], \
-            {"nested list next":[{"deeply nested object":1}]})
-</pre>
+</code></pre>
+
+<script>ShowSource("TestJSCallbackComplexArguments");</script>
 <a href="javascript:external.TestJSCallbackComplexArguments(
                 {'myCallback':JSCallback2})">
         external.TestJSCallbackComplexArguments({"myCallback": JSCallback2})
         </a>
 
+<!-- ********************************************************************** -->
+<!-- Python callbacks -->
+<!-- ********************************************************************** -->
 
+<a name="python-callbacks"></a>
+<h2>Python callbacks</h2>
 
-<h3>Python callbacks</h3>
+<h3>TestPythonCallback</h3>
+
 <script>
 function JSCallback3(pyCallback) {
     pyCallback(1, 2.14, "string", [1, [2, {"key": "value"}]], {"list": [1,2]});
 }
 </script>
-<pre>
-&lt;script&gt;
+
+<pre><code class="language-javascript">&lt;script&gt;
 function JSCallback3(pyCallback) {
     pyCallback(1, 2.14, "string", [1, [2, {"key": "value"}]], {"list": [1,2]});
 }
 &lt;/script&gt;
-</pre>
-<pre>
-def TestPythonCallback(self, jsCallback):
-    jsCallback.Call(PyCallback)
+</code></pre>
 
-def PyCallback(self, *args):
-        message = "PyCallback() was executed successfully! Arguments: %s" \
-                % str(args)
-        print(message)
-        self.mainBrowser.GetMainFrame().ExecuteJavascript(
-                "window.alert(\"%s\")" % message)
-</pre>
+<script>ShowSource("TestPythonCallback");</script>
+<script>ShowSource("PyCallback");</script>
+
 <a href="javascript:external.TestPythonCallback(JSCallback3)">
         external.TestPythonCallback(JSCallback3)</a>
 
+<!-- ********************************************************************** -->
+<!-- Display handler -->
+<!-- ********************************************************************** -->
 
+<a name="display-handler"></a>
+<h2>Display handler</h2>
 
-<h3>Display handler</h3>
-
-<pre>
-def OnAddressChange(self, browser, frame, url):
-    print("DisplayHandler::OnAddressChange()")
-    print("url = %s" % url)
-</pre>
-
+<h3>OnAddressChange</h3>
+<script>ShowSource("OnAddressChange");</script>
 See messages in the console during loading of a webpage.
 
-<pre>
-def OnTitleChange(self, browser, title):
-    print("DisplayHandler::OnTitleChange()")
-    print("title = %s" % title)
-</pre>
-
+<h3>OnTitleChange</h3>
+<script>ShowSource("OnTitleChange");</script>
 See messages in the console during loading of a webpage.
 
-<pre>
-def OnTooltip(self, browser, textOut):
-    # OnTooltip not yet implemented (both Linux and Windows), 
-    # will be fixed in next CEF release, see Issue 783:
-    # https://code.google.com/p/chromiumembedded/issues/detail?id=783
-    print("DisplayHandler::OnTooltip()")
-    print("text = %s" % textOut[0])
-</pre>
-
+<h3>OnTooltip</h3>
+<script>ShowSource("OnTooltip");</script>
 See messages in the console when hovering over a google logo:
 <a href="http://www.google.com/">http://www.google.com/</a>
 
-<pre>
-def OnStatusMessage(self, browser, value):
-    if not value:
-        # Do not notify in the console about empty statuses.
-        return
-    self.statusMessageCount += 1
-    if self.statusMessageCount > 3:
-        # Do not spam too much.
-        return
-    print("DisplayHandler::OnStatusMessage()")
-    print("value = %s" % value)
-</pre>
-
+<h3>OnStatusMessage</h3>
+<script>ShowSource("OnStatusMessage");</script>
 See messages in the console when hovering over links.
 
-<pre>
-def OnConsoleMessage(self, browser, message, source, line):
-    print("DisplayHandler::OnConsoleMessage()")
-    print("message = %s" % message)
-    print("source = %s" % source)
-    print("line = %s" % line)
-</pre>
-
+<h3>OnConsoleMessage</h3>
+<script>ShowSource("OnConsoleMessage");</script>
 Try this: 
 <a href="http://patik.com/code/console-log-polyfill/">
     http://patik.com/code/console-log-polyfill/</a>
 
+<!-- ********************************************************************** -->
+<!-- Keyboard handler -->
+<!-- ********************************************************************** -->
 
-<h3>Keyboard handler</h3>
+<a name="keyboard-handler"></a>
+<h2>Keyboard handler</h2>
+
 <p>
     Press F5 to reload the page.<br>
     On Linux it is required to click anywhere in the window first 
     so that keyboard focus is set. See Issue 77 in the CEF Python
     Issue Tracker.
 </p>
-<pre>
-def OnPreKeyEvent(self, browser, event, eventHandle, 
-        isKeyboardShortcutOut):
-    print("KeyboardHandler::OnPreKeyEvent()")
 
-def OnKeyEvent(self, browser, event, eventHandle):
-    print("KeyboardHandler::OnKeyEvent()")
-    if platform.system() == "Linux":
-        print("native_key_code = %s" % event["native_key_code"])
-        # F5 = 71
-        if event["native_key_code"] == 71:
-            print("F5 pressed! Reloading page..")
-            browser.ReloadIgnoreCache()
-    elif platform.system() == "Windows":
-        print("windows_key_code = %s" % event["windows_key_code"])
-        # F5 = VK_F5
-        if event["windows_key_code"] == cefpython.VK_F5:
-            print("F5 pressed! Reloading page..")
-            browser.ReloadIgnoreCache()
-</pre>
+<script>ShowSource("OnPreKeyEvent");</script>
+<script>ShowSource("OnKeyEvent");</script>
 
+<!-- ********************************************************************** -->
+<!-- Request handler -->
+<!-- ********************************************************************** -->
 
+<a name="request-handler"></a>
+<h2>Request handler</h2>
 
-
-<h3>Request handler</h3>
-<pre>
-def OnBeforeResourceLoad(self, browser, frame, request):
-    print("RequestHandler::OnBeforeResourceLoad()")
-    print("url = %s" % request.GetUrl()[:70])
-    return False
-</pre>
+<h3>OnBeforeResourceLoad</h3>
+<script>ShowSource("OnBeforeResourceLoad");</script>
 See messages in the console.
 
-<pre>
-def OnResourceRedirect(self, browser, frame, oldUrl, newUrlOut):
-    print("RequestHandler::OnResourceRedirect()")
-    print("old url = %s" % oldUrl[:70])
-    print("new url = %s" % newUrlOut[0][:70])
-</pre>
+<h3>OnResourceRedirect</h3>
+<script>ShowSource("OnResourceRedirect");</script>
 Try this:
 <a href="http://tinyurl.com/google404redirect">
     http://tinyurl.com/google404redirect</a>    
 
-<pre>
-def GetAuthCredentials(self, browser, frame, isProxy, host, port, realm,
-        scheme, callback):
-    print("RequestHandler::GetAuthCredentials()")
-    print("host = %s" % host)
-    print("realm = %s" % realm)
-    callback.Continue(username="test", password="test")
-    return True
-</pre>
+<h3>GetAuthCredentials</h3>
+<script>ShowSource("GetAuthCredentials");</script>
 Try this:
 <a href="http://browserspy.dk/password-ok.php">
     http://browserspy.dk/password-ok.php</a>
 
-<pre>
-def OnQuotaRequest(self, browser, originUrl, newSize, callback):
-    print("RequestHandler::OnQuotaRequest()")
-    print("origin url = %s" % originUrl)
-    print("new size = %s" % newSize)
-    callback.Continue(True)
-    return True
-</pre>
-<pre>
-&lt;script&gt;
-function DoRequestQuota() {
-    // Request Quota (only for File System API)  
-    try {
-        navigator.webkitPersistentStorage.requestQuota(PERSISTENT, 1024*1024,
-                function(bytes){ window.alert("Granted bytes: "+bytes);},
-                function(error){ window.alert(error); });
-    } catch(e) {
-        navigator.webkitPersistentStorage.requestQuota(1024*1024,
-                function(bytes){ window.alert("Granted bytes: "+bytes);},
-                function(error){ window.alert(error); });
-    }
-}
-&lt;/script&gt;
-</pre>
+<h3>OnQuotaRequest</h3>
+<script>ShowSource("OnQuotaRequest");</script>
+
 <script>
 function DoRequestQuota() {
     // Request Quota (only for File System API)  
@@ -330,191 +490,243 @@ function DoRequestQuota() {
     }
 }
 </script>
+
+<pre><code class="language-javascript">&lt;script&gt;
+function DoRequestQuota() {
+    // Request Quota (only for File System API)  
+    try {
+        navigator.webkitPersistentStorage.requestQuota(PERSISTENT, 1024*1024,
+                function(bytes){ window.alert("Granted bytes: "+bytes);},
+                function(error){ window.alert(error); });
+    } catch(e) {
+        navigator.webkitPersistentStorage.requestQuota(1024*1024,
+                function(bytes){ window.alert("Granted bytes: "+bytes);},
+                function(error){ window.alert(error); });
+    }
+}
+&lt;/script&gt;
+</code></pre>
+
 Try this: 
 <a href="https://googledrive.com/host/0B1di2XiBBfacMnhRRkI1YlotUEk/requestquota.html">
     https://googledrive.com/host/0B1di2XiBBfacMnhRRkI1YlotUEk/requestquota.html</a>
 
-<pre>
-def OnProtocolExecution(self, browser, url, allowExecutionOut):
-    # There's no default implementation for OnProtocolExecution on Linux,
-    # you have to make OS system call on your own. You probably also need
-    # to use LoadHandler::OnLoadError() when implementing this on Linux.
-    print("RequestHandler::OnProtocolExecution()")
-    print("url = %s" % url)
-    if url.startswith("magnet:"):
-        print("Magnet link allowed!")
-        allowExecutionOut[0] = True
-</pre>
-Try this:
+<h3>OnProtocolExecution</h3>
+<script>ShowSource("OnProtocolExecution");</script>
+<script>ShowSource("OnBeforeBrowse");</script>
+Try magnet link to download a torrent:
 <a href="magnet:?xt=urn:btih:a4224b45b27f436374391379cc5c7e629e2e5189">
     magnet:?xt=urn:btih:a4224b45b27f436374391379cc5c7e629e2e5189</a>
-<br>
-(After you see the custom error message you have to hit
-twice the Back from the context menu, to get back to this page)
 
-<pre>
-def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
-    # Plugins are loaded on demand, only when website requires it,
-    # the same plugin may be called multiple times.
-    print("RequestHandler::OnBeforePluginLoad()")
-    print("url = %s" % url)
-    print("policy url = %s" % policyUrl)
-    print("info.GetName() = %s" % info.GetName())
-    print("info.GetPath() = %s" % info.GetPath())
-    print("info.GetVersion() = %s" % info.GetVersion())
-    print("info.GetDescription() = %s" % info.GetDescription())
-    # False to allow, True to block plugin.
-    return False
-</pre>
+<h3>_OnBeforePluginLoad</h3>
+<script>ShowSource("_OnBeforePluginLoad");</script>
 Try OnBeforePluginLoad() with Flash:
 <a href="http://www.adobe.com/software/flash/about/">
     http://www.adobe.com/software/flash/about/</a>
 
-<pre>
-def _OnCertificateError(self, certError, requestUrl, callback):
-    print("RequestHandler::OnCertificateError()")
-    print("certError = %s" % certError)
-    print("requestUrl = %s" % requestUrl)
-    if requestUrl.startswith(
-            "https://sage.math.washington.edu:8091/do-not-allow"):
-        print("Not allowed!")
-        return False
-    if requestUrl.startswith(
-            "https://sage.math.washington.edu:8091/hudson/job/"):
-        print("Allowed!")
-        callback.Continue(True)
-        return True
-    return False
-</pre>
-This won't be allowed:
-<a href="https://sage.math.washington.edu:8091/do-not-allow">
-    https://sage.math.washington.edu:8091/do-not-allow</a>
+<h3>_OnCertificateError</h3>
+<script>ShowSource("_OnCertificateError");</script>
+
+The url below won't be allowed. Click twice "Back" from context menu
+to return back here after visiting that url:<br>
+<a href="https://testssl-expire.disig.sk/index.en.html">
+    https://testssl-expire.disig.sk/index.en.html</a>
 <br>
-This will be allowed:
-<a href="https://sage.math.washington.edu:8091/hudson/job/cython-docs/">
-    https://sage.math.washington.edu:8091/hudson/job/cython-docs/</a>
 
-<pre>
-def OnRendererProcessTerminated(self, browser, status):
-    print("RequestHandler::OnRendererProcessTerminated()")
-    statuses = {
-        cefpython.TS_ABNORMAL_TERMINATION: "TS_ABNORMAL_TERMINATION",
-        cefpython.TS_PROCESS_WAS_KILLED: "TS_PROCESS_WAS_KILLED",
-        cefpython.TS_PROCESS_CRASHED: "TS_PROCESS_CRASHED"
-    }
-    statusName = "Unknown"
-    if status in statuses:
-        statusName = statuses[status]
-    print("status = %s" % statusName)
-</pre>
+This url will be allowed:<br>
+<a href="https://testssl-expire.disig.sk/index.en.html?allow=1">
+    https://testssl-expire.disig.sk/index.en.html?allow=1</a>
+<br>
+After you've clicked the second url, the first one will now be allowed,
+as this is the same domain and it's cached now.
+
+<h3>OnRendererProcessTerminated</h3>
+<script>ShowSource("OnRendererProcessTerminated");</script>
 Try to terminate the "subprocess.exe" renderer process through 
-process/task manager.
+task manager.
 
-<pre>
-def OnPluginCrashed(self, browser, pluginPath):
-    print("RequestHandler::OnPluginCrashed()")
-    print("plugin path = %s" % pluginPath)
-</pre>
+<h3>OnPluginCrashed</h3>
+<script>ShowSource("OnPluginCrashed");</script>
 No test for that yet.
 
+<!-- ********************************************************************** -->
+<!-- Cookie tests -->
+<!-- ********************************************************************** -->
 
-<h3>Cookie tests</h3>
+<a name="cookie-tests"></a>
+<h2>Cookie tests</h2>
 
 See messages in the console.
 
-<pre>
- def GetCookieManager(self, browser, mainUrl):
-    # Create unique cookie manager for each browser.
-    # You must set the "unique_request_context_per_browser"
-    # application setting to True for the cookie manager
-    # to work.
-    cookieManager = browser.GetUserData("cookieManager")
-    if cookieManager:
-        return cookieManager
-    else:
-        cookieManager = cefpython.CookieManager.CreateManager("")
-        browser.SetUserData("cookieManager", cookieManager)
-        return cookieManager
-</pre>
+<h3>GetCookieManager</h3>
+
+<script>ShowSource("GetCookieManager");</script>
 
 RequestHandler.GetCookieManager() - an example of having an unique
-cookie manager for each browser. Visit 
-<a href="http://www.html-kit.com/tools/cookietester/">
-    http://www.html-kit.com/tools/cookietester/</a> and set some cookie,
-then go back to this page using the context menu and open a 
-<a href="javascript:window.open('http://www.html-kit.com/tools/cookietester/')">
-    new popup window</a>, the cookie should not appear in the popup browser window.
-<br><br>
+cookie manager for each browser. 
+<ol>
+    <li>Visit the url below and set some cookies. Use "Back" from
+        context menu to get back here (you might have to click "Back"
+        multiple times).<br>
+        Visit it in the current browser:<br>
+        <a href="http://www.html-kit.com/tools/cookietester/">
+                http://www.html-kit.com/tools/cookietester/</a>
+    </li>
+    <li>Open cookietester in a popup - a separate cookie manager is used:<br>
+        <a href="javascript:external.CreateAnotherBrowser('http://www.html-kit.com/tools/cookietester/')">
+            javascript:external.CreateAnotherBrowser('http://www.html-kit.com/tools/cookietester/')</a>
+    </li>
+</ol>
 
-CookieManager.VisitAllCookies() - visit all cookies: 
+<p>
+Popup browsers created javascript's window.open share
+the same renderer process and request context. If you want
+to have separate cookie managers for popups created using
+window.open then you have to implement the
+LifespanHandler.`OnBeforePopup` callback. Return True in that
+callback to cancel popup creation and instead create the
+window on your own and embed browser in it. The CreateAnotherBrowser()
+function from the wxpython example does that.
+</p>
+
+<h3>VisitAllCookies</h3>
+<script>ShowSource("VisitAllCookies");</script>
+Visit all cookies:
 <a href="javascript:external.VisitAllCookies()">external.VisitAllCookies()</a>
-(note: visit some http:// webpage first, otherwise cookie manager is not
-yet created)
 <br><br>
 
-CookieManager.VisitUrlCookies("http://www.html-kit.com/tools/cookietester/")
-- visit a subset of cookies given the url, test:
-<a href="javascript:external.VisitUrlCookies()">external.VisitUrlCookies()</a>
-<br><br>
+Note: visit some http:// webpage first, otherwise cookie manager is not
+yet created.
+<br>
 
-CookieManager.SetCookie("http://www.html-kit.com/tools/cookietester/",
-    {name:"Created_Via_Python", value:"yeah really"}) - create the cookie: 
-    <a href="javascript:external.SetCookie()">external.SetCookie()</a>
-<br><br>
+<h3>VisitUrlCookies</h3>
+<script>ShowSource("VisitUrlCookies");</script>
+Visit a subset of cookies for the given url:
+<a href="javascript:external.VisitUrlCookies()">
+    external.VisitUrlCookies("http://www.html-kit.com/tools/cookietester/")</a>
+<br>
 
-CookieManager.DeleteCookies() - delete the single cookie previously created 
-via SetCookie(): <a href="javascript:external.DeleteCookies()">
+<h3>SetCookie</h3>
+<script>ShowSource("SetCookie");</script>
+Set a cookie on html-kit.com: 
+<a href="javascript:external.SetCookie()">external.SetCookie()</a>
+<br>
+Go see the cookie that was created:
+    <a href="http://www.html-kit.com/tools/cookietester/">
+                http://www.html-kit.com/tools/cookietester/</a> 
+
+<h3>DeleteCookies</h3>
+<script>ShowSource("DeleteCookies");</script>
+Delete the single cookie previously created via SetCookie():
+<a href="javascript:external.DeleteCookies()">
     external.DeleteCookies()</a>
-<br><br>
+<br>
+Go check if cookie was deleted:
+    <a href="http://www.html-kit.com/tools/cookietester/">
+                http://www.html-kit.com/tools/cookietester/</a> 
 
+<!-- ********************************************************************** -->
+<!-- Load handler -->
+<!-- ********************************************************************** -->
 
-
-
-<h3>Load Handler</h3>
-
-<pre>
-def OnLoadingStateChange(self, browser, isLoading, canGoBack, 
-        canGoForward):
-    print("LoadHandler::OnLoadingStateChange()")
-    print("isLoading = %s, canGoBack = %s, canGoForward = %s" \
-            % (isLoading, canGoBack, canGoForward))
-</pre>
+<a name="load-handler"></a>
+<h2>Load Handler</h2>
 
 See messages in the console during loading of a webpage.
 
-<pre>
-def OnLoadStart(self, browser, frame):
-    print("LoadHandler::OnLoadStart()")
-    print("frame url = %s" % frame.GetUrl()[:70])
-</pre>
-See messages in the console.
+<h3>OnLoadingStateChange</h3>
+<script>ShowSource("OnLoadingStateChange");</script>
 
-<pre>
-def OnLoadEnd(self, browser, frame, httpStatusCode):
-    print("LoadHandler::OnLoadEnd()")
-    print("frame url = %s" % frame.GetUrl()[:70])
-    # For file:// urls the status code = 0
-    print("http status code = %s" % httpStatusCode)
-</pre>
-See messages in the console.
+<h3>OnLoadStart</h3>
+<script>ShowSource("OnLoadStart");</script>
 
-<pre>
-def OnLoadError(self, browser, frame, errorCode, errorTextList, failedUrl):
-    print("LoadHandler::OnLoadError()")
-    print("frame url = %s" % frame.GetUrl()[:70])
-    print("error code = %s" % errorCode)
-    print("error text = %s" % errorTextList[0])
-    print("failed url = %s" % failedUrl)
-    customErrorMessage = "My custom error message!"
-    frame.LoadUrl("data:text/html,%s" % customErrorMessage)
-</pre>
+<h3>OnLoadEnd</h3>
+<script>ShowSource("OnLoadEnd");</script>
+
+<h3>OnLoadError</h3>
+<script>ShowSource("OnLoadError");</script>
+After you see the custom error message you have to hit
+twice the Back from the context menu, to get back to this page.
+<br>
 Try this: 
 <a href="http://www.non-existent.nono/">
     http://www.non-existent.nono/</a>
 <br>
-(After you see the custom error message you have to hit
-twice the Back from the context menu, to get back to this page)
 
+
+
+<!-- ********************************************************************** -->
+<!-- Javascript dialog handler -->
+<!-- ********************************************************************** -->
+
+<a name="javascript-dialog-handler"></a>
+<h2>Javascript Dialog Handler</h2>
+
+See messages in the console.
+
+<h3>OnJavascriptDialog</h3>
+<script>ShowSource("OnJavascriptDialog");</script>
+<a href="javascript:window.originalAlert('test js dialog handler')">
+    window.alert('Test js dialog handler')
+</a>
+
+<h3>OnBeforeUnloadJavascriptDialog</h3>
+<script>ShowSource("OnBeforeUnloadJavascriptDialog");</script>
+<script>
+function TestOnBeforeUnloadJavascriptDialog() {
+    window.onbeforeunload = function() {
+        return 'Testing the OnBeforeUnloadJavascriptDialog() callback';
+    }
+    location.href = "wxpython.html";
+}
+</script>
+
+<pre><code class="language-javascript">&lt;script&gt;
+function TestOnBeforeUnloadJavascriptDialog() {
+    window.onbeforeunload = function() {
+        return 'Testing the OnBeforeUnloadJavascriptDialog() callback';
+    }
+    location.href = "wxpython.html";
+}
+&lt;/script&gt;
+</code></pre>
+
+<a href="javascript:TestOnBeforeUnloadJavascriptDialog()">
+    TestOnBeforeUnloadJavascriptDialog()
+</a>
+
+<h3>OnResetJavascriptDialogState</h3>
+<script>ShowSource("OnResetJavascriptDialogState");</script>
+
+<h3>OnJavascriptDialogClosed</h3>   
+<script>ShowSource("OnJavascriptDialogClosed");</script>
+
+<!-- ********************************************************************** -->
+<!-- Other tests -->
+<!-- ********************************************************************** -->
+
+<a name="other-tests"></a>
+<h2>Other tests</h2>
+
+<h3>HTTPS caching with SSL certificate errors</h3>
+Set ApplicationSettings["ignore_certificate_errors"] to True.
+
+<ul>
+    <li><a href="https://192.168.0.17/test.html">
+            https://192.168.0.17/test.html</a></li>
+    <li><a href="javascript:window.open('https://192.168.0.17/test.html')">
+            window.open('https://192.168.0.17/test.html')</a></li>
+    <li><a href="javascript:external.CreateAnotherBrowser('https://192.168.0.17/test.html')">
+            external.CreateAnotherBrowser('https://192.168.0.17/test.html')</a>
+</ul>
+
+<!-- ********************************************************************** -->
+<!-- Other -->
+<!-- ********************************************************************** -->
+
+<a name="test-hash"></a>
+
+<script src="prism.js"></script>
 
 </body>
 </html>

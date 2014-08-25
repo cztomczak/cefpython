@@ -17,6 +17,16 @@ BYTES_DECODE_ERRORS = "replace"
 # should be unicode by default, if bytes is required make it
 # explicit").
 
+cdef py_string AnyToPyString(object value):
+    cdef object valueType = type(value)
+    if valueType == str or valueType == bytes:
+        return value
+    elif PY_MAJOR_VERSION < 3 and valueType == unicode:
+        # The unicode type is not defined in Python 3
+        return value
+    else:
+        return ""
+
 cdef py_string CharToPyString(
         const char* charString):
     if PY_MAJOR_VERSION < 3:
@@ -26,16 +36,18 @@ cdef py_string CharToPyString(
                 g_applicationSettings["string_encoding"],
                 errors=BYTES_DECODE_ERRORS))
 
-"""
-cdef py_string CppToPyString(
-        cpp_string cppString):
-    if PY_MAJOR_VERSION < 3:
-        return <bytes>cppString
-    else:
-        return <unicode>((<bytes>cppString).decode(
-                g_applicationSettings["string_encoding"],
-                errors=BYTES_DECODE_ERRORS))
-"""
+# cdef py_string CppToPyString(
+#         cpp_string cppString):
+#     if PY_MAJOR_VERSION < 3:
+#         return <bytes>cppString
+#     else:
+#         return <unicode>((<bytes>cppString).decode(
+#                 g_applicationSettings["string_encoding"],
+#                 errors=BYTES_DECODE_ERRORS))
+
+# cdef cpp_string PyToCppString(py_string pyString):
+#     cdef cpp_string cppString = pyString
+#     return cppString
 
 cdef py_string CefToPyString(
         ConstCefString& cefString):

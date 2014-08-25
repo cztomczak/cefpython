@@ -10,7 +10,7 @@
        python pyqt.py
        python pyside.py
        python pygtk_.py
-       python example.py
+       python pywin32.py
 
        cd wx/
        python sample1.py
@@ -19,4 +19,4 @@
 
 Note:
     Examples directory can also be found in the cefpython3 package directory:
-    C:/python/lib/site-packages/cefpython3/examples/
+    C:/python27/lib/site-packages/cefpython3/examples/

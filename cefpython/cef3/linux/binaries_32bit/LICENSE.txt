@@ -1,6 +1,9 @@
-Copyright (c) 2012-2013 Czarek Tomczak. Portions Copyright
-(c) 2008-2013 Marshall A.Greenblatt, 2006-2009 Google Inc.
-All rights reserved.
+Copyright (c) 2012-2014 The CEF Python authors. All rights
+reserved. Website: http://code.google.com/p/cefpython/
+
+This product includes the following third party libraries:
+* Chromium Embedded Framework licensed under the BSD 3-clause 
+  license. Website: http://code.google.com/p/chromiumembedded/
 
 Redistribution and use in source and binary forms, with
 or without modification, are permitted provided that the

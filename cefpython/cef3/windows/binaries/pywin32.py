@@ -1,16 +1,16 @@
-# CEF Python 3 example application.
+# Example of embedding CEF browser using the PyWin32 extension.
+# Tested with pywin32 version 218.
 
-# Checking whether python architecture and version are valid, otherwise an obfuscated error
-# will be thrown when trying to load cefpython.pyd with a message "DLL load failed".
 import platform
 if platform.architecture()[0] != "32bit":
-    raise Exception("Architecture not supported: %s" % platform.architecture()[0])
+    raise Exception("Architecture not supported: %s" \
+            % platform.architecture()[0])
 
 import os, sys
 libcef_dll = os.path.join(os.path.dirname(os.path.abspath(__file__)),
         'libcef.dll')
 if os.path.exists(libcef_dll):
-    # Import the local module.
+    # Import a local module
     if 0x02070000 <= sys.hexversion < 0x03000000:
         import cefpython_py27 as cefpython
     elif 0x03000000 <= sys.hexversion < 0x04000000:
@@ -18,18 +18,25 @@ if os.path.exists(libcef_dll):
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
 else:
-    # Import the package.
+    # Import an installed package
     from cefpython3 import cefpython
 
 import cefwindow
 import win32con
 import win32gui
+import win32api
 import time
 
 DEBUG = True
 
+# -----------------------------------------------------------------------------
+# Helper functions.
+
+def Log(msg):
+    print("[pywin32.py] %s" % str(msg))
+
 def GetApplicationPath(file=None):
-    import re, os
+    import re, os, platform
     # If file is None return current directory without trailing slash.
     if file is None:
         file = ""
@@ -43,7 +50,8 @@ def GetApplicationPath(file=None):
         else:
             path = os.getcwd()
         path = path + os.sep + file
-        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
+        if platform.system() == "Windows":
+            path = re.sub(r"[/\\]+", re.escape(os.sep), path)
         path = re.sub(r"[/\\]+$", "", path)
         return path
     return str(file)
@@ -52,7 +60,7 @@ def ExceptHook(excType, excValue, traceObject):
     import traceback, os, time, codecs
     # This hook does the following: in case of exception write it to
     # the "error.log" file, display it to the console, shutdown CEF
-    # and exit application immediately by ignoring "finally" (_exit()).
+    # and exit application immediately by ignoring "finally" (os._exit()).
     errorMsg = "\n".join(traceback.format_exception(excType, excValue,
             traceObject))
     errorFile = GetApplicationPath("error.log")
@@ -67,7 +75,7 @@ def ExceptHook(excType, excValue, traceObject):
             fp.write("\n[%s] %s\n" % (
                     time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
     except:
-        print("cefpython: WARNING: failed writing to error file: %s" % (
+        print("[pywin32.py] WARNING: failed writing to error file: %s" % (
                 errorFile))
     # Convert error message to ascii before printing, otherwise
     # you may get error like this:
@@ -78,6 +86,8 @@ def ExceptHook(excType, excValue, traceObject):
     cefpython.QuitMessageLoop()
     cefpython.Shutdown()
     os._exit(1)
+
+# -----------------------------------------------------------------------------
 
 def CefAdvanced():
     sys.excepthook = ExceptHook
@@ -106,9 +116,14 @@ def CefAdvanced():
     browserSettings["universal_access_from_file_urls_allowed"] = True
     browserSettings["file_access_from_file_urls_allowed"] = True
 
-    windowHandle = cefwindow.CreateWindow(title="CEF Python 3 example",
-            className="cefpython3_example", width=800, height=600,
-            icon="icon.ico", windowProc=wndproc)
+    if os.path.exists("icon.ico"):
+        icon = os.path.abspath("icon.ico")
+    else:
+        icon = ""
+
+    windowHandle = cefwindow.CreateWindow(title="pywin32 example",
+            className="cefpython3_example", width=1024, height=768,
+            icon=icon, windowProc=wndproc)
     windowInfo = cefpython.WindowInfo()
     windowInfo.SetAsChild(windowHandle)
     browser = cefpython.CreateBrowserSync(windowInfo, browserSettings,
@@ -125,5 +140,10 @@ def QuitApplication(windowHandle, message, wparam, lparam):
     win32gui.PostQuitMessage(0)
     return 0
 
+def GetPywin32Version():
+    fixed_file_info = win32api.GetFileVersionInfo(win32api.__file__, '\\')
+    return fixed_file_info['FileVersionLS'] >> 16
+
 if __name__ == "__main__":
+    Log("pywin32 version = %s" % GetPywin32Version())
     CefAdvanced()

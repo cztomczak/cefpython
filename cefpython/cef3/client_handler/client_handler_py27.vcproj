@@ -109,6 +109,14 @@
                 RelativePath=".\request_context_handler.h"
                 >
             </File>
+            <File
+                RelativePath=".\dpi_aware.h"
+                >
+            </File>
+            <File
+                RelativePath=".\task.h"
+                >
+            </File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -143,6 +151,14 @@
             </File>
             <File
                 RelativePath=".\request_context_handler.cpp"
+                >
+            </File>
+            <File
+                RelativePath=".\dpi_aware.cpp"
+                >
+            </File>
+            <File
+                RelativePath=".\task.cpp"
                 >
             </File>
 		</Filter>
