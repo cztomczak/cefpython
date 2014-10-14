@@ -50,19 +50,26 @@ TEST_EMBEDDING_IN_PANEL = True
 
 def GetApplicationPath(file=None):
     import re, os, platform
+    # On Windows after downloading file and calling Browser.GoForward(),
+    # current working directory is set to %UserProfile%.
+    # Calling os.path.dirname(os.path.realpath(__file__))
+    # returns for eg. "C:\Users\user\Downloads". A solution
+    # is to cache path on first call.
+    if not hasattr(GetApplicationPath, "dir"):
+        if hasattr(sys, "frozen"):
+            dir = os.path.dirname(sys.executable)
+        elif "__file__" in globals():
+            dir = os.path.dirname(os.path.realpath(__file__))
+        else:
+            dir = os.getcwd()
+        GetApplicationPath.dir = dir
     # If file is None return current directory without trailing slash.
     if file is None:
         file = ""
     # Only when relative path.
     if not file.startswith("/") and not file.startswith("\\") and (
             not re.search(r"^[\w-]+:", file)):
-        if hasattr(sys, "frozen"):
-            path = os.path.dirname(sys.executable)
-        elif "__file__" in globals():
-            path = os.path.dirname(os.path.realpath(__file__))
-        else:
-            path = os.getcwd()
-        path = path + os.sep + file
+        path = GetApplicationPath.dir + os.sep + file
         if platform.system() == "Windows":
             path = re.sub(r"[/\\]+", re.escape(os.sep), path)
         path = re.sub(r"[/\\]+$", "", path)
@@ -142,18 +149,23 @@ class MainFrame(wx.Frame):
             # all parent panels/controls, if it's deeply embedded.
             self.mainPanel = wx.Panel(self, style=wx.WANTS_CHARS)
 
+        # Global client callbacks must be set before browser is created.
+        clientHandler = ClientHandler()
+        cefpython.SetGlobalClientCallback("OnCertificateError",
+                clientHandler._OnCertificateError)
+        cefpython.SetGlobalClientCallback("OnBeforePluginLoad",
+                clientHandler._OnBeforePluginLoad)
+        cefpython.SetGlobalClientCallback("OnAfterCreated",
+                clientHandler._OnAfterCreated)
+
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(self.GetHandleForBrowser())
         self.browser = cefpython.CreateBrowserSync(windowInfo,
                 browserSettings=g_browserSettings,
                 navigateUrl=url)
-
-        clientHandler = ClientHandler(self.browser)
+        
+        clientHandler.mainBrowser = self.browser
         self.browser.SetClientHandler(clientHandler)
-        cefpython.SetGlobalClientCallback("OnCertificateError",
-                clientHandler._OnCertificateError)
-        cefpython.SetGlobalClientCallback("OnBeforePluginLoad",
-                clientHandler._OnBeforePluginLoad)
 
         jsBindings = cefpython.JavascriptBindings(
             bindToFrames=False, bindToPopups=True)
@@ -174,9 +186,9 @@ class MainFrame(wx.Frame):
             self.Bind(wx.EVT_SIZE, self.OnSize)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        if USE_EVT_IDLE:
-            print("Using EVT_IDLE to execute the CEF message loop work")
+        if USE_EVT_IDLE and not popup:
             # Bind EVT_IDLE only for the main application frame.
+            print("Using EVT_IDLE to execute the CEF message loop work")
             self.Bind(wx.EVT_IDLE, self.OnIdle)
 
     def CreateMenu(self):
@@ -353,10 +365,10 @@ class CookieVisitor:
         return True
 
 class ClientHandler:
-    mainBrowser = None
+    mainBrowser = None # May be None for global client callbacks.
 
-    def __init__(self, browser):
-        self.mainBrowser = browser
+    def __init__(self):
+        pass
 
     # -------------------------------------------------------------------------
     # DisplayHandler
@@ -516,11 +528,12 @@ class ClientHandler:
             allowExecutionOut[0] = True
 
     def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
+        # This is a global callback set using SetGlobalClientCallback().
         # Plugins are loaded on demand, only when website requires it,
         # the same plugin may be called multiple times.
         # This callback is called on the IO thread, thus print messages
         # may not be visible.
-        print("[wxpython.py] RequestHandler::OnBeforePluginLoad()")
+        print("[wxpython.py] RequestHandler::_OnBeforePluginLoad()")
         print("    url = %s" % url)
         print("    policy url = %s" % policyUrl)
         print("    info.GetName() = %s" % info.GetName())
@@ -531,7 +544,8 @@ class ClientHandler:
         return False
 
     def _OnCertificateError(self, certError, requestUrl, callback):
-        print("[wxpython.py] RequestHandler::OnCertificateError()")
+        # This is a global callback set using SetGlobalClientCallback().
+        print("[wxpython.py] RequestHandler::_OnCertificateError()")
         print("    certError = %s" % certError)
         print("    requestUrl = %s" % requestUrl)
         if requestUrl == "https://testssl-expire.disig.sk/index.en.html":
@@ -609,12 +623,18 @@ class ClientHandler:
     # -------------------------------------------------------------------------
 
     # ** This callback is executed on the IO thread **
-    # Empty place-holders: popupFeatures, windowInfo, client, browserSettings.
+    # Empty place-holders: popupFeatures, client.
     def OnBeforePopup(self, browser, frame, targetUrl, targetFrameName,
             popupFeatures, windowInfo, client, browserSettings,
             noJavascriptAccess):
         print("[wxpython.py] LifespanHandler::OnBeforePopup()")
         print("    targetUrl = %s" % targetUrl)
+
+        # Custom browser settings for popups:
+        # > browserSettings[0] = {"plugins_disabled": True}
+
+        # Set WindowInfo object:
+        # > windowInfo[0] = cefpython.WindowInfo()
         
         # On Windows there are keyboard problems in popups, when popup
         # is created using "window.open" or "target=blank". This issue
@@ -636,6 +656,23 @@ class ClientHandler:
     def _CreatePopup(self, url):
         frame = MainFrame(url=url, popup=True)
         frame.Show()
+
+    def _OnAfterCreated(self, browser):
+        # This is a global callback set using SetGlobalClientCallback().
+        print("[wxpython.py] LifespanHandler::_OnAfterCreated()")
+        print("    browserId=%s" % browser.GetIdentifier())
+
+    def RunModal(self, browser):
+        print("[wxpython.py] LifespanHandler::RunModal()")
+        print("    browserId=%s" % browser.GetIdentifier())
+
+    def DoClose(self, browser):
+        print("[wxpython.py] LifespanHandler::DoClose()")
+        print("    browserId=%s" % browser.GetIdentifier())
+
+    def OnBeforeClose(self, browser):
+        print("[wxpython.py] LifespanHandler::OnBeforeClose")
+        print("    browserId=%s" % browser.GetIdentifier())
 
     # -------------------------------------------------------------------------
     # JavascriptDialogHandler
