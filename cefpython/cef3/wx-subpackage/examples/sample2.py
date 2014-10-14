@@ -11,6 +11,8 @@
 import wx
 import wx.lib.agw.flatnotebook as fnb
 import cefpython3.wx.chromectrl as chrome
+import platform
+import sys
 
 ROOT_NAME = "My Locations"
 
@@ -32,6 +34,14 @@ class MainFrame(wx.Frame):
         self.initComponents()
         self.layoutComponents()
         self.initEventHandlers()
+        if len(sys.argv) == 2 and sys.argv[1] == "test-launch":
+            wx.CallLater(500, self.testLaunch)
+
+    def testLaunch(self):
+        # This hash is checked by /tests/test-launch.sh script
+        # to detect whether CEF initialized successfully.
+        print("b8ba7d9945c22425328df2e21fbb64cd")
+        self.Close()
 
     def initComponents(self):
         self.tree = wx.TreeCtrl(self, id=-1, size=(200, -1))
@@ -73,8 +83,16 @@ class MainFrame(wx.Frame):
     def OnClose(self, event):
         self.Destroy()
 
+
 if __name__ == '__main__':
     chrome.Initialize()
+    if platform.system() == "Linux":
+        # CEF initialization fails intermittently on Linux during
+        # launch of a subprocess (Issue 131). The solution is
+        # to offload cpu for half a second after Initialize
+        # has returned (it still runs some stuff in its thread).
+        import time
+        time.sleep(0.5)
     print('sample2.py: wx.version=%s' % wx.version())
     app = wx.PySimpleApp()
     MainFrame().Show()
