@@ -229,8 +229,9 @@ cdef class PyBrowser:
             # KeyboardHandler
             self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"];
             # RequestHandler
-            # Note: "OnCertificateError" and "OnBeforePluginLoad" must be 
-            # set using cefpython.SetGlobalClientCallback()
+            # NOTE: OnCertificateError and OnBeforePluginLoad are not 
+            #       included as they must be set using 
+            #       cefpython.SetGlobalClientCallback().
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
                     "OnQuotaRequest", "OnProtocolExecution", 
@@ -243,7 +244,10 @@ cdef class PyBrowser:
             self.allowedClientCallbacks += ["OnLoadingStateChange", 
                     "OnLoadStart", "OnLoadEnd", "OnLoadError"]
             # LifespanHandler
-            self.allowedClientCallbacks += ["OnBeforePopup"]
+            # NOTE: OnAfterCreated not included as it must be set using
+            #       cefpython.SetGlobalClientCallback().
+            self.allowedClientCallbacks += ["OnBeforePopup",
+                    "RunModal", "DoClose", "OnBeforeClose"]
             # RenderHandler
             self.allowedClientCallbacks += ["GetRootScreenRect",
                     "GetViewRect", "GetScreenPoint", "GetScreenInfo",

@@ -179,6 +179,7 @@ bool ClientHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 ///
 /*--cef()--*/
 void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
+    REQUIRE_UI_THREAD();
 #if defined(OS_WIN)
     // High DPI support.
     CefString auto_zooming = ApplicationSettings_GetString("auto_zooming");
@@ -188,6 +189,7 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
         SetBrowserDpiSettings(browser, auto_zooming);
     }
 #endif
+    LifespanHandler_OnAfterCreated(browser);
 }
 
 ///
@@ -197,7 +199,8 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 ///
 /*--cef()--*/
 bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) { 
-    return false; 
+    REQUIRE_UI_THREAD();
+    return LifespanHandler_RunModal(browser);
 }
 
 ///
@@ -260,7 +263,8 @@ bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) {
 ///
 /*--cef()--*/
 bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) { 
-    return false; 
+    REQUIRE_UI_THREAD();
+    return LifespanHandler_DoClose(browser);
 }
 
 ///

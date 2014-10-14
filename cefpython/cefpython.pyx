@@ -471,7 +471,7 @@ def SetOsModalLoop(py_bool modalLoop):
 
 cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     global g_globalClientCallbacks
-    if name in ["OnCertificateError", "OnBeforePluginLoad"]:
+    if name in ["OnCertificateError", "OnBeforePluginLoad", "OnAfterCreated"]:
         g_globalClientCallbacks[name] = callback
     else:
         raise Exception("SetGlobalClientCallback() failed: " \
