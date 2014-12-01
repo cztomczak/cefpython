@@ -13,6 +13,7 @@ import platform
 import shutil
 import glob
 import shutil
+import sysconfig
 
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
@@ -55,6 +56,7 @@ def main():
 
     vars = {}
     vars["APP_VERSION"] = args.version
+    vars["PLATFORM"] = sysconfig.get_platform()
 
     print("Reading template: %s" % README_TEMPLATE)
     f = open(README_TEMPLATE)

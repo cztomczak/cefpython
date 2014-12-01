@@ -1,11 +1,11 @@
-from distutils.core import setup
-from distutils.command.install import install as _install
+from setuptools import setup
+from setuptools.command.install import install as _install
 import sys
 import os
 import subprocess
 
 def my_post_install():
-    pass
+    print("my_post_install(): nothing to do")
 
 class install(_install):
     def run(self):
@@ -21,6 +21,7 @@ setup(
     author='Czarek Tomczak',
     author_email='czarek.tomczak@gmail.com',
     url='http://code.google.com/p/cefpython/',
+    platforms=['%(PLATFORM)'],
     packages=['cefpython3', 'cefpython3.wx'],
     package_data={'cefpython3': [
         'examples/*.py',

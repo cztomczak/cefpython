@@ -1,5 +1,5 @@
-from distutils.core import setup
-from distutils.command.install import install as _install
+from setuptools import setup
+from setuptools.command.install import install as _install
 import sys
 import os
 import subprocess
@@ -7,6 +7,8 @@ import subprocess
 def my_post_install():
     """ Chmod +x the subprocess and cefclient executables. """
     
+    print("my_post_install()")
+
     # Do not import from the local "cefpython3" directory.
     # Import the cefpython3 module from dist-packages/ directory.
     del sys.path[0]
@@ -49,6 +51,7 @@ setup(
     author='Czarek Tomczak',
     author_email='czarek.tomczak@gmail.com',
     url='http://code.google.com/p/cefpython/',
+    platforms=['%(PLATFORM)'],
     packages=['cefpython3', 'cefpython3.wx'],
     package_data={'cefpython3': [
         'examples/*.py',
