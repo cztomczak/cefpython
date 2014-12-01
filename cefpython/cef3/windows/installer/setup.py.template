@@ -1,3 +1,11 @@
+# Overwrite distutils.dist.Distribution.is_pure() 
+# to return False, so that Python Wheel doesn't set 
+# "none" platform tag.
+import distutils.dist
+def is_pure(self):
+    return False
+distutils.dist.Distribution.is_pure = is_pure
+
 from setuptools import setup
 from setuptools.command.install import install as _install
 import sys
