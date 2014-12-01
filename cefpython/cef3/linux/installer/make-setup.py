@@ -15,6 +15,10 @@ import glob
 
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
+IF BITS == "32bit":
+    LINUX_BITS = "linux32"
+ELSE:
+    LINUX_BITS = "linux64"
 PACKAGE_NAME = "cefpython3"
 
 README_TEMPLATE = os.getcwd()+r"/README.txt.template"
@@ -49,7 +53,7 @@ def main():
 
     installer_dir = os.path.dirname(os.path.abspath(__file__))
 
-    setup_dir = installer_dir+"/"+PACKAGE_NAME+"-"+vars["APP_VERSION"]+"-linux-"+BITS+"-setup"
+    setup_dir = installer_dir+"/"+PACKAGE_NAME+"-"+vars["APP_VERSION"]+"-"+LINUX_BITS+"-setup"
     print("Creating setup dir: "+setup_dir)
     os.mkdir(setup_dir)
 

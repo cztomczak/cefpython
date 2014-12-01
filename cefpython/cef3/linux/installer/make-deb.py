@@ -24,6 +24,10 @@ import shutil
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
 ARCHITECTURE = "i386" if (BITS == "32bit") else "amd64"
+IF BITS == "32bit":
+    LINUX_BITS = "linux32"
+ELSE:
+    LINUX_BITS = "linux64"
 
 PACKAGE_NAME = "cefpython3"
 PYTHON_NAME ="python2.7" # Directory name in deb archive
@@ -296,8 +300,8 @@ def main():
     
     # Paths
     global DISTUTILS_SETUP
-    DISTUTILS_SETUP = INSTALLER+"/"+PACKAGE_NAME+"-"+args.version+"-linux-"+\
-            BITS+"-setup"
+    DISTUTILS_SETUP = INSTALLER+"/"+PACKAGE_NAME+"-"+args.version+"-"+\
+            LINUX_BITS+"-setup"
 
     remove_directories_from_previous_run()
     create_distutils_setup_package()
