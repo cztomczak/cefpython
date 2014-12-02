@@ -1,13 +1,6 @@
-# Overwrite distutils.dist.Distribution.is_pure() 
-# to return False, so that Python Wheel doesn't set 
-# "none" platform tag.
-import distutils.dist
-def is_pure(self):
-    return False
-distutils.dist.Distribution.is_pure = is_pure
-
 from setuptools import setup
 from setuptools.command.install import install as _install
+from setuptools.dist import Distribution
 import sys
 import os
 import subprocess
@@ -20,7 +13,12 @@ class install(_install):
         _install.run(self)
         my_post_install()
 
+class BinaryDistribution(Distribution):
+    def is_pure(self):
+        return False
+
 setup(
+    distclass=BinaryDistribution,
     cmdclass={'install': install},
     name='cefpython3', # No spaces here, so that it works with deb packages.
     version='%(APP_VERSION)s',
