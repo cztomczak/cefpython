@@ -24,9 +24,9 @@ import shutil
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
 ARCHITECTURE = "i386" if (BITS == "32bit") else "amd64"
-IF BITS == "32bit":
+if BITS == "32bit":
     LINUX_BITS = "linux32"
-ELSE:
+else:
     LINUX_BITS = "linux64"
 
 PACKAGE_NAME = "cefpython3"
