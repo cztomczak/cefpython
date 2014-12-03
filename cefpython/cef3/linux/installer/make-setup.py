@@ -16,16 +16,25 @@ import sysconfig
 
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
-IF BITS == "32bit":
+if BITS == "32bit":
     LINUX_BITS = "linux32"
-ELSE:
+else:
     LINUX_BITS = "linux64"
 PACKAGE_NAME = "cefpython3"
 
-README_TEMPLATE = os.getcwd()+r"/README.txt.template"
+README_FILE = os.getcwd()+r"/README.txt"
 INIT_TEMPLATE = os.getcwd()+r"/__init__.py.template"
 SETUP_TEMPLATE = os.getcwd()+r"/setup.py.template"
 SETUP_CFG_TEMPLATE = os.getcwd()+r"/setup.cfg.template"
+
+def str_format(string, dictionary):
+    orig_string = string
+    for key, value in dictionary.iteritems():
+        string = string.replace("%("+key+")s", value)
+    if string == orig_string:
+        raise Exception("Nothing to format")
+    return string
+
 
 def main():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]")
@@ -37,28 +46,28 @@ def main():
 
     vars = {}
     vars["APP_VERSION"] = args.version
-    vars["PLATFORM"] = sysconfig.get_platform()
+    vars["PLATFORM2"] = sysconfig.get_platform()
     vars["PY_VERSION_DIGITS_ONLY"] = (str(sys.version_info.major) + ""
             + str(sys.version_info.minor)) # "27" or "34"
 
-    print("Reading template: %s" % README_TEMPLATE)
-    f = open(README_TEMPLATE)
-    README_CONTENT = f.read() % vars
+    print("Reading template: %s" % README_FILE)
+    f = open(README_FILE)
+    README_CONTENT = f.read()
     f.close()
 
     print("Reading template: %s" % INIT_TEMPLATE)
     f = open(INIT_TEMPLATE)
-    INIT_CONTENT = f.read() % vars
+    INIT_CONTENT = str_format(f.read(), vars)
     f.close()
 
     print("Reading template: %s" % SETUP_TEMPLATE)
     f = open(SETUP_TEMPLATE)
-    SETUP_CONTENT = f.read() % vars
+    SETUP_CONTENT = str_format(f.read(), vars)
     f.close()
 
     print("Reading template: %s" % SETUP_CFG_TEMPLATE)
     f = open(SETUP_CFG_TEMPLATE)
-    SETUP_CFG_CONTENT = f.read() % vars
+    SETUP_CFG_CONTENT = str_format(f.read(), vars)
     f.close()
 
     installer_dir = os.path.dirname(os.path.abspath(__file__))
