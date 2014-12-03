@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Exit immediately if a command exits with a non-zero status
 set -e
@@ -12,6 +12,25 @@ chmod 755 /usr/share/pyshared/cefpython3/subprocess
 # also have to chmod 777 /usr/share/pyshared/cefpython3/.
 chmod 777 /usr/share/pyshared/cefpython3/examples/
 chmod 777 /usr/share/pyshared/cefpython3/examples/wx/
+
+# Check if libudev.so.0 exists and if not, create
+# a symbolic link to libudev.so.1. See issues 145 
+# and 105 in the CEFPython Issue Tracker.
+# -- Sequence of these dirs does matter, on first
+# -- match searching should be stopped.
+declare -a libdirs=("/lib/x86_64-linux-gnu" "/usr/lib64" 
+                    "/lib/i386-linux-gnu" "/usr/lib")
+for libdir in "${libdirs[@]}"
+do
+    libudev_1="$libdir/libudev.so.1"
+    libudev_0="$libdir/libudev.so.0"
+    if [ -f $libudev_1 ] && ! [ -f $libudev_0 ];
+    then
+        echo "ln -sf $libudev_1 $libudev_0"
+        ln -sf "$libudev_1" "$libudev_0"
+        break
+    fi    
+done
 
 # This creates symbolic links in /usr/lib/pymodules/.../cefpython3/
 # for all the files. This is no more required, as in make-deb.py
