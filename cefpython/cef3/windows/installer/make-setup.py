@@ -20,7 +20,7 @@ assert (BITS == "32bit" or BITS == "64bit")
 BITS_NUMBER = BITS[0] + BITS[1]
 PACKAGE_NAME = "cefpython3"
 
-README_TEMPLATE = os.getcwd()+r"/README.txt.template"
+README_FILE = os.getcwd()+r"/README.txt"
 INIT_TEMPLATE = os.getcwd()+r"/__init__.py.template"
 SETUP_TEMPLATE = os.getcwd()+r"/setup.py.template"
 SETUP_CFG_TEMPLATE = os.getcwd()+r"/setup.cfg.template"
@@ -47,6 +47,16 @@ def glob_move(src_glob, dst_folder):
         shutil.move(fname,
                 os.path.join(dst_folder, os.path.basename(fname)))
 
+def str_format(string, dictionary):
+    orig_string = string
+    for key, value in dictionary.iteritems():
+        string = string.replace("%("+key+")s", value)
+    if string == orig_string:
+        raise Exception("Nothing to format")
+    if re.search(r"%\([a-zA-Z0-9_]+\)s", string):
+        raise Exception("Not all strings formatted")
+    return string
+
 def main():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]")
     parser.add_argument("-v", "--version", help="cefpython version",
@@ -61,24 +71,24 @@ def main():
     vars["PY_VERSION_DIGITS_ONLY"] = (str(sys.version_info.major) + ""
             + str(sys.version_info.minor)) # "27" or "34"
 
-    print("Reading template: %s" % README_TEMPLATE)
-    f = open(README_TEMPLATE)
-    README_CONTENT = f.read() % vars
+    print("Reading template: %s" % README_FILE)
+    f = open(README_FILE)
+    README_CONTENT = f.read()
     f.close()
 
     print("Reading template: %s" % INIT_TEMPLATE)
     f = open(INIT_TEMPLATE)
-    INIT_CONTENT = f.read() % vars
+    INIT_CONTENT = str_format(f.read(), vars)
     f.close()
 
     print("Reading template: %s" % SETUP_TEMPLATE)
     f = open(SETUP_TEMPLATE)
-    SETUP_CONTENT = f.read() % vars
+    SETUP_CONTENT = str_format(f.read(), vars)
     f.close()
 
     print("Reading template: %s" % SETUP_CFG_TEMPLATE)
     f = open(SETUP_CFG_TEMPLATE)
-    SETUP_CFG_CONTENT = f.read() % vars
+    SETUP_CFG_CONTENT = str_format(f.read(), vars)
     f.close()
 
     installer_dir = os.path.dirname(os.path.abspath(__file__))

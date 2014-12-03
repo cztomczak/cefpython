@@ -33,8 +33,9 @@ def str_format(string, dictionary):
         string = string.replace("%("+key+")s", value)
     if string == orig_string:
         raise Exception("Nothing to format")
+    if re.search(r"%\([a-zA-Z0-9_]+\)s", string):
+        raise Exception("Not all strings formatted")
     return string
-
 
 def main():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]")
@@ -46,7 +47,7 @@ def main():
 
     vars = {}
     vars["APP_VERSION"] = args.version
-    vars["PLATFORM2"] = sysconfig.get_platform()
+    vars["PLATFORM"] = sysconfig.get_platform()
     vars["PY_VERSION_DIGITS_ONLY"] = (str(sys.version_info.major) + ""
             + str(sys.version_info.minor)) # "27" or "34"
 
