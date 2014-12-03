@@ -45,7 +45,7 @@ cdef py_string CharToPyString(
 #                 g_applicationSettings["string_encoding"],
 #                 errors=BYTES_DECODE_ERRORS))
 
-# cdef cpp_string PyToCppString(py_string pyString):
+# cdef cpp_string PyToCppString(py_string pyString) except *:
 #     cdef cpp_string cppString = pyString
 #     return cppString
 

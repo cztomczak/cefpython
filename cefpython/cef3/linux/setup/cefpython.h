@@ -13,13 +13,17 @@
 #endif
 
 __PYX_EXTERN_C DL_IMPORT(void) PyBrowser_ShowDevTools(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(void) PyTaskRunnable(int);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>);
 __PYX_EXTERN_C DL_IMPORT(void) V8ContextHandler_OnContextReleased(int, int64);
 __PYX_EXTERN_C DL_IMPORT(void) V8FunctionHandler_Execute(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString &, CefRefPtr<CefListValue>);
 __PYX_EXTERN_C DL_IMPORT(void) RemovePythonCallbacksForFrame(int);
 __PYX_EXTERN_C DL_IMPORT(bool) ExecutePythonCallback(CefRefPtr<CefBrowser>, int, CefRefPtr<CefListValue>);
-__PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnBeforeClose(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString const &, CefString const &, int const , CefWindowInfo &, CefRefPtr<CefClient> &, CefBrowserSettings &, bool *);
+__PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnAfterCreated(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_RunModal(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_DoClose(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnBeforeClose(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnAddressChange(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString const &);
 __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnTitleChange(CefRefPtr<CefBrowser>, CefString const &);
 __PYX_EXTERN_C DL_IMPORT(bool) DisplayHandler_OnTooltip(CefRefPtr<CefBrowser>, CefString &);
@@ -75,6 +79,8 @@ __PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnJavascriptDialogClosed(
 __PYX_EXTERN_C DL_IMPORT(void) cefpython_GetDebugOptions(bool *, std::string *);
 __PYX_EXTERN_C DL_IMPORT(bool) ApplicationSettings_GetBool(char const *);
 __PYX_EXTERN_C DL_IMPORT(bool) ApplicationSettings_GetBoolFromDict(char const *, char const *);
+__PYX_EXTERN_C DL_IMPORT(std::string) ApplicationSettings_GetString(char const *);
+__PYX_EXTERN_C DL_IMPORT(int) CommandLineSwitches_GetInt(char const *);
 
 #endif /* !__PYX_HAVE_API__cefpython_py27 */
 
