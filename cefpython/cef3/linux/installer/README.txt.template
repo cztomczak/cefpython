@@ -5,29 +5,12 @@
    This will install the cefpython3 package to
    /usr/local/lib/python2.7/dist-packages/
 
-2. It may also be required to install "libnss3" and "libnspr4" dependencies:
-
-   sudo apt-get install libnss3-1d libnspr4-0d
-
-3. On Ubuntu 12 everything should work out of the box. But on Ubuntu 13,
-   Ubuntu 14, Fedora 20 and possibly some other OS'es there may be issues
-   with wrong version of libudev library. For example to fix it on Ubuntu
-   64bit it is required to create a symbolic link "libudev.so.0" to
-   the "libudev.so.1" library with this command:
-
-   cd /lib/x86_64-linux-gnu/
-   sudo ln -sf libudev.so.1 libudev.so.0
-
-   The path to libudev.so.1 may be different on other OS'es, see:
-   * Ubuntu, Xubuntu, Mint - /lib/x86_64-linux-gnu/
-   * SUSE, Fedora - /usr/lib64/
-   * Arch, Fedora 32bit - /usr/lib/
-   * Ubuntu 32bit - /lib/i386-linux-gnu/
-
-4. In the same directory that setup.py resides there is 
-   an examples/ directory, run some example scripts from there:
+2. In the same directory that setup.py resides there is 
+   an examples/ directory. Run some examples from there:
 
    cd examples/
+   python pygtk_.py
+   python pyqt.py
    python wxpython.py
    python kivy_.py
 
@@ -35,9 +18,3 @@
    python sample1.py
    python sample2.py
    python sample3.py
-
-Note:
-    Examples directory can also be found in the cefpython3 package directory:
-    /usr/local/lib/python2.7/dist-packages/cefpython3/examples/
-    But to run examples from there you would have to chmod 0777
-    the examples/ directory as it needs permission to create log files.

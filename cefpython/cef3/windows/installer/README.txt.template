@@ -1,22 +1,18 @@
 1. To install CEF Python 3 type:
 
-       python setup.py install
+   python setup.py install
 
 2. In the same directory that setup.py resides there is
    an examples/ directory, run some example scripts from there:
 
-       cd examples/
-       python wxpython.py
-       python pyqt.py
-       python pyside.py
-       python pygtk_.py
-       python pywin32.py
+   cd examples/
+   python wxpython.py
+   python pyqt.py
+   python pyside.py
+   python pygtk_.py
+   python pywin32.py
 
-       cd wx/
-       python sample1.py
-       python sample2.py
-       python sample3.py
-
-Note:
-    Examples directory can also be found in the cefpython3 package directory:
-    C:/python27/lib/site-packages/cefpython3/examples/
+   cd wx/
+   python sample1.py
+   python sample2.py
+   python sample3.py
