@@ -1,2 +1,2 @@
 [bdist_wheel]
-python-tag=cp%(PY_VERSION_DIGITS_ONLY)
+python-tag=cp%(PY_VERSION_DIGITS_ONLY)s

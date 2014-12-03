@@ -1,48 +1,66 @@
-from setuptools import setup
-from setuptools.command.install import install as _install
-from setuptools.dist import Distribution
+try:
+    # The setuptools package is not installed by default 
+    # on a clean Ubuntu. Might be also a case on Windows.
+    # Python Eggs and Wheels can be created only with setuptools.
+    from setuptools import setup
+    from setuptools.command.install import install as _install
+    from setuptools.dist import Distribution
+    print("[setup.py] Using setuptools")
+except:
+    from distutils.core import setup
+    from distutils.command.install import install as _install
+    from distutils.dist import Distribution
+    print("[setup.py] Using distutils")
+
 import sys
 import os
 import subprocess
 
-def my_post_install():
-    """ Chmod +x the subprocess and cefclient executables. """
+def post_install():
+    """ Post install tasks """
+    print("[setup.py] post_install()")
     
-    print("my_post_install()")
-
-    # Do not import from the local "cefpython3" directory.
-    # Import the cefpython3 module from dist-packages/ directory.
+    # Check if libudev.so.0 exists and if not, create
+    # a symbolic link to libudev.so.1. See issues 145 
+    # and 105 in the CEFPython Issue Tracker.
+    # -- Sequence of these dirs does matter, on first
+    # -- match searching should be stopped.
+    libdirs = ["/lib/x86_64-linux-gnu", "/usr/lib64", 
+               "/lib/i386-linux-gnu", "/usr/lib"]
+    for libdir in libdirs:
+        if os.path.exists(libdir+"/libudev.so.1") \
+                and not os.path.exists(libdir+"/libudev.so.0"):
+            libudev1 = "%s/libudev.so.1" % libdir
+            libudev0 = "%s/libudev.so.0" % libdir
+            print("[setup.py] ln -sf %s %s" % (libudev1, libudev0))
+            subprocess.call("ln -sf %s %s" % (libudev1, libudev0), shell=True)
+            break
+    
+    # Find package directory. 
+    # Do not import from local cefpython3/ directory.
     del sys.path[0]
     sys.path.append('')
     import cefpython3
     package_dir = os.path.dirname(cefpython3.__file__)
-    
-    # Make sure this is not a local package imported.
+        
+    # Make sure this is not a local package imported
+    print("[setup.py] package_dir = %s" % package_dir)
     assert not package_dir.startswith(
             os.path.dirname(os.path.abspath(__file__)))
     
-    # Chmod 755 executable files
+    # Execute permissions for subprocess.exe and cefclient.exe
     subprocess_exe = os.path.join(package_dir, "subprocess")
     cefclient_exe = os.path.join(package_dir, "cefclient")
-    print("chmod 755 "+subprocess_exe)
-    subprocess.call("chmod 755 "+subprocess_exe, shell=True)
-    print("chmod 755 "+cefclient_exe)
-    subprocess.call("chmod 755 "+cefclient_exe, shell=True)
-    
-    # Also chmod 777 the examples directory as "debug.log" file
-    # is created when running examples.
-    examples = os.path.join(package_dir, "examples")
-    examples_wx = os.path.join(examples, "wx")
-    print("chmod 777 "+examples)
-    subprocess.call("chmod 777 "+examples, shell=True)
-    print("chmod 777 "+examples_wx)
-    subprocess.call("chmod 777 "+examples_wx, shell=True)
+    print("[setup.py] chmod +x " + subprocess_exe)
+    subprocess.call("chmod +x "+subprocess_exe, shell=True)
+    print("[setup.py] chmod +x " + cefclient_exe)
+    subprocess.call("chmod +x "+cefclient_exe, shell=True)
 
 class install(_install):
     def run(self):
         _install.run(self)
-        my_post_install()
-
+        post_install()
+        
 class BinaryDistribution(Distribution):
     def is_pure(self):
         return False
@@ -57,7 +75,7 @@ setup(
     author='Czarek Tomczak',
     author_email='czarek.tomczak@gmail.com',
     url='http://code.google.com/p/cefpython/',
-    platforms=['%(PLATFORM)'],
+    platforms=['%(PLATFORM)s'],
     packages=['cefpython3', 'cefpython3.wx'],
     package_data={'cefpython3': [
         'examples/*.py',
