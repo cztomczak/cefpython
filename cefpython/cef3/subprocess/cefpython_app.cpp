@@ -13,7 +13,7 @@
 #include "util.h"
 #include "include/cef_runnable.h"
 #include "DebugLog.h"
-#include "LOG_DEBUG"
+#include "LOG_DEBUG.h"
 #include <vector>
 #include <algorithm>
 #include "v8utils.h"
