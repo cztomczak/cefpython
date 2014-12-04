@@ -283,7 +283,7 @@ def modify_deb_archive():
     # Create deb archive from the modified ./DEBIAN/ and 
     # ./usr/ directories.
     log("Creating deb archive from the modified files")
-    os.system("dpkg-deb -b . ./%s" % deb_archive_name)
+    os.system("fakeroot dpkg-deb -b . ./%s" % deb_archive_name)
 
 def main():
     # Command line options
