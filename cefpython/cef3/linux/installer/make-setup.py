@@ -13,6 +13,7 @@ import platform
 import shutil
 import glob
 import sysconfig
+import subprocess
 
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
