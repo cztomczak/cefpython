@@ -10,8 +10,9 @@ chmod 755 /usr/share/pyshared/cefpython3/subprocess
 # Permissions for the examples - debug.log is created.
 # If you want to run the cefclient executable you may
 # also have to chmod 777 /usr/share/pyshared/cefpython3/.
-chmod 777 /usr/share/pyshared/cefpython3/examples/
-chmod 777 /usr/share/pyshared/cefpython3/examples/wx/
+chmod 666 /usr/share/pyshared/cefpython3/debug.log
+chmod 666 /usr/share/pyshared/cefpython3/examples/debug.log
+chmod 666 /usr/share/pyshared/cefpython3/examples/wx/debug.log
 
 # Check if libudev.so.0 exists and if not, create
 # a symbolic link to libudev.so.1. See issues 145 

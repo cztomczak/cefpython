@@ -127,6 +127,7 @@ def main():
     glob_remove("*.log")
     glob_remove("*.pyc")
     glob_remove("*.pdb")
+    
     os.chdir(installer_dir)
 
     print("Creating __init__.py from template")
@@ -164,7 +165,17 @@ def main():
     print("Copying package dir examples to setup dir")
     glob_copy(package_dir+"/examples/", setup_dir+"/examples/")
 
-    print("Setup Package created.")
+    # Create empty debug.log files so that package uninstalls cleanly
+    # in case examples were launched. Issue 149.
+    debug_log_dirs = [package_dir, 
+                      package_dir+"/examples/", 
+                      package_dir+"/examples/wx/"]
+    for dir in debug_log_dirs:
+        print("Creating empty debug.log in %s" % dir)    
+        with open(dir+"/debug.log", "w") as f:
+            f.write("")
+
+    print("Setup Package created successfully.")
 
 if __name__ == "__main__":
     main()
