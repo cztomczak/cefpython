@@ -55,15 +55,20 @@ ext_modules = [Extension(
         r'./../../../cython_includes/',
         '/usr/include/gtk-2.0',
         '/usr/include/glib-2.0',
-        '/usr/lib/i386-linux-gnu/gtk-2.0/include',
-        '/usr/lib/i386-linux-gnu/glib-2.0/include',
         '/usr/include/cairo',
         '/usr/include/pango-1.0',
         '/usr/include/gdk-pixbuf-2.0',
         '/usr/include/atk-1.0',
-        # 64bit Ubuntu
+        # Ubuntu
         '/usr/lib/x86_64-linux-gnu/glib-2.0/include',
         '/usr/lib/x86_64-linux-gnu/gtk-2.0/include',
+        '/usr/lib/i386-linux-gnu/gtk-2.0/include',
+        '/usr/lib/i386-linux-gnu/glib-2.0/include',
+        # Fedora
+        '/usr/lib64/glib-2.0/include',
+        '/usr/lib64/gtk-2.0/include',
+        '/usr/lib/glib-2.0/include',
+        '/usr/lib/gtk-2.0/include',
     ],
 
     # http_authentication not implemented on Linux.
