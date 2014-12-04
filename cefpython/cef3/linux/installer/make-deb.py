@@ -188,8 +188,21 @@ def create_debian_source_package():
     log("Creating Debian source package using stdeb")
     os.chdir(DISTUTILS_SETUP)
     shutil.copy("../stdeb.cfg.template", "stdeb.cfg")
+    stdeb_cfg_add_deps("stdeb.cfg")
     subprocess.call("%s setup.py --command-packages=stdeb.command sdist_dsc"\
             % (sys.executable,), shell=True)
+
+def stdeb_cfg_add_deps(stdeb_cfg):
+    log("Adding deps to stdeb.cfg")
+    with open(INSTALLER+"/deps.txt", "r") as f:
+        deps = f.read()
+    deps = deps.strip()
+    deps = deps.splitlines()
+    for i, dep in enumerate(deps):
+        deps[i] = dep.strip()
+    deps = ", ".join(deps)
+    with open(stdeb_cfg, "a") as f:
+        f.write("\nDepends: %s" % deps)
 
 def deb_dist_cleanup():
     # Move the deb_dist/ directory and remove unnecessary files
