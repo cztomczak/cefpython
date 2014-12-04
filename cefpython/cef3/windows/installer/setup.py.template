@@ -61,5 +61,8 @@ setup(
         '*.pyd',
         '*.dll',
         '*.pak',
+        'debug.log',
+        'examples/debug.log',
+        'examples/wx/debug.log',
     ]}
 )

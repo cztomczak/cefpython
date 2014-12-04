@@ -56,6 +56,16 @@ def post_install():
     print("[setup.py] chmod +x " + cefclient_exe)
     subprocess.call("chmod +x "+cefclient_exe, shell=True)
 
+    # Write permissions for debug.log files
+    commands = [
+        "chmod 666 %s/debug.log" % package_dir,
+        "chmod 666 %s/examples/debug.log" % package_dir,
+        "chmod 666 %s/examples/wx/debug.log" % package_dir,
+    ]
+    for command in commands:
+        print("[setup.py] %s" % command)
+        subprocess.call(command, shell=True)
+
 class install(_install):
     def run(self):
         _install.run(self)
@@ -97,5 +107,8 @@ setup(
         'subprocess',
         '*.so',
         '*.pak',
+        'debug.log',
+        'examples/debug.log',
+        'examples/wx/debug.log',
     ]}
 )

@@ -150,7 +150,20 @@ def main():
     ret = os.system("cp -rf "+package_dir+"/examples/ "+setup_dir+"/examples/")
     assert ret == 0
 
-    print("Setup Package created.")
+    # Create empty debug.log files so that package uninstalls cleanly
+    # in case examples were launched. Issue 149.
+    debug_log_dirs = [package_dir, 
+                      package_dir+"/examples/", 
+                      package_dir+"/examples/wx/"]
+    for dir in debug_log_dirs:
+        print("Creating empty debug.log in %s" % dir)    
+        with open(dir+"/debug.log", "w") as f:
+            f.write("")
+        # Set write permissions so that Wheel package files have it
+        # right. So that examples may be run from package directory.
+        subprocess.call("chmod 666 %s/debug.log" % dir, shell=True)
+
+    print("Setup Package created successfully.")
 
 if __name__ == "__main__":
     main()
