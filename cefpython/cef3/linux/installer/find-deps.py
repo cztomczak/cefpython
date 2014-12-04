@@ -162,13 +162,26 @@ def package_exists(package):
 def get_final_deps(chrome_deps, cef_deps):
     final_deps = chrome_deps
     chrome_deps_names = []
+    chrome_libudev0_dep = ""
     for chrome_dep in chrome_deps:
-        chrome_deps_names.append(get_chrome_dep_name(chrome_dep))
+        chrome_dep_name = get_chrome_dep_name(chrome_dep)
+        chrome_deps_names.append(chrome_dep_name)
+        if chrome_dep_name == "libudev0":
+            chrome_libudev0_dep = chrome_dep
     for cef_dep in cef_deps:
         if cef_dep not in chrome_deps_names:
             final_deps.append(cef_dep)
     log("Found %d CEF deps that were not listed in Chrome deps" % \
             (len(final_deps)-len(chrome_deps)) )
+    # See Issue 145. libudev.so.0 may be missing and postinstall
+    # script creates a symlink. Not sure how Google Chrome can
+    # have libudev0 in deps and deb package can install fine.
+    if chrome_libudev0_dep and chrome_libudev0_dep in final_deps:
+        log("Removing '%s' from final deps (Issue 145)" % chrome_libudev0_dep)
+        final_deps.remove(chrome_libudev0_dep)
+    if "libudev0" in final_deps:
+        log("Removing 'libudev0' from final deps (Issue 145)")
+        final_deps.remove("libudev0")        
     log("Found %d final deps:" % len(final_deps))
     print("-" * 80)
     print("\n".join(final_deps))
