@@ -97,7 +97,7 @@ cdef class PyFrame:
         self.ExecuteJavascript(code)
 
     def CallFunction(self, *args):
-        # DEPRECATED name.
+        # DEPRECATED - keep for backwards compatibility.
         self.ExecuteFunction(*args)
 
     # Synchronous javascript calls won't be supported as CEF 3
