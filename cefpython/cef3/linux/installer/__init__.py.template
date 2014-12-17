@@ -1,3 +1,7 @@
+__all__ = ["cefpython", "wx"]
+__version__ = "%(APP_VERSION)s"
+__author__ = "The CEF Python authors"
+
 import ctypes, os
 
 # If this is a debian package then package_dir returns:
@@ -6,7 +10,7 @@ import ctypes, os
 #   /usr/share/pyshared/cefpython3
 
 # If package was installed using PIP or setup.py then package
-# dir is here: 
+# dir is here:
 #   /usr/local/lib/python2.7/dist-packages/cefpython3/
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,6 +32,3 @@ if 0x02070000 <=  sys.hexversion < 0x03000000:
     from . import cefpython_py27 as cefpython
 else:
     raise Exception("Unsupported python version: " + sys.version)
-
-__version__ = "%(APP_VERSION)s"
-__author__ = "The CEF Python authors"
