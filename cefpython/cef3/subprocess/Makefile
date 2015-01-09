@@ -4,6 +4,8 @@
 # -Wall - show important warnings
 # -Werror - treat warnings as errors
 
+UNAME_S = $(shell uname -s)
+
 INC = -I./../ -I/usr/include/python2.7 -I/usr/include/gtk-2.0 \
 	-I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/gtk-2.0/include \
 	-I/usr/lib/i386-linux-gnu/glib-2.0/include -I/usr/include/cairo \
@@ -13,10 +15,17 @@ INC = -I./../ -I/usr/include/python2.7 -I/usr/include/gtk-2.0 \
 	-I/usr/lib64/glib-2.0/include -I/usr/lib64/gtk-2.0/include \
 	-I/usr/lib/glib-2.0/include -I/usr/lib/gtk-2.0/include
 
-LIB = -L./../linux/setup/lib_64bit -L./../linux/setup/lib_32bit \
-	-L./../linux/binaries_64bit -L./../linux/binaries_32bit
+ifeq ($(UNAME_S), Linux)
+	LIB = -L./../linux/setup/lib_64bit -L./../linux/setup/lib_32bit \
+		-L./../linux/binaries_64bit -L./../linux/binaries_32bit
+else ifeq ($(UNAME_S), Darwin)
+	LIB = -L./../mac/setup/lib_64bit -L./../mac/setup/lib_32bit \
+		-L./../mac/binaries_64bit/cef.framework/libraries \
+		-L./../mac/binaries_32bit/cef.framework/libraries
+endif
 
-CCFLAGS = -g -Wall -Werror -DRENDERER_PROCESS
+CCFLAGS = -g -Wall -Werror -DRENDERER_PROCESS $(CEF_CCFLAGS)
+
 
 subprocess:
 	# -fPIC is required only for libraries included by Cython.

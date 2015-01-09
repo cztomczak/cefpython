@@ -93,7 +93,7 @@ include "imports.pyx"
 g_debug = False
 g_debugFile = "debug.log"
 
-# When put None here and assigned a local dictionary in Initialize(), later 
+# When put None here and assigned a local dictionary in Initialize(), later
 # while running app this global variable was garbage collected, see topic:
 # https://groups.google.com/d/topic/cython-users/0dw3UASh7HY/discussion
 g_applicationSettings = {}
@@ -129,6 +129,8 @@ IF UNAME_SYSNAME == "Windows":
         include "http_authentication_win.pyx"
 ELIF UNAME_SYSNAME == "Linux":
     include "window_utils_linux.pyx"
+ELIF UNAME_SYSNAME == "Darwin":
+    include "window_utils_mac.pyx"
 
 include "task.pyx"
 
@@ -289,9 +291,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
     # Remote debugging port. If value is 0 we will generate a random
     # port. To disable remote debugging set value to -1.
     if applicationSettings["remote_debugging_port"] == 0:
-        # Generate a random port.  
+        # Generate a random port.
         applicationSettings["remote_debugging_port"] =\
-                random.randint(49152, 65535) 
+                random.randint(49152, 65535)
     elif applicationSettings["remote_debugging_port"] == -1:
         # Disable remote debugging
         applicationSettings["remote_debugging_port"] = 0
@@ -313,6 +315,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
             cdef HINSTANCE hInstance = GetModuleHandle(NULL)
             cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
         ELIF UNAME_SYSNAME == "Linux":
+            # TODO: use the CefMainArgs(int argc, char** argv) constructor.
+            cdef CefMainArgs cefMainArgs
+        ELIF UNAME_SYSNAME == "Darwin":
             # TODO: use the CefMainArgs(int argc, char** argv) constructor.
             cdef CefMainArgs cefMainArgs
         cdef int exitCode = 1

@@ -2,8 +2,25 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from cef_types_mac cimport _cef_key_info_t
+include "compile_time_constants.pxi"
 
-cdef extern from "include/internal/cef_mac.h":
+from cef_types_mac cimport _cef_key_info_t
+from cef_types_wrappers cimport CefStructBase
+from libcpp cimport bool as cpp_bool
+
+cdef extern from "include/internal/cef_linux.h":
 
     ctypedef _cef_key_info_t CefKeyInfo
+    ctypedef void* CefWindowHandle
+    ctypedef void* CefCursorHandle
+
+    cdef cppclass CefWindowInfo:
+        void SetAsChild(CefWindowHandle ParentView, int x, int y, int width,
+                  int height)
+        void SetTransparentPainting(cpp_bool)
+        void SetAsOffScreen(CefWindowHandle)
+
+    IF CEF_VERSION == 3:
+        cdef cppclass CefMainArgs(CefStructBase):
+            CefMainArgs()
+            CefMainArgs(int argc_arg, char** argv_arg)

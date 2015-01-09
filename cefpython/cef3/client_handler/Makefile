@@ -9,7 +9,7 @@
 # 	-Wl,-z,relro
 
 CC = g++
-CCFLAGS = -g -fPIC -Wall -Werror
+CCFLAGS = -g -fPIC -Wall -Werror $(CEF_CCFLAGS)
 
 SRC = client_handler.cpp cookie_visitor.cpp resource_handler.cpp \
 		web_request_client.cpp string_visitor.cpp request_context_handler.cpp \

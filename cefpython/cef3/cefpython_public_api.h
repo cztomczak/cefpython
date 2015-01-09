@@ -30,10 +30,10 @@
 
 #if defined(OS_WIN)
 #include "windows/setup/cefpython.h"
-#endif
-
-#if defined(OS_LINUX)
+#elif defined(OS_LINUX)
 #include "linux/setup/cefpython.h"
+#elif defined(OS_MACOSX)
+#include "mac/setup/cefpython.h"
 #endif
 
 // CEFPYTHON_PUBLIC_API_H

@@ -1,5 +1,5 @@
 CC = g++
-CCFLAGS = -g
+CCFLAGS = -g $(CEF_CCFLAGS)
 
 SRC = PaintBuffer.cpp
 OBJ = $(SRC:.cpp=.o)
