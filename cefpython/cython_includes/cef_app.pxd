@@ -17,6 +17,8 @@ IF CEF_VERSION == 3:
         from cef_win cimport CefMainArgs
     ELIF UNAME_SYSNAME == "Linux":
         from cef_linux cimport CefMainArgs
+    ELIF UNAME_SYSNAME == "Darwin":
+        from cef_mac cimport CefMainArgs
 
 cdef extern from "include/cef_app.h":
 

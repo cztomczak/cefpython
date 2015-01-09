@@ -10,7 +10,7 @@
 #include "windows.h"
 #include "stdint_win.h"
 #include <stdio.h>
-#elif defined(__linux__)
+#else
 #include <stdint.h>
 #include <string.h>
 #endif

@@ -9,6 +9,8 @@ IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowHandle, CefWindowInfo
 ELIF UNAME_SYSNAME == "Linux":
     from cef_linux cimport CefWindowHandle, CefWindowInfo
+ELIF UNAME_SYSNAME == "Darwin":
+    from cef_mac cimport CefWindowHandle, CefWindowInfo
 from cef_client cimport CefClient
 from cef_types_wrappers cimport CefBrowserSettings
 from cef_request_context cimport CefRequestContext
