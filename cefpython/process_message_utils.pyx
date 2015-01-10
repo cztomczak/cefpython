@@ -198,7 +198,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
                 value = list(value)
             ret.get().SetList(index, PyListToCefListValue(
                     browserId, frameId, value, nestingLevel + 1))
-        elif valueType == types.FunctionType or valueType == types.MethodType:
+        elif IsFunctionOrMethod(valueType):
             ret.get().SetBinary(index, PutPythonCallback(
                     browserId, frameId, value))
         else:
@@ -258,7 +258,7 @@ cdef void PyListToExistingCefListValue(
             PyListToExistingCefListValue(browserId, frameId, value,
                     newCefListValue, nestingLevel + 1)
             cefListValue.get().SetList(index, newCefListValue)
-        elif valueType == types.FunctionType or valueType == types.MethodType:
+        elif IsFunctionOrMethod(valueType):
             cefListValue.get().SetBinary(index, PutPythonCallback(
                         browserId, frameId, value))
         else:
@@ -315,7 +315,7 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
                 value = list(value)
             ret.get().SetList(cefKey, PyListToCefListValue(
                     browserId, frameId, value, nestingLevel + 1))
-        elif valueType == types.FunctionType or valueType == types.MethodType:
+        elif IsFunctionOrMethod(valueType):
             ret.get().SetBinary(cefKey, PutPythonCallback(
                     browserId, frameId, value))
         else:

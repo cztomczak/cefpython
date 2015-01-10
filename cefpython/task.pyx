@@ -7,15 +7,14 @@ g_tasks = {}
 
 def PostTask(int threadId, object func, *args):
     global g_tasks, g_taskMaxId
-    
+
     # Validate threadId.
     if threadId not in g_browserProcessThreads:
         raise Exception("PoastTask failed: requires a browser process thread")
 
     # Validate func.
-    if not (type(func) == types.FunctionType \
-            or type(func) == types.MethodType):
-        raise Exception("PostTask failed: not a function or method")
+    if not IsFunctionOrMethod(type(func)):
+        raise Exception("PostTask failed: not a function nor method")
 
     # Params.
     cdef list params = list(args)
@@ -36,15 +35,15 @@ cdef public void PyTaskRunnable(int taskId) except * with gil:
     cdef object func
     cdef list params
     cdef object task
-    
+
     try:
         global g_tasks
-        
+
         # Validate if task exist.
         if str(taskId) not in g_tasks:
             raise Exception("PyTaskRunnable failed: invalid taskId=%s" \
                     % taskId)
-        
+
         # Fetch task: func and params.
         task = g_tasks[str(taskId)]
         func = task["func"]
