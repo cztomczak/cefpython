@@ -132,6 +132,12 @@ class ChromeWindow(wx.Window):
                  size=(-1, -1), *args, **kwargs):
         wx.Window.__init__(self, parent, id=wx.ID_ANY, size=size,
                            *args, **kwargs)
+
+        # This timer is not used anymore, but creating it for backwards
+        # compatibility. In one of external projects ChromeWindow.timer.Stop()
+        # is being called during browser destruction.
+        self.timer = wx.Timer()
+
         # On Linux absolute file urls need to start with "file://"
         # otherwise a path of "/home/some" is converted to "http://home/some".
         if platform.system() == "Linux":
