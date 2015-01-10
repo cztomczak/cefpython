@@ -14,7 +14,7 @@ cdef class JavascriptBindings:
         self.functions = {}
         self.properties = {}
         self.objects = {}
-    
+
         self.bindToFrames = bool(bindToFrames)
         self.bindToPopups = bool(bindToPopups)
 
@@ -75,12 +75,12 @@ cdef class JavascriptBindings:
                             % (name, allowed))
 
         cdef object valueType = type(value)
-        if valueType == types.FunctionType or valueType == types.MethodType:
+        if IsFunctionOrMethod(valueType):
             self.functions[name] = value
         else:
             self.properties[name] = value
 
-    
+
     IF CEF_VERSION == 1:
         cpdef py_void Rebind(self):
             # Rebind may also be used for first-time bindings, in
@@ -99,7 +99,7 @@ cdef class JavascriptBindings:
             cdef list frames
             global g_pyBrowsers
             for pyBrowser in g_pyBrowsers:
-                # These javascript bindings may have been binded 
+                # These javascript bindings may have been binded
                 # to many browsers.
                 if pyBrowser.GetJavascriptBindings() != self:
                     continue
@@ -122,7 +122,7 @@ cdef class JavascriptBindings:
                         assert v8Context.get().Exit(), "v8Context.Exit() failed"
     ELIF CEF_VERSION == 3:
         cpdef py_void Rebind(self):
-            # In CEF Python 3 due to its multi-process architecture 
+            # In CEF Python 3 due to its multi-process architecture
             # Rebind() is used for both first-time binding and rebinding.
             cdef PyBrowser pyBrowser
             cdef dict functions
@@ -183,7 +183,7 @@ cdef class JavascriptBindings:
             return True
         elif valueType == type(None):
             return True
-        elif valueType == types.FunctionType or valueType == types.MethodType:
+        elif IsFunctionOrMethod(valueType):
             if recursion:
                 return valueType.__name__
             else:

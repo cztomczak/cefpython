@@ -8,8 +8,8 @@ cdef void SetCefWindowInfo(
         ) except *:
     if not windowInfo.windowType:
         raise Exception("WindowInfo: windowType is not set")
-    
-    # It is allowed to pass 0 as parentWindowHandle in OSR mode, but then 
+
+    # It is allowed to pass 0 as parentWindowHandle in OSR mode, but then
     # some things like context menus and plugins may not display correctly.
     if windowInfo.windowType != "offscreen":
         if not windowInfo.parentWindowHandle:
@@ -32,7 +32,12 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle, rect)
         ELIF UNAME_SYSNAME == "Darwin":
-            raise Exception("WindowInfo.SetAsChild() not implemented on Mac")
+            cefWindowInfo.SetAsChild(
+                    <CefWindowHandle>windowInfo.parentWindowHandle,
+                    int(windowInfo.windowRect[0]),
+                    int(windowInfo.windowRect[1]),
+                    int(windowInfo.windowRect[2]),
+                    int(windowInfo.windowRect[3]))
         ELIF UNAME_SYSNAME == "Linux":
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle)
@@ -72,14 +77,14 @@ cdef class WindowInfo:
                         "windowRect is required")
         if windowRect:
             if type(windowRect) == list and len(windowRect) == 4:
-                self.windowRect = [windowRect[0], windowRect[1], 
+                self.windowRect = [windowRect[0], windowRect[1],
                                    windowRect[2], windowRect[3]]
             else:
                 raise Exception("WindowInfo.SetAsChild() failed: " \
                         "windowRect: invalid value")
 
     IF UNAME_SYSNAME == "Windows":
-        cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle, 
+        cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle,
                 py_string windowName):
             if not WindowUtils.IsWindowHandle(parentWindowHandle):
                 raise Exception("Invalid parentWindowHandle: %s" \
@@ -88,7 +93,7 @@ cdef class WindowInfo:
             self.windowType = "popup"
             self.windowName = str(windowName)
 
-    cpdef py_void SetAsOffscreen(self, 
+    cpdef py_void SetAsOffscreen(self,
             WindowHandle parentWindowHandle):
         # It is allowed to pass 0 as parentWindowHandle.
         if parentWindowHandle and \
@@ -97,7 +102,7 @@ cdef class WindowInfo:
                     % parentWindowHandle)
         self.parentWindowHandle = parentWindowHandle
         self.windowType = "offscreen"
-        
-    cpdef py_void SetTransparentPainting(self, 
+
+    cpdef py_void SetTransparentPainting(self,
             py_bool transparentPainting):
         self.transparentPainting = transparentPainting

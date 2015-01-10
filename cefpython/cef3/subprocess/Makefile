@@ -20,8 +20,8 @@ ifeq ($(UNAME_S), Linux)
 		-L./../linux/binaries_64bit -L./../linux/binaries_32bit
 else ifeq ($(UNAME_S), Darwin)
 	LIB = -L./../mac/setup/lib_64bit -L./../mac/setup/lib_32bit \
-		-L./../mac/binaries_64bit/cef.framework/libraries \
-		-L./../mac/binaries_32bit/cef.framework/libraries
+		-L./../mac/binaries_64bit/ \
+		-L./../mac/binaries_32bit/
 endif
 
 CCFLAGS = -g -Wall -Werror -DRENDERER_PROCESS $(CEF_CCFLAGS)

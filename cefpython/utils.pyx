@@ -58,12 +58,12 @@ cpdef str GetSystemError():
         return ""
 
 cpdef str GetNavigateUrl(py_string url):
-    # Encode local file paths so that CEF can load them correctly: 
+    # Encode local file paths so that CEF can load them correctly:
     # | some.html, some/some.html, D:\, /var, file://
     if re.search(r"^file:", url, re.I) or \
             re.search(r"^[a-zA-Z]:", url) or \
             not re.search(r"^[\w-]+:", url):
-        
+
         # Function pathname2url will complain if url starts with "file://".
         # CEF may also change local urls to "file:///C:/" - three slashes.
         is_file_protocol = False
@@ -83,13 +83,13 @@ cpdef str GetNavigateUrl(py_string url):
         # But it should be:
         # >> %E6%A1%8C%E9%9D%A2
         url = urllib_pathname2url(url)
-        
+
         if is_file_protocol:
             url = "%s%s" % (file_prefix, url)
-        
+
         # If it is C:\ then colon was encoded. Decode it back.
         url = re.sub(r"^([a-zA-Z])%3A", r"\1:", url)
-        
+
         # Allow hash when loading urls. The pathname2url function
         # replaced hashes with "%23" (Issue 114).
         url = url.replace("%23", "#")
@@ -124,3 +124,11 @@ cpdef str GetModuleDirectory():
         path = re.sub(r"[/\\]+", re.escape(os.sep), path)
     path = re.sub(r"[/\\]+$", "", path)
     return str(path)
+
+cpdef py_bool IsFunctionOrMethod(object valueType):
+    if (valueType == types.FunctionType \
+            or valueType == types.MethodType \
+            or valueType == types.BuiltinFunctionType \
+            or valueType == types.BuiltinMethodType):
+        return True
+    return False
