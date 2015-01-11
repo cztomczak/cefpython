@@ -89,9 +89,8 @@ ext_modules = [Extension(
     ],
 
     libraries=[
-        'cef_dll_wrapper',
-        # 'v8function_handler',
         'client_handler',
+        'cef_dll_wrapper',
         'cefpythonapp',
         'cpp_utils'
     ],

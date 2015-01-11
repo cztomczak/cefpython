@@ -34,7 +34,9 @@ import uuid
 import platform
 import inspect
 
+g_applicationSettings = None
 g_browserSettings = None
+g_switches = None
 g_countWindows = 0
 
 # Which method to use for message loop processing.
@@ -109,6 +111,8 @@ def ExceptHook(excType, excValue, traceObject):
 class MainFrame(wx.Frame):
     browser = None
     mainPanel = None
+    clientHandler = None
+    javascriptExternal = None
 
     def __init__(self, url=None):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
@@ -132,13 +136,13 @@ class MainFrame(wx.Frame):
         self.mainPanel = wx.Panel(self, style=wx.WANTS_CHARS)
 
         # Global client callbacks must be set before browser is created.
-        clientHandler = ClientHandler()
+        self.clientHandler = ClientHandler()
         cefpython.SetGlobalClientCallback("OnCertificateError",
-                clientHandler._OnCertificateError)
+                self.clientHandler._OnCertificateError)
         cefpython.SetGlobalClientCallback("OnBeforePluginLoad",
-                clientHandler._OnBeforePluginLoad)
+                self.clientHandler._OnBeforePluginLoad)
         cefpython.SetGlobalClientCallback("OnAfterCreated",
-                clientHandler._OnAfterCreated)
+                self.clientHandler._OnAfterCreated)
 
         windowInfo = cefpython.WindowInfo()
         (width, height) = self.mainPanel.GetClientSizeTuple()
@@ -153,8 +157,8 @@ class MainFrame(wx.Frame):
             browserSettings=g_browserSettings,
             navigateUrl=url)
 
-        clientHandler.mainBrowser = self.browser
-        self.browser.SetClientHandler(clientHandler)
+        self.clientHandler.mainBrowser = self.browser
+        self.browser.SetClientHandler(self.clientHandler)
 
         jsBindings = cefpython.JavascriptBindings(
             bindToFrames=False, bindToPopups=True)
@@ -163,7 +167,8 @@ class MainFrame(wx.Frame):
         jsBindings.SetProperty("pyConfig", ["This was set in Python",
                 {"name": "Nested dictionary", "isNested": True},
                 [1,"2", None]])
-        jsBindings.SetObject("external", JavascriptExternal(self.browser))
+        self.javascriptExternal = JavascriptExternal(self.browser)
+        jsBindings.SetObject("external", self.javascriptExternal)
         jsBindings.SetProperty("sources", GetSources())
         self.browser.SetJavascriptBindings(jsBindings)
 
@@ -185,21 +190,32 @@ class MainFrame(wx.Frame):
         self.SetMenuBar(menubar)
 
     def OnClose(self, event):
-        # In wx.chromectrl calling browser.CloseBrowser() and/or
-        # self.Destroy() in OnClose is causing crashes when embedding
-        # multiple browser tabs. The solution is to call only
-        # browser.ParentWindowWillClose. Behavior of this example
-        # seems different as it extends wx.Frame, while ChromeWindow
-        # from chromectrl extends wx.Window. Calling CloseBrowser
-        # and Destroy does not cause crashes, but is not recommended.
-        # Call ParentWindowWillClose and event.Skip() instead. See
-        # also Issue 107.
-        self.browser.ParentWindowWillClose()
-        event.Skip()
+        if self.browser:
+            # Calling CloseBrowser will cause that OnClose event occurs again,
+            # so self.browser must be checked if non-empty.
+            self.browser.StopLoad()
+            self.browser.CloseBrowser()
+            # Remove all CEF browser references so that browser is closed
+            # cleanly. Otherwise there may be issues for example with cookies
+            # not being flushed to disk when closing app immediately
+            # (Issue 158).
+            del self.javascriptExternal.mainBrowser
+            del self.clientHandler.mainBrowser
+            del self.browser
+            self.Destroy()
+            # In wx.chromectrl calling browser.CloseBrowser and/or self.Destroy
+            # may cause crashes when embedding multiple browsers in tab
+            # (Issue 107). In such case instead of calling CloseBrowser/Destroy
+            # try this code:
+            # | self.browser.ParentWindowWillClose()
+            # | event.Skip()
 
         global g_countWindows
         g_countWindows -= 1
         if g_countWindows == 0:
+            # On Win/Linux the call to cefpython.Shutdown() is after
+            # app.MainLoop() returns, but on Mac it needs to be here.
+            cefpython.Shutdown()
             print("[wxpython.py] OnClose: Exiting")
             wx.GetApp().Exit()
 
@@ -510,6 +526,11 @@ class ClientHandler:
             print("[wxpython.py] RequestHandler::GetCookieManager():"\
                     " created cookie manager")
             cookieManager = cefpython.CookieManager.CreateManager("")
+            if "cache_path" in g_applicationSettings:
+                path = g_applicationSettings["cache_path"]
+                # path = os.path.join(path, "cookies_browser_{}".format(
+                #     browser.GetIdentifier()))
+                cookieManager.SetStoragePath(path)
             browser.SetUserData("cookieManager", cookieManager)
             return cookieManager
 
@@ -745,7 +766,10 @@ if __name__ == '__main__':
     sys.excepthook = ExceptHook
 
     # Application settings
-    settings = {
+    g_applicationSettings = {
+        # Disk cache
+        # "cache_path": "webcache/",
+
         # CEF Python debug messages in console and in log_file
         "debug": True,
         # Set it to LOGSEVERITY_VERBOSE for more details
@@ -754,42 +778,41 @@ if __name__ == '__main__':
         "log_file": GetApplicationPath("debug.log"),
         # This should be enabled only when debugging
         "release_dcheck_enabled": True,
+
         # "resources_dir_path" must be set on Mac, "locales_dir_path" not.
-        # You must set locale_pak through command line switch, otherwise
-        # errors will occur:
-        #   [0110/155913:WARNING:resource_bundle.cc(269)] locale_file_path
-        #     .empty()
-        #   [0110/155913:FATAL:main_delegate.cc(449)] Check failed:
-        #     !loaded_locale.empty(). Locale could not be found for en-US
+        # You must also set "locale_pak" using command line switch.
         "resources_dir_path": cefpython.GetModuleDirectory()+"/Resources",
         # The "subprocess" executable that launches the Renderer
         # and GPU processes among others. You may rename that
         # executable if you like.
         "browser_subprocess_path": "%s/%s" % (
             cefpython.GetModuleDirectory(), "subprocess"),
+
         # This option is required for the GetCookieManager callback
         # to work. It affects renderer processes, when this option
         # is set to True. It will force a separate renderer process
         # for each browser created using CreateBrowserSync.
         "unique_request_context_per_browser": True,
+
         # Downloads are handled automatically. A default SaveAs file
         # dialog provided by OS will be displayed.
         "downloads_enabled": True,
+
         # Remote debugging port, required for Developer Tools support.
         # A value of 0 will generate a random port. To disable devtools
         # support set it to -1.
         "remote_debugging_port": 0,
+
         # Mouse context menu
         "context_menu": {
-            # Disabling, as context menu crashes app, see Issue 156:
-            # https://code.google.com/p/cefpython/issues/detail?id=156
-            "enabled": False,
+            "enabled": True,
             "navigation": True, # Back, Forward, Reload
             "print": True,
             "view_source": True,
             "external_browser": True, # Open in external browser
             "devtools": True, # Developer Tools
         },
+
         # See also OnCertificateError which allows you to ignore
         # certificate errors for specific websites.
         "ignore_certificate_errors": False,
@@ -804,22 +827,29 @@ if __name__ == '__main__':
     }
 
     # Command line switches set programmatically
-    switches = {
+    g_switches = {
+        # On Mac it is required to provide path to a specific
+        # locale.pak file. On Win/Linux you only specify the
+        # ApplicationSettings.locales_dir_path option.
+        "locale_pak": cefpython.GetModuleDirectory()
+            +"/Resources/en.lproj/locale.pak",
+
         # "proxy-server": "socks5://127.0.0.1:8888",
         # "no-proxy-server": "",
         # "enable-media-stream": "",
         # "remote-debugging-port": "12345",
         # "disable-gpu": "",
         # "--invalid-switch": "" -> Invalid switch name
-        "locale_pak": cefpython.GetModuleDirectory()
-            +"/Resources/en.lproj/locale.pak",
     }
 
-    cefpython.Initialize(settings, switches)
+    cefpython.Initialize(g_applicationSettings, g_switches)
 
     app = MyApp(False)
     app.MainLoop()
-    # Let wx.App destructor do the cleanup before calling cefpython.Shutdown().
+
+    # Let wx.App destructor do the cleanup before calling
+    # cefpython.Shutdown(). This is to ensure reliable CEF shutdown.
     del app
 
-    cefpython.Shutdown()
+    # On Mac cefpython.Shutdown() is called in MainFrame.OnClose,
+    # followed by wx.GetApp.Exit().
