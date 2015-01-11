@@ -100,6 +100,7 @@ def CefAdvanced():
     sys.excepthook = ExceptHook
 
     appSettings = dict()
+    # appSettings["cache_path"] = "webcache/" # Disk cache
     if DEBUG:
         # cefpython debug messages in console and in log_file
         appSettings["debug"] = True
