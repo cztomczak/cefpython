@@ -84,8 +84,10 @@ cimport ctime
 IF UNAME_SYSNAME == "Windows":
     from windows cimport *
     from dpi_aware_win cimport *
-IF UNAME_SYSNAME == "Linux":
+ELIF UNAME_SYSNAME == "Linux":
     from linux cimport *
+ELIF UNAME_SYSNAME == "Darwin":
+    from mac cimport *
 
 from cpp_utils cimport *
 from task cimport *

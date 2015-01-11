@@ -35,13 +35,13 @@ void OpenInExternalBrowser(const std::string& url)
 
     // xdg-open is a desktop-independent tool for running
     // default applications. Installed by default on Ubuntu.
-    // xdg-open process is running in the backround until 
+    // xdg-open process is running in the backround until
     // cefpython app closes.
     std::string prog = "xdg-open";
 
     // Using system() opens up for bugs and exploits, not
     // recommended.
-    
+
     // Fork yourself and run in parallel, do not block the
     // current proces.
     char *args[3];
@@ -198,7 +198,7 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 // true to use a custom implementation.
 ///
 /*--cef()--*/
-bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) { 
+bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) {
     REQUIRE_UI_THREAD();
     return LifespanHandler_RunModal(browser);
 }
@@ -262,7 +262,7 @@ bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) {
 //     exist.
 ///
 /*--cef()--*/
-bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) { 
+bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
     REQUIRE_UI_THREAD();
     return LifespanHandler_DoClose(browser);
 }
@@ -481,7 +481,7 @@ bool ClientHandler::GetAuthCredentials(CefRefPtr<CefBrowser> browser,
                               const CefString& scheme,
                               CefRefPtr<CefAuthCallback> callback) {
     REQUIRE_IO_THREAD();
-    return RequestHandler_GetAuthCredentials(browser, frame, isProxy, host, 
+    return RequestHandler_GetAuthCredentials(browser, frame, isProxy, host,
             port, realm, scheme, callback);
     // Default: return false;
 }
@@ -582,7 +582,7 @@ void ClientHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
 // --------------------------------------------------------------------------
 
 ///
-// Implement this interface to handle events related to browser load status. 
+// Implement this interface to handle events related to browser load status.
 // The methods of this class will be called on the UI thread.
 ///
 
@@ -663,7 +663,7 @@ void ClientHandler::OnLoadError(CefRefPtr<CefBrowser> browser,
 bool ClientHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
                              CefRect& rect) {
     REQUIRE_UI_THREAD();
-    return RenderHandler_GetRootScreenRect(browser, rect); 
+    return RenderHandler_GetRootScreenRect(browser, rect);
 }
 
 ///
@@ -685,7 +685,7 @@ bool ClientHandler::GetScreenPoint(CefRefPtr<CefBrowser> browser,
                           int viewX,
                           int viewY,
                           int& screenX,
-                          int& screenY) { 
+                          int& screenY) {
     REQUIRE_UI_THREAD();
     return RenderHandler_GetScreenPoint(browser, viewX, viewY, screenX,
             screenY);
@@ -702,7 +702,7 @@ bool ClientHandler::GetScreenPoint(CefRefPtr<CefBrowser> browser,
 ///
 /*--cef()--*/
 bool ClientHandler::GetScreenInfo(CefRefPtr<CefBrowser> browser,
-                         CefScreenInfo& screen_info) { 
+                         CefScreenInfo& screen_info) {
     REQUIRE_UI_THREAD();
     return RenderHandler_GetScreenInfo(browser, screen_info);
 }

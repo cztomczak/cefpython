@@ -9,7 +9,6 @@ from cef_types_wrappers cimport CefStructBase
 from libcpp cimport bool as cpp_bool
 
 cdef extern from "include/internal/cef_linux.h":
-
     ctypedef _cef_key_info_t CefKeyInfo
     ctypedef void* CefWindowHandle
     ctypedef void* CefCursorHandle

@@ -262,6 +262,12 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
 
     Debug("Initialize() called")
 
+    # Mac initialization. Need to call NSApplication.sharedApplication()
+    # and do NSApplication methods swizzling to implement
+    # CrAppControlProtocol. See Issue 156.
+    IF UNAME_SYSNAME == "Darwin":
+        MacInitialize()
+
     # -------------------------------------------------------------------------
     # CEF Python only options - default values
 
