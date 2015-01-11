@@ -125,7 +125,7 @@ class MainFrame(wx.Frame):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
                 title=title)
         size=(800,600)
-        
+
         # This is an optional code to enable High DPI support.
         if "auto_zooming" in g_applicationSettings \
                 and g_applicationSettings["auto_zooming"] == "system_dpi":
@@ -150,22 +150,22 @@ class MainFrame(wx.Frame):
             self.mainPanel = wx.Panel(self, style=wx.WANTS_CHARS)
 
         # Global client callbacks must be set before browser is created.
-        clientHandler = ClientHandler()
+        self.clientHandler = ClientHandler()
         cefpython.SetGlobalClientCallback("OnCertificateError",
-                clientHandler._OnCertificateError)
+                self.clientHandler._OnCertificateError)
         cefpython.SetGlobalClientCallback("OnBeforePluginLoad",
-                clientHandler._OnBeforePluginLoad)
+                self.clientHandler._OnBeforePluginLoad)
         cefpython.SetGlobalClientCallback("OnAfterCreated",
-                clientHandler._OnAfterCreated)
+                self.clientHandler._OnAfterCreated)
 
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsChild(self.GetHandleForBrowser())
         self.browser = cefpython.CreateBrowserSync(windowInfo,
                 browserSettings=g_browserSettings,
                 navigateUrl=url)
-        
-        clientHandler.mainBrowser = self.browser
-        self.browser.SetClientHandler(clientHandler)
+
+        self.clientHandler.mainBrowser = self.browser
+        self.browser.SetClientHandler(self.clientHandler)
 
         jsBindings = cefpython.JavascriptBindings(
             bindToFrames=False, bindToPopups=True)
@@ -174,7 +174,8 @@ class MainFrame(wx.Frame):
         jsBindings.SetProperty("pyConfig", ["This was set in Python",
                 {"name": "Nested dictionary", "isNested": True},
                 [1,"2", None]])
-        jsBindings.SetObject("external", JavascriptExternal(self.browser))
+        self.javascriptExternal = JavascriptExternal(self.browser)
+        jsBindings.SetObject("external", self.javascriptExternal)
         jsBindings.SetProperty("sources", GetSources())
         self.browser.SetJavascriptBindings(jsBindings)
 
@@ -210,17 +211,25 @@ class MainFrame(wx.Frame):
         cefpython.WindowUtils.OnSize(self.GetHandleForBrowser(), 0, 0, 0)
 
     def OnClose(self, event):
-        # In wx.chromectrl calling browser.CloseBrowser() and/or
-        # self.Destroy() in OnClose is causing crashes when embedding
-        # multiple browser tabs. The solution is to call only 
-        # browser.ParentWindowWillClose. Behavior of this example
-        # seems different as it extends wx.Frame, while ChromeWindow
-        # from chromectrl extends wx.Window. Calling CloseBrowser
-        # and Destroy does not cause crashes, but is not recommended.
-        # Call ParentWindowWillClose and event.Skip() instead. See 
-        # also Issue 107.
-        self.browser.ParentWindowWillClose()
-        event.Skip()
+        if self.browser:
+            # Calling CloseBrowser will cause that OnClose event occurs again,
+            # so self.browser must be checked if non-empty.
+            self.browser.StopLoad()
+            self.browser.CloseBrowser()
+            # Remove all CEF browser references so that browser is closed
+            # cleanly. Otherwise there may be issues for example with cookies
+            # not being flushed to disk when closing app immediately
+            # (Issue 158).
+            del self.javascriptExternal.mainBrowser
+            del self.clientHandler.mainBrowser
+            del self.browser
+            self.Destroy()
+        # In wx.chromectrl calling browser.CloseBrowser and/or self.Destroy
+        # may cause crashes when embedding multiple browsers in tab
+        # (Issue 107). In such case instead of calling CloseBrowser/Destroy
+        # try this code:
+        # | self.browser.ParentWindowWillClose()
+        # | event.Skip()
 
     def OnIdle(self, event):
         cefpython.MessageLoopWork()
@@ -514,6 +523,11 @@ class ClientHandler:
             print("[wxpython.py] RequestHandler::GetCookieManager():"\
                     " created cookie manager")
             cookieManager = cefpython.CookieManager.CreateManager("")
+            if "cache_path" in g_applicationSettings:
+                path = g_applicationSettings["cache_path"]
+                # path = os.path.join(path, "cookies_browser_{}".format(
+                #     browser.GetIdentifier()))
+                cookieManager.SetStoragePath(path)
             browser.SetUserData("cookieManager", cookieManager)
             return cookieManager
 
@@ -595,7 +609,7 @@ class ClientHandler:
         print("    http status code = %s" % httpStatusCode)
         # Tests for the Browser object methods
         self._Browser_LoadUrl(browser)
-        
+
     def _Browser_LoadUrl(self, browser):
         if browser.GetUrl() == "data:text/html,Test#Browser.LoadUrl":
              browser.LoadUrl("file://"+GetApplicationPath("wxpython.html"))
@@ -635,7 +649,7 @@ class ClientHandler:
 
         # Set WindowInfo object:
         # > windowInfo[0] = cefpython.WindowInfo()
-        
+
         # On Windows there are keyboard problems in popups, when popup
         # is created using "window.open" or "target=blank". This issue
         # occurs only in wxPython. PyGTK or PyQt do not require this fix.
@@ -711,14 +725,15 @@ class ClientHandler:
 class MyApp(wx.App):
     timer = None
     timerID = 1
+    mainFrame = None
 
     def OnInit(self):
         if not USE_EVT_IDLE:
-            print("Using TIMER to execute the CEF message loop work")
+            print("[wxpython.py] Using TIMER to run CEF message loop")
             self.CreateTimer()
-        frame = MainFrame()
-        self.SetTopWindow(frame)
-        frame.Show()
+        self.mainFrame = MainFrame()
+        self.SetTopWindow(self.mainFrame)
+        self.mainFrame.Show()
         return True
 
     def CreateTimer(self):
@@ -736,6 +751,7 @@ class MyApp(wx.App):
     def OnExit(self):
         # When app.MainLoop() returns, MessageLoopWork() should
         # not be called anymore.
+        print("[wxpython.py] MyApp.OnExit")
         if not USE_EVT_IDLE:
             self.timer.Stop()
 
@@ -772,6 +788,9 @@ if __name__ == '__main__':
 
     # Application settings
     g_applicationSettings = {
+        # Disk cache
+        # "cache_path": "webcache/",
+
         # CEF Python debug messages in console and in log_file
         "debug": True,
         # Set it to LOGSEVERITY_VERBOSE for more details
@@ -780,6 +799,7 @@ if __name__ == '__main__':
         "log_file": GetApplicationPath("debug.log"),
         # This should be enabled only when debugging
         "release_dcheck_enabled": True,
+
         # These directories must be set on Linux
         "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
         "resources_dir_path": cefpython.GetModuleDirectory(),
@@ -788,13 +808,15 @@ if __name__ == '__main__':
         # executable if you like.
         "browser_subprocess_path": "%s/%s" % (
             cefpython.GetModuleDirectory(), "subprocess"),
+
         # This option is required for the GetCookieManager callback
         # to work. It affects renderer processes, when this option
         # is set to True. It will force a separate renderer process
         # for each browser created using CreateBrowserSync.
         "unique_request_context_per_browser": True,
-        # Downloads are handled automatically. A default SaveAs file 
+        # Downloads are handled automatically. A default SaveAs file
         # dialog provided by OS will be displayed.
+
         "downloads_enabled": True,
         # Remote debugging port, required for Developer Tools support.
         # A value of 0 will generate a random port. To disable devtools
@@ -809,17 +831,18 @@ if __name__ == '__main__':
             "external_browser": True, # Open in external browser
             "devtools": True, # Developer Tools
         },
+
         # See also OnCertificateError which allows you to ignore
         # certificate errors for specific websites.
         "ignore_certificate_errors": True,
     }
 
     # You can comment out the code below if you do not want High
-    # DPI support. If you disable it text will look fuzzy on 
+    # DPI support. If you disable it text will look fuzzy on
     # high DPI displays.
-    # 
+    #
     # Enabling High DPI support in app can be done by
-    # embedding a DPI awareness xml manifest in executable 
+    # embedding a DPI awareness xml manifest in executable
     # (see Issue 112 comment #2), or by calling SetProcessDpiAware
     # function. Embedding xml manifest is the most reliable method.
     # The downside of calling SetProcessDpiAware is that scrollbar
@@ -831,7 +854,7 @@ if __name__ == '__main__':
     # javascript dialogs (alert) are tiny. However, you can implement
     # custom javascript dialogs using JavascriptDialogHandler.
     #
-    # Additionally you have to set "auto_zomming" application 
+    # Additionally you have to set "auto_zomming" application
     # setting. High DPI support is available only on Windows.
     # You may set auto_zooming to "system_dpi" and browser
     # contents will be zoomed using OS DPI settings. On Win7
@@ -839,7 +862,7 @@ if __name__ == '__main__':
     # Personalization > Display.
     #
     # Example values for auto_zooming are:
-    #   "system_dpi", "0.0" (96 DPI), "1.0" (120 DPI), 
+    #   "system_dpi", "0.0" (96 DPI), "1.0" (120 DPI),
     #   "2.0" (144 DPI), "-1.0" (72 DPI)
     # Numeric value means a zoom level.
     # Example values that can be set in Win7 DPI settings:
@@ -850,7 +873,7 @@ if __name__ == '__main__':
     g_applicationSettings["auto_zooming"] = "system_dpi"
     print("[wxpython.py] Calling SetProcessDpiAware")
     cefpython.DpiAware.SetProcessDpiAware()
-    
+
     # Browser settings. You may have different settings for each
     # browser, see the call to CreateBrowserSync.
     g_browserSettings = {
@@ -858,7 +881,7 @@ if __name__ == '__main__':
         # "file_access_from_file_urls_allowed": True,
         # "universal_access_from_file_urls_allowed": True,
     }
-    
+
     # Command line switches set programmatically
     g_commandLineSwitches = {
         # "proxy-server": "socks5://127.0.0.1:8888",
@@ -867,12 +890,15 @@ if __name__ == '__main__':
         # "disable-gpu": "",
 
     }
-    
+
     cefpython.Initialize(g_applicationSettings, g_commandLineSwitches)
-    
+
     app = MyApp(False)
     app.MainLoop()
-    # Let wx.App destructor do the cleanup before calling cefpython.Shutdown().
+
+    # Let wx.App destructor do the cleanup before calling
+    # cefpython.Shutdown(). This is to ensure reliable CEF shutdown.
     del app
-    
+
     cefpython.Shutdown()
+
