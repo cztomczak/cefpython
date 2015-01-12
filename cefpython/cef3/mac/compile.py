@@ -95,9 +95,8 @@ if ret != 0:
         sys.exit(1)
 subprocess_exe = "./../mac/binaries_%s/subprocess" % (BITS)
 if os.path.exists("./subprocess"):
-    shutil.copyfile("./subprocess", subprocess_exe)
-    st = os.stat(subprocess_exe)
-    os.chmod(subprocess_exe, st.st_mode | stat.S_IEXEC)
+    # .copy() will also copy Permission bits
+    shutil.copy("./subprocess", subprocess_exe)
 
 # os.chdir("./../v8function_handler/")
 # ret = subprocess.call("make -f Makefile", shell=True)
