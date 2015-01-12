@@ -191,25 +191,31 @@ class MainFrame(wx.Frame):
         self.SetMenuBar(menubar)
 
     def OnClose(self, event):
-        if self.browser:
-            # Calling CloseBrowser will cause that OnClose event occurs again,
-            # so self.browser must be checked if non-empty.
-            self.browser.StopLoad()
-            self.browser.CloseBrowser()
-            # Remove all CEF browser references so that browser is closed
-            # cleanly. Otherwise there may be issues for example with cookies
-            # not being flushed to disk when closing app immediately
-            # (Issue 158).
-            del self.javascriptExternal.mainBrowser
-            del self.clientHandler.mainBrowser
-            del self.browser
-            self.Destroy()
-            # In wx.chromectrl calling browser.CloseBrowser and/or self.Destroy
-            # may cause crashes when embedding multiple browsers in tab
-            # (Issue 107). In such case instead of calling CloseBrowser/Destroy
-            # try this code:
-            # | self.browser.ParentWindowWillClose()
-            # | event.Skip()
+        # Calling CloseBrowser will cause that OnClose event occurs again,
+        # so self.browser must be checked if non-empty.
+        if not self.browser:
+            return
+
+        self.browser.StopLoad()
+        self.browser.CloseBrowser()
+
+        # Remove all CEF browser references so that browser is closed
+        # cleanly. Otherwise there may be issues for example with cookies
+        # not being flushed to disk when closing app immediately
+        # (Issue 158).
+        del self.javascriptExternal.mainBrowser
+        del self.clientHandler.mainBrowser
+        del self.browser
+
+        # Destroy wx frame, this will complete the destruction of CEF browser
+        self.Destroy()
+
+        # In wx.chromectrl calling browser.CloseBrowser and/or self.Destroy
+        # may cause crashes when embedding multiple browsers in tab
+        # (Issue 107). In such case instead of calling CloseBrowser/Destroy
+        # try this code:
+        # | self.browser.ParentWindowWillClose()
+        # | event.Skip()
 
         global g_countWindows
         g_countWindows -= 1
