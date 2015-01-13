@@ -33,6 +33,17 @@ if sys.maxint == 2147483647:
     BITS = "32bit"
     PYTHON_CMD = "arch -i386 python"
 
+if BITS == "32bit":
+    if "i386" not in os.getenv("ARCHFLAGS", ""):
+        raise Exception("Detected Python 32bit, but ARCHFLAGS is not i386")
+    if "i386" not in os.getenv("CEF_CCFLAGS", ""):
+        raise Exception("Detected Python 32bit, but CEF_CCFLAGS is not i386")
+elif BITS == "64bit":
+    if "x86_64" not in os.getenv("ARCHFLAGS", ""):
+        raise Exception("Detected Python 64bit, but ARCHFLAGS is not x86_64")
+    if "x86_64" not in os.getenv("CEF_CCFLAGS", ""):
+        raise Exception("Detected Python 64bit, but CEF_CCFLAGS is not x86_64")
+
 PYVERSION = str(sys.version_info[0])+str(sys.version_info[1])
 print("PYVERSION = %s" % PYVERSION)
 print("BITS = %s" % BITS)
@@ -84,9 +95,8 @@ if ret != 0:
         sys.exit(1)
 subprocess_exe = "./../mac/binaries_%s/subprocess" % (BITS)
 if os.path.exists("./subprocess"):
-    shutil.copyfile("./subprocess", subprocess_exe)
-    st = os.stat(subprocess_exe)
-    os.chmod(subprocess_exe, st.st_mode | stat.S_IEXEC)
+    # .copy() will also copy Permission bits
+    shutil.copy("./subprocess", subprocess_exe)
 
 # os.chdir("./../v8function_handler/")
 # ret = subprocess.call("make -f Makefile", shell=True)
