@@ -1,15 +1,17 @@
-# Slightly more advanced sample illustrating the usage of CEFWindow class
-# __author__ = "Greg Kacy <grkacy@gmail.com>"
+# Slightly more advanced sample illustrating the usage of CEFWindow class.
+
+# On Mac the cefpython library must be imported the very first,
+# before any other libraries (Issue 155).
+import cefpython3.wx.chromectrl as chrome
 
 # TODO: There is something wrong happening on Linux. CPU usage
 #       for the python process is 100% all the time. This problem
 #       does not occur on Windows, nor in sample1.py/sample3.py.
-#       It must have something to do with invalid usage of the wx 
+#       It must have something to do with invalid usage of the wx
 #       controls in this example.
 
 import wx
 import wx.lib.agw.flatnotebook as fnb
-import cefpython3.wx.chromectrl as chrome
 import platform
 import sys
 
@@ -28,7 +30,7 @@ URLS = ["http://gmail.com",
 class MainFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
-                          title='cefwx example2', size=(1024, 768))
+                          title='cefwx example2', size=(800, 600))
 
         self.initComponents()
         self.layoutComponents()
@@ -80,7 +82,24 @@ class MainFrame(wx.Frame):
         event.Skip()
 
     def OnClose(self, event):
+        # Remember to destroy all CEF browser references before calling
+        # Destroy(), so that browser closes cleanly. In this specific
+        # example there are no references kept, but keep this in mind
+        # for the future.
         self.Destroy()
+        # On Mac the code after app.MainLoop() never executes, so
+        # need to call CEF shutdown here.
+        if platform.system() == "Darwin":
+            chrome.Shutdown()
+            wx.GetApp().Exit()
+
+
+class MyApp(wx.App):
+    def OnInit(self):
+        frame = MainFrame()
+        self.SetTopWindow(frame)
+        frame.Show()
+        return True
 
 
 if __name__ == '__main__':
@@ -93,10 +112,10 @@ if __name__ == '__main__':
         import time
         time.sleep(0.5)
     print('sample2.py: wx.version=%s' % wx.version())
-    app = wx.PySimpleApp()
-    MainFrame().Show()
+    app = MyApp(False)
     app.MainLoop()
-    # Important: do the wx cleanup before calling Shutdown.
+    # Important: do the wx cleanup before calling Shutdown
     del app
-    chrome.Shutdown()
-
+    # On Mac Shutdown is called in OnClose
+    if platform.system() in ["Linux", "Windows"]:
+        chrome.Shutdown()
