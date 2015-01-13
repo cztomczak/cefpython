@@ -191,14 +191,6 @@ class MainFrame(wx.Frame):
         self.SetMenuBar(menubar)
 
     def OnClose(self, event):
-        # Calling CloseBrowser will cause that OnClose event occurs again,
-        # so self.browser must be checked if non-empty.
-        if not self.browser:
-            return
-
-        self.browser.StopLoad()
-        self.browser.CloseBrowser()
-
         # Remove all CEF browser references so that browser is closed
         # cleanly. Otherwise there may be issues for example with cookies
         # not being flushed to disk when closing app immediately
