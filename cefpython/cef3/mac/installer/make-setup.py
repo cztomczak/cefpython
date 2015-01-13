@@ -47,9 +47,9 @@ def create_fat_binaries(b32, b64, bfat):
     if os.path.exists(bfat):
         shutil.rmtree(bfat)
     os.mkdir(bfat)
-    res = os.system("cp -rf {}/* {}/".format(b32, bfat))
+    res = os.system("cp -rf {}/* {}/".format(b64, bfat))
     assert res == 0
-    files = os.listdir(b64)
+    files = os.listdir(b32)
     for fbase in files:
         if not (fbase.endswith(".dylib") or fbase.endswith(".so")
                 or fbase.endswith("subprocess")):
