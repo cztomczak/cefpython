@@ -140,7 +140,7 @@ class ChromeWindow(wx.Window):
 
         # On Linux absolute file urls need to start with "file://"
         # otherwise a path of "/home/some" is converted to "http://home/some".
-        if platform.system() == "Linux":
+        if platform.system() in ["Linux", "Darwin"]:
             if url.startswith("/"):
                 url = "file://" + url
         self.url = url
@@ -150,6 +150,10 @@ class ChromeWindow(wx.Window):
             windowInfo.SetAsChild(self.GetHandle())
         elif platform.system() == "Linux":
             windowInfo.SetAsChild(self.GetGtkWidget())
+        elif platform.system() == "Darwin":
+            (width, height) = self.GetClientSizeTuple()
+            windowInfo.SetAsChild(self.GetHandle(),
+                                  [0, 0, width, height])
         else:
             raise Exception("Unsupported OS")
 
@@ -367,13 +371,16 @@ def Initialize(settings=None, debug=False):
     """Initializes CEF, We should do it before initializing wx
        If no settings passed a default is used
     """
+    switches = {}
     global g_settings
     if not settings:
         settings = {}
+
     if not "log_severity" in settings:
         settings["log_severity"] = cefpython.LOGSEVERITY_INFO
     if not "log_file" in settings:
         settings["log_file"] = ""
+
     if platform.system() == "Linux":
         # On Linux we need to set locales and resources directories.
         if not "locales_dir_path" in settings:
@@ -381,6 +388,18 @@ def Initialize(settings=None, debug=False):
                 cefpython.GetModuleDirectory() + "/locales"
         if not "resources_dir_path" in settings:
             settings["resources_dir_path"] = cefpython.GetModuleDirectory()
+    elif platform.system() == "Darwin":
+        # On Mac we need to set the resoures dir and the locale_pak switch
+        if not "resources_dir_path" in settings:
+            settings["resources_dir_path"] = (cefpython.GetModuleDirectory()
+                + "/Resources")
+        locale_pak = (cefpython.GetModuleDirectory()
+            + "/Resources/en.lproj/locale.pak")
+        if "locale_pak" in settings:
+            locale_pak = settings["locale_pak"]
+            del settings["locale_pak"]
+        switches["locale_pak"] = locale_pak
+
     if not "browser_subprocess_path" in settings:
         settings["browser_subprocess_path"] = \
             "%s/%s" % (cefpython.GetModuleDirectory(), "subprocess")
@@ -394,7 +413,7 @@ def Initialize(settings=None, debug=False):
         settings["release_dcheck_enabled"] = True
 
     g_settings = settings
-    cefpython.Initialize(settings)
+    cefpython.Initialize(settings, switches)
 
 def Shutdown():
     """Shuts down CEF, should be called by app exiting code"""
