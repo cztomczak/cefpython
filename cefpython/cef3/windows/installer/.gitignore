@@ -1,2 +1,3 @@
-/cefpython3-*/
-/output/
+cefpython3-*/
+Output/
+dist/

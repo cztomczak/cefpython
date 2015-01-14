@@ -1,6 +1,6 @@
 1 VERSIONINFO
-FILEVERSION     31,1,0,0
-PRODUCTVERSION  31,1,0,0
+FILEVERSION     31,2,0,0
+PRODUCTVERSION  31,2,0,0
 FILEFLAGSMASK   0x3FL
 FILEFLAGS       0x0L
 FILEOS          0x4L
@@ -13,13 +13,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "CEF Python"
             VALUE "FileDescription", "CEF Python DLL"
-            VALUE "FileVersion", "31.1.0.0"
+            VALUE "FileVersion", "31.2.0.0"
             VALUE "InternalName", "cefpython"
             VALUE "LegalCopyright", "(c) 2012-2014 The CEF Python authors"
             VALUE "LegalTrademarks", ""
             VALUE "OriginalFilename", "cefpython_py27.pyd"
             VALUE "ProductName", "CEF Python 3"
-            VALUE "ProductVersion", "31.1.0.0"
+            VALUE "ProductVersion", "31.2.0.0"
             VALUE "Comments", "Licensed under BSD 3-clause license"
             VALUE "Aditional Notes", ""
         END
