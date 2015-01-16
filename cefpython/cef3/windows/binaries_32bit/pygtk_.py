@@ -1,20 +1,15 @@
 # An example of embedding CEF browser in PyGTK on Windows.
 # Tested with PyGTK 2.24.10
 
-import platform
-if platform.architecture()[0] != "32bit":
-    raise Exception("Architecture not supported: %s" \
-            % platform.architecture()[0])
-
 import os, sys
 libcef_dll = os.path.join(os.path.dirname(os.path.abspath(__file__)),
         'libcef.dll')
 if os.path.exists(libcef_dll):
     # Import a local module
-    if 0x02070000 <= sys.hexversion < 0x03000000:
+    if (2,7) <= sys.version_info < (2,8):
         import cefpython_py27 as cefpython
-    elif 0x03000000 <= sys.hexversion < 0x04000000:
-        import cefpython_py32 as cefpython
+    elif (3,4) <= sys.version_info < (3,4):
+        import cefpython_py34 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
 else:

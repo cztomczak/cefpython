@@ -18,6 +18,7 @@ console.log
 *.user
 *.aps
 *.sdf
+*.sln
 Debug*/
 Release*/
 *.pdb

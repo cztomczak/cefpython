@@ -2,6 +2,11 @@
 // License: New BSD License.
 // Website: http://code.google.com/p/cefpython/
 
+// CefListValue->SetXxxx() functions need first param to be be cast
+// to (int) because GetSize() returns size_t and generates a warning
+// when compiling on VS2008 for x64 platform. Issue reported here:
+// https://code.google.com/p/cefpython/issues/detail?id=165
+
 #include "v8utils.h"
 #include "javascript_callback.h"
 #include "DebugLog.h"
@@ -24,7 +29,7 @@ CefRefPtr<CefListValue> V8ValueListToCefListValue(
     return listValue;
 }
 
-void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value, 
+void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
                                  CefRefPtr<CefListValue> listValue,
                                  int nestingLevel) {
     if (!v8Value->IsValid()) {
@@ -35,20 +40,20 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
         DebugLog("V8ValueAppendToCefListValue(): WARNING: max nesting level (8) " \
                 "exceeded");
         return;
-    }    
+    }
     if (v8Value->IsUndefined() || v8Value->IsNull()) {
-        listValue->SetNull(listValue->GetSize());
+        listValue->SetNull((int)listValue->GetSize());
     } else if (v8Value->IsBool()) {
-        listValue->SetBool(listValue->GetSize(), v8Value->GetBoolValue());
+        listValue->SetBool((int)listValue->GetSize(), v8Value->GetBoolValue());
     } else if (v8Value->IsInt()) {
-        listValue->SetInt(listValue->GetSize(), v8Value->GetIntValue());
+        listValue->SetInt((int)listValue->GetSize(), v8Value->GetIntValue());
     } else if (v8Value->IsUInt()) {
         uint32 uint32_value = v8Value->GetUIntValue();
         CefRefPtr<CefBinaryValue> binaryValue = CefBinaryValue::Create(
             &uint32_value, sizeof(uint32_value));
-        listValue->SetBinary(listValue->GetSize(), binaryValue);
+        listValue->SetBinary((int)listValue->GetSize(), binaryValue);
     } else if (v8Value->IsDouble()) {
-        listValue->SetDouble(listValue->GetSize(), v8Value->GetDoubleValue());
+        listValue->SetDouble((int)listValue->GetSize(), v8Value->GetDoubleValue());
     } else if (v8Value->IsDate()) {
         // TODO: in time_utils.pyx there are already functions for
         // converting cef_time_t to python DateTime, we could easily
@@ -57,9 +62,9 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
         // the "public" keyword. But how do we get the cef_time_t
         // structure from the CefTime class? GetDateValue() returns
         // CefTime class.
-        listValue->SetNull(listValue->GetSize());
+        listValue->SetNull((int)listValue->GetSize());
     } else if (v8Value->IsString()) {
-        listValue->SetString(listValue->GetSize(), v8Value->GetStringValue());
+        listValue->SetString((int)listValue->GetSize(), v8Value->GetStringValue());
     } else if (v8Value->IsArray()) {
         // Check for IsArray() must happen before the IsObject() check.
         int length = v8Value->GetArrayLength();
@@ -68,7 +73,7 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
             V8ValueAppendToCefListValue(v8Value->GetValue(i), newListValue,
                     nestingLevel + 1);
         }
-        listValue->SetList(listValue->GetSize(), newListValue);
+        listValue->SetList((int)listValue->GetSize(), newListValue);
     } else if (v8Value->IsFunction()) {
         // Check for IsFunction() must happen before the IsObject() check.
         if (CefV8Context::InContext()) {
@@ -78,19 +83,19 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
             std::string strCallbackId = PutJavascriptCallback(frame, v8Value);
             /* strCallbackId = '####cefpython####' \
                                '{"what"=>"javascript-callback", ..}' */
-            listValue->SetString(listValue->GetSize(), strCallbackId);
+            listValue->SetString((int)listValue->GetSize(), strCallbackId);
         } else {
-            listValue->SetNull(listValue->GetSize());
+            listValue->SetNull((int)listValue->GetSize());
             DebugLog("V8ValueAppendToCefListValue() FAILED: not in V8 context"
                     " , FATAL ERROR!");
         }
     } else if (v8Value->IsObject()) {
         // Check for IsObject() must happen after the IsArray()
         // and IsFunction() checks.
-        listValue->SetDictionary(listValue->GetSize(), 
+        listValue->SetDictionary((int)listValue->GetSize(),
                 V8ObjectToCefDictionaryValue(v8Value, nestingLevel + 1));
     } else {
-        listValue->SetNull(listValue->GetSize());
+        listValue->SetNull((int)listValue->GetSize());
         DebugLog("V8ValueAppendToCefListValue() FAILED: unknown V8 type");
     }
 }
@@ -173,7 +178,7 @@ CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
         } else if (v8Value->IsObject()) {
             // Check for IsObject() must happen after the IsArray()
             // and IsFunction() checks.
-            ret->SetDictionary(key, 
+            ret->SetDictionary(key,
                     V8ObjectToCefDictionaryValue(v8Value, nestingLevel + 1));
         } else {
             ret->SetNull(key);
@@ -227,7 +232,7 @@ CefRefPtr<CefV8Value> CefListValueToV8Value(
             "max nesting level (8) exceeded");
         return CefV8Value::CreateNull();
     }
-    int listSize = listValue->GetSize();
+    int listSize = (int)listValue->GetSize();
     CefRefPtr<CefV8Value> ret = CefV8Value::CreateArray(listSize);
     CefRefPtr<CefBinaryValue> binaryValue;
     PythonCallback pyCallback;
@@ -237,16 +242,16 @@ CefRefPtr<CefV8Value> CefListValueToV8Value(
         bool success;
         std::string callbackName = "python_callback_";
         if (valueType == VTYPE_NULL) {
-            success = ret->SetValue(key, 
+            success = ret->SetValue(key,
                     CefV8Value::CreateNull());
         } else if (valueType == VTYPE_BOOL) {
-            success = ret->SetValue(key, 
+            success = ret->SetValue(key,
                     CefV8Value::CreateBool(listValue->GetBool(key)));
         } else if (valueType == VTYPE_INT) {
-            success = ret->SetValue(key, 
+            success = ret->SetValue(key,
                     CefV8Value::CreateInt(listValue->GetInt(key)));
         } else if (valueType == VTYPE_DOUBLE) {
-            success = ret->SetValue(key, 
+            success = ret->SetValue(key,
                     CefV8Value::CreateDouble(listValue->GetDouble(key)));
         } else if (valueType == VTYPE_STRING) {
             success = ret->SetValue(key,
@@ -257,7 +262,7 @@ CefRefPtr<CefV8Value> CefListValueToV8Value(
                 binaryValue->GetData(&pyCallback, sizeof(pyCallback), 0);
                 v8FunctionHandler = new V8FunctionHandler(
                         NULL, pyCallback.callbackId);
-                // You must provide a function name to 
+                // You must provide a function name to
                 // CefV8Value::CreateFunction(), otherwise it fails.
                 callbackName.append(AnyToString(pyCallback.callbackId));
                 success = ret->SetValue(key,
@@ -322,19 +327,19 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
         bool success;
         std::string callbackName = "python_callback_";
         if (valueType == VTYPE_NULL) {
-            success = ret->SetValue(key, 
-                    CefV8Value::CreateNull(), 
+            success = ret->SetValue(key,
+                    CefV8Value::CreateNull(),
                     V8_PROPERTY_ATTRIBUTE_NONE);
         } else if (valueType == VTYPE_BOOL) {
-            success = ret->SetValue(key, 
+            success = ret->SetValue(key,
                     CefV8Value::CreateBool(dictValue->GetBool(key)),
                     V8_PROPERTY_ATTRIBUTE_NONE);
         } else if (valueType == VTYPE_INT) {
-            success = ret->SetValue(key, 
+            success = ret->SetValue(key,
                     CefV8Value::CreateInt(dictValue->GetInt(key)),
                     V8_PROPERTY_ATTRIBUTE_NONE);
         } else if (valueType == VTYPE_DOUBLE) {
-            success = ret->SetValue(key, 
+            success = ret->SetValue(key,
                     CefV8Value::CreateDouble(dictValue->GetDouble(key)),
                     V8_PROPERTY_ATTRIBUTE_NONE);
         } else if (valueType == VTYPE_STRING) {
@@ -347,17 +352,17 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
                 binaryValue->GetData(&pyCallback, sizeof(pyCallback), 0);
                 v8FunctionHandler = new V8FunctionHandler(
                         NULL, pyCallback.callbackId);
-                // You must provide a function name to 
+                // You must provide a function name to
                 // CefV8Value::CreateFunction(), otherwise it fails.
                 callbackName.append(AnyToString(pyCallback.callbackId));
-                success = ret->SetValue(key, 
+                success = ret->SetValue(key,
                                 CefV8Value::CreateFunction(
                                         callbackName, v8FunctionHandler),
                                 V8_PROPERTY_ATTRIBUTE_NONE);
             } else {
                 DebugLog("CefListValueToV8Value(): WARNING: " \
                         "unknown binary value, setting value to null");
-                success = ret->SetValue(key, 
+                success = ret->SetValue(key,
                         CefV8Value::CreateNull(),
                         V8_PROPERTY_ATTRIBUTE_NONE);
             }

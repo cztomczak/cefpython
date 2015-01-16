@@ -94,14 +94,7 @@ ext_modules = [Extension(
     #    './'
     #],
 
-    # /EHsc - using STL string, multimap and others that use C++ exceptions.
     extra_compile_args=[],
-
-    # '/ignore:4217' - silence warnings: "locally defined symbol _V8FunctionHandler_Execute
-    #                  imported in function "public: virtual bool __thiscall V8FunctionHandler::Execute".
-    #                  client_handler or other vcprojects include setup/cefpython.h,
-    #                  this is a list of functions with "public" statement that is
-    #                  accessible from c++.
     extra_link_args=[],
 
     # Defining macros:

@@ -9,6 +9,11 @@ import os
 import platform
 import argparse
 import re
+import struct
+import sysconfig
+
+BITS = str(8 * struct.calcsize('P')) + 'bit'
+assert (BITS == "32bit" or BITS == "64bit")
 
 ISCC = r"c:\Program Files (x86)\Inno Setup 5\ISCC.exe"
 if "INNO5" in os.environ:
@@ -32,13 +37,29 @@ def main():
     vars["PYTHON_VERSION_NODOT"] = (str(sys.version_info.major) + ""
             + str(sys.version_info.minor))
     vars["PYTHON_ARCHITECTURE"] = platform.architecture()[0]
-    vars["BINARIES_DIR"] = os.path.realpath(os.getcwd()+r"\..\binaries")
+    vars["BINARIES_DIR"] = os.path.realpath(
+        os.getcwd() + r"\..\binaries_%s" % BITS)
     vars["PYD_FILE"] = (vars["BINARIES_DIR"]+r"\cefpython_py"
             + str(sys.version_info.major) + str(sys.version_info.minor)
             + ".pyd")
     vars["INSTALLER_DIR"] = os.getcwd()
     vars["WX_SUBPACKAGE_DIR"] = os.path.realpath(os.getcwd()+r"\..\.."
             "\wx-subpackage")
+    vars["PLATFORM"] = sysconfig.get_platform()
+
+    if BITS == "32bit":
+        # We must keep compatibility, 32bit installers didn't contain
+        # architecture information in AppName. So make it an empty string.
+        vars["APP_NAME_BITS"] = ""
+        vars["HKEY_CURRENT_USER"] = "HKEY_CURRENT_USER"
+        vars["HKEY_LOCAL_MACHINE"] = "HKEY_LOCAL_MACHINE"
+    elif BITS == "64bit":
+        vars["APP_NAME_BITS"] = "64bit"
+        # Inno setup installer is a 32bit application. To query 64bit
+        # registry from within 32bit application you need to add _64
+        # postfix.
+        vars["HKEY_CURRENT_USER"] = "HKEY_CURRENT_USER_64"
+        vars["HKEY_LOCAL_MACHINE"] = "HKEY_LOCAL_MACHINE_64"
 
     print("Reading template: %s" % TEMPLATE_FILE)
 
@@ -66,7 +87,8 @@ def main():
 
     iscc_command = '"'+ ISCC + '" ' + ISS_FILE
     print("Running ISCC: %s" % iscc_command)
-    os.system(iscc_command)
+    exit_code = os.system(iscc_command)
+    sys.exit(exit_code)
 
 if __name__ == "__main__":
     main()

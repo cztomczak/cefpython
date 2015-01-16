@@ -1,20 +1,15 @@
 # An example of embedding CEF browser in wxPython on Windows.
-# Tested with wxPython 2.8.12.1
-
-import platform
-if platform.architecture()[0] != "32bit":
-    raise Exception("Architecture not supported: %s" \
-            % platform.architecture()[0])
+# Tested with wxPython 2.8.12.1 and 3.0.2.0.
 
 import os, sys
 libcef_dll = os.path.join(os.path.dirname(os.path.abspath(__file__)),
         'libcef.dll')
 if os.path.exists(libcef_dll):
     # Import a local module
-    if 0x02070000 <= sys.hexversion < 0x03000000:
+    if (2,7) <= sys.version_info < (2,8):
         import cefpython_py27 as cefpython
-    elif 0x03000000 <= sys.hexversion < 0x04000000:
-        import cefpython_py32 as cefpython
+    elif (3,4) <= sys.version_info < (3,4):
+        import cefpython_py34 as cefpython
     else:
         raise Exception("Unsupported python version: %s" % sys.version)
 else:
@@ -27,6 +22,7 @@ import re
 import uuid
 import platform
 import inspect
+import struct
 
 # -----------------------------------------------------------------------------
 # Globals
@@ -778,6 +774,7 @@ def GetSources():
 
 
 if __name__ == '__main__':
+    print('[wxpython.py] architecture=%s-bit' % (8 * struct.calcsize("P")))
     print('[wxpython.py] wx.version=%s' % wx.version())
 
     # Intercept python exceptions. Exit app immediately when exception
