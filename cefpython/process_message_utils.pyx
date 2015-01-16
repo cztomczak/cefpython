@@ -2,6 +2,13 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+# CefListValue->SetXxxx() functions need first param to be be cast
+# to (int) because GetSize() returns size_t and generates a warning
+# when compiling on VS2008 for x64 platform. Issue reported here:
+# https://code.google.com/p/cefpython/issues/detail?id=165
+# Here in pyx you also need to convert Py_ssize_t returned by
+# enumerate(), to an int.
+
 # -----------------------------------------------------------------------------
 # CEF values to Python values
 # -----------------------------------------------------------------------------
@@ -36,7 +43,7 @@ cdef list CefListValueToPyList(
         raise Exception("CefListValueToPyList(): max nesting level (8)"
                 " exceeded")
     cdef int index
-    cdef int size = cefListValue.get().GetSize()
+    cdef int size = int(cefListValue.get().GetSize())
     cdef cef_types.cef_value_type_t valueType
     cdef list ret = []
     cdef CefRefPtr[CefBinaryValue] binaryValue
@@ -166,7 +173,9 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
     cdef type valueType
     cdef CefRefPtr[CefListValue] ret = CefListValue_Create()
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    for index, value in enumerate(pyList):
+    cdef int index
+    for index_size_t, value in enumerate(pyList):
+        index = int(index_size_t)
         valueType = type(value)
         if valueType == type(None):
             ret.get().SetNull(index)
@@ -223,7 +232,9 @@ cdef void PyListToExistingCefListValue(
                 " exceeded")
     cdef type valueType
     cdef CefRefPtr[CefListValue] newCefListValue
-    for index, value in enumerate(pyList):
+    cdef int index
+    for index_size_t, value in enumerate(pyList):
+        index = int(index_size_t)
         valueType = type(value)
         if valueType == type(None):
             cefListValue.get().SetNull(index)

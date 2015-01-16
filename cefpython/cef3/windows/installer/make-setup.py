@@ -17,7 +17,7 @@ import sysconfig
 
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
-BITS_NUMBER = BITS[0] + BITS[1]
+
 PACKAGE_NAME = "cefpython3"
 
 README_FILE = os.getcwd()+r"/README.txt"
@@ -95,7 +95,7 @@ def main():
 
     pyVersion = str(sys.version_info.major) +"."+ str(sys.version_info.minor)
     setup_dir = installer_dir+"/"+PACKAGE_NAME+"-"+vars["APP_VERSION"]\
-            +".win"+BITS_NUMBER+"-py"+pyVersion+"-setup"
+            +"."+BITS+"-py"+pyVersion+"-setup"
     print("Creating setup dir: "+setup_dir)
     os.mkdir(setup_dir)
 
@@ -115,10 +115,7 @@ def main():
     with open(setup_dir+"/setup.cfg", "w") as f:
         f.write(SETUP_CFG_CONTENT)
 
-    if BITS == "32bit":
-        binaries_dir = os.path.abspath(installer_dir+"/../binaries/")
-    else:
-        binaries_dir = os.path.abspath(installer_dir+"/../binaries_"+BITS+"/")
+    binaries_dir = os.path.abspath(installer_dir+"/../binaries_"+BITS+"/")
     print("Copying binaries to package dir")
     shutil.copytree(binaries_dir, package_dir)
 
@@ -127,7 +124,7 @@ def main():
     glob_remove("*.log")
     glob_remove("*.pyc")
     glob_remove("*.pdb")
-    
+
     os.chdir(installer_dir)
 
     print("Creating __init__.py from template")
@@ -167,11 +164,11 @@ def main():
 
     # Create empty debug.log files so that package uninstalls cleanly
     # in case examples were launched. Issue 149.
-    debug_log_dirs = [package_dir, 
-                      package_dir+"/examples/", 
+    debug_log_dirs = [package_dir,
+                      package_dir+"/examples/",
                       package_dir+"/examples/wx/"]
     for dir in debug_log_dirs:
-        print("Creating empty debug.log in %s" % dir)    
+        print("Creating empty debug.log in %s" % dir)
         with open(dir+"/debug.log", "w") as f:
             f.write("")
 

@@ -2,8 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="client_handler_py32"
-	ProjectGUID="{37AA7CD9-67AD-40B1-ADC0-D62173764BCA}"
+	Name="client_handler_py27_32bit"
+    RootNamespace="client_handler_py27_32bit"
+	ProjectGUID="{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -17,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release_py32"
-			IntermediateDirectory="Release_py32"
+			OutputDirectory="Release_py27_32bit"
+			IntermediateDirectory="Release_py27_32bit"
 			ConfigurationType="4"
 			>
 			<Tool
@@ -38,7 +39,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../;$(PYTHON_INCLUDE_PATH);C:\Python32\include"
+				AdditionalIncludeDirectories="../;$(PYTHON_INCLUDE_PATH);C:\Python27\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;"
 				ExceptionHandling="1"
 				RuntimeLibrary="2"

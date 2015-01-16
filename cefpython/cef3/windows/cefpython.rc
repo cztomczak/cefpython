@@ -15,12 +15,12 @@ BEGIN
             VALUE "FileDescription", "CEF Python DLL"
             VALUE "FileVersion", "31.2.0.0"
             VALUE "InternalName", "cefpython"
-            VALUE "LegalCopyright", "(c) 2012-2014 The CEF Python authors"
+            VALUE "LegalCopyright", "(c) 2012 The CEF Python authors"
             VALUE "LegalTrademarks", ""
             VALUE "OriginalFilename", "cefpython_py27.pyd"
             VALUE "ProductName", "CEF Python 3"
             VALUE "ProductVersion", "31.2.0.0"
-            VALUE "Comments", "Licensed under BSD 3-clause license"
+            VALUE "Comments", "Licensed under the BSD 3-clause license"
             VALUE "Aditional Notes", ""
         END
     END

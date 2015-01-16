@@ -1,6 +1,8 @@
-# msvcr90.dll and the like should not be ignored - added manually.
- 
 *.exe
 *.dll
 *.pak
 *.lib
+
+!msvcr90.dll
+!msvcp90.dll
+!msvcm90.dll

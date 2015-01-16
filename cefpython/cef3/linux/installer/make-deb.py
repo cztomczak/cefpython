@@ -96,11 +96,11 @@ def remove_directories_from_previous_run():
     if os.path.exists(DISTUTILS_SETUP):
         log("The Distutils setup directory already exists, removing..")
         shutil.rmtree(DISTUTILS_SETUP)
-    
+
     if os.path.exists(INSTALLER+"/deb_dist/"):
         log("The deb_dist/ directory already exists, removing..")
         shutil.rmtree(INSTALLER+"/deb_dist/")
-    
+
     if os.path.exists(INSTALLER+"/deb_archive/"):
         log("The deb_archive/ directory already exists, removing..")
         shutil.rmtree(INSTALLER+"/deb_archive/")
@@ -115,15 +115,15 @@ def create_distutils_setup_package():
 def modify_control_file():
     log("Modyfing debian control file")
     control_file = DEBIAN+"/control"
-    
+
     # Read contents
     with open(control_file, "r") as f:
         contents = f.read()
-    
+
     # Set architecture to i386 or amd64
     contents = contents.replace("Architecture: all",
             "Architecture: %s" % ARCHITECTURE)
-    
+
     # Extend the Package section, remove the two ending new lines
     contents = re.sub("[\r\n]+$", "", contents)
     contents += "\n"
@@ -134,11 +134,11 @@ def modify_control_file():
     description = re.sub("\n$", "", description)
     contents += "%s\n" % description
 
-    # Other fields    
+    # Other fields
     contents += "Version: %s-1\n" % VERSION
     contents += "Maintainer: %s\n" % MAINTAINER
     contents += "Homepage: %s\n" % HOMEPAGE
-    
+
     # Control file should end with two new lines
     contents += "\n"
     with open(control_file, "w") as f:
@@ -177,11 +177,11 @@ def copy_postinst_script():
     # executables, so that they appear to be in one directory.
     # CEF executable requires that libcef.so and the subprocess
     # executable are in the same directory.
-    # This solution does not to work correctly in CEF3 branch 
+    # This solution does not to work correctly in CEF3 branch
     # 1650, so we will have to put .so libraries along with
     # other files in a real single directory.
     log("Copying .postinst script")
-    shutil.copy(INSTALLER+"/debian.postinst", 
+    shutil.copy(INSTALLER+"/debian.postinst",
             DEBIAN+"/python-%s.postinst" % (PACKAGE_NAME))
 
 def create_debian_source_package():
@@ -242,16 +242,16 @@ def modify_deb_archive():
     deb_archive_name = "python-%s_%s-1_%s.deb" \
             % (PACKAGE_NAME, VERSION, ARCHITECTURE)
     deb_archive_dir = INSTALLER+"/deb_archive"
-    
+
     # Move the deb archive to the deb_archive/ directory
     log("Moving the deb archive")
     os.system("mkdir %s" % deb_archive_dir)
     os.system("mv %s %s" % (DEB_DIST+"/"+deb_archive_name,\
             deb_archive_dir+"/"+deb_archive_name))
-    
+
     # Remove the deb_dist/ directory
     os.system("rm -rf %s" % DEB_DIST)
-    
+
     # Extract the deb archive
     log("Extracting the deb archive")
     os.chdir(deb_archive_dir)
@@ -293,7 +293,7 @@ def modify_deb_archive():
             % cefpython3_public_file, shell=True).strip()
     replace_in_file(md5sums_file, old_md5sum, new_md5sum)
 
-    # Create deb archive from the modified ./DEBIAN/ and 
+    # Create deb archive from the modified ./DEBIAN/ and
     # ./usr/ directories.
     log("Creating deb archive from the modified files")
     os.system("fakeroot dpkg-deb -b . ./%s" % deb_archive_name)
@@ -310,7 +310,7 @@ def main():
     # Version
     global VERSION
     VERSION = args.version
-    
+
     # Paths
     global DISTUTILS_SETUP
     DISTUTILS_SETUP = INSTALLER+"/"+PACKAGE_NAME+"-"+args.version+"-"+\
@@ -319,13 +319,13 @@ def main():
     remove_directories_from_previous_run()
     create_distutils_setup_package()
     create_debian_source_package()
-    deb_dist_cleanup()      
+    deb_dist_cleanup()
     modify_control_file()
     create_copyright_file()
     copy_postinst_script()
     create_debian_binary_package()
     modify_deb_archive()
-    
+
     log("DONE")
 
 if __name__ == "__main__":

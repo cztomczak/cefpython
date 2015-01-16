@@ -1,3 +1,5 @@
+#pragma warning(disable:4190)
+
 #ifndef __PYX_HAVE__cefpython_py27
 #define __PYX_HAVE__cefpython_py27
 
