@@ -176,9 +176,18 @@ echo [compile.bat] Entering setup/ directory
 cd %setup%
 
 echo [compile.bat] Copying .pyx files to setup/ directory and fixing includes
-python fix_includes.py
+python fix_pyx_files.py
 if %errorlevel% neq 0 (
-    echo [compile.bat] ERROR: running fix_includes.py failed
+    echo [compile.bat] ERROR: running fix_pyx_files.py failed
+    exit /B 1
+)
+
+:: __version__.pyx must be generated after running fix_pyx_files.py,
+:: as that script deletes old pyx files before copying new ones.
+echo [compile.bat] Creating __version__.pyx file
+echo __version__ = "%version%">>__version__.pyx
+if %errorlevel% neq 0 (
+    echo [compile.bat] ERROR: writing __version__.pyx failed
     exit /B 1
 )
 

@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import platform
 import stat
+import re
 
 # This will not show "Segmentation fault" error message:
 # | subprocess.call(["python", "./wxpython.py"])
@@ -20,11 +21,20 @@ import stat
 # 5. To display debug backtrace type "cy bt"
 # 6. More commands: http://docs.cython.org/src/userguide/debugging.html
 
-if len(sys.argv) > 1 and sys.argv[1] == "debug":
+if len(sys.argv) > 1 and "--debug" in sys.argv:
     DEBUG = True
     print("DEBUG mode On")
 else:
     DEBUG = False
+
+if len(sys.argv) > 1 and re.search(r"^\d+\.\d+$", sys.argv[1]):
+    VERSION = sys.argv[1]
+else:
+    print("[compile.py] ERROR: expected first argument to be version number")
+    print("             Allowed version format: \\d+\.\\d+")
+    sys.exit(1)
+
+print("VERSION=%s"%VERSION)
 
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
@@ -111,9 +121,15 @@ except OSError:
 
 os.chdir("./setup")
 
-ret = subprocess.call("python fix_includes.py", shell=True)
+ret = subprocess.call("python fix_pyx_files.py", shell=True)
 if ret != 0:
     sys.exit("ERROR")
+
+# Create __version__.pyx after fix_pyx_files.py was called,
+# as that script deletes old pyx files before copying new ones.
+print("Creating __version__.pyx file")
+with open("__version__.pyx", "w") as fo:
+    fo.write('__version__ = "{}"\n'.format(VERSION))
 
 if DEBUG:
     ret = subprocess.call("python-dbg setup.py build_ext --inplace"
