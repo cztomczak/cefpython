@@ -122,11 +122,7 @@ try:
 except OSError:
     pass
 
-try:
-    os.remove("./setup/cefpython_py%s.so" % PYVERSION)
-    os.remove("./setup/cefpython_py%s_d.so" % PYVERSION)
-except OSError:
-    pass
+os.system("rm ./setup/cefpython_py*.so")
 
 pyx_files = glob.glob("./setup/*.pyx")
 for f in pyx_files:
@@ -170,10 +166,11 @@ for pyxfile in oldpyxfiles:
 if ret != 0:
     sys.exit("ERROR")
 
-if DEBUG:
-    os.rename("./setup/cefpython_py%s_d.so" % PYVERSION, "./binaries_%s/cefpython_py%s.so" % (BITS, PYVERSION))
-else:
-    os.rename("./setup/cefpython_py%s.so" % PYVERSION, "./binaries_%s/cefpython_py%s.so" % (BITS, PYVERSION))
+exitcode = os.system("mv ./setup/cefpython_py{0}*.so"
+                     " ./binaries_{1}/cefpython_py{0}.so"
+                     .format(PYVERSION, BITS))
+if exitcode:
+    raise RuntimeError("Failed to move the cefpython module")
 
 print("DONE")
 
