@@ -160,5 +160,6 @@ function NextButtonClick(CurPage: Integer): Boolean;
 begin
     Result := True;
     if CurPage <> wpSelectDir then Exit;
+    UninstallOld(WizardDirValue() + '\%(PACKAGE_NAME)s\unins001.exe')
     UninstallOld(WizardDirValue() + '\%(PACKAGE_NAME)s\unins000.exe')
 end;
