@@ -84,6 +84,19 @@ cdef class PyFrame:
                 return True
             return False
 
+    def CallFunction(self, *args):
+        # DEPRECATED - keep for backwards compatibility.
+        self.ExecuteFunction(*args)
+
+    cpdef py_void Copy(self):
+        self.GetCefFrame().get().Copy()
+
+    cpdef py_void Cut(self):
+        self.GetCefFrame().get().Cut()
+
+    cpdef py_void Delete(self):
+        self.GetCefFrame().get().Delete()
+
     def ExecuteFunction(self, *args):
         # No need to enter V8 context as we're calling javascript
         # asynchronously using ExecuteJavascript() function.
@@ -96,53 +109,10 @@ cdef class PyFrame:
         code += ")"
         self.ExecuteJavascript(code)
 
-    def CallFunction(self, *args):
-        # DEPRECATED - keep for backwards compatibility.
-        self.ExecuteFunction(*args)
-
-    # Synchronous javascript calls won't be supported as CEF 3
-    # does not support it, so supporting it in CEF 1 is probably
-    # not a good idea - porting to CEF 3 would be problematic.
-
-    # cpdef object CallFunctionSync(self, funcName, ...):
-        # CefV8 Objects, Arrays and Functions can be created only inside V8 context,
-        # you need to call CefV8Context::Enter() and CefV8Context::Exit():
-        # http://code.google.com/p/chromiumembedded/issues/detail?id=203
-        # Entering context should be done for Frame::CallFunction().
-        # You must check current context and Enter it if not same, before calling
-        # PyToV8Value().
-        # TODO: call Frame->GetV8Context?()->GetGlobal?() you get a window object,
-        # now iterate through its all properties and compare to funcName, you get a
-        # real javascript object which you can call and be able to get return value, also
-        # you can pass python callbacks this way.'''
-        # Example:
-        # cdef CefRefPtr[CefV8Context] v8Context = (
-        #         self.GetCefFrame().get().GetV8Context())
-        # sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
-        # if not sameContext:
-        #    assert v8Context.get().Enter(), "v8Context.Enter() failed"
-        # ... execute function here ...
-        # if not sameContext:
-        #     assert v8Context.get().Exit(), "v8Context.Exit() failed"
-    #    pass
-
-    cpdef py_void Copy(self):
-        self.GetCefFrame().get().Copy()
-
-    cpdef py_void Cut(self):
-        self.GetCefFrame().get().Cut()
-
-    cpdef py_void Delete(self):
-        self.GetCefFrame().get().Delete()
-
     cpdef py_void ExecuteJavascript(self, py_string jsCode,
             py_string scriptUrl="", int startLine=0):
         self.GetCefFrame().get().ExecuteJavaScript(PyToCefStringValue(jsCode),
                 PyToCefStringValue(scriptUrl), startLine)
-
-    cpdef object EvalJavascript(self):
-        # TODO: CefV8Context > Eval
-        pass
 
     cpdef object GetIdentifier(self):
         # It is better to save browser and frame identifiers during
