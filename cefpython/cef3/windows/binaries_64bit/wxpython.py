@@ -255,7 +255,7 @@ class JavascriptExternal:
         print("[wxpython.py] TestAllTypes: "+str(args))
 
     def ExecuteFunction(self, *args):
-        self.mainBrowser.GetMainFrame().ExecuteFunction(*args)
+        self.mainBrowser.ExecuteFunction(*args)
 
     def TestJSCallback(self, jsCallback):
         print("[wxpython.py] jsCallback.GetFunctionName() = %s"\
