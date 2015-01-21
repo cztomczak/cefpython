@@ -4,7 +4,7 @@
 
 IF CEF_VERSION == 1:
     # In CEF 1 there are both KT_KEYDOWN and KEYEVENT_KEYDOWN, and
-    # these are different constants, making a bit of confusion. 
+    # these are different constants, making a bit of confusion.
     # In CEF 1 KT_ is for SendKeyEvent, KEYEVENT_ is for OnKeyEvent().
     # In CEF 3 there are only KEYEVENT_* constants.
     KEYTYPE_KEYDOWN = cef_types.KT_KEYDOWN
@@ -179,7 +179,7 @@ cdef class PyBrowser:
     # -------------------------------------------------------------------------
     # CEF 1
     # -------------------------------------------------------------------------
-    cpdef py_void SetClientCallback_CEF1(self, 
+    cpdef py_void SetClientCallback_CEF1(self,
             py_string name, object callback):
         if not self.allowedClientCallbacks:
             # CefLoadHandler.
@@ -196,7 +196,7 @@ cdef class PyBrowser:
                     "OnResourceResponse", "OnProtocolExecution",
                     "GetDownloadHandler", "GetAuthCredentials",
                     "GetCookieManager"]
-            
+
             # CefDisplayHandler.
             self.allowedClientCallbacks += ["OnAddressChange",
                     "OnConsoleMessage", "OnContentsSizeChange",
@@ -219,7 +219,7 @@ cdef class PyBrowser:
     # -------------------------------------------------------------------------
     # CEF 3
     # -------------------------------------------------------------------------
-    cpdef py_void SetClientCallback_CEF3(self, 
+    cpdef py_void SetClientCallback_CEF3(self,
             py_string name, object callback):
         if not self.allowedClientCallbacks:
             # DisplayHandler
@@ -229,19 +229,19 @@ cdef class PyBrowser:
             # KeyboardHandler
             self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"];
             # RequestHandler
-            # NOTE: OnCertificateError and OnBeforePluginLoad are not 
-            #       included as they must be set using 
+            # NOTE: OnCertificateError and OnBeforePluginLoad are not
+            #       included as they must be set using
             #       cefpython.SetGlobalClientCallback().
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
-                    "OnQuotaRequest", "OnProtocolExecution", 
+                    "OnQuotaRequest", "OnProtocolExecution",
                     "GetResourceHandler",
                     "OnBeforeBrowse", "OnRendererProcessTerminated",
                     "OnPluginCrashed"]
             # RequestContextHandler
             self.allowedClientCallbacks += ["GetCookieManager"]
             # LoadHandler
-            self.allowedClientCallbacks += ["OnLoadingStateChange", 
+            self.allowedClientCallbacks += ["OnLoadingStateChange",
                     "OnLoadStart", "OnLoadEnd", "OnLoadError"]
             # LifespanHandler
             # NOTE: OnAfterCreated not included as it must be set using
@@ -335,17 +335,24 @@ cdef class PyBrowser:
             if len(g_pyBrowsers) == 1:
                 # This is the last browser remaining.
                 if g_sharedRequestContext.get():
-                    # A similar release is done in Shutdown 
+                    # A similar release is done in Shutdown
                     # and RemovePyBrowser.
                     Debug("CloseBrowser: releasing shared request context")
                     g_sharedRequestContext.Assign(NULL)
             Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
             self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
-        
+
     IF CEF_VERSION == 1:
 
         cpdef py_void CloseDevTools(self):
             self.GetCefBrowser().get().CloseDevTools()
+
+    def ExecuteFunction(self, *args):
+        self.GetMainFrame().ExecuteFunction(*args)
+
+    cpdef py_void ExecuteJavascript(self, py_string jsCode,
+            py_string scriptUrl="", int startLine=0):
+        self.GetMainFrame().ExecuteJavascript(jsCode, scriptUrl, startLine)
 
     cpdef py_void Find(self, int searchId, py_string searchText,
                        py_bool forward, py_bool matchCase,
@@ -708,7 +715,7 @@ cdef class PyBrowser:
 
         cpdef py_void SendCaptureLostEvent(self):
             self.GetCefBrowser().get().SendCaptureLostEvent()
-    
+
     ELIF CEF_VERSION == 3:
         cpdef py_void SendKeyEvent(self, dict pyEvent):
             cdef CefKeyEvent cefEvent
@@ -731,7 +738,7 @@ cdef class PyBrowser:
                 cefEvent.focus_on_editable_field = \
                         bool(pyEvent["focus_on_editable_field"])
             self.GetCefBrowserHost().get().SendKeyEvent(cefEvent)
-        
+
         cpdef py_void SendMouseClickEvent(self, x, y,
                 cef_types.cef_mouse_button_type_t mouseButtonType,
                 py_bool mouseUp, int clickCount):
@@ -779,7 +786,7 @@ cdef class PyBrowser:
             mouseEvent.modifiers = 0
             self.GetCefBrowserHost().get().SendMouseWheelEvent(mouseEvent,
                     deltaX, deltaY)
-        
+
         cpdef py_void SendFocusEvent(self, py_bool setFocus):
             self.GetCefBrowserHost().get().SendFocusEvent(bool(setFocus))
 
@@ -812,7 +819,7 @@ cdef class PyBrowser:
         # virtual void HandleKeyEventBeforeTextInputClient(CefEventHandle keyEvent) =0;
         # virtual void HandleKeyEventAfterTextInputClient(CefEventHandle keyEvent) =0;
 
-        cdef void SendProcessMessage(self, cef_process_id_t targetProcess, 
+        cdef void SendProcessMessage(self, cef_process_id_t targetProcess,
                 object frameId, py_string messageName, list pyArguments
                 ) except *:
             cdef CefRefPtr[CefProcessMessage] message = \
@@ -826,7 +833,7 @@ cdef class PyBrowser:
             PyListToExistingCefListValue(self.GetIdentifier(), frameId,
                     pyArguments, messageArguments)
             Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
-                    messageName, 
+                    messageName,
                     message.get().GetArgumentList().get().GetSize()))
             cdef cpp_bool success = \
                     self.GetCefBrowser().get().SendProcessMessage(
