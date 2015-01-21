@@ -287,13 +287,13 @@ jsBindings.SetProperty("pyConfig", ["This was set in Python",
 <h3>TestAllTypes</h3>
 
 <script>ShowSource("TestAllTypes");</script>
-<a href="javascript:external.TestAllTypes(undefined, null, true, 1, 
-        ((1<<31)>>>0), 2.14, 'Date not yet supported', 'string', 
+<a href="javascript:external.TestAllTypes(undefined, null, true, 1,
+        ((1<<31)>>>0), 2.14, 'Date not yet supported', 'string',
         {key1: 1, key2: 2}, {key1: {'key1.1': 'nested object'}, 'key1.2': [1]},
         [1, 2], [1, [2.1, 'nested array']], [{key1: [{}]}])">
         external.TestAllTypes</a>
-        <small>(undefined, null, true, 1, 
-        ((1&lt;&lt;31)>>>0), 2.14, 'Date not yet supported', 'string', 
+        <small>(undefined, null, true, 1,
+        ((1&lt;&lt;31)>>>0), 2.14, 'Date not yet supported', 'string',
         {key1: 1, key2: 2}, {key1: {'key1.1': 'nested object'}, 'key1.2': [1]},
         [1, 2], [1, [2.1, 'nested array']], [{key1: [{}]}])</small>
 <br>
@@ -310,10 +310,10 @@ function JavascriptAlert(message) { window.alert(message); }
 </code></pre>
 
 <script>ShowSource("ExecuteFunction");</script>
-<a href="javascript:external.ExecuteFunction('JavascriptAlert', 
-        'python called from js and then js called from python')">
-        external.ExecuteFunction('JavascriptAlert', 
-        'python called from js and then js called from python')</a>
+<a href="javascript:external.ExecuteFunction('JavascriptAlert',
+        'python called from js and then js called from python', 0, [1,2])">
+        external.ExecuteFunction('JavascriptAlert',
+        'python called from js and then js called from python', 0, [1,2])</a>
 <br>
 
 <h3>GetSource, GetText</h3>
@@ -429,7 +429,7 @@ See messages in the console when hovering over links.
 
 <h3>OnConsoleMessage</h3>
 <script>ShowSource("OnConsoleMessage");</script>
-Try this: 
+Try this:
 <a href="http://patik.com/code/console-log-polyfill/">
     http://patik.com/code/console-log-polyfill/</a>
 
@@ -442,7 +442,7 @@ Try this:
 
 <p>
     Press F5 to reload the page.<br>
-    On Linux it is required to click anywhere in the window first 
+    On Linux it is required to click anywhere in the window first
     so that keyboard focus is set. See Issue 77 in the CEF Python
     Issue Tracker.
 </p>
@@ -465,7 +465,7 @@ See messages in the console.
 <script>ShowSource("OnResourceRedirect");</script>
 Try this:
 <a href="http://tinyurl.com/google404redirect">
-    http://tinyurl.com/google404redirect</a>    
+    http://tinyurl.com/google404redirect</a>
 
 <h3>GetAuthCredentials</h3>
 <script>ShowSource("GetAuthCredentials");</script>
@@ -478,7 +478,7 @@ Try this:
 
 <script>
 function DoRequestQuota() {
-    // Request Quota (only for File System API)  
+    // Request Quota (only for File System API)
     try {
         navigator.webkitPersistentStorage.requestQuota(PERSISTENT, 1024*1024,
                 function(bytes){ window.alert("Granted bytes: "+bytes);},
@@ -493,7 +493,7 @@ function DoRequestQuota() {
 
 <pre><code class="language-javascript">&lt;script&gt;
 function DoRequestQuota() {
-    // Request Quota (only for File System API)  
+    // Request Quota (only for File System API)
     try {
         navigator.webkitPersistentStorage.requestQuota(PERSISTENT, 1024*1024,
                 function(bytes){ window.alert("Granted bytes: "+bytes);},
@@ -507,7 +507,7 @@ function DoRequestQuota() {
 &lt;/script&gt;
 </code></pre>
 
-Try this: 
+Try this:
 <a href="https://googledrive.com/host/0B1di2XiBBfacMnhRRkI1YlotUEk/requestquota.html">
     https://googledrive.com/host/0B1di2XiBBfacMnhRRkI1YlotUEk/requestquota.html</a>
 
@@ -542,7 +542,7 @@ as this is the same domain and it's cached now.
 
 <h3>OnRendererProcessTerminated</h3>
 <script>ShowSource("OnRendererProcessTerminated");</script>
-Try to terminate the "subprocess.exe" renderer process through 
+Try to terminate the "subprocess.exe" renderer process through
 task manager.
 
 <h3>OnPluginCrashed</h3>
@@ -563,7 +563,7 @@ See messages in the console.
 <script>ShowSource("GetCookieManager");</script>
 
 RequestHandler.GetCookieManager() - an example of having an unique
-cookie manager for each browser. 
+cookie manager for each browser.
 <ol>
     <li>Visit the url below and set some cookies. Use "Back" from
         context menu to get back here (you might have to click "Back"
@@ -608,12 +608,12 @@ Visit a subset of cookies for the given url:
 
 <h3>SetCookie</h3>
 <script>ShowSource("SetCookie");</script>
-Set a cookie on html-kit.com: 
+Set a cookie on html-kit.com:
 <a href="javascript:external.SetCookie()">external.SetCookie()</a>
 <br>
 Go see the cookie that was created:
     <a href="http://www.html-kit.com/tools/cookietester/">
-                http://www.html-kit.com/tools/cookietester/</a> 
+                http://www.html-kit.com/tools/cookietester/</a>
 
 <h3>DeleteCookies</h3>
 <script>ShowSource("DeleteCookies");</script>
@@ -623,7 +623,7 @@ Delete the single cookie previously created via SetCookie():
 <br>
 Go check if cookie was deleted:
     <a href="http://www.html-kit.com/tools/cookietester/">
-                http://www.html-kit.com/tools/cookietester/</a> 
+                http://www.html-kit.com/tools/cookietester/</a>
 
 <!-- ********************************************************************** -->
 <!-- Load handler -->
@@ -648,7 +648,7 @@ See messages in the console during loading of a webpage.
 After you see the custom error message you have to hit
 twice the Back from the context menu, to get back to this page.
 <br>
-Try this: 
+Try this:
 <a href="http://www.non-existent.nono/">
     http://www.non-existent.nono/</a>
 <br>
@@ -698,7 +698,7 @@ function TestOnBeforeUnloadJavascriptDialog() {
 <h3>OnResetJavascriptDialogState</h3>
 <script>ShowSource("OnResetJavascriptDialogState");</script>
 
-<h3>OnJavascriptDialogClosed</h3>   
+<h3>OnJavascriptDialogClosed</h3>
 <script>ShowSource("OnJavascriptDialogClosed");</script>
 
 <!-- ********************************************************************** -->
