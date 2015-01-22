@@ -99,10 +99,15 @@ Use the mouse context menu to go Back/Forward in history navigation.
     </li>
 </ol>
 
-There are problems with keyboard when allow CEF to create popup
-windows internally. To create popup window explicitilly, the
-LifespanHandler::OnBeforePopup callback was implemented. See its
-source:
+There are problems with keyboard in wxPython when popup windows are created
+by CEF (<a href="https://code.google.com/p/cefpython/issues/detail?id=80">
+Issue 80</a>). To create the popup window of our own, the
+LifespanHandler::OnBeforePopup callback was implemented. Note that this has
+its implications, the popup window and parent window will not be able to
+script each other. There will be no "window.opener" property available
+in the popup window.
+
+See its source:
 
 <script>ShowSource("OnBeforePopup");</script>
 <script>ShowSource("_CreatePopup");</script>
