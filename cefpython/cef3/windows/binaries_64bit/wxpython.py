@@ -651,7 +651,9 @@ class ClientHandler:
         # is created using "window.open" or "target=blank". This issue
         # occurs only in wxPython. PyGTK or PyQt do not require this fix.
         # The solution is to create window explicitilly, and not depend
-        # on CEF to create window internally.
+        # on CEF to create window internally. See Issue 80 for details:
+        # https://code.google.com/p/cefpython/issues/detail?id=80
+
         # If you set allowPopups=True then CEF will create popup window.
         # The wx.Frame cannot be created here, as this callback is
         # executed on the IO thread. Window should be created on the UI
@@ -659,6 +661,12 @@ class ClientHandler:
         # which runs asynchronously and can be called on any thread.
         # The other solution is to post a task on the UI thread, so
         # that cefpython.CreateBrowserSync() can be used.
+
+        # Note that if you return True and create the popup window yourself,
+        # then the popup window and parent window will not be able to script
+        # each other. There will be no "window.opener" property available
+        # in the popup window.
+
         cefpython.PostTask(cefpython.TID_UI, self._CreatePopup, targetUrl)
 
         allowPopups = False
