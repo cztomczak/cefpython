@@ -244,6 +244,9 @@ class JavascriptExternal:
     def GoForward(self):
         self.mainBrowser.GoForward()
 
+    def SetZoomLevel(self, zoomLevel):
+        self.mainBrowser.SetZoomLevel(zoomLevel)
+
     def CreateAnotherBrowser(self, url=None):
         frame = MainFrame(url=url)
         frame.Show()
