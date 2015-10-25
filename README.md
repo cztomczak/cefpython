@@ -2,33 +2,33 @@
 
 ## Introduction
 
-CEF Python is an open source project founded by <a href="http://www.linkedin.com/in/czarektomczak">Czarek Tomczak</a> in 2012 to provide python bindings for the <a href="http://code.google.com/p/chromiumembedded/">Chromium Embedded Framework</a>. See the growing list of <a href="http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF">applications using CEF</a> on wikipedia. Examples of embedding CEF browser are available for many popular GUI toolkits including: <a href="/p/cefpython/wiki/wxPython">wxPython</a>, <a href="/p/cefpython/wiki/PyGTK">PyGTK</a>, <a href="/p/cefpython/wiki/PyQt">PyQt</a>, <a href="/p/cefpython/wiki/PySide">PySide</a>, <a href="/p/cefpython/wiki/Kivy">Kivy</a>, <a href="/p/cefpython/wiki/Panda3D">Panda3D</a> and <a href="https://code.google.com/p/cefpython/source/browse/cefpython/cef3/windows/binaries_32bit/pywin32.py">PyWin32</a>.
+CEF Python is an open source project founded by <a href="http://www.linkedin.com/in/czarektomczak">Czarek Tomczak</a> in 2012 to provide python bindings for the <a href="http://code.google.com/p/chromiumembedded/">Chromium Embedded Framework</a>. See the growing list of <a href="http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF">applications using CEF</a> on wikipedia. Examples of embedding CEF browser are available for many popular GUI toolkits including: <a href="http://code.google.com/p/cefpython/wiki/wxPython">wxPython</a>, <a href="http://code.google.com/p/cefpython/wiki/PyGTK">PyGTK</a>, <a href="http://code.google.com/p/cefpython/wiki/PyQt">PyQt</a>, <a href="http://code.google.com/p/cefpython/wiki/PySide">PySide</a>, <a href="http://code.google.com/p/cefpython/wiki/Kivy">Kivy</a>, <a href="http://code.google.com/p/cefpython/wiki/Panda3D">Panda3D</a> and <a href="https://code.google.com/p/cefpython/source/browse/cefpython/cef3/windows/binaries_32bit/pywin32.py">PyWin32</a>.
 
 Some use cases for CEF: 
 
 * Embed a web browser control with great HTML5 support (based on Chromium)
-* Use it to create a HTML5 based GUI in an application. This can act as a replacement for GUI toolkits like wxWidgets/Qt/Gtk. For native communication between javascript and python use <a href="/p/cefpython/wiki/JavascriptBindings">javascript bindings</a>. Another option is to run an internal python web server and use websockets/XMLHttpRequest for js&lt;&gt;python communication. This way you can write a desktop app in the same way you write web apps. 
-* Render web content off-screen in applications that use custom drawing frameworks. See the <a href="/p/cefpython/wiki/Kivy">Kivy</a> and <a href="/p/cefpython/wiki/Panda3D">Panda3D</a> examples.
+* Use it to create a HTML5 based GUI in an application. This can act as a replacement for GUI toolkits like wxWidgets/Qt/Gtk. For native communication between javascript and python use <a href="http://code.google.com/p/cefpython/wiki/JavascriptBindings">javascript bindings</a>. Another option is to run an internal python web server and use websockets/XMLHttpRequest for js&lt;&gt;python communication. This way you can write a desktop app in the same way you write web apps. 
+* Render web content off-screen in applications that use custom drawing frameworks. See the <a href="http://code.google.com/p/cefpython/wiki/Kivy">Kivy</a> and <a href="http://code.google.com/p/cefpython/wiki/Panda3D">Panda3D</a> examples.
 * Use it for automated testing of existing web applications. Use it for web scraping, or as a web crawler or other kind of internet bots.
 
 ## Supported Python versions and platforms
 
-* Supported Python versions: 2.7 (Python 3.4 will be supported soon, see <a title="Support for Python 3.4"  href="/p/cefpython/issues/detail?id=121">Issue 121</a>)
+* Supported Python versions: 2.7 (Python 3.4 will be supported soon, see <a title="Support for Python 3.4"  href="http://code.google.com/p/cefpython/issues/detail?id=121">Issue 121</a>)
 * Supported platforms: Windows, Linux, Mac (both 32bit and 64bit binaries are available for all platforms)
 
 ## Downloads
 
-* For Windows: see the <a href="/p/cefpython/wiki/Download_CEF3_Windows">Download_CEF3_Windows</a> wiki page.
-* For Linux: see the <a href="/p/cefpython/wiki/Download_CEF3_Linux">Download_CEF3_Linux</a> wiki page.
-* For Mac: see the <a href="/p/cefpython/wiki/Download_CEF3_Mac">Download_CEF3_Mac</a> wiki page.
+* For Windows: see the <a href="http://code.google.com/p/cefpython/wiki/Download_CEF3_Windows">Download_CEF3_Windows</a> wiki page.
+* For Linux: see the <a href="http://code.google.com/p/cefpython/wiki/Download_CEF3_Linux">Download_CEF3_Linux</a> wiki page.
+* For Mac: see the <a href="http://code.google.com/p/cefpython/wiki/Download_CEF3_Mac">Download_CEF3_Mac</a> wiki page.
 
 ## Help
 
-* Documentation is on the <a href="http://code.google.com/p/cefpython/w/list">wiki pages</a>. Start with the <a href="/p/cefpython/wiki/API">API</a> page.
+* Documentation is on the <a href="http://code.google.com/p/cefpython/w/list">wiki pages</a>. Start with the <a href="http://code.google.com/p/cefpython/wiki/API">API</a> page.
 * Ask questions and report problems on the <a href="https://groups.google.com/group/cefpython">CEF Python Forum</a>.
 * Please do not use the <a href="http://code.google.com/p/cefpython/issues/list">Issue Tracker</a> for asking questions.
-* Instructions on how to enable Flash Player are on the <a href="/p/cefpython/wiki/Plugins">Plugins</a> wiki page.
-* Having problems with playing audio or video? See the <a href="/p/cefpython/wiki/AudioVideo">AudioVideo</a> wiki page. 
+* Instructions on how to enable Flash Player are on the <a href="http://code.google.com/p/cefpython/wiki/Plugins">Plugins</a> wiki page.
+* Having problems with playing audio or video? See the <a href="http://code.google.com/p/cefpython/wiki/AudioVideo">AudioVideo</a> wiki page. 
 
 ## Watch the project
 
@@ -39,7 +39,7 @@ Some use cases for CEF:
 
 ## Support development
 
-<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=95W9VHNSFWRUN"><img align="right" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif"></img></a> If you are interested in donating time to help with the CEF Python development please see the <a href="/p/cefpython/wiki/InternalDevelopment">InternalDevelopment</a> wiki page. If you would like to support general CEF Python development efforts by making a donation please click the Paypal &quot;Donate&quot; button to the right. At this time CEF Python is unable to accept donations that sponsor the development of specific features. If you are interested in sponsorship opportunities please contact Czarek directly. </p>
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=95W9VHNSFWRUN"><img align="right" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif"></img></a> If you are interested in donating time to help with the CEF Python development please see the <a href="http://code.google.com/p/cefpython/wiki/InternalDevelopment">InternalDevelopment</a> wiki page. If you would like to support general CEF Python development efforts by making a donation please click the Paypal "Donate" button to the right. At this time CEF Python is unable to accept donations that sponsor the development of specific features. If you are interested in sponsorship opportunities please contact Czarek directly.
 
 ### Thanks
 
