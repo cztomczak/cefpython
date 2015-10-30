@@ -696,17 +696,17 @@ cdef class PyBrowser:
 
         cpdef py_void SendMouseClickEvent(self, int x, int y,
                 cef_types.cef_mouse_button_type_t mouseButtonType,
-                py_bool mouseUp, int clickCount):
+                py_bool mouseUp, int clickCount, int modifiers=0):
             self.GetCefBrowser().get().SendMouseClickEvent(x, y,
                     mouseButtonType, bool(mouseUp), clickCount)
 
         cpdef py_void SendMouseMoveEvent(self, int x, int y,
-                py_bool mouseLeave):
+                py_bool mouseLeave, int modifiers=0):
             self.GetCefBrowser().get().SendMouseMoveEvent(x, y,
                     bool(mouseLeave))
 
         cpdef py_void SendMouseWheelEvent(self, int x, int y,
-                int deltaX, int deltaY):
+                int deltaX, int deltaY, int modifiers=0):
             self.GetCefBrowser().get().SendMouseWheelEvent(x, y,
                     deltaX, deltaY)
 
@@ -739,9 +739,9 @@ cdef class PyBrowser:
                         bool(pyEvent["focus_on_editable_field"])
             self.GetCefBrowserHost().get().SendKeyEvent(cefEvent)
 
-        cpdef py_void SendMouseClickEvent(self, x, y,
+        cpdef py_void SendMouseClickEvent(self, int x, int y,
                 cef_types.cef_mouse_button_type_t mouseButtonType,
-                py_bool mouseUp, int clickCount):
+                py_bool mouseUp, int clickCount, int modifiers=0):
             cdef CefMouseEvent mouseEvent
             mouseEvent.x = x
             mouseEvent.y = y
@@ -765,25 +765,25 @@ cdef class PyBrowser:
                 EVENTFLAG_IS_LEFT             = 1 << 10,
                 EVENTFLAG_IS_RIGHT            = 1 << 11,
             """
-            mouseEvent.modifiers = 0
+            mouseEvent.modifiers = modifiers
             self.GetCefBrowserHost().get().SendMouseClickEvent(mouseEvent,
                     mouseButtonType, bool(mouseUp), clickCount)
 
         cpdef py_void SendMouseMoveEvent(self, int x, int y,
-                py_bool mouseLeave):
+                py_bool mouseLeave, int modifiers=0):
             cdef CefMouseEvent mouseEvent
             mouseEvent.x = x
             mouseEvent.y = y
-            mouseEvent.modifiers = 0
+            mouseEvent.modifiers = modifiers
             self.GetCefBrowserHost().get().SendMouseMoveEvent(mouseEvent,
                     bool(mouseLeave))
 
         cpdef py_void SendMouseWheelEvent(self, int x, int y,
-                int deltaX, int deltaY):
+                int deltaX, int deltaY, int modifiers=0):
             cdef CefMouseEvent mouseEvent
             mouseEvent.x = x
             mouseEvent.y = y
-            mouseEvent.modifiers = 0
+            mouseEvent.modifiers = modifiers
             self.GetCefBrowserHost().get().SendMouseWheelEvent(mouseEvent,
                     deltaX, deltaY)
 
