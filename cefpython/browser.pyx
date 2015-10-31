@@ -696,17 +696,17 @@ cdef class PyBrowser:
 
         cpdef py_void SendMouseClickEvent(self, int x, int y,
                 cef_types.cef_mouse_button_type_t mouseButtonType,
-                py_bool mouseUp, int clickCount):
+                py_bool mouseUp, int clickCount, int modifiers=0):
             self.GetCefBrowser().get().SendMouseClickEvent(x, y,
                     mouseButtonType, bool(mouseUp), clickCount)
 
         cpdef py_void SendMouseMoveEvent(self, int x, int y,
-                py_bool mouseLeave):
+                py_bool mouseLeave, int modifiers=0):
             self.GetCefBrowser().get().SendMouseMoveEvent(x, y,
                     bool(mouseLeave))
 
         cpdef py_void SendMouseWheelEvent(self, int x, int y,
-                int deltaX, int deltaY):
+                int deltaX, int deltaY, int modifiers=0):
             self.GetCefBrowser().get().SendMouseWheelEvent(x, y,
                     deltaX, deltaY)
 
@@ -739,51 +739,31 @@ cdef class PyBrowser:
                         bool(pyEvent["focus_on_editable_field"])
             self.GetCefBrowserHost().get().SendKeyEvent(cefEvent)
 
-        cpdef py_void SendMouseClickEvent(self, x, y,
+        cpdef py_void SendMouseClickEvent(self, int x, int y,
                 cef_types.cef_mouse_button_type_t mouseButtonType,
-                py_bool mouseUp, int clickCount):
+                py_bool mouseUp, int clickCount, int modifiers=0):
             cdef CefMouseEvent mouseEvent
             mouseEvent.x = x
             mouseEvent.y = y
-            """
-            TODO: allow to pass modifiers which represents
-                  bit flags describing any pressed modifier keys.
-                  See cef_event_flags_t for values.
-            enum cef_event_flags_t {
-                EVENTFLAG_NONE                = 0,
-                EVENTFLAG_CAPS_LOCK_ON        = 1 << 0,
-                EVENTFLAG_SHIFT_DOWN          = 1 << 1,
-                EVENTFLAG_CONTROL_DOWN        = 1 << 2,
-                EVENTFLAG_ALT_DOWN            = 1 << 3,
-                EVENTFLAG_LEFT_MOUSE_BUTTON   = 1 << 4,
-                EVENTFLAG_MIDDLE_MOUSE_BUTTON = 1 << 5,
-                EVENTFLAG_RIGHT_MOUSE_BUTTON  = 1 << 6,
-                // Mac OS-X command key.
-                EVENTFLAG_COMMAND_DOWN        = 1 << 7,
-                EVENTFLAG_NUM_LOCK_ON         = 1 << 8,
-                EVENTFLAG_IS_KEY_PAD          = 1 << 9,
-                EVENTFLAG_IS_LEFT             = 1 << 10,
-                EVENTFLAG_IS_RIGHT            = 1 << 11,
-            """
-            mouseEvent.modifiers = 0
+            mouseEvent.modifiers = modifiers
             self.GetCefBrowserHost().get().SendMouseClickEvent(mouseEvent,
                     mouseButtonType, bool(mouseUp), clickCount)
 
         cpdef py_void SendMouseMoveEvent(self, int x, int y,
-                py_bool mouseLeave):
+                py_bool mouseLeave, int modifiers=0):
             cdef CefMouseEvent mouseEvent
             mouseEvent.x = x
             mouseEvent.y = y
-            mouseEvent.modifiers = 0
+            mouseEvent.modifiers = modifiers
             self.GetCefBrowserHost().get().SendMouseMoveEvent(mouseEvent,
                     bool(mouseLeave))
 
         cpdef py_void SendMouseWheelEvent(self, int x, int y,
-                int deltaX, int deltaY):
+                int deltaX, int deltaY, int modifiers=0):
             cdef CefMouseEvent mouseEvent
             mouseEvent.x = x
             mouseEvent.y = y
-            mouseEvent.modifiers = 0
+            mouseEvent.modifiers = modifiers
             self.GetCefBrowserHost().get().SendMouseWheelEvent(mouseEvent,
                     deltaX, deltaY)
 
