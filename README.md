@@ -1,5 +1,14 @@
 # CEF Python
 
+Table of contents:
+ * [Introduction](#introduction)
+ * [Supported Python versions and platforms](#supported-python-versions-and-platforms)
+ * [Downloads](#downloads)
+ * [Help](#help)
+ * [Watch the project](#watch-the-project)
+ * [Support development](#support-development)
+ * [Thanks](#thanks)
+
 ## Introduction
 
 CEF Python is an open source project founded by <a href="http://www.linkedin.com/in/czarektomczak">Czarek Tomczak</a> in 2012 to provide python bindings for the <a href="https://bitbucket.org/chromiumembedded/cef">Chromium Embedded Framework</a>. See the growing list of <a href="http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF">applications using CEF</a> on wikipedia. Examples of embedding CEF browser are available for many popular GUI toolkits including: <a href="../wiki/wxPython.md">wxPython</a>, <a href="../wiki/PyGTK.md">PyGTK</a>, <a href="../wiki/PyQt.md">PyQt</a>, <a href="../wiki/PySide.md">PySide</a>, <a href="../wiki/Kivy.md">Kivy</a>, <a href="../wiki/Panda3D.md">Panda3D</a> and <a href="../master/cefpython/cef3/windows/binaries_32bit/pywin32.py">PyWin32</a>.
