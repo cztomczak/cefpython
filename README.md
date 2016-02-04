@@ -51,7 +51,7 @@ To be notified of updates watch the project on GitHub and additionally join the 
 
 * Thanks to the numerous individuals that made a Paypal donation: Walter Purvis, Rokas Stupuras, Alex Rattray, Greg Kacy, Paul Korzhyk.
 * Thanks to those that have donated their time through code contributions: see the  [AUTHORS.txt](../master/cefpython/AUTHORS.txt) file. Patches can be attached in the issue tracker.
-* <a href="http://www.cyaninc.com/"><img align="right" width="200" height="42" src="https://cefpython.googlecode.com/git/cefpython/var/cyan_new_logo.png"></img></a>Many thanks to [Cyan Inc.](http://www.cyaninc.com/) for sponsoring this project, making CEF Python 3 more mature. Lots of new features were added, including javascript bindings and Linux support.
+* <a href="http://www.cyaninc.com/"><img align="right" width="200" height="42" src="https://raw.githubusercontent.com/cztomczak/cefpython/master/cefpython/var/cyan_new_logo.png"></img></a>Many thanks to [Cyan Inc.](http://www.cyaninc.com/) for sponsoring this project, making CEF Python 3 more mature. Lots of new features were added, including javascript bindings and Linux support.
 * Thanks to [Rentouch GmbH](http://www.rentouch.ch/) for sponsoring the development of the off-screen rendering support in CEF Python 3.
 * Thanks to Thomas Wusatiuk for sponsoring the development of the web response reading features in CEF Python 3.
 * Thanks to Adam Duston for donating a Macbook to aid the development of the Mac port.
