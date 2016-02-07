@@ -33,11 +33,8 @@ Some use cases for CEF:
 
 ## Help
 
-* Documentation is on the [wiki pages](../../wiki).
-* Ask questions and report problems on the [CEF Python Forum](https://groups.google.com/group/cefpython).
+* See the [Help and search](../../wiki/Help-and-search) wiki page
 * Please do not use the [Issue Tracker](../../issues) for asking questions.
-* Instructions on how to enable Flash Player are on the [Plugins](../../wiki/Plugins) wiki page.
-* Having problems with playing audio or video? See the [AudioVideo](../../wiki/AudioVideo) wiki page. 
 
 ## Watch the project
 
