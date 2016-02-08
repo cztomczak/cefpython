@@ -31,10 +31,11 @@ Some use cases for CEF:
 * For Linux: see the [Download_CEF3_Linux](../../wiki/Download_CEF3_Linux) wiki page.
 * For Mac: see the [Download_CEF3_Mac](../../wiki/Download_CEF3_Mac) wiki page.
 
-## Help
+## Help and documentation
 
 * See the [Help and search](../../wiki/Help-and-search) wiki page
-* Please do not use the [Issue Tracker](../../issues) for asking questions.
+* Documentation and API is available on [Wiki Pages](../../wiki)
+* Please do not use the [Issue Tracker](../../issues) for asking questions
 
 ## Watch the project
 
