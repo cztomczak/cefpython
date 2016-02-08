@@ -4,8 +4,7 @@ Table of contents:
  * [Introduction](#introduction)
  * [Supported Python versions and platforms](#supported-python-versions-and-platforms)
  * [Downloads](#downloads)
- * [Help](#help)
- * [Watch the project](#watch-the-project)
+ * [Help and documentation](#help-and-documentation)
  * [Support development](#support-development)
  * [Thanks](#thanks)
 
@@ -36,10 +35,6 @@ Some use cases for CEF:
 * See the [Help and search](../../wiki/Help-and-search) wiki page
 * Documentation and API is available on [Wiki Pages](../../wiki)
 * Please do not use the [Issue Tracker](../../issues) for asking questions
-
-## Watch the project
-
-To be notified of updates watch the project on GitHub and additionally join the [Forum](http://groups.google.com/group/cefpython) and set membership settings to send Daily summaries via email.
 
 ## Support development
 
