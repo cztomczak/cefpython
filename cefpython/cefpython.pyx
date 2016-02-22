@@ -28,6 +28,14 @@
 #   CEF threading, see topic at cython-users for more details:
 #   https://groups.google.com/d/msg/cython-users/CRxWoX57dnM/aufW3gXMhOUJ.
 #
+# -  Note that acquiring the GIL is a blocking thread-synchronising operation,
+#    and therefore potentially costly. It might not be worth releasing the GIL
+#    for minor calculations. Usually, I/O operations and substantial
+#    computations in parallel code will benefit from it.
+#
+# -  In regards to GIL locks see Issue #102 "Remove GIL to avoid deadlocks when
+#    calling CEF functions".
+#
 # - CTags requires all functions/methods imported in .pxd files to be preceded with "cdef",
 #   otherwise they are not indexed.
 #

@@ -77,12 +77,11 @@ cdef class PyFrame:
         self.browserId = browserId
         self.frameId = frameId
 
-    IF CEF_VERSION == 3:
-        cpdef py_bool IsValid(self):
-            if <void*>self.cefFrame != NULL and self.cefFrame.get() \
-                    and self.cefFrame.get().IsValid():
-                return True
-            return False
+    cpdef py_bool IsValid(self):
+        if <void*>self.cefFrame != NULL and self.cefFrame.get() \
+                and self.cefFrame.get().IsValid():
+            return True
+        return False
 
     def CallFunction(self, *args):
         # DEPRECATED - keep for backwards compatibility.
@@ -97,13 +96,12 @@ cdef class PyFrame:
     cpdef py_void Delete(self):
         self.GetCefFrame().get().Delete()
 
-    def ExecuteFunction(self, *args):
+    def ExecuteFunction(self, funcName, *args):
         # No need to enter V8 context as we're calling javascript
         # asynchronously using ExecuteJavascript() function.
-        funcName = args[0]
         code = funcName+"("
-        for i in range(1, len(args)):
-            if i != 1:
+        for i in range(0, len(args)):
+            if i != 0:
                 code += ", "
             code += json.dumps(args[i])
         code += ")"
@@ -122,54 +120,32 @@ cdef class PyFrame:
         # may or may not include GetIdentifier() method, but let's be sure.
         return self.frameId
 
+    cpdef PyFrame GetParent(self):
+        return GetPyFrame(self.GetCefFrame().get().GetParent())
+
+    cpdef PyBrowser GetBrowser(self):
+        return GetPyBrowser(self.GetCefFrame().get().GetBrowser())
+
     cpdef int GetBrowserIdentifier(self) except *:
         return self.browserId
 
     cpdef str GetName(self):
         return CefToPyString(self.GetCefFrame().get().GetName())
 
-    IF CEF_VERSION == 1:
-        cpdef object GetProperty(self, py_string name):
-            assert IsThread(TID_UI), (
-                    "Frame.GetProperty() may only be called on the UI thread")
-            cdef CefRefPtr[CefV8Context] v8Context = self.GetCefFrame().get().GetV8Context()
-            cdef CefRefPtr[CefV8Value] window = v8Context.get().GetGlobal()
-            cdef CefString cefPropertyName
-            PyToCefString(name, cefPropertyName)
-            cdef CefRefPtr[CefV8Value] v8Value = window.get().GetValue(cefPropertyName)
-            return V8ToPyValue(v8Value, v8Context)
+    cpdef py_void GetSource(self, object visitor):
+        self.GetCefFrame().get().GetSource(CreateStringVisitor(visitor))
 
-        cpdef str GetSource(self):
-            assert IsThread(TID_UI), (
-                    "Frame.GetSource() may only be called on the UI thread")
-            return CefToPyString(self.GetCefFrame().get().GetSource())
-
-        cpdef str GetText(self):
-            assert IsThread(TID_UI), (
-                    "Frame.GetText() may only be called on the UI thread")
-            return CefToPyString(self.GetCefFrame().get().GetText())
-
-    IF CEF_VERSION == 3:
-        cpdef py_void GetSource(self, object userStringVisitor):
-            self.GetCefFrame().get().GetSource(CreateStringVisitor(userStringVisitor))
-
-        cpdef py_void GetText(self, object userStringVisitor):
-            self.GetCefFrame().get().GetText(CreateStringVisitor(userStringVisitor))
+    cpdef py_void GetText(self, object visitor):
+        self.GetCefFrame().get().GetText(CreateStringVisitor(visitor))
 
     cpdef str GetUrl(self):
         return CefToPyString(self.GetCefFrame().get().GetURL())
 
     cpdef py_bool IsFocused(self):
-        IF CEF_VERSION == 1:
-            assert IsThread(TID_UI), (
-                    "Frame.IsFocused() may only be called on the UI thread")
         return self.GetCefFrame().get().IsFocused()
 
     cpdef py_bool IsMain(self):
         return self.GetCefFrame().get().IsMain()
-
-    cpdef py_void LoadRequest(self):
-        pass
 
     cpdef py_void LoadString(self, py_string value, py_string url):
         cdef CefString cefValue
@@ -187,48 +163,14 @@ cdef class PyFrame:
     cpdef py_void Paste(self):
         self.GetCefFrame().get().Paste()
 
-    IF CEF_VERSION == 1:
-        cpdef py_void Print(self):
-            self.GetCefFrame().get().Print()
-
     cpdef py_void Redo(self):
         self.GetCefFrame().get().Redo()
 
     cpdef py_void SelectAll(self):
         self.GetCefFrame().get().SelectAll()
 
-    IF CEF_VERSION == 1:
-        cpdef py_void SetProperty(self, py_string name, object value):
-            assert IsThread(TID_UI), (
-                    "Frame.SetProperty() may only be called on the UI thread")
-            if not JavascriptBindings.IsValueAllowed(value):
-                valueType = JavascriptBindings.__IsValueAllowed(value)
-                raise Exception("Frame.SetProperty() failed: name=%s, "
-                        "not allowed type: %s (this may be a type of a nested value)"
-                        % (name, valueType))
-            cdef CefRefPtr[CefV8Context] v8Context = self.GetCefFrame().get().GetV8Context()
-            cdef CefRefPtr[CefV8Value] window = v8Context.get().GetGlobal()
-            cdef CefString cefPropertyName
-            PyToCefString(name, cefPropertyName)
-            cdef cpp_bool sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
-            if not sameContext:
-                Debug("Frame.SetProperty(): inside a different context, calling v8Context.Enter()")
-                assert v8Context.get().Enter(), "v8Context.Enter() failed"
-            window.get().SetValue(
-                    cefPropertyName,
-                    PyToV8Value(value, v8Context),
-                    V8_PROPERTY_ATTRIBUTE_NONE)
-            if not sameContext:
-                assert v8Context.get().Exit(), "v8Context.Exit() failed"
-
     cpdef py_void Undo(self):
         self.GetCefFrame().get().Undo()
 
     cpdef py_void ViewSource(self):
         self.GetCefFrame().get().ViewSource()
-
-    cpdef PyFrame GetParent(self):
-        return GetPyFrame(self.GetCefFrame().get().GetParent())
-
-    cpdef PyBrowser GetBrowser(self):
-        return GetPyBrowser(self.GetCefFrame().get().GetBrowser())

@@ -3,3 +3,4 @@ svn-win32-1.8.5
 cefpython.wiki
 .tags*
 /cython-version.*
+.idea/
