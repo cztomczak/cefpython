@@ -11,7 +11,7 @@ author = u'The CEF Python authors'
 copyright = u'2012, '+author
 
 master_doc = 'Home'
-source_suffix = ['.md']
+source_suffix = ['.rst', '.md']
 source_parsers = {
     '.md': CommonMarkParser,
 }
