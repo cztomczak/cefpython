@@ -1,3 +1,5 @@
+"""The build configuration file for Sphinx - Python Documentation Generator."""
+
 from recommonmark.parser import CommonMarkParser
 
 version = '31.2'
