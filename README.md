@@ -1,3 +1,10 @@
+__Notes__:
+* Repository rewritten on 2016-02-15 to reduce its size.
+  Please clone it again. Issue #103.
+* There is an ongoing big refactoring with code and documentation
+  cleanup. The last stable code is in the cefpython31 branch.
+  Issue #208.
+
 # CEF Python
 
 Table of contents:

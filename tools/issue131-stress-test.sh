@@ -20,7 +20,7 @@ for ((i = 1; i <= $1; i++)); do
         read -p "Press ENTER to exit"
         exit $code
     fi
-    echo RUN $i OK    
+    echo RUN $i OK
 done
 
 echo TEST SUCCEEDED

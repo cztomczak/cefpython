@@ -157,8 +157,6 @@ IF CEF_VERSION == 1:
     include "keyboard_handler_cef1.pyx"
     include "request_cef1.pyx"
     include "web_request_cef1.pyx"
-    include "stream.pyx"
-    include "content_filter.pyx"
     include "request_handler_cef1.pyx"
     include "response_cef1.pyx"
     include "display_handler_cef1.pyx"
@@ -166,8 +164,6 @@ IF CEF_VERSION == 1:
     IF UNAME_SYSNAME == "Windows":
         # Off-screen rendering currently supported only on Windows.
         include "render_handler_cef1.pyx"
-    include "drag_data.pyx"
-    include "drag_handler.pyx"
     include "download_handler.pyx"
     include "v8context_handler_cef1.pyx"
     include "v8function_handler_cef1.pyx"

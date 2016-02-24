@@ -7,7 +7,7 @@
 
 These settings can be passed to [cefpython](../modules/cefpython.md).CreateBrowser().
 
-Many of these settings have their command line switch equivalent, see the [Command line switches](Command-line-switches.md) page.
+Many of these settings have their command line switch equivalent, see the [CommandLineSwitches](CommandLineSwitches.md) page.
 
 In some cases, the default values of settings that are suggested by its name may not always be correct. This is because in one of CEF releases naming of these settings changed, and they started to accept states (enabled or disabled), instead of the state being included in its name (some_option_disabled). CEF Python tries to be backwards compatible, that's why the old naming convention is still used. Read description of setting and if you see that it mentions command line switch that starts with "disable-", it means that its default state is "enabled". If the command line switch starts with "enable-" then its default state is "disabled".
 

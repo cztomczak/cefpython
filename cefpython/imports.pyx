@@ -127,7 +127,6 @@ ELIF UNAME_SYSNAME == "Linux":
     cimport cef_types_linux
 
 from cef_time cimport *
-from cef_drag cimport *
 
 IF CEF_VERSION == 1:
     from cef_v8 cimport *
@@ -138,19 +137,13 @@ IF CEF_VERSION == 1:
     from cef_web_urlrequest_cef1 cimport *
     cimport cef_web_urlrequest_static_cef1
     from web_request_client_cef1 cimport *
-    from cef_stream cimport *
-    cimport cef_stream_static
     from cef_response_cef1 cimport *
-    from cef_stream cimport *
-    from cef_content_filter cimport *
-    from content_filter_handler cimport *
     from cef_download_handler cimport *
     from download_handler cimport *
     from cef_cookie_cef1 cimport *
     cimport cef_cookie_manager_namespace
     from cookie_visitor cimport *
     from cef_render_handler cimport *
-    from cef_drag_data cimport *
 
 IF UNAME_SYSNAME == "Windows":
     IF CEF_VERSION == 1:

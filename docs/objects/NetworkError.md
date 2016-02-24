@@ -1,239 +1,247 @@
-# Network error constants #
+# Network error
 
-These constants are for use with: [LoadHandler](LoadHandler).`OnLoadError()`, [WebRequestClient](WebRequestClient).`OnError()`, [RequestHandler](RequestHandler).`OnCertificateError()`.
+These constants are defined in the main [cefpython](../modules/cefpython.md) module. They are for use with:
+* [LoadHandler](../handlers/LoadHandler.md).OnLoadError()
+* [WebRequestClient](WebRequestClient.md).OnError()
+* [RequestHandler](../handlers/RequestHandler.md).OnCertificateError()
 
-For an up-to-date list of error codes see "net\_error\_list.h" in the Chromium trunk: http://src.chromium.org/viewvc/chrome/trunk/src/net/base/net_error_list.h?view=markup
+For an up-to-date list of error codes see [net_error_list.h](http://src.chromium.org/viewvc/chrome/trunk/src/net/base/net_error_list.h?view=markup) in Chromium.
 
-cefpython.**ERR\_NONE**
+<!-- START doctoc -->
+<!-- END doctoc -->
 
-> No error.
+## Constants
 
-cefpython.**ERR\_ABORTED**
+### ERR_NONE
 
-> An operation was aborted (due to user action).
+No error.
 
-cefpython.**ERR\_ACCESS\_DENIED**
+### ERR_ABORTED
 
-> Permission to access a resource, other than the network, was denied.
+An operation was aborted (due to user action).
 
-cefpython.**ERR\_ADDRESS\_INVALID**
+### ERR_ACCESS_DENIED
 
-> The IP address or port number is invalid (e.g., cannot connect to the IP address 0 or the port 0).
+Permission to access a resource, other than the network, was denied.
 
-cefpython.**ERR\_ADDRESS\_UNREACHABLE**
+### ERR_ADDRESS_INVALID
 
-> The IP address is unreachable.  This usually means that there is no route to the specified host or network.
+The IP address or port number is invalid (e.g., cannot connect to the IP address 0 or the port 0).
 
-cefpython.**ERR\_CACHE\_MISS**
+### ERR_ADDRESS_UNREACHABLE
 
-> The cache does not have the requested entry.
+The IP address is unreachable.  This usually means that there is no route to the specified host or network.
 
-cefpython.**ERR\_CERT\_AUTHORITY\_INVALID**
+### ERR_CACHE_MISS
 
-> The server responded with a certificate that is signed by an authority
-> we don't trust. That could mean:
+The cache does not have the requested entry.
+
+### ERR_CERT_AUTHORITY_INVALID
+
+The server responded with a certificate that is signed by an authority
+we don't trust. That could mean:
 
   1. An attacker has substituted the real certificate for a cert that contains his public key and is signed by his cousin.
   1. The server operator has a legitimate certificate from a CA we don't know about, but should trust.
   1. The server is presenting a self-signed certificate, providing no defense against active attackers (but foiling passive attackers).
 
-cefpython.**ERR\_CERT\_COMMON\_NAME\_INVALID**
+### ERR_CERT_COMMON_NAME_INVALID
 
-> The server responded with a certificate whose common name did not match
-> the host name.  This could mean:
+The server responded with a certificate whose common name did not match
+the host name.  This could mean:
 
   1. An attacker has redirected our traffic to his server and is  presenting a certificate for which he knows the private key.
   1. The server is misconfigured and responding with the wrong cert.
   1. The user is on a wireless network and is being redirected to the network's login page.
   1. The OS has used a DNS search suffix and the server doesn't have a certificate for the abbreviated name in the address bar.
 
-cefpython.**ERR\_CERT\_CONTAINS\_ERRORS**
+### ERR_CERT_CONTAINS_ERRORS
 
-> The server responded with a certificate that contains errors.
-> This error is not recoverable. MSDN describes this error as follows:
-> "The SSL certificate contains errors."
-> NOTE: It's unclear how this differs from ERR\_CERT\_INVALID. For consistency,
-> use that code instead of this one from now on.
+The server responded with a certificate that contains errors.
+This error is not recoverable. MSDN describes this error as follows:
+"The SSL certificate contains errors."
+NOTE: It's unclear how this differs from ERR_CERT_INVALID. For consistency,
+use that code instead of this one from now on.
 
-cefpython.**ERR\_CERT\_DATE\_INVALID**
+### ERR_CERT_DATE_INVALID
 
-> The server responded with a certificate that, by our clock, appears to
-> either not yet be valid or to have expired.  This could mean:
+The server responded with a certificate that, by our clock, appears to
+either not yet be valid or to have expired.  This could mean:
 
   1. An attacker is presenting an old certificate for which he has managed to obtain the private key.
   1. The server is misconfigured and is not presenting a valid cert.
   1. Our clock is wrong.
 
-cefpython.**ERR\_CERT\_END**
+### ERR_CERT_END
 
-> The value immediately past the last certificate error code.
+The value immediately past the last certificate error code.
 
-cefpython.**ERR\_CERT\_INVALID**
+### ERR_CERT_INVALID
 
-> The server responded with a certificate that is invalid.
-> This error is not recoverable.
-> MSDN describes this error as follows:
-> "The SSL certificate is invalid."
+The server responded with a certificate that is invalid.
+This error is not recoverable.
+MSDN describes this error as follows:
+"The SSL certificate is invalid."
 
-cefpython.**ERR\_CERT\_NO\_REVOCATION\_MECHANISM**
+### ERR_CERT_NO_REVOCATION_MECHANISM
 
-> The certificate has no mechanism for determining if it is revoked.  In
-> effect, this certificate cannot be revoked.
+The certificate has no mechanism for determining if it is revoked.  In
+effect, this certificate cannot be revoked.
 
-cefpython.**ERR\_CERT\_REVOKED**
+### ERR_CERT_REVOKED
 
-> The server responded with a certificate has been revoked.
-> We have the capability to ignore this error, but it is probably not the
-> thing to do.
+The server responded with a certificate has been revoked.
+We have the capability to ignore this error, but it is probably not the
+thing to do.
 
-cefpython.**ERR\_CERT\_UNABLE\_TO\_CHECK\_REVOCATION**
+### ERR_CERT_UNABLE_TO_CHECK_REVOCATION
 
-> Revocation information for the security certificate for this site is not
-> available.  This could mean:
+Revocation information for the security certificate for this site is not
+available.  This could mean:
 
   1. An attacker has compromised the private key in the certificate and is blocking our attempt to find out that the cert was revoked.
   1. The certificate is unrevoked, but the revocation server is busy or unavailable.
 
-cefpython.**ERR\_CONNECTION\_ABORTED**
+### ERR_CONNECTION_ABORTED
 
-> A connection timed out as a result of not receiving an ACK for data sent.
-> This can include a FIN packet that did not get ACK'd.
+A connection timed out as a result of not receiving an ACK for data sent.
+This can include a FIN packet that did not get ACK'd.
 
-cefpython.**ERR\_CONNECTION\_CLOSED**
+### ERR_CONNECTION_CLOSED
 
-> A connection was closed (corresponding to a TCP FIN).
+A connection was closed (corresponding to a TCP FIN).
 
-cefpython.**ERR\_CONNECTION\_FAILED**
+### ERR_CONNECTION_FAILED
 
-> A connection attempt failed.
+A connection attempt failed.
 
-cefpython.**ERR\_CONNECTION\_REFUSED**
+### ERR_CONNECTION_REFUSED
 
-> A connection attempt was refused.
+A connection attempt was refused.
 
-cefpython.**ERR\_CONNECTION\_RESET**
+### ERR_CONNECTION_RESET
 
-> A connection was reset (corresponding to a TCP RST).
+A connection was reset (corresponding to a TCP RST).
 
-cefpython.**ERR\_DISALLOWED\_URL\_SCHEME**
+### ERR_DISALLOWED_URL_SCHEME
 
-> The scheme of the URL is disallowed.
+The scheme of the URL is disallowed.
 
-cefpython.**ERR\_EMPTY\_RESPONSE**
+### ERR_EMPTY_RESPONSE
 
-> The server closed the connection without sending any data.
+The server closed the connection without sending any data.
 
-cefpython.**ERR\_FAILED**
+### ERR_FAILED
 
-> A generic failure occurred.
+A generic failure occurred.
 
-cefpython.**ERR\_FILE\_NOT\_FOUND**
+### ERR_FILE_NOT_FOUND
 
-> The file or directory cannot be found.
+The file or directory cannot be found.
 
-cefpython.**ERR\_FILE\_TOO\_BIG**
+### ERR_FILE_TOO_BIG
 
-> The file is too large.
+The file is too large.
 
-cefpython.**ERR\_INSECURE\_RESPONSE**
+### ERR_INSECURE_RESPONSE
 
-> The server's response was insecure (e.g. there was a cert error).
+The server's response was insecure (e.g. there was a cert error).
 
-cefpython.**ERR\_INTERNET\_DISCONNECTED**
+### ERR_INTERNET_DISCONNECTED
 
-> The Internet connection has been lost.
+The Internet connection has been lost.
 
-cefpython.**ERR\_INVALID\_ARGUMENT**
+### ERR_INVALID_ARGUMENT
 
-> An argument to the function is incorrect.
+An argument to the function is incorrect.
 
-cefpython.**ERR\_INVALID\_CHUNKED\_ENCODING**
+### ERR_INVALID_CHUNKED_ENCODING
 
-> Error in chunked transfer encoding.
+Error in chunked transfer encoding.
 
-cefpython.**ERR\_INVALID\_HANDLE**
+### ERR_INVALID_HANDLE
 
-> The handle or file descriptor is invalid.
+The handle or file descriptor is invalid.
 
-cefpython.**ERR\_INVALID\_RESPONSE**
+### ERR_INVALID_RESPONSE
 
-> The server's response was invalid.
+The server's response was invalid.
 
-cefpython.**ERR\_INVALID\_URL**
+### ERR_INVALID_URL
 
-> The URL is invalid.
+The URL is invalid.
 
-cefpython.**ERR\_METHOD\_NOT\_SUPPORTED**
+### ERR_METHOD_NOT_SUPPORTED
 
-> The server did not support the request method.
+The server did not support the request method.
 
-cefpython.**ERR\_NAME\_NOT\_RESOLVED**
+### ERR_NAME_NOT_RESOLVED
 
-> The host name could not be resolved.
+The host name could not be resolved.
 
-cefpython.**ERR\_NO\_SSL\_VERSIONS\_ENABLED**
+### ERR_NO_SSL_VERSIONS_ENABLED
 
-> No SSL protocol versions are enabled.
+No SSL protocol versions are enabled.
 
-cefpython.**ERR\_NOT\_IMPLEMENTED**
+### ERR_NOT_IMPLEMENTED
 
-> The operation failed because of unimplemented functionality.
+The operation failed because of unimplemented functionality.
 
-cefpython.**ERR\_RESPONSE\_HEADERS\_TOO\_BIG**
+### ERR_RESPONSE_HEADERS_TOO_BIG
 
-> The headers section of the response is too large.
+The headers section of the response is too large.
 
-cefpython.**ERR\_SSL\_CLIENT\_AUTH\_CERT\_NEEDED**
+### ERR_SSL_CLIENT_AUTH_CERT_NEEDED
 
-> The server requested a client certificate for SSL client authentication.
+The server requested a client certificate for SSL client authentication.
 
-cefpython.**ERR\_SSL\_PROTOCOL\_ERROR**
+### ERR_SSL_PROTOCOL_ERROR
 
-> An SSL protocol error occurred.
+An SSL protocol error occurred.
 
-cefpython.**ERR\_SSL\_RENEGOTIATION\_REQUESTED**
+### ERR_SSL_RENEGOTIATION_REQUESTED
 
-> The server requested a renegotiation (rehandshake).
+The server requested a renegotiation (rehandshake).
 
-cefpython.**ERR\_SSL\_VERSION\_OR\_CIPHER\_MISMATCH**
+### ERR_SSL_VERSION_OR_CIPHER_MISMATCH
 
-> The client and server don't support a common SSL protocol version or
-> cipher suite.
+The client and server don't support a common SSL protocol version or
+cipher suite.
 
-cefpython.**ERR\_TIMED\_OUT**
+### ERR_TIMED_OUT
 
-> An operation timed out.
+An operation timed out.
 
-cefpython.**ERR\_TOO\_MANY\_REDIRECTS**
+### ERR_TOO_MANY_REDIRECTS
 
-> Attempting to load an URL resulted in too many redirects.
+Attempting to load an URL resulted in too many redirects.
 
-cefpython.**ERR\_TUNNEL\_CONNECTION\_FAILED**
+### ERR_TUNNEL_CONNECTION_FAILED
 
-> A tunnel connection through the proxy could not be established.
+A tunnel connection through the proxy could not be established.
 
-cefpython.**ERR\_UNEXPECTED**
+### ERR_UNEXPECTED
 
-> An unexpected error.  This may be caused by a programming mistake or an
-> invalid assumption.
+An unexpected error.  This may be caused by a programming mistake or an
+invalid assumption.
 
-cefpython.**ERR\_UNEXPECTED\_PROXY\_AUTH**
+### ERR_UNEXPECTED_PROXY_AUTH
 
-> The response was 407 (Proxy Authentication Required), yet we did not send
-> the request to a proxy.
+The response was 407 (Proxy Authentication Required), yet we did not send
+the request to a proxy.
 
-cefpython.**ERR\_UNKNOWN\_URL\_SCHEME**
+### ERR_UNKNOWN_URL_SCHEME
 
-> The scheme of the URL is unknown.
+The scheme of the URL is unknown.
 
-cefpython.**ERR\_UNSAFE\_PORT**
+### ERR_UNSAFE_PORT
 
-> Attempting to load an URL with an unsafe port number.  These are port
-> numbers that correspond to services, which are not robust to spurious input
-> that may be constructed as a result of an allowed web construct (e.g., HTTP
-> looks a lot like SMTP, so form submission to port 25 is denied).
+Attempting to load an URL with an unsafe port number.  These are port
+numbers that correspond to services, which are not robust to spurious input
+that may be constructed as a result of an allowed web construct (e.g., HTTP
+looks a lot like SMTP, so form submission to port 25 is denied).
 
-cefpython.**ERR\_UNSAFE\_REDIRECT**
+### ERR_UNSAFE_REDIRECT
 
-> Attempting to load an URL resulted in an unsafe redirect (e.g., a redirect
-> to file:// is considered unsafe).
+Attempting to load an URL resulted in an unsafe redirect (e.g., a redirect
+to file:// is considered unsafe).

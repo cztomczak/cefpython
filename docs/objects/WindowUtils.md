@@ -1,41 +1,104 @@
-# WindowUtils class #
+# WindowUtils class
 
-All methods of this class are static. Access this class through [cefpython](cefpython).`WindowUtils`.
+All methods of this class are static. Many of the Windows-only functions here are utilized in the PyWin32 example.
 
-def **OnSetFocus**(int `windowHandle`, long `msg`, long `wparam`, long `lparam`)
+<!-- START doctoc -->
+<!-- END doctoc -->
 
-> This method processes WM\_SETFOCUS message which is sent to a window after it has gained the keyboard focus.
+## Methods
 
-def **OnSize**(int `windowHandle`, long `msg`, long `wparam`, long `lparam`)
+### OnSetFocus (Win)
 
-> This method processes WM\_SIZE message which is sent to a window after its size has changed.
+| Parameter | Type |
+| --- | --- |
+| windowHandle | int |
+| msg | long |
+| wparam | long |
+| lparam | long |
+| __Return__ | void |
 
-def **OnEraseBackground**(int `windowHandle`, long `msg`, long `wparam`, long `lparam`)
+Windows-only. This method processes WM_SETFOCUS message which is sent to a window after it has gained the keyboard focus.
 
-> This method processes WM\_ERASEBKGND message which is sent when the window background must be erased (for example, when a window is resized).
+### OnSize (Win)
 
-> This is a Windows-only function.
+| Parameter | Type |
+| --- | --- |
+| windowHandle | int |
+| msg | long |
+| wparam | long |
+| lparam | long |
+| __Return__ | void |
 
-def **SetTitle**([Browser](Browser) `browser`, str `title`)
+Windows-only. This method processes WM_SIZE message which is sent to a window after its size has changed.
 
-> Set the title for the main window or popup window. The default implementation of [DisplayHandler](DisplayHandler).`OnTitleChange()` calls this method to set the title for a window.
+### OnEraseBackground (Win)
 
-def **SetIcon**([Browser](Browser) `browser`, string `icon`="inherit")
+| Parameter | Type |
+| --- | --- |
+| windowHandle | int |
+| msg | long |
+| wparam | long |
+| lparam | long |
+| __Return__ | void |
 
-> Set the icon for the popup window. The default implementation of [DisplayHandler](DisplayHandler).`OnTitleChange()` calls this method to set the icon for a window that wasn't created explicitily (for example a popup window), the icon is inherited from the parent window. Icon parameter accepts only "inherit", you cannot pass here a path to an icon (currently not implemented).
+Windows-only. This method processes WM_ERASEBKGND message which is sent when the window background must be erased (for example, when a window is resized).
 
-def **GetParentHandle**(int `windowHandle`)
+### SetTitle (Win)
 
-> Get a parent handle.
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| title | str |
+| __Return__ | void |
 
-def **IsWindowHandle**(int `windowHandle`)
+Windows-only. Set the title for the main window or popup window. The default implementation of [DisplayHandler](../handlers/DisplayHandler.md).OnTitleChange() calls this method to set the title for a window.
 
-> Check whether this is a valid window handle.
+### SetIcon (Win)
 
-def **gtk\_plug\_new**(long long `GdkNativeWindow`)
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| icon="inherit" | string |
+| __Return__ | void |
 
-> Available only on Linux. This method is utilized in the pyqt example.
+Windows-only. Set the icon for the popup window. The default implementation of [DisplayHandler](../handlers/DisplayHandler.md).OnTitleChange() calls this method to set the icon for a window that wasn't created explicitily (for example a popup window), the icon is inherited from the parent window. Icon parameter accepts only "inherit", you cannot pass here a path to an icon (currently not implemented).
 
-def **gtk\_widget\_show**(long long `GtkWidget*`)
+### GetParentHandle
 
-> Available only on Linux. This method is utilized in the pyqt example.
+| Parameter | Type |
+| --- | --- |
+| windowHandle | int |
+| __Return__ | void |
+
+Get a parent handle.
+
+On Linux and Mac this method always returns 0. @TODO.
+
+### IsWindowHandle
+
+| Parameter | Type |
+| --- | --- |
+| windowHandle | int |
+| __Return__ | void |
+
+Check whether this is a valid window handle.
+
+On Linux and Mac this method always returns True. @TODO.
+
+### gtk_plug_new (Linux)
+
+| Parameter | Type |
+| --- | --- |
+| long GdkNativeWindow | long |
+| __Return__ | void |
+
+Linux-only. This method is utilized in the PyQt example.
+
+### gtk_widget_show (Linux)
+
+| Parameter | Type |
+| --- | --- |
+| long GtkWidget* | long |
+| __Return__ | void |
+
+Linux-only. This method is utilized in the PyQt example.
