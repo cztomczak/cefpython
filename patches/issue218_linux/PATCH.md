@@ -1,7 +1,5 @@
-Fixes to the CEF GTK implementation on Linux:
+Patch to CEF. Fixes GTK/wxPython issues on Linux:
 https://github.com/cztomczak/cefpython/issues/218
 
 Apply the patch in the `~/chromium/src/cef/` directory.
-
-Modifications are made to the CefBrowserHostImpl::
-PlatformCreateWindow function.
+It modifies PlatformCreateWindow().
