@@ -5,6 +5,8 @@
 Usage:
     toc.py FILE
     toc.py DIR
+
+To ignore file when generating TOC, put an empty line just before H1.
 """
 
 import os
