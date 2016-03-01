@@ -42,6 +42,7 @@ Some use cases for CEF:
 
 * See the [Help and search](../../wiki/Help-and-search) wiki page
 * Documentation and API is available on [Wiki Pages](../../wiki)
+* New up-to-date API docs are in the [api/](api/) directory.
 * Please do not use the Issue Tracker for asking questions. Use the
   [Forum](https://groups.google.com/group/cefpython).
 
