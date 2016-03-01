@@ -15,8 +15,8 @@ Table of contents:
   * [SetIcon (Win)](#seticon-win)
   * [GetParentHandle](#getparenthandle)
   * [IsWindowHandle](#iswindowhandle)
-  * [gtk_plug_new (Linux)](#gtkplugnew-linux)
-  * [gtk_widget_show (Linux)](#gtkwidgetshow-linux)
+  * [gtk_plug_new (Linux)](#gtk_plug_new-linux)
+  * [gtk_widget_show (Linux)](#gtk_widget_show-linux)
 
 
 ## Methods

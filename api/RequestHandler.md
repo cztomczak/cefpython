@@ -21,8 +21,8 @@ Table of contents:
   * [OnQuotaRequest](#onquotarequest)
   * [GetCookieManager](#getcookiemanager)
   * [OnProtocolExecution](#onprotocolexecution)
-  * [_OnBeforePluginLoad](#onbeforepluginload)
-  * [_OnCertificateError](#oncertificateerror)
+  * [_OnBeforePluginLoad](#_onbeforepluginload)
+  * [_OnCertificateError](#_oncertificateerror)
   * [OnRendererProcessTerminated](#onrendererprocessterminated)
   * [OnPluginCrashed](#onplugincrashed)
 

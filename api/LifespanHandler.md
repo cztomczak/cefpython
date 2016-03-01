@@ -11,7 +11,7 @@ For an example of how to implement a handler see [cefpython](cefpython.md).Creat
 Table of contents:
 * [Callbacks](#callbacks)
   * [OnBeforePopup](#onbeforepopup)
-  * [_OnAfterCreated](#onaftercreated)
+  * [_OnAfterCreated](#_onaftercreated)
   * [RunModal](#runmodal)
   * [DoClose](#doclose)
   * [OnBeforeClose](#onbeforeclose)
