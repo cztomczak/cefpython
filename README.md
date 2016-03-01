@@ -1,20 +1,17 @@
 __Notes__:
 * Repository rewritten on 2016-02-15 to reduce its size.
   Please clone it again.
-* There is an ongoing big refactoring with code and documentation
-  cleanup. The last stable code is in the cefpython31 branch.
-  Use documentation from the Wiki tab, the docs/ directory is still
-  under works.
+
 
 # CEF Python
 
 Table of contents:
 * [Introduction](#introduction)
-* [Supported Python versions and platforms](#supported-python-versions-and-platforms)
+* [Compatibility](#compatibility)
 * [Downloads](#downloads)
-* [Help and documentation](#help-and-documentation)
+* [Documentation and help](#documentation-and-help)
 * [Support development](#support-development)
-* [Thanks](#thanks)
+
 
 ## Introduction
 
@@ -27,10 +24,12 @@ Some use cases for CEF:
 * Render web content off-screen in applications that use custom drawing frameworks. See the [Kivy](../../wiki/Kivy) and [Panda3D](../../wiki/Panda3D) examples.
 * Use it for automated testing of existing web applications. Use it for web scraping, or as a web crawler or other kind of internet bots.
 
-## Supported Python versions and platforms
+
+## Compatibility
 
 * Supported Python versions: 2.7 (Python 3.4 will be supported soon, see [Issue #121](../../issues/121))
 * Supported platforms: Windows, Linux, Mac (both 32bit and 64bit binaries are available for all platforms)
+
 
 ## Downloads
 
@@ -38,21 +37,15 @@ Some use cases for CEF:
 * For Linux: see the [Download_CEF3_Linux](../../wiki/Download_CEF3_Linux) wiki page.
 * For Mac: see the [Download_CEF3_Mac](../../wiki/Download_CEF3_Mac) wiki page.
 
-## Help and documentation
+
+## Documentation and help
 
 * See the [Help and search](../../wiki/Help-and-search) wiki page
 * Documentation and API is available on [Wiki Pages](../../wiki)
 * Please do not use the Issue Tracker for asking questions. Use the
   [Forum](https://groups.google.com/group/cefpython).
 
+
 ## Support development
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=95W9VHNSFWRUN"><img align="right" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif"></img></a> If you are interested in donating time to help with the CEF Python development please see the [Internal development](../../wiki/InternalDevelopment) wiki page. If you would like to support general CEF Python development efforts by making a donation see the [Donations](docs/Donations.md) page. At this time CEF Python is unable to accept donations that sponsor the development of specific features. If you are interested in sponsorship opportunities please contact Czarek directly.
-
-## Built a cool app?
-
-Built a cool app using CEF Python and would like to share info with the community? Talk about it on the [CEF Python Forum](https://groups.google.com/group/cefpython).
-
-## CEF bindings for other languages
-
-The author of CEF Python is also working on CEF bindings for other languages such as PHP and Go. For PHP take a look at the [PHP Desktop](https://github.com/cztomczak/phpdesktop) project. For Go see the [CEF2go](https://github.com/cztomczak/cef2go) project on GitHub.
