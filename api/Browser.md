@@ -73,7 +73,8 @@ Table of contents:
 
 **Closing browser cleanly**
 
-Remember to delete all browser references for the browser to shut down cleanly. For an example see [wxpython.py MainFrame.OnClose()](../blob/master/cefpython/cef3/windows/binaries_32bit/wxpython.py#L209).
+Remember to delete all browser references for the browser to shut down cleanly. See the wxpython.py example > MainFrame.OnClose() for how to
+do it.
 
 
 ## Methods
