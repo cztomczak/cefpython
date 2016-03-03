@@ -1,4 +1,7 @@
+Core developers:
 Czarek Tomczak <czarek.tomczak@@gmail.com>
+
+Contributors:
 老农 cjjer <cjjer@@59490.com>
 Richard Rodriguez <rich770@@gmail.com>
 Roman Plášil <me@@rplasil.name>
