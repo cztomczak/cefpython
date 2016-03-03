@@ -1,5 +1,4 @@
-__Notes__:
-* Repository rewritten on 2016-02-15 to reduce its size.
+__Note__: Repository rewritten on 2016-02-15 to reduce its size.
   Please clone it again.
 
 
@@ -9,8 +8,8 @@ Table of contents:
 * [Introduction](#introduction)
 * [Compatibility](#compatibility)
 * [Downloads](#downloads)
-* [Documentation and help](#documentation-and-help)
-* [Support development](#support-development)
+* [Support](#support)
+* [Donate](#donate)
 
 
 ## Introduction
@@ -27,26 +26,29 @@ Some use cases for CEF:
 
 ## Compatibility
 
-* Supported Python versions: 2.7 (Python 3.4 will be supported soon, see [Issue #121](../../issues/121))
-* Supported platforms: Windows, Linux, Mac (both 32bit and 64bit binaries are available for all platforms)
+* Supported Python versions: 2.7. For Python 3.4 / 3.5 support see [Issue #121](../../issues/121).
+* Supported platforms: Windows, Linux, Mac. Both 32bit and 64bit binaries are available for all platforms.
 
 
 ## Downloads
+
+On Win/Mac you can install from PyPI using this command:
+`pip install cefpython3`.
 
 * For Windows: see the [Download_CEF3_Windows](../../wiki/Download_CEF3_Windows) wiki page.
 * For Linux: see the [Download_CEF3_Linux](../../wiki/Download_CEF3_Linux) wiki page.
 * For Mac: see the [Download_CEF3_Mac](../../wiki/Download_CEF3_Mac) wiki page.
 
 
-## Documentation and help
+## Support
 
-* See the [Help and search](../../wiki/Help-and-search) wiki page
-* Documentation and API is available on [Wiki Pages](../../wiki)
-* New up-to-date API docs are in the [api/](api/) directory.
-* Please do not use the Issue Tracker for asking questions. Use the
-  [Forum](https://groups.google.com/group/cefpython).
+* API docs are in the [api/](api/) directory
+* See [Wiki Pages](../../wiki)
+* Ask questions and report problems on the
+  [Forum](https://groups.google.com/group/cefpython)
+* Please do not ask questions in the Issue Tracker
 
 
-## Support development
+## Donate
 
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=95W9VHNSFWRUN"><img align="right" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif"></img></a> If you are interested in donating time to help with the CEF Python development please see the [Internal development](../../wiki/InternalDevelopment) wiki page. If you would like to support general CEF Python development efforts by making a donation see the [Donations](docs/Donations.md) page. At this time CEF Python is unable to accept donations that sponsor the development of specific features. If you are interested in sponsorship opportunities please contact Czarek directly.
+If you would like to support general CEF Python development efforts by making a donation see the [Donations](../../wiki/Donations) wiki page.
