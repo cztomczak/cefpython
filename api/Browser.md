@@ -122,9 +122,7 @@ information.
 | Parameter | Type |
 | --- | --- |
 | funcName | string |
-| param [ | [mixed |
-| param [ | mixed |
-|  | ..]]] |
+| [params..] | mixed |
 | __Return__ | void |
 
 Call javascript function asynchronously. This can also call object's methods, just pass "object.method" as `funcName`. Any valid javascript syntax is allowed as `funcName`, you could even pass an anonymous function here.
