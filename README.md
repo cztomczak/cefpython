@@ -1,8 +1,30 @@
-__Note__: Repository rewritten on 2016-02-15 to reduce its size.
-  Please clone it again.
-
-
 # CEF Python
+
+[![Python versions supported]
+(https://img.shields.io/badge/python-2.7-yellow.svg
+"Python versions supported")]
+(https://github.com/cztomczak/cefpython#cef-python)
+[![GitHub latest release]
+(https://img.shields.io/github/release/cztomczak/cefpython.svg
+"GitHub latest release")]
+(https://github.com/cztomczak/cefpython/releases/latest)
+[![PyPI latest release]
+(https://img.shields.io/pypi/v/cefpython3.svg "PyPI latest release")]
+(https://pypi.python.org/pypi/cefpython3/)
+[![Commits since v31.2 release]
+(https://img.shields.io/github/commits-since/cztomczak/cefpython/v31.2.svg
+"Commits since v31.2 release")]
+(https://github.com/cztomczak/cefpython/compare/v31.2...master)
+[![PyPI downloads per month]
+(https://img.shields.io/pypi/dm/rockstar.svg "PyPI downloads per month")]
+(https://pypi.python.org/pypi/cefpython3/)
+[![GitHub latest release downloads]
+(https://img.shields.io/github/downloads/cztomczak/cefpython/latest/total.svg
+"GitHub latest release downloads")]
+(https://github.com/cztomczak/cefpython/releases/latest)
+
+__NOTE__: Repository rewritten on 2016-02-15 to reduce its size.
+  Please clone it again.
 
 Table of contents:
 * [Introduction](#introduction)
