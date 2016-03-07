@@ -3,7 +3,7 @@
 [![](https://img.shields.io/badge/python-2.7-yellow.svg "Python versions supported")](https://github.com/cztomczak/cefpython#cef-python)
 [![](https://img.shields.io/badge/release-v31.2-orange.svg "GitHub latest release")](https://github.com/cztomczak/cefpython/releases/latest)
 [![](https://img.shields.io/badge/pypi-v31.2-blue.svg "PyPI latest release")](https://pypi.python.org/pypi/cefpython3/)
-[![](https://img.shields.io/badge/commits%20since-v31.2-lightgray.svg "Commits since v31.2 release")](https://github.com/cztomczak/cefpython/compare/v31.2...master)
+[![](https://img.shields.io/badge/commits%20since-v31.2-lightgray.svg "Commits since v31.2 release")](https://github.com/cztomczak/cefpython/compare/05366f2...master)
 
 __NOTE__: Repository rewritten on 2016-02-15 to reduce its size.
   Please clone it again.
