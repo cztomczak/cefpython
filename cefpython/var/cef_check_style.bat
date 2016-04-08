@@ -1,2 +1,0 @@
-cd C:\cef1_trunk\src\cef\tools\
-start check_style.bat --filter=-readability/todo,-runtime/references,-runtime/explicit,-whitespace/labels,-readability/casting,-runtime/sizeof,-runtime/int ../libcef/cef_process_ui_thread.cc ../include/internal/cef_types.h ../include/internal/cef_types_wrappers.h ../tests/cefclient/cefclient_switches.h ../tests/cefclient/cefclient_switches.cpp ../tests/cefclient/cefclient.cpp ../tests/unittests/test_suite.cc
