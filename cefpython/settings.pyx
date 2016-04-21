@@ -6,8 +6,7 @@
 # CefApp::OnBeforeCommandLineProcessing(), see comment 10 by Marshall:
 # https://code.google.com/p/chromiumembedded/issues/detail?id=878#c10
 
-IF CEF_VERSION == 3:
-    LOGSEVERITY_DEFAULT = cef_types.LOGSEVERITY_DEFAULT
+LOGSEVERITY_DEFAULT = cef_types.LOGSEVERITY_DEFAULT
 LOGSEVERITY_VERBOSE = cef_types.LOGSEVERITY_VERBOSE
 LOGSEVERITY_INFO = cef_types.LOGSEVERITY_INFO
 LOGSEVERITY_WARNING = cef_types.LOGSEVERITY_WARNING
@@ -15,12 +14,6 @@ LOGSEVERITY_ERROR = cef_types.LOGSEVERITY_ERROR
 LOGSEVERITY_ERROR_REPORT = cef_types.LOGSEVERITY_ERROR_REPORT
 LOGSEVERITY_DISABLE = cef_types.LOGSEVERITY_DISABLE
 
-IF UNAME_SYSNAME == "Windows":
-    IF CEF_VERSION == 1:
-        ANGLE_IN_PROCESS = <int>cef_types_win.ANGLE_IN_PROCESS
-        ANGLE_IN_PROCESS_COMMAND_BUFFER = <int>cef_types_win.ANGLE_IN_PROCESS_COMMAND_BUFFER
-        DESKTOP_IN_PROCESS = <int>cef_types_win.DESKTOP_IN_PROCESS
-        DESKTOP_IN_PROCESS_COMMAND_BUFFER = <int>cef_types_win.DESKTOP_IN_PROCESS_COMMAND_BUFFER
 
 cdef void SetApplicationSettings(
         dict appSettings,
@@ -33,145 +26,75 @@ cdef void SetApplicationSettings(
         # cefString = CefString(&cefSettings.user_agent)
         # cefString.FromASCII(<char*>settings[key])
 
-        # ---------------------------------------------------------------------
-        # CEF 1
-        # ---------------------------------------------------------------------
-        IF CEF_VERSION == 1:
-            if key == "string_encoding"\
-                    or key == "debug":
-                # CEF Python only options. These are not to be found in CEF.
-                continue
-            elif key == "multi_threaded_message_loop":
-                cefAppSettings.multi_threaded_message_loop = bool(appSettings[key])
-            elif key == "cache_path":
-                cefString = new CefString(&cefAppSettings.cache_path)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "user_agent":
-                cefString = new CefString(&cefAppSettings.user_agent)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "product_version":
-                cefString = new CefString(&cefAppSettings.product_version)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "log_file":
-                cefString = new CefString(&cefAppSettings.log_file)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "locale":
-                cefString = new CefString(&cefAppSettings.locale)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "log_severity":
-                cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
-            elif key == "release_dcheck_enabled":
-                cefAppSettings.release_dcheck_enabled = bool(appSettings[key])
-            elif key == "graphics_implementation" and platform.system() == "Windows":
-                # Cython compiler error: cef_types_win not defined on linux
-                IF UNAME_SYSNAME == "Windows":
-                    cefAppSettings.graphics_implementation = <cef_types_win.cef_graphics_implementation_t?><int>int(appSettings[key])
-            elif key == "local_storage_quota":
-                cefAppSettings.local_storage_quota = <int>int(appSettings[key])
-            elif key == "session_storage_quota":
-                cefAppSettings.session_storage_quota = <int>int(appSettings[key])
-            elif key == "javascript_flags":
-                cefString = new CefString(&cefAppSettings.javascript_flags)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "auto_detect_proxy_settings_enabled":
-                IF UNAME_SYSNAME == "Windows":
-                    cefAppSettings.auto_detect_proxy_settings_enabled = bool(appSettings[key])
-                ELSE:
-                    raise Exception("auto_detect_proxy_settings_enabled is a Windows-only option")
-            elif key == "resources_dir_path":
-                cefString = new CefString(&cefAppSettings.resources_dir_path)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "locales_dir_path":
-                cefString = new CefString(&cefAppSettings.locales_dir_path)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "pack_loading_disabled":
-                cefAppSettings.pack_loading_disabled = bool(appSettings[key])
-            elif key == "uncaught_exception_stack_size":
-                cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
-            else:
-                raise Exception("Invalid appSettings key: %s" % key)
-
-        # ---------------------------------------------------------------------
-        # CEF 3
-        # ---------------------------------------------------------------------
-        ELIF CEF_VERSION == 3:
-            if key == "string_encoding"\
-                    or key == "debug"\
-                    or key == "unique_request_context_per_browser"\
-                    or key == "downloads_enabled"\
-                    or key == "context_menu" \
-                    or key == "auto_zooming":
-                # CEF Python only options. These are not to be found in CEF.
-                continue
-            elif key == "multi_threaded_message_loop":
-                cefAppSettings.multi_threaded_message_loop = bool(appSettings[key])
-            elif key == "cache_path":
-                cefString = new CefString(&cefAppSettings.cache_path)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "persist_session_cookies":
-                cefAppSettings.persist_session_cookies = bool(appSettings[key])
-            elif key == "user_agent":
-                cefString = new CefString(&cefAppSettings.user_agent)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "product_version":
-                cefString = new CefString(&cefAppSettings.product_version)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "log_file":
-                cefString = new CefString(&cefAppSettings.log_file)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "locale":
-                cefString = new CefString(&cefAppSettings.locale)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "log_severity":
-                cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
-            elif key == "release_dcheck_enabled":
-                cefAppSettings.release_dcheck_enabled = bool(appSettings[key])
-            elif key == "javascript_flags":
-                cefString = new CefString(&cefAppSettings.javascript_flags)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "resources_dir_path":
-                cefString = new CefString(&cefAppSettings.resources_dir_path)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "locales_dir_path":
-                cefString = new CefString(&cefAppSettings.locales_dir_path)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "pack_loading_disabled":
-                cefAppSettings.pack_loading_disabled = bool(appSettings[key])
-            elif key == "uncaught_exception_stack_size":
-                cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
-            elif key == "single_process":
-                cefAppSettings.single_process = bool(appSettings[key])
-            elif key == "browser_subprocess_path":
-                cefString = new CefString(&cefAppSettings.browser_subprocess_path)
-                PyToCefStringPointer(appSettings[key], cefString)
-                del cefString
-            elif key == "command_line_args_disabled":
-                cefAppSettings.command_line_args_disabled = bool(appSettings[key])
-            elif key == "remote_debugging_port":
-                cefAppSettings.remote_debugging_port = int(appSettings[key])
-            elif key == "ignore_certificate_errors":
-                cefAppSettings.ignore_certificate_errors = bool(appSettings[key])
-            elif key == "background_color":
-                cefAppSettings.background_color = \
-                        <cef_types.uint32>int(appSettings[key])
-            else:
-                raise Exception("Invalid appSettings key: %s" % key)
+        if key == "string_encoding"\
+                or key == "debug"\
+                or key == "unique_request_context_per_browser"\
+                or key == "downloads_enabled"\
+                or key == "context_menu" \
+                or key == "auto_zooming":
+            # CEF Python only options. These are not to be found in CEF.
+            continue
+        elif key == "multi_threaded_message_loop":
+            cefAppSettings.multi_threaded_message_loop = bool(appSettings[key])
+        elif key == "cache_path":
+            cefString = new CefString(&cefAppSettings.cache_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "persist_session_cookies":
+            cefAppSettings.persist_session_cookies = bool(appSettings[key])
+        elif key == "user_agent":
+            cefString = new CefString(&cefAppSettings.user_agent)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "product_version":
+            cefString = new CefString(&cefAppSettings.product_version)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "log_file":
+            cefString = new CefString(&cefAppSettings.log_file)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "locale":
+            cefString = new CefString(&cefAppSettings.locale)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "log_severity":
+            cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
+        elif key == "release_dcheck_enabled":
+            cefAppSettings.release_dcheck_enabled = bool(appSettings[key])
+        elif key == "javascript_flags":
+            cefString = new CefString(&cefAppSettings.javascript_flags)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "resources_dir_path":
+            cefString = new CefString(&cefAppSettings.resources_dir_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "locales_dir_path":
+            cefString = new CefString(&cefAppSettings.locales_dir_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "pack_loading_disabled":
+            cefAppSettings.pack_loading_disabled = bool(appSettings[key])
+        elif key == "uncaught_exception_stack_size":
+            cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
+        elif key == "single_process":
+            cefAppSettings.single_process = bool(appSettings[key])
+        elif key == "browser_subprocess_path":
+            cefString = new CefString(&cefAppSettings.browser_subprocess_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "command_line_args_disabled":
+            cefAppSettings.command_line_args_disabled = bool(appSettings[key])
+        elif key == "remote_debugging_port":
+            cefAppSettings.remote_debugging_port = int(appSettings[key])
+        elif key == "ignore_certificate_errors":
+            cefAppSettings.ignore_certificate_errors = bool(appSettings[key])
+        elif key == "background_color":
+            cefAppSettings.background_color = \
+                    <cef_types.uint32>int(appSettings[key])
+        else:
+            raise Exception("Invalid appSettings key: %s" % key)
 
 cdef void SetBrowserSettings(
         dict browserSettings,

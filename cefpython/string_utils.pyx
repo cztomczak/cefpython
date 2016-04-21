@@ -2,20 +2,26 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-# TODO: cleanup the code in string_utils.pyx and string_utils_win.pyx,
-#       see this topic for a review of the code in this file, see the
-#       posts by Stefan Behnel:
-#       https://groups.google.com/d/topic/cython-users/VICzhVn-zPw/discussion
+# In Python 2 all cefpython strings are byte strings, but in Python 3
+# all cefpython strings are unicode. Unicode issues were discussed
+# in Issue #60: https://github.com/cztomczak/cefpython/issues/60
 
-# TODO: make this configurable through ApplicationSettings.
-UNICODE_ENCODE_ERRORS = "replace"
-BYTES_DECODE_ERRORS = "replace"
+# Unicode issues were discussed on cython-users, see posts by Stefan
+# Behnel: https://groups.google.com/d/topic/cython-users/VICzhVn-zPw/discussion
+
+# See the "basestring" comment in imports.pyx > py_string.
+# Note that bytes != str != unicode != basestring in Cython
 
 # Any bytes/unicode encoding and decoding in cefpython should
 # be performed only using functions from this file - let's
 # keep it in one place for future fixes - see Issue 60 ("Strings
 # should be unicode by default, if bytes is required make it
 # explicit").
+
+# TODO: make this configurable through ApplicationSettings.
+UNICODE_ENCODE_ERRORS = "replace"
+BYTES_DECODE_ERRORS = "replace"
+
 
 cdef py_string AnyToPyString(object value):
     cdef object valueType = type(value)
@@ -36,6 +42,8 @@ cdef py_string CharToPyString(
                 g_applicationSettings["string_encoding"],
                 errors=BYTES_DECODE_ERRORS))
 
+# Not used anywhere so commented out.
+# ---
 # cdef py_string CppToPyString(
 #         cpp_string cppString):
 #     if PY_MAJOR_VERSION < 3:
@@ -44,10 +52,15 @@ cdef py_string CharToPyString(
 #         return <unicode>((<bytes>cppString).decode(
 #                 g_applicationSettings["string_encoding"],
 #                 errors=BYTES_DECODE_ERRORS))
+# ---
 
+# No need for this function as you can do it in one line.
+# Stays here just for the info on how to do it.
+# ---
 # cdef cpp_string PyToCppString(py_string pyString) except *:
 #     cdef cpp_string cppString = pyString
 #     return cppString
+# ---
 
 cdef py_string CefToPyString(
         ConstCefString& cefString):

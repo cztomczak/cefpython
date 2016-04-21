@@ -312,11 +312,6 @@ cdef class PyBrowser:
     cpdef py_bool CanGoForward(self):
         return self.GetCefBrowser().get().CanGoForward()
 
-    IF CEF_VERSION == 1:
-
-        cpdef object ClearHistory(self):
-            self.GetCefBrowser().get().ClearHistory()
-
     cpdef py_void ParentWindowWillClose(self):
         IF CEF_VERSION == 1:
             self.GetCefBrowser().get().ParentWindowWillClose()

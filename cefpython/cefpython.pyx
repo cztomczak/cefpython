@@ -89,6 +89,12 @@
 # - Always import bool from libcpp as cpp_bool, if you import it as
 #   "bool" in a pxd file, then Cython will complain about bool casts
 #   like "bool(1)" being invalid, in pyx files.
+#
+# - malloc example code:
+#   from libc.stdlib cimport malloc, free
+#   cdef RECT* rect = <RECT*>malloc(sizeof(RECT))
+#   free(rect)
+#
 
 # All .pyx files need to be included in this file.
 # Includes being made in other .pyx files are allowed to help
