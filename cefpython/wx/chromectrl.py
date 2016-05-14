@@ -67,13 +67,13 @@ class NavigationBar(wx.Panel):
 
     def _InitComponents(self):
         self.backBtn = buttons.GenBitmapButton(self, -1,
-                wx.Bitmap(os.path.join(self.bitmapDir, "Arrow Left.png"),
+                wx.Bitmap(os.path.join(self.bitmapDir, "back.png"),
                           wx.BITMAP_TYPE_PNG), style=wx.BORDER_NONE)
         self.forwardBtn = buttons.GenBitmapButton(self, -1,
-                wx.Bitmap(os.path.join(self.bitmapDir, "Arrow Right.png"),
+                wx.Bitmap(os.path.join(self.bitmapDir, "forward.png"),
                           wx.BITMAP_TYPE_PNG), style=wx.BORDER_NONE)
         self.reloadBtn = buttons.GenBitmapButton(self, -1,
-                wx.Bitmap(os.path.join(self.bitmapDir, "Button Load.png"),
+                wx.Bitmap(os.path.join(self.bitmapDir, "reload_page.png"),
                           wx.BITMAP_TYPE_PNG), style=wx.BORDER_NONE)
 
         self.url = wx.TextCtrl(self, id=-1, style=0)
