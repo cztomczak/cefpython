@@ -140,8 +140,8 @@ def main():
     ret = os.system("mv "+package_dir+"/*.css "+package_dir+"/examples/")
     assert ret == 0
 
-    print("Copying wx-subpackage to wx dir in package dir")
-    wx_subpackage_dir = os.path.abspath(installer_dir+"/../../wx-subpackage/")
+    print("Copying wx/ to package dir")
+    wx_subpackage_dir = os.path.abspath(installer_dir+"/../../wx/")
     ret = os.system("cp -rf "+wx_subpackage_dir+"/* "+package_dir+"/wx/")
     assert ret == 0
 

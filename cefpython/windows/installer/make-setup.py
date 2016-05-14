@@ -151,8 +151,8 @@ def main():
     glob_move(package_dir+"/*.css", package_dir+"/examples/")
     glob_move(package_dir+"/*.js", package_dir+"/examples/")
 
-    print("Copying wx-subpackage to wx dir in package dir")
-    wx_subpackage_dir = os.path.abspath(installer_dir+"/../../wx-subpackage/")
+    print("Copying wx/ to package dir")
+    wx_subpackage_dir = os.path.abspath(installer_dir+"/../../wx/")
     glob_copy(wx_subpackage_dir+"/*", package_dir+"/wx/")
 
     print("Moving wx examples from wx/examples to examples/wx")

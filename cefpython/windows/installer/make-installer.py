@@ -43,8 +43,7 @@ def main():
             + str(sys.version_info.major) + str(sys.version_info.minor)
             + ".pyd")
     vars["INSTALLER_DIR"] = os.getcwd()
-    vars["WX_SUBPACKAGE_DIR"] = os.path.realpath(os.getcwd()+r"\..\.."
-            "\wx-subpackage")
+    vars["WX_SUBPACKAGE_DIR"] = os.path.realpath(os.getcwd()+r"\..\..\wx")
     vars["PLATFORM"] = sysconfig.get_platform()
 
     if BITS == "32bit":

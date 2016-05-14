@@ -15,7 +15,7 @@ pip install --upgrade cefpython3 --no-index --find-links=file://$cwd
 if [ $? -ne 0 ]; then echo "ERROR: pip install cefpython3..." && exit 1; fi;
 cd ../
 
-cd ../../wx-subpackage/examples/
+cd ../../wx/examples/
 
 python sample1.py
 #if [ $? -ne 0 ]; then echo "ERROR: python sample1.py" && exit 1; fi;
