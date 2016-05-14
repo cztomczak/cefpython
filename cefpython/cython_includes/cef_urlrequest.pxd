@@ -5,8 +5,8 @@
 from cef_base cimport CefBase
 from cef_ptr cimport CefRefPtr
 cimport cef_types
-from cef_request_cef3 cimport CefRequest
-from cef_response_cef3 cimport CefResponse
+from cef_request cimport CefRequest
+from cef_response cimport CefResponse
 
 cdef extern from "include/cef_urlrequest.h":
     cdef CefRefPtr[CefURLRequest] CefURLRequest_Create \

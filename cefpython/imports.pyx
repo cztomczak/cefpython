@@ -128,47 +128,25 @@ ELIF UNAME_SYSNAME == "Linux":
 
 from cef_time cimport *
 
-IF CEF_VERSION == 1:
-    from cef_v8 cimport *
-    cimport cef_v8_static
-    cimport cef_v8_stack_trace
-    from v8function_handler cimport *
-    from cef_request_cef1 cimport *
-    from cef_web_urlrequest_cef1 cimport *
-    cimport cef_web_urlrequest_static_cef1
-    from web_request_client_cef1 cimport *
-    from cef_response_cef1 cimport *
-    from cef_download_handler cimport *
-    from download_handler cimport *
-    from cef_cookie_cef1 cimport *
-    cimport cef_cookie_manager_namespace
-    from cookie_visitor cimport *
-    from cef_render_handler cimport *
-
-IF UNAME_SYSNAME == "Windows":
-    IF CEF_VERSION == 1:
-        from http_authentication cimport *
-
-IF CEF_VERSION == 3:
-    from cef_values cimport *
-    from cefpython_app cimport *
-    from cef_process_message cimport *
-    from cef_web_plugin_cef3 cimport *
-    from cef_request_handler_cef3 cimport *
-    from cef_request_cef3 cimport *
-    from cef_cookie_cef3 cimport *
-    from cef_string_visitor cimport *
-    cimport cef_cookie_manager_namespace
-    from cookie_visitor cimport *
-    from string_visitor cimport *
-    from cef_callback_cef3 cimport *
-    from cef_response_cef3 cimport *
-    from cef_resource_handler_cef3 cimport *
-    from resource_handler_cef3 cimport *
-    from cef_urlrequest_cef3 cimport *
-    from web_request_client_cef3 cimport *
-    from cef_command_line cimport *
-    from cef_request_context cimport *
-    from cef_request_context_handler cimport *
-    from request_context_handler cimport *
-    from cef_jsdialog_handler cimport *
+from cef_values cimport *
+from cefpython_app cimport *
+from cef_process_message cimport *
+from cef_web_plugin cimport *
+from cef_request_handler cimport *
+from cef_request cimport *
+from cef_cookie cimport *
+from cef_string_visitor cimport *
+cimport cef_cookie_manager_namespace
+from cookie_visitor cimport *
+from string_visitor cimport *
+from cef_callback cimport *
+from cef_response cimport *
+from cef_resource_handler cimport *
+from resource_handler cimport *
+from cef_urlrequest cimport *
+from web_request_client cimport *
+from cef_command_line cimport *
+from cef_request_context cimport *
+from cef_request_context_handler cimport *
+from request_context_handler cimport *
+from cef_jsdialog_handler cimport *

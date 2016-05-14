@@ -7,10 +7,7 @@ include "compile_time_constants.pxi"
 from cef_ptr cimport CefRefPtr
 from cef_task cimport CefTask
 from cef_string cimport CefString
-IF CEF_VERSION == 1:
-    from cef_cookie_cef1 cimport CefCookie, CefCookieManager
-ELIF CEF_VERSION == 3:
-    from cef_cookie_cef3 cimport CefCookie, CefCookieManager
+from cef_cookie cimport CefCookie, CefCookieManager
 from libcpp cimport bool as cpp_bool
 
 cdef extern from "include/cef_runnable.h":
