@@ -57,7 +57,7 @@ def ExceptAllMissing(content):
 print("\n")
 mainfile = "cefpython.pyx"
 
-pyxfiles = glob.glob("../../../*.pyx")
+pyxfiles = glob.glob("../../*.pyx")
 if not len(pyxfiles):
     sys.exit(1)
 pyxfiles = [file for file in pyxfiles if file.find(mainfile) == -1]
@@ -79,7 +79,7 @@ for pyxfile in oldpyxfiles:
 # Copying pyxfiles and reading its contents.
 
 print("Copying .pyx files to /setup/: %s" % pyxfiles)
-shutil.copy("../../../%s" % mainfile, "./%s" % mainfile)
+shutil.copy("../../%s" % mainfile, "./%s" % mainfile)
 # Rest of the files will be copied in for loop below.
 
 print("Fixing includes in .pyx files:")

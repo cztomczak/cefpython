@@ -52,7 +52,7 @@ print("Compiling C++ projects")
 # fails and then run the compile.py script again and this time
 # make should succeed.
 
-os.chdir("./../../cpp_utils/")
+os.chdir("./../cpp_utils/")
 subprocess.call("rm -f *.o *.a", shell=True)
 
 ret = subprocess.call("make -f Makefile", shell=True)
@@ -89,13 +89,6 @@ subprocess_exe = "./../linux/binaries_%s/subprocess" % (BITS)
 if os.path.exists("./subprocess"):
     # .copy() will also copy Permission bits
     shutil.copy("./subprocess", subprocess_exe)
-
-# os.chdir("./../v8function_handler/")
-# ret = subprocess.call("make -f Makefile", shell=True)
-# if ret != 0:
-#     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
-#     if what != "y":
-#         sys.exit(1)
 
 os.chdir("./../linux/")
 

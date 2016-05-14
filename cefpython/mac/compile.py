@@ -70,7 +70,7 @@ print("Compiling C++ projects")
 # fails and then run the compile.py script again and this time
 # make should succeed.
 
-os.chdir("./../../cpp_utils/")
+os.chdir("./../cpp_utils/")
 subprocess.call("rm -f *.o *.a", shell=True)
 
 ret = subprocess.call("make -f Makefile", shell=True)
