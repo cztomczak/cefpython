@@ -19,7 +19,6 @@ cdef extern from "include/internal/cef_linux.h":
         void SetTransparentPainting(cpp_bool)
         void SetAsOffScreen(CefWindowHandle)
 
-    IF CEF_VERSION == 3:
-        cdef cppclass CefMainArgs(CefStructBase):
-            CefMainArgs()
-            CefMainArgs(int argc_arg, char** argv_arg)
+    cdef cppclass CefMainArgs(CefStructBase):
+        CefMainArgs()
+        CefMainArgs(int argc_arg, char** argv_arg)

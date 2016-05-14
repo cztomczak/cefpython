@@ -12,32 +12,24 @@ from cef_ptr cimport CefRefPtr
 from cef_base cimport CefBase
 from libcpp cimport bool as cpp_bool
 
-IF CEF_VERSION == 3:
-    IF UNAME_SYSNAME == "Windows":
-        from cef_win cimport CefMainArgs
-    ELIF UNAME_SYSNAME == "Linux":
-        from cef_linux cimport CefMainArgs
-    ELIF UNAME_SYSNAME == "Darwin":
-        from cef_mac cimport CefMainArgs
+IF UNAME_SYSNAME == "Windows":
+    from cef_win cimport CefMainArgs
+ELIF UNAME_SYSNAME == "Linux":
+    from cef_linux cimport CefMainArgs
+ELIF UNAME_SYSNAME == "Darwin":
+    from cef_mac cimport CefMainArgs
 
 cdef extern from "include/cef_app.h":
 
     cdef cppclass CefApp(CefBase):
         pass
 
-    IF CEF_VERSION == 3:
-        cdef int CefExecuteProcess(CefMainArgs& args, CefRefPtr[CefApp] application) nogil
+    cdef int CefExecuteProcess(CefMainArgs& args, CefRefPtr[CefApp] application) nogil
 
-    IF CEF_VERSION == 1:
-        cdef cpp_bool CefInitialize(CefSettings&, CefRefPtr[CefApp]) nogil
-    ELIF CEF_VERSION == 3:
-        cdef cpp_bool CefInitialize(CefMainArgs&, CefSettings&, CefRefPtr[CefApp]) nogil
+    cdef cpp_bool CefInitialize(CefMainArgs&, CefSettings&, CefRefPtr[CefApp]) nogil
 
     cdef void CefRunMessageLoop() nogil
     cdef void CefDoMessageLoopWork() nogil
     cdef void CefQuitMessageLoop() nogil
     cdef void CefShutdown() nogil
-
-    IF CEF_VERSION == 3:
-        cdef void CefSetOSModalLoop(cpp_bool osModalLoop) nogil
-
+    cdef void CefSetOSModalLoop(cpp_bool osModalLoop) nogil

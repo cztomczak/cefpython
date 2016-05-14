@@ -128,7 +128,6 @@
   * [GetModuleDirectory](cefpython.md#getmoduledirectory)
   * [Initialize](cefpython.md#initialize)
   * [IsThread](cefpython.md#isthread)
-  * [IsKeyModifier](cefpython.md#iskeymodifier)
   * [MessageLoop](cefpython.md#messageloop)
   * [MessageLoopWork](cefpython.md#messageloopwork)
   * [PostTask](cefpython.md#posttask)

@@ -80,78 +80,36 @@ cdef class JavascriptBindings:
         else:
             self.properties[name] = value
 
-
-    IF CEF_VERSION == 1:
-        cpdef py_void Rebind(self):
-            # Rebind may also be used for first-time bindings, in
-            # a case when v8 process/thread was created too fast,
-            # see Browser.SetJavascriptBindings() that checks whether
-            # OnContextCreated() event already happened, if so it will
-            # call Rebind() to do the javascript bindings.
-            assert IsThread(TID_UI), (
-                    "JavascriptBindings.Rebind() may only be called on UI thread")
-            cdef CefRefPtr[CefBrowser] cefBrowser
-            cdef CefRefPtr[CefFrame] cefFrame
-            cdef CefRefPtr[CefV8Context] v8Context
-            cdef cpp_bool sameContext
-            cdef PyBrowser pyBrowser
-            cdef PyFrame pyFrame
-            cdef list frames
-            global g_pyBrowsers
-            for pyBrowser in g_pyBrowsers:
-                # These javascript bindings may have been binded
-                # to many browsers.
-                if pyBrowser.GetJavascriptBindings() != self:
-                    continue
-                if self.bindToFrames:
-                    frames = pyBrowser.GetFrames()
-                else:
-                    frames = [pyBrowser.GetMainFrame()]
-                for frameId in self.frames:
-                    pyBrowser = self.frames[frameId][0]
-                    pyFrame = self.frames[frameId][1]
-                    cefBrowser = pyBrowser.GetCefBrowser()
-                    cefFrame = pyFrame.GetCefFrame()
-                    v8Context = cefFrame.get().GetV8Context()
-                    sameContext = v8Context.get().IsSame(cef_v8_static.GetCurrentContext())
-                    if not sameContext:
-                        Debug("JavascriptBindings.Rebind(): inside a different context, calling v8Context.Enter()")
-                        assert v8Context.get().Enter(), "v8Context.Enter() failed"
-                    V8ContextHandler_OnContextCreated(cefBrowser, cefFrame, v8Context)
-                    if not sameContext:
-                        assert v8Context.get().Exit(), "v8Context.Exit() failed"
-    ELIF CEF_VERSION == 3:
-        cpdef py_void Rebind(self):
-            # In CEF Python 3 due to its multi-process architecture
-            # Rebind() is used for both first-time binding and rebinding.
-            cdef PyBrowser pyBrowser
-            cdef dict functions
-            cdef dict properties
-            cdef dict objects
-            cdef dict methods
-            global g_pyBrowsers
-            for browserId, pyBrowser in g_pyBrowsers.iteritems():
-                if pyBrowser.GetJavascriptBindings() != self:
-                    continue
-                # Send to the Renderer process: functions, properties,
-                # objects and its methods, bindToFrames.
-                functions = {}
-                for funcName in self.functions:
-                    functions[funcName] = None
-                properties = self.properties
-                objects = {}
-                for objectName in self.objects:
-                    methods = {}
-                    for methodName in self.objects[objectName]:
-                        methods[methodName] = None
-                    objects[objectName] = methods
-                pyBrowser.SendProcessMessage(cef_types.PID_RENDERER,
-                        0, "DoJavascriptBindings", [{
-                                "functions": functions,
-                                "properties": properties,
-                                "objects": objects,
-                                "bindToFrames": self.bindToFrames
-                                }])
+    cpdef py_void Rebind(self):
+        # Rebind() is called for both first-time binding and rebinding.
+        cdef PyBrowser pyBrowser
+        cdef dict functions
+        cdef dict properties
+        cdef dict objects
+        cdef dict methods
+        global g_pyBrowsers
+        for browserId, pyBrowser in g_pyBrowsers.iteritems():
+            if pyBrowser.GetJavascriptBindings() != self:
+                continue
+            # Send to the Renderer process: functions, properties,
+            # objects and its methods, bindToFrames.
+            functions = {}
+            for funcName in self.functions:
+                functions[funcName] = None
+            properties = self.properties
+            objects = {}
+            for objectName in self.objects:
+                methods = {}
+                for methodName in self.objects[objectName]:
+                    methods[methodName] = None
+                objects[objectName] = methods
+            pyBrowser.SendProcessMessage(cef_types.PID_RENDERER,
+                    0, "DoJavascriptBindings", [{
+                            "functions": functions,
+                            "properties": properties,
+                            "objects": objects,
+                            "bindToFrames": self.bindToFrames
+                            }])
 
     cpdef dict GetProperties(self):
         return self.properties

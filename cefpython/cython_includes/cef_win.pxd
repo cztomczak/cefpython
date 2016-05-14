@@ -20,9 +20,8 @@ cdef extern from "include/internal/cef_win.h":
         void SetTransparentPainting(int)
         void SetAsOffScreen(HWND)
 
-    IF CEF_VERSION == 3:
-        cdef cppclass CefMainArgs(CefStructBase):
-            CefMainArgs()
-            CefMainArgs(HINSTANCE hInstance)
+    cdef cppclass CefMainArgs(CefStructBase):
+        CefMainArgs()
+        CefMainArgs(HINSTANCE hInstance)
 
     ctypedef _cef_key_info_t CefKeyInfo

@@ -16,7 +16,6 @@ Table of contents:
   * [GetModuleDirectory](#getmoduledirectory)
   * [Initialize](#initialize)
   * [IsThread](#isthread)
-  * [IsKeyModifier](#iskeymodifier)
   * [MessageLoop](#messageloop)
   * [MessageLoopWork](#messageloopwork)
   * [PostTask](#posttask)
@@ -136,17 +135,6 @@ List of threads in the Browser process. These are constants defined in the cefpy
 
 List of threads in the Renderer process:
 * TID_RENDERER: The main thread in the renderer. Used for all webkit and V8 interaction.
-
-
-### IsKeyModifier
-
-| Parameter | Type |
-| --- | --- |
-| key | int |
-| modifiers | int |
-| __Return__ | bool |
-
-For use with [KeyboardHandler](KeyboardHandler.md) to check whether ALT, SHIFT or CTRL are pressed.
 
 
 ### MessageLoop

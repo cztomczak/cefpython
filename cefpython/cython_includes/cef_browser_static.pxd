@@ -18,25 +18,12 @@ from cef_browser cimport CefBrowser
 from libcpp cimport bool as cpp_bool
 from cef_string cimport CefString
 
-IF CEF_VERSION == 1:
+# Specifying namespace allows to import a static method.
+cdef extern from "include/cef_browser.h" namespace "CefBrowserHost":
 
-    # Specifying namespace allows to import a static method.
-    cdef extern from "include/cef_browser.h" namespace "CefBrowser":
-
-        cdef CefRefPtr[CefBrowser] CreateBrowserSync(
-            CefWindowInfo&,
-            CefRefPtr[CefClient],
-            CefString&,
-            CefBrowserSettings&) nogil
-
-ELIF CEF_VERSION == 3:
-
-    # Specifying namespace allows to import a static method.
-    cdef extern from "include/cef_browser.h" namespace "CefBrowserHost":
-
-        cdef CefRefPtr[CefBrowser] CreateBrowserSync(
-            CefWindowInfo&,
-            CefRefPtr[CefClient],
-            CefString&,
-            CefBrowserSettings&,
-            CefRefPtr[CefRequestContext]) nogil
+    cdef CefRefPtr[CefBrowser] CreateBrowserSync(
+        CefWindowInfo&,
+        CefRefPtr[CefClient],
+        CefString&,
+        CefBrowserSettings&,
+        CefRefPtr[CefRequestContext]) nogil

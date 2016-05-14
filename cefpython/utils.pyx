@@ -96,15 +96,6 @@ cpdef str GetNavigateUrl(py_string url):
 
     return str(url)
 
-IF CEF_VERSION == 1:
-    cpdef py_bool IsKeyModifier(int key, int modifiers):
-        if key == KEY_NONE:
-            # Same as: return (KEY_CTRL & modifiers) != KEY_CTRL
-            # and (KEY_ALT & modifiers) != KEY_ALT
-            # and (KEY_SHIFT & modifiers) != KEY_SHIFT
-            return ((KEY_SHIFT  | KEY_CTRL | KEY_ALT) & modifiers) == 0
-        return (key & modifiers) == key
-
 cpdef str GetModuleDirectory():
     import re, os, platform
     if platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):

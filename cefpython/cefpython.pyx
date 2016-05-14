@@ -137,15 +137,10 @@ include "browser.pyx"
 include "frame.pyx"
 
 include "settings.pyx"
-IF UNAME_SYSNAME == "Windows" and CEF_VERSION == 1:
-    # Off-screen rendering currently supported only on Windows
-    include "paint_buffer_cef1.pyx"
 
 IF UNAME_SYSNAME == "Windows":
     include "window_utils_win.pyx"
     include "dpi_aware_win.pyx"
-    IF CEF_VERSION == 1:
-        include "http_authentication_win.pyx"
 ELIF UNAME_SYSNAME == "Linux":
     include "window_utils_linux.pyx"
 ELIF UNAME_SYSNAME == "Darwin":
@@ -302,29 +297,27 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
     # CEF options - default values.
     if not "multi_threaded_message_loop" in applicationSettings:
         applicationSettings["multi_threaded_message_loop"] = False
-    IF CEF_VERSION == 3:
-        if not "single_process" in applicationSettings:
-            applicationSettings["single_process"] = False
+    if not "single_process" in applicationSettings:
+        applicationSettings["single_process"] = False
 
     cdef CefRefPtr[CefApp] cefApp
 
-    IF CEF_VERSION == 3:
-        cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
-        IF UNAME_SYSNAME == "Windows":
-            cdef HINSTANCE hInstance = GetModuleHandle(NULL)
-            cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
-        ELIF UNAME_SYSNAME == "Linux":
-            # TODO: use the CefMainArgs(int argc, char** argv) constructor.
-            cdef CefMainArgs cefMainArgs
-        ELIF UNAME_SYSNAME == "Darwin":
-            # TODO: use the CefMainArgs(int argc, char** argv) constructor.
-            cdef CefMainArgs cefMainArgs
-        cdef int exitCode = 1
-        with nogil:
-            exitCode = CefExecuteProcess(cefMainArgs, cefApp)
-        Debug("CefExecuteProcess(): exitCode = %s" % exitCode)
-        if exitCode >= 0:
-            sys.exit(exitCode)
+    cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
+    IF UNAME_SYSNAME == "Windows":
+        cdef HINSTANCE hInstance = GetModuleHandle(NULL)
+        cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
+    ELIF UNAME_SYSNAME == "Linux":
+        # TODO: use the CefMainArgs(int argc, char** argv) constructor.
+        cdef CefMainArgs cefMainArgs
+    ELIF UNAME_SYSNAME == "Darwin":
+        # TODO: use the CefMainArgs(int argc, char** argv) constructor.
+        cdef CefMainArgs cefMainArgs
+    cdef int exitCode = 1
+    with nogil:
+        exitCode = CefExecuteProcess(cefMainArgs, cefApp)
+    Debug("CefExecuteProcess(): exitCode = %s" % exitCode)
+    if exitCode >= 0:
+        sys.exit(exitCode)
 
     # Make a copy as applicationSettings is a reference only
     # that might get destroyed later.
@@ -345,12 +338,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
 
     Debug("CefInitialize()")
     cdef cpp_bool ret
-    IF CEF_VERSION == 1:
-        with nogil:
-            ret = CefInitialize(cefApplicationSettings, cefApp)
-    ELIF CEF_VERSION == 3:
-        with nogil:
-            ret = CefInitialize(cefMainArgs, cefApplicationSettings, cefApp)
+    with nogil:
+        ret = CefInitialize(cefMainArgs, cefApplicationSettings, cefApp)
 
     if not ret:
         Debug("CefInitialize() failed")
@@ -420,13 +409,6 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateUrl, requestContext=N
 
     cdef PyBrowser pyBrowser = GetPyBrowser(cefBrowser)
     pyBrowser.SetUserData("__outerWindowHandle", int(windowInfo.parentWindowHandle))
-
-    # IF CEF_VERSION == 3:
-        # Test whether process message sent before renderer thread is created
-        # will be delivered - OK.
-        # Debug("Sending 'CreateBrowserSync() done' message to the Renderer")
-        # pyBrowser.SendProcessMessage(cef_types.PID_RENDERER,
-        #        "CreateBrowserSync() done")
 
     return pyBrowser
 
