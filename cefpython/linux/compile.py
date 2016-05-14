@@ -38,28 +38,10 @@ print("VERSION=%s"%VERSION)
 
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
-PYTHON_CMD = "python"
-if sys.maxint == 2147483647:
-    BITS = "32bit"
-    PYTHON_CMD = "arch -i386 python"
-
-if BITS == "32bit":
-    if "i386" not in os.getenv("ARCHFLAGS", ""):
-        raise Exception("Detected Python 32bit, but ARCHFLAGS is not i386")
-    if "i386" not in os.getenv("CEF_CCFLAGS", ""):
-        raise Exception("Detected Python 32bit, but CEF_CCFLAGS is not i386")
-elif BITS == "64bit":
-    if "x86_64" not in os.getenv("ARCHFLAGS", ""):
-        raise Exception("Detected Python 64bit, but ARCHFLAGS is not x86_64")
-    if "x86_64" not in os.getenv("CEF_CCFLAGS", ""):
-        raise Exception("Detected Python 64bit, but CEF_CCFLAGS is not x86_64")
 
 PYVERSION = str(sys.version_info[0])+str(sys.version_info[1])
 print("PYVERSION = %s" % PYVERSION)
 print("BITS = %s" % BITS)
-
-os.environ["CC"] = "gcc"
-os.environ["CXX"] = "g++"
 
 print("Compiling C++ projects")
 
@@ -79,7 +61,7 @@ if ret != 0:
     if what != "y":
         sys.exit(1)
 
-os.chdir("./../cef3/client_handler/")
+os.chdir("./../client_handler/")
 subprocess.call("rm -f *.o *.a", shell=True)
 
 ret = subprocess.call("make -f Makefile", shell=True)
@@ -103,7 +85,7 @@ if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
         sys.exit(1)
-subprocess_exe = "./../mac/binaries_%s/subprocess" % (BITS)
+subprocess_exe = "./../linux/binaries_%s/subprocess" % (BITS)
 if os.path.exists("./subprocess"):
     # .copy() will also copy Permission bits
     shutil.copy("./subprocess", subprocess_exe)
@@ -115,7 +97,7 @@ if os.path.exists("./subprocess"):
 #     if what != "y":
 #         sys.exit(1)
 
-os.chdir("./../mac/")
+os.chdir("./../linux/")
 
 try:
     os.remove("./binaries_%s/cefpython_py%s.so" % (BITS, PYVERSION))
@@ -135,7 +117,7 @@ except OSError:
 
 os.chdir("./setup")
 
-ret = subprocess.call(PYTHON_CMD+" fix_pyx_files.py", shell=True)
+ret = subprocess.call("python fix_pyx_files.py", shell=True)
 if ret != 0:
     sys.exit("ERROR")
 
@@ -146,10 +128,10 @@ with open("__version__.pyx", "w") as fo:
     fo.write('__version__ = "{}"\n'.format(VERSION))
 
 if DEBUG:
-    ret = subprocess.call(PYTHON_CMD+"-dbg setup.py build_ext --inplace"
+    ret = subprocess.call("python-dbg setup.py build_ext --inplace"
             " --cython-gdb", shell=True)
 else:
-    ret = subprocess.call(PYTHON_CMD+" setup.py build_ext --inplace", shell=True)
+    ret = subprocess.call("python setup.py build_ext --inplace", shell=True)
 
 if DEBUG:
     shutil.rmtree("./../binaries_%s/cython_debug/" % BITS, ignore_errors=True)
@@ -178,4 +160,4 @@ os.chdir("./binaries_%s" % BITS)
 if DEBUG:
     subprocess.call("cygdb . --args python-dbg wxpython.py", shell=True)
 else:
-    subprocess.call(PYTHON_CMD+" wxpython.py", shell=True)
+    subprocess.call("python wxpython.py", shell=True)

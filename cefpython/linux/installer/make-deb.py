@@ -60,7 +60,7 @@ PYTHON_VERSION_WITH_DOT = (str(sys.version_info.major) + "."
 
 VERSION = None
 
-# cefpython/cef3/linux/installer
+# cefpython/linux/installer
 INSTALLER = os.path.dirname(os.path.abspath(__file__))
 
 # installer/cefpython3-31.0-linux-64bit-setup/

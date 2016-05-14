@@ -25,8 +25,7 @@ Release*/
 
 ctags
 
-/cef1/windows/installer/Output/
-/cef3/windows/installer/Output/
+/windows/installer/Output/
 
 # Inno setup files generated from a template
 *.generated
