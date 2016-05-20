@@ -657,12 +657,14 @@ Set whether mouse cursor change is disabled.
 | bindings | [JavascriptBindings](JavascriptBindings.md) |
 | __Return__ | void |
 
+Set javascript bindings.
+
 
 ### SetUserData
 
 | Parameter | Type |
 | --- | --- |
-|  | mixedkey |
+| key | mixed |
 | value | mixed |
 | __Return__ | void |
 
