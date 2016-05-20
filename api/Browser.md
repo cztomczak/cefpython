@@ -58,6 +58,7 @@ Table of contents:
   * [SetClientHandler](#setclienthandler)
   * [SetFocus](#setfocus)
   * [SetMouseCursorChangeDisabled](#setmousecursorchangedisabled)
+  * [SetJavascriptBindings](#setjavascriptbindings)
   * [SetUserData](#setuserdata)
   * [SetZoomLevel](#setzoomlevel)
   * [ShowDevTools](#showdevtools)
@@ -647,6 +648,14 @@ Set focus for the browser window. If |enable| is true focus will be set to the w
 | __Return__ | void |
 
 Set whether mouse cursor change is disabled.
+
+
+### SetJavascriptBindings
+
+| Parameter | Type |
+| --- | --- |
+| bindings | [JavascriptBindings](JavascriptBindings.md) |
+| __Return__ | void |
 
 
 ### SetUserData
