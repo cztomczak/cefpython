@@ -31,7 +31,7 @@ There are plans to support binding data by reference (a list, dict or object's p
 
 ## Example usage
 
-See the [wxpython.py](../blob/master/cefpython/windows/binaries_32bit/wxpython.py) example for an example usage of javascript bindings, javascript callbacks and python callbacks.
+See the [wxpython.py](../cefpython/windows/binaries_32bit/wxpython.py) example for an example usage of javascript bindings, javascript callbacks and python callbacks.
 
 
 
