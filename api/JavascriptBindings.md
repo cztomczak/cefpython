@@ -18,7 +18,7 @@ Table of contents:
 
 ## Introduction
 
-With this class you can expose python functions, objects and data. Binding is made to javascript "window" object. Instantiate this class and pass it to [cefpython](cefpython.md).CreateBrowserSync(). See also [javascript callbacks](JavascriptCallback.md).
+With this class you can expose python functions, objects and data. Binding is made to javascript "window" object. Instantiate this class and pass it using [Browser](Browser.md).SetJavascriptBindings(). See also [javascript callbacks](JavascriptCallback.md).
 
 To initiate communication from python, when there is no javascript callback available yet, use [Frame](Frame.md).ExecuteJavascript() or [Frame](Frame.md).ExecuteFunction(). To get main frame for browser call [Browser](Browser.md).GetMainFrame().
 
