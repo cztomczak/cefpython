@@ -38,7 +38,7 @@ Table of contents:
 | frame | [Frame](Frame.md) |
 | request | [Request](Request.md) |
 | isRedirect | bool |
-| __Return__ | void |
+| __Return__ | bool |
 
 Called on the UI thread before browser navigation. Return true to cancel
 the navigation or false to allow the navigation to proceed. The |request|
