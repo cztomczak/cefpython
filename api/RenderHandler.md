@@ -6,8 +6,8 @@
 Implement this interface to handle events when window rendering is disabled (off-screen rendering). The methods of this class will be called on the UI thread.
 
 Off-screen rendering examples:
-* [Kivy](Kivy)
-* [Panda3D](Panda3D)
+* [Kivy](https://github.com/cztomczak/cefpython/wiki/Kivy)
+* [Panda3D](https://github.com/cztomczak/cefpython/wiki/Panda3D)
 * [cefpython_offscreen_no_UI_framework.py](https://gist.github.com/stefanbacon/7b1571d57aee54aa9f8e9021b4848d06) - most basic usage of OSR to take screenshot of a page
 
 
