@@ -652,7 +652,7 @@ class ClientHandler:
         # occurs only in wxPython. PyGTK or PyQt do not require this fix.
         # The solution is to create window explicitilly, and not depend
         # on CEF to create window internally. See Issue 80 for details:
-        # https://code.google.com/p/cefpython/issues/detail?id=80
+        # https://github.com/cztomczak/cefpython/issues/80
 
         # If you set allowPopups=True then CEF will create popup window.
         # The wx.Frame cannot be created here, as this callback is

@@ -5,7 +5,7 @@
 // CefListValue->SetXxxx() functions need first param to be be cast
 // to (int) because GetSize() returns size_t and generates a warning
 // when compiling on VS2008 for x64 platform. Issue reported here:
-// https://code.google.com/p/cefpython/issues/detail?id=165
+// https://github.com/cztomczak/cefpython/issues/165
 
 #include "v8utils.h"
 #include "javascript_callback.h"

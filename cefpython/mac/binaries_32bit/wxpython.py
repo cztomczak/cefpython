@@ -11,7 +11,7 @@
 # then freed using tcmalloc then this would result in random
 # segmentation faults in an application. See Issue 155 which
 # is to provide CEF builds on Mac with tcmalloc disabled:
-# https://code.google.com/p/cefpython/issues/detail?id=155
+# https://github.com/cztomczak/cefpython/issues/155
 
 import ctypes, os, sys
 libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)),\
