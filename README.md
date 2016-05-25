@@ -5,8 +5,11 @@
 [![](https://img.shields.io/badge/pypi-v31.2-blue.svg "PyPI latest release")](https://pypi.python.org/pypi/cefpython3/)
 [![](https://img.shields.io/badge/commits%20since-v31.2-lightgray.svg "Commits since v31.2 release")](https://github.com/cztomczak/cefpython/compare/05366f2...master)
 
-__NOTE__: Repository rewritten on 2016-02-15 to reduce its size.
+__NOTES__: 
+* Repository rewritten on 2016-02-15 to reduce its size.
   Please clone it again.
+* Master branch is a work in progress. When building use the cefpython31
+  branch.
 
 Table of contents:
 * [Introduction](#introduction)
