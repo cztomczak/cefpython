@@ -91,7 +91,8 @@ The `GetResourceHandler` example can be found in the `wxpython-response.py` scri
 Not yet available in CEF 3 (see [CEF Issue 515](https://bitbucket.org/chromiumembedded/cef/issues/515)), though it can be emulated, see the comment below.
 
 You can implement this functionality by using [ResourceHandler](ResourceHandler.md)
-and [WebRequest](WebRequest.md) / [WebRequestClient](WebRequestClient.md). For an example see the _OnResourceResponse() method in the [wxpython-response.py](../blob/master/cefpython/cef3/linux/binaries_64bit/wxpython-response.py) script.
+and [WebRequest](WebRequest.md) / [WebRequestClient](WebRequestClient.md). For an example see the _OnResourceResponse() method in the [wxpython-response.py]
+(../src/linux/binaries_64bit/wxpython-response.py) script.
 
 
 ### OnResourceRedirect

@@ -1,0 +1,2 @@
+Since Chrome47 release version information is provided in header
+files in the src/version/ directory.
