@@ -118,6 +118,8 @@ g_debugFile = "debug.log"
 g_applicationSettings = {}
 g_commandLineSwitches = {}
 
+_MessageLoopWork_wasused = False
+
 cdef dict g_globalClientCallbacks = {}
 
 # If ApplicationSettings.unique_request_context_per_browser is False
@@ -428,6 +430,10 @@ def MessageLoopWork():
     # GIL must be released here otherwise we will get dead lock
     # when calling from c++ to python.
 
+    if not _MessageLoopWork_wasused:
+        global _MessageLoopWork_wasused
+        _MessageLoopWork_wasused = True
+
     with nogil:
         CefDoMessageLoopWork();
 
@@ -448,13 +454,18 @@ def Shutdown():
         g_sharedRequestContext.Assign(NULL)
     Debug("Shutdown()")
     with nogil:
-        CefShutdown()
         # Temporary fix for possible errors on shutdown. See this post:
         # https://magpcss.org/ceforum/viewtopic.php?p=30858#p30858
         # May be fixed by host owned message loop, see Issue 1805:
         # https://bitbucket.org/chromiumembedded/cef/issues/1805/
-        for i in range(10):
-            CefDoMessageLoopWork()
+        if _MessageLoopWork_wasused:
+            for i in range(10):
+                CefDoMessageLoopWork()
+        CefShutdown()
+        if _MessageLoopWork_wasused:
+            for i in range(10):
+                CefDoMessageLoopWork()
+
 
 
 def SetOsModalLoop(py_bool modalLoop):
