@@ -449,6 +449,13 @@ def Shutdown():
     Debug("Shutdown()")
     with nogil:
         CefShutdown()
+        # Temporary fix for possible errors on shutdown. See this post:
+        # https://magpcss.org/ceforum/viewtopic.php?p=30858#p30858
+        # May be fixed by host owned message loop, see Issue 1805:
+        # https://bitbucket.org/chromiumembedded/cef/issues/1805/
+        for i in range(10):
+            CefDoMessageLoopWork()
+
 
 def SetOsModalLoop(py_bool modalLoop):
     cdef cpp_bool cefModalLoop = bool(modalLoop)
