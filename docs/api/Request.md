@@ -93,7 +93,7 @@ Set the request method type.
 
 | | |
 | --- | --- |
-| __Return__ | list|dict |
+| __Return__ | list/dict |
 
 Get the post data. If the form content type is "multipart/form-data"
 then the post data will be returned as a list. If the form content
@@ -105,7 +105,7 @@ be returned as a dict.
 
 | Parameter | Type |
 | --- | --- |
-| postData | list|dict |
+| postData | list/dict |
 | __Return__ | void |
 
 Set the post data. See GetPostData() for an explanation of the
@@ -186,7 +186,7 @@ Set the flags used in combination with [WebRequest](WebRequest.md).
 | --- | --- |
 | __Return__ | str |
 
-Get the url to the first party for cookies used in combination with  
+Get the url to the first party for cookies used in combination with
 WebRequest.
 
 
@@ -197,7 +197,7 @@ WebRequest.
 | url | string |
 | __Return__ | void |
 
-Set the url to the first party for cookies used in combination with  
+Set the url to the first party for cookies used in combination with
 WebRequest.
 
 
@@ -220,7 +220,7 @@ Get the resource type for this request. Accurate resource type information may o
 
 Not yet implemented in CEF Python.
 
-Get the transition type for this request. Only available in the browser  
-process and only applies to requests that represent a main frame or  
+Get the transition type for this request. Only available in the browser
+process and only applies to requests that represent a main frame or
 sub-frame navigation.
 

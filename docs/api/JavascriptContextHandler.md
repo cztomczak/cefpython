@@ -24,6 +24,8 @@ Table of contents:
 
 Called shortly after (process message delay) the V8 context for a frame has been created.
 
+If the page does not contain `<script>` tags then this method won't get called.
+
 
 ### OnContextReleased
 

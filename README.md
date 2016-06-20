@@ -5,7 +5,7 @@
 [![](https://img.shields.io/badge/pypi-v31.2-blue.png "PyPI latest release")](https://pypi.python.org/pypi/cefpython3/)
 [![](https://img.shields.io/badge/commits%20since-v31.2-lightgray.png "Commits since v31.2 release")](https://github.com/cztomczak/cefpython/compare/05366f2...master)
 
-__NOTES__: 
+__NOTES__:
 * Repository rewritten on 2016-02-15 to reduce its size.
   Please clone it again.
 * Master branch is a work in progress. When building use the cefpython31
@@ -23,10 +23,10 @@ Table of contents:
 
 CEF Python is an open source project founded by [Czarek Tomczak](http://www.linkedin.com/in/czarektomczak) in 2012 to provide python bindings for the [Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef). See the growing list of [applications using CEF](http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF) on wikipedia. Examples of embedding CEF browser are available for many popular GUI toolkits including: [wxPython](../../wiki/wxPython), [PyGTK](../../wiki/PyGTK), [PyQt](../../wiki/PyQt), [PySide](../../wiki/PySide), [Kivy](../../wiki/Kivy), [Panda3D](../../wiki/Panda3D) and [PyWin32](src/windows/binaries_32bit/pywin32.py).
 
-Some use cases for CEF: 
+Some use cases for CEF:
 
 * Embed a web browser control with great HTML5 support (based on Chromium)
-* Use it to create a HTML5 based GUI in an application. This can act as a replacement for GUI toolkits like wxWidgets/Qt/Gtk. For native communication between javascript and python use [javascript bindings](../../wiki/JavascriptBindings). Another option is to run an internal python web server and use websockets/XMLHttpRequest for js&lt;&gt;python communication. This way you can write a desktop app in the same way you write web apps. 
+* Use it to create a HTML5 based GUI in an application. This can act as a replacement for GUI toolkits like wxWidgets/Qt/Gtk. For native communication between javascript and python use [javascript bindings](../../wiki/JavascriptBindings). Another option is to run an internal python web server and use websockets/XMLHttpRequest for js&lt;&gt;python communication. This way you can write a desktop app in the same way you write web apps.
 * Render web content off-screen in applications that use custom drawing frameworks. See the [Kivy](../../wiki/Kivy) and [Panda3D](../../wiki/Panda3D) examples.
 * Use it for automated testing of existing web applications. Use it for web scraping, or as a web crawler or other kind of internet bots.
 
@@ -46,13 +46,13 @@ On Win/Mac you can install from PyPI using this command:
 * For Linux: see the [Download_CEF3_Linux](../../wiki/Download_CEF3_Linux) wiki page.
 * For Mac: see the [Download_CEF3_Mac](../../wiki/Download_CEF3_Mac) wiki page.
 
-__New releases RSS/Atom feed__  
+__New releases RSS/Atom feed__
 To be notified of new releases subscribe to this [Atom feed](https://github.com/cztomczak/cefpython/releases.atom).
 
 ## Support
 
-* API docs are in the [api/](api/) directory
-* See [Wiki Pages](../../wiki)
+* API docs are in the [docs/api/](docs/api/) directory
+* See also [Wiki Pages](../../wiki)
 * Ask questions and report problems on the
   [Forum](https://groups.google.com/group/cefpython)
 * Please do not ask questions in the Issue Tracker
