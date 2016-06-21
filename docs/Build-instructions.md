@@ -1,17 +1,19 @@
 # Build instructions
 
+NOTE: These instructions are for the master branch (Chrome 47).
+
 There are two types of builds you can perform. You can build
-PyCEF using the prebuilt CEF binaries. Or you can build both
-PyCEF and CEF from sources. Building CEF is a long process that
+CEF Python using the prebuilt CEF binaries. Or you can build both
+CEF Python and CEF from sources. Building CEF is a long process that
 can take hours. In the tools/ directory there is the automate.py
-script that automates building. However before you can run it
+script that automates building CEF. However before you can run it
 you must satisfy some requirements.
 
 
 Table of contents:
 * [Requirements](#requirements)
-* [Build PyCEF using prebuilt CEF binaries](#build-pycef-using-prebuilt-cef-binaries)
-* [Build both PyCEF and CEF from sources](#build-both-pycef-and-cef-from-sources)
+* [Build CEF Python using prebuilt CEF binaries](#build-cefpython-using-prebuilt-cef-binaries)
+* [Build both CEF Python and CEF from sources](#build-both-cefpython-and-cef-from-sources)
 * [Build CEF manually](#build-cef-manually)
 * [How to patch](#how-to-patch)
 * [Ninja build slows down computer](#ninja-build-slows-down-computer)
@@ -32,8 +34,8 @@ __Windows__
 * For Python 3.5 - VS2015 compiler is required:
   https://docs.python.org/3.5/using/windows.html#compiling-python-on-windows
 * To build CEF from sources:
-    * Use Win7 x64 or later. 32-bit OS'es are not supported. For more details see [here]
-    (https://www.chromium.org/developers/how-tos/build-instructions-windows).
+    * Use Win7 x64 or later. 32-bit OS'es are not supported. For more details
+     see [here](https://www.chromium.org/developers/how-tos/build-instructions-windows).
     * For CEF branch >= 2704 install VS2015 Update 2 or later
     * For CEF branch < 2704 install VS2013 Update 4 or later
     * Install [CMake](https://cmake.org/) 2.8.12.1 or newer and add cmake.exe
@@ -42,8 +44,20 @@ __Windows__
         to PATH
     * You need about 16 GB of RAM during linking. If there is an error
         just add additional virtual memory.
-    * For Python 2.7 copy "pycef/src/windows/stdint.h" to
+    * For Python 2.7 copy "cefpython/src/windows/stdint.h" to
       "%LocalAppData%\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\include\"
+
+
+__Linux__
+
+* Building on Ubuntu 12.04 is supported up to branch 2526 (Chrome 47).
+  For branches 2623 (Chrome 49) or later Ubuntu 14.04+ is required.
+* To build on Debian 7 see
+  [cef/BuildingOnDebian7.md](https://bitbucket.org/chromiumembedded/cef/wiki/BuildingOnDebian7.md) and
+  [cef/#1575](https://bitbucket.org/chromiumembedded/cef/issues/1575)
+* To perform a 32-bit Linux build on a 64-bit Linux system see
+  [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804)
+
 
 __All platforms__
 
@@ -53,7 +67,7 @@ __All platforms__
   requires a VS compiler - see instructions above for Windows.
 
 
-## Build PyCEF using prebuilt CEF binaries
+## Build CEF Python using prebuilt CEF binaries
 
 Run the automate.py tool using the --prebuilt-cef flag:
 ```
@@ -65,12 +79,13 @@ You should be fine by running it with the default options, but if you
 need to customize the build then use the --help flag to see more.
 
 
-## Build both PyCEF and CEF from sources
+## Build both CEF Python and CEF from sources
 
-Run the automate.py tool using the --build-cef flag:
+Run the automate.py tool using the --build-cef flag. Specify cef branch
+and optionally how many parallel ninja jobs to run (by default cores/2).
 ```
 cd tools/
-python automate.py --build-cef --cef-branch 2526
+python automate.py --build-cef --cef-branch 2526 --ninja-jobs 6
 ```
 
 You should be fine by running it with the default options, but if you
@@ -86,8 +101,8 @@ patches/ directory.
 On Linux before running any of CEF tools apply the issue73 patch
 first.
 
-To build CEF follow the instructions on the Branches and
-Building CEF wiki page:
+To build CEF follow the instructions on the Branches and Building
+CEF wiki page:
 https://bitbucket.org/chromiumembedded/cef/wiki/BranchesAndBuilding
 
 After it is successfully built - apply patches, rebuild and remake

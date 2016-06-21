@@ -11,22 +11,23 @@ Usage:
     automate.py (-h | --help) [type -h to show full description for options]
 
 Options:
-    -h --help           Show this help message.
-    --prebuilt-cef      Whether to use prebuilt CEF binaries. Prebuilt
-                        binaries for Linux are built on Ubuntu.
-    --build-cef         Whether to build CEF from sources with the cefpython
-                        patches applied.
-    --cef-branch        CEF branch. Defaults to CHROME_VERSION_BUILD from
-                        "src/version/cef_version_{platform}.h" (TODO).
-    --cef-commit        CEF revision. Defaults to CEF_COMMIT_HASH from
-                        "src/version/cef_version_{platform}.h" (TODO).
-    --build-dir         Build directory.
-    --cef-build-dir     CEF build directory. By default same as --build-dir.
-    --ninja-jobs        How many CEF jobs to run in parallel. To speed up
-                        building set it to number of cores in your CPU.
-                        By default set to cpu_count / 2.
-    --gyp-generators    Set GYP_GENERATORS [default: ninja].
-    --gyp-msvs-version  Set GYP_MSVS_VERSION.
+    -h --help               Show this help message.
+    --prebuilt-cef          Whether to use prebuilt CEF binaries. Prebuilt
+                            binaries for Linux are built on Ubuntu.
+    --build-cef             Whether to build CEF from sources with the cefpython
+                            patches applied.
+    --cef-branch=<b>        CEF branch. Defaults to CHROME_VERSION_BUILD from
+                            "src/version/cef_version_{platform}.h" (TODO).
+    --cef-commit=<c>        CEF revision. Defaults to CEF_COMMIT_HASH from
+                            "src/version/cef_version_{platform}.h" (TODO).
+    --build-dir=<dir1>      Build directory.
+    --cef-build-dir=<dir2>  CEF build directory. By default same
+                            as --build-dir.
+    --ninja-jobs=<jobs>     How many CEF jobs to run in parallel. To speed up
+                            building set it to number of cores in your CPU.
+                            By default set to cpu_count / 2.
+    --gyp-generators=<gen>  Set GYP_GENERATORS [default: ninja].
+    --gyp-msvs-version=<v>  Set GYP_MSVS_VERSION.
 
 """
 
@@ -118,12 +119,6 @@ def setup_options(docopt_args):
     usage = __doc__
     for key in docopt_args:
         value = docopt_args[key]
-        if key.startswith("--"):
-            match = re.search(r"\[%s\s+([^\]]+)\]" % (re.escape(key),),
-                              usage)
-            if match:
-                arg_key = match.group(1)
-                value = docopt_args[arg_key]
         key2 = key.replace("--", "").replace("-", "_")
         if hasattr(Options, key2) and value is not None:
             setattr(Options, key2, value)
@@ -153,6 +148,8 @@ def setup_options(docopt_args):
         print("[automate.py] ERROR: Build dir cannot contain spaces")
         print(">> " + Options.build_dir)
         sys.exit(1)
+    if not os.path.exists(Options.build_dir):
+        os.makedirs(Options.build_dir)
 
     # --cef-build-dir
     if Options.cef_build_dir:
@@ -163,6 +160,8 @@ def setup_options(docopt_args):
         print("[automate.py] ERROR: CEF build dir cannot contain spaces")
         print(">> " + Options.cef_build_dir)
         sys.exit(1)
+    if not os.path.exists(Options.cef_build_dir):
+        os.makedirs(Options.cef_build_dir)
 
     # --depot-tools-dir
     Options.depot_tools_dir = os.path.join(Options.cef_build_dir,
@@ -279,11 +278,7 @@ def build_cef_projects():
         cef_binary = symbols.replace("_debug_symbols", "")
     assert "symbols" not in os.path.basename(cef_binary)
     build_cefclient = os.path.join(cef_binary, "build_cefclient")
-    build_wrapper_mt = os.path.join(cef_binary, "build_wrapper_mt")
-    build_wrapper_md = os.path.join(cef_binary, "build_wrapper_md")
     os.makedirs(build_cefclient)
-    os.makedirs(build_wrapper_mt)
-    os.makedirs(build_wrapper_md)
 
     # Build cefclient and cefsimple
     print("[automate.py] Building cefclient and cefsimple...")
@@ -301,6 +296,9 @@ def build_cef_projects():
     if platform.system() == "Windows":
         assert(os.path.exists(os.path.join(build_cefclient, "cefclient",
                                            "cefclient.exe")))
+    else:
+        assert (os.path.exists(os.path.join(build_cefclient, "cefclient",
+                                            "cefclient")))
 
     # Command to build libcef_dll_wrapper
     wrapper_command = ""
@@ -310,6 +308,20 @@ def build_cef_projects():
                        % Options.build_type
     wrapper_command += "ninja libcef_dll_wrapper"
 
+    # Build libcef_dll_wrapper libs
+    if platform.system() == "Windows":
+        build_wrapper_windows(cef_binary, wrapper_command)
+    elif platform.system() == "Linux":
+        build_wrapper_linux(cef_binary, wrapper_command)
+
+
+def build_wrapper_windows(cef_binary, wrapper_command):
+    # Directories
+    build_wrapper_mt = os.path.join(cef_binary, "build_wrapper_mt")
+    build_wrapper_md = os.path.join(cef_binary, "build_wrapper_md")
+    os.makedirs(build_wrapper_mt)
+    os.makedirs(build_wrapper_md)
+
     # Build libcef_dll_wrapper_mt.lib
     print("[automate.py] Building libcef_dll_wrapper /MT")
     old_gyp_msvs_version = Options.gyp_msvs_version
@@ -317,9 +329,8 @@ def build_cef_projects():
     run_command(wrapper_command, build_wrapper_mt)
     Options.gyp_msvs_version = old_gyp_msvs_version
     print("[automate.py] OK")
-    if platform.system() == "Windows":
-        assert(os.path.exists(os.path.join(build_wrapper_mt, "libcef_dll",
-                                           "libcef_dll_wrapper.lib")))
+    assert(os.path.exists(os.path.join(build_wrapper_mt, "libcef_dll",
+                                       "libcef_dll_wrapper.lib")))
 
     # Build libcef_dll_wrapper_md.lib
     print("[automate.py] Building libcef_dll_wrapper /MD")
@@ -340,9 +351,21 @@ def build_cef_projects():
     run_command(wrapper_command, build_wrapper_md)
     Options.gyp_msvs_version = old_gyp_msvs_version
     print("[automate.py] OK")
-    if platform.system() == "Windows":
-        assert(os.path.exists(os.path.join(build_wrapper_md, "libcef_dll",
-                                           "libcef_dll_wrapper.lib")))
+    assert(os.path.exists(os.path.join(build_wrapper_md, "libcef_dll",
+                                       "libcef_dll_wrapper.lib")))
+
+
+def build_wrapper_linux(cef_binary, wrapper_command):
+    # Directory
+    build_wrapper = os.path.join(cef_binary, "build_wrapper")
+    os.makedirs(build_wrapper)
+
+    # Build libcef_dll_wrapper.a and .o files
+    print("[automate.py] Building libcef_dll_wrapper")
+    run_command(wrapper_command, build_wrapper)
+    print("[automate.py] OK")
+    assert(os.path.exists(os.path.join(build_wrapper, "libcef_dll",
+                                       "libcef_dll_wrapper.a")))
 
 
 def get_msvs_for_python():
@@ -415,7 +438,8 @@ def run_automate_git():
         ninja -v -j2 -Cout\Release cefclient
     """
     args = []
-    if ARCH64:
+    if ARCH64 and platform.system() != "Linux":
+        # The x64 build flag is only supported on Windows and Mac OS X.
         args.append("--x64-build")
     args.append("--download-dir=" + Options.cef_build_dir)
     args.append("--branch=" + Options.cef_branch)
