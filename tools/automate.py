@@ -392,7 +392,8 @@ def getenv():
     env = os.environ
     env["PATH"] = Options.depot_tools_dir + os.pathsep + env["PATH"]
     env["GYP_GENERATORS"] = Options.gyp_generators
-    env["GYP_MSVS_VERSION"] = Options.gyp_msvs_version
+    if platform.system() == "Windows":
+        env["GYP_MSVS_VERSION"] = Options.gyp_msvs_version
     # Issue73 patch applied
     env["GYP_DEFINES"] = "use_allocator=none"
     # To perform an official build set GYP_DEFINES=buildtype=Official.

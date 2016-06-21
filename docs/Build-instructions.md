@@ -50,6 +50,15 @@ __Windows__
 
 __Linux__
 
+* Install required packages using apt-get or similar:
+```
+sudo apt-get install cmake g++ pkg-config gtk+-2.0 libgtkglext1-dev
+```
+* Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
+  and copy it to /usr/bin and chmod 755.
+* When building CEF from sources you will need to install many more packages
+  using the install-build-deps.sh script - instructions are provided
+  further down on this page.
 * Building on Ubuntu 12.04 is supported up to branch 2526 (Chrome 47).
   For branches 2623 (Chrome 49) or later Ubuntu 14.04+ is required.
 * To build on Debian 7 see
@@ -83,10 +92,26 @@ need to customize the build then use the --help flag to see more.
 
 Run the automate.py tool using the --build-cef flag. Specify cef branch
 and optionally how many parallel ninja jobs to run (by default cores/2).
+
 ```
 cd tools/
 python automate.py --build-cef --cef-branch 2526 --ninja-jobs 6
 ```
+
+__IMPORTANT__: On Linux it will fail on first run. After the chromium
+sources are downloaded, it will try to build cef projects and fail
+due to missing packages. You will need to run the install-build-deps.sh
+script (intended for Ubuntu systems). When the "ttf-mscorefonts-installer"
+graphical installer pops up you can deny EULA and not install these fonts
+(might deteriorate UX on some systems, experienced on Ubuntu 12.04 32-bit).
+
+```
+cd build/chromium/src/build/
+chmod 755 install-build-deps.sh
+sudo ./install-build-deps.sh --no-arm --no-chromeos-fonts --no-nacl
+```
+
+After dependencies are satisifed re-run automate.py.
 
 You should be fine by running it with the default options, but if you
 need to customize the build then use the --help flag to see more.
