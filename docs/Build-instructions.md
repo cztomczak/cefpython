@@ -12,8 +12,8 @@ you must satisfy some requirements.
 
 Table of contents:
 * [Requirements](#requirements)
-* [Build CEF Python using prebuilt CEF binaries](#build-cefpython-using-prebuilt-cef-binaries)
-* [Build both CEF Python and CEF from sources](#build-both-cefpython-and-cef-from-sources)
+* [Build CEF Python using prebuilt CEF binaries](#build-cef-python-using-prebuilt-cef-binaries)
+* [Build both CEF Python and CEF from sources](#build-both-cef-python-and-cef-from-sources)
 * [Build CEF manually](#build-cef-manually)
 * [CEF automated builds](#cef-automated-builds)
 * [How to patch](#how-to-patch)
@@ -50,24 +50,25 @@ __Windows__
 
 __Linux__
 
-* Install packages: cmake, g++ 4.6.3+, libgtkglext1-dev
-* Download and install cmake 2.8.12 or later (unless you already have a
+* Install packages: cmake, g++ 4.6.3+, libgtkglext1-dev, libgtk2.0-dev, libgtk2.0-0
+* If building CEF from sources:
+    * Download and install cmake 2.8.12 or later (unless you already have a
 proper version, check with cmake --version):
-```
-cd build/
-wget http://www.cmake.org/files/v2.8/cmake-2.8.12.2.tar.gz
-tar xzf cmake-2.8.12.2.tar.gz
-cd cmake-2.8.12.2
-./configure
-make
-sudo make install
-# restart terminal, so that new cmake is used
-```
-* Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
-  and copy it to /usr/bin and chmod 755.
-* When building CEF from sources you will need to install many more packages
-  using the install-build-deps.sh script - instructions are provided
-  further down on this page.
+        ```
+        cd build/
+        wget http://www.cmake.org/files/v2.8/cmake-2.8.12.2.tar.gz
+        tar xzf cmake-2.8.12.2.tar.gz
+        cd cmake-2.8.12.2
+        ./configure
+        make
+        sudo make install
+        # restart terminal, so that new cmake is used
+        ```
+    * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
+      and copy it to /usr/bin and chmod 755.
+    * When building CEF from sources you will need to install many more packages
+      using the install-build-deps.sh script - instructions are provided
+      further down on this page.
 * Building on Ubuntu 12.04 is supported up to branch 2526 (Chrome 47).
   For branches 2623 (Chrome 49) or later Ubuntu 14.04+ is required.
 * To build on Debian 7 see
@@ -90,7 +91,7 @@ __All platforms__
 
 Prebuilt binaries are available on
 [GitHub Releases](https://github.com/cztomczak/cefpython/releases)
-tagged 'cefXX'.
+and tagged eg. 'v47-upstream'.
 
 Run the automate.py tool using the --prebuilt-cef flag that will download
 prebuilt binaries from GitHub Releases using version information from
