@@ -2,3 +2,4 @@ Patch to CEF. Fixes tcmalloc issue on Linux:
 https://github.com/cztomczak/cefpython/issues/73
 
 Copy the "include.gypi" file to the ~/.gyp/ directory.
+The automate.py script applies this patch by setting GYP_DEFINES env var.

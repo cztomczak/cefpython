@@ -9,10 +9,22 @@ OS_POSTFIX = ("win" if platform.system() == "Windows" else
               "linux" if platform.system() == "Linux" else
               "mac" if platform.system() == "Darwin" else "unknown")
 
+# ALL PLATFORMS
 patches.append(
     {
-        # Fixes HTTPS cache problems on sites with certificate errors
-        'name': 'issue125_win_mac_linux',
+        # Fixes HTTPS cache problems with private certificates
+        'name': 'issue125',
         'path': '../net/http/',
     },
 )
+
+# LINUX
+if OS_POSTFIX == "linux":
+    patches.append(
+        {
+            # Fix compile error on Ubuntu 12:
+            #   cc1plus: error: unrecognized command line option '-std=gnu++11'
+            'name': 'CMakeLists.txt.in_linux',
+            'path': './',
+        },
+    )

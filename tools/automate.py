@@ -100,6 +100,7 @@ class Options(object):
     binary_distrib = ""
     release_build = True
     build_type = ""  # Will be set according to "release_build" value
+    cef_binary = ""
 
 
 def main():
@@ -108,6 +109,7 @@ def main():
 
     if Options.build_cef:
         build_cef()
+        create_prebuilt_binaries()
     elif Options.prebuilt_cef:
         prebuilt_cef()
 
@@ -116,7 +118,6 @@ def setup_options(docopt_args):
     """Setup options from cmd-line and internal options."""
 
     # Populate Options using command line arguments
-    usage = __doc__
     for key in docopt_args:
         value = docopt_args[key]
         key2 = key.replace("--", "").replace("-", "_")
@@ -190,15 +191,13 @@ def build_cef():
 
     # Delete binary_distrib
     if os.path.exists(Options.binary_distrib):
-        delete_directory(Options.binary_distrib)
+        rmdir(Options.binary_distrib)
 
     # Run automate-git.py
     run_automate_git()
 
     # Build cefclient, cefsimple, libcef_dll_wrapper
     build_cef_projects()
-
-    # TODO: Copy bin/lib and README.txt to build/win32/
 
 
 def create_cef_directories():
@@ -208,7 +207,7 @@ def create_cef_directories():
     cef_dir2 = os.path.join(src_dir, "cef")
     # Clone cef repo and checkout branch
     if os.path.exists(cef_dir):
-        delete_directory(cef_dir)
+        rmdir(cef_dir)
     run_git("clone %s cef" % CEF_GIT_URL, Options.cef_build_dir)
     run_git("checkout %s" % Options.cef_branch, cef_dir)
     if Options.cef_commit:
@@ -218,7 +217,7 @@ def create_cef_directories():
     # Copy cef/ to chromium/src/ but only if chromium/src/ exists.
     if os.path.exists(src_dir):
         if os.path.exists(cef_dir2):
-            delete_directory(cef_dir2)
+            rmdir(cef_dir2)
         shutil.copytree(cef_dir, cef_dir2)
 
 
@@ -268,15 +267,23 @@ def build_cef_projects():
     print("[automate.py] Building cef projects...")
 
     # Find cef_binary directories and create the cef_binary/build/ dir
-    files = glob.glob(os.path.join(Options.binary_distrib,
-                                   "*_symbols"))
-    assert len(files) == 1, "More than one dir with release symbols found"
-    symbols = files[0]
-    if Options.release_build:
-        cef_binary = symbols.replace("_release_symbols", "")
+    if platform.system() == "Windows":
+        files = glob.glob(os.path.join(Options.binary_distrib,
+                                       "cef_binary_*_symbols"))
+        assert len(files) == 1, "More than one dir with release symbols found"
+        symbols = files[0]
+        if Options.release_build:
+            cef_binary = symbols.replace("_release_symbols", "")
+        else:
+            cef_binary = symbols.replace("_debug_symbols", "")
+        assert "symbols" not in os.path.basename(cef_binary)
     else:
-        cef_binary = symbols.replace("_debug_symbols", "")
-    assert "symbols" not in os.path.basename(cef_binary)
+        files = glob.glob(os.path.join(Options.binary_distrib,
+                                       "cef_binary_*_"+OS_POSTFIX2))
+        assert len(files) == 1, "More than one cef binary dir found"
+        cef_binary = files[0]
+    assert os.path.exists(cef_binary)
+    Options.cef_binary = cef_binary
     build_cefclient = os.path.join(cef_binary, "build_cefclient")
     os.makedirs(build_cefclient)
 
@@ -288,47 +295,48 @@ def build_cef_projects():
             command += VS2015_VCVARS + " && "
         else:
             command += VS2013_VCVARS + " && "
-    command += "cmake -G \"Ninja\" -DCMAKE_BUILD_TYPE=%s .. && " \
+    command += "cmake -G \"Ninja\" -DCMAKE_BUILD_TYPE=%s .." \
                % Options.build_type
-    command += "ninja cefclient cefsimple"
+    run_command(command, build_cefclient)
+    print("[automate.py] OK")
+    # On Linux cannot pass "&&" and run two commands using run_command()
+    command = "ninja cefclient cefsimple"
     run_command(command, build_cefclient)
     print("[automate.py] OK")
     if platform.system() == "Windows":
-        assert(os.path.exists(os.path.join(build_cefclient, "cefclient",
-                                           "cefclient.exe")))
+        assert(os.path.exists(os.path.join(build_cefclient,
+                                           "cefclient", "cefclient.exe")))
     else:
-        assert (os.path.exists(os.path.join(build_cefclient, "cefclient",
-                                            "cefclient")))
-
-    # Command to build libcef_dll_wrapper
-    wrapper_command = ""
-    if platform.system() == "Windows":
-        wrapper_command += VS2008_VCVARS + " && "
-    wrapper_command += "cmake -G \"Ninja\" -DCMAKE_BUILD_TYPE=%s .. && " \
-                       % Options.build_type
-    wrapper_command += "ninja libcef_dll_wrapper"
+        assert (os.path.exists(os.path.join(build_cefclient,
+                                            "cefclient", "cefclient")))
 
     # Build libcef_dll_wrapper libs
     if platform.system() == "Windows":
-        build_wrapper_windows(cef_binary, wrapper_command)
-    elif platform.system() == "Linux":
-        build_wrapper_linux(cef_binary, wrapper_command)
+        build_wrapper_windows(cef_binary)
 
 
-def build_wrapper_windows(cef_binary, wrapper_command):
+def build_wrapper_windows(cef_binary):
     # Directories
     build_wrapper_mt = os.path.join(cef_binary, "build_wrapper_mt")
     build_wrapper_md = os.path.join(cef_binary, "build_wrapper_md")
     os.makedirs(build_wrapper_mt)
     os.makedirs(build_wrapper_md)
 
+    # Command to build libcef_dll_wrapper
+    wrapper_cmake = ""
+    wrapper_cmake += VS2008_VCVARS + " && "
+    wrapper_cmake += "cmake -G \"Ninja\" -DCMAKE_BUILD_TYPE=%s .." \
+                     % Options.build_type
+
     # Build libcef_dll_wrapper_mt.lib
     print("[automate.py] Building libcef_dll_wrapper /MT")
     old_gyp_msvs_version = Options.gyp_msvs_version
     Options.gyp_msvs_version = get_msvs_for_python()
-    run_command(wrapper_command, build_wrapper_mt)
+    run_command(wrapper_cmake, build_wrapper_mt)
     Options.gyp_msvs_version = old_gyp_msvs_version
-    print("[automate.py] OK")
+    print("[automate.py] cmake OK")
+    run_command("ninja libcef_dll_wrapper", build_wrapper_mt)
+    print("[automate.py] ninja OK")
     assert(os.path.exists(os.path.join(build_wrapper_mt, "libcef_dll",
                                        "libcef_dll_wrapper.lib")))
 
@@ -348,24 +356,67 @@ def build_wrapper_windows(cef_binary, wrapper_command):
     contents = contents.replace(r"/MTd ", r"/MDd /wd\"4275\" ")
     with open(cmakelists, "wb") as fp:
         fp.write(contents)
-    run_command(wrapper_command, build_wrapper_md)
+    run_command(wrapper_cmake, build_wrapper_md)
     Options.gyp_msvs_version = old_gyp_msvs_version
-    print("[automate.py] OK")
+    print("[automate.py] cmake OK")
+    run_command("ninja libcef_dll_wrapper", build_wrapper_md)
+    print("[automate.py] ninja OK")
     assert(os.path.exists(os.path.join(build_wrapper_md, "libcef_dll",
                                        "libcef_dll_wrapper.lib")))
 
 
-def build_wrapper_linux(cef_binary, wrapper_command):
-    # Directory
-    build_wrapper = os.path.join(cef_binary, "build_wrapper")
-    os.makedirs(build_wrapper)
+def create_prebuilt_binaries():
+    """After building copy binaries/libs to build/cef_xxxx/. """
+    # Directories
+    src = Options.cef_binary
+    version_header = os.path.join(src, "include", "cef_version.h")
+    dst = get_prebuilt_name(version_header)
+    dst = os.path.join(Options.build_dir, dst)
+    rmdir(dst)
+    os.makedirs(dst)
+    bindir = os.path.join(dst, "bin")
+    libdir = os.path.join(dst, "lib")
+    os.makedirs(bindir)
+    os.makedirs(libdir)
 
-    # Build libcef_dll_wrapper.a and .o files
-    print("[automate.py] Building libcef_dll_wrapper")
-    run_command(wrapper_command, build_wrapper)
-    print("[automate.py] OK")
-    assert(os.path.exists(os.path.join(build_wrapper, "libcef_dll",
-                                       "libcef_dll_wrapper.a")))
+    # Copy Release/Debug and Resources
+    cpdir(os.path.join(src, Options.build_type), bindir)
+    cpdir(os.path.join(src, "Resources"), bindir)
+
+    # Copy cefclient, cefsimple
+    cefclient = os.path.join(src, "build_cefclient", "cefclient", "cefclient")
+    cefclient_files = os.path.join(src, "build_cefclient", "cefclient",
+                                   "files")
+    cpdir(cefclient_files, os.path.join(bindir, "files"))
+    cefsimple = os.path.join(src, "build_cefclient", "cefsimple", "cefsimple")
+    if platform.system() == "Windows":
+        cefclient += ".exe"
+        cefsimple += ".exe"
+    shutil.copy(cefclient, bindir)
+    shutil.copy(cefsimple, bindir)
+
+    # Copy libraries
+    if platform.system() == "Windows":
+        # libcef.lib and cef_sandbox.lib
+        mvfiles(bindir, libdir, ".lib")
+        # MT lib
+        libsrc = os.path.join(src, "build_wrapper_mt", "libcef_dll",
+                              "libcef_dll_wrapper.lib")
+        libdst = os.path.join(libdir, "licef_dll_wrapper_mt.lib")
+        shutil.copy(libsrc, libdst)
+        # MD lib
+        libsrc = os.path.join(src, "build_wrapper_md", "libcef_dll",
+                              "libcef_dll_wrapper.lib")
+        libdst = os.path.join(libdir, "licef_dll_wrapper_md.lib")
+        shutil.copy(libsrc, libdst)
+    elif platform.system() == "Linux":
+        cpdir(os.path.join(src, "build_cefclient", "libcef_dll"), libdir)
+
+    # Copy README.txt and LICENSE.txt
+    shutil.copy(os.path.join(src, "README.txt"), dst)
+    shutil.copy(os.path.join(src, "LICENSE.txt"), dst)
+
+    print("[automate.py] OK prebuilt binaries created in '%s/'" % dst)
 
 
 def get_msvs_for_python():
@@ -407,7 +458,9 @@ def getenv():
 
 
 def run_command(command_line, working_dir):
-    """Run command in a given directory with env variables set."""
+    """Run command in a given directory with env variables set.
+    On Linux multiple commands on one line with the use of && are not allowed.
+    """
     print("[automate.py] Running '"+command_line+"' in '" +
           working_dir+"'...")
     args = shlex.split(command_line.replace("\\", "\\\\"))
@@ -459,11 +512,36 @@ def run_automate_git():
     return run_python(script+" "+args, Options.cef_build_dir)
 
 
-def delete_directory(path):
+def rmdir(path):
     """Delete directory recursively."""
     if os.path.exists(path):
-        print("[automate.py] Deleting directory %s" % path)
+        print("[automate.py] Removing directory %s" % path)
         shutil.rmtree(path, onerror=onerror)
+
+
+def cpdir(src, dst):
+    """An equivalent of linux 'cp -r src/* dst/'. """
+    names = os.listdir(src)
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for name in names:
+        path = os.path.join(src, name)
+        if os.path.isdir(path):
+            dst_subdir = os.path.join(dst, name)
+            shutil.copytree(path, dst_subdir)
+        else:
+            shutil.copy(path, dst)
+
+
+def mvfiles(src, dst, ext):
+    """An equivalent of linux 'mv src/*.ext dst/'. """
+    names = os.listdir(src)
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for name in names:
+        path = os.path.join(src, name)
+        if os.path.isfile(path) and name.endswith(ext):
+            shutil.copy(path, dst)
 
 
 def onerror(func, path, _):
@@ -475,29 +553,35 @@ def onerror(func, path, _):
         raise
 
 
-def cefpython_version():
+def get_cefpython_version():
     """Get CEF version from the 'src/version/' directory."""
     header_file = os.path.join(Options.cefpython_dir, "src", "version",
                                "cef_version_"+OS_POSTFIX+".h")
+    return get_version_from_file(header_file)
+
+
+def get_version_from_file(header_file):
     with open(header_file, "rU") as fp:
         contents = fp.read()
     ret = dict()
-
-    # cef_branch
-    match = re.match(r"#define CHROME_VERSION_BUILD (\d+)", contents)
-    if not match:
-        print("[automate.py] CHROME_VERSION_BUILD not found in "+header_file)
-        sys.exit(1)
-    ret["cef_branch"] = match.group(1)
-
-    # cef_commit
-    match = re.match(r"#define CEF_COMMIT_HASH \"(\w+)\"", contents)
-    if not match:
-        print("[automate.py] CEF_COMMIT_HASH not found in "+header_file)
-        sys.exit(1)
-    ret["cef_commit"] = match.group(1)
-
+    matches = re.findall(r'^#define (\w+) "?([^\s"]+)"?', contents,
+                         re.MULTILINE)
+    for match in matches:
+        ret[match[0]] = match[1]
     return ret
+
+
+def get_prebuilt_name(header_file=""):
+    if header_file:
+        version = get_version_from_file(header_file)
+    else:
+        version = get_cefpython_version()
+    name = "cef%s_%s_%s" % (
+        version["CHROME_VERSION_MAJOR"],
+        version["CEF_VERSION"],
+        OS_POSTFIX2,
+    )
+    return name
 
 
 if __name__ == "__main__":
