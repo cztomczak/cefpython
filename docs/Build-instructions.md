@@ -50,7 +50,7 @@ __Windows__
 
 __Linux__
 
-* Install packages: cmake, g++ 4.6.3+, libgtkglext1-dev, libgtk2.0-dev, libgtk2.0-0
+* Install packages: `sudo apt-get install cmake  g++`
 * If building CEF from sources:
     * Download and install cmake 2.8.12 or later (unless you already have a
 proper version, check with cmake --version):
@@ -69,6 +69,9 @@ proper version, check with cmake --version):
     * When building CEF from sources you will need to install many more packages
       using the install-build-deps.sh script - instructions are provided
       further down on this page.
+    * See also the Linux configuration for CEF automated
+      builds on the [cef/AutomatedBuildSetup.md](https://bitbucket.org/chromiumembedded/cef/wiki/AutomatedBuildSetup.md#markdown-header-linux-configuration)
+      wiki page.
 * Building on Ubuntu 12.04 is supported up to branch 2526 (Chrome 47).
   For branches 2623 (Chrome 49) or later Ubuntu 14.04+ is required.
 * To build on Debian 7 see
@@ -77,6 +80,7 @@ proper version, check with cmake --version):
   and [cef/#1697](https://bitbucket.org/chromiumembedded/cef/issues/1697)
 * To perform a 32-bit Linux build on a 64-bit Linux system see
   [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804)
+* To build upstream cefclient/cefsimple you need to install these packages: `sudo apt-get install libgtk2.0-dev libgtkglext1-dev`
 
 
 __All platforms__
@@ -98,8 +102,8 @@ prebuilt binaries from GitHub Releases using version information from
 src/version/.
 
 __NOTE__: The --prebuilt-cef flag is not implemented yet - you need to
-download manually from GitHub Releases and put files to
-cefpython/build/linux64/ (rename cef47_xxx_linux64/ to linux64/).
+download manually from GitHub Releases and extract to
+cefpython/build/.
 ```
 cd tools/
 python automate.py --prebuilt-cef

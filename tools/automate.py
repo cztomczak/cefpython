@@ -1,5 +1,8 @@
 # Copyright (c) 2016 CEF Python, see the Authors file. All rights reserved.
 
+# TODO: add GYP_DEFINES: disable_nacl=1 use_sysroot=1 (AutomatedBuildSetup)
+# TODO: run automate-git.py using Python 2.7 from depot_tools
+
 """Build CEF Python and use prebuilt CEF binaries or build CEF from sources.
 
 Usage:
@@ -128,10 +131,9 @@ def setup_options(docopt_args):
     Options.cefpython_dir = os.path.dirname(Options.tools_dir)
 
     # --cef-branch
-    # TODO: by default use branch by calling cefpython_version()
     if not Options.cef_branch:
-        print("[automate.py] ERROR: --cef-branch flag is required")
-        sys.exit(1)
+        # Use branch from the src/version/cef_version_*.h file
+        Options.cef_branch = get_cefpython_version()["CHROME_VERSION_BUILD"]
 
     # --gyp-msvs-version
     if not Options.gyp_msvs_version:
@@ -481,7 +483,6 @@ def run_git(command_line, working_dir):
 
 def run_automate_git():
     """Run CEF automate-git.py."""
-    # TODO: run automate-git.py using Python 2.7 from depot_tools
     script = os.path.join(Options.cefpython_dir, "tools", "automate-git.py")
     """
     Example automate-git.py command:
