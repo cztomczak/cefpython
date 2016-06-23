@@ -101,9 +101,7 @@ Run the automate.py tool using the --prebuilt-cef flag that will download
 prebuilt binaries from GitHub Releases using version information from
 src/version/.
 
-__NOTE__: The --prebuilt-cef flag is not implemented yet - you need to
-download manually from GitHub Releases and extract to
-cefpython/build/.
+__NOTE__: The --prebuilt-cef flag is not implemented yet.
 ```
 cd tools/
 python automate.py --prebuilt-cef
@@ -168,7 +166,7 @@ There are two sites that provide latest builds of CEF:
 * Spotify - http://opensource.spotify.com/cefbuilds/index.html
   * This is a new build system
   * Since 07/06/2016 all builds are without tcmalloc, see
-    [cefpython/#76](https://github.com/cztomczak/cefpython/issues/73)
+    [cefpython/#73](https://github.com/cztomczak/cefpython/issues/73)
     and [cef/#1827](https://bitbucket.org/chromiumembedded/cef/issues/1827)
 * Adobe - https://cefbuilds.com/
   * This is an old build system. It probably still builds with tcmalloc
@@ -177,11 +175,8 @@ There are two sites that provide latest builds of CEF:
 Official CEF Python binaries come with additional patches to CEF/Chromium,
 see the [patches/](../../../tree/master/patches) directory. Whether you
 need these patches depends on your use case, they may not be required
-and thus you could use the Spotify binaries. As of this writing there are
-three patches:
-* issue73 patch - tcmalloc issues, Spotify builds already apply it
-* issue125 patch - for https cache problems when using private certificates
-* issue218 patch - not required when running GTK or Kivy examples
+and thus you could use the Spotify binaries. Spotify builds have the
+issue73 patch (tcmalloc) applied.
 
 
 ## How to patch
