@@ -65,6 +65,7 @@ def toc_dir(dir_):
     modified and the number of warnings."""
     files = glob.glob(os.path.join(dir_, "*.md"))
     modified_any = False
+    warnings = 0
     for file_ in files:
         if "API-categories.md" in file_ or "API-index.md" in file_:
             continue

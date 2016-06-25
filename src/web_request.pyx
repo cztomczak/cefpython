@@ -2,6 +2,9 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+import weakref
+
 cdef object g_pyWebRequests = weakref.WeakValueDictionary()
 cdef int g_webRequestMaxId = 0
 
@@ -77,9 +80,10 @@ cdef class PyWebRequest:
                 <CefRefPtr[WebRequestClient]?>new WebRequestClient(
                         self.webRequestId))
         self.pyWebRequestClient = pyWebRequestClient
-        self.cefWebRequest = <CefRefPtr[CefURLRequest]?>(CefURLRequest_Create(\
-                pyRequest.cefRequest, \
-                <CefRefPtr[CefURLRequestClient]?>(cppWebRequestClient)))
+        self.cefWebRequest = <CefRefPtr[CefURLRequest]?>(CefURLRequest_Create(
+                pyRequest.cefRequest,
+                <CefRefPtr[CefURLRequestClient]?>cppWebRequestClient,
+                <CefRefPtr[CefRequestContext]?>NULL))
 
     cdef object GetCallback(self, str funcName):
         if hasattr(self.pyWebRequestClient, funcName) and (
@@ -118,8 +122,8 @@ cdef class PyWebRequest:
 cdef public void WebRequestClient_OnUploadProgress(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
-        cef_types.uint64 current,
-        cef_types.uint64 total
+        cef_types.int64 current,
+        cef_types.int64 total
         ) except * with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
@@ -136,8 +140,8 @@ cdef public void WebRequestClient_OnUploadProgress(
 cdef public void WebRequestClient_OnDownloadProgress(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
-        cef_types.uint64 current,
-        cef_types.uint64 total
+        cef_types.int64 current,
+        cef_types.int64 total
         ) except * with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback

@@ -47,7 +47,6 @@ if __name__ == '__main__':
         "debug": True,
         "log_file": "debug.log",
         "log_severity": chrome.cefpython.LOGSEVERITY_INFO,
-        "release_dcheck_enabled": True,
         # "cache_path": "webcache/",
     })
     print('[sample1.py] wx.version=%s' % wx.version())

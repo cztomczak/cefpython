@@ -117,7 +117,9 @@ postData type.
 | --- | --- |
 | __Return__ | dict |
 
-Get all header fields with duplicate keys overwritten by last.
+Get the header values. Will not include the Referer value if any.
+
+Duplicate values are overwritten by the last one.
 
 
 ### GetHeaderMultimap
@@ -126,7 +128,10 @@ Get all header fields with duplicate keys overwritten by last.
 | --- | --- |
 | __Return__ | list |
 
-Get all header fields. Returns list of tuples (name, value). Headers may have duplicate keys, if you want to ignore duplicates use GetHeaderMap().
+Get the header values. Will not include the Referer value if any.
+
+Returns list of tuples (name, value). Headers may have duplicate keys,
+if you want to ignore duplicates use GetHeaderMap().
 
 
 ### SetHeaderMap
@@ -136,7 +141,8 @@ Get all header fields. Returns list of tuples (name, value). Headers may have du
 | headerMap | dict |
 | __Return__ | void |
 
-Set all header fields.
+Set the header values. If a Referer value exists in the header map it will
+be removed and ignored.
 
 
 ### SetHeaderMultimap
@@ -146,7 +152,10 @@ Set all header fields.
 | headerMultimap | list |
 | __Return__ | void |
 
-Set all header fields. `headerMultimap` must be a list of tuples (name, value).
+Set the header values. If a Referer value exists in the header map it will
+be removed and ignored.
+
+`headerMultimap` must be a list of tuples (name, value).
 
 
 ### GetFlags
@@ -159,13 +168,11 @@ Get the flags used in combination with WebRequest.
 
 Available flags (access via `cefpython.Request.Flags["xxx"]`):
 
-  * **None** - Default behavior.
+* **None** - Default behavior.
 * **SkipCache** - If set the cache will be skipped when handling the request.
-* **AllowCachedCredentials** - If set user name, password, and cookies may be sent with the request.
-* **AllowCookies** - If set cookies may be sent with the request and saved from the response. `AllowCachedCredentials` must also be set.
+* **AllowCachedCredentials** - If set user name, password, and cookies may be
+      sent with the request, and cookies may be saved from the response.
 * **ReportUploadProgress** - If set upload progress events will be generated when a request has a body.
-* **ReportLoadTiming** - If set load timing info will be collected for the request.
-* **ReportRawHeaders** - If set the headers sent and received for the request will be recorded.
 * **NoDownloadData** - If set the [WebRequestClient](WebRequestClient.md)::`OnDownloadData` method will not be called.
 * **NoRetryOn5xx** - If set 5xx redirect errors will be propagated to the observer instead of automatically re-tried. This currently only applies for requests originated in the browser process.
 
@@ -209,7 +216,8 @@ WebRequest.
 
 Not yet implemented in CEF Python.
 
-Get the resource type for this request. Accurate resource type information may only be available in the browser process.
+Get the resource type for this request. Only available in the browser
+process.
 
 
 ### GetTransitionType

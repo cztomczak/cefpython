@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 # ------------------------------------------------------------------------------
 # Tests
 # ------------------------------------------------------------------------------
@@ -21,6 +23,7 @@
 
 cdef PyCookieManager g_globalCookieManager = None
 # See StoreUserCookieVisitor().
+import weakref
 cdef object g_userCookieVisitors = weakref.WeakValueDictionary()
 cdef int g_userCookieVisitorMaxId = 0
 
@@ -180,7 +183,8 @@ class CookieManager:
         global g_globalCookieManager
         cdef CefRefPtr[CefCookieManager] cefCookieManager
         if not g_globalCookieManager:
-            cefCookieManager = CefCookieManager_GetGlobalManager()
+            cefCookieManager = CefCookieManager_GetGlobalManager(
+                    <CefRefPtr[CefCompletionCallback]?>NULL)
             g_globalCookieManager = CreatePyCookieManager(cefCookieManager)
         return g_globalCookieManager
 
@@ -188,7 +192,8 @@ class CookieManager:
     def CreateManager(py_string path, py_bool persistSessionCookies=False):
         cdef CefRefPtr[CefCookieManager] cefCookieManager
         cefCookieManager = CefCookieManager_CreateManager(
-                PyToCefStringValue(path), bool(persistSessionCookies))
+                PyToCefStringValue(path), bool(persistSessionCookies),
+                <CefRefPtr[CefCompletionCallback]?>NULL)
         if <void*>cefCookieManager != NULL and cefCookieManager.get():
             return CreatePyCookieManager(cefCookieManager)
         return None
@@ -210,7 +215,8 @@ cdef class PyCookieManager:
         cdef cpp_vector[CefString] schemesVector
         for scheme in schemes:
             schemesVector.push_back(PyToCefStringValue(scheme))
-        self.cefCookieManager.get().SetSupportedSchemes(schemesVector)
+        self.cefCookieManager.get().SetSupportedSchemes(schemesVector,
+                <CefRefPtr[CefCompletionCallback]?>NULL)
 
     cdef py_void ValidateUserCookieVisitor(self, object userCookieVisitor):
         if userCookieVisitor and hasattr(userCookieVisitor, "Visit") and (
@@ -243,17 +249,20 @@ cdef class PyCookieManager:
         assert isinstance(cookie, Cookie), "cookie object is invalid"
         CefPostTask(TID_IO, NewCefRunnableMethod(self.cefCookieManager.get(),
                 &cef_cookie_manager_namespace.SetCookie, 
-                PyToCefStringValue(url), cookie.cefCookie))
+                PyToCefStringValue(url), cookie.cefCookie,
+                <CefRefPtr[CefSetCookieCallback]?>NULL))
 
     cpdef py_void DeleteCookies(self, py_string url, py_string cookie_name):
         CefPostTask(TID_IO, NewCefRunnableMethod(self.cefCookieManager.get(),
                 &cef_cookie_manager_namespace.DeleteCookies, 
-                PyToCefStringValue(url), PyToCefStringValue(cookie_name)))
+                PyToCefStringValue(url), PyToCefStringValue(cookie_name),
+                <CefRefPtr[CefDeleteCookiesCallback]?>NULL))
 
     cpdef py_bool SetStoragePath(self, py_string path, 
             py_bool persistSessionCookies=False):
         return self.cefCookieManager.get().SetStoragePath(
-                PyToCefStringValue(path), bool(persistSessionCookies))
+                PyToCefStringValue(path), bool(persistSessionCookies),
+                <CefRefPtr[CefCompletionCallback]?>NULL)
 
 # ------------------------------------------------------------------------------
 # PyCookieVisitor

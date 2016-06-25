@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef public void V8FunctionHandler_Execute(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
@@ -37,7 +39,7 @@ cdef public void V8FunctionHandler_Execute(
         functionArguments = CefListValueToPyList(cefBrowser, 
                 cefFunctionArguments)
         returnValue = function(*functionArguments)
-        if returnValue != None:
+        if returnValue is not None:
             Debug("V8FunctionHandler_Execute() WARNING: function returned" \
                     "value, but returning values to javascript is not " \
                     "supported, functionName=%s" % functionName)

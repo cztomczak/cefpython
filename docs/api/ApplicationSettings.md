@@ -7,32 +7,35 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Settings](#settings)
-  * [auto_zooming (string)](#auto_zooming-string)
-  * [background_color (int)](#background_color-int)
-  * [browser_subprocess_path (string)](#browser_subprocess_path-string)
-  * [cache_path (string)](#cache_path-string)
-  * [command_line_args_disabled (bool)](#command_line_args_disabled-bool)
-  * [context_menu (dict)](#context_menu-dict)
-  * [downloads_enabled (bool)](#downloads_enabled-bool)
-  * [ignore_certificate_errors (bool)](#ignore_certificate_errors-bool)
-  * [javascript_flags (string)](#javascript_flags-string)
-  * [locale (string)](#locale-string)
-  * [locales_dir_path (string)](#locales_dir_path-string)
-  * [debug (bool)](#debug-bool)
-  * [log_file (string)](#log_file-string)
-  * [log_severity (int)](#log_severity-int)
-  * [multi_threaded_message_loop (bool)](#multi_threaded_message_loop-bool)
-  * [pack_loading_disabled (bool)](#pack_loading_disabled-bool)
-  * [persist_session_cookies (bool)](#persist_session_cookies-bool)
-  * [product_version (string)](#product_version-string)
-  * [release_dcheck_enabled (bool)](#release_dcheck_enabled-bool)
-  * [remote_debugging_port (int)](#remote_debugging_port-int)
-  * [resources_dir_path (string)](#resources_dir_path-string)
-  * [single_process (bool)](#single_process-bool)
-  * [string_encoding (string)](#string_encoding-string)
-  * [uncaught_exception_stack_size (int)](#uncaught_exception_stack_size-int)
-  * [unique_request_context_per_browser (bool)](#unique_request_context_per_browser-bool)
-  * [user_agent (string)](#user_agent-string)
+  * [accept_language_list](#accept_language_list)
+  * [auto_zooming](#auto_zooming)
+  * [background_color](#background_color)
+  * [browser_subprocess_path](#browser_subprocess_path)
+  * [cache_path](#cache_path)
+  * [command_line_args_disabled](#command_line_args_disabled)
+  * [context_menu](#context_menu)
+  * [downloads_enabled](#downloads_enabled)
+  * [ignore_certificate_errors](#ignore_certificate_errors)
+  * [javascript_flags](#javascript_flags)
+  * [locale](#locale)
+  * [locales_dir_path](#locales_dir_path)
+  * [debug](#debug)
+  * [log_file](#log_file)
+  * [log_severity](#log_severity)
+  * [multi_threaded_message_loop](#multi_threaded_message_loop)
+  * [pack_loading_disabled](#pack_loading_disabled)
+  * [persist_session_cookies](#persist_session_cookies)
+  * [persist_user_preferences](#persist_user_preferences)
+  * [product_version](#product_version)
+  * [remote_debugging_port](#remote_debugging_port)
+  * [resources_dir_path](#resources_dir_path)
+  * [single_process](#single_process)
+  * [string_encoding](#string_encoding)
+  * [uncaught_exception_stack_size](#uncaught_exception_stack_size)
+  * [unique_request_context_per_browser](#unique_request_context_per_browser)
+  * [user_agent](#user_agent)
+  * [user_data_path](#user_data_path)
+  * [windowless_rendering_enabled](#windowless_rendering_enabled)
 
 
 ## Introduction
@@ -47,8 +50,20 @@ There are hundreds of options that can be set through CEF/Chromium command line 
 ## Settings
 
 
-### auto_zooming (string)
+### accept_language_list
 
+(string)
+Comma delimited ordered list of language codes without any
+whitespace that
+will be used in the "Accept-Language" HTTP header. May be overridden on a
+per-browser basis using the CefBrowserSettings.accept_language_list value.
+If both values are empty then "en-US,en" will be used. Can be overridden
+for individual CefRequestContext instances via the
+CefRequestContextSettings.accept_language_list value.
+
+### auto_zooming
+
+(string)
 Windows only. Perform automatic zooming of browser contents. Example values for auto_zooming (numeric value means a zoom level):
 
   * "system_dpi" - use system DPI settings, see the [DpiAware](DpiAware.md) wiki page for more details.
@@ -66,44 +81,55 @@ Example values that can be set in Win7 DPI settings (Control Panel Appearance an
   * Custom 75% = 72 DPI = -1.0 zoom level
 
 
-### background_color (int)
+### background_color
 
-Used on Mac OS X to specify the background color for hardware accelerated
-content.
+(int)
+Opaque background color used for accelerated content. By default the
+background color will be white. Only the RGB compontents of the specified
+value will be used. The alpha component must greater than 0 to enable use
+of the background color but will be otherwise ignored.
 
 32-bit ARGB color value, not premultiplied. The color components are always
 in a known order. Equivalent to the `SkColor` type.
 
 
-### browser_subprocess_path (string)
+### browser_subprocess_path
 
+(string)
 The path to a separate executable that will be launched for sub-processes.
 By default the browser process executable is used. See the comments on
 CefExecuteProcess() for details. Also configurable using the --browser-subprocess-path switch.
 
 
-### cache_path (string)
+### cache_path
 
-The location where cache data will be stored on disk. If empty an in-memory
-cache will be used for some features and a temporary disk cache for others.
-HTML5 databases such as localStorage will only persist across sessions if a
-cache path is specified.
+(string)
+The location where cache data will be stored on disk. If empty then
+browsers will be created in "incognito mode" where in-memory caches are
+used for storage and no data is persisted to disk. HTML5 databases such as
+localStorage will only persist across sessions if a cache path is
+specified. Can be overridden for individual CefRequestContext instances via
+the CefRequestContextSettings.cache_path value.
 
-CEF flushes cookies or other cache data to disk every 30 seconds, or immediately when [cefpython](cefpython.md).Shutdown() is called.
+CEF flushes cookies or other cache data to disk every 30 seconds,
+or immediately when [cefpython](cefpython.md).Shutdown() is called.
 
-When this option is not set (empty string), a unique cache directory will be created in the user's temp directory for each run of the application.
+When this option is not set (empty string), a unique cache directory
+will be created in the user's temp directory for each run of the application.
 
 
-### command_line_args_disabled (bool)
+### command_line_args_disabled
 
+(bool)
 Set to true (1) to disable configuration of browser process features using
 standard CEF and Chromium [command-line arguments](CommandLineSwitches.md). Configuration can still
 be specified using CEF data structures or via the
 `CefApp::OnBeforeCommandLineProcessing()` method.
 
 
-### context_menu (dict)
+### context_menu
 
+(dict)
 Configure mouse context menu. All dict values are of type bool and are True by default.
 
   * `enabled` - whether to enable mouse context menu
@@ -114,33 +140,48 @@ Configure mouse context menu. All dict values are of type bool and are True by d
   * `devtools` - show the "Developer Tools" option. See also ApplicationSettings.`remote_debugging_port`.
 
 
-### downloads_enabled (bool)
+### downloads_enabled
 
+(bool)
 Default: True
 
 Downloads are handled automatically. A default `SaveAs` file dialog provided by OS is displayed. See also the [DownloadHandler](DownloadHandler.md) wiki page.
 
 
-### ignore_certificate_errors (bool)
+### ignore_certificate_errors
 
+(bool)
 Set to true (1) to ignore errors related to invalid SSL certificates.  
 Enabling this setting can lead to potential security vulnerabilities like  
 "man in the middle" attacks. Applications that load content from the  
 internet should not enable this setting. Also configurable using the  
 "ignore-certificate-errors" [command-line switch](CommandLineSwitches.md).
+Can be overridden for individual CefRequestContext instances via the
+CefRequestContextSettings.ignore_certificate_errors value.
 
-Important: the official CEF Python binary releases incorporate a patch that changes the caching behavior on sites with SSL certificate errors when used with this setting. Chromium by default disallows caching of content when there is certificate error. CEF Python applies a patch to Chromium sources to allow for caching even when there is certificate error, but only when the "ignore_certificate_errors" option is set to True. When it's set to False then the Chromium's caching behavior does not change. Enabling caching with certificate errors is useful on local private networks that use self-signed SSL certificates. See the referenced CEF topic in [Issue #125](../issues/125) for more details.
+__NOTE ON CACHING__: the official CEF Python binary releases incorporate a patch
+that changes the caching behavior on sites with SSL certificate errors
+when used with this setting. Chromium by default disallows caching of
+content when there is certificate error. CEF Python applies a patch to
+Chromium sources to allow for caching even when there is certificate error,
+but only when the "ignore_certificate_errors" option is set to True.
+When it's set to False then the Chromium's caching behavior does not
+change. Enabling caching with certificate errors is useful on local
+private networks that use self-signed SSL certificates. See the
+referenced CEF topic in [Issue #125](../issues/125) for more details.
 
 
-### javascript_flags (string)
+### javascript_flags
 
+(string)
 Custom flags that will be used when initializing the V8 Javascript engine.  
 The consequences of using custom flags may not be well tested. Also  
 configurable using the --js-flags switch.
 
 
-### locale (string)
+### locale
 
+(string)
 The locale string that will be passed to Webkit. If empty the default  
 locale of "en-US" will be used. This value is ignored on Linux where locale  
 is determined using environment variable parsing with the precedence order:  
@@ -148,8 +189,9 @@ LANGUAGE, LC_ALL, LC_MESSAGES and LANG. Also configurable using the "lang"
 [command-line switch](CommandLineSwitches.md).
 
 
-### locales_dir_path (string)
+### locales_dir_path
 
+(string)
 The fully qualified path for the locales directory. If this value is empty  
 the locales directory must be located in the module directory. This value  
 is ignored on Mac OS X where pack files are always loaded from the app  
@@ -157,58 +199,65 @@ bundle Resources directory. Also configurable using the "locales-dir-path"
 [command-line switch](CommandLineSwitches.md).
 
 
-### debug (bool)
+### debug
 
+(bool)
 Whether cefpython should display debug messages in console and write them to "log_file" (see the next option).
 
 In previous versions of cefpython, this option was set by overwriting module's g_debug global variable, this way of setting is now deprecated.
 
 
-### log_file (string)
+### log_file
 
-The directory and file name to use for the debug log. If not set, the  
-default name of "debug.log" will be used and the file will be written  
-to the application directory. Set it to empty string to not use this file.  
-Also configurable using the --log-file switch.
+(string)
+The directory and file name to use for the debug log. If empty a default
+log file name and location will be used. On Windows and Linux a "debug.log"
+file will be written in the main executable directory. On Mac OS X a
+"~/Library/Logs/<app name>_debug.log" file will be written where <app name>
+is the name of the main app executable. Also configurable using the
+"log-file" command-line switch.
 
 
-### log_severity (int)
+### log_severity
 
+(int)
 The log severity. Only messages of this severity level or higher will be  
 logged. Also configurable using the --log-severity switch with  
 a value of "verbose", "info", "warning", "error", "error-report" or  
 "disable".
 
-Accepted values:
-
-cefpython.`LOGSEVERITY_VERBOSE`  
-cefpython.`LOGSEVERITY_INFO`  
-cefpython.`LOGSEVERITY_WARNING`  
-cefpython.`LOGSEVERITY_ERROR`  
-cefpython.`LOGSEVERITY_ERROR_REPORT`  
-cefpython.`LOGSEVERITY_DISABLE`  
-
-The default is cefpython.`LOGSEVERITY_INFO`.
+Accepted values - constants available in the cefpython module:
+* LOGSEVERITY_VERBOSE
+* LOGSEVERITY_INFO (default)
+* LOGSEVERITY_WARNING
+* LOGSEVERITY_ERROR
+* LOGSEVERITY_ERROR_REPORT
+* LOGSEVERITY_DISABLE
 
 
-### multi_threaded_message_loop (bool)
+### multi_threaded_message_loop
 
+(bool)
 Set to true (1) to have the browser process message loop run in a separate
-thread. If false (0) than the [cefpython](cefpython.md).MessageLoopWork() function must be called from your application message loop.
+thread. If false (0) than the [cefpython](cefpython.md).MessageLoopWork()
+function must be called from your application message loop. This option is
+only supported on Windows.
 
-This option is not and cannot be supported on OS-X for architectural reasons. This option only works on Windows.
+This option is not and cannot be supported on OS-X for architectural reasons.
 
 
-### pack_loading_disabled (bool)
+### pack_loading_disabled
 
+(bool)
 Set to true (1) to disable loading of pack files for resources and locales.  
 A resource bundle handler must be provided for the browser and render  
 processes via `CefApp::GetResourceBundleHandler()` if loading of pack files  
 is disabled. Also configurable using the --disable-pack-loading switch.
 
 
-### persist_session_cookies (bool)
+### persist_session_cookies
 
+(bool)
 To persist session cookies (cookies without an expiry date or validity  
 interval) by default when using the global cookie manager set this value to  
 true. Session cookies are generally intended to be transient and most Web  
@@ -217,27 +266,29 @@ enable this feature. Also configurable using the "persist-session-cookies"
 [command-line switch](CommandLineSwitches.md).
 
 
-### product_version (string)
+### persist_user_preferences
 
+(bool)
+To persist user preferences as a JSON file in the cache path directory set
+this value to true (1). A |cache_path| value must also be specified
+to enable this feature. Also configurable using the
+"persist-user-preferences" command-line switch. Can be overridden for
+individual CefRequestContext instances via the
+CefRequestContextSettings.persist_user_preferences value.
+
+
+### product_version
+
+(string)
 Value that will be inserted as the product portion of the default  
 User-Agent string. If empty the Chromium product version will be used. If  
 |userAgent| is specified this value will be ignored. Also configurable  
 using the --product-version switch.
 
 
-### release_dcheck_enabled (bool)
+### remote_debugging_port
 
-Enable DCHECK in release mode to ease debugging. Also configurable using the  
-"enable-release-dcheck" [command-line switch](CommandLineSwitches.md).
-
-Cefpython binaries are available only using release builds.  
-Failed DCHECKs will be displayed to the console or logged to a file,  
-this may help identify problems in an application. Do not enable it  
-in production as it might hurt performance.
-
-
-### remote_debugging_port (int)
-
+(int)
 Set to a value between 1024 and 65535 to enable remote debugging on the  
 specified port. For example, if 8080 is specified the remote debugging URL  
 will be http://127.0.0.1:8080. CEF can be remotely debugged from CEF or  
@@ -249,25 +300,28 @@ A default value of 0 will generate a random port between 49152–65535. A value 
 NOTE: Do not use the --remote-debugging-port command line switch, as it collides with this option.
 
 
-### resources_dir_path (string)
+### resources_dir_path
 
+(string)
 The fully qualified path for the resources directory. If this value is  
 empty the cef.pak and/or devtools_resources.pak files must be located in  
 the module directory on Windows/Linux or the app bundle Resources directory  
 on Mac OS X. Also configurable using the --resources-dir-path switch.
 
 
-### single_process (bool)
+### single_process
 
+(bool)
 Set to true (1) to use a single process for the browser and renderer. This  
 run mode is not officially supported by Chromium and is less stable than  
 the multi-process default. Also configurable using the "single-process"  
 [command-line switch](CommandLineSwitches.md).
 
 
-### string_encoding (string)
+### string_encoding
 
-What kind of encoding should we use when converting unicode string to bytes string? This conversion is done when you pass a unicode string to javascript.
+(string)
+What kind of encoding should we use when converting unicode string to bytes string. This conversion is done when you pass a unicode string to javascript.
 
 This encoding is also used when converting bytes to unicode, this includes the post data in the [Request](Request.md) object.
 
@@ -276,8 +330,9 @@ The default is "utf-8".
 The behavior for encode/decode errors is to replace the unknown character with "?", this can be changed in the "string_utils.pyx" file through UNICODE_ENCODE_ERRORS/BYTES_DECODE_ERRORS constants.
 
 
-### uncaught_exception_stack_size (int)
+### uncaught_exception_stack_size
 
+(int)
 The number of stack trace frames to capture for uncaught exceptions.  
 Specify a positive value to enable the [JavascriptContextHandler](JavascriptContextHandler.md).OnUncaughtException()
 callback. Specify 0 (default value) and  
@@ -285,8 +340,9 @@ OnUncaughtException() will not be called. Also configurable using the
 "uncaught-exception-stack-size" [command-line switch](CommandLineSwitches.md).
 
 
-### unique_request_context_per_browser (bool)
+### unique_request_context_per_browser
 
+(bool)
 A request context provides request handling for a set of related browser  
 objects. Browser objects with different  
 request contexts will never be hosted in the same render process. Browser  
@@ -301,8 +357,28 @@ with the use of the RequestHandler.`GetCookieManager` callback, you have to
 set `unique_request_context_per_browser` to True.
 
 
-### user_agent (string)
+### user_agent
 
+(string)
 Value that will be returned as the User-Agent HTTP header. If empty the
 default User-Agent string will be used. Also configurable using the
 "user-agent" [command-line switch](CommandLineSwitches.md).
+
+
+### user_data_path
+
+(string)
+The location where user data such as spell checking dictionary files will
+be stored on disk. If empty then the default platform-specific user data
+directory will be used ("~/.cef_user_data" directory on Linux,
+"~/Library/Application Support/CEF/User Data" directory on Mac OS X,
+"Local Settings\Application Data\CEF\User Data" directory under the user
+profile directory on Windows).
+
+
+### windowless_rendering_enabled
+
+(bool)
+Set to true (1) to enable windowless (off-screen) rendering support. Do not
+enable this value if the application does not use windowless rendering as
+it may reduce rendering performance on some systems.

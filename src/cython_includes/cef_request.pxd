@@ -2,7 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from cef_base cimport CefBase
 from cef_ptr cimport CefRefPtr
 from cef_string cimport CefString
 from cef_types cimport cef_urlrequest_flags_t, cef_postdataelement_type_t
@@ -16,7 +15,7 @@ cdef extern from "include/cef_request.h":
     # ctypedef cef_urlrequest_flags_t CefRequestFlags
 
     cdef CefRefPtr[CefRequest] CefRequest_Create "CefRequest::Create"()
-    cdef cppclass CefRequest(CefBase):
+    cdef cppclass CefRequest:
         cpp_bool IsReadOnly()
         CefString GetURL()
         void SetURL(CefString& url)
@@ -39,7 +38,7 @@ cdef extern from "include/cef_request.h":
 
     cdef CefRefPtr[CefPostData] CefPostData_Create \
             "CefPostData::Create"()
-    cdef cppclass CefPostData(CefBase):
+    cdef cppclass CefPostData:
         cpp_bool IsReadOnly()
         size_t GetElementCount()
         void GetElements(ElementVector& elements)
@@ -51,7 +50,7 @@ cdef extern from "include/cef_request.h":
 
     cdef CefRefPtr[CefPostDataElement] CefPostDataElement_Create \
             "CefPostDataElement::Create"()
-    cdef cppclass CefPostDataElement(CefBase):
+    cdef cppclass CefPostDataElement:
         cpp_bool IsReadOnly()
         void SetToEmpty()
         void SetToFile(CefString& fileName)

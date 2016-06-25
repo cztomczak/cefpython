@@ -7,14 +7,16 @@ from cef_ptr cimport CefRefPtr
 cimport cef_types
 from cef_request cimport CefRequest
 from cef_response cimport CefResponse
+from cef_request_context cimport CefRequestContext
 
 cdef extern from "include/cef_urlrequest.h":
     cdef CefRefPtr[CefURLRequest] CefURLRequest_Create \
-            "CefURLRequest::Create"( \
-                    CefRefPtr[CefRequest] request, \
-                    CefRefPtr[CefURLRequestClient] client)
+            "CefURLRequest::Create"(
+                    CefRefPtr[CefRequest] request,
+                    CefRefPtr[CefURLRequestClient] client,
+                    CefRefPtr[CefRequestContext])
 
-    cdef cppclass CefURLRequest(CefBase):
+    cdef cppclass CefURLRequest:
         CefRefPtr[CefRequest] GetRequest()
         CefRefPtr[CefURLRequestClient] GetClient()
         cef_types.cef_urlrequest_status_t GetRequestStatus()
@@ -22,5 +24,5 @@ cdef extern from "include/cef_urlrequest.h":
         CefRefPtr[CefResponse] GetResponse()
         void Cancel()
 
-    cdef cppclass CefURLRequestClient(CefBase):
+    cdef cppclass CefURLRequestClient:
         pass

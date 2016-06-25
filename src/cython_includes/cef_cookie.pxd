@@ -8,6 +8,8 @@ from cef_time cimport cef_time_t
 from libcpp.vector cimport vector as cpp_vector
 from cef_string cimport CefString
 from cef_ptr cimport CefRefPtr
+# noinspection PyUnresolvedReferences
+from cef_callback cimport CefCompletionCallback
 
 cdef extern from "include/cef_cookie.h":
     ctypedef struct CefCookie:
@@ -23,22 +25,35 @@ cdef extern from "include/cef_cookie.h":
         cef_time_t expires
 
     cdef CefRefPtr[CefCookieManager] CefCookieManager_GetGlobalManager \
-            "CefCookieManager::GetGlobalManager"()
+            "CefCookieManager::GetGlobalManager"(
+                CefRefPtr[CefCompletionCallback] callback)
     cdef CefRefPtr[CefCookieManager] CefCookieManager_CreateManager \
-            "CefCookieManager::CreateManager"(const CefString& path, \
-                    cpp_bool persist_session_cookies)
+            "CefCookieManager::CreateManager"(
+                const CefString& path,
+                cpp_bool persist_session_cookies,
+                CefRefPtr[CefCompletionCallback] callback)
     cdef cppclass CefCookieManager:
-        void SetSupportedSchemes(const cpp_vector[CefString]& schemes)
+        void SetSupportedSchemes(const cpp_vector[CefString]& schemes,
+                                 CefRefPtr[CefCompletionCallback] callback)
         cpp_bool VisitAllCookies(CefRefPtr[CefCookieVisitor] visitor)
         cpp_bool VisitUrlCookies(const CefString& url, 
                                  cpp_bool includeHttpOnly,
                                  CefRefPtr[CefCookieVisitor] visitor)
-        cpp_bool SetCookie(const CefString& url, const CefCookie& cookie)
+        cpp_bool SetCookie(const CefString& url, const CefCookie& cookie,
+                           CefRefPtr[CefSetCookieCallback] callback)
         cpp_bool DeleteCookies(const CefString& url,
-                               const CefString& cookie_name)
+                               const CefString& cookie_name,
+                               CefRefPtr[CefDeleteCookiesCallback] callback)
         cpp_bool SetStoragePath(const CefString& path,
-                                cpp_bool persist_session_cookies)
-        # cpp_bool FlushStore(CefRefPtr[CefCompletionHandler] handler)
+                                cpp_bool persist_session_cookies,
+                                CefRefPtr[CefCompletionCallback] callback)
+        # cpp_bool FlushStore(CefRefPtr[CefCompletionCallback] handler)
 
     cdef cppclass CefCookieVisitor:
+        pass
+
+    cdef cppclass CefSetCookieCallback:
+        pass
+
+    cdef cppclass CefDeleteCookiesCallback:
         pass

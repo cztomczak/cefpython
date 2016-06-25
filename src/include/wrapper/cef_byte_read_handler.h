@@ -37,6 +37,8 @@
 #define CEF_INCLUDE_WRAPPER_CEF_BYTE_READ_HANDLER_H_
 #pragma once
 
+#include "include/base/cef_lock.h"
+#include "include/base/cef_macros.h"
 #include "include/cef_base.h"
 #include "include/cef_stream.h"
 
@@ -60,6 +62,7 @@ class CefByteReadHandler : public CefReadHandler {
   virtual int Seek(int64 offset, int whence) OVERRIDE;
   virtual int64 Tell() OVERRIDE;
   virtual int Eof() OVERRIDE;
+  virtual bool MayBlock() OVERRIDE { return false; }
 
  private:
   const unsigned char* bytes_;
@@ -67,8 +70,10 @@ class CefByteReadHandler : public CefReadHandler {
   int64 offset_;
   CefRefPtr<CefBase> source_;
 
+  base::Lock lock_;
+
   IMPLEMENT_REFCOUNTING(CefByteReadHandler);
-  IMPLEMENT_LOCKING(CefByteReadHandler);
+  DISALLOW_COPY_AND_ASSIGN(CefByteReadHandler);
 };
 
 #endif  // CEF_INCLUDE_WRAPPER_CEF_BYTE_READ_HANDLER_H_

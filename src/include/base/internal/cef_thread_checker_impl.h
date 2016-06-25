@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2011 Google Inc. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -26,35 +26,47 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// Do not include this header file directly. Use base/cef_thread_checker.h
+// instead.
+
+#ifndef CEF_INCLUDE_BASE_INTERNAL_THREAD_CHECKER_IMPL_H_
+#define CEF_INCLUDE_BASE_INTERNAL_THREAD_CHECKER_IMPL_H_
+
+#include "include/base/cef_lock.h"
+#include "include/base/cef_platform_thread.h"
+
+namespace base {
+namespace cef_internal {
+
+// Real implementation of ThreadChecker, for use in debug mode, or
+// for temporary use in release mode (e.g. to CHECK on a threading issue
+// seen only in the wild).
 //
-// ---------------------------------------------------------------------------
-//
-// The contents of this file must follow a specific format in order to
-// support the CEF translator tool. See the translator.README.txt file in the
-// tools directory for more information.
-//
+// Note: You should almost always use the ThreadChecker class to get the
+// right version for your build configuration.
+class ThreadCheckerImpl {
+ public:
+  ThreadCheckerImpl();
+  ~ThreadCheckerImpl();
 
-#ifndef CEF_INCLUDE_CEF_URL_H_
-#define CEF_INCLUDE_CEF_URL_H_
-#pragma once
+  bool CalledOnValidThread() const;
 
-#include "include/cef_base.h"
+  // Changes the thread that is checked for in CalledOnValidThread.  This may
+  // be useful when an object may be created on one thread and then used
+  // exclusively on another thread.
+  void DetachFromThread();
 
-///
-// Parse the specified |url| into its component parts.
-// Returns false if the URL is empty or invalid.
-///
-/*--cef()--*/
-bool CefParseURL(const CefString& url,
-                 CefURLParts& parts);
+ private:
+  void EnsureThreadIdAssigned() const;
 
-///
-// Creates a URL from the specified |parts|, which must contain a non-empty
-// spec or a non-empty host and path (at a minimum), but not both.
-// Returns false if |parts| isn't initialized as described.
-///
-/*--cef()--*/
-bool CefCreateURL(const CefURLParts& parts,
-                  CefString& url);
+  mutable base::Lock lock_;
+  // This is mutable so that CalledOnValidThread can set it.
+  // It's guarded by |lock_|.
+  mutable PlatformThreadRef valid_thread_id_;
+};
 
-#endif  // CEF_INCLUDE_CEF_URL_H_
+}  // namespace cef_internal
+}  // namespace base
+
+#endif  // CEF_INCLUDE_BASE_INTERNAL_THREAD_CHECKER_IMPL_H_

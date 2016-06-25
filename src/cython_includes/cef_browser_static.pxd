@@ -12,7 +12,7 @@ ELIF UNAME_SYSNAME == "Linux":
 ELIF UNAME_SYSNAME == "Darwin":
     from cef_mac cimport CefWindowHandle, CefWindowInfo
 from cef_client cimport CefClient
-from cef_types_wrappers cimport CefBrowserSettings
+from cef_types cimport CefBrowserSettings
 from cef_request_context cimport CefRequestContext
 from cef_browser cimport CefBrowser
 from libcpp cimport bool as cpp_bool

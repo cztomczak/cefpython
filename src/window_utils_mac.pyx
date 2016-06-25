@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 class WindowUtils:
     # You have to overwrite this class and provide implementations
     # for these methods.

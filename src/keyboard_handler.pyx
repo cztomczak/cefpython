@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 # cef_key_event_type_t
 KEYEVENT_RAWKEYDOWN = cef_types.KEYEVENT_RAWKEYDOWN
 KEYEVENT_KEYDOWN = cef_types.KEYEVENT_KEYDOWN
@@ -30,10 +32,10 @@ cdef dict CefToPyKeyEvent(const cef_types.CefKeyEvent& cefKeyEvent):
         "modifiers": cefKeyEvent.modifiers,
         "windows_key_code": cefKeyEvent.windows_key_code,
         "native_key_code": cefKeyEvent.native_key_code,
-        "is_system_key": cefKeyEvent.is_system_key,
+        "is_system_key": bool(cefKeyEvent.is_system_key),
         "character": cefKeyEvent.character,
         "unmodified_character": cefKeyEvent.unmodified_character,
-        "focus_on_editable_field": cefKeyEvent.focus_on_editable_field
+        "focus_on_editable_field": bool(cefKeyEvent.focus_on_editable_field)
     }
     return pyKeyEvent
 

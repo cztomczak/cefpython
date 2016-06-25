@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
         CefRefPtr[CefListValue] extra_info
         ) except * with gil:
@@ -15,7 +17,6 @@ cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
 cdef public void BrowserProcessHandler_OnBeforeChildProcessLaunch(
         CefRefPtr[CefCommandLine] cefCommandLine
         ) except * with gil:
-    global g_commandLineSwitches
     try:
         AppendSwitchesToCommandLine(cefCommandLine, g_commandLineSwitches)
         Debug("BrowserProcessHandler_OnBeforeChildProcessLaunch()")

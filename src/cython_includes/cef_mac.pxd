@@ -4,21 +4,19 @@
 
 include "compile_time_constants.pxi"
 
-from cef_types_mac cimport _cef_key_info_t
-from cef_types_wrappers cimport CefStructBase
 from libcpp cimport bool as cpp_bool
 
 cdef extern from "include/internal/cef_linux.h":
-    ctypedef _cef_key_info_t CefKeyInfo
+
     ctypedef void* CefWindowHandle
     ctypedef void* CefCursorHandle
 
     cdef cppclass CefWindowInfo:
-        void SetAsChild(CefWindowHandle ParentView, int x, int y, int width,
-                  int height)
-        void SetTransparentPainting(cpp_bool)
-        void SetAsOffScreen(CefWindowHandle)
+        void SetAsChild(CefWindowHandle parent,
+                        int x, int y, int width, int height)
+        void SetAsWindowless(CefWindowHandle parent,
+                             cpp_bool transparent)
 
-    cdef cppclass CefMainArgs(CefStructBase):
+    cdef cppclass CefMainArgs:
         CefMainArgs()
         CefMainArgs(int argc_arg, char** argv_arg)

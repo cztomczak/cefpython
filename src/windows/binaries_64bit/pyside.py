@@ -170,7 +170,6 @@ if __name__ == '__main__':
     settings = {}
     settings["log_file"] = GetApplicationPath("debug.log")
     settings["log_severity"] = cefpython.LOGSEVERITY_INFO
-    settings["release_dcheck_enabled"] = True # Enable only when debugging
     settings["browser_subprocess_path"] = "%s/%s" % (
             cefpython.GetModuleDirectory(), "subprocess")
     cefpython.Initialize(settings)

@@ -25,18 +25,11 @@ public:
         browser_ = browser;
     }
 
-    ///
-    // Called on the IO thread to retrieve the cookie manager. Cookies managers 
-    // can be unique per browser or shared across multiple browsers. 
-    // The global cookie manager will be used if this method returns NULL.
-    ///
-    /*--cef()--*/
     virtual CefRefPtr<CefCookieManager> GetCookieManager() OVERRIDE;
 
 private:
     CefRefPtr<CefBrowser> browser_;
 
 private:
-    // Include the default reference counting implementation.
-    IMPLEMENT_REFCOUNTING(ClientHandler);
+    IMPLEMENT_REFCOUNTING(RequestContextHandler);
 };

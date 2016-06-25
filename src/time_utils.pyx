@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef void DatetimeToCefTimeT(object pyDatetime, cef_time_t& timeT) except *:
     if not isinstance(pyDatetime, datetime.datetime):
         raise Exception("Expected object of type datetime.datetime")

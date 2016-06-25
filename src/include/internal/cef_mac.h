@@ -32,41 +32,8 @@
 #define CEF_INCLUDE_INTERNAL_CEF_MAC_H_
 #pragma once
 
-#if defined(OS_MACOSX)
-#include <pthread.h>
 #include "include/internal/cef_types_mac.h"
 #include "include/internal/cef_types_wrappers.h"
-
-// Atomic increment and decrement.
-inline long CefAtomicIncrement(long volatile *pDest) {  // NOLINT(runtime/int)
-  return __sync_add_and_fetch(pDest, 1);
-}
-inline long CefAtomicDecrement(long volatile *pDest) {  // NOLINT(runtime/int)
-  return __sync_sub_and_fetch(pDest, 1);
-}
-
-// Critical section wrapper.
-class CefCriticalSection {
- public:
-  CefCriticalSection() {
-    pthread_mutexattr_init(&attr_);
-    pthread_mutexattr_settype(&attr_, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&lock_, &attr_);
-  }
-  virtual ~CefCriticalSection() {
-    pthread_mutex_destroy(&lock_);
-    pthread_mutexattr_destroy(&attr_);
-  }
-  void Lock() {
-    pthread_mutex_lock(&lock_);
-  }
-  void Unlock() {
-    pthread_mutex_unlock(&lock_);
-  }
-
-  pthread_mutex_t lock_;
-  pthread_mutexattr_t attr_;
-};
 
 // Handle types.
 #define CefCursorHandle cef_cursor_handle_t
@@ -112,8 +79,6 @@ struct CefWindowInfoTraits {
 
   static inline void set(const struct_type* src, struct_type* target,
       bool copy) {
-    target->view = src->view;
-    target->parent_view = src->parent_view;
     cef_string_set(src->window_name.str, src->window_name.length,
         &target->window_name, copy);
     target->x = src->x;
@@ -121,8 +86,10 @@ struct CefWindowInfoTraits {
     target->width = src->width;
     target->height = src->height;
     target->hidden = src->hidden;
-    target->transparent_painting = src->transparent_painting;
-    target->window_rendering_disabled = src->window_rendering_disabled;
+    target->parent_view = src->parent_view;
+    target->windowless_rendering_enabled = src->windowless_rendering_enabled;
+    target->transparent_painting_enabled = src->transparent_painting_enabled;
+    target->view = src->view;
   }
 };
 
@@ -135,9 +102,12 @@ class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
   explicit CefWindowInfo(const cef_window_info_t& r) : parent(r) {}
   explicit CefWindowInfo(const CefWindowInfo& r) : parent(r) {}
 
-  void SetAsChild(CefWindowHandle ParentView, int x, int y, int width,
+  ///
+  // Create the browser as a child view.
+  ///
+  void SetAsChild(CefWindowHandle parent, int x, int y, int width,
                   int height) {
-    parent_view = ParentView;
+    parent_view = parent;
     this->x = x;
     this->y = y;
     this->width = width;
@@ -145,16 +115,23 @@ class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
     hidden = false;
   }
 
-  void SetTransparentPainting(bool transparentPainting) {
-    transparent_painting = transparentPainting;
-  }
-
-  void SetAsOffScreen(NSView* view) {
-    window_rendering_disabled = true;
-    parent_view = view;
+  ///
+  // Create the browser using windowless (off-screen) rendering. No view
+  // will be created for the browser and all rendering will occur via the
+  // CefRenderHandler interface. The |parent| value will be used to identify
+  // monitor info and to act as the parent view for dialogs, context menus,
+  // etc. If |parent| is not provided then the main screen monitor will be used
+  // and some functionality that requires a parent view may not function
+  // correctly. If |transparent| is true a transparent background color will be
+  // used (RGBA=0x00000000). If |transparent| is false the background will be
+  // white and opaque. In order to create windowless browsers the
+  // CefSettings.windowless_rendering_enabled value must be set to true.
+  ///
+  void SetAsWindowless(CefWindowHandle parent, bool transparent) {
+    windowless_rendering_enabled = true;
+    parent_view = parent;
+    transparent_painting_enabled = transparent;
   }
 };
-
-#endif  // OS_MACOSX
 
 #endif  // CEF_INCLUDE_INTERNAL_CEF_MAC_H_

@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef dict g_pyFrames = {}
 
 cdef object GetUniqueFrameId(int browserId, object frameId):

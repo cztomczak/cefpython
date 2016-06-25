@@ -51,23 +51,32 @@ class CefClient;
 /*--cef(source=client)--*/
 class CefLifeSpanHandler : public virtual CefBase {
  public:
+  typedef cef_window_open_disposition_t WindowOpenDisposition;
+
   ///
-  // Called on the IO thread before a new popup window is created. The |browser|
-  // and |frame| parameters represent the source of the popup request. The
-  // |target_url| and |target_frame_name| values may be empty if none were
-  // specified with the request. The |popupFeatures| structure contains
+  // Called on the IO thread before a new popup browser is created. The
+  // |browser| and |frame| values represent the source of the popup request. The
+  // |target_url| and |target_frame_name| values indicate where the popup
+  // browser should navigate and may be empty if not specified with the request.
+  // The |target_disposition| value indicates where the user intended to open
+  // the popup (e.g. current tab, new tab, etc). The |user_gesture| value will
+  // be true if the popup was opened via explicit user gesture (e.g. clicking a
+  // link) or false if the popup opened automatically (e.g. via the
+  // DomContentLoaded event). The |popupFeatures| structure contains additional
   // information about the requested popup window. To allow creation of the
-  // popup window optionally modify |windowInfo|, |client|, |settings| and
+  // popup browser optionally modify |windowInfo|, |client|, |settings| and
   // |no_javascript_access| and return false. To cancel creation of the popup
-  // window return true. The |client| and |settings| values will default to the
-  // source browser's values. The |no_javascript_access| value indicates whether
-  // the new browser window should be scriptable and in the same process as the
-  // source browser.
+  // browser return true. The |client| and |settings| values will default to the
+  // source browser's values. If the |no_javascript_access| value is set to
+  // false the new browser will not be scriptable and may not be hosted in the
+  // same renderer process as the source browser.
   /*--cef(optional_param=target_url,optional_param=target_frame_name)--*/
   virtual bool OnBeforePopup(CefRefPtr<CefBrowser> browser,
                              CefRefPtr<CefFrame> frame,
                              const CefString& target_url,
                              const CefString& target_frame_name,
+                             WindowOpenDisposition target_disposition,
+                             bool user_gesture,
                              const CefPopupFeatures& popupFeatures,
                              CefWindowInfo& windowInfo,
                              CefRefPtr<CefClient>& client,
@@ -135,10 +144,8 @@ class CefLifeSpanHandler : public virtual CefBase {
   // 4.  User approves the close.
   // 5.  JavaScript 'onunload' handler executes.
   // 6.  Application's DoClose() handler is called. Application will:
-  //     A. Call CefBrowserHost::ParentWindowWillClose() to notify CEF that the
-  //        parent window will be closing.
-  //     B. Set a flag to indicate that the next close attempt will be allowed.
-  //     C. Return false.
+  //     A. Set a flag to indicate that the next close attempt will be allowed.
+  //     B. Return false.
   // 7.  CEF sends an OS close notification.
   // 8.  Application's top-level window receives the OS close notification and
   //     allows the window to close based on the flag from #6B.

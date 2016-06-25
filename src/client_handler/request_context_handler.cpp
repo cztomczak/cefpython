@@ -10,12 +10,6 @@
 // CefRequestContextHandler
 // --------------------------------------------------------------------------
 
-///
-// Called on the IO thread to retrieve the cookie manager. Cookies managers 
-// can be unique per browser or shared across multiple browsers. 
-// The global cookie manager will be used if this method returns NULL.
-///
-/*--cef()--*/
 CefRefPtr<CefCookieManager> RequestContextHandler::GetCookieManager() {
     REQUIRE_IO_THREAD();
     if (browser_.get()) {

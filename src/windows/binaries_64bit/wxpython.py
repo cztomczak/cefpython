@@ -480,7 +480,7 @@ class ClientHandler:
         print("    url = %s" % request.GetUrl()[:100])
         return False
 
-    def OnResourceRedirect(self, browser, frame, oldUrl, newUrlOut):
+    def OnResourceRedirect(self, browser, frame, oldUrl, newUrlOut, request):
         print("[wxpython.py] RequestHandler::OnResourceRedirect()")
         print("    old url = %s" % oldUrl[:100])
         print("    new url = %s" % newUrlOut[0][:100])
@@ -636,6 +636,7 @@ class ClientHandler:
     # ** This callback is executed on the IO thread **
     # Empty place-holders: popupFeatures, client.
     def OnBeforePopup(self, browser, frame, targetUrl, targetFrameName,
+            targetDisposition, userGesture,
             popupFeatures, windowInfo, client, browserSettings,
             noJavascriptAccess):
         print("[wxpython.py] LifespanHandler::OnBeforePopup()")
@@ -803,8 +804,6 @@ if __name__ == '__main__':
         "log_severity": cefpython.LOGSEVERITY_INFO,
         # Set to "" to disable logging to a file
         "log_file": GetApplicationPath("debug.log"),
-        # This should be enabled only when debugging
-        "release_dcheck_enabled": True,
 
         # These directories must be set on Linux
         "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",

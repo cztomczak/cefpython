@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef JavascriptCallback CreateJavascriptCallback(int callbackId,
         CefRefPtr[CefBrowser] cefBrowser, object frameId, py_string functionName):
     # frameId is int64

@@ -2,6 +2,10 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
+cimport cef_types
+
 # cef_paint_element_type_t, PaintElementType
 PET_VIEW = cef_types.PET_VIEW
 PET_POPUP = cef_types.PET_POPUP

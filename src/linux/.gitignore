@@ -1,7 +1,12 @@
 *.pak
 cefclient
+cefsimple
+chrome-sandbox
 *.so
 subprocess
 *.a
 *.o
+*.cc.o.d
 files/
+*.dat
+*.bin

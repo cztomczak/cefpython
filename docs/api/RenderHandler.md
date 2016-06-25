@@ -3,12 +3,21 @@
 
 # RenderHandler (interface)
 
-Implement this interface to handle events when window rendering is disabled (off-screen rendering). The methods of this class will be called on the UI thread.
+Implement this interface to handle events when window rendering is disabled
+(off-screen rendering). The methods of this class will be called on the UI thread.
+
+In order to create windowless browsers the
+ApplicationSettings.[windowless_rendering_enabled](ApplicationSettings.md#windowless_rendering_enabled)
+value must be set to true.
+
+Callbacks not implemented yet:
+* GetScreenInfo()
 
 Off-screen rendering examples:
 * [Kivy](https://github.com/cztomczak/cefpython/wiki/Kivy)
 * [Panda3D](https://github.com/cztomczak/cefpython/wiki/Panda3D)
-* [cefpython_offscreen_no_UI_framework.py](https://gist.github.com/stefanbacon/7b1571d57aee54aa9f8e9021b4848d06) - most basic usage of OSR to take screenshot of a page
+* [cefpython_offscreen_no_UI_framework.py](https://gist.github.com/stefanbacon/7b1571d57aee54aa9f8e9021b4848d06) -
+  most basic usage of OSR to take screenshot of a page
 
 
 Table of contents:
@@ -17,7 +26,6 @@ Table of contents:
   * [GetViewRect](#getviewrect)
   * [GetScreenRect](#getscreenrect)
   * [GetScreenPoint](#getscreenpoint)
-  * [GetScreenInfo](#getscreeninfo)
   * [OnPopupShow](#onpopupshow)
   * [OnPopupSize](#onpopupsize)
   * [OnPaint](#onpaint)
@@ -80,19 +88,6 @@ Called to retrieve the translation from view coordinates to actual screen coordi
 The `screenCoordinates` list should contain 2 elements: [x, y].
 
 
-### GetScreenInfo
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| screen_info | CefScreenInfo& |
-| __Return__ | bool |
-
-Not yet implemented.
-
-Called to allow the client to fill in the `CefScreenInfo` object with appropriate values. Return true if the |screen_info| structure has been modified. If the screen info rectangle is left empty the rectangle from `GetViewRect` will be used. If the rectangle is still empty or invalid popups may not be drawn correctly.
-
-
 ### OnPopupShow
 
 | Parameter | Type |
@@ -129,12 +124,18 @@ The `rect` list should contain 4 elements: [x, y, width, height].
 | height | int |
 | __Return__ | void |
 
-Called when an element should be painted. |paintElementType| indicates whether the element is the view or the popup widget. |buffer| contains the pixel data for the whole image. |dirtyRects| contains the set of rectangles that need to be repainted. On Windows |buffer| will be width\*height\*4 bytes in size and represents a BGRA image with an upper-left origin. The BrowserSettings.animation_frame_rate value controls the rate at which this method is called.
+Called when an element should be painted. Pixel values passed to this
+method are scaled relative to view coordinates based on the value of
+CefScreenInfo.device_scale_factor returned from GetScreenInfo. |type|
+indicates whether the element is the view or the popup widget. |buffer|
+contains the pixel data for the whole image. |dirtyRects| contains the set
+of rectangles in pixel coordinates that need to be repainted. |buffer| will
+be |width|*|height|*4 bytes in size and represents a BGRA image with an
+upper-left origin.
 
-`paintElementType` is one of:
-
-cefpython.`PET_VIEW`  
-cefpython.`PET_POPUP`  
+`paintElementType` constants in the cefpython module:
+* PET_VIEW
+* PET_POPUP
 
 `dirtyRects` is a list of rects: [[x, y, width, height], [..]]
 
@@ -147,7 +148,8 @@ cefpython.`PET_POPUP`
 | cursor | CursorHandle |
 | __Return__ | void |
 
-Called when the browser window's cursor has changed.
+Called when the browser's cursor has changed. If |type| is CT_CUSTOM then
+|custom_cursor_info| will be populated with the custom cursor information.
 
 `CursorHandle` is an int pointer.
 

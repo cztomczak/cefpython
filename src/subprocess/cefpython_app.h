@@ -12,11 +12,6 @@
 // the DebugLog() function instead, it will write the message
 // to the "debug.log" file.
 
-///
-// Implement this interface to provide handler implementations. Methods will be
-// called by the process and/or thread indicated.
-///
-/*--cef(source=client,no_debugct_check)--*/
 class CefPythonApp :
         public CefApp,
         public CefBrowserProcessHandler,
@@ -127,6 +122,5 @@ protected:
   std::string commandLineString_;
 
 private:
-  // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(CefPythonApp);
 };

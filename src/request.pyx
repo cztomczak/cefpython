@@ -2,15 +2,17 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 class Request:
     Flags = {
         "None": cef_types.UR_FLAG_NONE,
         "SkipCache": cef_types.UR_FLAG_SKIP_CACHE,
         "AllowCachedCredentials": cef_types.UR_FLAG_ALLOW_CACHED_CREDENTIALS,
-        "AllowCookies": cef_types.UR_FLAG_ALLOW_COOKIES,
+        "AllowCookies": 0, # keep for BC
         "ReportUploadProgress": cef_types.UR_FLAG_REPORT_UPLOAD_PROGRESS,
-        "ReportLoadTiming": cef_types.UR_FLAG_REPORT_LOAD_TIMING,
-        "ReportRawHeaders": cef_types.UR_FLAG_REPORT_RAW_HEADERS,
+        "ReportLoadTiming": 0, # keep for BC
+        "ReportRawHeaders": 0, # keep for BC
         "NoDownloadData": cef_types.UR_FLAG_NO_DOWNLOAD_DATA,
         "NoRetryOn5xx": cef_types.UR_FLAG_NO_RETRY_ON_5XX,
     }

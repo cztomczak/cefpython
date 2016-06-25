@@ -7,9 +7,8 @@
 
 include "compile_time_constants.pxi"
 
-from cef_types_wrappers cimport CefSettings
+from cef_types cimport CefSettings
 from cef_ptr cimport CefRefPtr
-from cef_base cimport CefBase
 from libcpp cimport bool as cpp_bool
 
 IF UNAME_SYSNAME == "Windows":
@@ -21,12 +20,18 @@ ELIF UNAME_SYSNAME == "Darwin":
 
 cdef extern from "include/cef_app.h":
 
-    cdef cppclass CefApp(CefBase):
+    cdef cppclass CefApp:
         pass
 
-    cdef int CefExecuteProcess(CefMainArgs& args, CefRefPtr[CefApp] application) nogil
+    cdef int CefExecuteProcess(CefMainArgs& args,
+                               CefRefPtr[CefApp] application,
+                               void* windows_sandbox_info
+                               ) nogil
 
-    cdef cpp_bool CefInitialize(CefMainArgs&, CefSettings&, CefRefPtr[CefApp]) nogil
+    cdef cpp_bool CefInitialize(CefMainArgs&,
+                                CefSettings&, CefRefPtr[CefApp],
+                                void* windows_sandbox_info
+                                ) nogil
 
     cdef void CefRunMessageLoop() nogil
     cdef void CefDoMessageLoopWork() nogil

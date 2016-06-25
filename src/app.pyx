@@ -2,10 +2,11 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef public void App_OnBeforeCommandLineProcessing_BrowserProcess(
         CefRefPtr[CefCommandLine] cefCommandLine
         ) except * with gil:
-    global g_commandLineSwitches
     try:
         AppendSwitchesToCommandLine(cefCommandLine, g_commandLineSwitches)
         Debug("App_OnBeforeCommandLineProcessing_BrowserProcess()")

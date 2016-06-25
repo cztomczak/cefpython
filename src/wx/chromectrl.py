@@ -410,7 +410,6 @@ def Initialize(settings=None, debug=False):
         settings["debug"] = True # cefpython messages in console and log_file
         settings["log_severity"] = cefpython.LOGSEVERITY_VERBOSE
         settings["log_file"] = "debug.log" # Set to "" to disable.
-        settings["release_dcheck_enabled"] = True
 
     g_settings = settings
     cefpython.Initialize(settings, switches)

@@ -114,6 +114,8 @@ Returns the parent of this frame or None if this is the main (top-level) frame.
 Frame identifiers are unique per render process, they are not
 globally unique.
 
+Returns < 0 if the underlying frame does not yet exist.
+
 
 ### GetBrowserIdentifier
 

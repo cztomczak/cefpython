@@ -9,6 +9,8 @@
 # Here in pyx you also need to convert Py_ssize_t returned by
 # enumerate(), to an int.
 
+include "cefpython.pyx"
+
 # -----------------------------------------------------------------------------
 # CEF values to Python values
 # -----------------------------------------------------------------------------

@@ -4,23 +4,20 @@
 
 include "compile_time_constants.pxi"
 
-from cef_base cimport CefBase
 from cef_types cimport int64
 from cef_string cimport CefString
 from libcpp cimport bool as cpp_bool
 from cef_ptr cimport CefRefPtr
-from cef_v8 cimport CefV8Context
 from cef_browser cimport CefBrowser
 from cef_string_visitor cimport CefStringVisitor
 
 cdef extern from "include/cef_frame.h":
 
-  cdef cppclass CefFrame(CefBase):
+  cdef cppclass CefFrame:
       cpp_bool IsValid()
       void ExecuteJavaScript(CefString& jsCode, CefString& scriptUrl, int startLine)
       CefString GetURL()
       int64 GetIdentifier()
-      CefRefPtr[CefV8Context] GetV8Context()
       cpp_bool IsMain()
       void LoadURL(CefString& url)
       void Undo()

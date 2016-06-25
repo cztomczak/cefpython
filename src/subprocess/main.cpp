@@ -26,6 +26,6 @@ int main(int argc, char **argv)
 #endif
 
 	CefRefPtr<CefPythonApp> app(new CefPythonApp);
-	int exitCode = CefExecuteProcess(mainArgs, app.get());
+	int exitCode = CefExecuteProcess(mainArgs, app.get(), NULL);
 	return exitCode;
 }

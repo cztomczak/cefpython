@@ -10,6 +10,7 @@ Table of contents:
   * [CanGoBack](#cangoback)
   * [CanGoForward](#cangoforward)
   * [CloseBrowser](#closebrowser)
+  * [CloseDevTools](#closedevtools)
   * [ExecuteFunction](#executefunction)
   * [ExecuteJavascript](#executejavascript)
   * [Find](#find)
@@ -44,6 +45,7 @@ Table of contents:
   * [IsWindowRenderingDisabled](#iswindowrenderingdisabled)
   * [LoadUrl](#loadurl)
   * [Navigate](#navigate)
+  * [NotifyMoveOrResizeStarted](#notifymoveorresizestarted)
   * [NotifyScreenInfoChanged](#notifyscreeninfochanged)
   * [ParentWindowWillClose](#parentwindowwillclose)
   * [Reload](#reload)
@@ -118,6 +120,16 @@ LifespanHandler::DoClose() documentation for additional usage
 information.
 
 
+### CloseDevTools
+
+| | |
+| --- | --- |
+| __Return__ | bool |
+
+Explicitly close the developer tools window if one exists for this browser
+instance.
+
+
 ### ExecuteFunction
 
 | Parameter | Type |
@@ -160,7 +172,7 @@ Calling javascript from native code synchronously is not possible in CEF 3. It i
 | findNext | bool |
 | __Return__ | void |
 
-Search for |searchText|. |searchID| can be custom, it is so that you can  have multiple searches running simultaneously. |forward| indicates whether to search forward or backward within the page. |matchCase| indicates whether the search should be case-sensitive. |findNext| indicates whether this is the first request or a follow-up.
+Search for |searchText|. |searchID| can be custom, it is so that you can  have multiple searches running simultaneously. |forward| indicates whether to search forward or backward within the page. |matchCase| indicates whether the search should be case-sensitive. |findNext| indicates whether this is the first request or a follow-up. The CefFindHandler instance, if any, returned via CefClient::GetFindHandler will be called to report find results.
 
 
 ### GetClientCallback
@@ -467,6 +479,16 @@ Load url in the main frame.
 This is an alias for the `LoadUrl` method.
 
 
+### NotifyMoveOrResizeStarted
+
+| | |
+| --- | --- |
+| __Return__ | void |
+
+Notify the browser that the window hosting it is about to be moved or
+resized. This method is only used on Windows and Linux.
+
+
 ### NotifyScreenInfoChanged
 
 | | |
@@ -487,10 +509,7 @@ disabled.
 | --- | --- |
 | __Return__ | void |
 
-Call this method before destroying a contained browser window. This method
-performs any internal cleanup that may be needed before the browser window
-is destroyed. See [LifespanHandler](LifespanHandler.md)::DoClose() documentation for
-additional usage information.
+This method does nothing. Kept for BC.
 
 
 ### Reload
@@ -634,10 +653,10 @@ Set client handler object (class instance), its members will be inspected. Priva
 
 | Parameter | Type |
 | --- | --- |
-| enable | bool |
+| focus | bool |
 | __Return__ | void |
 
-Set focus for the browser window. If |enable| is true focus will be set to the window. Otherwise, focus will be removed.
+Set whether the browser is focused.
 
 
 ### SetMouseCursorChangeDisabled

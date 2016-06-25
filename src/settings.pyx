@@ -6,12 +6,15 @@
 # CefApp::OnBeforeCommandLineProcessing(), see comment 10 by Marshall:
 # https://code.google.com/p/chromiumembedded/issues/detail?id=878#c10
 
+include "cefpython.pyx"
+
 LOGSEVERITY_DEFAULT = cef_types.LOGSEVERITY_DEFAULT
 LOGSEVERITY_VERBOSE = cef_types.LOGSEVERITY_VERBOSE
 LOGSEVERITY_INFO = cef_types.LOGSEVERITY_INFO
 LOGSEVERITY_WARNING = cef_types.LOGSEVERITY_WARNING
 LOGSEVERITY_ERROR = cef_types.LOGSEVERITY_ERROR
-LOGSEVERITY_ERROR_REPORT = cef_types.LOGSEVERITY_ERROR_REPORT
+# keep for BC
+LOGSEVERITY_ERROR_REPORT = cef_types.LOGSEVERITY_ERROR
 LOGSEVERITY_DISABLE = cef_types.LOGSEVERITY_DISABLE
 
 
@@ -34,14 +37,18 @@ cdef void SetApplicationSettings(
                 or key == "auto_zooming":
             # CEF Python only options. These are not to be found in CEF.
             continue
+        elif key == "accept_language_list":
+            cefString = new CefString(&cefAppSettings.accept_language_list)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
         elif key == "multi_threaded_message_loop":
-            cefAppSettings.multi_threaded_message_loop = bool(appSettings[key])
+            cefAppSettings.multi_threaded_message_loop = int(appSettings[key])
         elif key == "cache_path":
             cefString = new CefString(&cefAppSettings.cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
         elif key == "persist_session_cookies":
-            cefAppSettings.persist_session_cookies = bool(appSettings[key])
+            cefAppSettings.persist_session_cookies = int(appSettings[key])
         elif key == "user_agent":
             cefString = new CefString(&cefAppSettings.user_agent)
             PyToCefStringPointer(appSettings[key], cefString)
@@ -61,7 +68,8 @@ cdef void SetApplicationSettings(
         elif key == "log_severity":
             cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
         elif key == "release_dcheck_enabled":
-            cefAppSettings.release_dcheck_enabled = bool(appSettings[key])
+            # Keep for BC, just log info - no error
+            Debug("DEPRECATED: 'release_dcheck_enabled' setting")
         elif key == "javascript_flags":
             cefString = new CefString(&cefAppSettings.javascript_flags)
             PyToCefStringPointer(appSettings[key], cefString)
@@ -75,24 +83,34 @@ cdef void SetApplicationSettings(
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
         elif key == "pack_loading_disabled":
-            cefAppSettings.pack_loading_disabled = bool(appSettings[key])
+            cefAppSettings.pack_loading_disabled = int(appSettings[key])
         elif key == "uncaught_exception_stack_size":
             cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
         elif key == "single_process":
-            cefAppSettings.single_process = bool(appSettings[key])
+            cefAppSettings.single_process = int(appSettings[key])
         elif key == "browser_subprocess_path":
             cefString = new CefString(&cefAppSettings.browser_subprocess_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
         elif key == "command_line_args_disabled":
-            cefAppSettings.command_line_args_disabled = bool(appSettings[key])
+            cefAppSettings.command_line_args_disabled = int(appSettings[key])
         elif key == "remote_debugging_port":
             cefAppSettings.remote_debugging_port = int(appSettings[key])
         elif key == "ignore_certificate_errors":
-            cefAppSettings.ignore_certificate_errors = bool(appSettings[key])
+            cefAppSettings.ignore_certificate_errors = int(appSettings[key])
         elif key == "background_color":
             cefAppSettings.background_color = \
                     <cef_types.uint32>int(appSettings[key])
+        elif key == "persist_user_preferences":
+            cefAppSettings.persist_user_preferences = \
+                    int(appSettings[key])
+        elif key == "user_data_path":
+            cefString = new CefString(&cefAppSettings.user_data_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
+        elif key == "windowless_rendering_enabled":
+            cefAppSettings.windowless_rendering_enabled = \
+                    int(appSettings[key])
         else:
             raise Exception("Invalid appSettings key: %s" % key)
 
@@ -103,7 +121,14 @@ cdef void SetBrowserSettings(
     cdef CefString* cefString
 
     for key in browserSettings:
-        if key == "standard_font_family":
+        if key == "accept_language_list":
+            cefString = new CefString(&cefBrowserSettings.accept_language_list)
+            PyToCefStringPointer(browserSettings[key], cefString)
+            del cefString
+        elif key == "background_color":
+            cefBrowserSettings.background_color = \
+                    <cef_types.uint32>int(browserSettings[key])
+        elif key == "standard_font_family":
             cefString = new CefString(&cefBrowserSettings.standard_font_family)
             PyToCefStringPointer(browserSettings[key], cefString)
             del cefString
@@ -140,9 +165,8 @@ cdef void SetBrowserSettings(
             PyToCefStringPointer(browserSettings[key], cefString)
             del cefString
         elif key == "user_style_sheet_location":
-            cefString = new CefString(&cefBrowserSettings.user_style_sheet_location)
-            PyToCefStringPointer(browserSettings[key], cefString)
-            del cefString
+            # Keep for BC, just log info - no error
+            Debug("DEPRECATED: 'user_style_sheet_location' setting")
         elif key == "remote_fonts_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.remote_fonts = cef_types.STATE_DISABLED
@@ -189,10 +213,8 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.caret_browsing = (
                         cef_types.STATE_DISABLED)
         elif key == "java_disabled":
-            if browserSettings[key]:
-                cefBrowserSettings.java = cef_types.STATE_DISABLED
-            else:
-                cefBrowserSettings.java = cef_types.STATE_ENABLED
+            # Keep for BC, just log info - no error
+            Debug("DEPRECATED: 'java_disabled' setting")
         elif key == "plugins_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.plugins = cef_types.STATE_DISABLED
@@ -242,12 +264,7 @@ cdef void SetBrowserSettings(
             else:
                 cefBrowserSettings.tab_to_links = cef_types.STATE_ENABLED
         elif key == "author_and_user_styles_disabled":
-            if browserSettings[key]:
-                cefBrowserSettings.author_and_user_styles = (
-                        cef_types.STATE_DISABLED)
-            else:
-                cefBrowserSettings.author_and_user_styles = (
-                        cef_types.STATE_ENABLED)
+            Debug("DEPRECATED: 'author_and_user_styles_disabled' setting")
         elif key == "local_storage_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.local_storage = cef_types.STATE_DISABLED
@@ -271,11 +288,9 @@ cdef void SetBrowserSettings(
             else:
                 cefBrowserSettings.webgl = cef_types.STATE_ENABLED
         elif key == "accelerated_compositing_disabled":
-            if browserSettings[key]:
-                cefBrowserSettings.accelerated_compositing = (
-                        cef_types.STATE_DISABLED)
-            else:
-                cefBrowserSettings.accelerated_compositing = (
-                        cef_types.STATE_ENABLED)
+            Debug("DEPRECATED: 'accelerated_compositing_disabled' setting")
+        elif key == "windowless_frame_rate":
+            cefBrowserSettings.windowless_frame_rate =\
+                    <int>int(browserSettings[key])
         else:
             raise Exception("Invalid browserSettings key: %s" % key)

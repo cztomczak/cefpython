@@ -27,6 +27,5 @@ public:
             ) OVERRIDE;
     
 protected:
-  // Include the default reference counting implementation.
   IMPLEMENT_REFCOUNTING(CookieVisitor);
 };

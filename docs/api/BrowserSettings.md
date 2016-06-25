@@ -8,9 +8,9 @@ Table of contents:
 * [Introduction](#introduction)
 * [Settings](#settings)
   * [Font settings](#font-settings)
-  * [accelerated_compositing_disabled](#accelerated_compositing_disabled)
+  * [accept_language_list](#accept_language_list)
   * [application_cache_disabled](#application_cache_disabled)
-  * [author_and_user_styles_disabled](#author_and_user_styles_disabled)
+  * [background_color](#background_color)
   * [caret_browsing_enabled](#caret_browsing_enabled)
   * [databases_disabled](#databases_disabled)
   * [default_encoding](#default_encoding)
@@ -21,7 +21,6 @@ Table of contents:
   * [javascript_open_windows_disallowed](#javascript_open_windows_disallowed)
   * [javascript_close_windows_disallowed](#javascript_close_windows_disallowed)
   * [javascript_access_clipboard_disallowed](#javascript_access_clipboard_disallowed)
-  * [java_disabled](#java_disabled)
   * [local_storage_disabled](#local_storage_disabled)
   * [plugins_disabled](#plugins_disabled)
   * [remote_fonts](#remote_fonts)
@@ -32,11 +31,13 @@ Table of contents:
   * [user_style_sheet_location](#user_style_sheet_location)
   * [web_security_disabled](#web_security_disabled)
   * [webgl_disabled](#webgl_disabled)
+  * [windowless_frame_rate](#windowless_frame_rate)
 
 
 ## Introduction
 
-These settings can be passed to [cefpython](cefpython.md).CreateBrowser().
+This dictionary of settings can be passed to
+[cefpython](cefpython.md).CreateBrowser().
 
 Many of these settings have their command line switch equivalent, see the [CommandLineSwitches](CommandLineSwitches.md) page.
 
@@ -60,9 +61,13 @@ In some cases, the default values of settings that are suggested by its name may
 * minimum_logical_font_size (int)
 
 
-### accelerated_compositing_disabled
+### accept_language_list
 
-(bool) Controls whether content that depends on accelerated compositing can be used. Note that accelerated compositing requires hardware support and may not work on all systems even when enabled. Also configurable using the --disable-accelerated-compositing switch.
+(string)
+Comma delimited ordered list of language codes without any whitespace that
+will be used in the "Accept-Language" HTTP header. May be set globally
+using the CefBrowserSettings.accept_language_list value. If both values are
+empty then "en-US,en" will be used.
 
 
 ### application_cache_disabled
@@ -70,11 +75,14 @@ In some cases, the default values of settings that are suggested by its name may
 (bool) Controls whether the application cache can be used. Also configurable using the --disable-application-cache switch.
 
 
-### author_and_user_styles_disabled
+### background_color
 
-(bool) Controls whether style sheets can be used. Also configurable using the --disable-author-and-user-styles switch.
-
-This setting was removed in Chrome 33. Soon it will be removed from cefpython as well.
+(int)
+Opaque background color used for the browser before a document is loaded
+and when no document color is specified. By default the background color
+will be the same as CefSettings.background_color. Only the RGB compontents
+of the specified value will be used. The alpha component must greater than
+0 to enable use of the background color but will be otherwise ignored.
 
 
 ### caret_browsing_enabled
@@ -119,17 +127,16 @@ This setting was removed in Chrome 33. Soon it will be removed from cefpython as
 
 ### javascript_close_windows_disallowed
 
-(bool) Controls whether Javascript can be used to close windows that were not opened via Javascript. Javascript can still be used to close windows that were opened via Javascript. Also configurable using the --disable-javascript-close-windows switch.
+(bool) Controls whether JavaScript can be used to close windows that were not
+opened via JavaScript. JavaScript can still be used to close windows that
+were opened via JavaScript or that have no back/forward history. Also
+configurable using the "disable-javascript-close-windows" command-line
+switch.
 
 
 ### javascript_access_clipboard_disallowed
 
 (bool) Controls whether Javascript can access the clipboard. Also configurable using the --disable-javascript-access-clipboard switch.
-
-
-### java_disabled
-
-(bool) Controls whether the Java plugin will be loaded. Also configurable using the --disable-java switch.
 
 
 ### local_storage_disabled
@@ -182,3 +189,13 @@ This setting was removed in Chrome 33. Soon it will be removed from cefpython as
 ### webgl_disabled
 
 (bool) Controls whether WebGL can be used. Note that WebGL requires hardware support and may not work on all systems even when enabled. Also configurable using the --disable-webgl switch.
+
+
+### windowless_frame_rate
+
+(int) The maximum rate in frames per second (fps) that
+CefRenderHandler::OnPaint will be called for a windowless browser.
+The actual fps may be lower if the browser cannot generate frames at the
+requested rate. The minimum value is 1 and the maximum value is 60
+(default 30). This value can also be changed dynamically via
+CefBrowserHost::SetWindowlessFrameRate.

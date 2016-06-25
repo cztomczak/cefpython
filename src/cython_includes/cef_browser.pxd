@@ -5,15 +5,14 @@
 include "compile_time_constants.pxi"
 
 from cef_ptr cimport CefRefPtr
-from cef_base cimport CefBase
 from cef_string cimport CefString
 from cef_client cimport CefClient
 from libcpp cimport bool as cpp_bool
 from libcpp.vector cimport vector as cpp_vector
 from cef_frame cimport CefFrame
 cimport cef_types
-from cef_platform cimport CefKeyInfo
 from cef_types cimport int64
+from cef_types cimport CefBrowserSettings, CefPoint
 
 from cef_process_message cimport CefProcessMessage, CefProcessId
 
@@ -26,19 +25,15 @@ ELIF UNAME_SYSNAME == "Darwin":
 
 cdef extern from "include/cef_browser.h":
 
-    cdef cppclass CefBrowserHost(CefBase):
+    cdef cppclass CefBrowserHost:
 
         void CloseBrowser(cpp_bool force_close)
-        void ParentWindowWillClose()
         CefRefPtr[CefBrowser] GetBrowser()
         void SetFocus(cpp_bool enable)
         CefWindowHandle GetWindowHandle()
         CefWindowHandle GetOpenerWindowHandle()
         double GetZoomLevel()
         void SetZoomLevel(double zoomLevel)
-
-        CefString GetDevToolsURL(cpp_bool http_scheme)
-
         void StartDownload(const CefString& url)
         void SetMouseCursorChangeDisabled(cpp_bool disabled)
         cpp_bool IsMouseCursorChangeDisabled()
@@ -46,24 +41,31 @@ cdef extern from "include/cef_browser.h":
         void WasResized()
         void WasHidden(cpp_bool hidden)
         void NotifyScreenInfoChanged()
+        void NotifyMoveOrResizeStarted()
 
         void SendKeyEvent(cef_types.CefKeyEvent)
         void SendMouseClickEvent(cef_types.CefMouseEvent,
-                cef_types.cef_mouse_button_type_t type,
+                cef_types.cef_mouse_button_type_t mbtype,
                 cpp_bool mouseUp, int clickCount)
-        void SendMouseMoveEvent(cef_types.CefMouseEvent, \
+        void SendMouseMoveEvent(cef_types.CefMouseEvent,
                 cpp_bool mouseLeave)
-        void SendMouseWheelEvent(cef_types.CefMouseEvent, int deltaX, \
+        void SendMouseWheelEvent(cef_types.CefMouseEvent, int deltaX,
                 int deltaY)
         void SendFocusEvent(cpp_bool setFocus)
         void SendCaptureLostEvent()
+
+        void ShowDevTools(const CefWindowInfo& windowInfo,
+                          CefRefPtr[CefClient] client,
+                          const CefBrowserSettings& settings,
+                          const CefPoint& inspect_element_at)
+        void CloseDevTools()
 
         void Find(int identifier, const CefString& searchText, cpp_bool forward,
                 cpp_bool matchCase, cpp_bool findNext)
         void StopFinding(cpp_bool clearSelection)
         void Print()
 
-    cdef cppclass CefBrowser(CefBase):
+    cdef cppclass CefBrowser:
 
         CefRefPtr[CefBrowserHost] GetHost()
         cpp_bool CanGoBack()

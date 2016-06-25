@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef PyWebPluginInfo CreatePyWebPluginInfo(
         CefRefPtr[CefWebPluginInfo] cefPlugin):
     cdef PyWebPluginInfo pyPlugin = PyWebPluginInfo()

@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 TID_UI = cef_types.TID_UI
 TID_DB = cef_types.TID_DB
 TID_FILE = cef_types.TID_FILE

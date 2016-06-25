@@ -12,8 +12,8 @@
 //   statements with braces {} to guarantee the log to be
 //   written immediately.
 
-#ifndef __LOG_H__
-#define __LOG_H__
+#ifndef __LOG_DEBUG_H__
+#define __LOG_DEBUG_H__
 
 #include <sstream>
 #include <string>
@@ -153,15 +153,21 @@ class FILELOG_DECLSPEC FILELog : public Log<Output2FILE> {};
 #define FILELOG_MAX_LEVEL logDEBUG4
 #endif
 
-#define LOG(level) \
+// Name conflits with cef_logging.h, see:
+// https://bitbucket.org/chromiumembedded/cef/issues/1830
+// LOG, LOG_ERROR, LOG_WARNING and LOG_INFO are already defined
+// in cef_logging.h and must not be used here. So far we've only
+// used LOG_DEBUG in code.
+
+#define CEFPYTHON_LOG(level) \
     if (level > FILELOG_MAX_LEVEL) ;\
     else if (level > FILELog::ReportingLevel() || !Output2FILE::Stream()) ; \
     else FILELog().Get(level) \
 
-#define LOG_ERROR LOG(logERROR)
-#define LOG_WARNING LOG(logWARNING)
-#define LOG_INFO LOG(logINFO)
-#define LOG_DEBUG LOG(logDEBUG)
+// #define LOG_ERROR LOG(logERROR)
+// #define LOG_WARNING LOG(logWARNING)
+// #define LOG_INFO LOG(logINFO)
+#define LOG_DEBUG CEFPYTHON_LOG(logDEBUG)
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 
@@ -202,4 +208,4 @@ inline std::string NowTime()
 
 #endif //WIN32
 
-#endif //__LOG_H__
+#endif //__LOG_DEBUG_H__

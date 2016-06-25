@@ -2,12 +2,34 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
+from cef_types cimport WindowOpenDisposition
+# noinspection PyUnresolvedReferences
+cimport cef_types
+
+# WindowOpenDisposition
+WOD_UNKNOWN = cef_types.WOD_UNKNOWN
+WOD_SUPPRESS_OPEN = cef_types.WOD_SUPPRESS_OPEN
+WOD_CURRENT_TAB = cef_types.WOD_CURRENT_TAB
+WOD_SINGLETON_TAB = cef_types.WOD_SINGLETON_TAB
+WOD_NEW_FOREGROUND_TAB = cef_types.WOD_NEW_FOREGROUND_TAB
+WOD_NEW_BACKGROUND_TAB = cef_types.WOD_NEW_BACKGROUND_TAB
+WOD_NEW_POPUP = cef_types.WOD_NEW_POPUP
+WOD_NEW_WINDOW = cef_types.WOD_NEW_WINDOW
+WOD_SAVE_TO_DISK = cef_types.WOD_SAVE_TO_DISK
+WOD_OFF_THE_RECORD = cef_types.WOD_OFF_THE_RECORD
+WOD_IGNORE_ACTION = cef_types.WOD_IGNORE_ACTION
+
+
 cdef public cpp_bool LifespanHandler_OnBeforePopup(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         const CefString& targetUrl,
         const CefString& targetFrameName,
-        const int popupFeatures,
+        cef_types.cef_window_open_disposition_t targetDisposition,
+        cpp_bool userGesture,
+        const int popupFeaturesNotImpl,
         CefWindowInfo& windowInfo,
         CefRefPtr[CefClient]& client,
         CefBrowserSettings& settings,
@@ -34,8 +56,9 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
         callback = pyBrowser.GetClientCallback("OnBeforePopup")
         if callback:
             returnValue = bool(callback(pyBrowser, pyFrame, pyTargetUrl,
-                    pyTargetFrameName, None, pyWindowInfo, None,
-                    pyBrowserSettings, pyNoJavascriptAccess))
+                    pyTargetFrameName, targetDisposition, userGesture, None,
+                    pyWindowInfo, None, pyBrowserSettings,
+                    pyNoJavascriptAccess))
             noJavascriptAccess[0] = <cpp_bool>bool(pyNoJavascriptAccess[0])
             if len(pyBrowserSettings):
                 SetBrowserSettings(pyBrowserSettings[0], &settings)

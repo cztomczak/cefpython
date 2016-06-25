@@ -17,6 +17,9 @@ Table of contents:
 
 ## Preface
 
+You cannot instantiate the WebRequest class directly, use its static
+method instead by calling `cefpython.WebRequest.Create()`.
+
 Class used to make a URL request. URL requests are not associated with a
 browser instance so no client handler callbacks will be executed. URL requests
 can be created on any valid CEF thread in either the browser or render
@@ -25,6 +28,8 @@ on the same thread that created it.
 
 The `WebRequest` example can be found in the `wxpython-response.py` script on Linux.
 
+TODO: get rid of the static method WebRequest.Create by swapping objects
+using the `__new__()` method, see: https://stackoverflow.com/questions/3209233
 
 ## Methods
 
@@ -37,8 +42,19 @@ The `WebRequest` example can be found in the `wxpython-response.py` script on Li
 | handler | [WebRequestClient](WebRequestClient.md) |
 | __Return__ | static [WebRequest](WebRequest.md) |
 
- You cannot instantiate [WebRequest](WebRequest.md) class directly, use this static
- method instead by calling `cefpython.WebRequest.Create()`.
+Create a new URL request. Only GET, POST, HEAD, DELETE and PUT request
+methods are supported. Multiple post data elements are not supported and
+elements of type PDE_TYPE_FILE are only supported for requests originating
+from the browser process. Requests originating from the render process will
+receive the same handling as requests originating from Web content -- if
+the response contains Content-Disposition or Mime-Type header values that
+would not normally be rendered then the response may receive special
+handling inside the browser (for example, via the file download code path
+instead of the URL request code path). The |request| object will be marked
+as read-only after calling this method. In the browser process if
+|request_context| is empty the global request context will be used. In the
+render process |request_context| must be empty and the context associated
+with the current renderer process' browser will be used.
 
  The first parameter is a [Request](Request.md) object that needs to be created
  by calling `cefpython.Request.CreateRequest()`.
@@ -46,7 +62,8 @@ The `WebRequest` example can be found in the `wxpython-response.py` script on Li
  The [WebRequestClient](WebRequestClient.md) handler is a python class that implements
  the [WebRequestClient](WebRequestClient.md) callbacks.
 
- You must keep a strong reference to the [WebRequest](WebRequest.md) object
+ __IMPORTANT__: You must keep a strong reference to the [WebRequest](WebRequest
+ .md) object
  during the request, otherwise it gets destroyed and
  the [WebRequestClient](WebRequestClient.md) callbacks won't get called.
 

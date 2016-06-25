@@ -2,7 +2,10 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 # cef_mouse_button_type_t, SendMouseClickEvent().
+cimport cef_types
 MOUSEBUTTON_LEFT = cef_types.MBT_LEFT
 MOUSEBUTTON_MIDDLE = cef_types.MBT_MIDDLE
 MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
@@ -25,17 +28,17 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
 
     cdef PyBrowser pyBrowser
     cdef int browserId
-    cdef int id
+    cdef int identifier
 
     browserId = cefBrowser.get().GetIdentifier()
     if browserId in g_pyBrowsers:
         return g_pyBrowsers[browserId]
 
-    for id, pyBrowser in g_pyBrowsers.items():
+    for identifier, pyBrowser in g_pyBrowsers.items():
         if not pyBrowser.cefBrowser.get():
             Debug("GetPyBrowser(): removing an empty CefBrowser reference, "
-                  "browserId=%s" % id)
-            del g_pyBrowsers[id]
+                  "browserId=%s" % identifier)
+            del g_pyBrowsers[identifier]
 
     Debug("GetPyBrowser(): creating new PyBrowser, browserId=%s" % browserId)
     pyBrowser = PyBrowser()
@@ -62,7 +65,7 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
     if pyBrowser.IsPopup() and \
             not pyBrowser.GetUserData("__outerWindowHandle"):
         openerHandle = pyBrowser.GetOpenerWindowHandle()
-        for id, tempPyBrowser in g_pyBrowsers.items():
+        for identifier, tempPyBrowser in g_pyBrowsers.items():
             if tempPyBrowser.GetWindowHandle() == openerHandle:
                 clientCallbacks = tempPyBrowser.GetClientCallbacksDict()
                 if clientCallbacks:
@@ -160,7 +163,7 @@ cdef class PyBrowser:
                     "OnAddressChange", "OnTitleChange", "OnTooltip",
                     "OnStatusMessage", "OnConsoleMessage"]
             # KeyboardHandler
-            self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"];
+            self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"]
             # RequestHandler
             # NOTE: OnCertificateError and OnBeforePluginLoad are not
             #       included as they must be set using
@@ -240,13 +243,10 @@ cdef class PyBrowser:
         return self.GetCefBrowser().get().CanGoForward()
 
     cpdef py_void ParentWindowWillClose(self):
-        self.GetCefBrowserHost().get().ParentWindowWillClose()
+        # Method removed in upstream CEF, keeping for BC
+        pass
 
     cpdef py_void CloseBrowser(self, py_bool forceClose=False):
-        # ParentWindowWillClose() should be called by user when
-        # implementing LifespanHandler::DoClose().
-        # | Debug("CefBrowser::ParentWindowWillClose()")
-        # | self.GetCefBrowserHost().get().ParentWindowWillClose()
         if len(g_pyBrowsers) == 1:
             # This is the last browser remaining.
             if g_sharedRequestContext.get():
@@ -256,6 +256,9 @@ cdef class PyBrowser:
                 g_sharedRequestContext.Assign(NULL)
         Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
         self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
+
+    cpdef py_void CloseDevTools(self):
+        self.GetCefBrowserHost().get().CloseDevTools()
 
     def ExecuteFunction(self, *args):
         self.GetMainFrame().ExecuteFunction(*args)
@@ -371,6 +374,9 @@ cdef class PyBrowser:
     cpdef py_void Navigate(self, py_string url):
         self.LoadUrl(url)
 
+    cpdef py_void NotifyMoveOrResizeStarted(self):
+        self.GetCefBrowserHost().get().NotifyMoveOrResizeStarted()
+
     cpdef py_void Print(self):
         self.GetCefBrowserHost().get().Print()
 
@@ -390,17 +396,14 @@ cdef class PyBrowser:
         self.GetCefBrowserHost().get().SetZoomLevel(zoomLevel)
 
     cpdef py_void ShowDevTools(self):
-        cdef CefString cefUrl = self.GetCefBrowserHost().get().GetDevToolsURL(\
-                True)
-        cdef py_string url = CefToPyString(cefUrl)
-        # Example url returned:
-        # | http://localhost:54008/devtools/devtools.html?ws=localhost:54008
-        # | /devtools/page/1538ed984a2a4a90e5ed941c7d142a12
-        # Let's replace "localhost" with "127.0.0.1", using the ip address
-        # which is more reliable.
-        url = url.replace("localhost:", "127.0.0.1:")
-        jsCode = ("window.open('%s');" % url)
-        self.GetMainFrame().ExecuteJavascript(jsCode)
+        cdef CefWindowInfo windowInfo
+        cdef CefRefPtr[ClientHandler] clientHandler =\
+                <CefRefPtr[ClientHandler]?>new ClientHandler()
+        cdef CefBrowserSettings settings
+        cdef CefPoint inspect_element_at
+        self.GetCefBrowserHost().get().ShowDevTools(
+                windowInfo, <CefRefPtr[CefClient]?>clientHandler, settings,
+                inspect_element_at)
 
     cpdef py_void StopLoad(self):
         self.GetCefBrowser().get().StopLoad()
@@ -457,9 +460,9 @@ cdef class PyBrowser:
                 removeExStyle = (WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE
                         | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE)
                 SetWindowLong(hwnd, GWL_STYLE,
-                              self.gwlStyle & ~(removeStyle))
+                              self.gwlStyle & ~removeStyle)
                 SetWindowLong(hwnd, GWL_EXSTYLE,
-                              self.gwlExStyle & ~(removeExStyle))
+                              self.gwlExStyle & ~removeExStyle)
 
                 if not for_metro:
                     # MONITOR_DEFAULTTONULL, MONITOR_DEFAULTTOPRIMARY,
@@ -470,6 +473,7 @@ cdef class PyBrowser:
                     top = monitorInfo.rcMonitor.top
                     right = monitorInfo.rcMonitor.right
                     bottom = monitorInfo.rcMonitor.bottom
+                    # noinspection PyUnresolvedReferences
                     SetWindowPos(hwnd, NULL,
                             left, top, right-left, bottom-top,
                             SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)
@@ -479,6 +483,7 @@ cdef class PyBrowser:
 
                 if not for_metro:
                     (left, top, right, bottom) = self.windowRect
+                    # noinspection PyUnresolvedReferences
                     SetWindowPos(hwnd, NULL,
                             int(left), int(top),
                             int(right-left), int(bottom-top),
@@ -500,7 +505,7 @@ cdef class PyBrowser:
         if "native_key_code" in pyEvent:
             cefEvent.native_key_code = int(pyEvent["native_key_code"])
         if "is_system_key" in pyEvent:
-            cefEvent.is_system_key = bool(pyEvent["is_system_key"])
+            cefEvent.is_system_key = int(pyEvent["is_system_key"])
         if "character" in pyEvent:
             cefEvent.character = int(pyEvent["character"])
         if "unmodified_character" in pyEvent:
@@ -508,7 +513,7 @@ cdef class PyBrowser:
                     int(pyEvent["unmodified_character"])
         if "focus_on_editable_field" in pyEvent:
             cefEvent.focus_on_editable_field = \
-                    bool(pyEvent["focus_on_editable_field"])
+                    int(pyEvent["focus_on_editable_field"])
         self.GetCefBrowserHost().get().SendKeyEvent(cefEvent)
 
     cpdef py_void SendMouseClickEvent(self, int x, int y,

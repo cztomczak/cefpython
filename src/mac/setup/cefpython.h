@@ -36,11 +36,11 @@ __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforeBrowse(CefRefPtr<CefBrowse
 __PYX_EXTERN_C DL_IMPORT(CefRefPtr<CefResourceHandler>) RequestHandler_GetResourceHandler(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefRequest>);
 __PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnResourceRedirect(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString const &, CefString &);
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_GetAuthCredentials(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, bool, CefString const &, int, CefString const &, CefString const &, CefRefPtr<CefAuthCallback>);
-__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnQuotaRequest(CefRefPtr<CefBrowser>, CefString const &, int64, CefRefPtr<CefQuotaCallback>);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnQuotaRequest(CefRefPtr<CefBrowser>, CefString const &, int64, CefRefPtr<CefRequestCallback>);
 __PYX_EXTERN_C DL_IMPORT(CefRefPtr<CefCookieManager>) RequestHandler_GetCookieManager(CefRefPtr<CefBrowser>, CefString const &);
 __PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnProtocolExecution(CefRefPtr<CefBrowser>, CefString const &, bool &);
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforePluginLoad(CefRefPtr<CefBrowser>, CefString const &, CefString const &, CefRefPtr<CefWebPluginInfo>);
-__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnCertificateError(int, CefString const &, CefRefPtr<CefAllowCertificateErrorCallback>);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnCertificateError(int, CefString const &, CefRefPtr<CefRequestCallback>);
 __PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnRendererProcessTerminated(CefRefPtr<CefBrowser>, enum cef_termination_status_t);
 __PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnPluginCrashed(CefRefPtr<CefBrowser>, CefString const &);
 __PYX_EXTERN_C DL_IMPORT(bool) CookieVisitor_Visit(int, CefCookie const &, int, int, bool &);

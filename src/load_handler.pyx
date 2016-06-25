@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef public void LoadHandler_OnLoadingStateChange(
         CefRefPtr[CefBrowser] cefBrowser,
         cpp_bool isLoading,

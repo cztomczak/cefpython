@@ -4,22 +4,20 @@
 
 include "compile_time_constants.pxi"
 
-from cef_types_linux cimport _cef_key_info_t
-from cef_types_wrappers cimport CefStructBase
 from libcpp cimport bool as cpp_bool
+from cef_types cimport CefRect
 
 cdef extern from "include/internal/cef_linux.h":
 
-    ctypedef _cef_key_info_t CefKeyInfo
-    ctypedef void* CefWindowHandle    
-    ctypedef void* CefCursorHandle
+    ctypedef unsigned long CefWindowHandle
+    ctypedef unsigned long CefCursorHandle
 
     cdef cppclass CefWindowInfo:
-        void SetAsChild(CefWindowHandle)
-        void SetTransparentPainting(cpp_bool)
-        void SetAsOffScreen(CefWindowHandle)        
+        void SetAsChild(CefWindowHandle parent,
+                        const CefRect& windowRect)
+        void SetAsWindowless(CefWindowHandle parent,
+                             cpp_bool transparent)
 
-    cdef cppclass CefMainArgs(CefStructBase):
+    cdef cppclass CefMainArgs:
         CefMainArgs()
         CefMainArgs(int argc_arg, char** argv_arg)
-

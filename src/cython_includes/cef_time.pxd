@@ -15,7 +15,7 @@ cdef extern from "include/internal/cef_time.h":
         int second
         int millisecond
 
-cdef extern from "include/internal/cef_types_wrappers.h":
+cdef extern from "include/internal/cef_types.h":
     cdef cppclass CefTime:
         CefTime()
         CefTime(cef_time_t&)

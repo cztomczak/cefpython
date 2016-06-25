@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef class JavascriptBindings:
     # By default binding only to top frame.
     cdef public py_bool bindToFrames

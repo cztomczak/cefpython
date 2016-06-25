@@ -2,9 +2,11 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-cdef PaintBuffer CreatePaintBuffer(const void* buffer, int width, int height):
+include "cefpython.pyx"
+
+cdef PaintBuffer CreatePaintBuffer(const void* buffer_, int width, int height):
     cdef PaintBuffer paintBuffer = PaintBuffer()
-    paintBuffer.buffer = buffer
+    paintBuffer.buffer = buffer_
     paintBuffer.width = width
     paintBuffer.height = height
     paintBuffer.length = width*height*4
@@ -30,7 +32,7 @@ cdef class PaintBuffer:
         assert mode in ("bgra", "rgba"), "Invalid mode"
 
         # To get rid of a Cython warning:
-        # | ‘__pyx_v_dest’ may be used uninitialized in this function
+        # | '__pyx_v_dest' may be used uninitialized in this function
         dest = <void*>malloc(0)
 
         if mode == "rgba":

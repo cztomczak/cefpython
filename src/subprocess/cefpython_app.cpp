@@ -99,13 +99,6 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
 #endif
 }
 
-///
-// Called on the browser process IO thread after the main thread has been
-// created for a new render process. Provides an opportunity to specify extra
-// information that will be passed to
-// CefRenderProcessHandler::OnRenderThreadCreated() in the render process. Do
-// not keep a reference to |extra_info| outside of this method.
-///
 void CefPythonApp::OnRenderProcessThreadCreated(
         CefRefPtr<CefListValue> extra_info) {
     // If you have an existing CefListValue that you would like
@@ -127,12 +120,6 @@ void CefPythonApp::OnRenderProcessThreadCreated(
 // CefRenderProcessHandler
 // -----------------------------------------------------------------------------
 
-///
-// Called after the render process main thread has been created. |extra_info|
-// is a read-only value originating from
-// CefBrowserProcessHandler::OnRenderProcessThreadCreated(). Do not keep a
-// reference to |extra_info| outside of this method.
-///
 void CefPythonApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) {
     if (extra_info->GetType(0) == VTYPE_BOOL) {
         g_debug = extra_info->GetBool(0);
@@ -273,11 +260,6 @@ void CefPythonApp::OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser,
                                         CefRefPtr<CefDOMNode> node) {
 }
 
-///
-// Called when a new message is received from a different process. Return true
-// if the message was handled or false otherwise. Do not keep a reference to
-// or attempt to access the message outside of this callback.
-///
 bool CefPythonApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message) {

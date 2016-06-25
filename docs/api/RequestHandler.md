@@ -9,6 +9,10 @@ For an example of how to implement handler see [cefpython](cefpython.md).CreateB
 
 The `RequestHandler` tests can be found in the wxpython.py script.
 
+Not yet ported to CEF Python:
+* OnOpenURLFromTab
+
+
 
 Table of contents:
 * [Callbacks](#callbacks)
@@ -60,7 +64,8 @@ ERR_ABORTED.
 | __Return__ | bool |
 
 Called on the IO thread before a resource request is loaded. The |request|
-object may be modified. To cancel the request return true otherwise return false.
+object may be modified. To cancel the request return true otherwise return
+false.
 
 
 ### GetResourceHandler
@@ -102,12 +107,14 @@ and [WebRequest](WebRequest.md) / [WebRequestClient](WebRequestClient.md). For a
 | browser | [Browser](Browser.md) |
 | frame | [Frame](Frame.md) |
 | oldUrl | string |
-| newUrlOut | list& |
+| out newUrl[0] | string |
+| request | [Request](Request.md) |
 | __Return__ | void |
 
-Called on the IO thread when a resource load is redirected. The |oldUrl|
-parameter will contain the old URL. The `newUrlOut[0]` parameter will contain
-the new URL and can be changed if desired.
+Called on the IO thread when a resource load is redirected. The |request|
+parameter will contain the old URL and other request-related information.
+The |new_url| parameter will contain the new URL and can be changed if
+desired. The |request| object cannot be modified in this callback.
 
 
 ### GetAuthCredentials
@@ -126,13 +133,17 @@ the new URL and can be changed if desired.
 
 Called on the IO thread when the browser needs credentials from the user.
 |isProxy| indicates whether the host is a proxy server. |host| contains the
-hostname and |port| contains the port number. Return true to continue the
-request and call `AuthCallback`::Continue() when the authentication
-information is available. Return false to cancel the request.
+hostname and |port| contains the port number. |realm| is the realm of the
+challenge and may be empty. |scheme| is the authentication scheme used,
+such as "basic" or "digest", and will be empty if the source of the request
+is an FTP server. Return true to continue the request and call
+CefAuthCallback::Continue() either in this method or at a later time when
+the authentication information is available. Return false to cancel the
+request immediately.
 
 The `AuthCallback` object methods:
-  * void Continue(string username, string password)
-  * void Cancel()
+* void Continue(string username, string password)
+* void Cancel()
 
 
 ### OnQuotaRequest
@@ -142,19 +153,19 @@ The `AuthCallback` object methods:
 | browser | [Browser](Browser.md) |
 | originUrl | string |
 | newSize | long |
-| callback | QuotaCallback |
+| callback | RequestCallback |
 | __Return__ | bool |
 
 Called on the IO thread when javascript requests a specific storage quota
 size via the `webkitStorageInfo.requestQuota` function. |originUrl| is the
 origin of the page making the request. |newSize| is the requested quota
-size in bytes. Return true and call `QuotaCallback::Continue()` either in
-this method or at a later time to grant or deny the request. Return False
-to cancel the request.
+size in bytes. Return true to continue the request and call
+CefRequestCallback::Continue() either in this method or at a later time to
+grant or deny the request. Return false to cancel the request immediately.
 
-The `QuotaCallback` object methods:
-  * void Continue(bool allow)
-  * void Cancel()
+The `RequestCallback` object methods:
+* void Continue(bool allow)
+* void Cancel()
 
 
 ### GetCookieManager
@@ -219,21 +230,21 @@ This callback is called every time the page tries to load a plugin (perhaps even
 | --- | --- |
 | certError | [NetworkError](NetworkError.md) |
 | requestUrl | string |
-| callback | AllowCertificateErrorCallback |
+| callback | RequestCallback |
 | __Return__ | bool |
 
 This callback is not associated with any specific browser, thus you must call [cefpython](cefpython.md).SetGlobalClientCallback() to use it. The callback name was prefixed with "`_`" to distinguish this special behavior.
 
 Called on the UI thread to handle requests for URLs with an invalid
-SSL certificate. Return True and call `AllowCertificateErrorCallback`::
-Continue() either in this method or at a later time to continue or cancel
-the request. Return False to cancel the request immediately. If |callback|
-is empty the error cannot be recovered from and the request will be
-canceled automatically. If [ApplicationSettings](ApplicationSettings.md).`ignore_certificate_errors` is set
-all invalid certificates will be accepted without calling this method.
+SSL certificate. Return true and call CefRequestCallback::Continue() either
+in this method or at a later time to continue or cancel the request. Return
+false to cancel the request immediately. If
+CefSettings.ignore_certificate_errors is set all invalid certificates will
+be accepted without calling this method.
 
-The `AllowCertificateErrorCallback` object methods:
+The `RequestCallback` object methods:
   * void Continue(bool allow)
+  * void Cancel()
 
 
 ### OnRendererProcessTerminated
@@ -247,10 +258,10 @@ The `AllowCertificateErrorCallback` object methods:
 Called when the render process terminates unexpectedly. |status| indicates
 how the process terminated.
 
-`TerminationStatus` constants:
-  * cefpython.TS_ABNORMAL_TERMINATION - Non-zero exit status.
-  * cefpython.TS_PROCESS_WAS_KILLED - SIGKILL or task manager kill.
-  * cefpython.TS_PROCESS_CRASHED - Segmentation fault.
+`TerminationStatus` constants in the cefpython module:
+  * TS_ABNORMAL_TERMINATION - Non-zero exit status.
+  * TS_PROCESS_WAS_KILLED - SIGKILL or task manager kill.
+  * TS_PROCESS_CRASHED - Segmentation fault.
 
 
 ### OnPluginCrashed

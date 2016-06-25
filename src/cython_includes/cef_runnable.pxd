@@ -5,9 +5,13 @@
 include "compile_time_constants.pxi"
 
 from cef_ptr cimport CefRefPtr
+# noinspection PyUnresolvedReferences
 from cef_task cimport CefTask
 from cef_string cimport CefString
 from cef_cookie cimport CefCookie, CefCookieManager
+# noinspection PyUnresolvedReferences
+from cef_cookie cimport CefSetCookieCallback, CefDeleteCookiesCallback
+# noinspection PyUnresolvedReferences
 from libcpp cimport bool as cpp_bool
 
 cdef extern from "include/cef_runnable.h":
@@ -18,19 +22,27 @@ cdef extern from "include/cef_runnable.h":
     # template function.
 
     # Wrapping NewCefRunnableMethod() for CefCookieManager.SetCookie().
-    ctypedef cpp_bool (*SetCookie_type)(const CefString& url, 
-            const CefCookie& cookie)
+    ctypedef cpp_bool (*SetCookie_type)(
+            const CefString& url,
+            const CefCookie& cookie,
+            CefRefPtr[CefSetCookieCallback] callback)
+
     cdef CefRefPtr[CefTask] NewCefRunnableMethod(
-            CefCookieManager* obj, 
+            CefCookieManager* obj,
             SetCookie_type method,
             const CefString& url,
-            const CefCookie& cookie)
+            const CefCookie& cookie,
+            CefRefPtr[CefSetCookieCallback] callback)
 
     # Wrapping NewCefRunnableMethod() for CefCookieManager.DeleteCookies().
-    ctypedef cpp_bool (*DeleteCookies_type)(const CefString& url,
-            const CefString& cookie_name)
+    ctypedef cpp_bool (*DeleteCookies_type)(
+            const CefString& url,
+            const CefString& cookie_name,
+            CefRefPtr[CefDeleteCookiesCallback] callback)
+
     cdef CefRefPtr[CefTask] NewCefRunnableMethod(
             CefCookieManager* obj,
             DeleteCookies_type method,
             const CefString& url,
-            const CefString& cookie_name)
+            const CefString& cookie_name,
+            CefRefPtr[CefDeleteCookiesCallback] callback)

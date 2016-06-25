@@ -436,7 +436,6 @@ if __name__ == '__main__':
         "debug": False, # cefpython debug messages in console and in log_file
         "log_severity": cefpython.LOGSEVERITY_INFO, # LOGSEVERITY_VERBOSE
         "log_file": GetApplicationPath("debug.log"), # Set to "" to disable.
-        "release_dcheck_enabled": True, # Enable only when debugging.
         # This directories must be set on Linux
         "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
         "resources_dir_path": cefpython.GetModuleDirectory(),

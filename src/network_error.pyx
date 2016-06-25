@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+cimport cef_types
+
 # Network error constants.
 ERR_NONE = cef_types.ERR_NONE
 ERR_FAILED = cef_types.ERR_FAILED

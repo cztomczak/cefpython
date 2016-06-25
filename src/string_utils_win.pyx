@@ -2,6 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+include "cefpython.pyx"
+
 cdef int wchar_t_size = 2
 
 cdef void CharToWidechar(char* charString, wchar_t* wideString, int wideSize

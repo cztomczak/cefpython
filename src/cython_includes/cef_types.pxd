@@ -3,47 +3,123 @@
 # Website: http://code.google.com/p/cefpython/
 
 include "compile_time_constants.pxi"
+
 from libcpp cimport bool as cpp_bool
+# noinspection PyUnresolvedReferences
 from libc.stddef cimport wchar_t
+from cef_string cimport cef_string_t
 
 cdef extern from "include/internal/cef_types.h":
-    cdef enum cef_log_severity_t:
-        LOGSEVERITY_DEFAULT,
-        LOGSEVERITY_VERBOSE,
-        LOGSEVERITY_INFO,
-        LOGSEVERITY_WARNING,
-        LOGSEVERITY_ERROR,
-        LOGSEVERITY_ERROR_REPORT,
-        LOGSEVERITY_DISABLE = 99,
-
-    cdef enum cef_thread_id_t:
-            TID_UI,
-            TID_DB,
-            TID_FILE,
-            TID_FILE_USER_BLOCKING,
-            TID_PROCESS_LAUNCHER,
-            TID_CACHE,
-            TID_IO,
-            TID_RENDERER
 
     ctypedef unsigned int uint32
     ctypedef int int32
     ctypedef long long int64
     ctypedef unsigned long long uint64
-
     IF UNAME_SYSNAME == "Windows":
         ctypedef wchar_t char16
     ELSE:
         ctypedef unsigned short char16
 
-    cdef enum cef_v8_propertyattribute_t:
+    ctypedef uint32 cef_color_t
+
+    ctypedef struct CefSettings:
+        cef_string_t accept_language_list
+        int single_process
+        cef_string_t browser_subprocess_path
+        int multi_threaded_message_loop
+        int command_line_args_disabled
+        cef_string_t cache_path
+        int persist_session_cookies
+        cef_string_t user_agent
+        cef_string_t product_version
+        cef_string_t locale
+        cef_string_t log_file
+        int log_severity
+        cef_string_t javascript_flags
+        cef_string_t resources_dir_path
+        cef_string_t locales_dir_path
+        int pack_loading_disabled
+        int remote_debugging_port
+        int uncaught_exception_stack_size
+        int context_safety_implementation # Not exposed.
+        int ignore_certificate_errors
+        cef_color_t background_color
+        int persist_user_preferences
+        cef_string_t user_data_path
+        int windowless_rendering_enabled
+
+    ctypedef struct CefBrowserSettings:
+        cef_string_t accept_language_list
+        cef_color_t background_color
+        cef_string_t standard_font_family
+        cef_string_t fixed_font_family
+        cef_string_t serif_font_family
+        cef_string_t sans_serif_font_family
+        cef_string_t cursive_font_family
+        cef_string_t fantasy_font_family
+        int default_font_size
+        int default_fixed_font_size
+        int minimum_font_size
+        int minimum_logical_font_size
+        cef_string_t default_encoding
+        cef_state_t remote_fonts
+        cef_state_t javascript
+        cef_state_t javascript_open_windows
+        cef_state_t javascript_close_windows
+        cef_state_t javascript_access_clipboard
+        cef_state_t javascript_dom_paste
+        cef_state_t caret_browsing
+        cef_state_t plugins
+        cef_state_t universal_access_from_file_urls
+        cef_state_t file_access_from_file_urls
+        cef_state_t web_security
+        cef_state_t image_loading
+        cef_state_t image_shrink_standalone_to_fit
+        cef_state_t text_area_resize
+        cef_state_t tab_to_links
+        cef_state_t local_storage
+        cef_state_t databases
+        cef_state_t application_cache
+        cef_state_t webgl
+        int windowless_frame_rate
+
+    cdef cppclass CefRect:
+        int x, y, width, height
+        CefRect()
+        CefRect(int x, int y, int width, int height)
+
+    cdef cppclass CefPoint:
+        pass
+
+    ctypedef struct CefRequestContextSettings:
+        pass
+
+    ctypedef enum cef_log_severity_t:
+        LOGSEVERITY_DEFAULT,
+        LOGSEVERITY_VERBOSE,
+        LOGSEVERITY_INFO,
+        LOGSEVERITY_WARNING,
+        LOGSEVERITY_ERROR,
+        LOGSEVERITY_DISABLE = 99,
+
+    ctypedef enum cef_thread_id_t:
+        TID_UI,
+        TID_DB,
+        TID_FILE,
+        TID_FILE_USER_BLOCKING,
+        TID_PROCESS_LAUNCHER,
+        TID_CACHE,
+        TID_IO,
+        TID_RENDERER
+
+    ctypedef enum cef_v8_propertyattribute_t:
         V8_PROPERTY_ATTRIBUTE_NONE = 0,       # Writeable, Enumerable,
         #  Configurable
         V8_PROPERTY_ATTRIBUTE_READONLY = 1 << 0,  # Not writeable
         V8_PROPERTY_ATTRIBUTE_DONTENUM = 1 << 1,  # Not enumerable
         V8_PROPERTY_ATTRIBUTE_DONTDELETE = 1 << 2   # Not configurable
 
-    cdef enum cef_navigation_type_t:
+    ctypedef enum cef_navigation_type_t:
         NAVIGATION_LINK_CLICKED = 0,
         NAVIGATION_FORM_SUBMITTED,
         NAVIGATION_BACK_FORWARD,
@@ -51,7 +127,7 @@ cdef extern from "include/internal/cef_types.h":
         NAVIGATION_FORM_RESUBMITTED,
         NAVIGATION_OTHER,
 
-    cdef enum cef_process_id_t:
+    ctypedef enum cef_process_id_t:
         PID_BROWSER,
         PID_RENDERER,
 
@@ -60,25 +136,22 @@ cdef extern from "include/internal/cef_types.h":
         STATE_ENABLED,
         STATE_DISABLED,
 
-    enum cef_postdataelement_type_t:
-            PDE_TYPE_EMPTY  = 0,
-            PDE_TYPE_BYTES,
-            PDE_TYPE_FILE,
+    ctypedef enum cef_postdataelement_type_t:
+        PDE_TYPE_EMPTY  = 0,
+        PDE_TYPE_BYTES,
+        PDE_TYPE_FILE,
         
     # WebRequest
-    enum cef_urlrequest_flags_t:
+    ctypedef enum cef_urlrequest_flags_t:
         UR_FLAG_NONE                      = 0,
         UR_FLAG_SKIP_CACHE                = 1 << 0,
         UR_FLAG_ALLOW_CACHED_CREDENTIALS  = 1 << 1,
-        UR_FLAG_ALLOW_COOKIES             = 1 << 2,
         UR_FLAG_REPORT_UPLOAD_PROGRESS    = 1 << 3,
-        UR_FLAG_REPORT_LOAD_TIMING        = 1 << 4,
-        UR_FLAG_REPORT_RAW_HEADERS        = 1 << 5,
         UR_FLAG_NO_DOWNLOAD_DATA          = 1 << 6,
         UR_FLAG_NO_RETRY_ON_5XX           = 1 << 7,
 
     # CefListValue, CefDictionaryValue - types.
-    enum cef_value_type_t:
+    ctypedef enum cef_value_type_t:
         VTYPE_INVALID = 0,
         VTYPE_NULL,
         VTYPE_BOOL,
@@ -106,7 +179,7 @@ cdef extern from "include/internal/cef_types.h":
         char16 unmodified_character
         cpp_bool focus_on_editable_field
     ctypedef _cef_key_event_t CefKeyEvent
-    enum cef_event_flags_t:
+    ctypedef enum cef_event_flags_t:
         EVENTFLAG_NONE                = 0,
         EVENTFLAG_CAPS_LOCK_ON        = 1 << 0,
         EVENTFLAG_SHIFT_DOWN          = 1 << 1,
@@ -123,11 +196,12 @@ cdef extern from "include/internal/cef_types.h":
         EVENTFLAG_IS_RIGHT            = 1 << 11,
 
     # LoadHandler
-    enum cef_termination_status_t:
+    ctypedef enum cef_termination_status_t:
         TS_ABNORMAL_TERMINATION,
         TS_PROCESS_WAS_KILLED,
         TS_PROCESS_CRASHED,
-    enum cef_errorcode_t:
+
+    ctypedef enum cef_errorcode_t:
         ERR_NONE = 0,
         ERR_FAILED = -2,
         ERR_ABORTED = -3,
@@ -179,9 +253,11 @@ cdef extern from "include/internal/cef_types.h":
         ERR_INSECURE_RESPONSE = -501,
 
     # Browser > GetImage(), RenderHandler > OnPaint().
+
     ctypedef enum cef_paint_element_type_t:
         PET_VIEW = 0,
         PET_POPUP,
+    ctypedef cef_paint_element_type_t PaintElementType
 
     # Browser > SendMouseClickEvent().
     ctypedef enum cef_mouse_button_type_t:
@@ -200,7 +276,6 @@ cdef extern from "include/internal/cef_types.h":
         int y
         int width
         int height
-    ctypedef cef_rect_t CefRect
     ctypedef struct cef_screen_info_t:
         float device_scale_factor
         int depth
@@ -211,17 +286,32 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef cef_screen_info_t CefScreenInfo
 
     # CefURLRequest.GetStatus()
-    enum cef_urlrequest_status_t:
+    ctypedef enum cef_urlrequest_status_t:
         UR_UNKNOWN = 0
         UR_SUCCESS
         UR_IO_PENDING
         UR_CANCELED
         UR_FAILED
 
-    ctypedef uint32 cef_color_t
-
     # CefJSDialogHandler.OnJSDialog()
-    enum cef_jsdialog_type_t:
+    ctypedef enum cef_jsdialog_type_t:
         JSDIALOGTYPE_ALERT = 0,
         JSDIALOGTYPE_CONFIRM,
         JSDIALOGTYPE_PROMPT,
+    ctypedef cef_jsdialog_type_t JSDIalogType
+
+    # LifespanHandler and RequestHandler
+
+    ctypedef enum cef_window_open_disposition_t:
+        WOD_UNKNOWN,
+        WOD_SUPPRESS_OPEN,
+        WOD_CURRENT_TAB,
+        WOD_SINGLETON_TAB,
+        WOD_NEW_FOREGROUND_TAB,
+        WOD_NEW_BACKGROUND_TAB,
+        WOD_NEW_POPUP,
+        WOD_NEW_WINDOW,
+        WOD_SAVE_TO_DISK,
+        WOD_OFF_THE_RECORD,
+        WOD_IGNORE_ACTION
+    ctypedef cef_window_open_disposition_t WindowOpenDisposition

@@ -2,9 +2,6 @@
 
 """Generate API docs from sources.
 
-The pycef package must be first built and installed before running
-this tool. It inspects both Cython sources and the dynamic module.
-
 TODO:
 - generate api/ docs from Cython sources
 - generate API-index.md, a list of all modules/functions/classes/methods
@@ -14,15 +11,11 @@ TODO:
 """
 
 import os
-import sys
 import glob
 import re
 
 # Constants
-API_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    "api"
-)
+API_DIR = os.path.join(os.path.dirname(__file__), "..", "docs", "api")
 
 
 def main():

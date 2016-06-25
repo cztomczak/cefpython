@@ -102,7 +102,6 @@ def CefAdvanced():
         cefwindow.g_debug = True
     appSettings["log_file"] = GetApplicationPath("debug.log")
     appSettings["log_severity"] = cefpython.LOGSEVERITY_INFO
-    appSettings["release_dcheck_enabled"] = True # Enable only when debugging
     appSettings["browser_subprocess_path"] = "%s/%s" % (
             cefpython.GetModuleDirectory(), "subprocess")
     cefpython.Initialize(appSettings)

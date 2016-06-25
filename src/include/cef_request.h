@@ -53,6 +53,7 @@ class CefPostDataElement;
 class CefRequest : public virtual CefBase {
  public:
   typedef std::multimap<CefString, CefString> HeaderMap;
+  typedef cef_referrer_policy_t ReferrerPolicy;
   typedef cef_resource_type_t ResourceType;
   typedef cef_transition_type_t TransitionType;
 
@@ -94,6 +95,27 @@ class CefRequest : public virtual CefBase {
   virtual void SetMethod(const CefString& method) =0;
 
   ///
+  // Set the referrer URL and policy. If non-empty the referrer URL must be
+  // fully qualified with an HTTP or HTTPS scheme component. Any username,
+  // password or ref component will be removed.
+  ///
+  /*--cef()--*/
+  virtual void SetReferrer(const CefString& referrer_url,
+                           ReferrerPolicy policy) =0;
+
+  ///
+  // Get the referrer URL.
+  ///
+  /*--cef()--*/
+  virtual CefString GetReferrerURL() =0;
+
+  ///
+  // Get the referrer policy.
+  ///
+  /*--cef(default_retval=REFERRER_POLICY_DEFAULT)--*/
+  virtual ReferrerPolicy GetReferrerPolicy() =0;
+
+  ///
   // Get the post data.
   ///
   /*--cef()--*/
@@ -106,13 +128,14 @@ class CefRequest : public virtual CefBase {
   virtual void SetPostData(CefRefPtr<CefPostData> postData) =0;
 
   ///
-  // Get the header values.
+  // Get the header values. Will not include the Referer value if any.
   ///
   /*--cef()--*/
   virtual void GetHeaderMap(HeaderMap& headerMap) =0;
 
   ///
-  // Set the header values.
+  // Set the header values. If a Referer value exists in the header map it will
+  // be removed and ignored.
   ///
   /*--cef()--*/
   virtual void SetHeaderMap(const HeaderMap& headerMap) =0;
@@ -155,8 +178,8 @@ class CefRequest : public virtual CefBase {
   virtual void SetFirstPartyForCookies(const CefString& url) =0;
 
   ///
-  // Get the resource type for this request. Accurate resource type information
-  // may only be available in the browser process.
+  // Get the resource type for this request. Only available in the browser
+  // process.
   ///
   /*--cef(default_retval=RT_SUB_RESOURCE)--*/
   virtual ResourceType GetResourceType() =0;
@@ -168,6 +191,14 @@ class CefRequest : public virtual CefBase {
   ///
   /*--cef(default_retval=TT_EXPLICIT)--*/
   virtual TransitionType GetTransitionType() =0;
+
+  ///
+  // Returns the globally unique identifier for this request or 0 if not
+  // specified. Can be used by CefRequestHandler implementations in the browser
+  // process to track a single request across multiple callbacks.
+  ///
+  /*--cef()--*/
+  virtual uint64 GetIdentifier() =0;
 };
 
 
@@ -191,6 +222,15 @@ class CefPostData : public virtual CefBase {
   ///
   /*--cef()--*/
   virtual bool IsReadOnly() =0;
+
+  ///
+  // Returns true if the underlying POST data includes elements that are not
+  // represented by this CefPostData object (for example, multi-part file upload
+  // data). Modifying CefPostData objects with excluded elements may result in
+  // the request failing.
+  ///
+  /*--cef()--*/
+  virtual bool HasExcludedElements() = 0;
 
   ///
   // Returns the number of existing post data elements.

@@ -3,6 +3,9 @@ include "compile_time_constants.pxi"
 from libcpp cimport bool as cpp_bool
 from cef_string cimport CefString
 from cef_cookie cimport CefCookie
+# noinspection PyUnresolvedReferences
+from cef_cookie cimport CefSetCookieCallback, CefDeleteCookiesCallback
+from cef_ptr cimport CefRefPtr
 
 # We need to pass C++ class methods by reference to a function,
 # it is not possible with such syntax:
@@ -14,6 +17,10 @@ from cef_cookie cimport CefCookie
 # https://groups.google.com/d/topic/cython-users/G-vEdIkmNNY/discussion
 
 cdef extern from "include/cef_cookie.h" namespace "CefCookieManager":
-    cpp_bool SetCookie(const CefString& url, const CefCookie& cookie)
+
+    cpp_bool SetCookie(const CefString& url, const CefCookie& cookie,
+                       CefRefPtr[CefSetCookieCallback] callback)
+
     cpp_bool DeleteCookies(const CefString& url,
-                           const CefString& cookie_name)
+                           const CefString& cookie_name,
+                           CefRefPtr[CefDeleteCookiesCallback] callback)

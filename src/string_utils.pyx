@@ -9,7 +9,7 @@
 # Unicode issues were discussed on cython-users, see posts by Stefan
 # Behnel: https://groups.google.com/d/topic/cython-users/VICzhVn-zPw/discussion
 
-# See the "basestring" comment in imports.pyx > py_string.
+# See the "basestring" comment in cefpython.pyx.
 # Note that bytes != str != unicode != basestring in Cython
 
 # Any bytes/unicode encoding and decoding in cefpython should
@@ -17,6 +17,8 @@
 # keep it in one place for future fixes - see Issue 60 ("Strings
 # should be unicode by default, if bytes is required make it
 # explicit").
+
+include "cefpython.pyx"
 
 # TODO: make this configurable through ApplicationSettings.
 UNICODE_ENCODE_ERRORS = "replace"
