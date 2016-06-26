@@ -20,11 +20,4 @@ patches.append(
 
 # LINUX
 if OS_POSTFIX == "linux":
-    patches.append(
-        {
-            # Fix compile error on Ubuntu 12:
-            #   cc1plus: error: unrecognized command line option '-std=gnu++11'
-            'name': 'CMakeLists.txt.in_linux',
-            'path': './',
-        },
-    )
+    pass

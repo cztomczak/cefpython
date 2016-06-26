@@ -1,13 +1,19 @@
 # Build instructions
 
-NOTE: These instructions are for the master branch (Chrome 47).
+NOTE: These instructions are for the master branch (Chrome 51).
 
-There are two types of builds you can perform. You can build
-CEF Python using the prebuilt CEF binaries. Or you can build both
-CEF Python and CEF from sources. Building CEF is a long process that
-can take hours. In the tools/ directory there is the automate.py
-script that automates building CEF. However before you can run it
-you must satisfy some requirements.
+There are several types of builds you can perform:
+1. You can build CEF Python using prebuilt CEF binaries that were
+   uploaded to GH releases (tagged eg. v51-upstream)
+2. You can build both CEF Python and CEF from sources, but note
+   that Building CEF is a long process that can take hours.
+   In the tools/ directory there is the automate.py script that
+   automates building CEF.
+3. You may also use prebuilt binaries from Spotify automated builds,
+   see the CEF automated builds section.
+
+Before you can build CEF Python or CEF you must satisfy requirements
+listed on this page.
 
 
 Table of contents:
@@ -50,24 +56,25 @@ __Windows__
 
 __Linux__
 
-* Install packages: `sudo apt-get install cmake  g++`
+* Install packages: `sudo apt-get install python-dev cmake  g++`
+* To build upstream cefclient/cefsimple you need to install these packages:
+  `sudo apt-get install libgtk2.0-dev libgtkglext1-dev`
 * If building CEF from sources:
-    * Official binaries are build on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
+    * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
     * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
       and copy it to /usr/bin and chmod 755.
-    * When building CEF from sources you will need to install many more packages
-      using the install-build-deps.sh script - instructions are provided
-      further down on this page.
-    * See also the Linux configuration for CEF automated
+    * Install required packages using one of the methods below:
+        1. See Linux configuration for CEF automated
       builds on the [cef/AutomatedBuildSetup.md](https://bitbucket.org/chromiumembedded/cef/wiki/AutomatedBuildSetup.md#markdown-header-linux-configuration)
       wiki page.
+        2. Run the install-build-deps.sh script - instructions provided
+          further down on this page.
 * To build on Debian 7 see
   [cef/BuildingOnDebian7.md](https://bitbucket.org/chromiumembedded/cef/wiki/BuildingOnDebian7.md) and
   [cef/#1575](https://bitbucket.org/chromiumembedded/cef/issues/1575),
   and [cef/#1697](https://bitbucket.org/chromiumembedded/cef/issues/1697)
 * To perform a 32-bit Linux build on a 64-bit Linux system see
   [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804)
-* To build upstream cefclient/cefsimple you need to install these packages: `sudo apt-get install libgtk2.0-dev libgtkglext1-dev`
 
 
 __All platforms__
