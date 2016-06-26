@@ -8,14 +8,15 @@
 __NOTES__:
 * Repository rewritten on 2016-02-15 to reduce its size.
   Please clone it again.
-* Master branch is a work in progress. When building use the cefpython31
-  branch.
+* Master branch is a work in progress. The last stable release
+  is in the cefpython31 branch.
 
 Table of contents:
 * [Introduction](#introduction)
 * [Compatibility](#compatibility)
 * [Downloads](#downloads)
 * [Support](#support)
+* [Changes in API during updates](#changes-in-api-during-updates)
 * [Donate](#donate)
 
 
@@ -49,6 +50,7 @@ On Win/Mac you can install from PyPI using this command:
 __New releases RSS/Atom feed__
 To be notified of new releases subscribe to this [Atom feed](https://github.com/cztomczak/cefpython/releases.atom).
 
+
 ## Support
 
 * API docs are in the [docs/api/](docs/api/) directory
@@ -56,6 +58,16 @@ To be notified of new releases subscribe to this [Atom feed](https://github.com/
 * Ask questions and report problems on the
   [Forum](https://groups.google.com/group/cefpython)
 * Please do not ask questions in the Issue Tracker
+
+
+## Changes in API during updates
+
+CEF Python depends on CEF and API breaks are inevitable when updating
+to a newer CEF. When updating cefpython to a new version go to the
+[GitHub Releases](https://github.com/cztomczak/cefpython/releases) page
+and check release notes for all the releases that appeared between
+your old version and the new version. Look for lists named
+"Changes in API that break backward compatibility".
 
 
 ## Donate

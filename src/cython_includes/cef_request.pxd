@@ -4,9 +4,12 @@
 
 from cef_ptr cimport CefRefPtr
 from cef_string cimport CefString
+# noinspection PyUnresolvedReferences
 from cef_types cimport cef_urlrequest_flags_t, cef_postdataelement_type_t
+# noinspection PyUnresolvedReferences
 from libcpp.vector cimport vector as cpp_vector
 from libcpp cimport bool as cpp_bool
+# noinspection PyUnresolvedReferences
 from multimap cimport multimap as cpp_multimap
 
 cdef extern from "include/cef_request.h":
@@ -34,6 +37,7 @@ cdef extern from "include/cef_request.h":
         CefString GetFirstPartyForCookies()
         void SetFirstPartyForCookies(CefString& url)
 
+    # noinspection PyUnresolvedReferences
     ctypedef cpp_vector[CefRefPtr[CefPostDataElement]] ElementVector
 
     cdef CefRefPtr[CefPostData] CefPostData_Create \
@@ -46,6 +50,7 @@ cdef extern from "include/cef_request.h":
         cpp_bool AddElement(CefRefPtr[CefPostDataElement] element)
         void RemoveElements()
 
+    # noinspection PyUnresolvedReferences
     ctypedef cef_postdataelement_type_t ElementType
 
     cdef CefRefPtr[CefPostDataElement] CefPostDataElement_Create \
@@ -54,8 +59,8 @@ cdef extern from "include/cef_request.h":
         cpp_bool IsReadOnly()
         void SetToEmpty()
         void SetToFile(CefString& fileName)
-        void SetToBytes(size_t size, void* bytes)
+        void SetToBytes(size_t size, void* bytes_)
         ElementType GetType()
         CefString GetFile()
         size_t GetBytesCount()
-        size_t GetBytes(size_t size, void* bytes)
+        size_t GetBytes(size_t size, void* bytes_)

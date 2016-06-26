@@ -179,11 +179,6 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
     LifespanHandler_OnAfterCreated(browser);
 }
 
-bool ClientHandler::RunModal(CefRefPtr<CefBrowser> browser) {
-    REQUIRE_UI_THREAD();
-    return LifespanHandler_RunModal(browser);
-}
-
 bool ClientHandler::DoClose(CefRefPtr<CefBrowser> browser) {
     REQUIRE_UI_THREAD();
     return LifespanHandler_DoClose(browser);
@@ -474,7 +469,6 @@ void ClientHandler::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
 
 bool ClientHandler::OnJSDialog(CefRefPtr<CefBrowser> browser,
                   const CefString& origin_url,
-                  const CefString& accept_lang,
                   JSDialogType dialog_type,
                   const CefString& message_text,
                   const CefString& default_prompt_text,
@@ -482,7 +476,7 @@ bool ClientHandler::OnJSDialog(CefRefPtr<CefBrowser> browser,
                   bool& suppress_message) {
     REQUIRE_UI_THREAD();
     return JavascriptDialogHandler_OnJavascriptDialog(browser, origin_url,
-            accept_lang, dialog_type, message_text, default_prompt_text,
+            dialog_type, message_text, default_prompt_text,
             callback, suppress_message);
 }
 

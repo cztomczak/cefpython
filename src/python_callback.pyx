@@ -81,7 +81,7 @@ cdef public cpp_bool ExecutePythonCallback(
             functionArguments = CefListValueToPyList(
                     cefBrowser, cefFunctionArguments)
             returnValue = function(*functionArguments)
-            if returnValue != None:
+            if returnValue is not None:
                 Debug("ExecutePythonCallback() WARNING: function returned" \
                         "value, but returning values to javascript is not " \
                         "supported, function name = %s" % function.__name__)

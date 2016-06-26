@@ -4,6 +4,8 @@
 
 include "cefpython.pyx"
 
+from task cimport *
+
 # ------------------------------------------------------------------------------
 # Tests
 # ------------------------------------------------------------------------------
@@ -21,6 +23,7 @@ include "cefpython.pyx"
 # Globals
 # ------------------------------------------------------------------------------
 
+# noinspection PyUnresolvedReferences
 cdef PyCookieManager g_globalCookieManager = None
 # See StoreUserCookieVisitor().
 import weakref
@@ -31,6 +34,7 @@ cdef int g_userCookieVisitorMaxId = 0
 # Cookie
 # ------------------------------------------------------------------------------
 
+# noinspection PyUnresolvedReferences
 ctypedef Cookie PyCookie
 
 cdef PyCookie CreatePyCookie(CefCookie cefCookie):
@@ -247,14 +251,14 @@ cdef class PyCookieManager:
 
     cpdef py_void SetCookie(self, py_string url, PyCookie cookie):
         assert isinstance(cookie, Cookie), "cookie object is invalid"
-        CefPostTask(TID_IO, NewCefRunnableMethod(self.cefCookieManager.get(),
-                &cef_cookie_manager_namespace.SetCookie, 
+        CefPostTask(TID_IO, CreateTask_SetCookie(
+                self.cefCookieManager.get(),
                 PyToCefStringValue(url), cookie.cefCookie,
                 <CefRefPtr[CefSetCookieCallback]?>NULL))
 
     cpdef py_void DeleteCookies(self, py_string url, py_string cookie_name):
-        CefPostTask(TID_IO, NewCefRunnableMethod(self.cefCookieManager.get(),
-                &cef_cookie_manager_namespace.DeleteCookies, 
+        CefPostTask(TID_IO, CreateTask_DeleteCookies(
+                self.cefCookieManager.get(),
                 PyToCefStringValue(url), PyToCefStringValue(cookie_name),
                 <CefRefPtr[CefDeleteCookiesCallback]?>NULL))
 

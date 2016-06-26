@@ -190,7 +190,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
             # minimum size by one as Cython was throwing a warning:
             # "unary minus operator applied to unsigned type, result still
             # unsigned".
-            if value <= 2147483647 and value >= -2147483647:
+            if -2147483647 <= value <= 2147483647:
                 ret.get().SetInt(index, int(value))
             else:
                 # Long values become strings.
@@ -249,7 +249,7 @@ cdef void PyListToExistingCefListValue(
             # minimum size by one as Cython was throwing a warning:
             # "unary minus operator applied to unsigned type, result still
             # unsigned".
-            if value <= 2147483647 and value >= -2147483647:
+            if -2147483647 <= value <= 2147483647:
                 cefListValue.get().SetInt(index, int(value))
             else:
                 # Long values become strings.
@@ -309,7 +309,7 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
             # minimum size by one as Cython was throwing a warning:
             # "unary minus operator applied to unsigned type, result still
             # unsigned".
-            if value <= 2147483647 and value >= -2147483647:
+            if -2147483647 <= value <= 2147483647:
                 ret.get().SetInt(cefKey, int(value))
             else:
                 # Long values become strings.

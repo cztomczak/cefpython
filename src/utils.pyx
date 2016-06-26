@@ -4,6 +4,9 @@
 
 include "cefpython.pyx"
 
+# noinspection PyUnresolvedReferences
+cimport cef_types
+
 TID_UI = cef_types.TID_UI
 TID_DB = cef_types.TID_DB
 TID_FILE = cef_types.TID_FILE
@@ -45,8 +48,8 @@ cpdef object Debug(str msg):
     print(msg)
     if g_debugFile:
         try:
-            with open(g_debugFile, "a") as file:
-                file.write(msg+"\n")
+            with open(g_debugFile, "a") as file_:
+                file_.write(msg+"\n")
         except:
             print("[CEF Python] WARNING: failed writing to debug file: %s" % (
                     g_debugFile))
@@ -55,7 +58,7 @@ cpdef object Debug(str msg):
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":
         cdef DWORD errorCode = GetLastError()
-        return "Error Code = %d" % (errorCode)
+        return "Error Code = %d" % errorCode
     ELSE:
         return ""
 
@@ -119,9 +122,9 @@ cpdef str GetModuleDirectory():
     return str(path)
 
 cpdef py_bool IsFunctionOrMethod(object valueType):
-    if (valueType == types.FunctionType \
-            or valueType == types.MethodType \
-            or valueType == types.BuiltinFunctionType \
+    if (valueType == types.FunctionType
+            or valueType == types.MethodType
+            or valueType == types.BuiltinFunctionType
             or valueType == types.BuiltinMethodType):
         return True
     return False

@@ -68,6 +68,7 @@ Table of contents:
   * [StopLoad](#stopload)
   * [StopFinding](#stopfinding)
   * [ToggleFullscreen](#togglefullscreen)
+  * [TryCloseBrowser](#tryclosebrowser)
   * [WasResized](#wasresized)
   * [WasHidden](#washidden)
 
@@ -126,8 +127,7 @@ information.
 | --- | --- |
 | __Return__ | bool |
 
-Explicitly close the developer tools window if one exists for this browser
-instance.
+Explicitly close the associated DevTools browser, if any.
 
 
 ### ExecuteFunction
@@ -706,7 +706,13 @@ Change the zoom level to the specified value. Specify 0.0 to reset the zoom leve
 | --- | --- |
 | __Return__ | void |
 
-Open developer tools in a popup window.
+Open developer tools (DevTools) in its own browser. The DevTools browser
+will remain associated with this browser. If the DevTools browser is
+already open then it will be focused, in which case the |windowInfo|,
+|client| and |settings| parameters will be ignored. If |inspect_element_at|
+is non-empty then the element at the specified (x,y) location will be
+inspected. The |windowInfo| parameter will be ignored if this browser is
+wrapped in a CefBrowserView.
 
 
 ### StartDownload
@@ -747,6 +753,16 @@ Cancel all searches that are currently going on.
 Switch between fullscreen mode / windowed mode. To check whether in fullscreen mode call IsFullscreen().
 
 This function is Windows-only.
+
+
+### TryCloseBrowser
+
+Helper for closing a browser. Call this method from the top-level window
+close handler. Internally this calls CloseBrowser(false) if the close has
+not yet been initiated. This method returns false while the close is
+pending and true after the close has completed. See CloseBrowser() and
+CefLifeSpanHandler::DoClose() documentation for additional usage
+information. This method must be called on the browser process UI thread.
 
 
 ### WasResized

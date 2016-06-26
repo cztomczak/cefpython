@@ -113,7 +113,6 @@ public:
                              bool* no_javascript_access) OVERRIDE;
 
   virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
-  virtual bool RunModal(CefRefPtr<CefBrowser> browser) OVERRIDE;
   virtual bool DoClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
   virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
@@ -284,7 +283,6 @@ public:
 
   virtual bool OnJSDialog(CefRefPtr<CefBrowser> browser,
                           const CefString& origin_url,
-                          const CefString& accept_lang,
                           JSDialogType dialog_type,
                           const CefString& message_text,
                           const CefString& default_prompt_text,

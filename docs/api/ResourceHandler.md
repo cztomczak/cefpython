@@ -58,7 +58,9 @@ returns false. If the response length is known set `responseLengthOut[0]`
 to a positive value and ReadResponse() will be called until it returns
 false or the specified number of bytes have been read. Use the |response|
 object to set the mime type, http status code and other optional header
-values. To redirect the request to a new URL set `redirectUrlOut[0]` to the new url.
+values. To redirect the request to a new URL set `redirectUrlOut[0]` to the new
+URL. If an error occured while setting up the request you can call
+SetError() on |response| to indicate the error condition.
 
 
 ### ReadResponse

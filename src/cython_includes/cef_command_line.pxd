@@ -7,12 +7,11 @@
 
 include "compile_time_constants.pxi"
 
-from cef_base cimport CefBase
 from cef_string cimport CefString
 from libcpp cimport bool as cpp_bool
 
 cdef extern from "include/cef_command_line.h":
-    cdef cppclass CefCommandLine(CefBase):
+    cdef cppclass CefCommandLine:
         void AppendSwitch(CefString& name)
         void AppendSwitchWithValue(CefString& name, CefString& value)
         CefString GetCommandLineString()

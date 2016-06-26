@@ -1076,6 +1076,16 @@ typedef enum {
   // Main resource of a service worker.
   ///
   RT_SERVICE_WORKER,
+
+  ///
+  // A report of Content Security Policy violations.
+  ///
+  RT_CSP_REPORT,
+
+  ///
+  // A resource that a plugin requested.
+  ///
+  RT_PLUGIN_RESOURCE,
 } cef_resource_type_t;
 
 ///
@@ -1273,6 +1283,24 @@ typedef struct _cef_size_t {
   int width;
   int height;
 } cef_size_t;
+
+///
+// Structure representing a range.
+///
+typedef struct _cef_range_t {
+  int from;
+  int to;
+} cef_range_t;
+
+///
+// Structure representing insets.
+///
+typedef struct _cef_insets_t {
+  int top;
+  int left;
+  int bottom;
+  int right;
+} cef_insets_t;
 
 ///
 // Structure representing a draggable region.
@@ -2024,14 +2052,6 @@ typedef enum {
 } cef_duplex_mode_t;
 
 ///
-// Structure representing a print job page range.
-///
-typedef struct _cef_page_range_t {
-  int from;
-  int to;
-} cef_page_range_t;
-
-///
 // Cursor type values.
 ///
 typedef enum {
@@ -2109,7 +2129,7 @@ typedef enum {
   // addition to their special meaning. Things like escaped letters, digits,
   // and most symbols will get unescaped with this mode.
   ///
-  UU_NORMAL = 1,
+  UU_NORMAL = 1 << 0,
 
   ///
   // Convert %20 to spaces. In some places where we're showing URLs, we may
@@ -2117,31 +2137,42 @@ typedef enum {
   // you wouldn't want this since it might not be interpreted in one piece
   // by other applications.
   ///
-  UU_SPACES = 2,
+  UU_SPACES = 1 << 1,
+
+  ///
+  // Unescapes '/' and '\\'. If these characters were unescaped, the resulting
+  // URL won't be the same as the source one. Moreover, they are dangerous to
+  // unescape in strings that will be used as file paths or names. This value
+  // should only be used when slashes don't have special meaning, like data
+  // URLs.
+  ///
+  UU_PATH_SEPARATORS = 1 << 2,
 
   ///
   // Unescapes various characters that will change the meaning of URLs,
-  // including '%', '+', '&', '/', '#'. If we unescaped these characters, the
-  // resulting URL won't be the same as the source one. This flag is used when
-  // generating final output like filenames for URLs where we won't be
-  // interpreting as a URL and want to do as much unescaping as possible.
+  // including '%', '+', '&', '#'. Does not unescape path separators.
+  // If these characters were unescaped, the resulting URL won't be the same
+  // as the source one. This flag is used when generating final output like
+  // filenames for URLs where we won't be interpreting as a URL and want to do
+  // as much unescaping as possible.
   ///
-  UU_URL_SPECIAL_CHARS = 4,
+  UU_URL_SPECIAL_CHARS_EXCEPT_PATH_SEPARATORS = 1 << 3,
 
   ///
-  // Unescapes control characters such as %01. This INCLUDES NULLs. This is
-  // used for rare cases such as data: URL decoding where the result is binary
-  // data. This flag also unescapes BiDi control characters.
+  // Unescapes characters that can be used in spoofing attempts (such as LOCK)
+  // and control characters (such as BiDi control characters and %01).  This
+  // INCLUDES NULLs.  This is used for rare cases such as data: URL decoding
+  // where the result is binary data.
   //
-  // DO NOT use CONTROL_CHARS if the URL is going to be displayed in the UI
-  // for security reasons.
+  // DO NOT use UU_SPOOFING_AND_CONTROL_CHARS if the URL is going to be
+  // displayed in the UI for security reasons.
   ///
-  UU_CONTROL_CHARS = 8,
+  UU_SPOOFING_AND_CONTROL_CHARS = 1 << 4,
 
   ///
   // URL queries use "+" for space. This flag controls that replacement.
   ///
-  UU_REPLACE_PLUS_WITH_SPACE = 16,
+  UU_REPLACE_PLUS_WITH_SPACE = 1 << 5,
 } cef_uri_unescape_rule_t;
 
 ///
@@ -2401,6 +2432,196 @@ typedef enum {
   ///
   RESPONSE_FILTER_ERROR
 } cef_response_filter_status_t;
+
+///
+// Describes how to interpret the components of a pixel.
+///
+typedef enum {
+  ///
+  // RGBA with 8 bits per pixel (32bits total).
+  ///
+  CEF_COLOR_TYPE_RGBA_8888,
+
+  ///
+  // BGRA with 8 bits per pixel (32bits total).
+  ///
+  CEF_COLOR_TYPE_BGRA_8888,
+} cef_color_type_t;
+
+///
+// Describes how to interpret the alpha component of a pixel.
+///
+typedef enum {
+  ///
+  // No transparency. The alpha component is ignored.
+  ///
+  CEF_ALPHA_TYPE_OPAQUE,
+
+  ///
+  // Transparency with pre-multiplied alpha component.
+  ///
+  CEF_ALPHA_TYPE_PREMULTIPLIED,
+  
+  ///
+  // Transparency with post-multiplied alpha component.
+  ///
+  CEF_ALPHA_TYPE_POSTMULTIPLIED,
+} cef_alpha_type_t;
+
+///
+// Text style types. Should be kepy in sync with gfx::TextStyle.
+///
+typedef enum {
+  CEF_TEXT_STYLE_BOLD,
+  CEF_TEXT_STYLE_ITALIC,
+  CEF_TEXT_STYLE_STRIKE,
+  CEF_TEXT_STYLE_DIAGONAL_STRIKE,
+  CEF_TEXT_STYLE_UNDERLINE,
+} cef_text_style_t;
+
+///
+// Specifies where along the main axis the CefBoxLayout child views should be
+// laid out.
+///
+typedef enum {
+  ///
+  // Child views will be left-aligned.
+  ///
+  CEF_MAIN_AXIS_ALIGNMENT_START,
+
+  ///
+  // Child views will be center-aligned.
+  ///
+  CEF_MAIN_AXIS_ALIGNMENT_CENTER,
+
+  ///
+  // Child views will be right-aligned.
+  ///
+  CEF_MAIN_AXIS_ALIGNMENT_END,
+} cef_main_axis_alignment_t;
+
+///
+// Specifies where along the cross axis the CefBoxLayout child views should be
+// laid out.
+///
+typedef enum {
+  ///
+  // Child views will be stretched to fit.
+  ///
+  CEF_CROSS_AXIS_ALIGNMENT_STRETCH,
+
+  ///
+  // Child views will be left-aligned.
+  ///
+  CEF_CROSS_AXIS_ALIGNMENT_START,
+
+  ///
+  // Child views will be center-aligned.
+  ///
+  CEF_CROSS_AXIS_ALIGNMENT_CENTER,
+
+  ///
+  // Child views will be right-aligned.
+  ///
+  CEF_CROSS_AXIS_ALIGNMENT_END,
+} cef_cross_axis_alignment_t;
+
+///
+// Settings used when initializing a CefBoxLayout.
+///
+typedef struct _cef_box_layout_settings_t {
+  ///
+  // If true (1) the layout will be horizontal, otherwise the layout will be
+  // vertical.
+  ///
+  int horizontal;
+
+  ///
+  // Adds additional horizontal space between the child view area and the host
+  // view border.
+  ///
+  int inside_border_horizontal_spacing;
+
+  ///
+  // Adds additional vertical space between the child view area and the host
+  // view border.
+  ///
+  int inside_border_vertical_spacing;
+
+  ///
+  // Adds additional space around the child view area.
+  ///
+  cef_insets_t inside_border_insets;
+
+  ///
+  // Adds additional space between child views.
+  ///
+  int between_child_spacing;
+
+  ///
+  // Specifies where along the main axis the child views should be laid out.
+  ///
+  cef_main_axis_alignment_t main_axis_alignment;
+
+  ///
+  // Specifies where along the cross axis the child views should be laid out.
+  ///
+  cef_cross_axis_alignment_t cross_axis_alignment;
+
+  ///
+  // Minimum cross axis size.
+  ///
+  int minimum_cross_axis_size;
+
+  ///
+  // Default flex for views when none is specified via CefBoxLayout methods.
+  // Using the preferred size as the basis, free space along the main axis is
+  // distributed to views in the ratio of their flex weights. Similarly, if the
+  // views will overflow the parent, space is subtracted in these ratios. A flex
+  // of 0 means this view is not resized. Flex values must not be negative.
+  ///
+  int default_flex;
+} cef_box_layout_settings_t;
+
+///
+// Specifies the button display state.
+///
+typedef enum {
+  CEF_BUTTON_STATE_NORMAL,
+  CEF_BUTTON_STATE_HOVERED,
+  CEF_BUTTON_STATE_PRESSED,
+  CEF_BUTTON_STATE_DISABLED,
+} cef_button_state_t;
+
+///
+// Specifies the horizontal text alignment mode.
+///
+typedef enum {
+  ///
+  // Align the text's left edge with that of its display area.
+  ///
+  CEF_HORIZONTAL_ALIGNMENT_LEFT,
+
+  ///
+  // Align the text's center with that of its display area.
+  ///
+  CEF_HORIZONTAL_ALIGNMENT_CENTER,
+
+  ///
+  // Align the text's right edge with that of its display area.
+  ///
+  CEF_HORIZONTAL_ALIGNMENT_RIGHT,
+} cef_horizontal_alignment_t;
+
+///
+// Specifies how a menu will be anchored for non-RTL languages. The opposite
+// position will be used for RTL languages.
+///
+typedef enum {
+  CEF_MENU_ANCHOR_TOPLEFT,
+  CEF_MENU_ANCHOR_TOPRIGHT,
+  CEF_MENU_ANCHOR_BOTTOMCENTER,
+} cef_menu_anchor_position_t;
 
 #ifdef __cplusplus
 }

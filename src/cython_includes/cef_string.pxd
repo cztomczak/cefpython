@@ -16,6 +16,7 @@ cdef extern from "include/internal/cef_string.h":
         void Attach(cef_string_t* str, cpp_bool owner)
         cpp_bool empty()
         cpp_bool FromASCII(char*)
+        # noinspection PyUnresolvedReferences
         cpp_bool FromString(wchar_t*, size_t, cpp_bool)
         cpp_bool FromString(cpp_string& str)
         cpp_string ToString()

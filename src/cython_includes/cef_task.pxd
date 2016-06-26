@@ -3,6 +3,7 @@
 # Website: http://code.google.com/p/cefpython/
 
 from libcpp cimport bool as cpp_bool
+# noinspection PyUnresolvedReferences
 cimport cef_types
 from cef_ptr cimport CefRefPtr
 

@@ -11,7 +11,9 @@ from libcpp cimport bool as cpp_bool
 
 cdef extern from "include/internal/cef_win.h":
 
+    # noinspection PyUnresolvedReferences
     ctypedef HWND CefWindowHandle
+    # noinspection PyUnresolvedReferences
     ctypedef HCURSOR CefCursorHandle
 
     cdef cppclass CefWindowInfo:

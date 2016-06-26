@@ -655,7 +655,7 @@ class ClientHandler:
         return True
 
 
-    def OnJavascriptDialog(self, browser, originUrl, acceptLang, dialogType,
+    def OnJavascriptDialog(self, browser, originUrl, dialogType,
                    messageText, defaultPromptText, callback,
                    suppressMessage):
         suppressMessage[0] = True

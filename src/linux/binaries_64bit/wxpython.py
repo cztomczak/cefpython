@@ -607,10 +607,6 @@ class ClientHandler:
         print("[wxpython.py] LifespanHandler::_OnAfterCreated()")
         print("    browserId=%s" % browser.GetIdentifier())
 
-    def RunModal(self, browser):
-        print("[wxpython.py] LifespanHandler::RunModal()")
-        print("    browserId=%s" % browser.GetIdentifier())
-
     def DoClose(self, browser):
         print("[wxpython.py] LifespanHandler::DoClose()")
         print("    browserId=%s" % browser.GetIdentifier())
@@ -623,12 +619,11 @@ class ClientHandler:
     # JavascriptDialogHandler
     # -------------------------------------------------------------------------
 
-    def OnJavascriptDialog(self, browser, originUrl, acceptLang, dialogType,
+    def OnJavascriptDialog(self, browser, originUrl, dialogType,
                    messageText, defaultPromptText, callback,
                    suppressMessage):
         print("[wxpython.py] JavascriptDialogHandler::OnJavascriptDialog()")
         print("    originUrl="+originUrl)
-        print("    acceptLang="+acceptLang)
         print("    dialogType="+str(dialogType))
         print("    messageText="+messageText)
         print("    defaultPromptText="+defaultPromptText)

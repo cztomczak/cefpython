@@ -12,7 +12,6 @@ Table of contents:
 * [Callbacks](#callbacks)
   * [OnBeforePopup](#onbeforepopup)
   * [_OnAfterCreated](#_onaftercreated)
-  * [RunModal](#runmodal)
   * [DoClose](#doclose)
   * [OnBeforeClose](#onbeforeclose)
 
@@ -52,7 +51,9 @@ popup browser optionally modify |windowInfo|, |client|, |browserSettings| and
 browser return true. The |client| and |settings| values will default to the
 source browser's values. If the |no_javascript_access| value is set to
 false the new browser will not be scriptable and may not be hosted in the
-same renderer process as the source browser.
+same renderer process as the source browser. Any modifications to
+|windowInfo| will be ignored if the parent browser is wrapped in a
+CefBrowserView.
 
 Note that if you return True and create the popup window yourself, then
 the popup window and parent window will not be able to script each other.
@@ -79,21 +80,10 @@ There will be no "window.opener" property available in the popup window.
 | browser | [Browser](Browser.md) |
 | __Return__ | void |
 
-Called after a new browser is created.
+Called after a new browser is created. This callback will be the first
+notification that references |browser|.
 
 This callback will be executed during browser creation, thus you must call [cefpython](cefpython.md).SetGlobalClientCallback() to use it. The callback name was prefixed with "`_`" to distinguish this special behavior.
-
-
-### RunModal
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| __Return__ | bool |
-
-Called when a modal window is about to display and the modal loop should
-begin running. Return false to use the default modal loop implementation or
-true to use a custom implementation.
 
 
 ### DoClose
@@ -125,7 +115,6 @@ See complete description of this callback in [cef_life_span_handler.h]
 
 Called just before a browser is destroyed. Release all references to the
 browser object and do not attempt to execute any methods on the browser
-object after this callback returns. If this is a modal window and a custom
-modal loop implementation was provided in RunModal() this callback should
-be used to exit the custom modal loop. See DoClose() documentation for
+object after this callback returns. This callback will be the last
+notification that references |browser|. See DoClose() documentation for
 additional usage information.

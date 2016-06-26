@@ -16,7 +16,7 @@ cdef extern from "time.h":
         int tm_yday
         int tm_isdst
 
-    size_t strftime (char* ptr, size_t maxsize, const char* format,
+    size_t strftime (char* ptr, size_t maxsize, const char* format_,
                  const tm* timeptr )
     tm* localtime (const time_t* timer)
     time_t mktime (tm* timeptr)

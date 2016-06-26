@@ -17,7 +17,7 @@ cdef extern from "include/cef_values.h":
         cpp_bool IsOwned()
         CefRefPtr[CefBinaryValue] Copy()
         size_t GetSize()
-        size_t GetData(void* buffer, size_t buffer_size, size_t data_offset)
+        size_t GetData(void* buffer_, size_t buffer_size, size_t data_offset)
         
     cdef CefRefPtr[CefDictionaryValue] CefDictionaryValue_Create \
         "CefDictionaryValue::Create"()

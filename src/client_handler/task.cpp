@@ -1,9 +1,8 @@
-// Copyright (c) 2012-2014 The CEF Python authors. All rights reserved.
-// License: New BSD License.
-// Website: http://code.google.com/p/cefpython/
+// Copyright (c) 2012-2016 CEF Python. All rights reserved.
 
 #include "task.h"
-#include "include/cef_runnable.h"
+#include "include/wrapper/cef_closure_task.h"
+#include "include/base/cef_bind.h"
 
 void PostTaskWrapper(int threadId, int taskId) {
     // Calling CefPostDelayedTask with 0ms delay seems to give 
@@ -12,6 +11,38 @@ void PostTaskWrapper(int threadId, int taskId) {
     // shorter, when compared to a call to CefPostTask.
     CefPostDelayedTask(
             static_cast<CefThreadId>(threadId),
-            NewCefRunnableFunction(&PyTaskRunnable, taskId),
-            0);
+            CefCreateClosureTask(base::Bind(
+                    &PyTaskRunnable,
+                    taskId
+            )),
+            0
+    );
+}
+
+CefRefPtr<CefTask> CreateTask_SetCookie(
+        CefCookieManager* obj,
+        const CefString& url,
+        const CefCookie& cookie,
+        CefRefPtr<CefSetCookieCallback> callback)
+{
+    return CefCreateClosureTask(base::Bind(
+            base::IgnoreResult(&CefCookieManager::SetCookie), obj,
+            url,
+            cookie,
+            callback
+    ));
+}
+
+CefRefPtr<CefTask> CreateTask_DeleteCookies(
+        CefCookieManager* obj,
+        const CefString& url,
+        const CefString& cookie_name,
+        CefRefPtr<CefDeleteCookiesCallback> callback)
+{
+    return CefCreateClosureTask(base::Bind(
+            base::IgnoreResult(&CefCookieManager::DeleteCookies), obj,
+            url,
+            cookie_name,
+            callback
+    ));
 }

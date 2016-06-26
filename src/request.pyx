@@ -94,7 +94,7 @@ cdef class PyRequest:
                 postDataElement.get().GetBytes(bytesCount, voidData)
                 pyData = VoidPtrToString(voidData, bytesCount)
                 free(voidData)
-                if (pyData.startswith('--') or retMultipart):
+                if pyData.startswith('--') or retMultipart:
                     # Content-Type: multipart/form-data
                     retMultipart.append(pyData)
                 else:

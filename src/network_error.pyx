@@ -2,6 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
+# noinspection PyUnresolvedReferences
 cimport cef_types
 
 # Network error constants.

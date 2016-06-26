@@ -2,11 +2,11 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from cef_base cimport CefBase
 from cef_ptr cimport CefRefPtr
 cimport cef_types
 from cef_request cimport CefRequest
 from cef_response cimport CefResponse
+# noinspection PyUnresolvedReferences
 from cef_request_context cimport CefRequestContext
 
 cdef extern from "include/cef_urlrequest.h":

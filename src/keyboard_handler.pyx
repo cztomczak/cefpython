@@ -4,6 +4,9 @@
 
 include "cefpython.pyx"
 
+# noinspection PyUnresolvedReferences
+cimport cef_types
+
 # cef_key_event_type_t
 KEYEVENT_RAWKEYDOWN = cef_types.KEYEVENT_RAWKEYDOWN
 KEYEVENT_KEYDOWN = cef_types.KEYEVENT_KEYDOWN

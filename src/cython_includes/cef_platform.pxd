@@ -5,7 +5,9 @@
 include "compile_time_constants.pxi"
 
 IF UNAME_SYSNAME == "Windows":
-    from cef_win cimport CefWindowHandle, CefCursorHandle, CefKeyInfo, CefWindowInfo
+    # noinspection PyUnresolvedReferences
+    from cef_win cimport CefWindowHandle, CefCursorHandle, CefKeyInfo,\
+                         CefWindowInfo
 ELIF UNAME_SYSNAME == "Darwin":
     from cef_mac cimport *
 ELIF UNAME_SYSNAME == "Linux":

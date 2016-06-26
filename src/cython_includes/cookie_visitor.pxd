@@ -3,5 +3,6 @@
 # Website: http://code.google.com/p/cefpython/
 
 cdef extern from "client_handler/cookie_visitor.h":
+
     cdef cppclass CookieVisitor:
         CookieVisitor(int cookieVisitorId)

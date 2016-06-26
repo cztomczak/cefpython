@@ -32,10 +32,10 @@
 #define CEF_INCLUDE_BASE_CEF_BUILD_H_
 #pragma once
 
-#if defined(BUILDING_CEF_SHARED)
+#if defined(USING_CHROMIUM_INCLUDES)
 // When building CEF include the Chromium header directly.
 #include "base/compiler_specific.h"
-#else  // !BUILDING_CEF_SHARED
+#else  // !USING_CHROMIUM_INCLUDES
 // The following is substantially similar to the Chromium implementation.
 // If the Chromium implementation diverges the below implementation should be
 // updated to match.
@@ -135,7 +135,7 @@
 // Annotate a function indicating the caller must examine the return value.
 // Use like:
 //   int foo() WARN_UNUSED_RESULT;
-// To explicitly ignore a result, see |ignore_result()| in <base/basictypes.h>.
+// To explicitly ignore a result, see |ignore_result()| in <base/macros.h>.
 #ifndef WARN_UNUSED_RESULT
 #if defined(COMPILER_GCC)
 #define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
@@ -165,7 +165,7 @@
 #define ALLOW_UNUSED_LOCAL(x) false ? (void)x : (void)0
 #endif
 
-#endif  // !BUILDING_CEF_SHARED
+#endif  // !USING_CHROMIUM_INCLUDES
 
 // Annotate a virtual method indicating it must be overriding a virtual method
 // in the parent class.

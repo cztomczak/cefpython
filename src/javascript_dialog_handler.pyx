@@ -5,6 +5,7 @@
 include "cefpython.pyx"
 
 # enum cef_jsdialog_type_t
+cimport cef_types
 JSDIALOGTYPE_ALERT = cef_types.JSDIALOGTYPE_ALERT
 JSDIALOGTYPE_CONFIRM = cef_types.JSDIALOGTYPE_CONFIRM
 JSDIALOGTYPE_PROMPT = cef_types.JSDIALOGTYPE_PROMPT
@@ -31,7 +32,6 @@ cdef class PyJavascriptDialogCallback:
 cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& origin_url,
-        const CefString& accept_lang,
         cef_types.cef_jsdialog_type_t dialog_type,
         const CefString& message_text,
         const CefString& default_prompt_text,
@@ -40,7 +40,6 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef py_string pyOriginUrl
-    cdef py_string pyAcceptLang
     cdef py_string pyMessageText
     cdef py_string pyDefaultPromptText
     cdef PyJavascriptDialogCallback pyCallback
@@ -51,7 +50,6 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
         pyOriginUrl = CefToPyString(origin_url)
-        pyAcceptLang = CefToPyString(accept_lang)
         pyMessageText = CefToPyString(message_text)
         pyDefaultPromptText = CefToPyString(default_prompt_text)
         pyCallback = CreatePyJavascriptDialogCallback(callback)
@@ -59,7 +57,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
         
         clientCallback = pyBrowser.GetClientCallback("OnJavascriptDialog")
         if clientCallback:
-            returnValue = clientCallback(pyBrowser, pyOriginUrl, pyAcceptLang,
+            returnValue = clientCallback(pyBrowser, pyOriginUrl,
                     dialog_type, pyMessageText, pyDefaultPromptText,
                     pyCallback, pySuppressMessage)
             (&suppress_message)[0] = bool(pySuppressMessage[0])
@@ -88,10 +86,10 @@ cdef public cpp_bool JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(
         pyIsReload = bool(is_reload)
         pyCallback = CreatePyJavascriptDialogCallback(callback)
 
-        clientCallback = pyBrowser.GetClientCallback(\
+        clientCallback = pyBrowser.GetClientCallback(
                 "OnBeforeUnloadJavascriptDialog")
         if clientCallback:
-            returnValue = clientCallback(pyBrowser, pyMessageText, pyIsReload,\
+            returnValue = clientCallback(pyBrowser, pyMessageText, pyIsReload,
                     pyCallback)
             return bool(returnValue)
         return False
@@ -105,7 +103,7 @@ cdef public void JavascriptDialogHandler_OnResetJavascriptDialogState(
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
-        callback = pyBrowser.GetClientCallback(\
+        callback = pyBrowser.GetClientCallback(
                 "OnResetJavascriptDialogState")
         if callback:
             callback(pyBrowser)

@@ -25,7 +25,7 @@ cdef class PyResponse:
         return self.GetCefResponse().get().GetStatus()
 
     cpdef py_void SetStatus(self, int status):
-        assert type(status) == int, ("Response.SetStatus() failed: status param is not an int")
+        assert type(status) == int, "Response.SetStatus() failed: status param is not an int"
         self.GetCefResponse().get().SetStatus(status)
 
     cpdef str GetStatusText(self):

@@ -2,8 +2,8 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from cef_base cimport CefBase
 from cef_string cimport CefString
+# noinspection PyUnresolvedReferences
 from multimap cimport multimap as cpp_multimap
 from libcpp cimport bool as cpp_bool
 from cef_ptr cimport CefRefPtr
@@ -13,7 +13,7 @@ cdef extern from "include/cef_response.h":
 
     cdef CefRefPtr[CefResponse] CefResponse_Create "CefResponse::Create"()
 
-    cdef cppclass CefResponse(CefBase):
+    cdef cppclass CefResponse:
         cpp_bool IsReadOnly()
         int GetStatus()
         void SetStatus(int status)

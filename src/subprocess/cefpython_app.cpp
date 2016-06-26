@@ -11,7 +11,8 @@
 
 #include "cefpython_app.h"
 #include "util.h"
-#include "include/cef_runnable.h"
+#include "include/wrapper/cef_closure_task.h"
+#include "include/base/cef_bind.h"
 #include "DebugLog.h"
 #include "LOG_DEBUG.h"
 #include <vector>
@@ -441,9 +442,10 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
         }
         CefRefPtr<CefV8Context> context = frame->GetV8Context();
         CefRefPtr<CefTaskRunner> taskRunner = context->GetTaskRunner();
-        taskRunner->PostTask(NewCefRunnableMethod(
-                this, &CefPythonApp::DoJavascriptBindingsForFrame,
-                browser, frame, context));
+        taskRunner->PostTask(CefCreateClosureTask(base::Bind(
+                &CefPythonApp::DoJavascriptBindingsForFrame, this,
+                browser, frame, context
+        )));
     }
 }
 

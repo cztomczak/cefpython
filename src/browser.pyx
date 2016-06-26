@@ -23,6 +23,7 @@ cdef PyBrowser GetPyBrowserById(int browserId):
 cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
     global g_pyBrowsers
     if <void*>cefBrowser == NULL or not cefBrowser.get():
+        # noinspection PyUnresolvedReferences
         Debug("GetPyBrowser(): returning None")
         return None
 
@@ -36,10 +37,12 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
 
     for identifier, pyBrowser in g_pyBrowsers.items():
         if not pyBrowser.cefBrowser.get():
+            # noinspection PyUnresolvedReferences
             Debug("GetPyBrowser(): removing an empty CefBrowser reference, "
                   "browserId=%s" % identifier)
             del g_pyBrowsers[identifier]
 
+    # noinspection PyUnresolvedReferences
     Debug("GetPyBrowser(): creating new PyBrowser, browserId=%s" % browserId)
     pyBrowser = PyBrowser()
     pyBrowser.cefBrowser = cefBrowser
@@ -84,11 +87,14 @@ cdef void RemovePyBrowser(int browserId) except *:
             # This is the last browser remaining.
             if g_sharedRequestContext.get():
                 # A similar release is done in Shutdown and CloseBrowser.
+                # noinspection PyUnresolvedReferences
                 Debug("RemovePyBrowser: releasing shared request context")
                 g_sharedRequestContext.Assign(NULL)
+        # noinspection PyUnresolvedReferences
         Debug("del g_pyBrowsers[%s]" % browserId)
         del g_pyBrowsers[browserId]
     else:
+        # noinspection PyUnresolvedReferences
         Debug("RemovePyBrowser() FAILED: browser not found, id = %s" \
                 % browserId)
 
@@ -183,7 +189,7 @@ cdef class PyBrowser:
             # NOTE: OnAfterCreated not included as it must be set using
             #       cefpython.SetGlobalClientCallback().
             self.allowedClientCallbacks += ["OnBeforePopup",
-                    "RunModal", "DoClose", "OnBeforeClose"]
+                    "DoClose", "OnBeforeClose"]
             # RenderHandler
             self.allowedClientCallbacks += ["GetRootScreenRect",
                     "GetViewRect", "GetScreenPoint", "GetScreenInfo",
@@ -560,6 +566,9 @@ cdef class PyBrowser:
 
     cpdef py_bool IsMouseCursorChangeDisabled(self):
         return self.GetCefBrowserHost().get().IsMouseCursorChangeDisabled()
+
+    cpdef py_bool TryCloseBrowser(self):
+        return self.GetCefBrowserHost().get().TryCloseBrowser()
 
     cpdef py_void WasResized(self):
         self.GetCefBrowserHost().get().WasResized()

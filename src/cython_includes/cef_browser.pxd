@@ -64,6 +64,7 @@ cdef extern from "include/cef_browser.h":
                 cpp_bool matchCase, cpp_bool findNext)
         void StopFinding(cpp_bool clearSelection)
         void Print()
+        cpp_bool TryCloseBrowser()
 
     cdef cppclass CefBrowser:
 

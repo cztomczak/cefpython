@@ -89,7 +89,6 @@ cdef class JavascriptBindings:
         cdef dict properties
         cdef dict objects
         cdef dict methods
-        global g_pyBrowsers
         for browserId, pyBrowser in g_pyBrowsers.iteritems():
             if pyBrowser.GetJavascriptBindings() != self:
                 continue

@@ -28,7 +28,7 @@ cdef py_string WidecharToPyString(
     # WideCharToMultiByte does not include the NULL character
     # when 0 bytes are written.
     if copiedBytes == 0:
-        charString[0] = <char>0;
+        charString[0] = <char>0
 
     cdef py_string pyString = CharToPyString(charString)
     free(charString)

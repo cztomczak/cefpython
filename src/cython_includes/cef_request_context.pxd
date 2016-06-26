@@ -3,6 +3,7 @@
 # Website: http://code.google.com/p/cefpython/
 
 from cef_ptr cimport CefRefPtr
+# noinspection PyUnresolvedReferences
 from cef_request_context_handler cimport CefRequestContextHandler
 from cef_types cimport CefRequestContextSettings
 

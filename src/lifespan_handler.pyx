@@ -4,6 +4,7 @@
 
 include "cefpython.pyx"
 
+# noinspection PyUnresolvedReferences
 from cef_types cimport WindowOpenDisposition
 # noinspection PyUnresolvedReferences
 cimport cef_types
@@ -79,20 +80,6 @@ cdef public void LifespanHandler_OnAfterCreated(
         callback = GetGlobalClientCallback("OnAfterCreated")
         if callback:
             callback(pyBrowser)
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public cpp_bool LifespanHandler_RunModal(
-        CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
-    cdef PyBrowser pyBrowser
-    try:
-        pyBrowser = GetPyBrowser(cefBrowser)
-        callback = pyBrowser.GetClientCallback("RunModal")
-        if callback:
-            return bool(callback(pyBrowser))
-        return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

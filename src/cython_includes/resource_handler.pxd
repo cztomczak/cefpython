@@ -3,5 +3,6 @@
 # Website: http://code.google.com/p/cefpython/
 
 cdef extern from "client_handler/resource_handler.h":
+
     cdef cppclass ResourceHandler:
         ResourceHandler(int resourceHandlerId)

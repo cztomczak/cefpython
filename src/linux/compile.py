@@ -4,7 +4,6 @@ import glob
 import shutil
 import subprocess
 import platform
-import stat
 import re
 
 # This will not show "Segmentation fault" error message:
@@ -34,7 +33,7 @@ else:
     print("             Allowed version format: \\d+\.\\d+")
     sys.exit(1)
 
-print("VERSION=%s"%VERSION)
+print("VERSION=%s" % VERSION)
 
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
@@ -85,7 +84,7 @@ if ret != 0:
     what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
         sys.exit(1)
-subprocess_exe = "./../linux/binaries_%s/subprocess" % (BITS)
+subprocess_exe = "./../linux/binaries_%s/subprocess" % BITS
 if os.path.exists("./subprocess"):
     # .copy() will also copy Permission bits
     shutil.copy("./subprocess", subprocess_exe)
@@ -97,7 +96,7 @@ try:
 except OSError:
     pass
 
-os.system("rm ./setup/cefpython_py*.so")
+os.system("rm -f ./setup/cefpython_py*.so")
 
 pyx_files = glob.glob("./setup/*.pyx")
 for f in pyx_files:
@@ -122,7 +121,7 @@ with open("__version__.pyx", "w") as fo:
 
 if DEBUG:
     ret = subprocess.call("python-dbg setup.py build_ext --inplace"
-            " --cython-gdb", shell=True)
+                          " --cython-gdb", shell=True)
 else:
     ret = subprocess.call("python setup.py build_ext --inplace", shell=True)
 

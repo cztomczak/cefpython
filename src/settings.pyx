@@ -8,6 +8,8 @@
 
 include "cefpython.pyx"
 
+cimport cef_types
+
 LOGSEVERITY_DEFAULT = cef_types.LOGSEVERITY_DEFAULT
 LOGSEVERITY_VERBOSE = cef_types.LOGSEVERITY_VERBOSE
 LOGSEVERITY_INFO = cef_types.LOGSEVERITY_INFO

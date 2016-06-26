@@ -2,6 +2,7 @@ from libc.stddef cimport wchar_t
 from libcpp.string cimport string
 
 cdef extern from *:
+    # noinspection PyUnresolvedReferences
     ctypedef wchar_t const_wchar_t "const wchar_t"
 
 cdef extern from "<string>" namespace "std":

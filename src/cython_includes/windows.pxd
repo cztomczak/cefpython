@@ -6,6 +6,7 @@ from libc.stddef cimport wchar_t
 
 cdef extern from *:
     ctypedef char const_char "const char"
+    # noinspection PyUnresolvedReferences
     ctypedef wchar_t const_wchar_t "const wchar_t"
 
 cdef extern from "stdio.h" nogil:
@@ -22,7 +23,9 @@ cdef extern from "Windows.h" nogil:
     ctypedef HICON HCURSOR
 
     ctypedef unsigned int UINT
+    # noinspection PyUnresolvedReferences
     ctypedef wchar_t* LPCTSTR
+    # noinspection PyUnresolvedReferences
     ctypedef wchar_t* LPTSTR
     ctypedef int BOOL
     ctypedef unsigned long DWORD

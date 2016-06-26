@@ -2,8 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from cef_base cimport CefBase
-
 cdef extern from "include/cef_callback.h":
 
     cdef cppclass CefCallback:

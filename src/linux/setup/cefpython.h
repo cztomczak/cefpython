@@ -21,7 +21,6 @@ __PYX_EXTERN_C DL_IMPORT(void) RemovePythonCallbacksForFrame(int);
 __PYX_EXTERN_C DL_IMPORT(bool) ExecutePythonCallback(CefRefPtr<CefBrowser>, int, CefRefPtr<CefListValue>);
 __PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString const &, CefString const &, cef_window_open_disposition_t, bool, int const , CefWindowInfo &, CefRefPtr<CefClient> &, CefBrowserSettings &, bool *);
 __PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnAfterCreated(CefRefPtr<CefBrowser>);
-__PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_RunModal(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_DoClose(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnBeforeClose(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnAddressChange(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString const &);
@@ -72,7 +71,7 @@ __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnDownloadProgress(int, CefRefPt
 __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnDownloadData(int, CefRefPtr<CefURLRequest>, void const *, size_t);
 __PYX_EXTERN_C DL_IMPORT(void) WebRequestClient_OnRequestComplete(int, CefRefPtr<CefURLRequest>);
 __PYX_EXTERN_C DL_IMPORT(void) App_OnBeforeCommandLineProcessing_BrowserProcess(CefRefPtr<CefCommandLine>);
-__PYX_EXTERN_C DL_IMPORT(bool) JavascriptDialogHandler_OnJavascriptDialog(CefRefPtr<CefBrowser>, CefString const &, CefString const &, cef_jsdialog_type_t, CefString const &, CefString const &, CefRefPtr<CefJSDialogCallback>, bool &);
+__PYX_EXTERN_C DL_IMPORT(bool) JavascriptDialogHandler_OnJavascriptDialog(CefRefPtr<CefBrowser>, CefString const &, cef_jsdialog_type_t, CefString const &, CefString const &, CefRefPtr<CefJSDialogCallback>, bool &);
 __PYX_EXTERN_C DL_IMPORT(bool) JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(CefRefPtr<CefBrowser>, CefString const &, bool, CefRefPtr<CefJSDialogCallback>);
 __PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnResetJavascriptDialogState(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnJavascriptDialogClosed(CefRefPtr<CefBrowser>);

@@ -8,7 +8,8 @@
 #include <math.h>
 
 #include "dpi_aware.h"
-#include "include/cef_runnable.h"
+#include "include/wrapper/cef_closure_task.h"
+#include "include/base/cef_bind.h"
 #include "LOG_DEBUG.h"
 
 const int DEFAULT_DPIX = 96;
@@ -216,8 +217,11 @@ void SetBrowserDpiSettings(CefRefPtr<CefBrowser> cefBrowser,
     // be set again.
     CefPostDelayedTask(
             TID_UI,
-            NewCefRunnableFunction(&SetBrowserDpiSettings, cefBrowser,
-                autoZooming),
-            50);
+            CefCreateClosureTask(
+                    base::Bind(&SetBrowserDpiSettings,
+                               cefBrowser, autoZooming)
+            ),
+            50
+    );
 }
 

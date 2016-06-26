@@ -3,7 +3,7 @@
 # Website: http://code.google.com/p/cefpython/
 
 """
-CHANGES in CEF since v31..v47.
+CHANGES in CEF since v31..v51.
 Below are listed new or modified functions/classes, but not all of them.
 -------------------------------------------------------------------------------
 
@@ -22,8 +22,10 @@ CefRequestContext
     PurgePluginListCache
     GetDefaultCookieManager
     GetCachePath
-    IsSharingWith
-    - possible to create new context that shares storage with another context
+    IsSharingWith - possible to create new context that shares
+                    storage with another context
+    more methods...
+
 CefRequestContextHandler
     OnBeforePluginLoad
 
@@ -49,6 +51,9 @@ CefBrowserHost
     DragTargetDrop
     DragSourceEndedAt
     DragSourceSystemDragEnded
+    HasDevTools
+    DownloadImage
+    HasView
 
 CefRequestHandler
     OnOpenURLFromTab
@@ -62,11 +67,23 @@ CefRequestHandler
                          cefpython.SetGlobalClientCallback()
     OnRenderViewReady
 
+Support for handling onbeforeunload in LifespanHandler::DoClose with
+the use of Browser.TryCloseBrowser() or Browser.CloseBrowser.
+
 CefRequest
     SetReferrer
     GetReferrerURL
     GetReferrerPolicy
     GetIdentifier
+
+CefResponse
+    GetError
+    SetError
+
+CEF exposes Views/Aura framework as an alternative API
+for client applications. This can be a replacement for
+WinAPI/GTK/X11/Cocoa UI frameworks. See for more info:
+https://bitbucket.org/chromiumembedded/cef/issues/1749
 
 CefPrintHandler - Linux only
 CefPrintSettings
@@ -238,32 +255,51 @@ include "compile_time_constants.pxi"
 # -----------------------------------------------------------------------------
 # IMPORTS
 
+# noinspection PyUnresolvedReferences
 import os
 import sys
+# noinspection PyUnresolvedReferences
 import cython
+# noinspection PyUnresolvedReferences
 import platform
+# noinspection PyUnresolvedReferences
 import traceback
+# noinspection PyUnresolvedReferences
 import time
+# noinspection PyUnresolvedReferences
 import types
+# noinspection PyUnresolvedReferences
 import re
+# noinspection PyUnresolvedReferences
 import copy
+# noinspection PyUnresolvedReferences
 import inspect # used by JavascriptBindings.__SetObjectMethods()
+# noinspection PyUnresolvedReferences
 import urllib
+# noinspection PyUnresolvedReferences
 import json
+# noinspection PyUnresolvedReferences
 import datetime
+# noinspection PyUnresolvedReferences
 import random
 
 if sys.version_info.major == 2:
+    # noinspection PyUnresolvedReferences
     import urlparse
 else:
+    # noinspection PyUnresolvedReferences
     from urllib import parse as urlparse
 
 if sys.version_info.major == 2:
+    # noinspection PyUnresolvedReferences
     from urllib import pathname2url as urllib_pathname2url
 else:
+    # noinspection PyUnresolvedReferences
     from urllib.request import pathname2url as urllib_pathname2url
 
+# noinspection PyUnresolvedReferences
 from cpython.version cimport PY_MAJOR_VERSION
+# noinspection PyUnresolvedReferences
 import weakref
 
 # We should allow multiple string types: str, unicode, bytes.
@@ -282,29 +318,37 @@ ctypedef object py_string
 ctypedef object py_void
 ctypedef long long WindowHandle
 
+# noinspection PyUnresolvedReferences
 from cpython cimport PyLong_FromVoidPtr
-
+# noinspection PyUnresolvedReferences
 from cpython cimport bool as py_bool
+# noinspection PyUnresolvedReferences
 from libcpp cimport bool as cpp_bool
-
+# noinspection PyUnresolvedReferences
 from libcpp.map cimport map as cpp_map
+# noinspection PyUnresolvedReferences
 from multimap cimport multimap as cpp_multimap
+# noinspection PyUnresolvedReferences
 from libcpp.pair cimport pair as cpp_pair
+# noinspection PyUnresolvedReferences
 from libcpp.vector cimport vector as cpp_vector
-
+# noinspection PyUnresolvedReferences
 from libcpp.string cimport string as cpp_string
+# noinspection PyUnresolvedReferences
 from wstring cimport wstring as cpp_wstring
-
+# noinspection PyUnresolvedReferences
 from libc.string cimport strlen
+# noinspection PyUnresolvedReferences
 from libc.string cimport memcpy
-
 # preincrement and dereference must be "as" otherwise not seen.
 # noinspection PyUnresolvedReferences
 from cython.operator cimport preincrement as preinc, dereference as deref
 
 # from cython.operator cimport address as addr # Address of an c++ object?
 
+# noinspection PyUnresolvedReferences
 from libc.stdlib cimport calloc, malloc, free
+# noinspection PyUnresolvedReferences
 from libc.stdlib cimport atoi
 
 # When pyx file cimports * from a pxd file and that pxd cimports * from another pxd
@@ -313,9 +357,12 @@ from libc.stdlib cimport atoi
 # Circular imports are allowed in form "cimport ...", but won't work if you do
 # "from ... cimport *", this is important to know in pxd files.
 
+# noinspection PyUnresolvedReferences
 from libc.stdint cimport uint64_t
+# noinspection PyUnresolvedReferences
 from libc.stdint cimport uintptr_t
 
+# noinspection PyUnresolvedReferences
 cimport ctime
 
 IF UNAME_SYSNAME == "Windows":
@@ -331,9 +378,11 @@ from task cimport *
 
 from cef_string cimport *
 cdef extern from *:
+    # noinspection PyUnresolvedReferences
     ctypedef CefString ConstCefString "const CefString"
 
-# cannot cimport *, that would cause name conflicts with constants.
+# cannot cimport *, that would cause name conflicts with constants
+# noinspection PyUnresolvedReferences
 from cef_types cimport (
     CefSettings, CefBrowserSettings, CefRect, CefPoint,
     CefRequestContextSettings,
@@ -341,11 +390,11 @@ from cef_types cimport (
 )
 
 from cef_task cimport *
-from cef_runnable cimport *
 from cef_platform cimport *
 from cef_ptr cimport *
 from cef_app cimport *
 from cef_browser cimport *
+# noinspection PyUnresolvedReferences
 cimport cef_browser_static
 from cef_client cimport *
 from client_handler cimport *
@@ -359,6 +408,7 @@ from cef_request_handler cimport *
 from cef_request cimport *
 from cef_cookie cimport *
 from cef_string_visitor cimport *
+# noinspection PyUnresolvedReferences
 cimport cef_cookie_manager_namespace
 from cookie_visitor cimport *
 from string_visitor cimport *
@@ -395,6 +445,7 @@ cdef dict g_globalClientCallbacks = {}
 # If ApplicationSettings.unique_request_context_per_browser is False
 # then a shared request context is used for all browsers. Otherwise
 # a unique one is created for each call to CreateBrowserSync.
+# noinspection PyUnresolvedReferences
 cdef CefRefPtr[CefRequestContext] g_sharedRequestContext
 
 # -----------------------------------------------------------------------------

@@ -4,6 +4,8 @@
 
 include "cefpython.pyx"
 
+import weakref
+
 # -----------------------------------------------------------------------------
 # Globals
 # -----------------------------------------------------------------------------
@@ -21,20 +23,20 @@ cdef py_void ValidateUserResourceHandler(object userResourceHandler):
     cdef list methods = ["ProcessRequest", "GetResponseHeaders",
             "ReadResponse", "CanGetCookie", "CanSetCookie", "Cancel"]
     for method in methods:
-        if userResourceHandler and hasattr(userResourceHandler, method) \
+        if userResourceHandler and hasattr(userResourceHandler, method)\
                 and callable(getattr(userResourceHandler, method)):
             # Okay.
             continue
         else:
-            raise Exception("ResourceHandler object is missing method: %s" \
+            raise Exception("ResourceHandler object is missing method: %s"\
                     % method)
 
 cdef CefRefPtr[CefResourceHandler] CreateResourceHandler(
         object userResourceHandler) except *:
     ValidateUserResourceHandler(userResourceHandler)
     cdef int resourceHandlerId = StoreUserResourceHandler(userResourceHandler)
-    cdef CefRefPtr[CefResourceHandler] resourceHandler = \
-            <CefRefPtr[CefResourceHandler]?>new ResourceHandler( \
+    cdef CefRefPtr[CefResourceHandler] resourceHandler =\
+            <CefRefPtr[CefResourceHandler]?>new ResourceHandler(
                 resourceHandlerId)
     return resourceHandler
 
@@ -119,7 +121,7 @@ cdef public void ResourceHandler_GetResponseHeaders(
                 returnValue = userCallback(pyResponse, responseLengthOut,
                         redirectUrlOut)
                 (&cefResponseLength)[0] = <int64>long(responseLengthOut[0])
-                if (redirectUrlOut[0]):
+                if redirectUrlOut[0]:
                     PyToCefString(redirectUrlOut[0], cefRedirectUrl)
                 return
         return

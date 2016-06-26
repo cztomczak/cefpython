@@ -23,13 +23,13 @@ class DpiAware:
         cdef int dpix = 0
         cdef int dpiy = 0
         GetSystemDpi(&dpix, &dpiy)
-        return (dpix, dpiy)
+        return tuple(dpix, dpiy)
 
     @staticmethod
     def CalculateWindowSize(int width, int height):
         # Calculation for DPI < 96 is not yet supported.
         GetDpiAwareWindowSize(&width, &height)
-        return (width, height)
+        return tuple(width, height)
 
     @staticmethod
     def IsProcessDpiAware():

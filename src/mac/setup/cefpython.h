@@ -21,7 +21,6 @@ __PYX_EXTERN_C DL_IMPORT(void) RemovePythonCallbacksForFrame(int);
 __PYX_EXTERN_C DL_IMPORT(bool) ExecutePythonCallback(CefRefPtr<CefBrowser>, int, CefRefPtr<CefListValue>);
 __PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString const &, CefString const &, int const , CefWindowInfo &, CefRefPtr<CefClient> &, CefBrowserSettings &, bool *);
 __PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnAfterCreated(CefRefPtr<CefBrowser>);
-__PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_RunModal(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(bool) LifespanHandler_DoClose(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) LifespanHandler_OnBeforeClose(CefRefPtr<CefBrowser>);
 __PYX_EXTERN_C DL_IMPORT(void) DisplayHandler_OnAddressChange(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefString const &);

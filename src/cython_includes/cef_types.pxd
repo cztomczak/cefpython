@@ -16,6 +16,7 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef long long int64
     ctypedef unsigned long long uint64
     IF UNAME_SYSNAME == "Windows":
+        # noinspection PyUnresolvedReferences
         ctypedef wchar_t char16
     ELSE:
         ctypedef unsigned short char16

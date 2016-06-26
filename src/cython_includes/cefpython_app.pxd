@@ -2,8 +2,6 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-from cef_app cimport CefApp
-
 cdef extern from "subprocess/cefpython_app.h":
-    cdef cppclass CefPythonApp(CefApp):
+    cdef cppclass CefPythonApp:
         pass
