@@ -572,9 +572,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
     if not "single_process" in applicationSettings:
         applicationSettings["single_process"] = False
 
-    cdef CefRefPtr[CefApp] cefApp
+    cdef CefRefPtr[CefApp] cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
 
-    cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
     IF UNAME_SYSNAME == "Windows":
         cdef HINSTANCE hInstance = GetModuleHandle(NULL)
         cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
@@ -598,6 +597,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
         g_applicationSettings[key] = copy.deepcopy(applicationSettings[key])
 
     cdef CefSettings cefApplicationSettings
+    # No sandboxing for the subprocesses
+    cefApplicationSettings.no_sandbox = 1
     SetApplicationSettings(applicationSettings, &cefApplicationSettings)
 
     if commandLineSwitches:

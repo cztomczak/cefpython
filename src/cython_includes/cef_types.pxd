@@ -47,6 +47,7 @@ cdef extern from "include/internal/cef_types.h":
         int persist_user_preferences
         cef_string_t user_data_path
         int windowless_rendering_enabled
+        int no_sandbox
 
     ctypedef struct CefBrowserSettings:
         cef_string_t accept_language_list

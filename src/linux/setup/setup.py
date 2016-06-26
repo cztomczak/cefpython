@@ -68,6 +68,7 @@ ext_modules = [Extension(
 
     # http_authentication not implemented on Linux.
     library_dirs=[
+        r'./../binaries_%s' % BITS,
         r'./lib_%s' % BITS,
         r'./../../client_handler/',
         r'./../../subprocess/', # libcefpythonapp
@@ -75,11 +76,14 @@ ext_modules = [Extension(
     ],
 
     libraries=[
-        'cef_dll_wrapper',
-        # 'v8function_handler',
-        'client_handler',
+        # Feed cefpythonapp before cef/cef_dll_wrapper to the linker,
+        # otherwise an "undefined symbol" error may occur when importing
+        # the cefpython .so module (Issue #230).
         'cefpythonapp',
+        'client_handler',
         'cpp_utils',
+        'cef',
+        'cef_dll_wrapper',
         'gtk-x11-2.0',
     ],
 

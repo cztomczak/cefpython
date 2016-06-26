@@ -52,18 +52,7 @@ __Linux__
 
 * Install packages: `sudo apt-get install cmake  g++`
 * If building CEF from sources:
-    * Download and install cmake 2.8.12 or later (unless you already have a
-proper version, check with cmake --version):
-        ```
-        cd build/
-        wget http://www.cmake.org/files/v2.8/cmake-2.8.12.2.tar.gz
-        tar xzf cmake-2.8.12.2.tar.gz
-        cd cmake-2.8.12.2
-        ./configure
-        make
-        sudo make install
-        # restart terminal, so that new cmake is used
-        ```
+    * Official binaries are build on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
     * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
       and copy it to /usr/bin and chmod 755.
     * When building CEF from sources you will need to install many more packages
@@ -72,8 +61,6 @@ proper version, check with cmake --version):
     * See also the Linux configuration for CEF automated
       builds on the [cef/AutomatedBuildSetup.md](https://bitbucket.org/chromiumembedded/cef/wiki/AutomatedBuildSetup.md#markdown-header-linux-configuration)
       wiki page.
-* Building on Ubuntu 12.04 is supported up to branch 2526 (Chrome 47).
-  For branches 2623 (Chrome 49) or later Ubuntu 14.04+ is required.
 * To build on Debian 7 see
   [cef/BuildingOnDebian7.md](https://bitbucket.org/chromiumembedded/cef/wiki/BuildingOnDebian7.md) and
   [cef/#1575](https://bitbucket.org/chromiumembedded/cef/issues/1575),

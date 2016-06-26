@@ -1,6 +1,5 @@
 # Copyright (c) 2016 CEF Python, see the Authors file. All rights reserved.
 
-# TODO: add GYP_DEFINES: disable_nacl=1 use_sysroot=1 (AutomatedBuildSetup)
 # TODO: run automate-git.py using Python 2.7 from depot_tools
 
 """Build CEF Python and use prebuilt CEF binaries or build CEF from sources.
@@ -447,8 +446,10 @@ def getenv():
     env["GYP_GENERATORS"] = Options.gyp_generators
     if platform.system() == "Windows":
         env["GYP_MSVS_VERSION"] = Options.gyp_msvs_version
-    # Issue73 patch applied
-    env["GYP_DEFINES"] = "use_allocator=none"
+    # See cef/AutomatedBuildSetup.md for reference.
+    # Issue73 patch applied with "use_allocator=none"
+    # TODO: 32-bit gyp defines: host_arch=x86_64 target_arch=ia32
+    env["GYP_DEFINES"] = "disable_nacl=1 use_sysroot=1 use_allocator=none"
     # To perform an official build set GYP_DEFINES=buildtype=Official.
     # This will disable debugging code and enable additional link-time
     # optimizations in Release builds.
