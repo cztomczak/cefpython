@@ -5,11 +5,12 @@
 [![](https://img.shields.io/badge/pypi-v31.2-blue.png "PyPI latest release")](https://pypi.python.org/pypi/cefpython3/)
 [![](https://img.shields.io/badge/commits%20since-v31.2-lightgray.png "Commits since v31.2 release")](https://github.com/cztomczak/cefpython/compare/05366f2...master)
 
-__NOTES__:
+__IMPORTANT NOTES__:
+* Master branch is a work in progress. The last stable release
+  is in the cefpython31 branch. Up-to-date API docs for the cefpython31
+  branch can be viewed in commit [169a1b2](https://github.com/cztomczak/cefpython/tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api).
 * Repository rewritten on 2016-02-15 to reduce its size.
   Please clone it again.
-* Master branch is a work in progress. The last stable release
-  is in the cefpython31 branch.
 
 Table of contents:
 * [Introduction](#introduction)
