@@ -3,6 +3,7 @@
 NOTE: These instructions are for the master branch (Chrome 51).
 
 There are several types of builds you can perform:
+
 1. You can build CEF Python using prebuilt CEF binaries that were
    uploaded to GH releases (tagged eg. v51-upstream)
 2. You can build both CEF Python and CEF from sources, but note

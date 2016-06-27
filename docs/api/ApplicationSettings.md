@@ -159,6 +159,15 @@ internet should not enable this setting. Also configurable using the
 Can be overridden for individual CefRequestContext instances via the
 CefRequestContextSettings.ignore_certificate_errors value.
 
+__IMPORTANT__: This option not only ignores all certificate errors,
+but it also enables caching of content due to custom patch being
+applied (read more in "NOTE ON CACHING" further down). If you don't
+want this caching feature of insecure content then alternatively you
+can ignore certificate errors using the
+RequestHandler.[_OnCertificateError()](#_oncertificateerror)
+callback. Note that disk caching is enabled only when the "cache_path"
+option is set.
+
 __NOTE ON CACHING__: the official CEF Python binary releases incorporate a patch
 that changes the caching behavior on sites with SSL certificate errors
 when used with this setting. Chromium by default disallows caching of
