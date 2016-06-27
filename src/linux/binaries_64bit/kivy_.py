@@ -141,7 +141,10 @@ class CefBrowser(Widget):
             # This directories must be set on Linux
             "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
             "resources_dir_path": cefpython.GetModuleDirectory(),
-            "browser_subprocess_path": "%s/%s" % (cefpython.GetModuleDirectory(), "subprocess")}
+            "browser_subprocess_path": "%s/%s" % (
+                cefpython.GetModuleDirectory(), "subprocess"),
+            "windowless_rendering_enabled": True,
+        }
 
         #start idle
         Clock.schedule_interval(self._cef_mes, 0)
@@ -269,201 +272,246 @@ class CefBrowser(Widget):
     is_alt1 = False
     is_alt2 = False
 
-    def on_key_down(self, keyboard, keycode, text, modifiers):
-        # Notes:
-        # - right alt modifier is not sent by Kivy through modifiers param.
-        # print("on_key_down(): keycode = %s, text = %s, modifiers = %s" % (
-        #         keycode, text, modifiers))
-        if keycode[0] == 27:
-            # On escape release the keyboard, see the injected
-            # javascript in OnLoadStart().
+
+    """
+    Understanding keyboard handling.
+    ---------------------------------------------------------------------------
+
+    type:
+
+        KEYEVENT_RAWKEYDOWN = 0
+        KEYEVENT_KEYDOWN = 1
+        KEYEVENT_KEYUP = 2
+        KEYEVENT_CHAR = 3
+
+    From w3schools.com:
+
+        When pressing the "a" key on the keyboard (not using caps lock),
+        the result of char and key will be:
+
+            Unicode CHARACTER code: 97     - named "charCode" in Javascript
+            Unicode KEY code: 65           - named "keyCode" in Javascript
+
+    Pressing 'a' - CEF keyboard handler:
+
+        type=KEYEVENT_RAWKEYDOWN
+        modifiers=0
+        windows_key_code=65
+        native_key_code=38
+        character=97
+        unmodified_character=97
+
+        type=KEYEVENT_CHAR
+        modifiers=0
+        windows_key_code=97
+        native_key_code=38
+        character=97
+        unmodified_character=97
+
+        type=KEYEVENT_KEYUP
+        modifiers=0
+        windows_key_code=65
+        native_key_code=38
+        character=97
+        unmodified_character=97
+
+    Pressing Right Alt - CEF keyboard handler:
+
+        type=KEYEVENT_RAWKEYDOWN
+        modifiers=0
+        windows_key_code=225
+        native_key_code=108
+        character=0
+        unmodified_character=0
+
+        type=KEYEVENT_KEYUP
+        modifiers=0
+        windows_key_code=225
+        native_key_code=108
+        character=0
+        unmodified_character=0
+
+    Pressing Right Alt + 'a' - CEF keyboard handler:
+
+        type=KEYEVENT_RAWKEYDOWN
+        modifiers=0
+        windows_key_code=225
+        native_key_code=108
+        character=0
+        unmodified_character=0
+
+        type=KEYEVENT_RAWKEYDOWN
+        modifiers=0
+        windows_key_code=65
+        native_key_code=38
+        character=261
+        unmodified_character=261
+
+        type=KEYEVENT_CHAR
+        modifiers=0
+        windows_key_code=261
+        native_key_code=38
+        character=261
+        unmodified_character=261
+
+        type=KEYEVENT_KEYUP
+        modifiers=0
+        windows_key_code=65
+        native_key_code=38
+        character=261
+        unmodified_character=261
+
+        type=KEYEVENT_KEYUP
+        modifiers=0
+        windows_key_code=225
+        native_key_code=108
+        character=0
+        unmodified_character=0
+
+
+    Pressing 'a' - Kivy keyboard handler:
+
+        ---- on_key_down:
+        -- key=(97, 'a')
+        -- modifiers=[]
+
+        ---- on_key_up:
+        -- key=(97, 'a')
+
+    Pressing Right Alt + 'a' - Kivy keyboard handler:
+
+        ---- on_key_down
+        -- key=(313, '')
+        -- modifiers=[]
+
+        ---- on_key_down:
+        -- key=(97, 'a')
+        -- modifiers=[]
+
+        ---- on_key_up:
+        -- key=(97, 'a')
+
+        ---- on_key_up
+        -- key=(313, '')
+
+    ---------------------------------------------------------------------------
+    """
+
+    def on_key_down(self, keyboard, key, text, modifiers):
+        # NOTE: Right alt modifier is not sent by Kivy through modifiers param.
+        print("---- on_key_down")
+        print("-- keyboard="+str(keyboard))
+        print("-- key="+str(key))
+        print("-- modifiers="+str(modifiers))
+
+        # CEF modifiers
+        cef_modifiers = cefpython.EVENTFLAG_NONE
+        if "shift" in modifiers:
+            cef_modifiers |= cefpython.EVENTFLAG_SHIFT_DOWN
+        if "ctrl" in modifiers:
+            cef_modifiers |= cefpython.EVENTFLAG_CONTROL_DOWN
+        if "alt" in modifiers:
+            cef_modifiers |= cefpython.EVENTFLAG_ALT_DOWN
+        if "capslock" in modifiers:
+            cef_modifiers |= cefpython.EVENTFLAG_CAPS_LOCK_ON
+
+        (keycode, charcode) = self.get_cef_key_codes(key[0])
+
+        # On escape release the keyboard, see the injected in OnLoadStart()
+        if keycode == 27:
             self.browser.GetFocusedFrame().ExecuteJavascript(
                     "__kivy__on_escape()")
             return
-        cefModifiers = cefpython.EVENTFLAG_NONE
-        if "shift" in modifiers:
-            cefModifiers |= cefpython.EVENTFLAG_SHIFT_DOWN
-        if "ctrl" in modifiers:
-            cefModifiers |= cefpython.EVENTFLAG_CONTROL_DOWN
-        if "alt" in modifiers:
-            cefModifiers |= cefpython.EVENTFLAG_ALT_DOWN
-        if "capslock" in modifiers:
-            cefModifiers |= cefpython.EVENTFLAG_CAPS_LOCK_ON
-        # print("on_key_down(): cefModifiers = %s" % cefModifiers)
-        cef_keycode = self.translate_to_cef_keycode(keycode[0])
+
+        # Send key event to cef: RAWKEYDOWN
         keyEvent = {
                 "type": cefpython.KEYEVENT_RAWKEYDOWN,
-                "native_key_code": cef_keycode,
-                "modifiers": cefModifiers
-                }
-        # print("keydown keyEvent: %s" % keyEvent)
+                "native_key_code": keycode,
+                "character": charcode,
+                "unmodified_character": charcode,
+                "modifiers": cef_modifiers
+        }
+        print("- SendKeyEvent: %s" % keyEvent)
         self.browser.SendKeyEvent(keyEvent)
-        if keycode[0] == 304:
+
+        if keycode == 304:
             self.is_shift1 = True
-        elif keycode[0] == 303:
+        elif keycode == 303:
             self.is_shift2 = True
-        elif keycode[0] == 306:
+        elif keycode == 306:
             self.is_ctrl1 = True
-        elif keycode[0] == 305:
+        elif keycode == 305:
             self.is_ctrl2 = True
-        elif keycode[0] == 308:
+        elif keycode == 308:
             self.is_alt1 = True
-        elif keycode[0] == 313:
+        elif keycode == 313:
             self.is_alt2 = True
 
 
-    def on_key_up(self, keyboard, keycode):
-        # print("on_key_up(): keycode = %s" % (keycode,))
-        cefModifiers = cefpython.EVENTFLAG_NONE
+    def on_key_up(self, keyboard, key):
+        print("---- on_key_up")
+        print("-- key="+str(key))
+
+        # CEF modifiers
+        cef_modifiers = cefpython.EVENTFLAG_NONE
         if self.is_shift1 or self.is_shift2:
-            cefModifiers |= cefpython.EVENTFLAG_SHIFT_DOWN
+            cef_modifiers |= cefpython.EVENTFLAG_SHIFT_DOWN
         if self.is_ctrl1 or self.is_ctrl2:
-            cefModifiers |= cefpython.EVENTFLAG_CONTROL_DOWN
+            cef_modifiers |= cefpython.EVENTFLAG_CONTROL_DOWN
         if self.is_alt1:
-            cefModifiers |= cefpython.EVENTFLAG_ALT_DOWN
-        # Capslock todo.
-        cef_keycode = self.translate_to_cef_keycode(keycode[0])
-        keyEvent = {
-                "type": cefpython.KEYEVENT_KEYUP,
-                "native_key_code": cef_keycode,
-                "modifiers": cefModifiers
-                }
-        # print("keyup keyEvent: %s" % keyEvent)
-        self.browser.SendKeyEvent(keyEvent)
+            cef_modifiers |= cefpython.EVENTFLAG_ALT_DOWN
+
+        kivycode = key[0]
+        (keycode, charcode) = self.get_cef_key_codes(kivycode)
+
+        # Send key event to cef: CHAR
         keyEvent = {
                 "type": cefpython.KEYEVENT_CHAR,
-                "native_key_code": cef_keycode,
-                "modifiers": cefModifiers
-                }
-        # print("char keyEvent: %s" % keyEvent)
+                "native_key_code": keycode,
+                "character": charcode,
+                "unmodified_character": charcode,
+                "modifiers": cef_modifiers
+        }
+        print("- SendKeyEvent: %s" % keyEvent)
         self.browser.SendKeyEvent(keyEvent)
-        if keycode[0] == 304:
+
+        # Send key event to cef: KEYUP
+        keyEvent = {
+                "type": cefpython.KEYEVENT_KEYUP,
+                "native_key_code": keycode,
+                "character": charcode,
+                "unmodified_character": charcode,
+                "modifiers": cef_modifiers
+        }
+        print("- SendKeyEvent: %s" % keyEvent)
+        self.browser.SendKeyEvent(keyEvent)
+
+        if kivycode == 304:
             self.is_shift1 = False
-        elif keycode[0] == 303:
+        elif kivycode == 303:
             self.is_shift2 = False
-        elif keycode[0] == 306:
+        elif kivycode == 306:
             self.is_ctrl1 = False
-        elif keycode[0] == 305:
+        elif kivycode == 305:
             self.is_ctrl2 = False
-        elif keycode[0] == 308:
+        elif kivycode == 308:
             self.is_alt1 = False
-        elif keycode[0] == 313:
+        elif kivycode == 313:
             self.is_alt2 = False
 
 
-    def translate_to_cef_keycode(self, keycode):
-        # TODO: this works on Linux, but on Windows the key
-        #       mappings will probably be different.
-        # TODO: what if the Kivy keyboard layout is changed
-        #       from qwerty to azerty? (F1 > options..)
-        cef_keycode = keycode
-        if self.is_alt2:
-            # The key mappings here for right alt were tested
-            # with the utf-8 charset on a webpage. If the charset
-            # is different there is a chance they won't work correctly.
-            alt2_map = {
-                    # tilde
-                    "96":172,
-                    # 0-9 (48..57)
-                    "48":125, "49":185, "50":178, "51":179, "52":188,
-                    "53":189, "54":190, "55":123, "56":91, "57":93,
-                    # minus
-                    "45":92,
-                    # a-z (97..122)
-                    "97":433, "98":2771, "99":486, "100":240, "101":490,
-                    "102":496, "103":959, "104":689, "105":2301, "106":65121,
-                    "107":930, "108":435, "109":181, "110":497, "111":243,
-                    "112":254, "113":64, "114":182, "115":438, "116":956,
-                    "117":2302, "118":2770, "119":435, "120":444, "121":2299,
-                    "122":447,
-                    }
-            if str(keycode) in alt2_map:
-                cef_keycode = alt2_map[str(keycode)]
-            else:
-                print("Kivy to CEF key mapping not found (right alt), " \
-                        "key code = %s" % keycode)
-            shift_alt2_map = {
-                    # tilde
-                    "96":172,
-                    # 0-9 (48..57)
-                    "48":176, "49":161, "50":2755, "51":163, "52":36,
-                    "53":2756, "54":2757, "55":2758, "56":2761, "57":177,
-                    # minus
-                    "45":191,
-                    # A-Z (97..122)
-                    "97":417, "98":2769, "99":454, "100":208, "101":458,
-                    "102":170, "103":957, "104":673, "105":697, "106":65122,
-                    "107":38, "108":419, "109":186, "110":465, "111":211,
-                    "112":222, "113":2009, "114":174, "115":422, "116":940,
-                    "117":2300, "118":2768, "119":419, "120":428, "121":165,
-                    "122":431,
-                    # special: <>?  :"  {}
-                    "44":215, "46":247, "47":65110,
-                    "59":65113, "39":65114,
-                    "91":65112, "93":65108,
-                    }
-            if self.is_shift1 or self.is_shift2:
-                if str(keycode) in shift_alt2_map:
-                    cef_keycode = shift_alt2_map[str(keycode)]
-                else:
-                    print("Kivy to CEF key mapping not found " \
-                            "(shift + right alt), key code = %s" % keycode)
-        elif self.is_shift1 or self.is_shift2:
-            shift_map = {
-                    # tilde
-                    "96":126,
-                    # 0-9 (48..57)
-                    "48":41, "49":33, "50":64, "51":35, "52":36, "53":37,
-                    "54":94, "55":38, "56":42, "57":40,
-                    # minus, plus
-                    "45":95, "61":43,
-                    # a-z (97..122)
-                    "97":65, "98":66, "99":67, "100":68, "101":69, "102":70,
-                    "103":71, "104":72, "105":73, "106":74, "107":75, "108":76,
-                    "109":77, "110":78, "111":79, "112":80, "113":81, "114":82,
-                    "115":83, "116":84, "117":85, "118":86, "119":87, "120":88,
-                    "121":89, "122":90,
-                    # special: <>?  :"  {}
-                    "44":60, "46":62, "47":63,
-                    "59":58, "39":34,
-                    "91":123, "93":125,
-            }
-            if str(keycode) in shift_map:
-                cef_keycode = shift_map[str(keycode)]
-        # Other keys:
-        other_keys_map = {
-            # Escape
-            "27":65307,
-            # F1-F12
-            "282":65470, "283":65471, "284":65472, "285":65473,
-            "286":65474, "287":65475, "288":65476, "289":65477,
-            "290":65478, "291":65479, "292":65480, "293":65481,
-            # Tab
-            "9":65289,
-            # Left Shift, Right Shift
-            "304":65505, "303":65506,
-            # Left Ctrl, Right Ctrl
-            "306":65507, "305": 65508,
-            # Left Alt, Right Alt
-            "308":65513, "313":65027,
-            # Backspace
-            "8":65288,
-            # Enter
-            "13":65293,
-            # PrScr, ScrLck, Pause
-            "316":65377, "302":65300, "19":65299,
-            # Insert, Delete,
-            # Home, End,
-            # Pgup, Pgdn
-            "277":65379, "127":65535,
-            "278":65360, "279":65367,
-            "280":65365, "281":65366,
-            # Arrows (left, up, right, down)
-            "276":65361, "273":65362, "275":65363, "274":65364,
-        }
-        if str(keycode) in other_keys_map:
-            cef_keycode = other_keys_map[str(keycode)]
-        return cef_keycode
+    def get_cef_key_codes(self, kivycode):
+
+        keycode = kivycode
+        charcode = kivycode
+
+        # shifts, ctrls, alts
+        if kivycode in [303,304,305,306,308,313]:
+            charcode = 0
+
+        # TODO...................
+
+        return keycode, charcode
 
 
     def go_forward(self):
