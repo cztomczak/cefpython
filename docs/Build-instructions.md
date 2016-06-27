@@ -26,6 +26,42 @@ Table of contents:
 * [How to patch](#how-to-patch)
 
 
+## Build CEF Python 51 BETA
+
+1. Works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
+2. Download 64-bit Linux standard distribution from Spotify builds:
+   http://opensource.spotify.com/cefbuilds/index.html
+    * As of writing the proper file is:
+      "cef_binary_3.2704.1432.g60b3718_linux64.tar.bz2"
+    * Check CEF version in "cefpython/src/version/cef_version_linux.h"
+      to make sure you're downloading the right file
+3. Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
+   and copy it to /usr/bin and chmod 755.
+4. Install packages: `sudo apt-get install python-dev cmake g++`
+5. Create projects to build:
+```
+cd cef_binary/
+mkdir build
+cd build/
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ..
+```
+6. To build type: `ninja libcef_dll_wrapper`. You may also build cefclient
+   by typing `nincja cefclient`, but this will require installing
+   additional packages, read Requirements further on this page.
+7. Copy "cef_binary/Resources/*" to "cefpython/src/linux/binaries_64bit/"
+8. Copy "cef_binary/Release/*" to "cefpython/src/linux/binaries_64bit/"
+9. Copy "cef_binary/build/libcef_dll_wrapper/*"
+   to "cefpython/src/linux/setup/lib_64bit/" (create dir)
+10. Temporary fix for Isue #231 - copy icudtl.dat and natives_blob.bin
+    to /usr/bin (where the python executable resides)
+11. Build cefpython:
+```
+cd cefpython/src/linux/
+python compile.py 51.0
+```
+12. As of writing only "pygtk_.py" and "kivy_.py" examples work.
+
+
 ## Requirements
 
 Below are platform specific requirements. Do these first before
@@ -57,7 +93,7 @@ __Windows__
 
 __Linux__
 
-* Install packages: `sudo apt-get install python-dev cmake  g++`
+* Install packages: `sudo apt-get install python-dev cmake g++`
 * To build upstream cefclient/cefsimple you need to install these packages:
   `sudo apt-get install libgtk2.0-dev libgtkglext1-dev`
 * If building CEF from sources:
