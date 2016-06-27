@@ -48,7 +48,7 @@ On Win/Mac you can install from PyPI using this command:
 * For Linux: see the [Download_CEF3_Linux](../../wiki/Download_CEF3_Linux) wiki page.
 * For Mac: see the [Download_CEF3_Mac](../../wiki/Download_CEF3_Mac) wiki page.
 
-__New releases RSS/Atom feed__
+__New releases RSS/Atom feed__<br>
 To be notified of new releases subscribe to this [Atom feed](https://github.com/cztomczak/cefpython/releases.atom).
 
 

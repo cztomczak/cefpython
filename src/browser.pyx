@@ -4,8 +4,11 @@
 
 include "cefpython.pyx"
 
-# cef_mouse_button_type_t, SendMouseClickEvent().
 cimport cef_types
+IF UNAME_SYSNAME == "Linux":
+    cimport x11
+
+# cef_mouse_button_type_t, SendMouseClickEvent().
 MOUSEBUTTON_LEFT = cef_types.MBT_LEFT
 MOUSEBUTTON_MIDDLE = cef_types.MBT_MIDDLE
 MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
@@ -391,6 +394,12 @@ cdef class PyBrowser:
 
     cpdef py_void ReloadIgnoreCache(self):
         self.GetCefBrowser().get().ReloadIgnoreCache()
+
+    cpdef py_void SetBounds(self, int x, int y, int width, int height):
+        if platform.system() == "Linux":
+            x11.SetX11WindowBounds(self.GetCefBrowser(), x, y, width, height)
+        else:
+            raise Exception("SetBounds() not impplemented on this platform")
 
     cpdef py_void SetFocus(self, enable):
         self.GetCefBrowserHost().get().SetFocus(bool(enable))

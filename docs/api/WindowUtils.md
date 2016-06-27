@@ -17,6 +17,7 @@ Table of contents:
   * [IsWindowHandle](#iswindowhandle)
   * [gtk_plug_new (Linux)](#gtk_plug_new-linux)
   * [gtk_widget_show (Linux)](#gtk_widget_show-linux)
+  * [InstallX11ErrorHandlers (Linux)](#installx11errorhandlers-linux)
 
 
 ## Methods
@@ -125,3 +126,14 @@ Linux-only. This method is utilized in the PyQt example.
 | __Return__ | void |
 
 Linux-only. This method is utilized in the PyQt example.
+
+
+### InstallX11ErrorHandlers (Linux)
+
+| | |
+| --- | --- |
+| __Return__ | void |
+
+Linux-only. Install xlib error handlers so that the application
+won't be terminated on non-fatal errors. Must be done after
+initializing GTK.

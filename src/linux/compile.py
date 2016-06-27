@@ -148,8 +148,9 @@ if exitcode:
 
 print("DONE")
 
-os.chdir("./binaries_%s" % BITS)
 if DEBUG:
+    os.chdir("./binaries_%s" % BITS)
     subprocess.call("cygdb . --args python-dbg wxpython.py", shell=True)
 else:
-    subprocess.call("python wxpython.py", shell=True)
+    subprocess.call("cd ./binaries_%s && python pygtk_.py && cd .." % BITS,
+                    shell=True)

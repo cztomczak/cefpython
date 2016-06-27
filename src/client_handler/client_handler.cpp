@@ -2,7 +2,9 @@
 // License: New BSD License.
 // Website: http://code.google.com/p/cefpython/
 
-// ClientHandler code is running in the Browser process only.
+// NOTE: clienthandler code is running only in the BROWSER PROCESS.
+//       cefpythonapp code is running in both BROWSER PROCESS and subprocess
+//       (see the subprocess/ directory).
 
 #include "client_handler.h"
 #include "cefpython_public_api.h"

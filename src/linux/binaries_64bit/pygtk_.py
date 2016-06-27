@@ -9,7 +9,7 @@
 # for more details.
 
 import ctypes, os, sys
-libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)),\
+libcef_so = os.path.join(os.path.dirname(os.path.abspath(__file__)),
         'libcef.so')
 if os.path.exists(libcef_so):
     # Import local module
@@ -94,24 +94,27 @@ class PyGTKExample:
     exiting = None
     searchEntry = None
     vbox = None
+    menubar = None
+    menubar_height = None
 
     def __init__(self):
         self.mainWindow = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.mainWindow.connect('focus-in-event', self.OnFocusIn)
+        self.mainWindow.connect('configure-event', self.OnConfigure)
         self.mainWindow.connect('destroy', self.OnExit)
         self.mainWindow.set_size_request(width=800, height=600)
         self.mainWindow.set_title('PyGTK CEF example')
         self.mainWindow.realize()
 
         self.vbox = gtk.VBox(False, 0)
-        self.vbox.pack_start(self.CreateMenu(), False, False, 0)
+        self.vbox.connect('size-allocate', self.OnVBoxSize)
+        self.menubar = self.CreateMenu()
+        self.menubar.connect('size-allocate', self.OnMenubarSize)
+        self.vbox.pack_start(self.menubar, False, False, 0)
         self.mainWindow.add(self.vbox)
 
-        m = re.search("GtkVBox at 0x(\w+)", str(self.vbox))
-        hexID = m.group(1)
-        windowID = int(hexID, 16)
-
         windowInfo = cefpython.WindowInfo()
-        windowInfo.SetAsChild(windowID)
+        windowInfo.SetAsChild(self.mainWindow.window.xid, [0,0,0,0])
         # Linux requires adding "file://" for local files,
         # otherwise /home/some will be replaced as http://home/some
         self.browser = cefpython.CreateBrowserSync(
@@ -121,6 +124,8 @@ class PyGTKExample:
 
         self.vbox.show()
         self.mainWindow.show()
+        self.vbox.get_window().focus()
+        self.mainWindow.get_window().focus()
         gobject.timeout_add(10, self.OnTimer)
 
     def CreateMenu(self):
@@ -150,9 +155,6 @@ class PyGTKExample:
 
         return menubar
 
-    def OnWidgetClick(self, widget, data):
-        self.mainWindow.get_window().focus()
-
     def OnTimer(self):
         if self.exiting:
             return False
@@ -160,11 +162,27 @@ class PyGTKExample:
         return True
 
     def OnFocusIn(self, widget, data):
-        # This function is currently not called by any of code,
-        # but if you would like for browser to have automatic focus
-        # add such line:
-        # self.mainWindow.connect('focus-in-event', self.OnFocusIn)
-        self.browser.SetFocus(True)
+        if self.browser:
+            self.browser.SetFocus(True)
+            return True
+        return False
+
+    def OnConfigure(self, widget, data):
+        if self.browser:
+            self.browser.NotifyMoveOrResizeStarted()
+        return False
+
+    def OnVBoxSize(self, widget, data):
+        if self.browser:
+            x = data.x
+            y = data.y + self.menubar_height
+            width = data.width
+            height = data.height - self.menubar_height
+            self.browser.SetBounds(x, y, width, height)
+            print("%s %s %s %s" % (x,y,width,height))
+
+    def OnMenubarSize(self, widget, data):
+        self.menubar_height = data.height
 
     def OnExit(self, widget, data=None):
         self.exiting = True
@@ -191,6 +209,7 @@ if __name__ == '__main__':
     }
 
     cefpython.Initialize(settings)
+    cefpython.WindowUtils.InstallX11ErrorHandlers()
 
     gobject.threads_init() # Timer for the message loop
     PyGTKExample()

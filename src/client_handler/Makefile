@@ -15,7 +15,7 @@ CCFLAGS = -g -fPIC -Wall -Werror $(CEF_CCFLAGS)
 
 SRC = client_handler.cpp cookie_visitor.cpp resource_handler.cpp \
 		web_request_client.cpp string_visitor.cpp request_context_handler.cpp \
-		task.cpp
+		task.cpp x11.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

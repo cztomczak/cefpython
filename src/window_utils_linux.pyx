@@ -4,6 +4,9 @@
 
 include "cefpython.pyx"
 
+IF UNAME_SYSNAME == "Linux":
+    cimport x11
+
 class WindowUtils:
     # You have to overwrite this class and provide implementations
     # for these methods.
@@ -24,4 +27,10 @@ class WindowUtils:
 
     @staticmethod
     def gtk_widget_show(long long gtkWidgetPtr):
-        gtk_widget_show(<GtkWidget*>gtkWidgetPtr)
+        with nogil:
+            gtk_widget_show(<GtkWidget*>gtkWidgetPtr)
+
+    @staticmethod
+    def InstallX11ErrorHandlers():
+        with nogil:
+            x11.InstallX11ErrorHandlers()

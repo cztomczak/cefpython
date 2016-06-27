@@ -50,6 +50,7 @@ Table of contents:
   * [ParentWindowWillClose](#parentwindowwillclose)
   * [Reload](#reload)
   * [ReloadIgnoreCache](#reloadignorecache)
+  * [SetBounds](#setbounds)
   * [SendKeyEvent](#sendkeyevent)
   * [SendMouseClickEvent](#sendmouseclickevent)
   * [SendMouseMoveEvent](#sendmousemoveevent)
@@ -528,6 +529,19 @@ Reload the current page.
 | __Return__ | void |
 
 Reload the current page ignoring any cached data.
+
+
+### SetBounds
+
+| Parameter | Type |
+| --- | --- |
+| x | int |
+| y | int |
+| width | int |
+| height | int |
+| __Return__ | void |
+
+Linux-only. Set window bounds.
 
 
 ### SendKeyEvent

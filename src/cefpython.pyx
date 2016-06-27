@@ -99,7 +99,7 @@ CefRenderHandler
     OnScrollOffsetChanged - new args: x,y
 
 
-LINUX TODO:
+In upstream cefclient:
 1. g_signal_connect(G_OBJECT(window_), "configure-event",
                     G_CALLBACK(&RootWindowGtk::WindowConfigure), this);
    browser->GetHost()->NotifyMoveOrResizeStarted();
