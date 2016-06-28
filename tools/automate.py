@@ -209,8 +209,8 @@ def create_cef_directories():
     # Clone cef repo and checkout branch
     if os.path.exists(cef_dir):
         rmdir(cef_dir)
-    run_git("clone %s cef" % CEF_GIT_URL, Options.cef_build_dir)
-    run_git("checkout %s" % Options.cef_branch, cef_dir)
+    run_git("clone -b %s %s cef" % (Options.cef_branch, CEF_GIT_URL),
+            Options.cef_build_dir)
     if Options.cef_commit:
         run_git("checkout %s" % Options.cef_commit, cef_dir)
     # Update cef patches
@@ -306,10 +306,14 @@ def build_cef_projects():
     print("[automate.py] OK")
     if platform.system() == "Windows":
         assert(os.path.exists(os.path.join(build_cefclient,
-                                           "cefclient", "cefclient.exe")))
+                                           "cefclient",
+                                           Options.build_type,
+                                           "cefclient.exe")))
     else:
         assert (os.path.exists(os.path.join(build_cefclient,
-                                            "cefclient", "cefclient")))
+                                            "cefclient",
+                                            Options.build_type,
+                                            "cefclient")))
 
     # Build libcef_dll_wrapper libs
     if platform.system() == "Windows":
@@ -385,11 +389,13 @@ def create_prebuilt_binaries():
     cpdir(os.path.join(src, "Resources"), bindir)
 
     # Copy cefclient, cefsimple
-    cefclient = os.path.join(src, "build_cefclient", "cefclient", "cefclient")
+    cefclient = os.path.join(src, "build_cefclient", "cefclient",
+                             Options.build_type, "cefclient")
     cefclient_files = os.path.join(src, "build_cefclient", "cefclient",
-                                   "files")
+                                   Options.build_type, "files")
     cpdir(cefclient_files, os.path.join(bindir, "files"))
-    cefsimple = os.path.join(src, "build_cefclient", "cefsimple", "cefsimple")
+    cefsimple = os.path.join(src, "build_cefclient", "cefsimple",
+                             Options.build_type, "cefsimple")
     if platform.system() == "Windows":
         cefclient += ".exe"
         cefsimple += ".exe"
@@ -411,7 +417,8 @@ def create_prebuilt_binaries():
         libdst = os.path.join(libdir, "licef_dll_wrapper_md.lib")
         shutil.copy(libsrc, libdst)
     elif platform.system() == "Linux":
-        cpdir(os.path.join(src, "build_cefclient", "libcef_dll"), libdir)
+        cpdir(os.path.join(src, "build_cefclient", "libcef_dll_wrapper"),
+              libdir)
 
     # Copy README.txt and LICENSE.txt
     shutil.copy(os.path.join(src, "README.txt"), dst)
@@ -509,6 +516,11 @@ def run_automate_git():
     # so don't fetch/update CEF repo.
     args.append("--no-cef-update")
     args.append("--no-distrib-archive")
+    if platform.system() == "Linux":
+        # Building cefclient target isn't supported on Linux when
+        # using sysroot (cef/#1916). However building cefclient
+        # later in cef_binary/ with cmake/ninja do works fine.
+        args.append("--build-target=cefsimple")
 
     args = " ".join(args)
     return run_python(script+" "+args, Options.cef_build_dir)

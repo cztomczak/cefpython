@@ -1,0 +1,140 @@
+diff --git include/capi/cef_path_util_capi.h include/capi/cef_path_util_capi.h
+index 23befac..de31b3d 100644
+--- include/capi/cef_path_util_capi.h
++++ include/capi/cef_path_util_capi.h
+@@ -51,6 +51,16 @@ extern "C" {
+ ///
+ CEF_EXPORT int cef_get_path(cef_path_key_t key, cef_string_t* path);
+ 
++///
++// Override the path associated with the specified |key|. This cannot be used to
++// change the value of PK_DIR_CURRENT, but that should be obvious. Also, if the
++// path specifies a directory that does not exist, the directory will be created
++// by this function.  This function returns true (1) if successful. WARNING:
++// Consumers of CefGetPath may expect paths to be constant over the lifetime of
++// the app, so this function should be used with caution.
++///
++CEF_EXPORT int cef_override_path(cef_path_key_t key, const cef_string_t* path);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git include/cef_path_util.h include/cef_path_util.h
+index 552f4ba..95af66e 100644
+--- include/cef_path_util.h
++++ include/cef_path_util.h
+@@ -49,4 +49,15 @@ typedef cef_path_key_t PathKey;
+ /*--cef()--*/
+ bool CefGetPath(PathKey key, CefString& path);
+ 
++///
++// Override the path associated with the specified |key|. This cannot
++// be used to change the value of PK_DIR_CURRENT, but that should be obvious.
++// Also, if the path specifies a directory that does not exist, the directory
++// will be created by this method.  This method returns true if successful.
++// WARNING: Consumers of CefGetPath may expect paths to be constant
++// over the lifetime of the app, so this method should be used with caution.
++///
++/*--cef()--*/
++bool CefOverridePath(PathKey key, const CefString& path);
++
+ #endif  // CEF_INCLUDE_CEF_PATH_UTIL_H_
+diff --git libcef/browser/path_util_impl.cc libcef/browser/path_util_impl.cc
+index 6a75930..ad620d7 100644
+--- libcef/browser/path_util_impl.cc
++++ libcef/browser/path_util_impl.cc
+@@ -51,3 +51,38 @@ bool CefGetPath(PathKey key, CefString& path) {
+ 
+   return false;
+ }
++
++bool CefOverridePath(PathKey key, const CefString& path) {
++  int pref_key = base::PATH_START;
++  switch(key) {
++    case PK_DIR_EXE:
++      pref_key = base::DIR_EXE;
++      break;
++    case PK_DIR_MODULE:
++      pref_key = base::DIR_MODULE;
++      break;
++    case PK_DIR_TEMP:
++      pref_key = base::DIR_TEMP;
++      break;
++    case PK_FILE_EXE:
++      pref_key = base::FILE_EXE;
++      break;
++    case PK_FILE_MODULE:
++      pref_key = base::FILE_MODULE;
++      break;
++#if defined(OS_WIN)
++    case PK_LOCAL_APP_DATA:
++      pref_key = base::DIR_LOCAL_APP_DATA;
++      break;
++#endif
++    case PK_USER_DATA:
++      pref_key = chrome::DIR_USER_DATA;
++      break;
++    default:
++      NOTREACHED() << "invalid argument";
++      return false;
++  }
++
++  base::FilePath file_path = base::FilePath(path);
++  return PathService::Override(pref_key, file_path);
++}
+diff --git libcef_dll/libcef_dll.cc libcef_dll/libcef_dll.cc
+index cde4fde..7a5b13a 100644
+--- libcef_dll/libcef_dll.cc
++++ libcef_dll/libcef_dll.cc
+@@ -739,6 +739,23 @@ CEF_EXPORT int cef_get_path(cef_path_key_t key, cef_string_t* path) {
+   return _retval;
+ }
+ 
++CEF_EXPORT int cef_override_path(cef_path_key_t key, const cef_string_t* path) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: path; type: string_byref_const
++  DCHECK(path);
++  if (!path)
++    return 0;
++
++  // Execute
++  bool _retval = CefOverridePath(
++      key,
++      CefString(path));
++
++  // Return type: bool
++  return _retval;
++}
++
+ CEF_EXPORT int cef_launch_process(struct _cef_command_line_t* command_line) {
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 
+diff --git libcef_dll/wrapper/libcef_dll_wrapper.cc libcef_dll/wrapper/libcef_dll_wrapper.cc
+index 74827e3..cf35e11 100644
+--- libcef_dll/wrapper/libcef_dll_wrapper.cc
++++ libcef_dll/wrapper/libcef_dll_wrapper.cc
+@@ -683,6 +683,23 @@ CEF_GLOBAL bool CefGetPath(PathKey key, CefString& path) {
+   return _retval?true:false;
+ }
+ 
++CEF_GLOBAL bool CefOverridePath(PathKey key, const CefString& path) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: path; type: string_byref_const
++  DCHECK(!path.empty());
++  if (path.empty())
++    return false;
++
++  // Execute
++  int _retval = cef_override_path(
++      key,
++      path.GetStruct());
++
++  // Return type: bool
++  return _retval?true:false;
++}
++
+ CEF_GLOBAL bool CefLaunchProcess(CefRefPtr<CefCommandLine> command_line) {
+   // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
+ 

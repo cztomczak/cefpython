@@ -10,13 +10,19 @@ OS_POSTFIX = ("win" if platform.system() == "Windows" else
               "mac" if platform.system() == "Darwin" else "unknown")
 
 # ALL PLATFORMS
-patches.append(
+# noinspection PyUnresolvedReferences
+patches.extend([
     {
         # Fixes HTTPS cache problems with private certificates
         'name': 'issue125',
-        'path': '../net/http/',
+        'path': '../net/http/'
     },
-)
+    {
+        # Expose CefOverridePath to override PathService path keys
+        'name': 'issue231',
+        'path': './'
+    },
+])
 
 # LINUX
 if OS_POSTFIX == "linux":

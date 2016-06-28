@@ -115,11 +115,9 @@ cpdef str GetModuleDirectory():
     else:
         path = os.getcwd()
     if platform.system() == "Windows":
-        # On linux this regexp would give:
-        # "\/home\/czarek\/cefpython\/cefpython\/cef1\/linux\/binaries"
         path = re.sub(r"[/\\]+", re.escape(os.sep), path)
     path = re.sub(r"[/\\]+$", "", path)
-    return str(path)
+    return os.path.abspath(path)
 
 cpdef py_bool IsFunctionOrMethod(object valueType):
     if (valueType == types.FunctionType

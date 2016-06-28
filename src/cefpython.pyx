@@ -387,6 +387,7 @@ from cef_types cimport (
     CefSettings, CefBrowserSettings, CefRect, CefPoint,
     CefRequestContextSettings,
     CefKeyEvent, CefMouseEvent, CefScreenInfo,
+    PathKey, PK_DIR_EXE, PK_DIR_MODULE
 )
 
 from cef_task cimport *
@@ -423,6 +424,7 @@ from cef_request_context cimport *
 from cef_request_context_handler cimport *
 from request_context_handler cimport *
 from cef_jsdialog_handler cimport *
+from cef_path_util cimport *
 
 
 # -----------------------------------------------------------------------------
@@ -556,9 +558,19 @@ cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
 
 # If you've built custom binaries with tcmalloc hook enabled on
 # Linux, then do not to run any of the CEF code until Initialize()
-# is called. See Issue 73 in the CEF Python Issue Tracker.
+# is called. See Issue #73 in the CEF Python Issue Tracker.
 
 def Initialize(applicationSettings=None, commandLineSwitches=None):
+
+    # Fix Issue #231 - Discovery of the "icudtl.dat" file fails
+    cdef str py_module_dir = GetModuleDirectory()
+    cdef CefString module_dir
+    PyToCefString(py_module_dir, module_dir)
+    CefOverridePath(PK_DIR_EXE, module_dir)\
+            or Debug("ERROR: CefOverridePath failed")
+    CefOverridePath(PK_DIR_MODULE, module_dir)\
+            or Debug("ERROR: CefOverridePath failed")
+
     if not applicationSettings:
         applicationSettings = {}
     # Debug settings need to be set before Debug() is called

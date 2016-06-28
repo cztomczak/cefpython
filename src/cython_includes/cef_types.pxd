@@ -317,3 +317,14 @@ cdef extern from "include/internal/cef_types.h":
         WOD_OFF_THE_RECORD,
         WOD_IGNORE_ACTION
     ctypedef cef_window_open_disposition_t WindowOpenDisposition
+
+    ctypedef enum cef_path_key_t:
+        PK_DIR_CURRENT,
+        PK_DIR_EXE,
+        PK_DIR_MODULE,
+        PK_DIR_TEMP,
+        PK_FILE_EXE,
+        PK_FILE_MODULE,
+        PK_LOCAL_APP_DATA,
+        PK_USER_DATA,
+    ctypedef cef_path_key_t PathKey

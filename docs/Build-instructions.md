@@ -18,6 +18,7 @@ listed on this page.
 
 
 Table of contents:
+* [Build CEF Python 51 BETA](#build-cef-python-51-beta)
 * [Requirements](#requirements)
 * [Build CEF Python using prebuilt CEF binaries](#build-cef-python-using-prebuilt-cef-binaries)
 * [Build both CEF Python and CEF from sources](#build-both-cef-python-and-cef-from-sources)
@@ -28,38 +29,55 @@ Table of contents:
 
 ## Build CEF Python 51 BETA
 
-1. Works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
-2. Download 64-bit Linux standard distribution from Spotify builds:
+Complete steps for building CEF Python 51 using prebuilt
+binaries from Spotify Automated Builds.
+
+1) Tested and works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
+
+2) Download 64-bit Linux standard distribution from Spotify builds:
    http://opensource.spotify.com/cefbuilds/index.html
-    * As of writing the proper file is:
-      "cef_binary_3.2704.1432.g60b3718_linux64.tar.bz2"
-    * Check CEF version in "cefpython/src/version/cef_version_linux.h"
-      to make sure you're downloading the right file
-3. Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
+
+   * As of writing the proper file is:
+     "cef_binary_3.2704.1432.g60b3718_linux64.tar.bz2"
+   * Check CEF version in "cefpython/src/version/cef_version_linux.h"
+     to make sure you're downloading the right file
+
+3) Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
    and copy it to /usr/bin and chmod 755.
-4. Install packages: `sudo apt-get install python-dev cmake g++`
-5. Create projects to build:
+
+4) Install packages: `sudo apt-get install python-dev cmake g++`
+
+5) Configure projects in the build/ directory:
 ```
 cd cef_binary/
 mkdir build
 cd build/
 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ..
 ```
-6. To build type: `ninja libcef_dll_wrapper`. You may also build cefclient
-   by typing `nincja cefclient`, but this will require installing
-   additional packages, read Requirements further on this page.
-7. Copy "cef_binary/Resources/*" to "cefpython/src/linux/binaries_64bit/"
-8. Copy "cef_binary/Release/*" to "cefpython/src/linux/binaries_64bit/"
-9. Copy "cef_binary/build/libcef_dll_wrapper/*"
+
+6) To build type: `ninja libcef_dll_wrapper`.
+
+   You may also build cefclient by typing `nincja cefclient`, but
+   this will require installing additional packages - see Requirements
+   further down on this page.
+
+7) Copy "cef_binary/Resources/*" to "cefpython/src/linux/binaries_64bit/"
+
+8) Copy "cef_binary/Release/*" to "cefpython/src/linux/binaries_64bit/"
+
+9) Copy "cef_binary/build/libcef_dll_wrapper/*"
    to "cefpython/src/linux/setup/lib_64bit/" (create dir)
-10. Temporary fix for Isue #231 - copy icudtl.dat and natives_blob.bin
+
+10) Temporary fix for Isue #231 - copy icudtl.dat and natives_blob.bin
     to /usr/bin (where the python executable resides)
-11. Build cefpython:
+
+11) Build cefpython:
 ```
 cd cefpython/src/linux/
 python compile.py 51.0
 ```
-12. As of writing only "pygtk_.py" and "kivy_.py" examples work.
+
+12) As of writing only "pygtk_.py" and "kivy_.py" examples work.
 
 
 ## Requirements
@@ -94,24 +112,27 @@ __Windows__
 __Linux__
 
 * Install packages: `sudo apt-get install python-dev cmake g++`
-* To build upstream cefclient/cefsimple you need to install these packages:
-  `sudo apt-get install libgtk2.0-dev libgtkglext1-dev`
 * If building CEF from sources:
     * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
     * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
       and copy it to /usr/bin and chmod 755.
-    * Install required packages using one of the methods below:
-        1. See Linux configuration for CEF automated
-      builds on the [cef/AutomatedBuildSetup.md](https://bitbucket.org/chromiumembedded/cef/wiki/AutomatedBuildSetup.md#markdown-header-linux-configuration)
-      wiki page.
-        2. Run the install-build-deps.sh script - instructions provided
-          further down on this page.
-* To build on Debian 7 see
-  [cef/BuildingOnDebian7.md](https://bitbucket.org/chromiumembedded/cef/wiki/BuildingOnDebian7.md) and
-  [cef/#1575](https://bitbucket.org/chromiumembedded/cef/issues/1575),
-  and [cef/#1697](https://bitbucket.org/chromiumembedded/cef/issues/1697)
-* To perform a 32-bit Linux build on a 64-bit Linux system see
-  [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804)
+    * Install required packages using one of the three methods below:
+        1. Type command: `sudo apt-get install bison build-essential cdbs curl devscripts dpkg-dev elfutils fakeroot flex g++ git-core git-svn gperf libapache2-mod-php5 libasound2-dev libav-tools libbrlapi-dev libbz2-dev libcairo2-dev libcap-dev libcups2-dev libcurl4-gnutls-dev libdrm-dev libelf-dev libexif-dev libffi-dev libgconf2-dev libgl1-mesa-dev libglib2.0-dev libglu1-mesa-dev libgnome-keyring-dev libgtk2.0-dev libkrb5-dev libnspr4-dev libnss3-dev libpam0g-dev libpci-dev libpulse-dev libsctp-dev libspeechd-dev libsqlite3-dev libssl-dev libudev-dev libwww-perl libxslt1-dev libxss-dev libxt-dev libxtst-dev mesa-common-dev openbox patch perl php5-cgi pkg-config python python-cherrypy3 python-crypto python-dev python-psutil python-numpy python-opencv python-openssl python-yaml rpm ruby subversion ttf-dejavu-core ttf-indic-fonts ttf-kochi-gothic ttf-kochi-mincho fonts-thai-tlwg wdiff zip`
+        2. See the list of packages on the
+           [cef/AutomatedBuildSetup.md](https://bitbucket.org/chromiumembedded/cef/wiki/AutomatedBuildSetup.md#markdown-header-linux-configuration)
+            wiki page.
+        2. Run the install-build-deps.sh script -
+           instructions provided further down on this page.
+    * To build on Debian 7 see
+      [cef/BuildingOnDebian7.md](https://bitbucket.org/chromiumembedded/cef/wiki/BuildingOnDebian7.md) and
+      [cef/#1575](https://bitbucket.org/chromiumembedded/cef/issues/1575),
+      and [cef/#1697](https://bitbucket.org/chromiumembedded/cef/issues/1697)
+    * To perform a 32-bit Linux build on a 64-bit Linux system see
+      Linux configuration in upstream cef/AutomatedBuildSetup.md. See also
+      [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804).
+* If using prebuilt binaries from Spotify automated builds and want to
+  build cefclient/cefsimple you need to install these packages:
+  `sudo apt-get install libgtk2.0-dev libgtkglext1-dev`
 
 
 __All platforms__
@@ -124,15 +145,16 @@ __All platforms__
 
 ## Build CEF Python using prebuilt CEF binaries
 
+__NOT WORKING YET__
+
 Prebuilt binaries are available on
 [GitHub Releases](https://github.com/cztomczak/cefpython/releases)
-and tagged eg. 'v47-upstream'.
+and tagged eg. 'v51-upstream'.
 
 Run the automate.py tool using the --prebuilt-cef flag that will download
 prebuilt binaries from GitHub Releases using version information from
-src/version/.
+the "src/version/" directory.
 
-__NOTE__: The --prebuilt-cef flag is not implemented yet.
 ```
 cd tools/
 python automate.py --prebuilt-cef
@@ -144,31 +166,48 @@ need to customize the build then use the --help flag to see more.
 
 ## Build both CEF Python and CEF from sources
 
-Run the automate.py tool using the --build-cef flag. Specify cef branch
-and optionally how many parallel ninja jobs to run (by default cores/2).
-If building on Linux see the Important note futher down.
+Run the automate.py tool using the --build-cef flag. You can optionally
+set how many parallel ninja jobs to run (by default cores/2) with
+the --ninja-jobs flag.
+
+The automate script will use version information from the "src/version/"
+directory. If you would like to use a custom CEF branch then you can
+use the --cef-branch flag - but note that this is only for advanced
+users as this will require updating cefpython's C++/Cython code.
+
+If building on Linux and there are errors, see the MISSING PACKAGES
+note futher down.
+
+You should be fine by running automate.py with the default options, but if you
+need to customize the build then use the --help flag to see more.
 
 ```
-cd tools/
-python automate.py --build-cef --cef-branch 2526 --ninja-jobs 6
+cd ~/cefpython/
+mkdir build/ && cd build
+python ../tools/automate.py --build-cef --ninja-jobs 6
+cd cef*_*_linux64/
+cp bin/* ../../../src/linux/binaries_64bit/
+mkdir ../../../src/linux/setup/lib_64bit/
+cp lib/* ../../../src/linux/setup/lib_64bit/
+cd ../../../src/linux/
+python compile.py 51.0
 ```
 
-__IMPORTANT NOTE (Linux)__: On Linux it will fail on first run. After the chromium
-sources are downloaded, it will try to build cef projects and fail
-due to missing packages. You will need to run the install-build-deps.sh
-script (intended for Ubuntu systems). When the "ttf-mscorefonts-installer"
+__MISSING PACKAGES (Linux)__: After the chromium sources are downloaded,
+it will try to build cef projects and if it fails due to missing packages
+make sure you've installed all the required packages listed in the
+Requirements section further up on this page. If it still fails, you
+can fix it by running the install-build-deps.sh script (intended for
+Ubuntu systems, but you could edit it). When the "ttf-mscorefonts-installer"
 graphical installer pops up don't install it - deny EULA.
 
 ```
 cd build/chromium/src/build/
 chmod 755 install-build-deps.sh
-sudo ./install-build-deps.sh --no-arm --no-chromeos-fonts --no-nacl
+sudo ./install-build-deps.sh --no-lib32 --no-arm --no-chromeos-fonts --no-nacl
 ```
 
 After dependencies are satisifed re-run automate.py.
-
-You should be fine by running automate.py with the default options, but if you
-need to customize the build then use the --help flag to see more.
 
 
 ## Build CEF manually
@@ -195,19 +234,30 @@ directory, not in the "download_dir/cef/" directory.
 
 There are two sites that provide latest builds of CEF:
 * Spotify - http://opensource.spotify.com/cefbuilds/index.html
-  * This is a new build system
-  * Since 07/06/2016 all builds are without tcmalloc, see
+  * This is the new build system
+  * Since June 2016 all builds are without tcmalloc, see
     [cefpython/#73](https://github.com/cztomczak/cefpython/issues/73)
     and [cef/#1827](https://bitbucket.org/chromiumembedded/cef/issues/1827)
 * Adobe - https://cefbuilds.com/
-  * This is an old build system. It probably still builds with tcmalloc
-    (see above)
+  * This is the old build system. Not tested whether it builds without
+    tcmalloc.
+
+To build the "libcef_dll_wrapper" library type these commands:
+```
+cd cef_binary/
+mkdir build
+cd build/
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ..
+ninja libcef_dll_wrapper
+```
+
+To build CEF sample applications type `ninja cefclient cefsimple`.
 
 Official CEF Python binaries come with additional patches to CEF/Chromium,
 see the [patches/](../../../tree/master/patches) directory. Whether you
 need these patches depends on your use case, they may not be required
 and thus you could use the Spotify binaries. Spotify builds have the
-issue73 patch (tcmalloc) applied.
+issue73 patch (no tcmalloc) applied.
 
 
 ## How to patch
