@@ -107,6 +107,8 @@ setup(
         'subprocess',
         '*.so',
         '*.pak',
+        '*.bin',
+        '*.dat',
         'debug.log',
         'examples/debug.log',
         'examples/wx/debug.log',
