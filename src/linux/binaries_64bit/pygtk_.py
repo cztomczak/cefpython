@@ -179,7 +179,6 @@ class PyGTKExample:
             width = data.width
             height = data.height - self.menubar_height
             self.browser.SetBounds(x, y, width, height)
-            print("%s %s %s %s" % (x,y,width,height))
 
     def OnMenubarSize(self, widget, data):
         self.menubar_height = data.height

@@ -132,7 +132,11 @@ class MainFrame(wx.Frame):
                 clientHandler._OnAfterCreated)
 
         windowInfo = cefpython.WindowInfo()
-        windowInfo.SetAsChild(self.mainPanel.GetGtkWidget())
+        # Must show window otherwise GetHandle() returns 0
+        self.Show()
+        cefpython.WindowUtils.InstallX11ErrorHandlers()
+        windowInfo.SetAsChild(self.mainPanel.GetHandle(),
+                              [0,0,0,0])
         # Linux requires adding "file://" for local files,
         # otherwise /home/some will be replaced as http://home/some
         self.browser = cefpython.CreateBrowserSync(
@@ -176,12 +180,12 @@ class MainFrame(wx.Frame):
     def OnClose(self, event):
         # In wx.chromectrl calling browser.CloseBrowser() and/or
         # self.Destroy() in OnClose is causing crashes when embedding
-        # multiple browser tabs. The solution is to call only 
+        # multiple browser tabs. The solution is to call only
         # browser.ParentWindowWillClose. Behavior of this example
         # seems different as it extends wx.Frame, while ChromeWindow
         # from chromectrl extends wx.Window. Calling CloseBrowser
         # and Destroy does not cause crashes, but is not recommended.
-        # Call ParentWindowWillClose and event.Skip() instead. See 
+        # Call ParentWindowWillClose and event.Skip() instead. See
         # also Issue 107.
         self.browser.ParentWindowWillClose()
         event.Skip()
@@ -206,9 +210,9 @@ class JavascriptExternal:
         self.mainBrowser.GoForward()
 
     def CreateAnotherBrowser(self, url=None):
-        """ 
+        """
         TODO: There are errors in the console when closing the window:
-        >> Check failed: window 
+        >> Check failed: window
         >> Gdk: _gdk_window_destroy_hierarchy: assertion `GDK_IS_WINDOW\
         >>      (window)' failed
         >> GLib-GObject: g_object_unref: assertion `G_IS_OBJECT (object)' failed
@@ -384,16 +388,19 @@ class ClientHandler:
 
     def OnPreKeyEvent(self, browser, event, eventHandle,
             isKeyboardShortcutOut):
-        print("[wxpython.py] KeyboardHandler::OnPreKeyEvent()")
 
-    def OnKeyEvent(self, browser, event, eventHandle):
-        if event["type"] == cefpython.KEYEVENT_KEYUP:
-            # OnKeyEvent is called twice for F5/Esc keys, with event
-            # type KEYEVENT_RAWKEYDOWN and KEYEVENT_KEYUP.
-            # Normal characters a-z should have KEYEVENT_CHAR.
-            return False
-        print("[wxpython.py] KeyboardHandler::OnKeyEvent()")
-        print("    type=%s" % event["type"])
+        stype = event["type"]
+        if stype == cefpython.KEYEVENT_RAWKEYDOWN:
+            stype = "RAWKEYDOWN"
+        elif stype == cefpython.KEYEVENT_KEYDOWN:
+            stype = "KEYDOWN"
+        elif stype == cefpython.KEYEVENT_KEYUP:
+            stype = "KEYUP"
+        elif stype == cefpython.KEYEVENT_CHAR:
+            stype = "CHAR"
+
+        print("[wxpython.py] KeyboardHandler::OnPreKeyEvent()")
+        print("    type=%s" % stype)
         print("    modifiers=%s" % event["modifiers"])
         print("    windows_key_code=%s" % event["windows_key_code"])
         print("    native_key_code=%s" % event["native_key_code"])
@@ -402,29 +409,9 @@ class ClientHandler:
         print("    unmodified_character=%s" % event["unmodified_character"])
         print("    focus_on_editable_field=%s"\
                 % event["focus_on_editable_field"])
-        if platform.system() == "Linux":
-            # F5
-            if event["native_key_code"] == 71:
-                print("[wxpython.py] F5 pressed, calling"\
-                        " browser.ReloadIgnoreCache()")
-                browser.ReloadIgnoreCache()
-                return True
-            # Escape
-            if event["native_key_code"] == 9:
-                print("[wxpython.py] Esc pressed, calling browser.StopLoad()")
-                browser.StopLoad()
-                return True
-            # F12
-            if event["native_key_code"] == 96:
-                print("[wxpython.py] F12 pressed, calling"\
-                        " browser.ShowDevTools()")
-                browser.ShowDevTools()
-                return True
-        elif platform.system() == "Windows":
-            # F5 todo
-            # Escape todo
-            pass
-        return False
+
+    def OnKeyEvent(self, browser, event, eventHandle):
+        pass
 
     # -------------------------------------------------------------------------
     # RequestHandler
@@ -562,7 +549,7 @@ class ClientHandler:
         print("    http status code = %s" % httpStatusCode)
         # Tests for the Browser object methods
         self._Browser_LoadUrl(browser)
-        
+
     def _Browser_LoadUrl(self, browser):
         if browser.GetUrl() == "data:text/html,Test#Browser.LoadUrl":
              browser.LoadUrl("file://"+GetApplicationPath("wxpython.html"))
@@ -731,7 +718,7 @@ if __name__ == '__main__':
         # is set to True. It will force a separate renderer process
         # for each browser created using CreateBrowserSync.
         "unique_request_context_per_browser": True,
-        # Downloads are handled automatically. A default SaveAs file 
+        # Downloads are handled automatically. A default SaveAs file
         # dialog provided by OS will be displayed.
         "downloads_enabled": True,
         # Remote debugging port, required for Developer Tools support.
@@ -759,7 +746,7 @@ if __name__ == '__main__':
         # "file_access_from_file_urls_allowed": True,
         # "universal_access_from_file_urls_allowed": True,
     }
-    
+
     # Command line switches set programmatically
     switches = {
         # "proxy-server": "socks5://127.0.0.1:8888",
@@ -769,12 +756,12 @@ if __name__ == '__main__':
         # "disable-gpu": "",
         # "--invalid-switch": "" -> Invalid switch name
     }
-    
+
     cefpython.Initialize(settings, switches)
-    
+
     app = MyApp(False)
     app.MainLoop()
     # Let wx.App destructor do the cleanup before calling cefpython.Shutdown().
     del app
-    
+
     cefpython.Shutdown()
