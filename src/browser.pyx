@@ -515,7 +515,11 @@ cdef class PyBrowser:
             cefEvent.type = int(pyEvent["type"])
         if "modifiers" in pyEvent:
             cefEvent.modifiers = long(pyEvent["modifiers"])
-        if ("windows_key_code" in pyEvent) and UNAME_SYSNAME == "Windows":
+        # Always set CefKeyEvent.windows_key_code in SendKeyEvent, even on
+        # Linux. When sending key event for 'backspace' on Linux and setting
+        # "native_key_code", "character", "unmodified_character" it doesn't
+        # work. It starts working after "windows_key_code" is also sent.
+        if "windows_key_code" in pyEvent:
             cefEvent.windows_key_code = int(pyEvent["windows_key_code"])
         if "native_key_code" in pyEvent:
             cefEvent.native_key_code = int(pyEvent["native_key_code"])
