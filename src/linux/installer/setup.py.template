@@ -20,23 +20,7 @@ def post_install():
     """ Post install tasks """
     print("[setup.py] post_install()")
     
-    # Check if libudev.so.0 exists and if not, create
-    # a symbolic link to libudev.so.1. See issues 145 
-    # and 105 in the CEFPython Issue Tracker.
-    # -- Sequence of these dirs does matter, on first
-    # -- match searching should be stopped.
-    libdirs = ["/lib/x86_64-linux-gnu", "/usr/lib64", 
-               "/lib/i386-linux-gnu", "/usr/lib"]
-    for libdir in libdirs:
-        if os.path.exists(libdir+"/libudev.so.1") \
-                and not os.path.exists(libdir+"/libudev.so.0"):
-            libudev1 = "%s/libudev.so.1" % libdir
-            libudev0 = "%s/libudev.so.0" % libdir
-            print("[setup.py] ln -sf %s %s" % (libudev1, libudev0))
-            subprocess.call("ln -sf %s %s" % (libudev1, libudev0), shell=True)
-            break
-    
-    # Find package directory. 
+    # Find package directory.
     # Do not import from local cefpython3/ directory.
     del sys.path[0]
     sys.path.append('')
