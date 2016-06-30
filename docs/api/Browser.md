@@ -486,8 +486,10 @@ This is an alias for the `LoadUrl` method.
 | --- | --- |
 | __Return__ | void |
 
-Notify the browser that the window hosting it is about to be moved or
-resized. This method is only used on Windows and Linux.
+Notify the browser of move or resize events so that popup windows are
+displayed in the correct location and dismissed when the window moves.
+Also so that drag&drop areas are updated accordingly. In upstream
+cefclient this method is being called only on Linux and Windows.
 
 
 ### NotifyScreenInfoChanged
