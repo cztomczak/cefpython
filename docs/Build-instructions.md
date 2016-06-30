@@ -1,6 +1,6 @@
 # Build instructions
 
-NOTE: These instructions are for the master branch (Chrome 51).
+__NOTE__: These instructions are for the master branch (Chrome 51).
 
 There are several types of builds you can perform:
 
@@ -30,7 +30,7 @@ Table of contents:
 ## Build CEF Python 51 BETA
 
 Complete steps for building CEF Python 51 using prebuilt
-binaries from Spotify Automated Builds.
+binaries from GH releases.
 
 1) Tested and works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
 
