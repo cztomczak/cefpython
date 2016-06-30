@@ -153,7 +153,7 @@ def create_copyright_file():
     copyright = re.sub("[\r\n]", "\n", copyright)
     copyright += "\n"
     copyright += "License: BSD 3-clause\n"
-    with open(INSTALLER+"/../../../LICENSE.txt", "r") as f:
+    with open(INSTALLER+"/../../../License", "r") as f:
         license = f.readlines()
     for line in license:
         if not len(re.sub("\s+", "", line)):

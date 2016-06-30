@@ -87,6 +87,7 @@ setup(
         'wx/*.txt',
         'wx/images/*.png',
         '*.txt',
+        'License',
         'cefclient',
         'subprocess',
         '*.so',
