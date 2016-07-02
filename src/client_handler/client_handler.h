@@ -194,12 +194,6 @@ public:
   virtual void OnProtocolExecution(CefRefPtr<CefBrowser> browser,
                                    const CefString& url,
                                    bool& allow_os_execution) OVERRIDE;
-
-  virtual bool OnBeforePluginLoad(CefRefPtr<CefBrowser> browser,
-                                  const CefString& url,
-                                  const CefString& policy_url,
-                                  CefRefPtr<CefWebPluginInfo> info) OVERRIDE;
-
   virtual bool OnCertificateError(
       CefRefPtr<CefBrowser> browser, // not used
       cef_errorcode_t cert_error,

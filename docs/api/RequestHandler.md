@@ -210,13 +210,30 @@ to use [LoadHandler](LoadHandler.md)::OnLoadError() when implementing this on Li
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| url | string |
-| policyUrl | string |
+| mime_type | string |
+| plugin_url | string |
+| top_origin_url | string |
 | info | [WebPluginInfo](WebPluginInfo.md) |
 | __Return__ | bool |
 
-Called on the browser process IO thread before a plugin is loaded. Return
-True to block loading of the plugin.
+Description from upstream CEF:
+> Called on multiple browser process threads before a plugin instance is
+> loaded. |mime_type| is the mime type of the plugin that will be loaded.
+> |plugin_url| is the content URL that the plugin will load and may be empty.
+> |top_origin_url| is the URL for the top-level frame that contains the
+> plugin when loading a specific plugin instance or empty when building the
+> initial list of enabled plugins for 'navigator.plugins' JavaScript state.
+> |plugin_info| includes additional information about the plugin that will be
+> loaded. |plugin_policy| is the recommended policy. Modify |plugin_policy|
+> and return true to change the policy. Return false to use the recommended
+> policy. The default plugin policy can be set at runtime using the
+> `--plugin-policy=[allow|detect|block]` command-line flag. Decisions to mark
+> a plugin as disabled by setting |plugin_policy| to PLUGIN_POLICY_DISABLED
+> may be cached when |top_origin_url| is empty. To purge the plugin list
+> cache and potentially trigger new calls to this method call
+> CefRequestContext::PurgePluginListCache.
+
+Return True to block loading of the plugin.
 
 This callback will be executed during browser creation, thus you must call [cefpython](cefpython.md).SetGlobalClientCallback() to use it. The callback name was prefixed with "`_`" to distinguish this special behavior.
 

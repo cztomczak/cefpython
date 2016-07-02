@@ -8,25 +8,48 @@
 # -fPIC -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-Bsymbolic-functions \
 #   -Wl,-z,relro
 
+UNAME_S = $(shell uname -s)
 CC = g++
-CCFLAGS = -g -fPIC -Wall -Werror -DBROWSER_PROCESS $(CEF_CCFLAGS)
+CCFLAGS = -fPIC -std=gnu++11 -Wall -Werror -DBROWSER_PROCESS \
+			$(CEF_CCFLAGS)
+
+ifeq ($(UNAME_S), Linux)
+	CPP_FILES = print_handler_gtk.cpp
+else
+	CPP_FILES =
+endif
+
 
 SRC = cefpython_app.cpp v8function_handler.cpp v8utils.cpp \
-        javascript_callback.cpp
+		javascript_callback.cpp $(CPP_FILES)
 OBJ = $(SRC:.cpp=.o)
 OUT = libcefpythonapp.a
 
-INC = -I./../ -I/usr/include/python2.7 -I/usr/include/gtk-2.0 \
-    -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/gtk-2.0/include \
-    -I/usr/lib/i386-linux-gnu/glib-2.0/include -I/usr/include/cairo \
-    -I/usr/include/pango-1.0 -I/usr/include/gdk-pixbuf-2.0 \
-    -I/usr/include/atk-1.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include \
-    -I/usr/lib/x86_64-linux-gnu/gtk-2.0/include \
-    -I/usr/lib64/glib-2.0/include -I/usr/lib64/gtk-2.0/include \
-    -I/usr/lib/glib-2.0/include -I/usr/lib/gtk-2.0/include
+INC = -I./../ -I/usr/include/python2.7 \
+	-I/usr/include/gtk-2.0 \
+	-I/usr/include/gtk-unix-print-2.0 \
+	-I/usr/include/glib-2.0 \
+	-I/usr/include/cairo \
+	-I/usr/include/pango-1.0 \
+	-I/usr/include/gdk-pixbuf-2.0 \
+	-I/usr/include/atk-1.0 \
+	-I/usr/lib/x86_64-linux-gnu/gtk-2.0/include \
+	-I/usr/lib/x86_64-linux-gnu/gtk-unix-print-2.0 \
+	-I/usr/lib/x86_64-linux-gnu/glib-2.0/include \
+	-I/usr/lib/i386-linux-gnu/gtk-2.0/include \
+	-I/usr/lib/i386-linux-gnu/gtk-unix-print-2.0 \
+	-I/usr/lib/i386-linux-gnu/glib-2.0/include \
+	-I/usr/lib64/gtk-2.0/include \
+	-I/usr/lib64/gtk-unix-print-2.0 \
+	-I/usr/lib64/glib-2.0/include \
+	-I/usr/lib/gtk-2.0/include \
+	-I/usr/lib/gtk-2.0/gtk-unix-print-2.0 \
+	-I/usr/lib/glib-2.0/include
 
 .cpp.o:
+	@echo [CEFPYTHONAPP] Building $@ from $<...
 	$(CC) $(CCFLAGS) $(INC) -c $< -o $@
 
 $(OUT): $(OBJ)
+	@echo [CEFPYTHONAPP] Creating library $(OUT) from $(OBJ)...
 	ar rcs $(OUT) $(OBJ)

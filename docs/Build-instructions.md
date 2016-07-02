@@ -39,22 +39,26 @@ binaries from GH releases.
 
 3) Install packages: `sudo apt-get install python-dev cmake g++`
 
-4) Download 64-bit Linux binaries and libraries from
+4) Install python dependencies by executing:
+  `cd cefpython/tools/ && pip install -r requirements.txt`
+  (Cython 0.19.2 required - the version must match exactly)
+
+5) Download 64-bit Linux binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/releases)
    tagged 'v51-upstream'.
 
 
-5) Copy "bin/*" to "cefpython/src/linux/binaries_64bit/"
+6) Copy "bin/*" to "cefpython/src/linux/binaries_64bit/"
 
-6) Copy "lib/*" to "cefpython/src/linux/setup/lib_64bit/" (create dir)
+7) Copy "lib/*" to "cefpython/src/linux/setup/lib_64bit/" (create dir)
 
-7) Build cefpython:
+8) Build cefpython:
 ```
 cd cefpython/src/linux/
 python compile.py 51.0
 ```
 
-8) As of writing only "pygtk_.py" and "kivy_.py" examples are working
+9) As of writing only "pygtk_.py" and "kivy_.py" examples are working
 
 
 ## Requirements

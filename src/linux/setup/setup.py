@@ -50,51 +50,62 @@ ext_modules = [Extension(
         r'./../../cython_includes/',
         '/usr/include/gtk-2.0',
         '/usr/include/glib-2.0',
+        '/usr/include/gtk-unix-print-2.0',
         '/usr/include/cairo',
         '/usr/include/pango-1.0',
         '/usr/include/gdk-pixbuf-2.0',
         '/usr/include/atk-1.0',
         # Ubuntu
-        '/usr/lib/x86_64-linux-gnu/glib-2.0/include',
         '/usr/lib/x86_64-linux-gnu/gtk-2.0/include',
+        '/usr/lib/x86_64-linux-gnu/gtk-unix-print-2.0',
+        '/usr/lib/x86_64-linux-gnu/glib-2.0/include',
         '/usr/lib/i386-linux-gnu/gtk-2.0/include',
+        '/usr/lib/i386-linux-gnu/gtk-unix-print-2.0',
         '/usr/lib/i386-linux-gnu/glib-2.0/include',
         # Fedora
-        '/usr/lib64/glib-2.0/include',
         '/usr/lib64/gtk-2.0/include',
-        '/usr/lib/glib-2.0/include',
+        '/usr/lib64/gtk-unix-print-2.0',
+        '/usr/lib64/glib-2.0/include',
         '/usr/lib/gtk-2.0/include',
+        '/usr/lib/gtk-2.0/gtk-unix-print-2.0',
+        '/usr/lib/glib-2.0/include',
     ],
 
     # http_authentication not implemented on Linux.
     library_dirs=[
-        r'./../binaries_%s' % BITS,
         r'./lib_%s' % BITS,
         r'./../../client_handler/',
         r'./../../subprocess/', # libcefpythonapp
         r'./../../cpp_utils/'
     ],
 
+    # Static libraries only. Order is important, if library A depends on B,
+    # then B must be included before A.
     libraries=[
-        # Feed cefpythonapp before cef/cef_dll_wrapper to the linker,
-        # otherwise an "undefined symbol" error may occur when importing
-        # the cefpython .so module (Issue #230).
+        'X11',
+        'gobject-2.0',
+        'glib-2.0',
+        'gtk-x11-2.0',
+        # CEF and CEF Python libraries
+        'cef_dll_wrapper',
         'cefpythonapp',
         'client_handler',
         'cpp_utils',
-        'cef',
-        'cef_dll_wrapper',
-        'gtk-x11-2.0',
     ],
 
-    # Loading libcef.so will only work when running scripts from the same
-    # directory that libcef.so resides in when you put "./" in here.
+    # When you put "./" in here, loading of libcef.so will only work when
+    # running scripts from the same directory that libcef.so resides in.
     # runtime_library_dirs=[
     #    './'
     #],
 
-    extra_compile_args=[],
-    extra_link_args=[],
+    # Fix "ImportError ... undefined symbol ..." caused by CEF's include/base/
+    # headers by adding the -flto flag (Issue #230). Unfortunately -flto
+    # prolongs compilation time significantly.
+    # More on the other flags: https://stackoverflow.com/questions/6687630/
+    extra_compile_args=['-flto', '-fdata-sections', '-ffunction-sections',
+                        '-std=gnu++11'],
+    extra_link_args=['-flto', '-Wl,--gc-sections'],
 
     # Defining macros:
     # define_macros = [("UNICODE","1"), ("_UNICODE","1"), ]

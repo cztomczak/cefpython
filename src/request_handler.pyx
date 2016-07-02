@@ -306,22 +306,30 @@ cdef public void RequestHandler_OnProtocolExecution(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
-        CefRefPtr[CefBrowser] cefBrowser,
-        const CefString& cefUrl,
-        const CefString& cefPolicyUrl,
-        CefRefPtr[CefWebPluginInfo] cefInfo
+        CefRefPtr[CefBrowser] browser,
+        const CefString& mime_type,
+        const CefString& plugin_url,
+        const CefString& top_origin_url,
+        CefRefPtr[CefWebPluginInfo] plugin_info,
+        cef_types.cef_plugin_policy_t* plugin_policy
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyWebPluginInfo pyInfo
     cdef py_bool returnValue
     cdef object clientCallback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
-        pyInfo = CreatePyWebPluginInfo(cefInfo)
+        py_browser = GetPyBrowser(browser)
+        py_plugin_info = CreatePyWebPluginInfo(plugin_info)
         clientCallback = GetGlobalClientCallback("OnBeforePluginLoad")
         if clientCallback:
-            returnValue = clientCallback(pyBrowser, CefToPyString(cefUrl),
-                    CefToPyString(cefPolicyUrl), pyInfo)
+            returnValue = clientCallback(
+                    py_browser,
+                    CefToPyString(mime_type),
+                    CefToPyString(plugin_url),
+                    CefToPyString(top_origin_url),
+                    py_plugin_info)
+            if returnValue:
+                plugin_policy[0] = cef_types.PLUGIN_POLICY_DISABLE
             return bool(returnValue)
         else:
             return False

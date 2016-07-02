@@ -83,12 +83,19 @@ CefRefPtr<CefRenderProcessHandler> CefPythonApp::GetRenderProcessHandler() {
     return this;
 }
 
+CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
+    return print_handler_;
+}
+
 // -----------------------------------------------------------------------------
 // CefBrowserProcessHandler
 // -----------------------------------------------------------------------------
 
 void CefPythonApp::OnContextInitialized() {
     REQUIRE_UI_THREAD();
+#if defined(OS_LINUX)
+    print_handler_ = new ClientPrintHandlerGtk();
+#endif
 }
 
 void CefPythonApp::OnBeforeChildProcessLaunch(

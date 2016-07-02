@@ -21,3 +21,15 @@ CefRefPtr<CefCookieManager> RequestContextHandler::GetCookieManager() {
     }    
     // Default: return NULL.
 }
+
+bool RequestContextHandler::OnBeforePluginLoad(
+                        const CefString& mime_type,
+                        const CefString& plugin_url,
+                        const CefString& top_origin_url,
+                        CefRefPtr<CefWebPluginInfo> plugin_info,
+                        PluginPolicy* plugin_policy) {
+    // Called on multiple threads
+    return RequestHandler_OnBeforePluginLoad(browser_, mime_type, plugin_url,
+                                             top_origin_url, plugin_info,
+                                             plugin_policy);
+}

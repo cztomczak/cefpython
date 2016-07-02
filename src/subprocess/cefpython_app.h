@@ -4,6 +4,12 @@
 
 #pragma once
 #include "include/cef_app.h"
+#include "include/cef_print_handler.h"
+
+#if defined(OS_LINUX)
+#include "print_handler_gtk.h"
+#endif
+
 #include <map>
 
 // CefPythonApp class is instantiated in subprocess and in
@@ -16,6 +22,11 @@ class CefPythonApp :
         public CefApp,
         public CefBrowserProcessHandler,
         public CefRenderProcessHandler {
+ protected:
+  std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;
+  std::string commandLineString_;
+  CefRefPtr<CefPrintHandler> print_handler_;
+
  public:
   CefPythonApp();
 
@@ -34,6 +45,8 @@ class CefPythonApp :
 
   virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler()
         OVERRIDE;
+
+  virtual CefRefPtr<CefPrintHandler> GetPrintHandler() OVERRIDE;
 
   // ---------------------------------------------------------------------------
   // CefBrowserProcessHandler
@@ -116,10 +129,6 @@ class CefPythonApp :
   virtual void DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefV8Context> context);
-
-protected:
-  std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;
-  std::string commandLineString_;
 
 private:
   IMPLEMENT_REFCOUNTING(CefPythonApp);

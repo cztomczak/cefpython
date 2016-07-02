@@ -543,15 +543,17 @@ class ClientHandler:
             print("[wxpython.py] Magnet link allowed!")
             allowExecutionOut[0] = True
 
-    def _OnBeforePluginLoad(self, browser, url, policyUrl, info):
+    def _OnBeforePluginLoad(self, browser, mimeType, pluginUrl, topOriginUrl,
+                            info):
         # This is a global callback set using SetGlobalClientCallback().
         # Plugins are loaded on demand, only when website requires it,
         # the same plugin may be called multiple times.
-        # This callback is called on the IO thread, thus print messages
+        # This callback is called on various threads, thus print messages
         # may not be visible.
         print("[wxpython.py] RequestHandler::_OnBeforePluginLoad()")
-        print("    url = %s" % url)
-        print("    policy url = %s" % policyUrl)
+        print("    mimeType = %s" % mimeType)
+        print("    pluginUrl = %s" % pluginUrl)
+        print("    topOriginUrl = %s" % topOriginUrl)
         print("    info.GetName() = %s" % info.GetName())
         print("    info.GetPath() = %s" % info.GetPath())
         print("    info.GetVersion() = %s" % info.GetVersion())

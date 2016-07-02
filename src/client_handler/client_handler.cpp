@@ -327,15 +327,6 @@ void ClientHandler::OnProtocolExecution(CefRefPtr<CefBrowser> browser,
     RequestHandler_OnProtocolExecution(browser, url, allow_os_execution);
 }
 
-bool ClientHandler::OnBeforePluginLoad(CefRefPtr<CefBrowser> browser,
-                              const CefString& url,
-                              const CefString& policy_url,
-                              CefRefPtr<CefWebPluginInfo> info) {
-    REQUIRE_IO_THREAD();
-    return RequestHandler_OnBeforePluginLoad(browser, url, policy_url, info);
-    // Default: return false;
-}
-
 bool ClientHandler::OnCertificateError(
                       CefRefPtr<CefBrowser> browser, // not used
                       cef_errorcode_t cert_error,

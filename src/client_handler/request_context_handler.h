@@ -13,6 +13,10 @@
 class RequestContextHandler :
         public CefRequestContextHandler
 {
+private:
+    CefRefPtr<CefBrowser> browser_;
+    typedef cef_plugin_policy_t PluginPolicy;
+
 public:
     // Browser may be NULL when instantiated from cefpython.CreateBrowserSync.
     // In such case SetBrowser will be called after browser creation.
@@ -26,9 +30,11 @@ public:
     }
 
     virtual CefRefPtr<CefCookieManager> GetCookieManager() OVERRIDE;
-
-private:
-    CefRefPtr<CefBrowser> browser_;
+    virtual bool OnBeforePluginLoad(const CefString& mime_type,
+                                  const CefString& plugin_url,
+                                  const CefString& top_origin_url,
+                                  CefRefPtr<CefWebPluginInfo> plugin_info,
+                                  PluginPolicy* plugin_policy) OVERRIDE;
 
 private:
     IMPLEMENT_REFCOUNTING(RequestContextHandler);
