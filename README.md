@@ -54,8 +54,8 @@ To be notified of new releases subscribe to this [Atom feed](https://github.com/
 
 ## Support
 
-* API docs are in the [docs/api/](docs/api/) directory
-* See also [Wiki Pages](../../wiki)
+* API docs are in the [api/](api/) directory
+* See [Wiki Pages](../../wiki)
 * Ask questions and report problems on the
   [Forum](https://groups.google.com/group/cefpython)
 * Please do not ask questions in the Issue Tracker

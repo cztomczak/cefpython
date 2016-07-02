@@ -15,7 +15,7 @@ import glob
 import re
 
 # Constants
-API_DIR = os.path.join(os.path.dirname(__file__), "..", "docs", "api")
+API_DIR = os.path.join(os.path.dirname(__file__), "..", "api")
 
 
 def main():
