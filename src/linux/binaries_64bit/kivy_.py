@@ -33,6 +33,10 @@ else:
     # Import from package
     from cefpython3 import cefpython
 
+import pygtk
+pygtk.require('2.0')
+import gtk
+
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Rectangle, GraphicException
@@ -50,13 +54,22 @@ Builder.load_string("""
     orientation: 'vertical'
     BoxLayout:
         size_hint_y: None
-        width: 80
+        height: 40
         Button:
             text: "Back"
             on_press: browser.go_back()
         Button:
             text: "Forward"
             on_press: browser.go_forward()
+        Button:
+            text: "Reload"
+            on_press: browser.reload()
+        Button:
+            text: "Print"
+            on_press: browser.print_page()
+        Button:
+            text: "DevTools"
+            on_press: browser.devtools()
     CefBrowser:
         id: browser
 
@@ -150,6 +163,10 @@ class CefBrowser(Widget):
             "browser_subprocess_path": "%s/%s" % (
                 cefpython.GetModuleDirectory(), "subprocess"),
             "windowless_rendering_enabled": True,
+            "context_menu": {
+                # Disable context menu, popup widgets not supported
+                "enabled": False,
+            },
         }
 
         #start idle
@@ -159,9 +176,15 @@ class CefBrowser(Widget):
         cefpython.WindowUtils.InstallX11ErrorHandlers()
         cefpython.Initialize(settings)
 
+        # CEF needs a valid window handle passed to SetAsOffscreen()
+        # for Printing to work. There is no API to get Kivy's window
+        # handle so creating a dummy hidden Window using GTK.
+        gtkwin = gtk.Window()
+        gtkwin.realize()
+
         #WindowInfo offscreen flag
         windowInfo = cefpython.WindowInfo()
-        windowInfo.SetAsOffscreen(0)
+        windowInfo.SetAsOffscreen(gtkwin.window.xid)
 
         #Create Broswer and naviagte to empty page <= OnPaint won't get called yet
         browserSettings = {}
@@ -483,14 +506,41 @@ class CefBrowser(Widget):
         self.browser.GoBack()
 
 
+    def reload(self):
+        self.browser.Reload()
+
+
+    def print_page(self):
+        self.browser.Print()
+
+
+    def devtools(self):
+        self.browser.ShowDevTools()
+
+
     def on_touch_down(self, touch, *kwargs):
         if not self.collide_point(*touch.pos):
             return
         touch.grab(self)
 
         y = self.height-touch.pos[1]
-        self.browser.SendMouseClickEvent(touch.x, y, cefpython.MOUSEBUTTON_LEFT,
-                                         mouseUp=False, clickCount=1)
+        if touch.is_double_tap:
+            # is_double_tap seems not to work in Kivy 1.7.
+            # Context menu is currently disabled see
+            # settings["context_menu"] in cef_start().
+            self.browser.SendMouseClickEvent(
+                touch.x, y, cefpython.MOUSEBUTTON_RIGHT,
+                mouseUp=False, clickCount=1
+            )
+            self.browser.SendMouseClickEvent(
+                touch.x, y, cefpython.MOUSEBUTTON_RIGHT,
+                mouseUp=True, clickCount=1
+            )
+        else:
+            self.browser.SendMouseClickEvent(touch.x, y,
+                                             cefpython.MOUSEBUTTON_LEFT,
+                                             mouseUp=False, clickCount=1)
+
 
 
     def on_touch_move(self, touch, *kwargs):
