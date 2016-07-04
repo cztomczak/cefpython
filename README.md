@@ -54,8 +54,11 @@ To be notified of new releases subscribe to this [Atom feed](https://github.com/
 
 ## Support
 
-* API docs are in the [api/](api/) directory
-* See [Wiki Pages](../../wiki)
+* Documentation:
+  * See [API docs](api/) in the api/ directory
+  * See [Wiki Pages](../../wiki)
+  * See issues with the [Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+    label
 * Ask questions and report problems on the
   [Forum](https://groups.google.com/group/cefpython)
 * Please do not ask questions in the Issue Tracker
