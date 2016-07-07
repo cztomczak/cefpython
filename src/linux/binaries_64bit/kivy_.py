@@ -132,6 +132,7 @@ class CefBrowser(Widget):
         '''Get called every frame.
         '''
         cefpython.MessageLoopWork()
+        self.on_mouse_move_emulate()
 
 
     def _update_rect(self, *kwargs):
@@ -541,6 +542,18 @@ class CefBrowser(Widget):
                                              cefpython.MOUSEBUTTON_LEFT,
                                              mouseUp=False, clickCount=1)
 
+    last_mouse_pos = None
+    def on_mouse_move_emulate(self):
+        mouse_pos = self.get_root_window().mouse_pos
+        if self.last_mouse_pos == mouse_pos:
+            return
+        self.last_mouse_pos = mouse_pos
+        # Fix mouse pos: realy = 0, kivy y = 600 / realy = 600, kivy y = 0
+        x = mouse_pos[0]
+        y = int(mouse_pos[1]-self.height)
+        if x >= 0 and y <= 0:
+            y = abs(y)
+            self.browser.SendMouseMoveEvent(x, y, mouseLeave=False)
 
 
     def on_touch_move(self, touch, *kwargs):
