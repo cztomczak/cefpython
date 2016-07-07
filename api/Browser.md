@@ -566,6 +566,7 @@ for a description of the available keys.
 | mouseButtonType | int |
 | mouseUp | bool |
 | clickCount | int |
+| modifiers | int |
 | __Return__ | void |
 
 Send a mouse click event to the browser. The |x| and |y| coordinates are relative to the upper-left corner of the view.
@@ -576,28 +577,21 @@ cefpython.`MOUSEBUTTON_LEFT`
 cefpython.`MOUSEBUTTON_MIDDLE`
 cefpython.`MOUSEBUTTON_RIGHT`
 
-TODO: allow to pass modifiers which represents bit flags
-describing any pressed modifier keys. Modifiers can also
-be passed to SendMouseMoveEvent(), SendMouseWheelEvent().
-See cef_event_flags_t enum for modifiers values:
+`modifiers` flags:
 
-```
-enum cef_event_flags_t {
-        EVENTFLAG_NONE                = 0,
-        EVENTFLAG_CAPS_LOCK_ON        = 1 << 0,
-        EVENTFLAG_SHIFT_DOWN          = 1 << 1,
-        EVENTFLAG_CONTROL_DOWN        = 1 << 2,
-        EVENTFLAG_ALT_DOWN            = 1 << 3,
-        EVENTFLAG_LEFT_MOUSE_BUTTON   = 1 << 4,
-        EVENTFLAG_MIDDLE_MOUSE_BUTTON = 1 << 5,
-        EVENTFLAG_RIGHT_MOUSE_BUTTON  = 1 << 6,
-        // Mac OS-X command key.
-        EVENTFLAG_COMMAND_DOWN        = 1 << 7,
-        EVENTFLAG_NUM_LOCK_ON         = 1 << 8,
-        EVENTFLAG_IS_KEY_PAD          = 1 << 9,
-        EVENTFLAG_IS_LEFT             = 1 << 10,
-        EVENTFLAG_IS_RIGHT            = 1 << 11,
-```
+* EVENTFLAG_NONE
+* EVENTFLAG_CAPS_LOCK_ON
+* EVENTFLAG_SHIFT_DOWN
+* EVENTFLAG_CONTROL_DOWN
+* EVENTFLAG_ALT_DOWN
+* EVENTFLAG_LEFT_MOUSE_BUTTON
+* EVENTFLAG_MIDDLE_MOUSE_BUTTON
+* EVENTFLAG_RIGHT_MOUSE_BUTTON
+* EVENTFLAG_COMMAND_DOWN (Mac)
+* EVENTFLAG_NUM_LOCK_ON (Mac)
+* EVENTFLAG_IS_KEY_PAD (Mac)
+* EVENTFLAG_IS_LEFT (Mac)
+* EVENTFLAG_IS_RIGHT (Mac)
 
 
 ### SendMouseMoveEvent
@@ -607,9 +601,12 @@ enum cef_event_flags_t {
 | x | int |
 | y | int |
 | mouseLeave | bool |
+| modifiers | int |
 | __Return__ | void |
 
-Send a mouse move event to the browser. The |x| and |y| coordinates are relative to the upper-left corner of the view.
+Send a mouse move event to the browser. The |x| and |y| coordinates are
+relative to the upper-left corner of the view. For a list of modifiers
+flags see SendMouseClickEvent().
 
 
 ### SendMouseWheelEvent
@@ -620,9 +617,10 @@ Send a mouse move event to the browser. The |x| and |y| coordinates are relative
 | y | int |
 | deltaX | int |
 | deltaY | int |
+| modifiers | int |
 | __Return__ | void |
 
-Send a mouse wheel event to the browser. The |x| and |y| coordinates are relative to the upper-left corner of the view. The |deltaX| and |deltaY| values represent the movement delta in the X and Y directions respectively. In order to scroll inside select popups with window rendering disabled [RenderHandler](RenderHandler.md).GetScreenPoint() should be implemented properly.
+Send a mouse wheel event to the browser. The |x| and |y| coordinates are relative to the upper-left corner of the view. The |deltaX| and |deltaY| values represent the movement delta in the X and Y directions respectively. In order to scroll inside select popups with window rendering disabled [RenderHandler](RenderHandler.md).GetScreenPoint() should be implemented properly. For a list of modifiers flags see SendMouseClickEvent().
 
 
 ### SendFocusEvent

@@ -561,7 +561,9 @@ class CefBrowser(Widget):
             return
 
         y = self.height-touch.pos[1]
-        self.browser.SendMouseMoveEvent(touch.x, y, mouseLeave=False)
+        modifiers = cefpython.EVENTFLAG_LEFT_MOUSE_BUTTON
+        self.browser.SendMouseMoveEvent(touch.x, y, mouseLeave=False,
+                                        modifiers=modifiers)
 
 
     def on_touch_up(self, touch, *kwargs):
