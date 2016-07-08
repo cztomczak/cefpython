@@ -281,7 +281,7 @@ def build_cef_projects():
     else:
         files = glob.glob(os.path.join(Options.binary_distrib,
                                        "cef_binary_*_"+OS_POSTFIX2))
-        assert len(files) == 1, "More than one cef binary dir found"
+        assert len(files) == 1, "Error finding binary distrib"
         cef_binary = files[0]
     assert os.path.exists(cef_binary)
     Options.cef_binary = cef_binary

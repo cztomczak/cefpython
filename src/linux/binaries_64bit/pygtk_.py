@@ -155,9 +155,12 @@ class PyGTKExample:
 
         return menubar
 
+    # count = 0
     def OnTimer(self):
         if self.exiting:
             return False
+        # self.count += 1
+        # print(self.count)
         cefpython.MessageLoopWork()
         return True
 

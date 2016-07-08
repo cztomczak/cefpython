@@ -37,7 +37,7 @@ binaries from GH releases.
 2) Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
    and copy it to /usr/bin and chmod 755.
 
-3) Install packages: `sudo apt-get install python-dev cmake g++`
+3) Install packages: `sudo apt-get install python-dev cmake g++ libgtk2.0-dev`
 
 4) Install python dependencies by executing:
   `cd cefpython/tools/ && pip install -r requirements.txt`
@@ -92,7 +92,7 @@ __Windows__
 
 __Linux__
 
-* Install packages: `sudo apt-get install python-dev cmake g++`
+* Install packages: `sudo apt-get install python-dev cmake g++ libgtk2.0-dev`
 * If building CEF from sources:
     * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
     * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
@@ -113,7 +113,7 @@ __Linux__
       [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804).
 * If using prebuilt binaries from Spotify automated builds and want to
   build cefclient/cefsimple you need to install these packages:
-  `sudo apt-get install libgtk2.0-dev libgtkglext1-dev`
+  `sudo apt-get install libgtkglext1-dev`
 
 
 __All platforms__

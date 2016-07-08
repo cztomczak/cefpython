@@ -37,7 +37,11 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
+import kivy
 from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Rectangle, GraphicException
 from kivy.clock import Clock
@@ -47,40 +51,30 @@ from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.base import EventLoop
 
-####Kivy APP ####
-Builder.load_string("""
-
-<BrowserLayout>:
-    orientation: 'vertical'
-    BoxLayout:
-        size_hint_y: None
-        height: 40
-        Button:
-            text: "Back"
-            on_press: browser.go_back()
-        Button:
-            text: "Forward"
-            on_press: browser.go_forward()
-        Button:
-            text: "Reload"
-            on_press: browser.reload()
-        Button:
-            text: "Print"
-            on_press: browser.print_page()
-        Button:
-            text: "DevTools"
-            on_press: browser.devtools()
-    CefBrowser:
-        id: browser
-
-""")
-
+# Global variables
+g_switches = None
 
 
 class BrowserLayout(BoxLayout):
+    browser = None
 
     def __init__(self, **kwargs):
         super(BrowserLayout, self).__init__(**kwargs)
+        self.orientation = "vertical"
+
+        browser = CefBrowser(id="browser")
+
+        layout = BoxLayout()
+        layout.size_hint_y = None
+        layout.height = 40
+        layout.add_widget(Button(text="Back", on_press=browser.go_back))
+        layout.add_widget(Button(text="Forward", on_press=browser.go_forward))
+        layout.add_widget(Button(text="Reload", on_press=browser.reload))
+        layout.add_widget(Button(text="Print", on_press=browser.print_page))
+        layout.add_widget(Button(text="DevTools", on_press=browser.devtools))
+
+        self.add_widget(layout)
+        self.add_widget(browser)
 
 
 
@@ -97,6 +91,9 @@ class CefBrowser(Widget):
     def __init__(self, start_url='https://www.google.com/', **kwargs):
         super(CefBrowser, self).__init__(**kwargs)
 
+        for arg in sys.argv:
+            if arg.startswith("http://") or arg.startswith("https://"):
+                start_url = arg
         self.start_url = start_url
 
         #Workaround for flexible size:
@@ -128,11 +125,28 @@ class CefBrowser(Widget):
             self.browser.WasResized()
 
 
-    def _cef_mes(self, *kwargs):
+    count = 0
+    def _message_loop_work(self, *kwargs):
         '''Get called every frame.
         '''
+        self.count += 1
+        # print(self.count)
         cefpython.MessageLoopWork()
         self.on_mouse_move_emulate()
+
+        # From Kivy docs:
+        # Clock.schedule_once(my_callback, 0) # call after the next frame
+        # Clock.schedule_once(my_callback, -1) # call before the next frame
+
+        # When scheduling "after the next frame" Kivy calls _message_loop_work
+        # in about 13ms intervals. We use a small trick to make this 6ms
+        # interval by scheduling it alternately before and after the next
+        # frame. This gives better User Experience when scrolling.
+        # See Issue #240 for more details on OSR performance.
+        if self.count % 2 == 0:
+            Clock.schedule_once(self._message_loop_work, 0)
+        else:
+            Clock.schedule_once(self._message_loop_work, -1)
 
 
     def _update_rect(self, *kwargs):
@@ -153,7 +167,7 @@ class CefBrowser(Widget):
             Color(1, 1, 1)
             self.rect = Rectangle(size=self.size, texture=self.texture)
 
-        #configure cef
+        # Configure CEF
         settings = {
             "debug": True, # cefpython debug messages in console and in log_file
             "log_severity": cefpython.LOGSEVERITY_INFO,
@@ -169,13 +183,28 @@ class CefBrowser(Widget):
                 "enabled": False,
             },
         }
+        switches = {
+            # Tweaking OSR performance by setting the same Chromium flags
+            # as in upstream cefclient (# Issue #240).
+            "disable-surfaces": "",
+            "disable-gpu": "",
+            "disable-gpu-compositing": "",
+            "enable-begin-frame-scheduling": "",
+        }
+        browserSettings = {
+            # Tweaking OSR performance (Issue #240)
+            "windowless_frame_rate": 60
+        }
 
-        #start idle
-        Clock.schedule_interval(self._cef_mes, 0)
-
-        #init CEF
+        # Initialize CEF
         cefpython.WindowUtils.InstallX11ErrorHandlers()
-        cefpython.Initialize(settings)
+
+        global g_switches
+        g_switches = switches
+        cefpython.Initialize(settings, switches)
+
+        # Start idle - CEF message loop work.
+        Clock.schedule_once(self._message_loop_work, 0)
 
         # CEF needs a valid window handle passed to SetAsOffscreen()
         # for Printing to work. There is no API to get Kivy's window
@@ -183,12 +212,12 @@ class CefBrowser(Widget):
         gtkwin = gtk.Window()
         gtkwin.realize()
 
-        #WindowInfo offscreen flag
+        # WindowInfo offscreen flag
         windowInfo = cefpython.WindowInfo()
         windowInfo.SetAsOffscreen(gtkwin.window.xid)
 
-        #Create Broswer and naviagte to empty page <= OnPaint won't get called yet
-        browserSettings = {}
+        # Create Broswer and naviagte to empty page <= OnPaint won't get
+        # called yet
         # The render handler callbacks are not yet set, thus an
         # error report will be thrown in the console (when release
         # DCHECKS are enabled), however don't worry, it is harmless.
@@ -201,17 +230,19 @@ class CefBrowser(Widget):
         # --
         # Do not use "about:blank" as navigateUrl - this will cause
         # the GoBack() and GoForward() methods to not work.
+        #
         self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings,
                 navigateUrl=self.start_url)
 
-        #set focus
+        # Set focus
         self.browser.SendFocusEvent(True)
 
         self._client_handler = ClientHandler(self)
         self.browser.SetClientHandler(self._client_handler)
         self.set_js_bindings()
 
-        #Call WasResized() => force cef to call GetViewRect() and OnPaint afterwards
+        # Call WasResized() => force cef to call GetViewRect() and OnPaint
+        # afterwards
         self.browser.WasResized()
 
         # The browserWidget instance is required in OnLoadingStateChange().
@@ -493,33 +524,53 @@ class CefBrowser(Widget):
         return cefcode
 
 
-    def go_forward(self):
+    def go_forward(self, *kwargs):
         '''Going to forward in browser history
         '''
         print "go forward"
         self.browser.GoForward()
 
 
-    def go_back(self):
+    def go_back(self, *kwargs):
         '''Going back in browser history
         '''
         print "go back"
         self.browser.GoBack()
 
 
-    def reload(self):
+    def reload(self, *kwargs):
         self.browser.Reload()
 
 
-    def print_page(self):
+    def print_page(self, *kwargs):
         self.browser.Print()
 
 
-    def devtools(self):
-        self.browser.ShowDevTools()
+    def devtools(self, *kwargs):
+        # ShowDevTools doesn't work with the 'enable-begin-frame-scheduling'
+        # switch. This might be fixed by implementing native popup widgets,
+        # see Issue #69. The solution for now is to remove that switch,
+        # but this will impact performance.
+        if "enable-begin-frame-scheduling" in g_switches:
+            text = ("To enable DevTools you need to remove the\n"
+                    "'enable-begin-frame-scheduling' switch that\n"
+                    "is passed to cefpython.Initialize(). See also\n"
+                    "comment in CefBrowser.devtools().")
+            popup = Popup(title='DevTools INFO', content=Label(text=text),
+                          size_hint=(None, None), size=(400, 400))
+            popup.open()
+
+        else:
+            self.browser.ShowDevTools()
 
 
     def on_touch_down(self, touch, *kwargs):
+        # Mouse scrolling
+        if "button" in touch.profile:
+            if touch.button in ["scrollup", "scrolldown"]:
+                # Handled in on_touch_up()
+                return
+
         if not self.collide_point(*touch.pos):
             return
         touch.grab(self)
@@ -542,8 +593,32 @@ class CefBrowser(Widget):
                                              cefpython.MOUSEBUTTON_LEFT,
                                              mouseUp=False, clickCount=1)
 
+
+    def on_touch_up(self, touch, *kwargs):
+        # Mouse scrolling
+        if "button" in touch.profile:
+            if touch.button in ["scrollup", "scrolldown"]:
+                x = touch.x
+                y = self.height-touch.pos[1]
+                deltaY = -40 if "scrollup" == touch.button else 40
+                self.browser.SendMouseWheelEvent(x, y, deltaX=0, deltaY=deltaY)
+                return
+
+        if touch.grab_current is not self:
+            return
+
+        y = self.height-touch.pos[1]
+        self.browser.SendMouseClickEvent(touch.x, y, cefpython.MOUSEBUTTON_LEFT,
+                                         mouseUp=True, clickCount=1)
+        touch.ungrab(self)
+
+
     last_mouse_pos = None
     def on_mouse_move_emulate(self):
+        if not hasattr(self.get_root_window(), "mouse_pos"):
+            # Not all Kivy window providers have the "mouse_pos" attribute.
+            # WindowPygame does have (kivy/kivy#325).
+            return
         mouse_pos = self.get_root_window().mouse_pos
         if self.last_mouse_pos == mouse_pos:
             return
@@ -565,15 +640,6 @@ class CefBrowser(Widget):
         self.browser.SendMouseMoveEvent(touch.x, y, mouseLeave=False,
                                         modifiers=modifiers)
 
-
-    def on_touch_up(self, touch, *kwargs):
-        if touch.grab_current is not self:
-            return
-
-        y = self.height-touch.pos[1]
-        self.browser.SendMouseClickEvent(touch.x, y, cefpython.MOUSEBUTTON_LEFT,
-                                         mouseUp=True, clickCount=1)
-        touch.ungrab(self)
 
 
 class ClientHandler:
@@ -736,10 +802,11 @@ class ClientHandler:
         return True
 
 
+
 if __name__ == '__main__':
+
     class CefBrowserApp(App):
         def build(self):
             return BrowserLayout()
     CefBrowserApp().run()
-
     cefpython.Shutdown()
