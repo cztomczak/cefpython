@@ -349,6 +349,11 @@ class CefBrowser(Widget):
         #   KEYEVENT_KEYUP = 2
         #   KEYEVENT_CHAR = 3
 
+        # Kivy code -1 is a special key eg. Change keyboard layout.
+        # Sending it to CEF would crash it.
+        if key[0] == -1:
+            return
+
         # On escape release the keyboard, see the injected in OnLoadStart()
         if key[0] == 27:
             self.browser.GetFocusedFrame().ExecuteJavascript(
@@ -414,6 +419,11 @@ class CefBrowser(Widget):
     def on_key_up(self, keyboard, key):
         print("---- on_key_up")
         print("-- key="+str(key))
+
+        # Kivy code -1 is a special key eg. Change keyboard layout.
+        # Sending it to CEF would crash it.
+        if key[0] == -1:
+            return
 
         # CEF modifiers
         cef_modifiers = cefpython.EVENTFLAG_NONE
