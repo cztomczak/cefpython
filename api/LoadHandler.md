@@ -45,7 +45,13 @@ calls to OnLoadError and/or OnLoadEnd.
 | frame | [Frame](Frame.md) |
 | __Return__ | void |
 
-Called when the browser begins loading a frame. The |frame| value will
+This callback is called for a number of different reasons, including when
+history.pushState or history.replaceState changes the reference fragment
+for the currently loaded page. In most cases you want to use
+OnLoadingStateChange. In newer CEF there is |transition_type| arg that
+provides information about the source of the navigation.
+
+The |frame| value will
 never be empty -- call the IsMain() method to check if this frame is the
 main frame. Multiple frames may be loading at the same time. Sub-frames may
 start or continue loading after the main frame load has ended. This method
