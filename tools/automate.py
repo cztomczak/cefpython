@@ -6,6 +6,7 @@
 
 Usage:
     automate.py (--prebuilt-cef | --build-cef)
+                [--force-chromium-update FORCECHROMIUMUPDATE]
                 [--cef-branch BRANCH] [--cef-commit COMMIT]
                 [--build-dir BUILDDIR] [--cef-build-dir CEFBUILDDIR]
                 [--ninja-jobs JOBS] [--gyp-generators GENERATORS]
@@ -13,23 +14,24 @@ Usage:
     automate.py (-h | --help) [type -h to show full description for options]
 
 Options:
-    -h --help               Show this help message.
-    --prebuilt-cef          Whether to use prebuilt CEF binaries. Prebuilt
-                            binaries for Linux are built on Ubuntu.
-    --build-cef             Whether to build CEF from sources with the cefpython
-                            patches applied.
-    --cef-branch=<b>        CEF branch. Defaults to CHROME_VERSION_BUILD from
-                            "src/version/cef_version_{platform}.h" (TODO).
-    --cef-commit=<c>        CEF revision. Defaults to CEF_COMMIT_HASH from
-                            "src/version/cef_version_{platform}.h" (TODO).
-    --build-dir=<dir1>      Build directory.
-    --cef-build-dir=<dir2>  CEF build directory. By default same
-                            as --build-dir.
-    --ninja-jobs=<jobs>     How many CEF jobs to run in parallel. To speed up
-                            building set it to number of cores in your CPU.
-                            By default set to cpu_count / 2.
-    --gyp-generators=<gen>  Set GYP_GENERATORS [default: ninja].
-    --gyp-msvs-version=<v>  Set GYP_MSVS_VERSION.
+    -h --help                Show this help message.
+    --prebuilt-cef           Whether to use prebuilt CEF binaries. Prebuilt
+                             binaries for Linux are built on Ubuntu.
+    --build-cef              Whether to build CEF from sources with the
+                             cefpython patches applied.
+    --force-chromium-update  Force Chromium update (gclient sync etc).
+    --cef-branch=<b>         CEF branch. Defaults to CHROME_VERSION_BUILD from
+                             "src/version/cef_version_{platform}.h" (TODO).
+    --cef-commit=<c>         CEF revision. Defaults to CEF_COMMIT_HASH from
+                             "src/version/cef_version_{platform}.h" (TODO).
+    --build-dir=<dir1>       Build directory.
+    --cef-build-dir=<dir2>   CEF build directory. By default same
+                             as --build-dir.
+    --ninja-jobs=<jobs>      How many CEF jobs to run in parallel. To speed up
+                             building set it to number of cores in your CPU.
+                             By default set to cpu_count / 2.
+    --gyp-generators=<gen>   Set GYP_GENERATORS [default: ninja].
+    --gyp-msvs-version=<v>   Set GYP_MSVS_VERSION.
 
 """
 
@@ -87,6 +89,7 @@ class Options(object):
     # From command-line
     prebuilt_cef = False
     build_cef = False
+    force_chromium_update = False
     cef_branch = ""
     cef_commit = ""
     build_dir = ""
@@ -179,9 +182,10 @@ def setup_options(docopt_args):
     # cpu_count() returns number of CPU threads, not CPU cores.
     # On i5 with 2 cores and 4 cpu threads the default of 4 ninja
     # jobs slows down computer significantly.
-    Options.ninja_jobs = int(multiprocessing.cpu_count() / 2)
-    if Options.ninja_jobs < 1:
-        Options.ninja_jobs = 1
+    if not Options.ninja_jobs:
+        Options.ninja_jobs = int(multiprocessing.cpu_count() / 2)
+        if Options.ninja_jobs < 1:
+            Options.ninja_jobs = 1
 
 
 def build_cef():
@@ -515,6 +519,10 @@ def run_automate_git():
     # We clone cef repository ourselves and update cef patches with ours,
     # so don't fetch/update CEF repo.
     args.append("--no-cef-update")
+    # Force Chromium update so that gclient sync is called. It may fail
+    # sometimes with files missing and must re-run to fix.
+    if Options.force_chromium_update:
+        args.append("--force-update")
     args.append("--no-distrib-archive")
     if platform.system() == "Linux":
         # Building cefclient target isn't supported on Linux when

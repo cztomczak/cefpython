@@ -539,9 +539,14 @@ if (options.nochromiumupdate and options.forceupdate) or \
    (options.nocefupdate and options.forceupdate) or \
    (options.nobuild and options.forcebuild) or \
    (options.nodistrib and options.forcedistrib):
-  print "Invalid combination of options."
-  parser.print_help(sys.stderr)
-  sys.exit()
+  # -- CEF Python modification below
+  if (options.nocefupdate and options.forceupdate):
+    pass
+  else:
+    print "Invalid combination of options."
+    parser.print_help(sys.stderr)
+    sys.exit()
+  # --
 
 if (options.noreleasebuild and \
      (options.minimaldistrib or options.minimaldistribonly or \
