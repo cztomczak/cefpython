@@ -78,8 +78,8 @@ __Windows__
 * To build CEF from sources:
     * Use Win7 x64 or later. 32-bit OS'es are not supported. For more details
      see [here](https://www.chromium.org/developers/how-tos/build-instructions-windows).
-    * For CEF branch >= 2704 install VS2015 Update 2 or later
-    * For CEF branch < 2704 install VS2013 Update 4 or later
+    * For CEF branch >= 2704 install VS2015 Update 2 or later. Use the
+      Custom Install option, see details [here](https://chromium.googlesource.com/chromium/src/+/master/docs/windows_build_instructions.md#Open-source-contributors).
     * Install [CMake](https://cmake.org/) 2.8.12.1 or newer and add cmake.exe
         to PATH
     * Install [ninja](http://martine.github.io/ninja/) and add ninja.exe
