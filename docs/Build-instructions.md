@@ -34,13 +34,13 @@ binaries from GH releases.
 
 1) Tested and works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
 
-2) Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
+2) Download [ninja](https://github.com/ninja-build/ninja) 1.7.1 or later
    and copy it to /usr/bin and chmod 755.
 
 3) Install packages: `sudo apt-get install python-dev cmake g++ libgtk2.0-dev`
 
 4) Install python dependencies by executing:
-  `cd cefpython/tools/ && pip install -r requirements.txt`
+  `cd cefpython/tools/ && sudo pip install -r requirements.txt`
   (Cython 0.19.2 required - the version must match exactly)
 
 5) Download 64-bit Linux binaries and libraries from
@@ -93,6 +93,9 @@ __Windows__
 __Linux__
 
 * Install packages: `sudo apt-get install python-dev cmake g++ libgtk2.0-dev`
+* If using prebuilt binaries from Spotify automated builds and want to
+  build cefclient/cefsimple you need to install these packages:
+  `sudo apt-get install libgtkglext1-dev`
 * If building CEF from sources:
     * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
     * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
@@ -111,17 +114,15 @@ __Linux__
     * To perform a 32-bit Linux build on a 64-bit Linux system see
       Linux configuration in upstream cef/AutomatedBuildSetup.md. See also
       [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804).
-* If using prebuilt binaries from Spotify automated builds and want to
-  build cefclient/cefsimple you need to install these packages:
-  `sudo apt-get install libgtkglext1-dev`
 
 
 __All platforms__
 
 * Install dependencies for the automate.py tool by executing:
-  `cd tools/ && pip install -r requirements.txt`. This will install
-  some PyPI packages including Cython. On Windows installing Cython
-  requires a VS compiler - see instructions above for Windows.
+  `cd tools/ && pip install -r requirements.txt` (on Linux use `sudo`).
+  This will install some PyPI packages including Cython. On Windows
+  installing Cython requires a VS compiler - see instructions above
+  for Windows.
 
 
 ## Build CEF Python using prebuilt CEF binaries

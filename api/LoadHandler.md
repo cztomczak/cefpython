@@ -51,13 +51,16 @@ for the currently loaded page. In most cases you want to use
 OnLoadingStateChange. In newer CEF there is |transition_type| arg that
 provides information about the source of the navigation.
 
-The |frame| value will
-never be empty -- call the IsMain() method to check if this frame is the
-main frame. Multiple frames may be loading at the same time. Sub-frames may
-start or continue loading after the main frame load has ended. This method
-will always be called for all frames irrespective of whether the request
-completes successfully. For notification of overall browser load status use
-[DisplayHandler](DisplayHandler.md).`OnLoadingStateChange` instead.
+Description from upstream CEF:
+> Called when the browser begins loading a frame. The |frame| value will
+> never be empty -- call the IsMain() method to check if this frame is the
+> main frame. |transition_type| provides information about the source of the
+> navigation and an accurate value is only available in the browser process.
+> Multiple frames may be loading at the same time. Sub-frames may
+> start or continue loading after the main frame load has ended. This method
+> will always be called for all frames irrespective of whether the request
+> completes successfully. For notification of overall browser load status use
+> [DisplayHandler](DisplayHandler.md).`OnLoadingStateChange` instead.
 
 
 ### OnDomReady

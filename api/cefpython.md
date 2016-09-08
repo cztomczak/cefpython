@@ -154,11 +154,27 @@ provided message loop to get the best balance between performance and CPU usage.
 | --- | --- |
 | __Return__ | void |
 
-Perform a single iteration of CEF message loop processing. This function is used to integrate the CEF message loop into an existing application message loop. Care must be taken to balance performance against excessive CPU usage. This function should only be called on the main application thread (UI thread) and only if cefpython.Initialize() is called with a [ApplicationSettings](ApplicationSettings.md).multi_threaded_message_loop value of false. This function will not block.
+Description from upstream CEF:
 
-Alternatively you could create a periodic timer (with 10 ms interval) that calls cefpython.MessageLoopWork().
+> Perform a single iteration of CEF message loop processing. This function is
+> provided for cases where the CEF message loop must be integrated into an
+> existing application message loop. Use of this function is not recommended
+> for most users; use either the CefRunMessageLoop() function or
+> CefSettings.multi_threaded_message_loop if possible. When using this function
+> care must be taken to balance performance against excessive CPU usage. It is
+> recommended to enable the CefSettings.external_message_pump option when using
+> this function so that CefBrowserProcessHandler::OnScheduleMessagePumpWork()
+> callbacks can facilitate the scheduling process. This function should only be
+> called on the main application thread and only if CefInitialize() is called
+> with a CefSettings.multi_threaded_message_loop value of false. This function
+> will not block.
 
-MessageLoopWork() is not tested on OS X and there are known issues - according to  [this post](http://www.magpcss.org/ceforum/viewtopic.php?p=27124#p27124) by Marshall.
+Alternatively you could create a periodic timer (with 10 ms interval) that calls
+cefpython.MessageLoopWork().
+
+MessageLoopWork() is not tested on OS X and there are known issues - according to
+[this post](http://www.magpcss.org/ceforum/viewtopic.php?p=27124#p27124) by
+Marshall.
 
 
 ### PostTask

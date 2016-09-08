@@ -31,6 +31,7 @@ public:
   typedef cef_jsdialog_type_t JSDialogType;
   typedef cef_event_flags_t EventFlags;
   typedef cef_window_open_disposition_t WindowOpenDisposition;
+  typedef cef_transition_type_t TransitionType;
 
   ClientHandler(){}
   virtual ~ClientHandler(){}
@@ -218,7 +219,8 @@ public:
                                     bool canGoForward) OVERRIDE;
 
   virtual void OnLoadStart(CefRefPtr<CefBrowser> browser,
-                           CefRefPtr<CefFrame> frame) OVERRIDE;
+                           CefRefPtr<CefFrame> frame,
+                           TransitionType transition_type) OVERRIDE;
 
   virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser,
                          CefRefPtr<CefFrame> frame,

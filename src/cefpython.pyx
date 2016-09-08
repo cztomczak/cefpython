@@ -562,7 +562,8 @@ cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
 
 def Initialize(applicationSettings=None, commandLineSwitches=None):
 
-    # Fix Issue #231 - Discovery of the "icudtl.dat" file fails
+    # Fix Issue #231 - Discovery of the "icudtl.dat" file fails on Linux.
+    # Apply patch for all platforms just in case.
     cdef str py_module_dir = GetModuleDirectory()
     cdef CefString module_dir
     PyToCefString(py_module_dir, module_dir)

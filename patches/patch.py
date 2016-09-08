@@ -18,7 +18,8 @@ patches.extend([
         'path': '../net/http/'
     },
     {
-        # Expose CefOverridePath to override PathService path keys
+        # Discovery of the "icudtl.dat" file fails on Linux.
+        # Apply patch for all platforms just in case.
         'name': 'issue231',
         'path': './'
     },
