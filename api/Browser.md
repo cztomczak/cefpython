@@ -11,6 +11,12 @@ Table of contents:
   * [CanGoForward](#cangoforward)
   * [CloseBrowser](#closebrowser)
   * [CloseDevTools](#closedevtools)
+  * [DragTargetDragEnter](#dragtargetdragenter)
+  * [DragTargetDragOver](#dragtargetdragover)
+  * [DragTargetDragLeave](#dragtargetdragleave)
+  * [DragTargetDrop](#dragtargetdrop)
+  * [DragSourceEndedAt](#dragsourceendedat)
+  * [DragSourceSystemDragEnded](#dragsourcesystemdragended)
   * [ExecuteFunction](#executefunction)
   * [ExecuteJavascript](#executejavascript)
   * [Find](#find)
@@ -129,6 +135,116 @@ information.
 | __Return__ | bool |
 
 Explicitly close the associated DevTools browser, if any.
+
+
+### DragTargetDragEnter
+
+| | |
+| --- | --- |
+| drag_data | [DragData](DragData.md) |
+| x | int |
+| y | int |
+| allowed_ops | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the user drags the mouse into the web view (before
+> calling DragTargetDragOver/DragTargetLeave/DragTargetDrop).
+> |drag_data| should not contain file contents as this type of data is not
+> allowed to be dragged into the web view. File contents can be removed using
+> CefDragData::ResetFileContents (for example, if |drag_data| comes from
+> CefRenderHandler::StartDragging).
+> This method is only used when window rendering is disabled.
+
+
+### DragTargetDragOver
+
+| | |
+| --- | --- |
+| x | int |
+| y | int |
+| allowed_ops | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method each time the mouse is moved across the web view during
+> a drag operation (after calling DragTargetDragEnter and before calling
+> DragTargetDragLeave/DragTargetDrop).
+> This method is only used when window rendering is disabled.
+
+
+### DragTargetDragLeave
+
+| | |
+| --- | --- |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the user drags the mouse out of the web view (after
+> calling DragTargetDragEnter).
+> This method is only used when window rendering is disabled.
+
+
+### DragTargetDrop
+
+| | |
+| --- | --- |
+| x | int |
+| y | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the user completes the drag operation by dropping
+> the object onto the web view (after calling DragTargetDragEnter).
+> The object being dropped is |drag_data|, given as an argument to
+> the previous DragTargetDragEnter call.
+> This method is only used when window rendering is disabled.
+
+
+### DragSourceEndedAt
+
+| | |
+| --- | --- |
+| x | int |
+| y | int |
+| operation | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the drag operation started by a
+> CefRenderHandler::StartDragging call has ended either in a drop or
+> by being cancelled. |x| and |y| are mouse coordinates relative to the
+> upper-left corner of the view. If the web view is both the drag source
+> and the drag target then all DragTarget* methods should be called before
+> DragSource* mthods.
+> This method is only used when window rendering is disabled.
+
+Operation enum from upstream CEF - these constants are declared in the
+`cefpython` module:
+> DRAG_OPERATION_NONE    = 0,
+> DRAG_OPERATION_COPY    = 1,
+> DRAG_OPERATION_LINK    = 2,
+> DRAG_OPERATION_GENERIC = 4,
+> DRAG_OPERATION_PRIVATE = 8,
+> DRAG_OPERATION_MOVE    = 16,
+> DRAG_OPERATION_DELETE  = 32,
+> DRAG_OPERATION_EVERY   = UINT_MAX
+
+
+### DragSourceSystemDragEnded
+
+| | |
+| --- | --- |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the drag operation started by a
+> CefRenderHandler::StartDragging call has completed. This method may be
+> called immediately without first calling DragSourceEndedAt to cancel a
+> drag operation. If the web view is both the drag source and the drag
+> target then all DragTarget* methods should be called before DragSource*
+> mthods.
+> This method is only used when window rendering is disabled.
 
 
 ### ExecuteFunction

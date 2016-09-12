@@ -10,6 +10,17 @@ cimport cef_types
 PET_VIEW = cef_types.PET_VIEW
 PET_POPUP = cef_types.PET_POPUP
 
+# cef_drag_operations_mask_t, DragOperation, DragOperationsMask
+DRAG_OPERATION_NONE    = cef_types.DRAG_OPERATION_NONE
+DRAG_OPERATION_COPY    = cef_types.DRAG_OPERATION_COPY
+DRAG_OPERATION_LINK    = cef_types.DRAG_OPERATION_LINK
+DRAG_OPERATION_GENERIC = cef_types.DRAG_OPERATION_GENERIC
+DRAG_OPERATION_PRIVATE = cef_types.DRAG_OPERATION_PRIVATE
+DRAG_OPERATION_MOVE    = cef_types.DRAG_OPERATION_MOVE
+DRAG_OPERATION_DELETE  = cef_types.DRAG_OPERATION_DELETE
+DRAG_OPERATION_EVERY   = cef_types.DRAG_OPERATION_EVERY
+
+
 cdef public cpp_bool RenderHandler_GetRootScreenRect(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRect& cefRect
@@ -224,3 +235,43 @@ cdef public void RenderHandler_OnScrollOffsetChanged(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public cpp_bool RenderHandler_StartDragging(
+        CefRefPtr[CefBrowser] cef_browser,
+        CefRefPtr[CefDragData] cef_drag_data,
+        long long allowed_ops,
+        int x, int y
+        ) except * with gil:
+    cdef PyBrowser browser
+    cdef DragData drag_data
+    cdef py_bool ret
+    try:
+        browser = GetPyBrowser(cef_browser)
+        drag_data = DragData_Init(cef_drag_data)
+        callback = browser.GetClientCallback("StartDragging")
+        if callback:
+            ret = callback(browser, drag_data, allowed_ops, x, y)
+            if ret:
+                return True
+            else:
+                return False
+        else:
+            return False
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public void RenderHandler_UpdateDragCursor(
+        CefRefPtr[CefBrowser] cef_browser,
+        long long operation,
+        ) except * with gil:
+    cdef PyBrowser browser
+    try:
+        browser = GetPyBrowser(cef_browser)
+        callback = browser.GetClientCallback("UpdateDragCursor")
+        if callback:
+            callback(browser, operation)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+

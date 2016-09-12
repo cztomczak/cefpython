@@ -77,7 +77,6 @@ class BrowserLayout(BoxLayout):
         self.add_widget(browser)
 
 
-
 class CefBrowser(Widget):
 
     # Keyboard mode: "global" or "local".
@@ -599,9 +598,14 @@ class CefBrowser(Widget):
                 mouseUp=True, clickCount=1
             )
         else:
+            print("~~ DragTargetDragEnter")
             self.browser.SendMouseClickEvent(touch.x, y,
                                              cefpython.MOUSEBUTTON_LEFT,
                                              mouseUp=False, clickCount=1)
+            self.browser.DragTargetDragEnter(cefpython.DragData(), touch.x,
+                                             y, cefpython.DRAG_OPERATION_EVERY)
+
+
 
 
     def on_touch_up(self, touch, *kwargs):
@@ -620,6 +624,17 @@ class CefBrowser(Widget):
         y = self.height-touch.pos[1]
         self.browser.SendMouseClickEvent(touch.x, y, cefpython.MOUSEBUTTON_LEFT,
                                          mouseUp=True, clickCount=1)
+
+        print("~~ DragTargetDrop")
+        self.browser.DragTargetDrop(touch.x, y)
+
+        print("~~ DragSourceEndedAt")
+        self.browser.DragSourceEndedAt(touch.x, y,
+                                       cefpython.DRAG_OPERATION_MOVE)
+
+        print("~~ DragSourceSystemDragEnded")
+        self.browser.DragSourceSystemDragEnded()
+
         touch.ungrab(self)
 
 
@@ -646,9 +661,15 @@ class CefBrowser(Widget):
             return
 
         y = self.height-touch.pos[1]
+
         modifiers = cefpython.EVENTFLAG_LEFT_MOUSE_BUTTON
         self.browser.SendMouseMoveEvent(touch.x, y, mouseLeave=False,
                                         modifiers=modifiers)
+
+        print("~~ DragTargetDragOver")
+        self.browser.DragTargetDragOver(touch.x, y,
+                                        cefpython.DRAG_OPERATION_MOVE)
+
 
 
 
@@ -799,6 +820,34 @@ class ClientHandler:
         return True
 
 
+    """
+
+    def GetRootScreenRect(self, browser, rect):
+        width, height = self.browserWidget.texture.size
+        rect.append(0)
+        rect.append(0)
+        rect.append(width)
+        rect.append(height)
+        return True
+
+
+    def GetScreenRect(self, browser, rect):
+        width, height = self.browserWidget.texture.size
+        rect.append(0)
+        rect.append(0)
+        rect.append(width)
+        rect.append(height)
+        return True
+
+
+    def GetScreenPoint(self, browser, view_x, view_y, screen_coords):
+        screen_coords.append(view_x)
+        screen_coords.append(view_y)
+        return True
+
+    """
+
+
     def OnJavascriptDialog(self, browser, originUrl, dialogType,
                    messageText, defaultPromptText, callback,
                    suppressMessage):
@@ -811,6 +860,23 @@ class ClientHandler:
         callback.Continue(allow=True, userInput="")
         return True
 
+
+    def StartDragging(self, browser, drag_data, allowed_ops, x, y):
+        print("!!!! StartDragging()")
+        # TODO: succession of calls:
+        #   DragTargetDragEnter
+        #   DragTargetDragOver
+        #   DragTargetDragLeave - optional
+        #   DragSourceSystemDragEnded - optional, to cancel dragging
+        #   DragTargetDrop
+        #   DragSourceEndedAt
+        #   DragSourceSystemDragEnded
+        return False
+
+
+    def UpdateDragCursor(self, browser, operation):
+        # print("~~ UpdateDragCursor(): operation=%s" % operation)
+        pass
 
 
 if __name__ == '__main__':

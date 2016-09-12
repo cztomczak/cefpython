@@ -31,6 +31,8 @@ Table of contents:
   * [OnPaint](#onpaint)
   * [OnCursorChange](#oncursorchange)
   * [OnScrollOffsetChanged](#onscrolloffsetchanged)
+  * [StartDragging](#startdragging)
+  * [UpdateDragCursor](#updatedragcursor)
 
 
 ## Callbacks
@@ -162,3 +164,48 @@ Called when the browser's cursor has changed. If |type| is CT_CUSTOM then
 | __Return__ | void |
 
 Called when the scroll offset has changed.
+
+
+### StartDragging
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| drag_data | [DragData](DragData.md) |
+| allowed_ops | int |
+| x | int |
+| y | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Called when the user starts dragging content in the web view. Contextual
+> information about the dragged content is supplied by |drag_data|.
+> (|x|, |y|) is the drag start location in screen coordinates.
+> OS APIs that run a system message loop may be used within the
+> StartDragging call.
+>
+> Return false to abort the drag operation. Don't call any of
+> CefBrowserHost::DragSource*Ended* methods after returning false.
+>
+> Return true to handle the drag operation. Call
+> CefBrowserHost::DragSourceEndedAt and DragSourceSystemDragEnded either
+> synchronously or asynchronously to inform the web view that the drag
+> operation has ended.
+
+
+### UpdateDragCursor
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| operation | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Called when the web view wants to update the mouse cursor during a
+> drag & drop operation. |operation| describes the allowed operation
+> (none, move, copy, link).
+
+See Browser.[DragSourceEndedAt](Browser.md#dragsourceendedat) for a list
+of values for the operation enum.
+

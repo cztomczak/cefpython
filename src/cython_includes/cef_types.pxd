@@ -8,6 +8,7 @@ from libcpp cimport bool as cpp_bool
 # noinspection PyUnresolvedReferences
 from libc.stddef cimport wchar_t
 from cef_string cimport cef_string_t
+from libc.limits cimport UINT_MAX
 
 cdef extern from "include/internal/cef_types.h":
 
@@ -334,3 +335,15 @@ cdef extern from "include/internal/cef_types.h":
         PLUGIN_POLICY_DETECT_IMPORTANT,
         PLUGIN_POLICY_BLOCK,
         PLUGIN_POLICY_DISABLE,
+
+    # Drag & drop
+
+    ctypedef enum cef_drag_operations_mask_t:
+        DRAG_OPERATION_NONE    = 0
+        DRAG_OPERATION_COPY    = 1
+        DRAG_OPERATION_LINK    = 2
+        DRAG_OPERATION_GENERIC = 4
+        DRAG_OPERATION_PRIVATE = 8
+        DRAG_OPERATION_MOVE    = 16
+        DRAG_OPERATION_DELETE  = 32
+        DRAG_OPERATION_EVERY   = UINT_MAX

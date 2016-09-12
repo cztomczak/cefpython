@@ -60,6 +60,8 @@ __PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnPopupSize(CefRefPtr<CefBrowser>, 
 __PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnPaint(CefRefPtr<CefBrowser>, cef_paint_element_type_t, std::vector<CefRect> &, void const *, int, int);
 __PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle);
 __PYX_EXTERN_C DL_IMPORT(void) RenderHandler_OnScrollOffsetChanged(CefRefPtr<CefBrowser>);
+__PYX_EXTERN_C DL_IMPORT(bool) RenderHandler_StartDragging(CefRefPtr<CefBrowser>, CefRefPtr<CefDragData>, PY_LONG_LONG, int, int);
+__PYX_EXTERN_C DL_IMPORT(void) RenderHandler_UpdateDragCursor(CefRefPtr<CefBrowser>, PY_LONG_LONG);
 __PYX_EXTERN_C DL_IMPORT(bool) ResourceHandler_ProcessRequest(int, CefRefPtr<CefRequest>, CefRefPtr<CefCallback>);
 __PYX_EXTERN_C DL_IMPORT(void) ResourceHandler_GetResponseHeaders(int, CefRefPtr<CefResponse>, int64 &, CefString &);
 __PYX_EXTERN_C DL_IMPORT(bool) ResourceHandler_ReadResponse(int, void *, int, int &, CefRefPtr<CefCallback>);

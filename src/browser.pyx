@@ -196,8 +196,10 @@ cdef class PyBrowser:
             # RenderHandler
             self.allowedClientCallbacks += ["GetRootScreenRect",
                     "GetViewRect", "GetScreenPoint", "GetScreenInfo",
+                    "GetScreenRect",
                     "OnPopupShow", "OnPopupSize", "OnPaint", "OnCursorChange",
-                    "OnScrollOffsetChanged"]
+                    "OnScrollOffsetChanged",
+                    "StartDragging", "UpdateDragCursor"]
             # JavascriptDialogHandler
             self.allowedClientCallbacks += ["OnJavascriptDialog",
                     "OnBeforeUnloadJavascriptDialog",
@@ -614,3 +616,40 @@ cdef class PyBrowser:
         if not success:
             raise Exception("Browser.SendProcessMessage() failed: "\
                     "messageName=%s" % messageName)
+
+    # -------------------------------------------------------------------------
+    # OSR drag & drop
+    # -------------------------------------------------------------------------
+
+    cpdef py_void DragTargetDragEnter(self, DragData drag_data, int x, int y,
+                                      long long allowed_ops):
+        cdef CefMouseEvent mouse_event
+        mouse_event.x = x
+        mouse_event.y = y
+        self.GetCefBrowserHost().get().DragTargetDragEnter(
+                drag_data.cef_drag_data, mouse_event,
+                <cef_types.cef_drag_operations_mask_t>allowed_ops)
+
+    cpdef py_void DragTargetDragOver(self, int x, int y, long long allowed_ops):
+        cdef CefMouseEvent mouse_event
+        mouse_event.x = x
+        mouse_event.y = y
+        self.GetCefBrowserHost().get().DragTargetDragOver(
+                mouse_event, <cef_types.cef_drag_operations_mask_t>allowed_ops)
+
+    cpdef py_void DragTargetDragLeave(self):
+        self.GetCefBrowserHost().get().DragTargetDragLeave()
+
+    cpdef py_void DragTargetDrop(self, int x, int y):
+        cdef CefMouseEvent mouse_event
+        mouse_event.x = x
+        mouse_event.y = y
+        self.GetCefBrowserHost().get().DragTargetDrop(mouse_event)
+
+    cpdef py_void DragSourceEndedAt(self, int x, int y, long long operation):
+        self.GetCefBrowserHost().get().DragSourceEndedAt(
+                x, y, <cef_types.cef_drag_operations_mask_t>operation)
+
+    cpdef py_void DragSourceSystemDragEnded(self):
+        self.GetCefBrowserHost().get().DragSourceSystemDragEnded()
+

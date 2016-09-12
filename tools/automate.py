@@ -20,6 +20,8 @@ Options:
     --build-cef              Whether to build CEF from sources with the
                              cefpython patches applied.
     --force-chromium-update  Force Chromium update (gclient sync etc).
+    --no-cef-update          Do not update CEF sources (by default both cef/
+                             directories are deleted on every run).
     --cef-branch=<b>         CEF branch. Defaults to CHROME_VERSION_BUILD from
                              "src/version/cef_version_{platform}.h" (TODO).
     --cef-commit=<c>         CEF revision. Defaults to CEF_COMMIT_HASH from
@@ -90,6 +92,7 @@ class Options(object):
     prebuilt_cef = False
     build_cef = False
     force_chromium_update = False
+    no_cef_update = False
     cef_branch = ""
     cef_commit = ""
     build_dir = ""
@@ -207,6 +210,8 @@ def build_cef():
 
 def create_cef_directories():
     """Create cef/ directories in cef_build_dir/ and in chromium/src/ ."""
+    if Options.no_cef_update:
+        return
     cef_dir = os.path.join(Options.cef_build_dir, "cef")
     src_dir = os.path.join(Options.cef_build_dir, "chromium", "src")
     cef_dir2 = os.path.join(src_dir, "cef")

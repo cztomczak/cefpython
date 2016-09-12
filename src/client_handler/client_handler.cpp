@@ -456,6 +456,21 @@ void ClientHandler::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
     RenderHandler_OnScrollOffsetChanged(browser);
 }
 
+bool ClientHandler::StartDragging(CefRefPtr<CefBrowser> browser,
+                   CefRefPtr<CefDragData> drag_data,
+                   DragOperationsMask allowed_ops,
+                   int x, int y) {
+    REQUIRE_UI_THREAD();
+    return RenderHandler_StartDragging(browser, drag_data,
+                                       static_cast<long>(allowed_ops), x, y);
+}
+
+void ClientHandler::UpdateDragCursor(CefRefPtr<CefBrowser> browser,
+                      DragOperation operation) {
+    REQUIRE_UI_THREAD();
+    RenderHandler_UpdateDragCursor(browser, static_cast<long>(operation));
+}
+
 
 // ----------------------------------------------------------------------------
 // CefJSDialogHandler

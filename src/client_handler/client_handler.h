@@ -14,6 +14,8 @@
 
 // needs to be forward declared otherwise compile error
 typedef cef_return_value_t ReturnValue;
+typedef cef_drag_operations_mask_t DragOperationsMask;
+typedef cef_drag_operations_mask_t DragOperation;
 
 class ClientHandler : 
 		public CefClient,
@@ -272,6 +274,14 @@ public:
   virtual void OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
                                      double x,
                                      double y) OVERRIDE;
+
+  virtual bool StartDragging(CefRefPtr<CefBrowser> browser,
+                             CefRefPtr<CefDragData> drag_data,
+                             cef_drag_operations_mask_t allowed_ops,
+                             int x, int y) OVERRIDE;
+
+  virtual void UpdateDragCursor(CefRefPtr<CefBrowser> browser,
+                                cef_drag_operations_mask_t operation) OVERRIDE;
 
   // --------------------------------------------------------------------------
   // CefJSDialogHandler

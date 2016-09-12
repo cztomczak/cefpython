@@ -13,6 +13,8 @@ from cef_frame cimport CefFrame
 cimport cef_types
 from cef_types cimport int64
 from cef_types cimport CefBrowserSettings, CefPoint
+from cef_drag_data cimport CefDragData
+from cef_types cimport CefMouseEvent
 
 from cef_process_message cimport CefProcessMessage, CefProcessId
 
@@ -65,6 +67,18 @@ cdef extern from "include/cef_browser.h":
         void StopFinding(cpp_bool clearSelection)
         void Print()
         cpp_bool TryCloseBrowser()
+
+        # Drag & drop OSR
+        void DragTargetDragEnter(CefRefPtr[CefDragData] drag_data,
+                                 const CefMouseEvent& event,
+                                 cef_types.cef_drag_operations_mask_t allowed_ops)
+        void DragTargetDragOver(const CefMouseEvent& event,
+                                cef_types.cef_drag_operations_mask_t allowed_ops)
+        void DragTargetDragLeave()
+        void DragTargetDrop(const CefMouseEvent& event)
+        void DragSourceEndedAt(int x, int y, cef_types.cef_drag_operations_mask_t op)
+        void DragSourceSystemDragEnded()
+
 
     cdef cppclass CefBrowser:
 

@@ -387,7 +387,7 @@ from cef_types cimport (
     CefSettings, CefBrowserSettings, CefRect, CefPoint,
     CefRequestContextSettings,
     CefKeyEvent, CefMouseEvent, CefScreenInfo,
-    PathKey, PK_DIR_EXE, PK_DIR_MODULE
+    PathKey, PK_DIR_EXE, PK_DIR_MODULE,
 )
 
 from cef_task cimport *
@@ -425,6 +425,7 @@ from cef_request_context_handler cimport *
 from request_context_handler cimport *
 from cef_jsdialog_handler cimport *
 from cef_path_util cimport *
+from cef_drag_data cimport *
 
 
 # -----------------------------------------------------------------------------
@@ -502,6 +503,7 @@ include "web_request.pyx"
 include "command_line.pyx"
 include "app.pyx"
 include "javascript_dialog_handler.pyx"
+include "drag_data.pyx"
 
 # -----------------------------------------------------------------------------
 # Utility functions to provide settings to the C++ browser process code.
