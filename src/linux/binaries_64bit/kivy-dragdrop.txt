@@ -1,0 +1,5 @@
+"kivy-dragdrop.png" downloaded from here:
+http://www.softicons.com/toolbar-icons/free-blue-button-icons-by-aha-soft/cursor-drag-arrow-icon
+
+Author: 	Aha-Soft ( http://www.aha-soft.com/ )
+License: 	CC Attribution 3.0 United States 
