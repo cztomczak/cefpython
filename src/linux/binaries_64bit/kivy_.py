@@ -577,6 +577,7 @@ class CefBrowser(Widget):
     is_drag = False
     is_drag_leave = False  # Mouse leaves web view
     drag_data = None
+    current_drag_operation = cefpython.DRAG_OPERATION_NONE
 
     def on_touch_down(self, touch, *kwargs):
         # Mouse scrolling
@@ -630,7 +631,6 @@ class CefBrowser(Widget):
         if self.is_drag:
             #print("on_touch_up=%s/%s" % (touch.x,y))
             if self.is_drag_leave or not self.is_inside_web_view(touch.x, y):
-                print("~~ DragSourceEndedAt")
                 # See comment in is_inside_web_view() - x/y at borders
                 # should be treated as outside of web view.
                 x = touch.x
@@ -642,15 +642,20 @@ class CefBrowser(Widget):
                     y = -1
                 if y == self.height-1:
                     y = self.height
+                print("~~ DragSourceEndedAt")
+                print("~~ current_drag_operation=%s"
+                      % self.current_drag_operation)
                 self.browser.DragSourceEndedAt(x, y,
-                                               cefpython.DRAG_OPERATION_MOVE)
+                                               self.current_drag_operation)
                 self.drag_ended()
             else:
                 print("~~ DragTargetDrop")
                 print("~~ DragSourceEndedAt")
+                print("~~ current_drag_operation=%s"
+                      % self.current_drag_operation)
                 self.browser.DragTargetDrop(touch.x, y)
                 self.browser.DragSourceEndedAt(touch.x, y,
-                                               cefpython.DRAG_OPERATION_MOVE)
+                                               self.current_drag_operation)
                 self.drag_ended()
 
         touch.ungrab(self)
@@ -697,7 +702,7 @@ class CefBrowser(Widget):
                     self.is_drag_leave = False
                 print("~~ DragTargetDragOver")
                 self.browser.DragTargetDragOver(
-                        touch.x, y, cefpython.DRAG_OPERATION_MOVE)
+                        touch.x, y, cefpython.DRAG_OPERATION_EVERY)
                 self.update_drag_icon(touch.x, y)
             else:
                 if not self.is_drag_leave:
@@ -720,6 +725,7 @@ class CefBrowser(Widget):
         self.is_drag = False
         self.is_drag_leave = False
         del self.drag_data
+        self.current_drag_operation = cefpython.DRAG_OPERATION_NONE
         self.update_drag_icon(None, None)
         print("~~ DragSourceSystemDragEnded")
         self.browser.DragSourceSystemDragEnded()
@@ -954,13 +960,15 @@ class ClientHandler:
         self.browserWidget.is_drag = True
         self.browserWidget.is_drag_leave = False
         self.browserWidget.drag_data = drag_data
+        self.browserWidget.current_drag_operation =\
+                cefpython.DRAG_OPERATION_NONE
         self.browserWidget.update_drag_icon(x, y)
         return True
 
 
     def UpdateDragCursor(self, browser, operation):
-        # print("~~ UpdateDragCursor(): operation=%s" % operation)
-        pass
+        #print("~~ UpdateDragCursor(): operation=%s" % operation)
+        self.browserWidget.current_drag_operation = operation
 
 
 if __name__ == '__main__':
