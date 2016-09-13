@@ -76,6 +76,8 @@ setup(
         'examples/*.html',
         'examples/*.js',
         'examples/*.css',
+        'examples/*.png',
+        'examples/*.txt',
         'examples/kivy-select-boxes/*.html',
         'examples/kivy-select-boxes/*.js',
         'examples/kivy-select-boxes/*.css',

@@ -136,6 +136,9 @@ def main():
     ret = os.system("mv "+package_dir+"/*.html "+package_dir+"/examples/")
     ret = os.system("mv "+package_dir+"/*.js "+package_dir+"/examples/")
     ret = os.system("mv "+package_dir+"/*.css "+package_dir+"/examples/")
+    ret = os.system("mv "+package_dir+"/*.png "+package_dir+"/examples/")
+    ret = os.system("mv "+package_dir+"/kivy-dragdrop.txt "\
+                    +package_dir+"/examples/")
     assert ret == 0
 
     print("Copying wx/ to package dir")

@@ -1,6 +1,9 @@
 # Build instructions
 
-__NOTE__: These instructions are for the master branch (Chrome 51).
+__IMPORTANT NOTE__: These instructions are for the new releases of CEF Python
+(Chrome v51 and later). Currently only Linux platform is being tested.
+For the old v31 release that is supported on all platforms, see build
+instructions on the wiki pages.
 
 There are several types of builds you can perform:
 
@@ -18,7 +21,7 @@ listed on this page.
 
 
 Table of contents:
-* [Build CEF Python 51 BETA](#build-cef-python-51-beta)
+* [Build CEF Python 53 BETA on Linux](#build-cef-python-51-beta-on-linux)
 * [Requirements](#requirements)
 * [Build CEF Python using prebuilt CEF binaries](#build-cef-python-using-prebuilt-cef-binaries)
 * [Build both CEF Python and CEF from sources](#build-both-cef-python-and-cef-from-sources)
@@ -27,9 +30,9 @@ Table of contents:
 * [How to patch](#how-to-patch)
 
 
-## Build CEF Python 51 BETA
+## Build CEF Python 53 BETA on Linux
 
-Complete steps for building CEF Python 51 using prebuilt
+Complete steps for building CEF Python 53 using prebuilt
 binaries from GH releases.
 
 1) Tested and works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
@@ -45,7 +48,7 @@ binaries from GH releases.
 
 5) Download 64-bit Linux binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/releases)
-   tagged 'v51-upstream'.
+   tagged 'v53-upstream'.
 
 
 6) Copy "bin/*" to "cefpython/src/linux/binaries_64bit/"
@@ -55,7 +58,7 @@ binaries from GH releases.
 8) Build cefpython:
 ```
 cd cefpython/src/linux/
-python compile.py 51.0
+python compile.py 53.0
 ```
 
 9) As of writing only "pygtk_.py" and "kivy_.py" examples are working
