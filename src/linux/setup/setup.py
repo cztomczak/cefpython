@@ -9,6 +9,24 @@ import Cython
 
 print("Cython version: %s" % Cython.__version__)
 
+if len(sys.argv) > 1 and "--fast" in sys.argv:
+    sys.argv.remove("--fast")
+    # Fast mode disables optimization flags
+    FAST = True
+    print("FAST mode On")
+    COMPILE_OPTIMIZE_FLAGS = ['-flto', '-std=gnu++11']
+    LINK_OPTIMIZE_FLAGS = ['-flto']
+else:
+    FAST = False
+    # Fix "ImportError ... undefined symbol ..." caused by CEF's include/base/
+    # headers by adding the -flto flag (Issue #230). Unfortunately -flto
+    # prolongs compilation time significantly.
+    # More on the other flags: https://stackoverflow.com/questions/6687630/
+    COMPILE_OPTIMIZE_FLAGS = ['-flto', '-fdata-sections', '-ffunction-sections',
+                              '-std=gnu++11']
+    LINK_OPTIMIZE_FLAGS = ['-flto', '-Wl,--gc-sections']
+
+
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
 
@@ -17,6 +35,7 @@ Options.fast_fail = True
 
 # Python version string: "27" or "32".
 PYTHON_VERSION = str(sys.version_info.major) + str(sys.version_info.minor)
+
 
 def CompileTimeConstants():
 
@@ -75,7 +94,7 @@ ext_modules = [Extension(
     library_dirs=[
         r'./lib_%s' % BITS,
         r'./../../client_handler/',
-        r'./../../subprocess/', # libcefpythonapp
+        r'./../../subprocess/',  # libcefpythonapp
         r'./../../cpp_utils/'
     ],
 
@@ -97,22 +116,17 @@ ext_modules = [Extension(
     # running scripts from the same directory that libcef.so resides in.
     # runtime_library_dirs=[
     #    './'
-    #],
+    # ],
 
-    # Fix "ImportError ... undefined symbol ..." caused by CEF's include/base/
-    # headers by adding the -flto flag (Issue #230). Unfortunately -flto
-    # prolongs compilation time significantly.
-    # More on the other flags: https://stackoverflow.com/questions/6687630/
-    extra_compile_args=['-flto', '-fdata-sections', '-ffunction-sections',
-                        '-std=gnu++11'],
-    extra_link_args=['-flto', '-Wl,--gc-sections'],
+    extra_compile_args=COMPILE_OPTIMIZE_FLAGS,
+    extra_link_args=LINK_OPTIMIZE_FLAGS,
 
     # Defining macros:
     # define_macros = [("UNICODE","1"), ("_UNICODE","1"), ]
 )]
 
 setup(
-    name = 'cefpython_py%s' % PYTHON_VERSION,
-    cmdclass = {'build_ext': build_ext},
-    ext_modules = ext_modules
+    name='cefpython_py%s' % PYTHON_VERSION,
+    cmdclass={'build_ext': build_ext},
+    ext_modules=ext_modules
 )

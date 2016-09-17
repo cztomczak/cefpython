@@ -15,7 +15,8 @@ cdef void SetCefWindowInfo(
     # some things like context menus and plugins may not display correctly.
     if windowInfo.windowType != "offscreen":
         if not windowInfo.parentWindowHandle:
-            raise Exception("WindowInfo: parentWindowHandle is not set")
+            # raise Exception("WindowInfo: parentWindowHandle is not set")
+            pass
 
     IF UNAME_SYSNAME == "Windows":
         cdef RECT windowRect
@@ -87,8 +88,7 @@ cdef class WindowInfo:
         self.parentWindowHandle = parentWindowHandle
         IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
             if not windowRect:
-                raise Exception("WindowInfo.SetAsChild() failed: "
-                        "windowRect is required")
+                windowRect = [0,0,0,0]
         if windowRect:
             if type(windowRect) == list and len(windowRect) == 4:
                 self.windowRect = [windowRect[0], windowRect[1],

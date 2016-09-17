@@ -30,7 +30,7 @@ SETUP_CFG_TEMPLATE = os.getcwd()+r"/setup.cfg.template"
 
 def str_format(string, dictionary):
     orig_string = string
-    for key, value in dictionary.iteritems():
+    for key, value in dictionary.items():
         string = string.replace("%("+key+")s", value)
     if string == orig_string:
         raise Exception("Nothing to format")

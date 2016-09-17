@@ -1,3 +1,17 @@
+"""
+Build the cefpython module, install package and run example.
+
+Usage:
+    compile.py VERSION [--debug] [--fast]
+
+Options:
+    VERSION     Version in format xx.xx
+    --debug     Debug mode
+    --fast      Fast mode, don't delete C++ .o .a files, nor the setup/build/
+                directory, and disable optimization flags when building
+                the so/pyd module.
+"""
+
 import sys
 import os
 import glob
@@ -5,6 +19,14 @@ import shutil
 import subprocess
 import platform
 import re
+
+# raw_input() was renamed to input() in Python 3
+try:
+    # noinspection PyUnresolvedReferences
+    # noinspection PyShadowingBuiltins
+    input = raw_input
+except NameError:
+    pass
 
 # This will not show "Segmentation fault" error message:
 # | subprocess.call(["python", "./wxpython.py"])
@@ -25,6 +47,14 @@ if len(sys.argv) > 1 and "--debug" in sys.argv:
     print("DEBUG mode On")
 else:
     DEBUG = False
+
+if len(sys.argv) > 1 and "--fast" in sys.argv:
+    # Fast mode doesn't delete C++ .o .a files.
+    # Fast mode also disables optimization flags in setup/setup.py .
+    FAST = True
+    print("FAST mode On")
+else:
+    FAST = False
 
 if len(sys.argv) > 1 and re.search(r"^\d+\.\d+$", sys.argv[1]):
     VERSION = sys.argv[1]
@@ -52,36 +82,40 @@ print("Compiling C++ projects")
 # make should succeed.
 
 os.chdir("./../cpp_utils/")
-subprocess.call("rm -f *.o *.a", shell=True)
+if not FAST:
+    subprocess.call("rm -f *.o *.a", shell=True)
 
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
-    what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
+    # noinspection PyUnboundLocalVariable
+    what = input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
         sys.exit(1)
 
 os.chdir("./../client_handler/")
-subprocess.call("rm -f *.o *.a", shell=True)
+if not FAST:
+    subprocess.call("rm -f *.o *.a", shell=True)
 
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
-    what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
+    what = input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
         sys.exit(1)
 
 os.chdir("./../subprocess/")
-subprocess.call("rm -f *.o *.a", shell=True)
-subprocess.call("rm -f subprocess", shell=True)
+if not FAST:
+    subprocess.call("rm -f *.o *.a", shell=True)
+    subprocess.call("rm -f subprocess", shell=True)
 
 ret = subprocess.call("make -f Makefile-libcefpythonapp", shell=True)
 if ret != 0:
-    what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
+    what = input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
         sys.exit(1)
 
 ret = subprocess.call("make -f Makefile", shell=True)
 if ret != 0:
-    what = raw_input("make failed, press 'y' to continue, 'n' to stop: ")
+    what = input("make failed, press 'y' to continue, 'n' to stop: ")
     if what != "y":
         sys.exit(1)
 subprocess_exe = "./../linux/binaries_%s/subprocess" % BITS
@@ -103,7 +137,8 @@ for f in pyx_files:
     os.remove(f)
 
 try:
-    shutil.rmtree("./setup/build")
+    if not FAST:
+        shutil.rmtree("./setup/build")
 except OSError:
     pass
 
@@ -123,7 +158,7 @@ if DEBUG:
     ret = subprocess.call("python-dbg setup.py build_ext --inplace"
                           " --cython-gdb", shell=True)
 else:
-    ret = subprocess.call("python setup.py build_ext --inplace", shell=True)
+    ret = subprocess.call("python setup.py build_ext --inplace --fast", shell=True)
 
 if DEBUG:
     shutil.rmtree("./../binaries_%s/cython_debug/" % BITS, ignore_errors=True)
@@ -152,5 +187,9 @@ if DEBUG:
     os.chdir("./binaries_%s" % BITS)
     subprocess.call("cygdb . --args python-dbg wxpython.py", shell=True)
 else:
-    subprocess.call("cd ./binaries_%s && python pygtk_.py && cd .." % BITS,
-                    shell=True)
+    os.system("rm -rf ./installer/cefpython3-%s-*" % (VERSION,))
+    subprocess.call("cd ./installer/ && python make-setup.py --version %s"
+                    " && cd cefpython3-%s-* && python setup.py install"
+                    " && cd ../../../../examples/"
+                    " && python hello_world.py && cd ../src/linux/"\
+                    % (VERSION,VERSION), shell=True)

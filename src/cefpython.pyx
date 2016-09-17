@@ -437,7 +437,8 @@ g_debugFile = "debug.log"
 # When put None here and assigned a local dictionary in Initialize(), later
 # while running app this global variable was garbage collected, see topic:
 # https://groups.google.com/d/topic/cython-users/0dw3UASh7HY/discussion
-g_applicationSettings = {}
+# The string_encoding key must be set early here and also in Initialize.
+g_applicationSettings = {"string_encoding": "utf-8"}
 g_commandLineSwitches = {}
 
 # noinspection PyUnresolvedReferences
@@ -504,6 +505,7 @@ include "command_line.pyx"
 include "app.pyx"
 include "javascript_dialog_handler.pyx"
 include "drag_data.pyx"
+include "helpers.pyx"
 
 # -----------------------------------------------------------------------------
 # Utility functions to provide settings to the C++ browser process code.
@@ -513,7 +515,7 @@ cdef public void cefpython_GetDebugOptions(
         cpp_string* debugFile
         ) except * with gil:
     # Called from subprocess/cefpython_app.cpp -> CefPythonApp constructor.
-    cdef cpp_string cppString = g_debugFile
+    cdef cpp_string cppString = PyStringToChar(g_debugFile)
     try:
         debug[0] = <cpp_bool>bool(g_debug)
         debugFile.assign(cppString)
@@ -547,7 +549,7 @@ cdef public cpp_string ApplicationSettings_GetString(const char* key
     cdef py_string pyKey = CharToPyString(key)
     cdef cpp_string cppString
     if pyKey in g_applicationSettings:
-        cppString = AnyToPyString(g_applicationSettings[pyKey])
+        cppString = PyStringToChar(AnyToPyString(g_applicationSettings[pyKey]))
     return cppString
 
 cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
@@ -567,11 +569,11 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
     # Fix Issue #231 - Discovery of the "icudtl.dat" file fails on Linux.
     # Apply patch for all platforms just in case.
     cdef str py_module_dir = GetModuleDirectory()
-    cdef CefString module_dir
-    PyToCefString(py_module_dir, module_dir)
-    CefOverridePath(PK_DIR_EXE, module_dir)\
+    cdef CefString cef_module_dir
+    PyToCefString(py_module_dir, cef_module_dir)
+    CefOverridePath(PK_DIR_EXE, cef_module_dir)\
             or Debug("ERROR: CefOverridePath failed")
-    CefOverridePath(PK_DIR_MODULE, module_dir)\
+    CefOverridePath(PK_DIR_MODULE, cef_module_dir)\
             or Debug("ERROR: CefOverridePath failed")
 
     if not applicationSettings:
@@ -610,6 +612,20 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
         IF UNAME_SYSNAME == "Windows":
             if DpiAware.IsProcessDpiAware():
                 applicationSettings["auto_zooming"] = "system_dpi"
+
+    # Paths
+    cdef str module_dir = GetModuleDirectory()
+    if "locales_dir_path" not in applicationSettings:
+        if platform.system() != "Darwin":
+            applicationSettings["locales_dir_path"] = os.path.join(
+                    module_dir, "/locales")
+    if "resources_dir_path" not in applicationSettings:
+        applicationSettings["resources_dir_path"] = module_dir
+        if platform.system() == "Darwin":
+            applicationSettings["resources_dir_path"] = module_dir+"/Resources"
+    if "browser_subprocess_path" not in applicationSettings:
+        applicationSettings["browser_subprocess_path"] = os.path.join(
+                module_dir, "subprocess")
 
     # Mouse context menu
     if "context_menu" not in applicationSettings:
@@ -682,15 +698,37 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
 
     if not ret:
         Debug("CefInitialize() failed")
+
+    IF UNAME_SYSNAME == "Linux":
+        # Install by default.
+        WindowUtils.InstallX11ErrorHandlers()
+
     return ret
 
-def CreateBrowserSync(windowInfo, browserSettings, navigateUrl, requestContext=None):
+def CreateBrowser(**kwargs):
+    """Create browser asynchronously. TODO. """
+    CreateBrowserSync(**kwargs)
+
+def CreateBrowserSync(windowInfo=None,
+                      browserSettings=None,
+                      navigateUrl="",
+                      **kwargs):
     Debug("CreateBrowserSync() called")
     assert IsThread(TID_UI), (
             "cefpython.CreateBrowserSync() may only be called on the UI thread")
 
-    if not isinstance(windowInfo, WindowInfo):
+    if "window_info" in kwargs:
+        windowInfo = kwargs["window_info"]
+    if not windowInfo:
+        windowInfo = WindowInfo()
+        windowInfo.SetAsChild(0)
+    elif not isinstance(windowInfo, WindowInfo):
         raise Exception("CreateBrowserSync() failed: windowInfo: invalid object")
+
+    if "settings" in kwargs:
+        browserSettings = kwargs["settings"]
+    if not browserSettings:
+        browserSettings = {}
 
     cdef CefBrowserSettings cefBrowserSettings
     SetBrowserSettings(browserSettings, &cefBrowserSettings)
@@ -698,6 +736,8 @@ def CreateBrowserSync(windowInfo, browserSettings, navigateUrl, requestContext=N
     cdef CefWindowInfo cefWindowInfo
     SetCefWindowInfo(cefWindowInfo, windowInfo)
 
+    if "url" in kwargs:
+        navigateUrl = kwargs["url"]
     navigateUrl = GetNavigateUrl(navigateUrl)
     Debug("navigateUrl: %s" % navigateUrl)
     cdef CefString cefNavigateUrl

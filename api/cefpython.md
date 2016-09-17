@@ -8,8 +8,11 @@ Functions in the cefpython module.
 
 Table of contents:
 * [Functions](#functions)
+  * [CreateBrowser](#createbrowsersync)
   * [CreateBrowserSync](#createbrowsersync)
+  * [ExceptHook](#excepthook)
   * [GetAppSetting](#getappsetting)
+  * [GetAppPath](#getapppath)
   * [GetBrowserByWindowHandle](#getbrowserbywindowhandle)
   * [GetCommandLineSwitch](#getcommandlineswitch)
   * [GetGlobalClientCallback](#getglobalclientcallback)
@@ -28,17 +31,26 @@ Table of contents:
 ## Functions
 
 
+### CreateBrowser
+
+Create browser asynchronously (does not return Browser object).
+See `CreateBrowserSync()` for params list.
+
+NOTE: currently this is just an alias and actually creates browser
+synchronously. The async call to CefCreateBrowser is yet TODO.
+
+
 ### CreateBrowserSync
 
 | Parameter | Type |
 | --- | --- |
-| windowInfo | [WindowInfo](WindowInfo.md) |
-| [BrowserSettings](BrowserSettings.md) | dict |
-| navigateUrl | string |
-| requestContext | void |
+| window_info | [WindowInfo](WindowInfo.md) |
+| [settings](BrowserSettings.md) | [BrowserSettings](BrowserSettings.md) |
+| url | string |
+| request_context | void |
 | __Return__ | [Browser](Browser.md) |
 
-This function should only be called on the UI thread. The 'requestContext' parameter is not yet implemented. You must first create a window and initialize 'windowInfo' by calling WindowInfo.SetAsChild().
+This function should only be called on the UI thread. The 'request_context' parameter is not yet implemented. You must first create a window and initialize 'window_info' by calling WindowInfo.SetAsChild().
 
 After the call to CreateBrowserSync() the page is not yet loaded, if you want your next lines of code to do some stuff on the webpage you will have to implement [LoadHandler](LoadHandler.md).OnLoadEnd() callback, see example below:
 
@@ -52,6 +64,23 @@ browser = cefpython.CreateBrowserSync(windowInfo, settings, url)
 browser.SetClientCallback("OnLoadEnd", OnLoadEnd)
 ```
 
+
+### ExceptHook
+
+| Parameter | Type |
+| --- | --- |
+| excType | - |
+| excValue | - |
+| traceObject | - |
+| __Return__ | string |
+
+Global except hook to exit app cleanly on error.
+
+This hook does the following: in case of exception write it to
+the "error.log" file, display it to the console, shutdown CEF
+and exit application immediately by ignoring "finally" (_exit())
+
+
 ### GetAppSetting
 
 | Parameter | Type |
@@ -60,6 +89,15 @@ browser.SetClientCallback("OnLoadEnd", OnLoadEnd)
 | __Return__ | object |
 
 Returns [ApplicationSettings](ApplicationSettings.md) option that was passed to Initialize(). Returns None if key is not found.
+
+
+### GetAppPath
+
+| | |
+| --- | --- |
+| __Return__ | string |
+
+Get path to where application resides.
 
 
 ### GetBrowserByWindowHandle

@@ -101,24 +101,6 @@ cpdef str GetNavigateUrl(py_string url):
 
     return str(url)
 
-cpdef str GetModuleDirectory():
-    import re, os, platform
-    if platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):
-        # cefpython3 package __init__.py sets CEFPYTHON3_PATH.
-        # When cefpython3 is installed as debian package, this
-        # env variable is the only way of getting valid path.
-        return os.getenv("CEFPYTHON3_PATH")
-    if hasattr(sys, "frozen"):
-        path = os.path.dirname(sys.executable)
-    elif "__file__" in globals():
-        path = os.path.dirname(os.path.realpath(__file__))
-    else:
-        path = os.getcwd()
-    if platform.system() == "Windows":
-        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
-    path = re.sub(r"[/\\]+$", "", path)
-    return os.path.abspath(path)
-
 cpdef py_bool IsFunctionOrMethod(object valueType):
     if (valueType == types.FunctionType
             or valueType == types.MethodType
