@@ -5,11 +5,11 @@
 [![](https://img.shields.io/badge/pypi-v31.2-blue.png "PyPI latest release")](https://pypi.python.org/pypi/cefpython3/)
 [![](https://img.shields.io/badge/commits%20since-v31.2-lightgray.png "Commits since v31.2 release")](https://github.com/cztomczak/cefpython/compare/05366f2...master)
 
-__IMPORTANT NOTES__:
+__Important notes__:
 * Branches cefpython51/52/53+ with latest Chrome are tested and work only on Linux currently.
   Instructions for building these are in docs/[Build-instructions.md](docs/Build-instructions.md)
-* The last stable release is in the cefpython31 branch. Up-to-date API docs for the cefpython31
-  branch can be viewed in commit [169a1b2](https://github.com/cztomczak/cefpython/tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api).
+* The last stable release that works on all platforms is in the cefpython31 branch.
+  Up-to-date API docs for the cefpython31 branch can be viewed in commit [169a1b2](https://github.com/cztomczak/cefpython/tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api).
 * Repository rewritten on 2016-02-15 to reduce its size. Please clone it again.
 
 Table of contents:
