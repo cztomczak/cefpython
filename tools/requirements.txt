@@ -1,2 +1,2 @@
-cython == 0.19.2
+cython == 0.24.1
 docopt >= 0.6.2
