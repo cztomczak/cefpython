@@ -832,6 +832,31 @@ def Shutdown():
         # This one is probably redundant. Additional testing should be done.
         Debug("Shutdown: releasing shared request context")
         g_sharedRequestContext.Assign(NULL)
+
+    if len(g_pyBrowsers):
+        Error("Shutdown called, but there are still browser references alive,"
+              " will try to close them and free references.")
+        # There might be a case when python error occured after creating
+        # browser, but before any message loop was run. In such case
+        # the renderer process won't be terminated unless we run some
+        # message loop work here, try to close browser and free reference,
+        # and then run some message loop work again.
+        for i in range(10):
+            with nogil:
+                CefDoMessageLoopWork()
+            time.sleep(0.01)
+        browsers_list = []
+        for browserId in g_pyBrowsers:
+            browser = g_pyBrowsers[browserId]
+            browser.TryCloseBrowser()
+            browsers_list.append(browserId)
+        for browserId in browsers_list:
+            RemovePyBrowser(browserId)
+        for i in range(10):
+            with nogil:
+                CefDoMessageLoopWork()
+            time.sleep(0.01)
+
     Debug("Shutdown()")
     with nogil:
         # Temporary fix for possible errors on shutdown. See this post:

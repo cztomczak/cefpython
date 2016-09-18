@@ -41,10 +41,15 @@ cpdef py_bool IsThread(int threadID):
 #       unicode strings and writing them to file (codecs.open).
 #       This change is required to work with Cython 0.20.
 
-cpdef object Debug(str msg):
+cpdef object Debug(py_string msg):
     if not g_debug:
         return
-    msg = "[CEF Python] "+str(msg)
+    # In Python 3 str or bytes may be passed
+    if type(msg) != str and type(msg) == bytes:
+        msg = msg.decode("utf-8", "replace")
+    # Convert to str in case other kind of object was passed
+    msg = str(msg)
+    msg = "[CEF Python] "+msg
     print(msg)
     if g_debugFile:
         try:
@@ -54,6 +59,21 @@ cpdef object Debug(str msg):
             print("[CEF Python] WARNING: failed writing to debug file: %s" % (
                     g_debugFile))
 
+cdef void Error(py_string msg) except *:
+    # In Python 3 str or bytes may be passed
+    if type(msg) != str and type(msg) == bytes:
+        msg = msg.decode("utf-8", "replace")
+    # Convert to str in case other kind of object was passed
+    msg = str(msg)
+    msg = "[CEF Python] ERROR: "+msg
+    print(msg)
+    if g_debugFile:
+        try:
+            with open(g_debugFile, "a") as file_:
+                file_.write(msg+"\n")
+        except:
+            print("[CEF Python] WARNING: failed writing to debug file: %s" % (
+                    g_debugFile))
 
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":

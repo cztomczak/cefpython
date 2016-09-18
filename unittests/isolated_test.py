@@ -1,0 +1,38 @@
+"""
+Test isolated test. Isolated tests are run each using a new instance
+of Python interpreter. They also implement some unique features for
+our use case. See main_test.py for some real tests.
+"""
+
+import unittest
+# noinspection PyUnresolvedReferences
+import _runner
+from os.path import basename
+
+# Globals
+g_count = 0
+
+
+class IsolatedTest1(unittest.TestCase):
+
+    def test_isolated1(self):
+        global g_count
+        g_count += 1
+        self.assertEqual(g_count, 1)
+
+    def test_isolated2(self):
+        global g_count
+        g_count += 1
+        self.assertEqual(g_count, 2)
+
+
+class IsolatedTest2(unittest.TestCase):
+
+    def test_isolated3(self):
+        global g_count
+        g_count += 1
+        self.assertEqual(g_count, 1)
+
+
+if __name__ == "__main__":
+    _runner.main(basename(__file__))

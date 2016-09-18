@@ -15,9 +15,11 @@ def main():
 
 
 class ClientHandler:
-    """Client handler."""
+
     def OnBeforeClose(self, browser):
+        """Called just before a browser is destroyed."""
         if not browser.IsPopup():
+            # Exit app when main window is closed.
             cef.QuitMessageLoop()
 
 

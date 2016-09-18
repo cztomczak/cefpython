@@ -30,7 +30,7 @@ cpdef str GetModuleDirectory():
 
 g_GetAppPath_dir = None
 
-cpdef GetAppPath(file=None):
+cpdef str GetAppPath(file=None):
     """Get application path."""
     # On Windows after downloading file and calling Browser.GoForward(),
     # current working directory is set to %UserProfile%.
@@ -58,12 +58,16 @@ cpdef GetAppPath(file=None):
     return str(file)
 
 
-cpdef ExceptHook(excType, excValue, traceObject):
+cpdef py_void ExceptHook(excType, excValue, traceObject):
     """Global except hook to exit app cleanly on error."""
     # This hook does the following: in case of exception write it to
     # the "error.log" file, display it to the console, shutdown CEF
     # and exit application immediately by ignoring "finally" (_exit()).
-    errorMsg = "\n".join(traceback.format_exception(excType, excValue,
+    print("[CEF Python] ExceptHook: catched exception, will shutdown CEF now")
+    QuitMessageLoop()
+    Shutdown()
+    print("[CEF Python] ExceptHook: see the catched exception below:")
+    errorMsg = "".join(traceback.format_exception(excType, excValue,
             traceObject))
     errorFile = GetAppPath("error.log")
     try:
@@ -77,16 +81,13 @@ cpdef ExceptHook(excType, excValue, traceObject):
             fp.write("\n[%s] %s\n" % (
                     time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
     except:
-        print("[pygtk_.py]: WARNING: failed writing to error file: %s" % (
+        print("[CEF Python] WARNING: failed writing to error file: %s" % (
                 errorFile))
     # Convert error message to ascii before printing, otherwise
     # you may get error like this:
     # | UnicodeEncodeError: 'charmap' codec can't encode characters
     errorMsg = errorMsg.encode("ascii", errors="replace")
     errorMsg = errorMsg.decode("ascii", errors="replace")
-    print("\n"+errorMsg+"\n")
-    QuitMessageLoop()
-    Shutdown()
+    print("\n"+errorMsg)
     # noinspection PyProtectedMember
     os._exit(1)
-

@@ -78,7 +78,10 @@ Global except hook to exit app cleanly on error.
 
 This hook does the following: in case of exception write it to
 the "error.log" file, display it to the console, shutdown CEF
-and exit application immediately by ignoring "finally" (_exit())
+and exit application immediately by ignoring "finally" (_exit()).
+
+If you would like to implement a custom hook take a look at the
+source code of ExceptHook in the cefpython/src/helpers.pyx file.
 
 
 ### GetAppSetting
