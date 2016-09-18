@@ -44,7 +44,7 @@ binaries from GH releases.
 
 4) Install python dependencies by executing:
   `cd cefpython/tools/ && sudo pip install -r requirements.txt`
-  (Cython 0.19.2 required - the version must match exactly)
+  (Cython version from requirements.txt must match exactly)
 
 5) Download 64-bit Linux binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/releases)
