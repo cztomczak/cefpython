@@ -3,6 +3,11 @@
 # API categories
 
 
+### Modules
+
+ * [cefpython](cefpython.md) module
+
+
 ### Settings
 
  * [ApplicationSettings](ApplicationSettings.md) dictionary
@@ -17,6 +22,7 @@
  * [Cookie](Cookie.md) class
  * [CookieManager](CookieManager.md) class
  * [DpiAware](DpiAware.md) class (Win)
+ * [DragData](DragData.md) object
  * [Frame](Frame.md) object
  * [JavascriptBindings](JavascriptBindings.md) class
  * [JavascriptCallback](JavascriptCallback.md) object
@@ -42,7 +48,3 @@
  * [RequestHandler](RequestHandler.md)
  * [ResourceHandler](ResourceHandler.md)
 
-
-### Modules
-
- * [cefpython](cefpython.md) module
