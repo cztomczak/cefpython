@@ -1,15 +1,16 @@
 """General testing of CEF Python."""
 
-# To show the window for an extended period of time increase this number.
-MESSAGE_LOOP_RANGE = 25  # each iteration is 0.01 sec
-
 import unittest
 # noinspection PyUnresolvedReferences
-import _runner
+import _test_runner
 from os.path import basename
 from cefpython3 import cefpython as cef
 import time
 import base64
+import sys
+
+# To show the window for an extended period of time increase this number.
+MESSAGE_LOOP_RANGE = 25  # each iteration is 0.01 sec
 
 g_browser = None
 g_client_handler = None
@@ -27,6 +28,7 @@ g_datauri_data = """
     </style>
     <script>
     function print(msg) {
+        console.log(msg+" [JS]");
         msg = msg.replace("ok", "<b style='color:green'>ok</b>");
         msg = msg.replace("error", "<b style='color:red'>error</b>");
         document.getElementById("console").innerHTML += msg+"<br>";
@@ -34,29 +36,33 @@ g_datauri_data = """
     window.onload = function(){
         print("window.onload() ok");
 
-        print("test_property1 = <i>"+test_property1+"</i>")
+        // Test binding property: test_property1
         if (test_property1 == "Test binding property to the 'window' object") {
-            print("ok");
+            print("test_property_1 ok");
         } else {
-            print("error");
-            throw "test_property1 contains invalid string";
+            throw new Error("test_property1 contains invalid string");
         }
 
-        print("test_property2 = <i>"+JSON.stringify(test_property2)+"</i>");
+        // Test binding property: test_property2
         if (JSON.stringify(test_property2) == '{"key1":"Test binding property'+
                 ' to the \\'window\\' object","key2":["Inside list",1,2]}') {
-            print("ok");
+            print("test_property2 ok");
         } else {
-            print("error");
-            throw "test_property2 contains invalid value";
+            throw new Error("test_property2 contains invalid value");
         }
 
+        // Test binding function: test_function
         test_function();
         print("test_function() ok");
 
+        // Test binding external object and use of javascript<>python callbacks
         external.test_callbacks(function(msg_from_python, py_callback){
-            print("test_callbacks(): "+msg_from_python+" ok")
-            print("py_callback.toString()="+py_callback.toString());
+            if (msg_from_python == "String sent from Python") {
+                print("test_callbacks() ok");
+            } else {
+                throw new Error("test_callbacks(): msg_from_python contains"+
+                                " invalid value");
+            }
             py_callback("String sent from Javascript");
             print("py_callback() ok");
         });
@@ -73,6 +79,15 @@ g_datauri_data = """
 g_datauri = "data:text/html;base64,"+base64.b64encode(g_datauri_data.encode(
         "utf-8", "replace")).decode("utf-8", "replace")
 
+g_subtests_ran = 0
+
+
+def subtest_message(message):
+    global g_subtests_ran
+    g_subtests_ran += 1
+    print(str(g_subtests_ran) + ". " + message)
+    sys.stdout.flush()
+
 
 class MainTest_IsolatedTest(unittest.TestCase):
 
@@ -80,6 +95,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         """Main entry point."""
         # All this code must run inside one single test, otherwise strange
         # things happen.
+        print("")
 
         # Test initialization of CEF
         cef.Initialize({
@@ -87,20 +103,24 @@ class MainTest_IsolatedTest(unittest.TestCase):
             "log_severity": cef.LOGSEVERITY_ERROR,
             "log_file": "",
         })
+        subtest_message("cef.Initialize() ok")
 
         # Test global client callback
         global g_client_handler
         g_client_handler = ClientHandler(self)
         cef.SetGlobalClientCallback("OnAfterCreated",
                                     g_client_handler._OnAfterCreated)
+        subtest_message("cef.SetGlobalClientCallback() ok")
 
         # Test creation of browser
         global g_browser
         g_browser = cef.CreateBrowserSync(url=g_datauri)
         self.assertIsNotNone(g_browser, "Browser object")
+        subtest_message("cef.CreateBrowserSync() ok")
 
         # Test client handler
         g_browser.SetClientHandler(g_client_handler)
+        subtest_message("browser.SetClientHandler() ok")
 
         # Test javascript bindings
         global g_external
@@ -112,16 +132,19 @@ class MainTest_IsolatedTest(unittest.TestCase):
         bindings.SetProperty("test_property2", g_external.test_property2)
         bindings.SetObject("external", g_external)
         g_browser.SetJavascriptBindings(bindings)
+        subtest_message("browser.SetJavascriptBindings() ok")
 
         # Run message loop for 0.5 sec.
         # noinspection PyTypeChecker
         for i in range(MESSAGE_LOOP_RANGE):
             cef.MessageLoopWork()
             time.sleep(0.01)
+        subtest_message("cef.MessageLoopWork() ok")
 
         # Test browser closing. Remember to clean reference.
         g_browser.CloseBrowser(True)
         g_browser = None
+        subtest_message("browser.CloseBrowser() ok")
 
         # Give it some time to close before calling shutdown.
         # noinspection PyTypeChecker
@@ -129,53 +152,56 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.MessageLoopWork()
             time.sleep(0.01)
 
-        # Client handler asserts
-        self.assertTrue(g_client_handler.OnAfterCreated_called,
-                        "OnAfterCreated() call")
-        self.assertTrue(g_client_handler.OnLoadStart_called,
-                        "OnLoadStart() call")
-        self.assertTrue(g_client_handler.OnLoadEnd_called,
-                        "OnLoadEnd() call")
-        self.assertTrue(g_client_handler.FrameSourceVisitor_called,
-                        "FrameSourceVisitor.Visit() call")
-        self.assertEqual(g_client_handler.javascript_errors, 0,
-                         "Javascript errors caught in OnConsoleMessage")
-
-        # Javascript asserts
-        self.assertTrue(g_external.test_function_called,
-                        "js test_function() call")
-        self.assertTrue(g_external.test_callbacks_called,
-                        "js external.test_callbacks() call")
-        self.assertTrue(g_external.py_callback_called,
-                        "py_callback() call from js external.test_callbacks()")
+        # Client handler asserts and javascript External asserts
+        for obj in [g_client_handler, g_external]:
+            test_for_True = False  # Test whether asserts are working correctly
+            for key, value in obj.__dict__.items():
+                if key == "test_for_True":
+                    test_for_True = True
+                    continue
+                if "_True" in key:
+                    self.assertTrue(value, "Check assert: "+key)
+                    subtest_message(obj.__class__.__name__ + "." +
+                                    key.replace("_True", "") +
+                                    " ok")
+                elif "_False" in key:
+                    self.assertFalse(value, "Check assert: "+key)
+                    subtest_message(obj.__class__.__name__ + "." +
+                                    key.replace("_False", "") +
+                                    " ok")
+            self.assertTrue(test_for_True)
 
         # Test shutdown of CEF
         cef.Shutdown()
+        subtest_message("cef.Shutdown() ok")
+
+        # Display real number of tests there were run
+        print("\nRan " + str(g_subtests_ran) + " sub-tests in test_main")
+        sys.stdout.flush()
 
 
-class ClientHandler:
-    test_case = None
-
-    OnAfterCreated_called = False
-    OnLoadStart_called = False
-    OnLoadEnd_called = False
-
-    FrameSourceVisitor_called = False
-    frame_source_visitor = None
-
-    javascript_errors = 0
-
+class ClientHandler(object):
     def __init__(self, test_case):
         self.test_case = test_case
+        self.frame_source_visitor = None
+
+        # Asserts for True/False will be checked just before shutdown
+        self.test_for_True = True  # Test whether asserts are working correctly
+        self.OnAfterCreated_True = False
+        self.OnLoadStart_True = False
+        self.OnLoadEnd_True = False
+        self.FrameSourceVisitor_True = False
+        self.javascript_errors_False = False
+        self.OnConsoleMessage_True = False
 
     # noinspection PyUnusedLocal
     def _OnAfterCreated(self, browser):
-        self.OnAfterCreated_called = True
+        self.OnAfterCreated_True = True
 
     # noinspection PyUnusedLocal
     def OnLoadStart(self, browser, frame):
         self.test_case.assertEqual(browser.GetUrl(), g_datauri)
-        self.OnLoadStart_called = True
+        self.OnLoadStart_True = True
 
     # noinspection PyUnusedLocal
     def OnLoadEnd(self, browser, frame, http_code):
@@ -184,18 +210,21 @@ class ClientHandler:
         frame.GetSource(self.frame_source_visitor)
         browser.ExecuteJavascript(
                 "print('ClientHandler.OnLoadEnd() ok')")
-        self.OnLoadEnd_called = True
+        self.OnLoadEnd_True = True
 
     # noinspection PyUnusedLocal
     def OnConsoleMessage(self, browser, message, source, line):
         if "error" in message.lower() or "uncaught" in message.lower():
-            self.javascript_errors += 1
+            self.javascript_errors_False = True
             raise Exception(message)
+        else:
+            # Confirmation that messages from javascript are coming
+            self.OnConsoleMessage_True = True
+            subtest_message(message)
 
 
-class FrameSourceVisitor:
-    client_handler = None
-    test_case = None
+class FrameSourceVisitor(object):
+    """Visitor for Frame.GetSource()."""
 
     def __init__(self, client_handler, test_case):
         self.client_handler = client_handler
@@ -205,38 +234,39 @@ class FrameSourceVisitor:
     def Visit(self, value):
         self.test_case.assertIn("747ef3e6011b6a61e6b3c6e54bdd2dee",
                                 g_datauri_data)
-        self.client_handler.FrameSourceVisitor_called = True
+        self.client_handler.FrameSourceVisitor_True = True
 
 
-class External:
+class External(object):
     """Javascript 'window.external' object."""
-    test_case = None
-
-    # Test binding properties to the 'window' object.
-    test_property1 = "Test binding property to the 'window' object"
-    test_property2 = {"key1": test_property1,
-                      "key2": ["Inside list", 1, 2]}
-
-    test_function_called = False
-    test_callbacks_called = False
-    py_callback_called = False
 
     def __init__(self, test_case):
         self.test_case = test_case
 
+        # Test binding properties to the 'window' object.
+        self.test_property1 = "Test binding property to the 'window' object"
+        self.test_property2 = {"key1": self.test_property1,
+                               "key2": ["Inside list", 1, 2]}
+
+        # Asserts for True/False will be checked just before shutdown
+        self.test_for_True = True  # Test whether asserts are working correctly
+        self.test_function_True = False
+        self.test_callbacks_True = False
+        self.py_callback_True = False
+
     def test_function(self):
         """Test binding function to the 'window' object."""
-        self.test_function_called = True
+        self.test_function_True = True
 
     def test_callbacks(self, js_callback):
         """Test both javascript and python callbacks."""
         def py_callback(msg_from_js):
             self.test_case.assertEqual(msg_from_js,
                                        "String sent from Javascript")
-            self.py_callback_called = True
+            self.py_callback_True = True
         js_callback.Call("String sent from Python", py_callback)
-        self.test_callbacks_called = True
+        self.test_callbacks_True = True
 
 
 if __name__ == "__main__":
-    _runner.main(basename(__file__))
+    _test_runner.main(basename(__file__))

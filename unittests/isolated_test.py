@@ -6,7 +6,7 @@ our use case. See main_test.py for some real tests.
 
 import unittest
 # noinspection PyUnresolvedReferences
-import _runner
+import _test_runner
 from os.path import basename
 
 # Globals
@@ -35,4 +35,4 @@ class IsolatedTest2(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    _runner.main(basename(__file__))
+    _test_runner.main(basename(__file__))

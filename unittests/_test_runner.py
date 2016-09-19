@@ -3,7 +3,7 @@
 """Run unit tests. With no arguments all tests are run. Read notes below.
 
 Usage:
-    _runner.py [FILE | _TESTCASE]
+    _test_runner.py [FILE | _TESTCASE]
 
 Options:
     FILE       Run tests from single file
@@ -83,7 +83,7 @@ class TestRunner(object):
         self._discover("[!_]*.py", testcase)
         assert not self._count_suites(self._isolated_suites)
         if not self._count_suites(self._suites):
-            print("[_runner.py] ERROR: test case not found")
+            print("[_test_runner.py] ERROR: test case not found")
             sys.exit(1)
         # Import errors found during discovery are ignored
         self._run_suites(self._suites)
@@ -140,7 +140,7 @@ class TestRunner(object):
             # Run test using new instance of Python interpreter
             try:
                 output = subprocess.check_output(
-                        ["python", "_runner.py", testcase_id],
+                        ["python", "_test_runner.py", testcase_id],
                         stderr=subprocess.STDOUT)
                 exit_code = 0
             except subprocess.CalledProcessError as exc:
@@ -148,6 +148,9 @@ class TestRunner(object):
                 exit_code = exc.returncode
             if type(output) != str:
                 output = output.decode("utf-8", errors="replace")
+            match = re.search(r"Ran (\d+) sub-tests in \w+", output)
+            if match:
+                self.ran += int(match.group(1))
             sys.stdout.write(output)
             # If tests failed parse output for errors/failures
             if exit_code:
@@ -228,9 +231,9 @@ class TestRunner(object):
         # type: () -> None
         """Print summary and exit."""
         print("-"*70)
-        print("[_runner.py] Ran "+str(self.ran)+" tests in total")
+        print("[_test_runner.py] Ran "+str(self.ran)+" tests in total")
         if self.errors or self.failures:
-            failed_str = "[_runner.py] FAILED ("
+            failed_str = "[_test_runner.py] FAILED ("
             if self.failures:
                 failed_str += ("failures="+str(self.failures))
             if self.errors:
@@ -240,7 +243,7 @@ class TestRunner(object):
             failed_str += ")"
             print(failed_str)
         else:
-            print("[_runner.py] OK")
+            print("[_test_runner.py] OK")
         self._exit()
 
     def _exit(self):
