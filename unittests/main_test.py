@@ -12,10 +12,6 @@ import sys
 # To show the window for an extended period of time increase this number.
 MESSAGE_LOOP_RANGE = 25  # each iteration is 0.01 sec
 
-g_browser = None
-g_client_handler = None
-g_external = None
-
 g_datauri_data = """
 <!DOCTYPE html>
 <html>
@@ -105,33 +101,32 @@ class MainTest_IsolatedTest(unittest.TestCase):
         })
         subtest_message("cef.Initialize() ok")
 
-        # Test global client callback
-        global g_client_handler
-        g_client_handler = ClientHandler(self)
+        # Test global handler
+        global_handler = GlobalHandler(self)
         cef.SetGlobalClientCallback("OnAfterCreated",
-                                    g_client_handler._OnAfterCreated)
+                                    global_handler._OnAfterCreated)
         subtest_message("cef.SetGlobalClientCallback() ok")
 
         # Test creation of browser
-        global g_browser
-        g_browser = cef.CreateBrowserSync(url=g_datauri)
-        self.assertIsNotNone(g_browser, "Browser object")
+        browser = cef.CreateBrowserSync(url=g_datauri)
+        self.assertIsNotNone(browser, "Browser object")
         subtest_message("cef.CreateBrowserSync() ok")
 
-        # Test client handler
-        g_browser.SetClientHandler(g_client_handler)
+        # Test other handlers: LoadHandler, DisplayHandler etc.
+        client_handlers = [LoadHandler(self), DisplayHandler(self)]
+        for handler in client_handlers:
+            browser.SetClientHandler(handler)
         subtest_message("browser.SetClientHandler() ok")
 
         # Test javascript bindings
-        global g_external
-        g_external = External(self)
+        external = External(self)
         bindings = cef.JavascriptBindings(
                 bindToFrames=False, bindToPopups=False)
-        bindings.SetFunction("test_function", g_external.test_function)
-        bindings.SetProperty("test_property1", g_external.test_property1)
-        bindings.SetProperty("test_property2", g_external.test_property2)
-        bindings.SetObject("external", g_external)
-        g_browser.SetJavascriptBindings(bindings)
+        bindings.SetFunction("test_function", external.test_function)
+        bindings.SetProperty("test_property1", external.test_property1)
+        bindings.SetProperty("test_property2", external.test_property2)
+        bindings.SetObject("external", external)
+        browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
 
         # Run message loop for 0.5 sec.
@@ -142,8 +137,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
         subtest_message("cef.MessageLoopWork() ok")
 
         # Test browser closing. Remember to clean reference.
-        g_browser.CloseBrowser(True)
-        g_browser = None
+        browser.CloseBrowser(True)
+        del browser
         subtest_message("browser.CloseBrowser() ok")
 
         # Give it some time to close before calling shutdown.
@@ -152,20 +147,22 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.MessageLoopWork()
             time.sleep(0.01)
 
-        # Client handler asserts and javascript External asserts
-        for obj in [g_client_handler, g_external]:
+        # Asserts in handlers and in external
+        for obj in [] + client_handlers + [global_handler, external]:
             test_for_True = False  # Test whether asserts are working correctly
             for key, value in obj.__dict__.items():
                 if key == "test_for_True":
                     test_for_True = True
                     continue
                 if "_True" in key:
-                    self.assertTrue(value, "Check assert: "+key)
+                    self.assertTrue(value, "Check assert: " +
+                                    obj.__class__.__name__ + "." + key)
                     subtest_message(obj.__class__.__name__ + "." +
                                     key.replace("_True", "") +
                                     " ok")
                 elif "_False" in key:
-                    self.assertFalse(value, "Check assert: "+key)
+                    self.assertFalse(value, "Check assert: " +
+                                     obj.__class__.__name__ + "." + key)
                     subtest_message(obj.__class__.__name__ + "." +
                                     key.replace("_False", "") +
                                     " ok")
@@ -180,23 +177,29 @@ class MainTest_IsolatedTest(unittest.TestCase):
         sys.stdout.flush()
 
 
-class ClientHandler(object):
+class GlobalHandler(object):
+    def __init__(self, test_case):
+        self.test_case = test_case
+
+        # Asserts for True/False will be checked just before shutdown
+        self.test_for_True = True  # Test whether asserts are working correctly
+        self.OnAfterCreated_True = False
+
+    # noinspection PyUnusedLocal
+    def _OnAfterCreated(self, browser):
+        self.OnAfterCreated_True = True
+
+
+class LoadHandler(object):
     def __init__(self, test_case):
         self.test_case = test_case
         self.frame_source_visitor = None
 
         # Asserts for True/False will be checked just before shutdown
         self.test_for_True = True  # Test whether asserts are working correctly
-        self.OnAfterCreated_True = False
         self.OnLoadStart_True = False
         self.OnLoadEnd_True = False
         self.FrameSourceVisitor_True = False
-        self.javascript_errors_False = False
-        self.OnConsoleMessage_True = False
-
-    # noinspection PyUnusedLocal
-    def _OnAfterCreated(self, browser):
-        self.OnAfterCreated_True = True
 
     # noinspection PyUnusedLocal
     def OnLoadStart(self, browser, frame):
@@ -209,8 +212,18 @@ class ClientHandler(object):
         self.frame_source_visitor = FrameSourceVisitor(self, self.test_case)
         frame.GetSource(self.frame_source_visitor)
         browser.ExecuteJavascript(
-                "print('ClientHandler.OnLoadEnd() ok')")
+                "print('LoadHandler.OnLoadEnd() ok')")
         self.OnLoadEnd_True = True
+
+
+class DisplayHandler(object):
+    def __init__(self, test_case):
+        self.test_case = test_case
+
+        # Asserts for True/False will be checked just before shutdown
+        self.test_for_True = True  # Test whether asserts are working correctly
+        self.javascript_errors_False = False
+        self.OnConsoleMessage_True = False
 
     # noinspection PyUnusedLocal
     def OnConsoleMessage(self, browser, message, source, line):

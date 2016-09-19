@@ -776,7 +776,13 @@ Set client callback.
 | clientHandler | object |
 | __Return__ | void |
 
-Set client handler object (class instance), its members will be inspected. Private methods that are not meant to be callbacks should have their names prepended with an underscore.
+Set client handler object (class instance), its members will be inspected.
+Private methods that are not meant to be callbacks should have their names
+prepended with an underscore.
+
+You can call this method multiple times with to set many handlers. For
+example you can create in your code several objects named LoadHandler,
+LifespanHandler etc.
 
 
 ### SetFocus
