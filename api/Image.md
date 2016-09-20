@@ -1,7 +1,7 @@
 [API categories](API-categories.md) | [API index](API-index.md)
 
 
-# Frame (object)
+# Image (object)
 
 
 Table of contents:
@@ -25,13 +25,13 @@ Table of contents:
 | __Return__ | bytes |
 
 `cef_color_type_t` constants in the cefpython module:
-> CEF_COLOR_TYPE_RGBA_8888,
-> CEF_COLOR_TYPE_BGRA_8888,
+* CEF_COLOR_TYPE_RGBA_8888,
+* CEF_COLOR_TYPE_BGRA_8888,
 
 `enum cef_alpha_type_t` constants in the cefpython module:
-> CEF_ALPHA_TYPE_OPAQUE,
-> CEF_ALPHA_TYPE_PREMULTIPLIED,
-> CEF_ALPHA_TYPE_POSTMULTIPLIED,
+* CEF_ALPHA_TYPE_OPAQUE,
+* CEF_ALPHA_TYPE_PREMULTIPLIED,
+* CEF_ALPHA_TYPE_POSTMULTIPLIED,
 
 
 ### GetAsPng

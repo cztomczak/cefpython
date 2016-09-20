@@ -12,6 +12,8 @@ Table of contents:
   * [GetLinkTitle](#getlinktitle)
   * [GetFragmentText](#getfragmenttext)
   * [GetFragmentHtml](#getfragmenthtml)
+  * [GetImage](#getimage)
+  * [HasImage](#hasimage)
 
 
 ## Methods

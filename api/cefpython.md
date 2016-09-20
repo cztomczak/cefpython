@@ -8,7 +8,7 @@ Functions in the cefpython module.
 
 Table of contents:
 * [Functions](#functions)
-  * [CreateBrowser](#createbrowsersync)
+  * [CreateBrowser](#createbrowser)
   * [CreateBrowserSync](#createbrowsersync)
   * [ExceptHook](#excepthook)
   * [GetAppSetting](#getappsetting)
