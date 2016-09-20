@@ -26,7 +26,6 @@ PACKAGE_NAME = "cefpython3"
 README_FILE = os.getcwd()+r"/README.txt"
 INIT_TEMPLATE = os.getcwd()+r"/__init__.py.template"
 SETUP_TEMPLATE = os.getcwd()+r"/setup.py.template"
-SETUP_CFG_TEMPLATE = os.getcwd()+r"/setup.cfg.template"
 
 def str_format(string, dictionary):
     orig_string = string
@@ -67,11 +66,6 @@ def main():
     SETUP_CONTENT = str_format(f.read(), vars)
     f.close()
 
-    print("Reading template: %s" % SETUP_CFG_TEMPLATE)
-    f = open(SETUP_CFG_TEMPLATE)
-    SETUP_CFG_CONTENT = str_format(f.read(), vars)
-    f.close()
-
     installer_dir = os.path.dirname(os.path.abspath(__file__))
 
     setup_dir = installer_dir+"/"+PACKAGE_NAME+"-"+vars["APP_VERSION"]+"-"+LINUX_BITS+"-setup"
@@ -94,10 +88,6 @@ def main():
     with open(setup_dir+"/setup.py", "w") as f:
         f.write(SETUP_CONTENT)
 
-    print("Creating setup.cfg from template")
-    with open(setup_dir+"/setup.cfg", "w") as f:
-        f.write(SETUP_CFG_CONTENT)
-
     binaries_dir = os.path.abspath(installer_dir+"/../binaries_"+BITS+"/")
     print("Copying binaries to package dir")
     ret = os.system("cp -rf "+binaries_dir+"/* "+package_dir)
@@ -115,6 +105,9 @@ def main():
 
     print("Creating examples dir in package dir")
     os.mkdir(package_dir+"/examples/")
+
+    print("Copying Hello World example")
+    shutil.copy("../../../examples/hello_world.py", package_dir+"/examples/")
 
     print("Moving kivy-select-boxes dir to examples dir")
     shutil.move(package_dir+"/kivy-select-boxes",
@@ -136,9 +129,6 @@ def main():
     ret = os.system("mv "+package_dir+"/*.html "+package_dir+"/examples/")
     ret = os.system("mv "+package_dir+"/*.js "+package_dir+"/examples/")
     ret = os.system("mv "+package_dir+"/*.css "+package_dir+"/examples/")
-    ret = os.system("mv "+package_dir+"/*.png "+package_dir+"/examples/")
-    ret = os.system("mv "+package_dir+"/kivy-dragdrop.txt "\
-                    +package_dir+"/examples/")
     assert ret == 0
 
     print("Copying wx/ to package dir")

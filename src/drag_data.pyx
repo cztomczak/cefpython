@@ -34,3 +34,12 @@ cdef class DragData:
     cpdef py_string GetFragmentHtml(self):
         return CefToPyString(self.cef_drag_data.get().GetFragmentHtml())
 
+    cpdef PyImage GetImage(self):
+        cdef CefRefPtr[CefImage] cef_image =\
+                self.cef_drag_data.get().GetImage()
+        if not cef_image.get():
+            raise Exception("Image is not available")
+        return PyImage_Init(cef_image)
+
+    cpdef py_bool HasImage(self):
+        return self.cef_drag_data.get().HasImage()

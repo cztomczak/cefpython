@@ -36,6 +36,7 @@ else:
 import pygtk
 pygtk.require('2.0')
 import gtk
+import io
 
 import kivy
 from kivy.app import App
@@ -46,8 +47,6 @@ from kivy.uix.widget import Widget
 from kivy.graphics import Color, Rectangle, GraphicException
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
-from kivy.core.window import Window
-from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.base import EventLoop
 
@@ -56,25 +55,29 @@ g_switches = None
 
 
 class BrowserLayout(BoxLayout):
-    browser = None
 
     def __init__(self, **kwargs):
         super(BrowserLayout, self).__init__(**kwargs)
         self.orientation = "vertical"
 
-        browser = CefBrowser(id="browser")
+        self.browser_widget = CefBrowser(id="browser")
 
         layout = BoxLayout()
         layout.size_hint_y = None
         layout.height = 40
-        layout.add_widget(Button(text="Back", on_press=browser.go_back))
-        layout.add_widget(Button(text="Forward", on_press=browser.go_forward))
-        layout.add_widget(Button(text="Reload", on_press=browser.reload))
-        layout.add_widget(Button(text="Print", on_press=browser.print_page))
-        layout.add_widget(Button(text="DevTools", on_press=browser.devtools))
+        layout.add_widget(Button(text="Back",
+                                 on_press=self.browser_widget.go_back))
+        layout.add_widget(Button(text="Forward",
+                                 on_press=self.browser_widget.go_forward))
+        layout.add_widget(Button(text="Reload",
+                                 on_press=self.browser_widget.reload))
+        layout.add_widget(Button(text="Print",
+                                 on_press=self.browser_widget.print_page))
+        layout.add_widget(Button(text="DevTools",
+                                 on_press=self.browser_widget.devtools))
 
         self.add_widget(layout)
-        self.add_widget(browser)
+        self.add_widget(self.browser_widget)
 
 
 class CefBrowser(Widget):
@@ -101,6 +104,8 @@ class CefBrowser(Widget):
         #the texture size
         #until runtime without core-dump.
         self.bind(size = self.size_changed)
+
+        self.browser = None
 
 
     starting = True
@@ -734,15 +739,27 @@ class CefBrowser(Widget):
     drag_icon = None
 
     def update_drag_icon(self, x, y):
-        if self.drag_icon:
+        if self.is_drag:
+            if self.drag_icon:
+                self.drag_icon.pos = self.flip_pos_vertical(x, y)
+            else:
+                image = self.drag_data.GetImage()
+                width = image.GetWidth()
+                height = image.GetHeight()
+                abuffer = image.GetAsBitmap(
+                        1.0,
+                        cefpython.CEF_COLOR_TYPE_BGRA_8888,
+                        cefpython.CEF_ALPHA_TYPE_PREMULTIPLIED)
+                texture = Texture.create(size=(width, height))
+                texture.blit_buffer(abuffer, colorfmt='bgra', bufferfmt='ubyte')
+                texture.flip_vertical()
+                self.drag_icon = Rectangle(texture=texture,
+                                           pos=self.flip_pos_vertical(x, y),
+                                           size=(width, height))
+                self.canvas.add(self.drag_icon)
+        elif self.drag_icon:
             self.canvas.remove(self.drag_icon)
             del self.drag_icon
-        if self.is_drag:
-            self.drag_icon = Rectangle(source="kivy-dragdrop.png",
-                                       pos=self.flip_pos_vertical(x,y),
-                                       size=(40,40))
-            self.canvas.add(self.drag_icon)
-
 
     def flip_pos_vertical(self, x, y):
         half = self.height / 2
@@ -971,10 +988,18 @@ class ClientHandler:
         self.browserWidget.current_drag_operation = operation
 
 
-if __name__ == '__main__':
+class CefBrowserApp(App):
 
-    class CefBrowserApp(App):
-        def build(self):
-            return BrowserLayout()
+    def build(self):
+        self.layout = BrowserLayout()
+        return self.layout
+
+    def on_stop(self):
+        # This is required for a clean shutdown of CEF.
+        self.layout.browser_widget.browser.CloseBrowser(True)
+        del self.layout.browser_widget.browser
+
+
+if __name__ == '__main__':
     CefBrowserApp().run()
     cefpython.Shutdown()

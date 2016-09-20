@@ -58,7 +58,7 @@ binaries from GH releases.
 8) Build cefpython:
 ```
 cd cefpython/src/linux/
-python compile.py 53.0
+python compile.py 53.1
 ```
 
 9) As of writing only "pygtk_.py" and "kivy_.py" examples are working

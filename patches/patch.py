@@ -23,6 +23,11 @@ patches.extend([
         'name': 'issue231',
         'path': './'
     },
+    {
+        # Adds drag-image representation during drag & drop in OSR mode.
+        'name': 'issue251',
+        'path': './'
+    },
 ])
 
 # LINUX

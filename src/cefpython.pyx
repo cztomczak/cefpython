@@ -426,6 +426,7 @@ from request_context_handler cimport *
 from cef_jsdialog_handler cimport *
 from cef_path_util cimport *
 from cef_drag_data cimport *
+from cef_image cimport *
 
 
 # -----------------------------------------------------------------------------
@@ -506,6 +507,7 @@ include "app.pyx"
 include "javascript_dialog_handler.pyx"
 include "drag_data.pyx"
 include "helpers.pyx"
+include "image.pyx"
 
 # -----------------------------------------------------------------------------
 # Utility functions to provide settings to the C++ browser process code.
@@ -618,7 +620,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
     if "locales_dir_path" not in applicationSettings:
         if platform.system() != "Darwin":
             applicationSettings["locales_dir_path"] = os.path.join(
-                    module_dir, "/locales")
+                    module_dir, "locales")
     if "resources_dir_path" not in applicationSettings:
         applicationSettings["resources_dir_path"] = module_dir
         if platform.system() == "Darwin":
@@ -847,10 +849,13 @@ def Shutdown():
             time.sleep(0.01)
         browsers_list = []
         for browserId in g_pyBrowsers:
-            browser = g_pyBrowsers[browserId]
-            browser.TryCloseBrowser()
+            # Cannot close browser here otherwise error:
+            # > dictionary changed size during iteration
             browsers_list.append(browserId)
         for browserId in browsers_list:
+            browser = GetPyBrowserById(browserId)
+            if browser:
+                browser.TryCloseBrowser()
             RemovePyBrowser(browserId)
         for i in range(10):
             with nogil:

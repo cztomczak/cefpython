@@ -56,6 +56,12 @@ if len(sys.argv) > 1 and "--fast" in sys.argv:
 else:
     FAST = False
 
+if len(sys.argv) > 1 and "--kivy" in sys.argv:
+    KIVY = True
+    print("KIVY mode On")
+else:
+    KIVY = False
+
 if len(sys.argv) > 1 and re.search(r"^\d+\.\d+$", sys.argv[1]):
     VERSION = sys.argv[1]
 else:
@@ -187,9 +193,12 @@ if DEBUG:
     os.chdir("./binaries_%s" % BITS)
     subprocess.call("cygdb . --args python-dbg wxpython.py", shell=True)
 else:
-    os.system("rm -rf ./installer/cefpython3-%s-*" % (VERSION,))
-    subprocess.call("cd ./installer/ && python make-setup.py --version %s"
-                    " && cd cefpython3-%s-* && python setup.py install"
-                    " && cd ../../../../examples/"
-                    " && python hello_world.py && cd ../src/linux/"\
-                    % (VERSION,VERSION), shell=True)
+    if KIVY:
+        os.system("python binaries_64bit/kivy_.py")
+    else:
+        os.system("rm -rf ./installer/cefpython3-%s-*" % (VERSION,))
+        subprocess.call("cd ./installer/ && python make-setup.py --version %s"
+                        " && cd cefpython3-%s-* && python setup.py install"
+                        " && cd ../../../../examples/"
+                        " && python hello_world.py && cd ../src/linux/"\
+                        % (VERSION,VERSION), shell=True)

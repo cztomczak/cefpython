@@ -6,9 +6,10 @@
 
 Usage:
     automate.py (--prebuilt-cef | --build-cef)
-                [--force-chromium-update FORCECHROMIUMUPDATE]
+                [--force-chromium-update FORCE_CHROMIUM_UPDATE]
+                [--no-cef-update NO_CEF_UPDATE]
                 [--cef-branch BRANCH] [--cef-commit COMMIT]
-                [--build-dir BUILDDIR] [--cef-build-dir CEFBUILDDIR]
+                [--build-dir BUILD_DIR] [--cef-build-dir CEF_BUIL_DDIR]
                 [--ninja-jobs JOBS] [--gyp-generators GENERATORS]
                 [--gyp-msvs-version MSVS]
     automate.py (-h | --help) [type -h to show full description for options]
@@ -113,6 +114,12 @@ class Options(object):
 
 def main():
     """Main entry point."""
+
+    if not ((2, 7) <= sys.version_info < (2, 8)):
+        print("ERROR: to run this tool you need Python 2.7, as upstream")
+        print("       automate-git.py works only with that version.")
+        sys.exit(1)
+
     setup_options(docopt.docopt(__doc__))
 
     if Options.build_cef:
@@ -135,10 +142,13 @@ def setup_options(docopt_args):
     Options.tools_dir = os.path.dirname(os.path.realpath(__file__))
     Options.cefpython_dir = os.path.dirname(Options.tools_dir)
 
-    # --cef-branch
+    # If --cef-branch is specified will use latest CEF commit from that
+    # branch. Otherwise get cef branch/commit from src/version/.
     if not Options.cef_branch:
-        # Use branch from the src/version/cef_version_*.h file
+        # Use branch/commit from the src/version/cef_version_*.h file
         Options.cef_branch = get_cefpython_version()["CHROME_VERSION_BUILD"]
+        Options.cef_commit = get_cefpython_version()["CEF_COMMIT_HASH"]
+
 
     # --gyp-msvs-version
     if not Options.gyp_msvs_version:
@@ -224,11 +234,14 @@ def create_cef_directories():
         run_git("checkout %s" % Options.cef_commit, cef_dir)
     # Update cef patches
     update_cef_patches()
-    # Copy cef/ to chromium/src/ but only if chromium/src/ exists.
+    # Copy cef/ to chromium/src/ but only if chromium/src/ exists,
+    # but don't copy it and delete if exists when --force-chromium-update
+    # flag is passed, chromium throws error about unstaged changes.
     if os.path.exists(src_dir):
         if os.path.exists(cef_dir2):
             rmdir(cef_dir2)
-        shutil.copytree(cef_dir, cef_dir2)
+        if not Options.force_chromium_update:
+            shutil.copytree(cef_dir, cef_dir2)
 
 
 def update_cef_patches():
@@ -577,7 +590,7 @@ def onerror(func, path, _):
         os.chmod(path, stat.S_IWUSR)
         func(path)
     else:
-        raise
+        raise Exception("Not a file permission error, dunno what to do")
 
 
 def get_cefpython_version():

@@ -347,3 +347,12 @@ cdef extern from "include/internal/cef_types.h":
         DRAG_OPERATION_MOVE    = 16
         DRAG_OPERATION_DELETE  = 32
         DRAG_OPERATION_EVERY   = UINT_MAX
+
+    ctypedef enum cef_color_type_t:
+        CEF_COLOR_TYPE_RGBA_8888,
+        CEF_COLOR_TYPE_BGRA_8888,
+
+    ctypedef enum cef_alpha_type_t:
+        CEF_ALPHA_TYPE_OPAQUE,
+        CEF_ALPHA_TYPE_PREMULTIPLIED,
+        CEF_ALPHA_TYPE_POSTMULTIPLIED,

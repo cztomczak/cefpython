@@ -24,6 +24,7 @@
  * [DpiAware](DpiAware.md) class (Win)
  * [DragData](DragData.md) object
  * [Frame](Frame.md) object
+ * [Image](Image.md) object
  * [JavascriptBindings](JavascriptBindings.md) class
  * [JavascriptCallback](JavascriptCallback.md) object
  * [PaintBuffer](PaintBuffer.md) object
