@@ -153,7 +153,8 @@ except OSError:
 
 os.chdir("./setup")
 
-ret = subprocess.call("python fix_pyx_files.py", shell=True)
+ret = subprocess.call("{python} fix_pyx_files.py"
+                      .format(python=sys.executable), shell=True)
 if ret != 0:
     sys.exit("ERROR")
 
@@ -168,11 +169,11 @@ if DEBUG:
                           " --cython-gdb", shell=True)
 else:
     if FAST:
-        ret = subprocess.call("python setup.py build_ext --inplace --fast",
-                              shell=True)
+        ret = subprocess.call("{python} setup.py build_ext --inplace --fast"
+                              .format(python=sys.executable), shell=True)
     else:
-        ret = subprocess.call("python setup.py build_ext --inplace",
-                              shell=True)
+        ret = subprocess.call("{python} setup.py build_ext --inplace"
+                              .format(python=sys.executable), shell=True)
 
 if DEBUG:
     shutil.rmtree("./../binaries_%s/cython_debug/" % BITS, ignore_errors=True)
@@ -202,7 +203,8 @@ if DEBUG:
     subprocess.call("cygdb . --args python-dbg wxpython.py", shell=True)
 else:
     if KIVY:
-        os.system("python binaries_64bit/kivy_.py")
+        os.system("{python} binaries_64bit/kivy_.py"
+                  .format(python=sys.executable))
     else:
         print("Make installer and run setup.py install...")
 
@@ -220,10 +222,10 @@ else:
             sudo = ""
 
         # Make installer, install, run hello world and return to initial dir
-        os.system("cd ./installer/ && python make-setup.py --version {ver}"
+        os.system("cd ./installer/ && {python} make-setup.py --version {ver}"
                   " && cd cefpython3-{ver}-*-setup/"
-                  " && {sudo} python setup.py install"
+                  " && {sudo} {python} setup.py install"
                   " && cd ../ && {sudo} rm -rf ./cefpython3-{ver}-*-setup/"
                   " && cd ../../../examples/"
-                  " && python hello_world.py && cd ../src/linux/"
-                  .format(ver=VERSION, sudo=sudo))
+                  " && {python} hello_world.py && cd ../src/linux/"
+                  .format(python=sys.executable, ver=VERSION, sudo=sudo))

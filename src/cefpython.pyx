@@ -602,6 +602,10 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
 
     if "debug" not in applicationSettings:
         applicationSettings["debug"] = False
+    if "log_severity" not in applicationSettings:
+        # By default show only errors. Don't show on Linux X server non-fatal
+        # errors like "WARNING:x11_util.cc(1409)] X error received".
+        applicationSettings["log_severity"] = LOGSEVERITY_ERROR
     if "string_encoding" not in applicationSettings:
         applicationSettings["string_encoding"] = "utf-8"
     if "unique_request_context_per_browser" not in applicationSettings:
