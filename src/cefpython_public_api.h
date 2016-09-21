@@ -1,33 +1,32 @@
-// d:\cefpython\src\setup/cefpython.h(22) : warning C4190: 'RequestHandler_GetCookieManager'
-// has C-linkage specified, but returns UDT 'CefRefPtr<T>' which is incompatible with C
+/* This is a wrapper around including cefpython.h that is generated
+   by Cython. Functions marked with the 'public' keyword are exposed
+   to C through that header file. */
 
 #ifndef CEFPYTHON_PUBLIC_API_H
 #define CEFPYTHON_PUBLIC_API_H
 
 #if defined(OS_WIN)
-#pragma warning(disable:4190)
+#pragma warning(disable:4190)  // cefpython.h extern C-linkage warnings
 #endif
 
-// To be able to use 'public' declarations you need to include Python.h and cefpython.h.
-// This include must be before including CEF, otherwise you get errors like:
-// | /usr/include/python2.7/pyconfig.h:1161:0: warning: "_POSIX_C_SOURCE" redefined
-// This file needs to be included first before CEF.
 #include "Python.h"
 
-// All the imports that are required when including "cefpython.h".
+// cefpython.h declares public functions using DL_IMPORT and these
+// macros are not available in Python 3.
+#ifndef DL_IMPORT
+#define DL_IMPORT(RTYPE) RTYPE
+#endif
+#ifndef DL_EXPORT
+#define DL_EXPORT(RTYPE) RTYPE
+#endif
+
+// Includes required by "cefpython.h".
 #include "include/cef_client.h"
 #include "include/cef_urlrequest.h"
 #include "include/cef_command_line.h"
 #include "util.h"
 
-// Python 3.2 fix - DL_IMPORT is not defined in Python.h
-#ifndef DL_IMPORT /* declarations for DLL import/export */
-#define DL_IMPORT(RTYPE) RTYPE
-#endif
-#ifndef DL_EXPORT /* declarations for DLL import/export */
-#define DL_EXPORT(RTYPE) RTYPE
-#endif
-
+// cefpython.h include depending on platform
 #if defined(OS_WIN)
 #include "windows/setup/cefpython.h"
 #elif defined(OS_LINUX)
@@ -36,5 +35,4 @@
 #include "mac/setup/cefpython.h"
 #endif
 
-// CEFPYTHON_PUBLIC_API_H
-#endif
+#endif // CEFPYTHON_PUBLIC_API_H

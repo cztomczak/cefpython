@@ -10,7 +10,10 @@ Options:
     --fast      Fast mode, don't delete C++ .o .a files, nor the setup/build/
                 directory, and disable optimization flags when building
                 the so/pyd module.
+    --kivy      Run Kivy example (don't install package)
 """
+
+# TODO: Check Cython version using info from tools/requirements.txt
 
 import sys
 import os
@@ -164,7 +167,12 @@ if DEBUG:
     ret = subprocess.call("python-dbg setup.py build_ext --inplace"
                           " --cython-gdb", shell=True)
 else:
-    ret = subprocess.call("python setup.py build_ext --inplace --fast", shell=True)
+    if FAST:
+        ret = subprocess.call("python setup.py build_ext --inplace --fast",
+                              shell=True)
+    else:
+        ret = subprocess.call("python setup.py build_ext --inplace",
+                              shell=True)
 
 if DEBUG:
     shutil.rmtree("./../binaries_%s/cython_debug/" % BITS, ignore_errors=True)
@@ -196,9 +204,26 @@ else:
     if KIVY:
         os.system("python binaries_64bit/kivy_.py")
     else:
-        os.system("rm -rf ./installer/cefpython3-%s-*" % (VERSION,))
-        subprocess.call("cd ./installer/ && python make-setup.py --version %s"
-                        " && cd cefpython3-%s-* && python setup.py install"
-                        " && cd ../../../../examples/"
-                        " && python hello_world.py && cd ../src/linux/"\
-                        % (VERSION,VERSION), shell=True)
+        print("Make installer and run setup.py install...")
+
+        # Clean installer directory from previous run
+        exit_code = os.system("rm -rf ./installer/cefpython3-{ver}-*-setup/"
+                              .format(ver=VERSION))
+        if exit_code:
+            os.system("sudo rm -rf ./installer/cefpython3-{ver}-*-setup/"
+                      .format(ver=VERSION))
+
+        # System python requires sudo when installing package
+        if sys.executable in ["/usr/bin/python", "/usr/bin/python3"]:
+            sudo = "sudo"
+        else:
+            sudo = ""
+
+        # Make installer, install, run hello world and return to initial dir
+        os.system("cd ./installer/ && python make-setup.py --version {ver}"
+                  " && cd cefpython3-{ver}-*-setup/"
+                  " && {sudo} python setup.py install"
+                  " && cd ../ && {sudo} rm -rf ./cefpython3-{ver}-*-setup/"
+                  " && cd ../../../examples/"
+                  " && python hello_world.py && cd ../src/linux/"
+                  .format(ver=VERSION, sudo=sudo))
