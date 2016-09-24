@@ -2,7 +2,7 @@
 # License: New BSD License.
 # Website: http://code.google.com/p/cefpython/
 
-include "cefpython.pyx"
+include "../cefpython.pyx"
 
 # cef_termination_status_t
 cimport cef_types

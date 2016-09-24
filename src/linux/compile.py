@@ -221,11 +221,19 @@ else:
         else:
             sudo = ""
 
-        # Make installer, install, run hello world and return to initial dir
-        os.system("cd ./installer/ && {python} make-setup.py --version {ver}"
+        # Make installer, install, run examples and unit tests,
+        # and return to src/linux/ dir.
+        os.system("cd ./installer/"
+                  " && {python} make-setup.py --version {ver}"
                   " && cd cefpython3-{ver}-*-setup/"
                   " && {sudo} {python} setup.py install"
-                  " && cd ../ && {sudo} rm -rf ./cefpython3-{ver}-*-setup/"
+                  " && cd ../"
+                  " && {sudo} rm -rf ./cefpython3-{ver}-*-setup/"
                   " && cd ../../../examples/"
-                  " && {python} hello_world.py && cd ../src/linux/"
+                  " && {python} hello_world.py"
+                  " && {python} gtk.py"
+                  " && {python} tkinter_.py"
+                  " && cd ../unittests/"
+                  " && {python} _test_runner.py"
+                  " && cd ../src/linux/"
                   .format(python=sys.executable, ver=VERSION, sudo=sudo))

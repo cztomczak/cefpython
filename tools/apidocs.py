@@ -1,4 +1,5 @@
 # Copyright (c) 2016 CEF Python, see the Authors file. All rights reserved.
+# TODO: sort objects by name in API-index.md
 
 """Generate API docs from sources.
 

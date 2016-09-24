@@ -8,7 +8,7 @@
 # recreate these events in the Browser process, but the timing will be
 # a bit delayed due to asynchronous way this is being done.
 
-include "cefpython.pyx"
+include "../cefpython.pyx"
 
 cdef public void V8ContextHandler_OnContextCreated(
         CefRefPtr[CefBrowser] cefBrowser,

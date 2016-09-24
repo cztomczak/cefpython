@@ -56,7 +56,7 @@ ext_modules = [Extension(
         r'./../',
         r'./../../',
         r'./../../extern/',
-        r'./../../extern_cef/',
+        r'./../../extern/cef/',
         '/usr/include/gtk-2.0',
         '/usr/include/glib-2.0',
         '/usr/include/cairo',

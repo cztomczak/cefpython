@@ -60,7 +60,7 @@ ext_modules = [Extension(
         r'./../',
         r'./../../',
         r'./../../extern/',
-        r'./../../extern_cef/',
+        r'./../../extern/cef/',
     ],
 
     library_dirs=[

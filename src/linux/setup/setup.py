@@ -68,7 +68,7 @@ ext_modules = [Extension(
         r'./../../',
         r'./../../common/',
         r'./../../extern/',
-        r'./../../extern_cef/',
+        r'./../../extern/cef/',
         '/usr/include/gtk-2.0',
         '/usr/include/glib-2.0',
         '/usr/include/gtk-unix-print-2.0',

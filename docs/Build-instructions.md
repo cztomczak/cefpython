@@ -250,11 +250,17 @@ issue73 patch (no tcmalloc) applied.
 Create a patch from unstaged changes in current directory:
 ```
 cd chromium/src/cef/
-git diff --no-prefix --relative > cef.gyp.patch
+git diff --no-prefix --relative > issue251.patch
 ```
 
 Apply a patch in current directory:
 ```
 cd chromium/src/cef/
-git apply cef.gyp.patch
+git apply issue251.patch
+```
+
+In case of a "No such file or directory" error and when paths seem
+to be correct, try the -p0 or -p1 flag:
+```
+git apply -p0 issue251.patch
 ```

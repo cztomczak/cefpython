@@ -272,7 +272,8 @@ class LoadHandler(object):
         self.browser_frame = browser_frame
 
     def OnLoadStart(self, browser, _):
-        self.browser_frame.master.navigation_bar.set_url(browser.GetUrl())
+        if self.browser_frame.master.navigation_bar:
+            self.browser_frame.master.navigation_bar.set_url(browser.GetUrl())
 
 
 class FocusHandler(object):
