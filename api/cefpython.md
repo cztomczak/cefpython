@@ -74,8 +74,9 @@ browser.SetClientCallback("OnLoadEnd", OnLoadEnd)
 | traceObject | - |
 | __Return__ | string |
 
-Global except hook to exit app cleanly on error.
-
+Global except hook to exit app cleanly on error. CEF has a multiprocess
+architecture and when exiting you need to close all processes (main Browser
+process, Renderer process, GPU process, etc.) by calling Shutdown().
 This hook does the following: in case of exception write it to
 the "error.log" file, display it to the console, shutdown CEF
 and exit application immediately by ignoring "finally" (_exit()).

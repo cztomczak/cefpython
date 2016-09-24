@@ -6,7 +6,7 @@
 // RENDERER_PROCESS macro is define when compiling the subprocess executable.
 
 #ifdef BROWSER_PROCESS
-#include "cefpython_public_api.h"
+#include "common/cefpython_public_api.h"
 #endif
 
 #include "cefpython_app.h"

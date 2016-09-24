@@ -508,6 +508,7 @@ include "javascript_dialog_handler.pyx"
 include "drag_data.pyx"
 include "helpers.pyx"
 include "image.pyx"
+include "handlers/focus_handler.pyx"
 
 # -----------------------------------------------------------------------------
 # Utility functions to provide settings to the C++ browser process code.
@@ -839,14 +840,12 @@ def Shutdown():
         Debug("Shutdown: releasing shared request context")
         g_sharedRequestContext.Assign(NULL)
 
-    if len(g_pyBrowsers):
-        Error("Shutdown called, but there are still browser references alive,"
-              " will try to close them and free references.")
+    if len(g_pyBrowsers) and _MessageLoopWork_wasused:
         # There might be a case when python error occured after creating
         # browser, but before any message loop was run. In such case
         # the renderer process won't be terminated unless we run some
-        # message loop work here, try to close browser and free reference,
-        # and then run some message loop work again.
+        # message loop work here first, try to close browser and free
+        # reference, and then run some message loop work again.
         for i in range(10):
             with nogil:
                 CefDoMessageLoopWork()
@@ -866,6 +865,9 @@ def Shutdown():
                 CefDoMessageLoopWork()
             time.sleep(0.01)
 
+    if len(g_pyBrowsers):
+        Error("Shutdown called, but there are still browser references alive")
+
     Debug("Shutdown()")
     with nogil:
         # Temporary fix for possible errors on shutdown. See this post:
@@ -879,7 +881,6 @@ def Shutdown():
         if _MessageLoopWork_wasused:
             for i in range(10):
                 CefDoMessageLoopWork()
-
 
 
 def SetOsModalLoop(py_bool modalLoop):

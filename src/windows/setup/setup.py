@@ -59,7 +59,8 @@ ext_modules = [Extension(
     include_dirs=[
         r'./../',
         r'./../../',
-        r'./../../cython_includes/',
+        r'./../../extern/',
+        r'./../../extern_cef/',
     ],
 
     library_dirs=[

@@ -6,19 +6,19 @@ from cefpython3 import cefpython as cef
 from gi.repository import GdkX11, Gtk, GObject, GdkPixbuf
 import sys
 import os
-import time
 
 
 def main():
-    version_info()
+    print("CEF Python {ver}".format(ver=cef.__version__))
+    print("Python {ver}".format(ver=sys.version[:6]))
+    print("GTK {major}.{minor}".format(
+            major=Gtk.get_major_version(),
+            minor=Gtk.get_minor_version()))
+    assert cef.__version__ >= "53.1", "CEF Python v53.1+ required to run this"
+    sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
+    cef.Initialize()
     app = GtkExample()
     SystemExit(app.run(sys.argv))
-
-
-def version_info():
-    print("CEF Python "+cef.__version__)
-    print("Python "+sys.version[:6])
-    print("GTK %s.%s" % (Gtk.get_major_version(), Gtk.get_minor_version()))
 
 
 class GtkExample(Gtk.Application):
@@ -29,7 +29,6 @@ class GtkExample(Gtk.Application):
         self.window = None
 
     def run(self, argv):
-        cef.Initialize()
         GObject.threads_init()
         GObject.timeout_add(10, self.on_timer)
         self.connect("activate", self.on_activate)
@@ -54,7 +53,6 @@ class GtkExample(Gtk.Application):
         window_info.SetAsChild(self.window.get_property("window").get_xid())
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
-        self.window.get_property("window").focus(False)
         self.window.show_all()
 
     def on_configure(self, *_):
@@ -73,13 +71,9 @@ class GtkExample(Gtk.Application):
         return False
 
     def on_window_close(self, *_):
-        # Close browser and free reference
+        # Close browser and free reference by setting to None
         self.browser.CloseBrowser(True)
-        del self.browser
-        # Give the browser some time to close before calling cef.Shutdown()
-        for i in range(10):
-            cef.MessageLoopWork()
-            time.sleep(0.01)
+        self.browser = None
 
     def on_shutdown(self, *_):
         cef.Shutdown()

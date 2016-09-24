@@ -66,7 +66,9 @@ ext_modules = [Extension(
     include_dirs=[
         r'./../',
         r'./../../',
-        r'./../../cython_includes/',
+        r'./../../common/',
+        r'./../../extern/',
+        r'./../../extern_cef/',
         '/usr/include/gtk-2.0',
         '/usr/include/glib-2.0',
         '/usr/include/gtk-unix-print-2.0',

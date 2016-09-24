@@ -3,7 +3,7 @@
 // Website: http://code.google.com/p/cefpython/
 
 #include "request_context_handler.h"
-#include "cefpython_public_api.h"
+#include "common/cefpython_public_api.h"
 #include "DebugLog.h"
 
 // --------------------------------------------------------------------------

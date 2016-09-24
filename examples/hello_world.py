@@ -5,9 +5,10 @@ import sys
 
 
 def main():
-    """Main entry point."""
-    version_info()
-    sys.excepthook = cef.ExceptHook
+    print("CEF Python {ver}".format(ver=cef.__version__))
+    print("Python {ver}".format(ver=sys.version[:6]))
+    assert cef.__version__ >= "53.1", "CEF Python v53.1+ required to run this"
+    sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     cef.Initialize()
     browser = cef.CreateBrowserSync(url="https://www.google.com/")
     browser.SetClientHandler(ClientHandler())
@@ -15,12 +16,7 @@ def main():
     cef.Shutdown()
 
 
-def version_info():
-    print("CEF Python "+cef.__version__)
-    print("Python "+sys.version[:6])
-
-
-class ClientHandler:
+class ClientHandler(object):
 
     def OnBeforeClose(self, browser):
         """Called just before a browser is destroyed."""

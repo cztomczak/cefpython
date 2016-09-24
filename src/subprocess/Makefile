@@ -5,7 +5,7 @@
 # -Werror - treat warnings as errors
 
 UNAME_S = $(shell uname -s)
-INC = -I./../ -I/usr/include/python2.7 \
+INC = -I./../ -I./../common/ -I/usr/include/python2.7 \
 	-I/usr/include/gtk-2.0 \
 	-I/usr/include/gtk-unix-print-2.0 \
 	-I/usr/include/glib-2.0 \

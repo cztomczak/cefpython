@@ -40,6 +40,7 @@
 
  * [DisplayHandler](DisplayHandler.md)
  * [DownloadHandler](DownloadHandler.md)
+ * [FocusHandler](FocusHandler.md)
  * [JavascriptContextHandler](JavascriptContextHandler.md)
  * [JavascriptDialogHandler](JavascriptDialogHandler.md)
  * [KeyboardHandler](KeyboardHandler.md)

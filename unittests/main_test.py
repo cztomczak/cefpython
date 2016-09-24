@@ -147,7 +147,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.MessageLoopWork()
             time.sleep(0.01)
 
-        # Asserts in handlers and in external
+        # Automatic check of asserts in handlers and in external
         for obj in [] + client_handlers + [global_handler, external]:
             test_for_True = False  # Test whether asserts are working correctly
             for key, value in obj.__dict__.items():
@@ -185,9 +185,14 @@ class GlobalHandler(object):
         self.test_for_True = True  # Test whether asserts are working correctly
         self.OnAfterCreated_True = False
 
-    # noinspection PyUnusedLocal
     def _OnAfterCreated(self, browser):
+        # For asserts that are checked automatically before shutdown its
+        # values should be set first, so that when other asserts fail
+        # (the ones called through the test_case member) they are reported
+        # correctly.
+        self.test_case.assertFalse(self.OnAfterCreated_True)
         self.OnAfterCreated_True = True
+        self.test_case.assertEqual(browser.GetIdentifier(), 1)
 
 
 class LoadHandler(object):
@@ -200,20 +205,42 @@ class LoadHandler(object):
         self.OnLoadStart_True = False
         self.OnLoadEnd_True = False
         self.FrameSourceVisitor_True = False
+        # self.OnLoadingStateChange_Start_True = False # FAILS
+        self.OnLoadingStateChange_End_True = False
 
-    # noinspection PyUnusedLocal
     def OnLoadStart(self, browser, frame):
-        self.test_case.assertEqual(browser.GetUrl(), g_datauri)
+        self.test_case.assertFalse(self.OnLoadStart_True)
         self.OnLoadStart_True = True
+        self.test_case.assertEqual(browser.GetUrl(), frame.GetUrl())
+        self.test_case.assertEqual(browser.GetUrl(), g_datauri)
 
-    # noinspection PyUnusedLocal
     def OnLoadEnd(self, browser, frame, http_code):
+        # OnLoadEnd should be called only once
+        self.test_case.assertFalse(self.OnLoadEnd_True)
+        self.OnLoadEnd_True = True
         self.test_case.assertEqual(http_code, 200)
         self.frame_source_visitor = FrameSourceVisitor(self, self.test_case)
         frame.GetSource(self.frame_source_visitor)
         browser.ExecuteJavascript(
                 "print('LoadHandler.OnLoadEnd() ok')")
-        self.OnLoadEnd_True = True
+
+    def OnLoadingStateChange(self, browser, is_loading,
+                             can_go_back, can_go_forward):
+        if is_loading:
+            # TODO: this test fails, looks like OnLoadingStaetChange with
+            #       is_loading=False is being called very fast, before
+            #       OnLoadStart and before client handler is set by calling
+            #       browser.SetClientHandler().
+            #       SOLUTION: allow to set OnLoadingStateChange through
+            #       SetGlobalClientCallback similarly to _OnAfterCreated().
+            # self.test_case.assertFalse(self.OnLoadingStateChange_Start_True)
+            # self.OnLoadingStateChange_Start_True = True
+            pass
+        else:
+            self.test_case.assertFalse(self.OnLoadingStateChange_End_True)
+            self.OnLoadingStateChange_End_True = True
+            self.test_case.assertEqual(browser.CanGoBack(), can_go_back)
+            self.test_case.assertEqual(browser.CanGoForward(), can_go_forward)
 
 
 class DisplayHandler(object):
@@ -231,7 +258,7 @@ class DisplayHandler(object):
             self.javascript_errors_False = True
             raise Exception(message)
         else:
-            # Confirmation that messages from javascript are coming
+            # Check whether messages from javascript are coming
             self.OnConsoleMessage_True = True
             subtest_message(message)
 
@@ -239,15 +266,16 @@ class DisplayHandler(object):
 class FrameSourceVisitor(object):
     """Visitor for Frame.GetSource()."""
 
-    def __init__(self, client_handler, test_case):
-        self.client_handler = client_handler
+    def __init__(self, load_handler, test_case):
+        self.load_handler = load_handler
         self.test_case = test_case
 
     # noinspection PyUnusedLocal
     def Visit(self, value):
+        self.test_case.assertFalse(self.load_handler.FrameSourceVisitor_True)
+        self.load_handler.FrameSourceVisitor_True = True
         self.test_case.assertIn("747ef3e6011b6a61e6b3c6e54bdd2dee",
                                 g_datauri_data)
-        self.client_handler.FrameSourceVisitor_True = True
 
 
 class External(object):
@@ -274,11 +302,11 @@ class External(object):
     def test_callbacks(self, js_callback):
         """Test both javascript and python callbacks."""
         def py_callback(msg_from_js):
+            self.py_callback_True = True
             self.test_case.assertEqual(msg_from_js,
                                        "String sent from Javascript")
-            self.py_callback_True = True
-        js_callback.Call("String sent from Python", py_callback)
         self.test_callbacks_True = True
+        js_callback.Call("String sent from Python", py_callback)
 
 
 if __name__ == "__main__":

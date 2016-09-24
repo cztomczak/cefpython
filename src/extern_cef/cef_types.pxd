@@ -356,3 +356,7 @@ cdef extern from "include/internal/cef_types.h":
         CEF_ALPHA_TYPE_OPAQUE,
         CEF_ALPHA_TYPE_PREMULTIPLIED,
         CEF_ALPHA_TYPE_POSTMULTIPLIED,
+
+    ctypedef enum cef_focus_source_t:
+        FOCUS_SOURCE_NAVIGATION,
+        FOCUS_SOURCE_SYSTEM,

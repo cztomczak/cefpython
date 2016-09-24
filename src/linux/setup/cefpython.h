@@ -83,6 +83,9 @@ __PYX_EXTERN_C DL_IMPORT(bool) JavascriptDialogHandler_OnJavascriptDialog(CefRef
 __PYX_EXTERN_C DL_IMPORT(bool) JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(CefRefPtr<CefBrowser> , CefString const &, bool, CefRefPtr<CefJSDialogCallback> );
 __PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnResetJavascriptDialogState(CefRefPtr<CefBrowser> );
 __PYX_EXTERN_C DL_IMPORT(void) JavascriptDialogHandler_OnJavascriptDialogClosed(CefRefPtr<CefBrowser> );
+__PYX_EXTERN_C DL_IMPORT(void) FocusHandler_OnTakeFocus(CefRefPtr<CefBrowser> , bool);
+__PYX_EXTERN_C DL_IMPORT(bool) FocusHandler_OnSetFocus(CefRefPtr<CefBrowser> , cef_focus_source_t);
+__PYX_EXTERN_C DL_IMPORT(void) FocusHandler_OnGotFocus(CefRefPtr<CefBrowser> );
 __PYX_EXTERN_C DL_IMPORT(void) cefpython_GetDebugOptions(bool *, std::string *);
 __PYX_EXTERN_C DL_IMPORT(bool) ApplicationSettings_GetBool(char const *);
 __PYX_EXTERN_C DL_IMPORT(bool) ApplicationSettings_GetBoolFromDict(char const *, char const *);
