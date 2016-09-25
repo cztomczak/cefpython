@@ -15,4 +15,3 @@ cdef extern from "include/internal/cef_ptr.h":
         T* get()
         # noinspection PyUnresolvedReferences
         void swap(CefRefPtr[T]& r)
-

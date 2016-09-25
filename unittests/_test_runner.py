@@ -59,6 +59,7 @@ class TestRunner(object):
     ran = 0
     errors = 0
     failures = 0
+    cefpython_version = "-unknown-"
 
     _suites = None  # type: unittest.TestSuite
     _isolated_suites = None  # type: unittest.TestSuite
@@ -148,9 +149,17 @@ class TestRunner(object):
                 exit_code = exc.returncode
             if type(output) != str:
                 output = output.decode("utf-8", errors="replace")
-            match = re.search(r"Ran (\d+) sub-tests in \w+", output)
+            # Fetch number of sub-tests ran from output
+            match = re.search(r"^Ran (\d+) sub-tests in \w+", output,
+                              re.MULTILINE)
             if match:
                 self.ran += int(match.group(1))
+            # Fetch CEF Python version from output
+            match = re.search(r"^CEF Python (\d+\.\d+)", output,
+                              re.MULTILINE)
+            if match:
+                self.cefpython_version = match.group(1)
+            # Write original output
             sys.stdout.write(output)
             # If tests failed parse output for errors/failures
             if exit_code:
@@ -231,6 +240,8 @@ class TestRunner(object):
         # type: () -> None
         """Print summary and exit."""
         print("-"*70)
+        print("[_test_runner.py] CEF Python {ver}"
+              .format(ver=self.cefpython_version))
         print("[_test_runner.py] Python {ver}".format(ver=sys.version[:6]))
         print("[_test_runner.py] Ran {ran} tests in total"
               .format(ran=self.ran))

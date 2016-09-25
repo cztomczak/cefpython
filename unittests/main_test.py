@@ -92,6 +92,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # All this code must run inside one single test, otherwise strange
         # things happen.
         print("")
+        print("CEF Python {ver}".format(ver=cef.__version__))
         print("Python {ver}".format(ver=sys.version[:6]))
 
         # Test initialization of CEF
@@ -312,4 +313,3 @@ class External(object):
 
 if __name__ == "__main__":
     _test_runner.main(basename(__file__))
-

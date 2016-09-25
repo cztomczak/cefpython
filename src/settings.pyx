@@ -113,6 +113,9 @@ cdef void SetApplicationSettings(
         elif key == "windowless_rendering_enabled":
             cefAppSettings.windowless_rendering_enabled = \
                     int(appSettings[key])
+        elif key == "external_message_pump":
+            cefAppSettings.external_message_pump = \
+                    int(appSettings[key])
         else:
             raise Exception("Invalid appSettings key: %s" % key)
 

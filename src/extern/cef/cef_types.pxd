@@ -8,6 +8,7 @@ from libcpp cimport bool as cpp_bool
 # noinspection PyUnresolvedReferences
 from libc.stddef cimport wchar_t
 from cef_string cimport cef_string_t
+# noinspection PyUnresolvedReferences
 from libc.limits cimport UINT_MAX
 
 cdef extern from "include/internal/cef_types.h":
@@ -50,6 +51,7 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t user_data_path
         int windowless_rendering_enabled
         int no_sandbox
+        int external_message_pump
 
     ctypedef struct CefBrowserSettings:
         cef_string_t accept_language_list

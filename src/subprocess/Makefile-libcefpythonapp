@@ -14,14 +14,22 @@ CCFLAGS = -fPIC -std=gnu++11 -Wall -Werror -DBROWSER_PROCESS \
 			$(CEF_CCFLAGS)
 
 ifeq ($(UNAME_S), Linux)
-	CPP_FILES = print_handler_gtk.cpp
+	CPP_FILES = print_handler_gtk.cpp \
+	            main_message_loop/main_message_loop_external_pump_linux.cpp
+else ifeq ($(UNAME_S), Darwin)
+    CPP_FILES = \
+    main_message_loop/main_message_loop_external_pump_mac.mm
 else
 	CPP_FILES =
 endif
 
 
 SRC = cefpython_app.cpp v8function_handler.cpp v8utils.cpp \
-		javascript_callback.cpp $(CPP_FILES)
+		javascript_callback.cpp \
+		main_message_loop/main_message_loop.cpp \
+		main_message_loop/main_message_loop_std.cpp \
+		main_message_loop/main_message_loop_external_pump.cpp \
+		$(CPP_FILES)
 OBJ = $(SRC:.cpp=.o)
 OUT = libcefpythonapp.a
 

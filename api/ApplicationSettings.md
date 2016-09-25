@@ -15,6 +15,7 @@ Table of contents:
   * [command_line_args_disabled](#command_line_args_disabled)
   * [context_menu](#context_menu)
   * [downloads_enabled](#downloads_enabled)
+  * [external_message_pump](#external_message_pump)
   * [ignore_certificate_errors](#ignore_certificate_errors)
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
@@ -146,6 +147,30 @@ Configure mouse context menu. All dict values are of type bool and are True by d
 Default: True
 
 Downloads are handled automatically. A default `SaveAs` file dialog provided by OS is displayed. See also the [DownloadHandler](DownloadHandler.md) wiki page.
+
+
+### external_message_pump
+
+(bool)
+Default: False
+
+EXPERIMENTAL: currently this option makes browser slower, so don't use it.
+              Reported issue in upstream, see Issue #246 for details.
+
+It is recommended to use this option as a replacement for calls to
+cefpython.MessageLoopWork(). CEF Python will do these calls automatically
+using CEF's OnScheduleMessagePumpWork. This results in improved performance
+and resolves some bugs. See Issue #246 for more details.
+
+Description from upstream CEF:
+> Set to true (1) to control browser process main (UI) thread message pump
+> scheduling via the CefBrowserProcessHandler::OnScheduleMessagePumpWork()
+> callback. This option is recommended for use in combination with the
+> CefDoMessageLoopWork() function in cases where the CEF message loop must be
+> integrated into an existing application message loop (see additional
+> comments and warnings on CefDoMessageLoopWork). Enabling this option is not
+> recommended for most users; leave this option disabled and use either the
+> CefRunMessageLoop() function or multi_threaded_message_loop if possible.
 
 
 ### ignore_certificate_errors

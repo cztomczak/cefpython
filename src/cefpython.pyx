@@ -343,6 +343,7 @@ from libc.string cimport memcpy
 # preincrement and dereference must be "as" otherwise not seen.
 # noinspection PyUnresolvedReferences
 from cython.operator cimport preincrement as preinc, dereference as deref
+# noinspection PyUnresolvedReferences
 
 # from cython.operator cimport address as addr # Address of an c++ object?
 
@@ -427,6 +428,8 @@ from cef_jsdialog_handler cimport *
 from cef_path_util cimport *
 from cef_drag_data cimport *
 from cef_image cimport *
+from main_message_loop cimport *
+from cef_scoped_ptr cimport scoped_ptr
 
 
 # -----------------------------------------------------------------------------
@@ -441,6 +444,8 @@ g_debugFile = "debug.log"
 # The string_encoding key must be set early here and also in Initialize.
 g_applicationSettings = {"string_encoding": "utf-8"}
 g_commandLineSwitches = {}
+
+cdef scoped_ptr[MainMessageLoopExternalPump] g_external_message_pump
 
 # noinspection PyUnresolvedReferences
 cdef cpp_bool _MessageLoopWork_wasused = False
@@ -567,7 +572,13 @@ cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
 # Linux, then do not to run any of the CEF code until Initialize()
 # is called. See Issue #73 in the CEF Python Issue Tracker.
 
-def Initialize(applicationSettings=None, commandLineSwitches=None):
+def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
+
+    # Alternative names for existing parameters
+    if "settings" in kwargs:
+        applicationSettings = kwargs["settings"]
+    if "switches" in kwargs:
+        commandLineSwitches = kwargs["switches"]
 
     # Fix Issue #231 - Discovery of the "icudtl.dat" file fails on Linux.
     # Apply patch for all platforms just in case.
@@ -698,6 +709,11 @@ def Initialize(applicationSettings=None, commandLineSwitches=None):
             g_commandLineSwitches[key] = copy.deepcopy(
                     commandLineSwitches[key])
 
+    # External message pump
+    if GetAppSetting("external_message_pump")\
+            and not g_external_message_pump.get():
+        g_external_message_pump.Assign(MainMessageLoopExternalPump.Create())
+
     Debug("CefInitialize()")
     cdef cpp_bool ret
     with nogil:
@@ -720,20 +736,24 @@ def CreateBrowserSync(windowInfo=None,
                       browserSettings=None,
                       navigateUrl="",
                       **kwargs):
+    # Alternative names for existing parameters
+    if "window_info" in kwargs:
+        windowInfo = kwargs["window_info"]
+    if "settings" in kwargs:
+        browserSettings = kwargs["settings"]
+    if "url" in kwargs:
+        navigateUrl = kwargs["url"]
+
     Debug("CreateBrowserSync() called")
     assert IsThread(TID_UI), (
             "cefpython.CreateBrowserSync() may only be called on the UI thread")
 
-    if "window_info" in kwargs:
-        windowInfo = kwargs["window_info"]
     if not windowInfo:
         windowInfo = WindowInfo()
         windowInfo.SetAsChild(0)
     elif not isinstance(windowInfo, WindowInfo):
         raise Exception("CreateBrowserSync() failed: windowInfo: invalid object")
 
-    if "settings" in kwargs:
-        browserSettings = kwargs["settings"]
     if not browserSettings:
         browserSettings = {}
 
@@ -743,8 +763,7 @@ def CreateBrowserSync(windowInfo=None,
     cdef CefWindowInfo cefWindowInfo
     SetCefWindowInfo(cefWindowInfo, windowInfo)
 
-    if "url" in kwargs:
-        navigateUrl = kwargs["url"]
+
     navigateUrl = GetNavigateUrl(navigateUrl)
     Debug("navigateUrl: %s" % navigateUrl)
     cdef CefString cefNavigateUrl
@@ -882,6 +901,11 @@ def Shutdown():
             for i in range(10):
                 CefDoMessageLoopWork()
 
+    # Release external message pump, as in cefclient after Shutdown
+    if g_external_message_pump.get():
+        # Reset will set it to NULL
+        g_external_message_pump.reset()
+
 
 def SetOsModalLoop(py_bool modalLoop):
     cdef cpp_bool cefModalLoop = bool(modalLoop)
@@ -903,3 +927,8 @@ cpdef object GetGlobalClientCallback(py_string name):
     else:
         return None
 
+cpdef object GetAppSetting(py_string key):
+    global g_applicationSettings
+    if key in g_applicationSettings:
+        return g_applicationSettings[key]
+    return None

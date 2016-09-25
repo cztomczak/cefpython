@@ -25,16 +25,16 @@
 
 
 class ClientHandler : public CefClient,
-                             ContextMenuHandler,
-                             DisplayHandler,
-                             DownloadHandler,
-                             FocusHandler,
-                             JSDialogHandler,
-                             KeyboardHandler,
-                             LifespanHandler,
-                             LoadHandler,
-                             RenderHandler,
-                             RequestHandler
+                      public ContextMenuHandler,
+                      public DisplayHandler,
+                      public DownloadHandler,
+                      public FocusHandler,
+                      public JSDialogHandler,
+                      public KeyboardHandler,
+                      public LifespanHandler,
+                      public LoadHandler,
+                      public RenderHandler,
+                      public RequestHandler
 {
 public:
     ClientHandler(){}

@@ -92,7 +92,8 @@ source code of ExceptHook in the cefpython/src/helpers.pyx file.
 | key | string |
 | __Return__ | object |
 
-Returns [ApplicationSettings](ApplicationSettings.md) option that was passed to Initialize(). Returns None if key is not found.
+Returns [ApplicationSettings](ApplicationSettings.md) option that was passed
+to Initialize(). Returns None if key is not found.
 
 
 ### GetAppPath
@@ -147,8 +148,8 @@ Get the cefpython module directory. This method is useful to get full path to CE
 
 | Parameter | Type |
 | --- | --- |
-| [ApplicationSettings](ApplicationSettings.md)=None | dict |
-| [CommandLineSwitches](CommandLineSwitches.md)=None | dict |
+| settings (optional) | [ApplicationSettings](ApplicationSettings.md) |
+| switches (optional) | [CommandLineSwitches](CommandLineSwitches.md) |
 | __Return__ | bool |
 
 This function should be called on the main application thread (UI thread) to initialize CEF when the application is started. A call to Initialize() must have a corresponding call to Shutdown() so that CEF exits cleanly. Otherwise when application closes data (eg. storage, cookies) might not be saved to disk or the process might freeze (experienced on Windows XP).
@@ -186,8 +187,14 @@ List of threads in the Renderer process:
 | __Return__ | void |
 
 Run the CEF message loop. Use this function instead of an application-
-provided message loop to get the best balance between performance and CPU usage. This function should only be called on the main application thread (UI thread) and only if cefpython.Initialize() is called with a
-[ApplicationSettings](ApplicationSettings.md).multi_threaded_message_loop value of false. This function will block until a quit message is received by the system.
+provided message loop to get the best balance between performance and 
+CPU usage. This function should only be called on the main application
+thread (UI thread) and only if cefpython.Initialize() is called with a
+[ApplicationSettings](ApplicationSettings.md).multi_threaded_message_loop
+value of false. This function will block until a quit message is received
+by the system.
+
+See also MessageLoopWork().
 
 
 ### MessageLoopWork
@@ -196,8 +203,9 @@ provided message loop to get the best balance between performance and CPU usage.
 | --- | --- |
 | __Return__ | void |
 
-Description from upstream CEF:
+Call this function in a periodic timer (eg. 10ms).
 
+Description from upstream CEF:
 > Perform a single iteration of CEF message loop processing. This function is
 > provided for cases where the CEF message loop must be integrated into an
 > existing application message loop. Use of this function is not recommended
@@ -210,13 +218,6 @@ Description from upstream CEF:
 > called on the main application thread and only if CefInitialize() is called
 > with a CefSettings.multi_threaded_message_loop value of false. This function
 > will not block.
-
-Alternatively you could create a periodic timer (with 10 ms interval) that calls
-cefpython.MessageLoopWork().
-
-MessageLoopWork() is not tested on OS X and there are known issues - according to
-[this post](http://www.magpcss.org/ceforum/viewtopic.php?p=27124#p27124) by
-Marshall.
 
 
 ### PostTask

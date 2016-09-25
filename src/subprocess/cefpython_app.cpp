@@ -21,6 +21,10 @@
 #include "javascript_callback.h"
 #include "v8function_handler.h"
 
+#ifdef BROWSER_PROCESS
+#include "main_message_loop/main_message_loop_external_pump.h"
+#endif
+
 bool g_debug = false;
 std::string g_logFile = "debug.log";
 
@@ -83,19 +87,17 @@ CefRefPtr<CefRenderProcessHandler> CefPythonApp::GetRenderProcessHandler() {
     return this;
 }
 
-CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
-    return print_handler_;
-}
-
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // CefBrowserProcessHandler
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 void CefPythonApp::OnContextInitialized() {
+#ifdef BROWSER_PROCESS
     REQUIRE_UI_THREAD();
 #if defined(OS_LINUX)
     print_handler_ = new ClientPrintHandlerGtk();
-#endif
+#endif // OS_LINUX
+#endif // BROWSER_PROCESS
 }
 
 void CefPythonApp::OnBeforeChildProcessLaunch(
@@ -104,11 +106,12 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
     // This is included only in the Browser process, when building
     // the libcefpythonapp library.
     BrowserProcessHandler_OnBeforeChildProcessLaunch(command_line);
-#endif
+#endif // BROWSER_PROCESS
 }
 
 void CefPythonApp::OnRenderProcessThreadCreated(
         CefRefPtr<CefListValue> extra_info) {
+#ifdef BROWSER_PROCESS
     // If you have an existing CefListValue that you would like
     // to provide, do this:
     // | extra_info = mylist.get()
@@ -117,11 +120,24 @@ void CefPythonApp::OnRenderProcessThreadCreated(
     REQUIRE_IO_THREAD();
     extra_info->SetBool(0, g_debug);
     extra_info->SetString(1, g_logFile);
-#ifdef BROWSER_PROCESS
     // This is included only in the Browser process, when building
     // the libcefpythonapp library.
     BrowserProcessHandler_OnRenderProcessThreadCreated(extra_info);
-#endif
+#endif // BROWSER_PROCESS
+}
+
+CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
+    return print_handler_;
+}
+
+void CefPythonApp::OnScheduleMessagePumpWork(int64 delay_ms) {
+#ifdef BROWSER_PROCESS
+    MainMessageLoopExternalPump* message_pump =\
+            MainMessageLoopExternalPump::Get();
+    if (message_pump) {
+        message_pump->OnScheduleMessagePumpWork(delay_ms);
+    }
+#endif // BROWSER_PROCESS
 }
 
 // -----------------------------------------------------------------------------
