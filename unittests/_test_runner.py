@@ -140,7 +140,7 @@ class TestRunner(object):
             # Run test using new instance of Python interpreter
             try:
                 output = subprocess.check_output(
-                        ["python", "_test_runner.py", testcase_id],
+                        [sys.executable, "_test_runner.py", testcase_id],
                         stderr=subprocess.STDOUT)
                 exit_code = 0
             except subprocess.CalledProcessError as exc:
@@ -231,7 +231,9 @@ class TestRunner(object):
         # type: () -> None
         """Print summary and exit."""
         print("-"*70)
-        print("[_test_runner.py] Ran "+str(self.ran)+" tests in total")
+        print("[_test_runner.py] Python {ver}".format(ver=sys.version[:6]))
+        print("[_test_runner.py] Ran {ran} tests in total"
+              .format(ran=self.ran))
         if self.errors or self.failures:
             failed_str = "[_test_runner.py] FAILED ("
             if self.failures:
