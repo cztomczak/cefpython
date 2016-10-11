@@ -6,8 +6,6 @@
 
 import sys
 import os
-import platform
-import argparse
 import re
 import platform
 import shutil
@@ -26,6 +24,8 @@ PACKAGE_NAME = "cefpython3"
 README_FILE = os.getcwd()+r"/README.txt"
 INIT_TEMPLATE = os.getcwd()+r"/__init__.py.template"
 SETUP_TEMPLATE = os.getcwd()+r"/setup.py.template"
+# SETUP_CFG_TEMPLATE = os.getcwd()+r"/setup.cfg.template"
+
 
 def str_format(string, dictionary):
     orig_string = string
@@ -37,19 +37,22 @@ def str_format(string, dictionary):
         raise Exception("Not all strings formatted")
     return string
 
-def main():
-    parser = argparse.ArgumentParser(usage="%(prog)s [options]")
-    parser.add_argument("-v", "--version", help="cefpython version",
-            required=True)
-    args = parser.parse_args()
-    assert re.search(r"^\d+\.\d+$", args.version), (
-            "Invalid version string")
 
-    vars = {}
-    vars["APP_VERSION"] = args.version
-    vars["PLATFORM"] = sysconfig.get_platform()
-    vars["PY_VERSION_DIGITS_ONLY"] = (str(sys.version_info.major) + ""
-            + str(sys.version_info.minor)) # "27" or "34"
+def main():
+    args = ' '.join(sys.argv)
+    match = re.search(r"\d+\.\d+", args)
+    if match:
+        version = match.group(0)
+    else:
+        print("Usage make-setup.py {version}")
+        sys.exit(1)
+
+    template_vars = dict()
+    template_vars["APP_VERSION"] = version
+    template_vars["PLATFORM"] = sysconfig.get_platform()
+    template_vars["PY_VERSION_DIGITS_ONLY"] = (
+            str(sys.version_info.major) +
+            str(sys.version_info.minor))  # e.g. "27" or "34"
 
     print("Reading template: %s" % README_FILE)
     f = open(README_FILE)
@@ -58,17 +61,23 @@ def main():
 
     print("Reading template: %s" % INIT_TEMPLATE)
     f = open(INIT_TEMPLATE)
-    INIT_CONTENT = str_format(f.read(), vars)
+    INIT_CONTENT = str_format(f.read(), template_vars)
     f.close()
 
     print("Reading template: %s" % SETUP_TEMPLATE)
     f = open(SETUP_TEMPLATE)
-    SETUP_CONTENT = str_format(f.read(), vars)
+    SETUP_CONTENT = str_format(f.read(), template_vars)
     f.close()
+
+    # print("Reading template: %s" % SETUP_CFG_TEMPLATE)
+    # f = open(SETUP_CFG_TEMPLATE)
+    # SETUP_CFG_CONTENT = str_format(f.read(), template_vars)
+    # f.close()
 
     installer_dir = os.path.dirname(os.path.abspath(__file__))
 
-    setup_dir = installer_dir+"/"+PACKAGE_NAME+"-"+vars["APP_VERSION"]+"-"+LINUX_BITS+"-setup"
+    setup_dir = (installer_dir + "/" + PACKAGE_NAME+"-" +
+                 template_vars["APP_VERSION"] + "-" + LINUX_BITS + "-setup")
     print("Creating setup dir: "+setup_dir)
     os.mkdir(setup_dir)
 
@@ -79,7 +88,6 @@ def main():
     print("Copying License file")
     shutil.copy("../../../License", package_dir)
 
-
     print("Creating README.txt from template")
     with open(setup_dir+"/README.txt", "w") as f:
         f.write(README_CONTENT)
@@ -88,6 +96,10 @@ def main():
     with open(setup_dir+"/setup.py", "w") as f:
         f.write(SETUP_CONTENT)
 
+    # print("Creating setup.cfg from template")
+    # with open(setup_dir+"/setup.cfg", "w") as f:
+    #     f.write(SETUP_CFG_CONTENT)
+
     binaries_dir = os.path.abspath(installer_dir+"/../binaries_"+BITS+"/")
     print("Copying binaries to package dir")
     ret = os.system("cp -rf "+binaries_dir+"/* "+package_dir)
@@ -95,7 +107,7 @@ def main():
 
     os.chdir(package_dir)
     print("Removing .log files from the package dir")
-    ret = os.system("rm *.log")
+    os.system("rm *.log")
     # assert ret == 0 - if there are no .log files this assert would fail.
     os.chdir(installer_dir)
 
@@ -111,7 +123,7 @@ def main():
 
     print("Moving kivy-select-boxes dir to examples dir")
     shutil.move(package_dir+"/kivy-select-boxes",
-            package_dir+"/examples/kivy-select-boxes")
+                package_dir+"/examples/kivy-select-boxes")
 
     print("Creating wx dir in package dir")
     os.mkdir(package_dir+"/wx/")
@@ -127,7 +139,9 @@ def main():
             continue
         os.rename(example, package_dir+"/examples/"+os.path.basename(example))
     ret = os.system("mv "+package_dir+"/*.html "+package_dir+"/examples/")
+    assert ret == 0
     ret = os.system("mv "+package_dir+"/*.js "+package_dir+"/examples/")
+    assert ret == 0
     ret = os.system("mv "+package_dir+"/*.css "+package_dir+"/examples/")
     assert ret == 0
 
@@ -149,13 +163,13 @@ def main():
     debug_log_dirs = [package_dir, 
                       package_dir+"/examples/", 
                       package_dir+"/examples/wx/"]
-    for dir in debug_log_dirs:
-        print("Creating empty debug.log in %s" % dir)    
-        with open(dir+"/debug.log", "w") as f:
+    for curdir in debug_log_dirs:
+        print("Creating empty debug.log in %s" % curdir)
+        with open(curdir+"/debug.log", "w") as f:
             f.write("")
         # Set write permissions so that Wheel package files have it
         # right. So that examples may be run from package directory.
-        subprocess.call("chmod 666 %s/debug.log" % dir, shell=True)
+        subprocess.call("chmod 666 %s/debug.log" % curdir, shell=True)
 
     print("Setup Package created successfully.")
 
