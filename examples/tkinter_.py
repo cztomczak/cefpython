@@ -46,6 +46,7 @@ class MainFrame(tk.Frame):
         tk.Frame.__init__(self, master)
         self.master.title("Tkinter example")
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.master.bind("<Configure>", self.on_root_configure)
         self.setup_icon()
         self.bind("<Configure>", self.on_configure)
         self.bind("<FocusIn>", self.on_focus_in)
@@ -68,10 +69,19 @@ class MainFrame(tk.Frame):
         # Pack MainFrame
         self.pack(fill=tk.BOTH, expand=tk.YES)
 
+    def on_root_configure(self, _):
+        logger.debug("MainFrame.on_root_configure")
+        if self.browser_frame:
+            self.browser_frame.on_root_configure()
+
     def on_configure(self, event):
-        self.browser_frame.on_root_configure(
-                event.width,
-                event.height-self.navigation_bar.winfo_height())
+        logger.debug("MainFrame.on_configure")
+        if self.browser_frame:
+            width = event.width
+            height = event.height
+            if self.navigation_bar:
+                height = height - self.navigation_bar.winfo_height()
+            self.browser_frame.on_mainframe_configure(width, height)
 
     def on_focus_in(self, _):
         logger.debug("MainFrame.on_focus_in")
@@ -177,6 +187,7 @@ class NavigationBar(tk.Frame):
 
     def on_load_url(self, _):
         if self.master.get_browser():
+            self.master.get_browser().StopLoad()
             self.master.get_browser().LoadUrl(self.url_entry.get())
 
     def on_button1(self, _):
@@ -252,9 +263,15 @@ class BrowserFrame(tk.Frame):
         if not self.browser:
             self.embed_browser()
 
-    def on_root_configure(self, width, height):
+    def on_root_configure(self):
+        # Root <Configure> event will be called when top window is moved
+        if self.browser:
+            self.browser.NotifyMoveOrResizeStarted()
+
+    def on_mainframe_configure(self, width, height):
         if self.browser:
             self.browser.SetBounds(0, 0, width, height)
+            self.browser.NotifyMoveOrResizeStarted()
 
     def on_focus_in(self, _):
         logger.debug("BrowserFrame.on_focus_in")

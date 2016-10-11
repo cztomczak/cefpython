@@ -1,6 +1,6 @@
 # Copyright (c) 2016 CEF Python, see the Authors file. All rights reserved.
 
-"""This tool automates building CEF from with CEF Python patches applied.
+"""Automates building CEF from sources with CEF Python patches applied.
 
 Usage:
     automate.py (--prebuilt-cef | --build-cef)
