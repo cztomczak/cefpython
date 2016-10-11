@@ -264,3 +264,9 @@ to be correct, try the -p0 or -p1 flag:
 ```
 git apply -p0 issue251.patch
 ```
+
+To create a patch from last two commits (no --relative flag available
+in this case, so must be in root CEF dir):
+```
+git format-patch --no-prefix -2 HEAD --stdout > issue251.patch
+```

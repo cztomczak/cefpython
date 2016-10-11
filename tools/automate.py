@@ -1,8 +1,6 @@
 # Copyright (c) 2016 CEF Python, see the Authors file. All rights reserved.
 
-# TODO: run automate-git.py using Python 2.7 from depot_tools
-
-"""Build CEF Python and use prebuilt CEF binaries or build CEF from sources.
+"""This tool automates building CEF from with CEF Python patches applied.
 
 Usage:
     automate.py (--prebuilt-cef | --build-cef)
@@ -24,9 +22,9 @@ Options:
     --no-cef-update          Do not update CEF sources (by default both cef/
                              directories are deleted on every run).
     --cef-branch=<b>         CEF branch. Defaults to CHROME_VERSION_BUILD from
-                             "src/version/cef_version_{platform}.h" (TODO).
+                             "src/version/cef_version_{platform}.h".
     --cef-commit=<c>         CEF revision. Defaults to CEF_COMMIT_HASH from
-                             "src/version/cef_version_{platform}.h" (TODO).
+                             "src/version/cef_version_{platform}.h".
     --build-dir=<dir1>       Build directory.
     --cef-build-dir=<dir2>   CEF build directory. By default same
                              as --build-dir.

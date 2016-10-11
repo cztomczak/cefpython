@@ -3,3 +3,4 @@ build/
 *.log
 __pycache__/
 *.pyc
+cefclient

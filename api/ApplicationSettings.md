@@ -47,6 +47,9 @@ The default values of options that are suggested in descriptions may not always 
 
 There are hundreds of options that can be set through CEF/Chromium command line switches. These switches can be set programmatically by passing a dictionary with switches as second argument to [cefpython](cefpython.md).Initialize(). See the [CommandLineSwitches](CommandLineSwitches.md) wiki page for more information.
 
+Issue #244 is to add even more configurable settings by exposing API
+to Chromium Preferences.
+
 
 ## Settings
 

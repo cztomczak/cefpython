@@ -429,6 +429,7 @@ from cef_path_util cimport *
 from cef_drag_data cimport *
 from cef_image cimport *
 from main_message_loop cimport *
+# noinspection PyUnresolvedReferences
 from cef_scoped_ptr cimport scoped_ptr
 
 
