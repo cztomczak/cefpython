@@ -1,5 +1,5 @@
 # Example of embedding CEF Python browser using PyGObject/Gtk library.
-# Tested with GTK 3.10.
+# Tested with GTK 3.10 and CEF Python v53+.
 
 from cefpython3 import cefpython as cef
 # noinspection PyUnresolvedReferences

@@ -1,6 +1,6 @@
 # Example of embedding CEF Python browser using Tkinter toolkit.
 # This example has two widgets: a navigation bar and a browser.
-# Tested with Tk 8.6.
+# Tested with Tk 8.6 and CEF Python v53+.
 
 # TODO: url entry loses keyboard focus when mouse hovers over browser (#255)
 

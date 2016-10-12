@@ -5,20 +5,28 @@
 [![](https://img.shields.io/badge/pypi-v31.2-blue.png "PyPI latest release")](https://pypi.python.org/pypi/cefpython3/)
 [![](https://img.shields.io/badge/commits%20since-v31.2-lightgray.png "Commits since v31.2 release")](https://github.com/cztomczak/cefpython/compare/05366f2...master)
 
-__Important notes__:
-* Branches cefpython51/52/53+ with latest Chrome are tested and work only on Linux currently.
-  Instructions for building these are in docs/[Build-instructions.md](docs/Build-instructions.md)
-* The last stable release that works on all platforms is in the cefpython31 branch.
-  Up-to-date API docs for the cefpython31 branch can be viewed in commit [169a1b2](https://github.com/cztomczak/cefpython/tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api).
-* Repository rewritten on 2016-02-15 to reduce its size. Please clone it again.
-
 Table of contents:
+* [Important notes](#important-notes)
 * [Introduction](#introduction)
 * [Compatibility](#compatibility)
 * [Downloads](#downloads)
 * [Support](#support)
+* [Notifications on new releases](#notifications-on-new-releases)
 * [Changes in API during updates](#changes-in-api-during-updates)
 * [Donate](#donate)
+
+## Important notes
+
+* Branches cefpython51/52/53+ with latest Chrome are tested and work only
+  on Linux currently. Instructions for building these are
+  in docs/[Build-instructions.md](docs/Build-instructions.md).
+  Beta downloads are available on the [Github Releases](../../releases) page.
+  Pre-releases are also available on PyPI.
+* The last stable release that works on all platforms is in the cefpython31
+  branch. Downloads for this branch are available on wiki pages. Up-to-date
+  API docs for the cefpython31 branch can be viewed in commit 
+  [169a1b2](https://github.com/cztomczak/cefpython/tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api).
+* Repository rewritten on 2016-02-15 to reduce its size. Please clone it again.
 
 
 ## Introduction
@@ -35,7 +43,8 @@ Some use cases for CEF:
 
 ## Compatibility
 
-* Supported Python versions: 2.7. For Python 3.4 / 3.5 support see [Issue #121](../../issues/121).
+* Supported Python versions: 2.7
+  (for Python 3.4 / 3.5 support see [Issue #121](../../issues/121)).
 * Supported platforms: Windows, Linux, Mac. Both 32bit and 64bit binaries are available for all platforms.
 
 
@@ -48,8 +57,8 @@ On Win/Mac you can install from PyPI using this command:
 * For Linux: see the [Download_CEF3_Linux](../../wiki/Download_CEF3_Linux) wiki page.
 * For Mac: see the [Download_CEF3_Mac](../../wiki/Download_CEF3_Mac) wiki page.
 
-__New releases RSS/Atom feed__<br>
-To be notified of new releases subscribe to this [Atom feed](https://github.com/cztomczak/cefpython/releases.atom).
+To be notified when new downloads are available see the
+[Notifications on new releases](#notifications-on-new-releases) section.
 
 
 ## Support
@@ -64,6 +73,17 @@ To be notified of new releases subscribe to this [Atom feed](https://github.com/
 * Please do not ask questions in the Issue Tracker
 
 
+## Notifications on new releases
+
+To be notified of new releases subscribe to this
+[RSS/Atom feed](https://github.com/cztomczak/cefpython/releases.atom).
+
+Announcements are also made on the
+[Forum](https://groups.google.com/d/forum/cefpython).
+To be notified of these via email set your Membership and Email settings
+and change delivery preference to Daily summaries.
+
+
 ## Changes in API during updates
 
 CEF Python depends on CEF and API breaks are inevitable when updating
@@ -72,6 +92,12 @@ to a newer CEF. When updating cefpython to a new version go to the
 and check release notes for all the releases that appeared between
 your old version and the new version. Look for lists named
 "Changes in API that break backward compatibility".
+
+Due to unavoidable changes in API it is recommended for your setup scripts
+that use for example PIP to install the cefpython3 package, to hardcode
+the cefpython version string. If for example using PIP's requirements.txt
+file then list the cefpython3 package in the following format:
+`cefpython3 == 31.2`.
 
 
 ## Donate
