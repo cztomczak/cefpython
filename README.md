@@ -15,6 +15,7 @@ Table of contents:
 * [Changes in API during updates](#changes-in-api-during-updates)
 * [Donate](#donate)
 
+
 ## Important notes
 
 * Branches cefpython51/52/53+ with latest Chrome are tested and work only
@@ -31,21 +32,42 @@ Table of contents:
 
 ## Introduction
 
-CEF Python is an open source project founded by [Czarek Tomczak](http://www.linkedin.com/in/czarektomczak) in 2012 to provide python bindings for the [Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef). See the growing list of [applications using CEF](http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF) on wikipedia. Examples of embedding CEF browser are available for many popular GUI toolkits including: [wxPython](../../wiki/wxPython), [PyGTK](../../wiki/PyGTK), [PyQt](../../wiki/PyQt), [PySide](../../wiki/PySide), [Kivy](../../wiki/Kivy), [Panda3D](../../wiki/Panda3D) and [PyWin32](src/windows/binaries_32bit/pywin32.py).
+CEF Python is an open source project founded by
+[Czarek Tomczak](http://www.linkedin.com/in/czarektomczak)
+in 2012 to provide python bindings for the
+[Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef).
+See the growing list of
+[applications using CEF](http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
+on wikipedia. Examples of embedding CEF browser are available for many popular
+GUI toolkits including: [wxPython](../../wiki/wxPython),
+[PyGTK](../../wiki/PyGTK), [PyQt](../../wiki/PyQt),
+[PySide](../../wiki/PySide), [Kivy](../../wiki/Kivy),
+[Panda3D](../../wiki/Panda3D)
+and [PyWin32](src/windows/binaries_32bit/pywin32.py).
 
 Some use cases for CEF:
 
 * Embed a web browser control with great HTML5 support (based on Chromium)
-* Use it to create a HTML5 based GUI in an application. This can act as a replacement for GUI toolkits like wxWidgets/Qt/Gtk. For native communication between javascript and python use [javascript bindings](../../wiki/JavascriptBindings). Another option is to run an internal python web server and use websockets/XMLHttpRequest for js&lt;&gt;python communication. This way you can write a desktop app in the same way you write web apps.
-* Render web content off-screen in applications that use custom drawing frameworks. See the [Kivy](../../wiki/Kivy) and [Panda3D](../../wiki/Panda3D) examples.
-* Use it for automated testing of existing web applications. Use it for web scraping, or as a web crawler or other kind of internet bots.
+* Use it to create a HTML5 based GUI in an application. This can act as a
+  replacement for GUI toolkits like wxWidgets/Qt/Gtk. For native communication
+  between javascript and python use
+  [javascript bindings](api/JavascriptBindings.md).
+  Another option is to run an internal python web server and use
+  websockets/XMLHttpRequest for js&lt;&gt;python communication. This way you
+  can write a desktop app in the same way you write web apps.
+* Render web content off-screen in applications that use custom drawing
+  frameworks. See the [Kivy](../../wiki/Kivy)
+  and [Panda3D](../../wiki/Panda3D) examples.
+* Use it for automated testing of existing web applications. Use it for web
+  scraping, or as a web crawler or other kind of internet bots.
 
 
 ## Compatibility
 
 * Supported Python versions: 2.7
   (for Python 3.4 / 3.5 support see [Issue #121](../../issues/121)).
-* Supported platforms: Windows, Linux, Mac. Both 32bit and 64bit binaries are available for all platforms.
+* Supported platforms: Windows, Linux, Mac.<br>
+  Both 32-bit and 64-bit binaries are available for all platforms.
 
 
 ## Downloads
@@ -53,9 +75,12 @@ Some use cases for CEF:
 On Win/Mac you can install from PyPI using this command:
 `pip install cefpython3`.
 
-* For Windows: see the [Download_CEF3_Windows](../../wiki/Download_CEF3_Windows) wiki page.
-* For Linux: see the [Download_CEF3_Linux](../../wiki/Download_CEF3_Linux) wiki page.
-* For Mac: see the [Download_CEF3_Mac](../../wiki/Download_CEF3_Mac) wiki page.
+* For Windows: see the
+  [Download_CEF3_Windows](../../wiki/Download_CEF3_Windows) wiki page.
+* For Linux: see the
+  [Download_CEF3_Linux](../../wiki/Download_CEF3_Linux) wiki page.
+* For Mac: see the
+  [Download_CEF3_Mac](../../wiki/Download_CEF3_Mac) wiki page.
 
 To be notified when new downloads are available see the
 [Notifications on new releases](#notifications-on-new-releases) section.
@@ -66,7 +91,8 @@ To be notified when new downloads are available see the
 * Documentation:
   * See [API docs](api/) in the api/ directory
   * See [Wiki Pages](../../wiki)
-  * See issues with the [Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+  * See issues with the
+    [Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
     label
 * Ask questions and report problems on the
   [Forum](https://groups.google.com/group/cefpython)
@@ -102,4 +128,5 @@ file then list the cefpython3 package in the following format:
 
 ## Donate
 
-If you would like to support general CEF Python development efforts by making a donation see the [Donations](../../wiki/Donations) wiki page.
+If you would like to support general CEF Python development efforts by
+making a donation see the [Donations](../../wiki/Donations) wiki page.
