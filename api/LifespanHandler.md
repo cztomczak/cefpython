@@ -61,7 +61,6 @@ There will be no "window.opener" property available in the popup window.
 
 `WindowOpenDisposition` constants in the cefpython module:
 * WOD_UNKNOWN,
-* WOD_SUPPRESS_OPEN,
 * WOD_CURRENT_TAB,
 * WOD_SINGLETON_TAB,
 * WOD_NEW_FOREGROUND_TAB,

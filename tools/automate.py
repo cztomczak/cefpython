@@ -476,12 +476,12 @@ def getenv():
     # See cef/AutomatedBuildSetup.md for reference.
     # Issue73 patch applied with "use_allocator=none"
     # TODO: 32-bit gyp defines: host_arch=x86_64 target_arch=ia32
-    env["GYP_DEFINES"] = "disable_nacl=1 use_sysroot=1 use_allocator=none"
+    env["GN_DEFINES"] = "use_sysroot=true use_allocator=none symbol_level=1"
     # To perform an official build set GYP_DEFINES=buildtype=Official.
     # This will disable debugging code and enable additional link-time
     # optimizations in Release builds.
     if Options.release_build:
-        env["GYP_DEFINES"] += " buildtype=Official"
+        env["GN_DEFINES"] += " is_official_build=true"
     # Modifications to automate-git.py
     env["CEFPYTHON_NINJA_JOBS"] = str(Options.ninja_jobs)
     return env
@@ -521,8 +521,7 @@ def run_automate_git():
         ninja -v -j2 -Cout\Release cefclient
     """
     args = []
-    if ARCH64 and platform.system() != "Linux":
-        # The x64 build flag is only supported on Windows and Mac OS X.
+    if ARCH64:
         args.append("--x64-build")
     args.append("--download-dir=" + Options.cef_build_dir)
     args.append("--branch=" + Options.cef_branch)

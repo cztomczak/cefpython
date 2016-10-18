@@ -12,14 +12,45 @@ import shutil
 import glob
 import sysconfig
 import subprocess
+import struct
 
+PACKAGE_NAME = "cefpython3"
+
+# Bits
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
 if BITS == "32bit":
     LINUX_BITS = "linux32"
 else:
     LINUX_BITS = "linux64"
-PACKAGE_NAME = "cefpython3"
+
+# Architecture and OS postfixes
+ARCH32 = (8 * struct.calcsize('P') == 32)
+ARCH64 = (8 * struct.calcsize('P') == 64)
+OS_POSTFIX = ("win" if platform.system() == "Windows" else
+              "linux" if platform.system() == "Linux" else
+              "mac" if platform.system() == "Darwin" else "unknown")
+OS_POSTFIX2 = "unknown"
+if OS_POSTFIX == "win":
+    OS_POSTFIX2 = "win32" if ARCH32 else "win64"
+elif OS_POSTFIX == "mac":
+    OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
+elif OS_POSTFIX == "linux":
+    OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
+
+# Directories
+INSTALLER_DIR = os.path.dirname(os.path.abspath(__file__))
+LINUX_DIR = os.path.abspath(os.path.join(INSTALLER_DIR, ".."))
+SRC_DIR = os.path.abspath(os.path.join(LINUX_DIR, ".."))
+CEFPYTHON_DIR = os.path.abspath(os.path.join(SRC_DIR, ".."))
+BUILD_DIR = os.path.abspath(os.path.join(CEFPYTHON_DIR, "build"))
+CEF_BINARY = os.path.abspath(os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2))
+CEFPYTHON_BINARY = os.path.abspath(os.path.join(BUILD_DIR,
+                                                "cefpython_"+OS_POSTFIX2))
+
+# Check directories
+assert os.path.exists(CEF_BINARY)
+assert os.path.exists(CEFPYTHON_BINARY)
 
 README_FILE = os.getcwd()+r"/README.txt"
 INIT_TEMPLATE = os.getcwd()+r"/__init__.py.template"
@@ -74,10 +105,8 @@ def main():
     # SETUP_CFG_CONTENT = str_format(f.read(), template_vars)
     # f.close()
 
-    installer_dir = os.path.dirname(os.path.abspath(__file__))
-
-    setup_dir = (installer_dir + "/" + PACKAGE_NAME+"-" +
-                 template_vars["APP_VERSION"] + "-" + LINUX_BITS + "-setup")
+    setup_dir = (INSTALLER_DIR + "/" + PACKAGE_NAME+"-" +
+                 template_vars["APP_VERSION"] + "-" + OS_POSTFIX2 + "-setup")
     print("Creating setup dir: "+setup_dir)
     os.mkdir(setup_dir)
 
@@ -100,16 +129,27 @@ def main():
     # with open(setup_dir+"/setup.cfg", "w") as f:
     #     f.write(SETUP_CFG_CONTENT)
 
-    binaries_dir = os.path.abspath(installer_dir+"/../binaries_"+BITS+"/")
     print("Copying binaries to package dir")
-    ret = os.system("cp -rf "+binaries_dir+"/* "+package_dir)
+    # Copy Kivy
+    old_binaries_dir = os.path.abspath(INSTALLER_DIR+"/../binaries_"+BITS+"/")
+    ret = os.system("cp -rf "+old_binaries_dir+"/kivy_.py "+package_dir)
+    assert ret == 0
+    ret = os.system("cp -rf "+old_binaries_dir+"/kivy-select-boxes/ "
+                    + package_dir)
+    assert ret == 0
+    # Copy binaries
+    ret = os.system("cp -rf "+CEF_BINARY+"/*.txt "+package_dir)
+    assert ret == 0
+    ret = os.system("cp -rf "+CEF_BINARY+"/bin/* "+package_dir)
+    assert ret == 0
+    ret = os.system("cp -rf "+CEFPYTHON_BINARY+"/* "+package_dir)
     assert ret == 0
 
     os.chdir(package_dir)
     print("Removing .log files from the package dir")
     os.system("rm *.log")
     # assert ret == 0 - if there are no .log files this assert would fail.
-    os.chdir(installer_dir)
+    os.chdir(INSTALLER_DIR)
 
     print("Creating __init__.py from template")
     with open(package_dir+"/__init__.py", "w") as f:
@@ -118,10 +158,12 @@ def main():
     print("Creating examples dir in package dir")
     os.mkdir(package_dir+"/examples/")
 
-    print("Copying Hello World example")
-    shutil.copy("../../../examples/hello_world.py", package_dir+"/examples/")
+    print("Copying root examples/ directory")
+    ret = os.system("cp -r ../../../examples/* "+package_dir+"/examples/")
+    assert ret == 0
 
     print("Moving kivy-select-boxes dir to examples dir")
+    assert os.path.exists(package_dir+"/kivy-select-boxes")
     shutil.move(package_dir+"/kivy-select-boxes",
                 package_dir+"/examples/kivy-select-boxes")
 
@@ -139,14 +181,14 @@ def main():
             continue
         os.rename(example, package_dir+"/examples/"+os.path.basename(example))
     ret = os.system("mv "+package_dir+"/*.html "+package_dir+"/examples/")
-    assert ret == 0
+    # assert ret == 0
     ret = os.system("mv "+package_dir+"/*.js "+package_dir+"/examples/")
-    assert ret == 0
+    # assert ret == 0
     ret = os.system("mv "+package_dir+"/*.css "+package_dir+"/examples/")
-    assert ret == 0
+    # assert ret == 0
 
     print("Copying wx/ to package dir")
-    wx_subpackage_dir = os.path.abspath(installer_dir+"/../../wx/")
+    wx_subpackage_dir = os.path.abspath(INSTALLER_DIR+"/../../wx/")
     ret = os.system("cp -rf "+wx_subpackage_dir+"/* "+package_dir+"/wx/")
     assert ret == 0
 

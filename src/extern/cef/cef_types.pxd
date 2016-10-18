@@ -309,7 +309,6 @@ cdef extern from "include/internal/cef_types.h":
 
     ctypedef enum cef_window_open_disposition_t:
         WOD_UNKNOWN,
-        WOD_SUPPRESS_OPEN,
         WOD_CURRENT_TAB,
         WOD_SINGLETON_TAB,
         WOD_NEW_FOREGROUND_TAB,

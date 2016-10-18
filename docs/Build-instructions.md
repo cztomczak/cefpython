@@ -21,7 +21,7 @@ listed on this page.
 
 
 Table of contents:
-* [Build CEF Python 53 BETA on Linux](#build-cef-python-51-beta-on-linux)
+* [Build CEF Python on Linux](#build-cef-python-on-linux)
 * [Requirements](#requirements)
 * [Build CEF Python using prebuilt CEF binaries](#build-cef-python-using-prebuilt-cef-binaries)
 * [Build both CEF Python and CEF from sources](#build-both-cef-python-and-cef-from-sources)
@@ -30,10 +30,10 @@ Table of contents:
 * [How to patch](#how-to-patch)
 
 
-## Build CEF Python 53 BETA on Linux
+## Build CEF Python on Linux
 
-Complete steps for building CEF Python 53 using prebuilt
-binaries from GH releases.
+Complete steps for building CEF Python 54 using prebuilt
+binaries from GitHub releases:
 
 1) Tested and works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
 
@@ -48,21 +48,16 @@ binaries from GH releases.
 
 5) Download 64-bit Linux binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/releases)
-   tagged 'v53-upstream'.
+   tagged 'v54-upstream'.
 
+6) Extract it in the cefpython/build/ directory and rename the extracted
+   directory to "cef_linux64".
 
-6) Copy "bin/*" to "cefpython/src/linux/binaries_64bit/"
-
-7) Copy "lib/*" to "cefpython/src/linux/setup/lib_64bit/" (create dir)
-
-8) Build cefpython:
+8) Build cefpython and run examples:
 ```
 cd cefpython/src/linux/
-python compile.py 53.1
+python compile.py 54.0
 ```
-
-9) As of writing only "pygtk_.py" and "kivy_.py" examples are working
-
 
 ## Requirements
 
@@ -170,12 +165,9 @@ need to customize the build then use the --help flag to see more.
 cd ~/cefpython/
 mkdir build/ && cd build
 python ../tools/automate.py --build-cef --ninja-jobs 6
-cd cef*_*_linux64/
-cp bin/* ../../../src/linux/binaries_64bit/
-mkdir ../../../src/linux/setup/lib_64bit/
-cp lib/* ../../../src/linux/setup/lib_64bit/
+mv cef*_*_linux64/ cef_linux64/
 cd ../../../src/linux/
-python compile.py 51.0
+python compile.py 54.0
 ```
 
 __MISSING PACKAGES (Linux)__: After the chromium sources are downloaded,

@@ -109,12 +109,16 @@ and [WebRequest](WebRequest.md) / [WebRequestClient](WebRequestClient.md). For a
 | oldUrl | string |
 | out newUrl[0] | string |
 | request | [Request](Request.md) |
+| response | [Response](Response.md) |
 | __Return__ | void |
 
-Called on the IO thread when a resource load is redirected. The |request|
-parameter will contain the old URL and other request-related information.
-The |new_url| parameter will contain the new URL and can be changed if
-desired. The |request| object cannot be modified in this callback.
+Description from upstream CEF:
+> Called on the IO thread when a resource load is redirected. The |request|
+> parameter will contain the old URL and other request-related information.
+> The |response| parameter will contain the response that resulted in the
+> redirect. The |new_url| parameter will contain the new URL and can be
+> changed if desired. The |request| object cannot be modified in this
+> callback.
 
 
 ### GetAuthCredentials

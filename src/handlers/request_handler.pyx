@@ -138,13 +138,15 @@ cdef public void RequestHandler_OnResourceRedirect(
         CefRefPtr[CefFrame] cefFrame,
         const CefString& cefOldUrl,
         CefString& cefNewUrl,
-        CefRefPtr[CefRequest] cefRequest
+        CefRefPtr[CefRequest] cefRequest,
+        CefRefPtr[CefResponse] cefResponse
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef str pyOldUrl
     cdef list pyNewUrlOut
     cdef PyRequest pyRequest
+    cdef PyResponse pyResponse
     cdef object clientCallback
     try:
         pyBrowser = GetPyBrowser(cefBrowser)
@@ -152,10 +154,11 @@ cdef public void RequestHandler_OnResourceRedirect(
         pyOldUrl = CefToPyString(cefOldUrl)
         pyNewUrlOut = [CefToPyString(cefNewUrl)]
         pyRequest = CreatePyRequest(cefRequest)
+        pyResponse = CreatePyResponse(cefResponse)
         clientCallback = pyBrowser.GetClientCallback("OnResourceRedirect")
         if clientCallback:
             clientCallback(pyBrowser, pyFrame, pyOldUrl, pyNewUrlOut,
-                           pyRequest)
+                           pyRequest, pyResponse)
             if pyNewUrlOut[0]:
                 PyToCefString(pyNewUrlOut[0], cefNewUrl)
     except:
