@@ -278,7 +278,9 @@ if KIVY_FLAG:
     run_examples = " && {python} kivy_.py"
 else:
     run_examples = (" && {python} hello_world.py"
-                    " && {python} gtk.py"
+                    " && {python} gtk2.py"
+                    " && {python} gtk2.py --message-loop-timer"
+                    " && {python} gtk3.py"
                     " && {python} tkinter_.py")
 commands = ("cd ./installer/"
             " && {python} make-setup.py --version {ver}"

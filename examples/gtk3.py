@@ -1,4 +1,4 @@
-# Example of embedding CEF Python browser using PyGObject/Gtk library.
+# Example of embedding CEF Python browser using PyGObject library (GTK 3).
 # Tested with GTK 3.10 and CEF Python v53+.
 
 from cefpython3 import cefpython as cef
@@ -17,14 +17,14 @@ def main():
     assert cef.__version__ >= "53.1", "CEF Python v53.1+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     cef.Initialize()
-    app = GtkExample()
+    app = Gtk3Example()
     SystemExit(app.run(sys.argv))
 
 
-class GtkExample(Gtk.Application):
+class Gtk3Example(Gtk.Application):
 
     def __init__(self):
-        super(GtkExample, self).__init__(application_id='cefpython.gtk')
+        super(Gtk3Example, self).__init__(application_id='cefpython.gtk')
         self.browser = None
         self.window = None
 
@@ -33,7 +33,7 @@ class GtkExample(Gtk.Application):
         GObject.timeout_add(10, self.on_timer)
         self.connect("activate", self.on_activate)
         self.connect("shutdown", self.on_shutdown)
-        return super(GtkExample, self).run(argv)
+        return super(Gtk3Example, self).run(argv)
 
     def on_timer(self):
         cef.MessageLoopWork()
@@ -41,7 +41,7 @@ class GtkExample(Gtk.Application):
 
     def on_activate(self, *_):
         self.window = Gtk.ApplicationWindow.new(self)
-        self.window.set_title("Gtk example")
+        self.window.set_title("GTK 3 example (PyGObject)")
         self.window.set_default_size(800, 600)
         self.window.connect("configure-event", self.on_configure)
         self.window.connect("size-allocate", self.on_size_allocate)
