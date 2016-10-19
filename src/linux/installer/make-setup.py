@@ -159,6 +159,7 @@ def main():
     os.mkdir(package_dir+"/examples/")
 
     print("Copying root examples/ directory")
+    ret = os.system("rm ../../../examples/*.log")
     ret = os.system("cp -r ../../../examples/* "+package_dir+"/examples/")
     assert ret == 0
 
@@ -192,9 +193,9 @@ def main():
     ret = os.system("cp -rf "+wx_subpackage_dir+"/* "+package_dir+"/wx/")
     assert ret == 0
 
-    print("Moving wx examples from wx/examples to examples/wx")
-    shutil.move(package_dir+"/wx/examples", package_dir+"/wx/wx/")
-    shutil.move(package_dir+"/wx/wx/", package_dir+"/examples/")
+    # print("Moving wx examples from wx/examples to examples/wx")
+    # shutil.move(package_dir+"/wx/examples", package_dir+"/wx/wx/")
+    # shutil.move(package_dir+"/wx/wx/", package_dir+"/examples/")
 
     print("Copying package dir examples to setup dir")
     ret = os.system("cp -rf "+package_dir+"/examples/ "+setup_dir+"/examples/")
@@ -204,7 +205,8 @@ def main():
     # in case examples were launched. Issue 149.
     debug_log_dirs = [package_dir, 
                       package_dir+"/examples/", 
-                      package_dir+"/examples/wx/"]
+                      # package_dir+"/examples/wx/"
+                     ]
     for curdir in debug_log_dirs:
         print("Creating empty debug.log in %s" % curdir)
         with open(curdir+"/debug.log", "w") as f:

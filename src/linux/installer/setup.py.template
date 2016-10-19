@@ -44,7 +44,7 @@ def post_install():
     commands = [
         "chmod 666 %s/debug.log" % package_dir,
         "chmod 666 %s/examples/debug.log" % package_dir,
-        "chmod 666 %s/examples/wx/debug.log" % package_dir,
+        # "chmod 666 %s/examples/wx/debug.log" % package_dir,
     ]
     for command in commands:
         print("[setup.py] %s" % command)
@@ -83,9 +83,9 @@ setup(
         'examples/kivy-select-boxes/*.css',
         'examples/kivy-select-boxes/*.md',
         'examples/resources/*.png',
-        'examples/wx/*.py',
-        'examples/wx/*.html',
-        'examples/wx/*.png',
+        # 'examples/wx/*.py',
+        # 'examples/wx/*.html',
+        # 'examples/wx/*.png',
         'locales/*.pak',
         'wx/*.txt',
         'wx/images/*.png',
@@ -99,6 +99,6 @@ setup(
         '*.dat',
         'debug.log',
         'examples/debug.log',
-        'examples/wx/debug.log',
+        # 'examples/wx/debug.log',
     ]}
 )
