@@ -12,15 +12,18 @@ except ImportError:
     import Tkinter as tk
 import sys
 import os
-import logging
+import logging as _logging
 
 # Globals
-logger = logging.getLogger()
+logger = _logging.getLogger("tkinter_.py")
 
 
 def main():
-    logger.setLevel(logging.INFO)
-    logger.addHandler(logging.StreamHandler())
+    logger.setLevel(_logging.INFO)
+    stream_handler = _logging.StreamHandler()
+    formatter = _logging.Formatter("[%(filename)s] %(message)s")
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
     logger.info("CEF Python {ver}".format(ver=cef.__version__))
     logger.info("Python {ver}".format(ver=sys.version[:6]))
     logger.info("Tk {ver}".format(ver=tk.TkVersion))

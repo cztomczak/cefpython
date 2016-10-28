@@ -579,7 +579,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     for (std::vector<CefString>::iterator it = objectsVector.begin(); \
             it != objectsVector.end(); ++it) {
         CefString objectName = *it;
-        CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(NULL);
+        CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(NULL, NULL);
         v8Window->SetValue(objectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
         // METHODS.
         if (!(objects->GetType(objectName) == VTYPE_DICTIONARY)) {

@@ -32,7 +32,7 @@ Table of contents:
 
 ## Build CEF Python on Linux
 
-Complete steps for building CEF Python 54 using prebuilt
+Complete steps for building CEF Python 55 using prebuilt
 binaries from GitHub releases:
 
 1) Tested and works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
@@ -48,7 +48,7 @@ binaries from GitHub releases:
 
 5) Download 64-bit Linux binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/releases)
-   tagged 'v54-upstream'.
+   tagged 'v55-upstream'.
 
 6) Extract it in the cefpython/build/ directory and rename the extracted
    directory to "cef_linux64".
@@ -56,7 +56,7 @@ binaries from GitHub releases:
 8) Build cefpython and run examples:
 ```
 cd cefpython/src/linux/
-python compile.py 54.0
+python compile.py 55.0
 ```
 
 ## Requirements
@@ -167,7 +167,7 @@ mkdir build/ && cd build
 python ../tools/automate.py --build-cef --ninja-jobs 6
 mv cef*_*_linux64/ cef_linux64/
 cd ../../../src/linux/
-python compile.py 54.0
+python compile.py 55.0
 ```
 
 __MISSING PACKAGES (Linux)__: After the chromium sources are downloaded,
@@ -248,13 +248,7 @@ git diff --no-prefix --relative > issue251.patch
 Apply a patch in current directory:
 ```
 cd chromium/src/cef/
-git apply issue251.patch
-```
-
-In case of a "No such file or directory" error and when paths seem
-to be correct, try the -p0 or -p1 flag:
-```
-git apply -p0 issue251.patch
+git apply -v -p0 issue251.patch
 ```
 
 To create a patch from last two commits (no --relative flag available

@@ -33,6 +33,30 @@ try:
 except NameError:
     pass
 
+
+def check_cython_version():
+    output = subprocess.check_output(["cython", "--version"],
+                                     stderr=subprocess.STDOUT)
+    output = output.strip()
+    if not isinstance(output, str):
+        output = output.decode("utf-8")
+    match = re.search(r"[\d+.]+", output)
+    assert match, "Checking Cython version failed"
+    version = match.group(0)
+    with open("../../tools/requirements.txt", "r") as fileobj:
+        contents = fileobj.read()
+        match = re.search(r"cython\s*==\s*([\d.]+)", contents,
+                          flags=re.IGNORECASE)
+        assert match, "cython package not found in requirements.txt"
+        require_version = match.group(1)
+    if version != require_version:
+        print("ERROR: Wrong Cython version: {}. Required: {}"
+              .format(version, require_version))
+        sys.exit(1)
+    print("Cython version: {}".format(version))
+
+check_cython_version()
+
 # This will not show "Segmentation fault" error message:
 # | subprocess.call(["python", "./wxpython.py"])
 # You need to call it with shell=True for this kind of
@@ -280,7 +304,7 @@ else:
     run_examples = (" && {python} hello_world.py"
                     " && {python} gtk2.py"
                     " && {python} gtk2.py --message-loop-timer"
-                    " && {python} gtk3.py"
+                    #  " && {python} gtk3.py"
                     " && {python} tkinter_.py")
 commands = ("cd ./installer/"
             " && {python} make-setup.py --version {ver}"
@@ -288,9 +312,9 @@ commands = ("cd ./installer/"
             " && {sudo} {python} setup.py install"
             " && cd ../"
             " && {sudo} rm -rf ./cefpython3-{ver}-*-setup/"
-            " && cd ../../../examples/"
-            + run_examples +
-            " && cd ../unittests/"
+            " && cd ../../../unittests/"
             " && {python} _test_runner.py"
+            " && cd ../examples/"
+            + run_examples +
             " && cd ../src/linux/")
 os.system(commands.format(python=sys.executable, ver=VERSION, sudo=sudo))

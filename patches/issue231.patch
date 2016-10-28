@@ -83,10 +83,10 @@ index 6a75930..ad620d7 100644
 +  return PathService::Override(pref_key, file_path);
 +}
 diff --git libcef_dll/libcef_dll.cc libcef_dll/libcef_dll.cc
-index 208333c..fcadb7e 100644
+index 496c9b0..f2dc4d8 100644
 --- libcef_dll/libcef_dll.cc
 +++ libcef_dll/libcef_dll.cc
-@@ -747,6 +747,23 @@ CEF_EXPORT int cef_get_path(cef_path_key_t key, cef_string_t* path) {
+@@ -752,6 +752,23 @@ CEF_EXPORT int cef_get_path(cef_path_key_t key, cef_string_t* path) {
    return _retval;
  }
  
@@ -111,10 +111,10 @@ index 208333c..fcadb7e 100644
    // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
  
 diff --git libcef_dll/wrapper/libcef_dll_wrapper.cc libcef_dll/wrapper/libcef_dll_wrapper.cc
-index 248a285..3f0c226 100644
+index 3a5d30f..7431698 100644
 --- libcef_dll/wrapper/libcef_dll_wrapper.cc
 +++ libcef_dll/wrapper/libcef_dll_wrapper.cc
-@@ -691,6 +691,23 @@ CEF_GLOBAL bool CefGetPath(PathKey key, CefString& path) {
+@@ -696,6 +696,23 @@ CEF_GLOBAL bool CefGetPath(PathKey key, CefString& path) {
    return _retval?true:false;
  }
  

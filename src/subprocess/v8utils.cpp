@@ -316,7 +316,7 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
             "dictValue->GetKeys() failed");
         return CefV8Value::CreateNull();
     }
-    CefRefPtr<CefV8Value> ret = CefV8Value::CreateObject(NULL);
+    CefRefPtr<CefV8Value> ret = CefV8Value::CreateObject(NULL, NULL);
     CefRefPtr<CefBinaryValue> binaryValue;
     PythonCallback pyCallback;
     CefRefPtr<CefV8Handler> v8FunctionHandler;
