@@ -9,9 +9,10 @@ For an example of how to implement handler see [cefpython](cefpython.md).CreateB
 
 The `RequestHandler` tests can be found in the wxpython.py script.
 
-Not yet ported to CEF Python:
+The following callbacks are available in upstream CEF, but were not yet
+exposed:
 * OnOpenURLFromTab
-
+* OnSelectClientCertificate
 
 
 Table of contents:

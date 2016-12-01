@@ -9,9 +9,9 @@ import os
 
 
 def main():
-    print("CEF Python {ver}".format(ver=cef.__version__))
-    print("Python {ver}".format(ver=sys.version[:6]))
-    print("GTK {major}.{minor}".format(
+    print("[gkt3.py] CEF Python {ver}".format(ver=cef.__version__))
+    print("[gkt3.py] Python {ver}".format(ver=sys.version[:6]))
+    print("[gkt3.py] GTK {major}.{minor}".format(
             major=Gtk.get_major_version(),
             minor=Gtk.get_minor_version()))
     assert cef.__version__ >= "53.1", "CEF Python v53.1+ required to run this"

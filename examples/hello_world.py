@@ -6,8 +6,8 @@ import sys
 
 
 def main():
-    print("CEF Python {ver}".format(ver=cef.__version__))
-    print("Python {ver}".format(ver=sys.version[:6]))
+    print("[hello_world.py] CEF Python {ver}".format(ver=cef.__version__))
+    print("[hello_world.py] Python {ver}".format(ver=sys.version[:6]))
     assert cef.__version__ >= "53.1", "CEF Python v53.1+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     cef.Initialize()
