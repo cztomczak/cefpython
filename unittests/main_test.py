@@ -52,9 +52,14 @@ g_datauri_data = """
         print("test_function() ok");
 
         // Test binding external object and use of javascript<>python callbacks
+        var start_time = new Date().getTime();
+        print("[TIMER] Call Python function and then js callback that was"+
+              " passed (Issue #277 test)");
         external.test_callbacks(function(msg_from_python, py_callback){
             if (msg_from_python == "String sent from Python") {
                 print("test_callbacks() ok");
+                var execution_time = new Date().getTime() - start_time;
+                print("[TIMER]: Elapsed = "+String(execution_time)+" ms");
             } else {
                 throw new Error("test_callbacks(): msg_from_python contains"+
                                 " invalid value");
