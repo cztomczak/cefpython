@@ -35,9 +35,9 @@ def main():
 
 
 def check_versions():
-    print("CEF Python {ver}".format(ver=cef.__version__))
-    print("Python {ver}".format(ver=sys.version[:6]))
-    print("GTK {ver}".format(ver='.'.join(map(str, list(gtk.gtk_version)))))
+    print("[gkt2.py] CEF Python {ver}".format(ver=cef.__version__))
+    print("[gkt2.py] Python {ver}".format(ver=sys.version[:6]))
+    print("[gkt2.py] GTK {ver}".format(ver='.'.join(map(str, list(gtk.gtk_version)))))
     assert cef.__version__ >= "54.0", "CEF Python v54+ required to run this"
     pygtk.require('2.0')
 
@@ -45,14 +45,14 @@ def check_versions():
 def configure_message_loop():
     global g_message_loop
     if "--message-loop-timer" in sys.argv:
-        print("Message loop mode: TIMER")
+        print("[gkt2.py] Message loop mode: TIMER")
         g_message_loop = MESSAGE_LOOP_TIMER
         sys.argv.remove("--message-loop-timer")
     else:
-        print("Message loop mode: BEST")
+        print("[gkt2.py] Message loop mode: BEST")
         g_message_loop = MESSAGE_LOOP_BEST
     if len(sys.argv) > 1:
-        print("ERROR: unknown argument passed")
+        print("[gkt2.py] ERROR: unknown argument passed")
         sys.exit(1)
 
 

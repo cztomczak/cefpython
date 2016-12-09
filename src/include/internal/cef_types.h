@@ -377,6 +377,19 @@ typedef struct _cef_settings_t {
   int ignore_certificate_errors;
 
   ///
+  // Set to true (1) to enable date-based expiration of built in network
+  // security information (i.e. certificate transparency logs, HSTS preloading
+  // and pinning information). Enabling this option improves network security
+  // but may cause HTTPS load failures when using CEF binaries built more than
+  // 10 weeks in the past. See https://www.certificate-transparency.org/ and
+  // https://www.chromium.org/hsts for details. Also configurable using the
+  // "enable-net-security-expiration" command-line switch. Can be overridden for
+  // individual CefRequestContext instances via the
+  // CefRequestContextSettings.enable_net_security_expiration value.
+  ///
+  int enable_net_security_expiration;
+
+  ///
   // Opaque background color used for accelerated content. By default the
   // background color will be white. Only the RGB compontents of the specified
   // value will be used. The alpha component must greater than 0 to enable use
@@ -442,6 +455,17 @@ typedef struct _cef_request_context_settings_t {
   // |cache_path| matches the CefSettings.cache_path value.
   ///
   int ignore_certificate_errors;
+
+  ///
+  // Set to true (1) to enable date-based expiration of built in network
+  // security information (i.e. certificate transparency logs, HSTS preloading
+  // and pinning information). Enabling this option improves network security
+  // but may cause HTTPS load failures when using CEF binaries built more than
+  // 10 weeks in the past. See https://www.certificate-transparency.org/ and
+  // https://www.chromium.org/hsts for details. Can be set globally using the
+  // CefSettings.enable_net_security_expiration value.
+  ///
+  int enable_net_security_expiration;
 
   ///
   // Comma delimited ordered list of language codes without any whitespace that
@@ -2656,6 +2680,31 @@ typedef enum {
   SSL_CONTENT_DISPLAYED_INSECURE_CONTENT = 1 << 0,
   SSL_CONTENT_RAN_INSECURE_CONTENT = 1 << 1,
 } cef_ssl_content_status_t;
+
+///
+// Error codes for CDM registration. See cef_web_plugin.h for details.
+///
+typedef enum {
+  ///
+  // No error. Registration completed successfully.
+  ///
+  CEF_CDM_REGISTRATION_ERROR_NONE,
+
+  ///
+  // Required files or manifest contents are missing.
+  ///
+  CEF_CDM_REGISTRATION_ERROR_INCORRECT_CONTENTS,
+
+  ///
+  // The CDM is incompatible with the current Chromium version.
+  ///
+  CEF_CDM_REGISTRATION_ERROR_INCOMPATIBLE,
+
+  ///
+  // CDM registration is not supported at this time.
+  ///
+  CEF_CDM_REGISTRATION_ERROR_NOT_SUPPORTED,
+} cef_cdm_registration_error_t;
 
 #ifdef __cplusplus
 }

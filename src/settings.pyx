@@ -43,8 +43,6 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.accept_language_list)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
-        elif key == "multi_threaded_message_loop":
-            cefAppSettings.multi_threaded_message_loop = int(appSettings[key])
         elif key == "cache_path":
             cefString = new CefString(&cefAppSettings.cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
@@ -69,6 +67,11 @@ cdef void SetApplicationSettings(
             del cefString
         elif key == "log_severity":
             cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
+        elif key == "multi_threaded_message_loop":
+            cefAppSettings.multi_threaded_message_loop = int(appSettings[key])
+        elif key == "net_security_expiration_enabled":
+            cefAppSettings.enable_net_security_expiration =\
+                    int(appSettings[key])
         elif key == "release_dcheck_enabled":
             # Keep for BC, just log info - no error
             Debug("DEPRECATED: 'release_dcheck_enabled' setting")

@@ -32,7 +32,7 @@ Table of contents:
 
 ## Build CEF Python on Linux
 
-Complete steps for building CEF Python 54 using prebuilt
+Complete steps for building CEF Python v50+ using prebuilt
 binaries from GitHub releases:
 
 1) Tested and works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
@@ -48,15 +48,15 @@ binaries from GitHub releases:
 
 5) Download 64-bit Linux binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/releases)
-   tagged 'v54-upstream'.
+   tagged e.g. 'v50-upstream' when building v50.
 
 6) Extract it in the cefpython/build/ directory and rename the extracted
    directory to "cef_linux64".
 
-8) Build cefpython and run examples:
+8) Build cefpython and run examples (xx.x is version e.g. 50.0):
 ```
 cd cefpython/src/linux/
-python compile.py 54.0
+python compile.py xx.x
 ```
 
 ## Requirements
@@ -167,7 +167,7 @@ mkdir build/ && cd build
 python ../tools/automate.py --build-cef --ninja-jobs 6
 mv cef*_*_linux64/ cef_linux64/
 cd ../../../src/linux/
-python compile.py 54.0
+python compile.py xx.x
 ```
 
 __MISSING PACKAGES (Linux)__: After the chromium sources are downloaded,

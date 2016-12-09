@@ -283,6 +283,20 @@ only supported on Windows.
 This option is not and cannot be supported on OS-X for architectural reasons.
 
 
+### net_security_expiration_enabled
+
+(bool)
+Set to true (1) to enable date-based expiration of built in network
+security information (i.e. certificate transparency logs, HSTS preloading
+and pinning information). Enabling this option improves network security
+but may cause HTTPS load failures when using CEF binaries built more than
+10 weeks in the past. See https://www.certificate-transparency.org/ and
+https://www.chromium.org/hsts for details. Also configurable using the
+"enable-net-security-expiration" command-line switch. Can be overridden for
+individual CefRequestContext instances via the
+CefRequestContextSettings.enable_net_security_expiration value.
+
+
 ### pack_loading_disabled
 
 (bool)
