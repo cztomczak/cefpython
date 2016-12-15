@@ -1,12 +1,13 @@
 # Example of embedding CEF Python browser using PyGTK library (GTK 2).
 # Tested with GTK 2.24 and CEF Python v54+.
 
+# Known issue on Linux: Keyboard focus problem (Issue #284)
+
 from cefpython3 import cefpython as cef
 import pygtk
 import gtk
 import gobject
 import sys
-import time
 
 # In CEF you can run message loop in two ways (see API docs for more details):
 # 1. By calling cef.MessageLoop() instead of an application-provided
@@ -37,7 +38,8 @@ def main():
 def check_versions():
     print("[gkt2.py] CEF Python {ver}".format(ver=cef.__version__))
     print("[gkt2.py] Python {ver}".format(ver=sys.version[:6]))
-    print("[gkt2.py] GTK {ver}".format(ver='.'.join(map(str, list(gtk.gtk_version)))))
+    print("[gkt2.py] GTK {ver}".format(ver='.'.join(
+                                           map(str, list(gtk.gtk_version)))))
     assert cef.__version__ >= "54.0", "CEF Python v54+ required to run this"
     pygtk.require('2.0')
 
@@ -135,10 +137,6 @@ class Gtk2Example:
         self.browser.CloseBrowser(True)
         self.browser = None
         if g_message_loop == MESSAGE_LOOP_BEST:
-            # Run some message loop work for the browser to close cleanly
-            for i in range(0, 10):
-                cef.MessageLoopWork()
-                time.sleep(0.01)
             cef.QuitMessageLoop()
         else:
             gtk.main_quit()

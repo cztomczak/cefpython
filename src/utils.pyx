@@ -116,8 +116,15 @@ cpdef str GetNavigateUrl(py_string url):
         url = re.sub(r"^([a-zA-Z])%3A", r"\1:", url)
 
         # Allow hash when loading urls. The pathname2url function
-        # replaced hashes with "%23" (Issue 114).
+        # replaced hashes with "%23" (Issue #114).
         url = url.replace("%23", "#")
+
+        # Allow more special characters when loading urls. The pathname2url
+        # function encoded them and need to decode them back here
+        # Characters: ? & = (Issue #273).
+        url = url.replace("%3F", "?")
+        url = url.replace("%26", "&")
+        url = url.replace("%3D", "=")
 
     return str(url)
 

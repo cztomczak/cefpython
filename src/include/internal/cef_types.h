@@ -377,6 +377,19 @@ typedef struct _cef_settings_t {
   int ignore_certificate_errors;
 
   ///
+  // Set to true (1) to enable date-based expiration of built in network
+  // security information (i.e. certificate transparency logs, HSTS preloading
+  // and pinning information). Enabling this option improves network security
+  // but may cause HTTPS load failures when using CEF binaries built more than
+  // 10 weeks in the past. See https://www.certificate-transparency.org/ and
+  // https://www.chromium.org/hsts for details. Also configurable using the
+  // "enable-net-security-expiration" command-line switch. Can be overridden for
+  // individual CefRequestContext instances via the
+  // CefRequestContextSettings.enable_net_security_expiration value.
+  ///
+  int enable_net_security_expiration;
+
+  ///
   // Opaque background color used for accelerated content. By default the
   // background color will be white. Only the RGB compontents of the specified
   // value will be used. The alpha component must greater than 0 to enable use
@@ -442,6 +455,17 @@ typedef struct _cef_request_context_settings_t {
   // |cache_path| matches the CefSettings.cache_path value.
   ///
   int ignore_certificate_errors;
+
+  ///
+  // Set to true (1) to enable date-based expiration of built in network
+  // security information (i.e. certificate transparency logs, HSTS preloading
+  // and pinning information). Enabling this option improves network security
+  // but may cause HTTPS load failures when using CEF binaries built more than
+  // 10 weeks in the past. See https://www.certificate-transparency.org/ and
+  // https://www.chromium.org/hsts for details. Can be set globally using the
+  // CefSettings.enable_net_security_expiration value.
+  ///
+  int enable_net_security_expiration;
 
   ///
   // Comma delimited ordered list of language codes without any whitespace that
@@ -1395,6 +1419,73 @@ typedef enum {
   ///
   TID_RENDERER,
 } cef_thread_id_t;
+
+///
+// Thread priority values listed in increasing order of importance.
+///
+typedef enum {
+  ///
+  // Suitable for threads that shouldn't disrupt high priority work.
+  ///
+  TP_BACKGROUND,
+
+  ///
+  // Default priority level.
+  ///
+  TP_NORMAL,
+
+  ///
+  // Suitable for threads which generate data for the display (at ~60Hz).
+  ///
+  TP_DISPLAY,
+
+  ///
+  // Suitable for low-latency, glitch-resistant audio.
+  ///
+  TP_REALTIME_AUDIO,
+} cef_thread_priority_t;
+
+///
+// Message loop types. Indicates the set of asynchronous events that a message
+// loop can process.
+///
+typedef enum {
+  ///
+  // Supports tasks and timers.
+  ///
+  ML_TYPE_DEFAULT,
+
+  ///
+  // Supports tasks, timers and native UI events (e.g. Windows messages).
+  ///
+  ML_TYPE_UI,
+
+  ///
+  // Supports tasks, timers and asynchronous IO events.
+  ///
+  ML_TYPE_IO,
+} cef_message_loop_type_t;
+
+///
+// Windows COM initialization mode. Specifies how COM will be initialized for a
+// new thread.
+///
+typedef enum {
+  ///
+  // No COM initialization.
+  ///
+  COM_INIT_MODE_NONE,
+
+  ///
+  // Initialize COM using single-threaded apartments.
+  ///
+  COM_INIT_MODE_STA,
+
+  ///
+  // Initialize COM using multi-threaded apartments.
+  ///
+  COM_INIT_MODE_MTA,
+} cef_com_init_mode_t;
 
 ///
 // Supported value types.
@@ -2681,6 +2772,33 @@ typedef enum {
   ///
   CEF_CDM_REGISTRATION_ERROR_NOT_SUPPORTED,
 } cef_cdm_registration_error_t;
+
+///
+// Structure representing IME composition underline information. This is a thin
+// wrapper around Blink's WebCompositionUnderline class and should be kept in
+// sync with that.
+///
+typedef struct _cef_composition_underline_t {
+  ///
+  // Underline character range.
+  ///
+  cef_range_t range;
+
+  ///
+  // Text color.
+  ///
+  cef_color_t color;
+
+  ///
+  // Background color.
+  ///
+  cef_color_t background_color;
+
+  ///
+  // Set to true (1) for thick underline.
+  ///
+  int thick;
+} cef_composition_underline_t;
 
 #ifdef __cplusplus
 }

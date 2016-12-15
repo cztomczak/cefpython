@@ -24,6 +24,7 @@ Table of contents:
   * [log_file](#log_file)
   * [log_severity](#log_severity)
   * [multi_threaded_message_loop](#multi_threaded_message_loop)
+  * [net_security_expiration_enabled](#net_security_expiration_enabled)
   * [pack_loading_disabled](#pack_loading_disabled)
   * [persist_session_cookies](#persist_session_cookies)
   * [persist_user_preferences](#persist_user_preferences)
@@ -283,6 +284,19 @@ only supported on Windows.
 This option is not and cannot be supported on OS-X for architectural reasons.
 
 
+### net_security_expiration_enabled
+
+(bool)
+Set to true (1) to enable date-based expiration of built in network
+security information (i.e. certificate transparency logs, HSTS preloading
+and pinning information). Enabling this option improves network security
+but may cause HTTPS load failures when using CEF binaries built more than
+10 weeks in the past. See https://www.certificate-transparency.org/ and
+https://www.chromium.org/hsts for details. Can be set globally using the
+CefSettings.enable_net_security_expiration value.
+
+
+
 ### pack_loading_disabled
 
 (bool)
@@ -392,6 +406,11 @@ browser.
 To successfully implement separate cookie manager per browser session  
 with the use of the RequestHandler.`GetCookieManager` callback, you have to  
 set `unique_request_context_per_browser` to True.
+
+In upstream CEF each request context may have separate settings like
+cache_path, persist_session_cookies, persist_user_preferences,
+ignore_certificate_errors, enable_net_security_expiration,
+accept_language_list. Such functionality wasn't yet exposed in CEF Python.
 
 
 ### user_agent

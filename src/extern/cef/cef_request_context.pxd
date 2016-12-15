@@ -5,12 +5,12 @@
 from cef_ptr cimport CefRefPtr
 # noinspection PyUnresolvedReferences
 from cef_request_context_handler cimport CefRequestContextHandler
-from cef_types cimport CefRequestContextSettings
 
 cdef extern from "include/cef_request_context.h":
     cdef cppclass CefRequestContext:
-        pass
-    cdef CefRefPtr[CefRequestContext] CefRequestContext_CreateContext\
-            "CefRequestContext::CreateContext"(
-                    const CefRequestContextSettings& settings,
-                    CefRefPtr[CefRequestContextHandler] handler)
+        @staticmethod
+        CefRefPtr[CefRequestContext] GetGlobalContext()
+        @staticmethod
+        CefRefPtr[CefRequestContext] CreateContext(
+                CefRefPtr[CefRequestContext] other,
+                CefRefPtr[CefRequestContextHandler] handler)

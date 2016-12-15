@@ -607,6 +607,8 @@ struct CefSettingsTraits {
     target->uncaught_exception_stack_size = src->uncaught_exception_stack_size;
     target->context_safety_implementation = src->context_safety_implementation;
     target->ignore_certificate_errors = src->ignore_certificate_errors;
+    target->enable_net_security_expiration =
+        src->enable_net_security_expiration;
     target->background_color = src->background_color;
 
     cef_string_set(src->accept_language_list.str,
@@ -639,6 +641,8 @@ struct CefRequestContextSettingsTraits {
     target->persist_session_cookies = src->persist_session_cookies;
     target->persist_user_preferences = src->persist_user_preferences;
     target->ignore_certificate_errors = src->ignore_certificate_errors;
+    target->enable_net_security_expiration =
+        src->enable_net_security_expiration;
     cef_string_set(src->accept_language_list.str,
         src->accept_language_list.length, &target->accept_language_list, copy);
   }
@@ -974,5 +978,32 @@ struct CefBoxLayoutSettingsTraits {
 // Class representing CefBoxLayout settings.
 ///
 typedef CefStructBase<CefBoxLayoutSettingsTraits> CefBoxLayoutSettings;
+
+struct CefCompositionUnderlineTraits {
+  typedef cef_composition_underline_t struct_type;
+
+  static inline void init(struct_type* s) {
+    s->range = {0, 0};
+    s->color = 0;
+    s->background_color = 0;
+    s->thick = 0;
+  }
+
+  static inline void clear(struct_type* s) {
+  }
+
+  static inline void set(const struct_type* src, struct_type* target,
+                         bool copy) {
+    target->range = src->range;
+    target->color = src->color;
+    target->background_color = src->background_color;
+    target->thick = src->thick;
+  }
+};
+
+///
+// Class representing IME composition underline.
+///
+typedef CefStructBase<CefCompositionUnderlineTraits> CefCompositionUnderline;
 
 #endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WRAPPERS_H_

@@ -4,23 +4,14 @@
 # RenderHandler (interface)
 
 Implement this interface to handle events when window rendering is disabled
-(off-screen rendering). The methods of this class will be called on the UI thread.
-
-In order to create windowless browsers the
-ApplicationSettings.[windowless_rendering_enabled](ApplicationSettings.md#windowless_rendering_enabled)
-value must be set to true.
-
-Callbacks not implemented yet:
-* GetScreenInfo()
-
-Off-screen rendering examples:
-* [Kivy](https://github.com/cztomczak/cefpython/wiki/Kivy)
-* [Panda3D](https://github.com/cztomczak/cefpython/wiki/Panda3D)
-* [cefpython_offscreen_no_UI_framework.py](https://gist.github.com/stefanbacon/7b1571d57aee54aa9f8e9021b4848d06) -
-  most basic usage of OSR to take screenshot of a page
-
+(off-screen rendering). The methods of this class will be called on
+the UI thread. In order to create windowless browsers the
+[windowless_rendering_enabled](ApplicationSettings.md#windowless_rendering_enabled)
+setting must be set to true.
 
 Table of contents:
+* [Examples](#examples)
+* [Notes](#notes)
 * [Callbacks](#callbacks)
   * [GetRootScreenRect](#getrootscreenrect)
   * [GetViewRect](#getviewrect)
@@ -33,6 +24,26 @@ Table of contents:
   * [OnScrollOffsetChanged](#onscrolloffsetchanged)
   * [StartDragging](#startdragging)
   * [UpdateDragCursor](#updatedragcursor)
+
+
+## Examples
+
+Off-screen rendering examples:
+* [Kivy](https://github.com/cztomczak/cefpython/wiki/Kivy)
+* [Panda3D](https://github.com/cztomczak/cefpython/wiki/Panda3D)
+  \- tested with v31
+* [pygame + PyOpenGL](https://gist.github.com/AnishN/aa3bb27fc9d69319955ed9a8973cd40f)
+  \- tested with v31, more info on this example on the Forum in
+  [this post](https://groups.google.com/d/topic/cefpython/mwSa7He90xA/discussion) 
+* [cefpython_offscreen_no_UI_framework.py](https://gist.github.com/stefanbacon/7b1571d57aee54aa9f8e9021b4848d06)
+  \- most basic usage of OSR to take a screenshot of a page
+
+## Notes
+
+Callbacks available in upstream CEF, but not yet exposed in CEF Python
+(see src/include/cef_render_handler.h):
+* GetScreenInfo
+* OnImeCompositionRangeChanged
 
 
 ## Callbacks

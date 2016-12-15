@@ -5,14 +5,16 @@
 
 Implement this interface to handle events related to browser requests.
 
-For an example of how to implement handler see [cefpython](cefpython.md).CreateBrowser(). For a list of all handler interfaces see [API > Client handlers](API#Client_handlers).
+For an example of how to implement handler see
+[cefpython](cefpython.md).CreateBrowserSync(). For a list of all handler
+interfaces see [API > Client handlers](API#Client_handlers).
 
-The `RequestHandler` tests can be found in the wxpython.py script.
+The `RequestHandler` tests can be found in the old wxpython.py script (v31).
 
-The following callbacks are available in upstream CEF, but were not yet
-exposed:
+Not yet exposed in CEF Python:
 * OnOpenURLFromTab
 * OnSelectClientCertificate
+
 
 
 Table of contents:

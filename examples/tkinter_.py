@@ -2,8 +2,9 @@
 # This example has two widgets: a navigation bar and a browser.
 # Tested with Tk 8.6 and CEF Python v53+.
 
-# Issue #255: when typing url, mouse must be over url entry widget
-#             otherwise keyboard focus is lost.
+# Known issue on Linux: When typing url, mouse must be over url
+# entry widget otherwise keyboard focus is lost (Issue #255
+# and Issue #284)
 
 from cefpython3 import cefpython as cef
 try:

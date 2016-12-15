@@ -80,8 +80,8 @@ Call a javascript function asynchronously. This can also call object's methods, 
 | Parameter | Type |
 | --- | --- |
 | jsCode | string |
-| scriptUrl=None | string |
-| startLine=None | int |
+| scriptUrl="" | string |
+| startLine=1 | int |
 | __Return__ | void |
 
 Execute a string of JavaScript code in this frame. The sciptUrl parameter is the url where the script in question can be found, if any. The renderer may request this URL to show the developer the source of the error. The startLine parameter is the base line number to use for error reporting. This function executes asynchronously so there is no way to get the returned value. Calling javascript <> native code synchronously is not possible.

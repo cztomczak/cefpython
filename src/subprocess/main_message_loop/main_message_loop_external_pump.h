@@ -1,11 +1,9 @@
-// Copied from upstream cefclient with minor modifications.
-
 // Copyright (c) 2016 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-#ifndef CEF_TESTS_CEFCLIENT_BROWSER_MAIN_MESSAGE_LOOP_EXTERNAL_PUMP_H_
-#define CEF_TESTS_CEFCLIENT_BROWSER_MAIN_MESSAGE_LOOP_EXTERNAL_PUMP_H_
+#ifndef CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_EXTERNAL_PUMP_H_
+#define CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_EXTERNAL_PUMP_H_
 #pragma once
 
 #include "main_message_loop_std.h"
@@ -17,13 +15,13 @@
 // correctly). See comments in Chromium's platform-specific
 // base/message_loop/message_pump_* source files for additional guidance when
 // implementing CefBrowserProcessHandler::OnScheduleMessagePumpWork() in your
-// application. Run cefclient or cef_unittests with the
+// application. Run cefclient or ceftests with the
 // "--external-message-pump" command-line flag to test this mode.
 class MainMessageLoopExternalPump : public MainMessageLoopStd {
  public:
   // Creates the singleton instance of this object. Must be called on the main
   // application thread.
-  static SCOPED_PTR(MainMessageLoopExternalPump) Create();
+  static scoped_ptr<MainMessageLoopExternalPump> Create();
 
   // Returns the singleton instance of this object. Safe to call from any
   // thread.
@@ -36,7 +34,7 @@ class MainMessageLoopExternalPump : public MainMessageLoopStd {
 
  protected:
   // Only allow deletion via scoped_ptr.
-  friend DEFAULT_DELETER(MainMessageLoopExternalPump);
+  friend struct base::DefaultDeleter<MainMessageLoopExternalPump>;
 
   // Construct and destruct this object on the main application thread.
   MainMessageLoopExternalPump();
@@ -65,4 +63,4 @@ class MainMessageLoopExternalPump : public MainMessageLoopStd {
   bool reentrancy_detected_;
 };
 
-#endif  // CEF_TESTS_CEFCLIENT_BROWSER_MAIN_MESSAGE_LOOP_EXTERNAL_PUMP_H_
+#endif  // CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_EXTERNAL_PUMP_H_

@@ -3,6 +3,11 @@
 
 # Browser (object)
 
+Remember to free all browser references for the browser to shut down cleanly.
+Otherwise data such as cookies or other storage might not be flushed to disk
+when closing app, and other issues might occur as well. To free a reference
+just assign a None value to a "browser" variable.
+
 
 Table of contents:
 * [Notes](#notes)
@@ -82,10 +87,13 @@ Table of contents:
 
 ## Notes
 
-**Closing browser cleanly**
+Methods available in upstream CEF which were not yet exposed in CEF Python
+(see src/include/cef_browser.h):
 
-Remember to delete all browser references for the browser to shut down cleanly. See the wxpython.py example > MainFrame.OnClose() for how to
-do it.
+* ImeSetComposition
+* ImeCommitText
+* ImeFinishComposingText
+* ImeCancelComposition
 
 
 ## Methods
@@ -267,8 +275,8 @@ Passing a python function here is not allowed, it is only possible through [Java
 | Parameter | Type |
 | --- | --- |
 | jsCode | string |
-| scriptURL=None | string |
-| startLine=None | int |
+| scriptUrl="" | string |
+| startLine=1 | int |
 | __Return__ | void |
 
 Execute a string of JavaScript code in this frame. The `sciptURL` parameter is the URL where the script in question can be found, if any. The renderer may request this URL to show the developer the source of the error.  The `startLine` parameter is the base line number to use for error reporting.

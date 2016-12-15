@@ -147,7 +147,6 @@ def setup_options(docopt_args):
         Options.cef_branch = get_cefpython_version()["CHROME_VERSION_BUILD"]
         Options.cef_commit = get_cefpython_version()["CEF_COMMIT_HASH"]
 
-
     # --gyp-msvs-version
     if not Options.gyp_msvs_version:
         if int(Options.cef_branch) >= 2704:
@@ -212,7 +211,7 @@ def build_cef():
     # Run automate-git.py
     run_automate_git()
 
-    # Build cefclient, cefsimple, libcef_dll_wrapper
+    # Build cefclient, cefsimple, ceftests, libcef_dll_wrapper
     build_cef_projects()
 
 
@@ -282,7 +281,7 @@ def update_cef_patches():
 
 
 def build_cef_projects():
-    """Build cefclient, cefsimple, libcef_dll_wrapper."""
+    """Build cefclient, cefsimple, ceftests, libcef_dll_wrapper."""
     print("[automate.py] Binary distrib created in %s"
           % Options.binary_distrib)
     print("[automate.py] Building cef projects...")
@@ -308,8 +307,8 @@ def build_cef_projects():
     build_cefclient = os.path.join(cef_binary, "build_cefclient")
     os.makedirs(build_cefclient)
 
-    # Build cefclient and cefsimple
-    print("[automate.py] Building cefclient and cefsimple...")
+    # Build cefclient, cefsimple, ceftests
+    print("[automate.py] Building cefclient, cefsimple, ceftests ...")
     command = ""
     if platform.system() == "Windows":
         if int(Options.cef_branch) >= 2704:
@@ -321,16 +320,18 @@ def build_cef_projects():
     run_command(command, build_cefclient)
     print("[automate.py] OK")
     # On Linux cannot pass "&&" and run two commands using run_command()
-    command = "ninja cefclient cefsimple"
+    command = "ninja cefclient cefsimple ceftests"
     run_command(command, build_cefclient)
     print("[automate.py] OK")
     if platform.system() == "Windows":
         assert(os.path.exists(os.path.join(build_cefclient,
+                                           "tests",
                                            "cefclient",
                                            Options.build_type,
                                            "cefclient.exe")))
     else:
         assert (os.path.exists(os.path.join(build_cefclient,
+                                            "tests",
                                             "cefclient",
                                             Options.build_type,
                                             "cefclient")))
@@ -408,19 +409,51 @@ def create_prebuilt_binaries():
     cpdir(os.path.join(src, Options.build_type), bindir)
     cpdir(os.path.join(src, "Resources"), bindir)
 
-    # Copy cefclient, cefsimple
-    cefclient = os.path.join(src, "build_cefclient", "cefclient",
-                             Options.build_type, "cefclient")
-    cefclient_files = os.path.join(src, "build_cefclient", "cefclient",
-                                   Options.build_type, "files")
-    cpdir(cefclient_files, os.path.join(bindir, "files"))
-    cefsimple = os.path.join(src, "build_cefclient", "cefsimple",
-                             Options.build_type, "cefsimple")
+    # Copy cefclient, cefsimple, ceftests
+
+    # cefclient
+    cefclient = os.path.join(
+            src,
+            "build_cefclient", "tests", "cefclient",
+            Options.build_type,
+            "cefclient")
+    cefclient_files = os.path.join(
+            src,
+            "build_cefclient", "tests", "cefclient",
+            Options.build_type,
+            "cefclient_files")
+    cpdir(cefclient_files, os.path.join(bindir, "cefclient_files"))
+
+    # cefsimple
+    cefsimple = os.path.join(
+            src,
+            "build_cefclient", "tests", "cefsimple",
+            Options.build_type,
+            "cefsimple")
+
+    # ceftests
+    ceftests = os.path.join(
+            src,
+            "build_cefclient", "tests", "ceftests",
+            Options.build_type,
+            "ceftests")
+    ceftests_files = os.path.join(
+            src,
+            "build_cefclient", "tests", "ceftests",
+            Options.build_type,
+            "ceftests_files")
+    cpdir(ceftests_files, os.path.join(bindir, "ceftests_files"))
+
     if platform.system() == "Windows":
         cefclient += ".exe"
         cefsimple += ".exe"
+        ceftests += ".exe"
+
     shutil.copy(cefclient, bindir)
     shutil.copy(cefsimple, bindir)
+    shutil.copy(ceftests, bindir)
+
+    # END: Copy cefclient, cefsimple, ceftests
 
     # Copy libraries
     if platform.system() == "Windows":

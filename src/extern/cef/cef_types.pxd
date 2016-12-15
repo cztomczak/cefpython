@@ -29,15 +29,16 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t accept_language_list
         int single_process
         cef_string_t browser_subprocess_path
-        int multi_threaded_message_loop
         int command_line_args_disabled
         cef_string_t cache_path
+        int enable_net_security_expiration
         int persist_session_cookies
         cef_string_t user_agent
         cef_string_t product_version
         cef_string_t locale
         cef_string_t log_file
         int log_severity
+        int multi_threaded_message_loop
         cef_string_t javascript_flags
         cef_string_t resources_dir_path
         cef_string_t locales_dir_path

@@ -1,11 +1,9 @@
-// Copied from upstream cefclient with minor modifications.
-
 // Copyright (c) 2015 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-#ifndef CEF_TESTS_CEFCLIENT_BROWSER_MAIN_MESSAGE_LOOP_H_
-#define CEF_TESTS_CEFCLIENT_BROWSER_MAIN_MESSAGE_LOOP_H_
+#ifndef CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_H_
+#define CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_H_
 #pragma once
 
 #include "include/base/cef_bind.h"
@@ -51,7 +49,7 @@ class MainMessageLoop {
 
  protected:
   // Only allow deletion via scoped_ptr.
-  friend DEFAULT_DELETER(MainMessageLoop);
+  friend struct base::DefaultDeleter<MainMessageLoop>;
 
   MainMessageLoop();
   virtual ~MainMessageLoop();
@@ -103,4 +101,4 @@ struct DeleteOnMainThread {
   }
 };
 
-#endif  // CEF_TESTS_CEFCLIENT_BROWSER_MAIN_MESSAGE_LOOP_H_
+#endif  // CEF_TESTS_SHARED_BROWSER_MAIN_MESSAGE_LOOP_H_

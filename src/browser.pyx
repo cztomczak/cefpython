@@ -17,6 +17,7 @@ MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
 # get segmentation faults, as they will be garbage collected.
 
 cdef dict g_pyBrowsers = {}
+cdef list g_closed_browsers = []  # [int identifier, ..]
 
 cdef PyBrowser GetPyBrowserById(int browserId):
     if browserId in g_pyBrowsers:
@@ -269,7 +270,10 @@ cdef class PyBrowser:
                 Debug("CloseBrowser: releasing shared request context")
                 g_sharedRequestContext.Assign(NULL)
         Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
+        cdef int browserId = self.GetCefBrowser().get().GetIdentifier()
         self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
+        global g_closed_browsers
+        g_closed_browsers.append(browserId)
 
     cpdef py_void CloseDevTools(self):
         self.GetCefBrowserHost().get().CloseDevTools()
@@ -278,7 +282,7 @@ cdef class PyBrowser:
         self.GetMainFrame().ExecuteFunction(*args)
 
     cpdef py_void ExecuteJavascript(self, py_string jsCode,
-            py_string scriptUrl="", int startLine=0):
+            py_string scriptUrl="", int startLine=1):
         self.GetMainFrame().ExecuteJavascript(jsCode, scriptUrl, startLine)
 
     cpdef py_void Find(self, int searchId, py_string searchText,

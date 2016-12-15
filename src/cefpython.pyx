@@ -386,7 +386,6 @@ cdef extern from *:
 # noinspection PyUnresolvedReferences
 from cef_types cimport (
     CefSettings, CefBrowserSettings, CefRect, CefPoint,
-    CefRequestContextSettings,
     CefKeyEvent, CefMouseEvent, CefScreenInfo,
     PathKey, PK_DIR_EXE, PK_DIR_MODULE,
 )
@@ -777,19 +776,18 @@ def CreateBrowserSync(windowInfo=None,
 
     # Request context - part 1/2.
     createSharedRequestContext = bool(not g_sharedRequestContext.get())
-    cdef CefRequestContextSettings requestContextSettings
     cdef CefRefPtr[CefRequestContext] cefRequestContext
     cdef CefRefPtr[RequestContextHandler] requestContextHandler =\
             <CefRefPtr[RequestContextHandler]?>new RequestContextHandler(
                     cefBrowser)
     if g_applicationSettings["unique_request_context_per_browser"]:
-        cefRequestContext = CefRequestContext_CreateContext(
-                requestContextSettings,
+        cefRequestContext = CefRequestContext.CreateContext(
+                CefRequestContext.GetGlobalContext(),
                 <CefRefPtr[CefRequestContextHandler]?>requestContextHandler)
     else:
         if createSharedRequestContext:
-            cefRequestContext = CefRequestContext_CreateContext(
-                    requestContextSettings,
+            cefRequestContext = CefRequestContext.CreateContext(
+                    CefRequestContext.GetGlobalContext(),
                     <CefRefPtr[CefRequestContextHandler]?>\
                             requestContextHandler)
             g_sharedRequestContext.Assign(cefRequestContext.get())
@@ -860,47 +858,85 @@ def Shutdown():
         Debug("Shutdown: releasing shared request context")
         g_sharedRequestContext.Assign(NULL)
 
-    if len(g_pyBrowsers) and _MessageLoopWork_wasused:
-        # There might be a case when python error occured after creating
-        # browser, but before any message loop was run. In such case
-        # the renderer process won't be terminated unless we run some
-        # message loop work here first, try to close browser and free
-        # reference, and then run some message loop work again.
-        for i in range(10):
+    # Run some message loop work, force closing browsers and then run
+    # some message loop work again for the browsers to close cleanly.
+    #
+    # CASE 1:
+    # There might be a case when python error occured after creating
+    # browser, but before any message loop was run. In such case
+    # the renderer process won't be terminated unless we run some
+    # message loop work here first, close browser and free
+    # reference, and then run some message loop work again.
+    #
+    # CASE 2:
+    # Application closes browser and then calls CEF shutdown. We need
+    # to run some message loop work so that browser can close cleanly.
+    # Looks like running message loop work is also required when
+    # application runs MessageLoop() (Issue #282 and the hello_world.py
+    # example).
+    #
+    # CASE 3:
+    # Run some message loop work to fix possible errors on shutdown.
+    # See this post:
+    # >> https://magpcss.org/ceforum/viewtopic.php?p=30858#p30858
+    # May be fixed by host owned message loop, see Issue 1805:
+    # >> https://bitbucket.org/chromiumembedded/cef/issues/1805/
+
+    # This 0.2 sec message loop work should close browsers and clean
+    # CEF references. Even when CloseBrowser(True) wasn't called
+    # in client app, then this code below should close it cleanly.
+    # Looks like CEF detects that parent window was destroyed
+    # and closes browser automatically if you give it some time.
+    # If the time was not enough, then there is an emergency plan,
+    # the code block further down that checks len(g_pyBrowsers).
+    for _ in range(20):
+        for __ in range(10):
             with nogil:
                 CefDoMessageLoopWork()
-            time.sleep(0.01)
+        time.sleep(0.01)
+
+    # Emergency plan in case the code above didn't close browsers,
+    # and neither browsers were closed in client app. This code
+    # will force closing browsers by calling CloseBrowser(True)
+    # and then free global g_pyBrowsers list that keeps CEF
+    # references alive.
+    if len(g_pyBrowsers):
         browsers_list = []
         for browserId in g_pyBrowsers:
             # Cannot close browser here otherwise error:
             # > dictionary changed size during iteration
             browsers_list.append(browserId)
+        browser_close_forced = False
         for browserId in browsers_list:
             browser = GetPyBrowserById(browserId)
-            if browser:
-                browser.TryCloseBrowser()
+            if browser and browserId not in g_closed_browsers:
+                Debug("WARNING: Browser was not closed with CloseBrowser call."
+                      " Will close it safely now, but this will delay CEF"
+                      " shutdown by 0.2 sec.")
+                browser.CloseBrowser(True)
+                browser_close_forced = True
+            browser = None  # free reference
             RemovePyBrowser(browserId)
-        for i in range(10):
-            with nogil:
-                CefDoMessageLoopWork()
-            time.sleep(0.01)
+        if browser_close_forced:
+            for _ in range(20):
+                for __ in range(10):
+                    with nogil:
+                        CefDoMessageLoopWork()
+                time.sleep(0.01)
+        # Message loop work was run, so handlers callbacks might got called
+        # and browsers might still be in g_pyBrowsers.
+        for browserId in browsers_list:
+            if browserId in g_pyBrowsers:
+                RemovePyBrowser(browserId)
 
+    # If the the two code blocks above, that tried to close browsers
+    # and free CEF references, failed, then display an error about it!
     if len(g_pyBrowsers):
-        Error("Shutdown called, but there are still browser references alive")
+        Error("Shutdown called, but there are still browser references alive!")
 
     Debug("Shutdown()")
     with nogil:
-        # Temporary fix for possible errors on shutdown. See this post:
-        # https://magpcss.org/ceforum/viewtopic.php?p=30858#p30858
-        # May be fixed by host owned message loop, see Issue 1805:
-        # https://bitbucket.org/chromiumembedded/cef/issues/1805/
-        if _MessageLoopWork_wasused:
-            for i in range(10):
-                CefDoMessageLoopWork()
         CefShutdown()
-        if _MessageLoopWork_wasused:
-            for i in range(10):
-                CefDoMessageLoopWork()
 
     # Release external message pump, as in cefclient after Shutdown
     if g_external_message_pump.get():

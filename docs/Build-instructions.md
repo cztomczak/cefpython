@@ -32,7 +32,7 @@ Table of contents:
 
 ## Build CEF Python on Linux
 
-Complete steps for building CEF Python 55 using prebuilt
+Complete steps for building CEF Python v50+ using prebuilt
 binaries from GitHub releases:
 
 1) Tested and works fine on Ubuntu 14.04 64-bit (cmake 2.8.12 and g++ 4.8.4)
@@ -48,15 +48,15 @@ binaries from GitHub releases:
 
 5) Download 64-bit Linux binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/releases)
-   tagged 'v55-upstream'.
+   tagged e.g. 'v50-upstream' when building v50.
 
 6) Extract it in the cefpython/build/ directory and rename the extracted
    directory to "cef_linux64".
 
-8) Build cefpython and run examples:
+8) Build cefpython and run examples (xx.x is version e.g. 50.0):
 ```
 cd cefpython/src/linux/
-python compile.py 55.0
+python compile.py xx.x
 ```
 
 ## Requirements
@@ -67,12 +67,8 @@ requirements common for all platforms.
 
 __Windows__
 
-* For Python 2.7 - VS2008 compiler is required:
-  http://www.microsoft.com/en-us/download/details.aspx?id=44266
-* For Python 3.4 - VS2010 compiler is required:
-  https://docs.python.org/3.4/using/windows.html#compiling-python-on-windows
-* For Python 3.5 - VS2015 compiler is required:
-  https://docs.python.org/3.5/using/windows.html#compiling-python-on-windows
+* Install an appropriate MS compiler for a specific Python version:
+  https://wiki.python.org/moin/WindowsCompilers
 * To build CEF from sources:
     * Use Win7 x64 or later. 32-bit OS'es are not supported. For more details
      see [here](https://www.chromium.org/developers/how-tos/build-instructions-windows).
@@ -167,7 +163,7 @@ mkdir build/ && cd build
 python ../tools/automate.py --build-cef --ninja-jobs 6
 mv cef*_*_linux64/ cef_linux64/
 cd ../../../src/linux/
-python compile.py 55.0
+python compile.py xx.x
 ```
 
 __MISSING PACKAGES (Linux)__: After the chromium sources are downloaded,

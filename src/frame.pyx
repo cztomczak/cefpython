@@ -110,7 +110,7 @@ cdef class PyFrame:
         self.ExecuteJavascript(code)
 
     cpdef py_void ExecuteJavascript(self, py_string jsCode,
-            py_string scriptUrl="", int startLine=0):
+            py_string scriptUrl="", int startLine=1):
         self.GetCefFrame().get().ExecuteJavaScript(PyToCefStringValue(jsCode),
                 PyToCefStringValue(scriptUrl), startLine)
 
