@@ -1,13 +1,13 @@
 # Example of embedding CEF Python browser using PyGTK library (GTK 2).
-# Tested with GTK 2.24 and CEF Python v54+.
-
-# Known issue on Linux: Keyboard focus problem (Issue #284)
+# Tested with GTK 2.24 and CEF Python v54+, only on Linux.
+# Known issue on Linux: Keyboard focus problem (Issue #284).
 
 from cefpython3 import cefpython as cef
 import pygtk
 import gtk
 import gobject
 import sys
+import os
 
 # In CEF you can run message loop in two ways (see API docs for more details):
 # 1. By calling cef.MessageLoop() instead of an application-provided
@@ -70,6 +70,9 @@ class Gtk2Example:
         self.main_window.connect('destroy', self.on_exit)
         self.main_window.set_size_request(width=800, height=600)
         self.main_window.set_title('GTK 2 example (PyGTK)')
+        icon = os.path.join(os.path.dirname(__file__), "resources", "gtk.png")
+        if os.path.exists(icon):
+            self.main_window.set_icon_from_file(icon)
         self.main_window.realize()
 
         self.vbox = gtk.VBox(False, 0)

@@ -1,10 +1,11 @@
 # Example of embedding CEF Python browser using Tkinter toolkit.
 # This example has two widgets: a navigation bar and a browser.
-# Tested with Tk 8.6 and CEF Python v53+.
-
+#
+# Tested with Tk 8.6 and CEF Python v53.1+, only on Linux.
+#
 # Known issue on Linux: When typing url, mouse must be over url
 # entry widget otherwise keyboard focus is lost (Issue #255
-# and Issue #284)
+# and Issue #284).
 
 from cefpython3 import cefpython as cef
 try:
