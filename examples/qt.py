@@ -5,7 +5,8 @@
 # and CEF Python v55.2+, only on Linux.
 #
 # Known issue on Linux: Keyboard focus sometimes doesn't work, type cursor
-#                       is blinking, but you can' type anything. In such
+#                       is blinking, but you can' type anything. It seems
+#                       to happen only during initial loading. In such
 #                       case clicking on url and then back inside browser
 #                       fixes it. There are multiple keyboard focus
 #                       issues in upstream CEF, see Issue #284 for details.
@@ -81,13 +82,12 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(None)
         self.cef_widget = None
         self.navigation_bar = None
-        self.setupLayout()
-        # Title
         if "pyqt" in sys.argv:
             self.setWindowTitle("PyQt example")
         elif "pyside" in sys.argv:
             self.setWindowTitle("PySide example")
         self.setFocusPolicy(Qt.StrongFocus)
+        self.setupLayout()
 
     def setupLayout(self):
         self.resize(WIDTH, HEIGHT)
@@ -104,10 +104,9 @@ class MainWindow(QMainWindow):
         # Browser can be embedded only after layout was set up
         self.cef_widget.embedBrowser()
 
-    def setupNavbar(self):
-        QLineEdit("Test")
-
     def focusInEvent(self, event):
+        # This event seems to never get called, as CEF is stealing all
+        # focus due to Issue #284.
         if WINDOWS:
             # noinspection PyUnresolvedReferences
             cef.WindowUtils.OnSetFocus(int(self.centralWidget().winId()),
@@ -117,6 +116,8 @@ class MainWindow(QMainWindow):
             self.cef_widget.browser.SetFocus(True)
 
     def focusOutEvent(self, event):
+        # This event seems to never get called, as CEF is stealing all
+        # focus due to Issue #284.
         print("[qt.py] focusOutEvent")
 
     def closeEvent(self, event):
@@ -193,6 +194,7 @@ class NavigationBar(QFrame):
         self.forward.setEnabled(browser.CanGoForward())
         self.reload.setEnabled(True)
         self.url.setEnabled(True)
+        self.url.setText(browser.GetUrl())
 
     def createButton(self, name):
         resources = os.path.join(os.path.abspath(os.path.dirname(__file__)),
@@ -299,8 +301,9 @@ class LoadHandler(object):
 
 
 class FocusHandler(object):
-    """FocusHandler must be set for the browser, otherwise keyboard
-    focus issues occur. If there are still focus issues see Issue #284."""
+    """FocusHandler must be set for the browser to partially fix
+    keyboard focus issues. However it seems there are still some
+    focus issues, see Issue #284 for more details."""
 
     def __init__(self, cef_widget):
         self.cef_widget = cef_widget

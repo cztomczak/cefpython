@@ -447,8 +447,8 @@ g_commandLineSwitches = {}
 
 cdef scoped_ptr[MainMessageLoopExternalPump] g_external_message_pump
 
-# noinspection PyUnresolvedReferences
-cdef cpp_bool _MessageLoopWork_wasused = False
+cdef py_bool g_MessageLoop_called = False
+cdef py_bool g_MessageLoopWork_called = False
 
 cdef dict g_globalClientCallbacks = {}
 
@@ -821,6 +821,11 @@ def CreateBrowserSync(windowInfo=None,
 
 def MessageLoop():
     Debug("MessageLoop()")
+
+    if not g_MessageLoop_called:
+        global g_MessageLoop_called
+        g_MessageLoop_called = True
+
     with nogil:
         CefRunMessageLoop()
 
@@ -835,9 +840,9 @@ def MessageLoopWork():
     # GIL must be released here otherwise we will get dead lock
     # when calling from c++ to python.
 
-    if not _MessageLoopWork_wasused:
-        global _MessageLoopWork_wasused
-        _MessageLoopWork_wasused = True
+    if not g_MessageLoopWork_called:
+        global g_MessageLoopWork_called
+        g_MessageLoopWork_called = True
 
     with nogil:
         CefDoMessageLoopWork()

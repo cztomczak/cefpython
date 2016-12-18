@@ -3,6 +3,7 @@
 # Website: http://code.google.com/p/cefpython/
 
 include "../cefpython.pyx"
+include "../browser.pyx"
 
 # noinspection PyUnresolvedReferences
 from cef_types cimport WindowOpenDisposition
@@ -110,6 +111,9 @@ cdef public void LifespanHandler_OnBeforeClose(
         RemovePythonCallbacksForBrowser(pyBrowser.GetIdentifier())
         RemovePyFramesForBrowser(pyBrowser.GetIdentifier())
         RemovePyBrowser(pyBrowser.GetIdentifier())
+        if g_MessageLoop_called and not len(g_pyBrowsers):
+            QuitMessageLoop()
+
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

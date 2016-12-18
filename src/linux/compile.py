@@ -35,25 +35,26 @@ except NameError:
 
 
 def check_cython_version():
-    output = subprocess.check_output(["cython", "--version"],
-                                     stderr=subprocess.STDOUT)
-    output = output.strip()
-    if not isinstance(output, str):
-        output = output.decode("utf-8")
-    match = re.search(r"[\d+.]+", output)
-    assert match, "Checking Cython version failed"
-    version = match.group(0)
     with open("../../tools/requirements.txt", "r") as fileobj:
         contents = fileobj.read()
         match = re.search(r"cython\s*==\s*([\d.]+)", contents,
                           flags=re.IGNORECASE)
         assert match, "cython package not found in requirements.txt"
         require_version = match.group(1)
+    try:
+        import Cython
+        version = Cython.__version__
+    except ImportError:
+        # noinspection PyUnusedLocal
+        Cython = None
+        print("ERROR: Cython is not installed ({0} required)"
+              .format(require_version))
+        sys.exit(1)
     if version != require_version:
-        print("ERROR: Wrong Cython version: {}. Required: {}"
+        print("ERROR: Wrong Cython version: {0}. Required: {1}"
               .format(version, require_version))
         sys.exit(1)
-    print("Cython version: {}".format(version))
+    print("Cython version: {0}".format(version))
 
 check_cython_version()
 

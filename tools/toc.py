@@ -44,14 +44,14 @@ def toc_file(file_):
     """A single file was passed to doctoc. Return bool whether modified
     and the number of warnings."""
     with open(file_, "rb") as fo:
-        orig_contents = fo.read()
+        orig_contents = fo.read().decode("utf-8", "ignore")
         # Fix new lines just in case. Not using Python's "rU",
         # it is causing strange issues.
         orig_contents = re.sub(r"(\r\n|\r|\n)", os.linesep, orig_contents)
     (tocsize, contents, warnings) = create_toc(orig_contents, file_)
     if contents != orig_contents:
         with open(file_, "wb") as fo:
-            fo.write(contents)
+            fo.write(contents.encode("utf-8"))
         tocsize_str = ("TOC size: "+str(tocsize) if tocsize
                        else "TOC removed")
         print("Modified: "+file_+" ("+tocsize_str+")")
