@@ -2,14 +2,7 @@
 # This example has two widgets: a navigation bar and a browser.
 #
 # Tested with PyQt 4.10.4 (4.8.6), PySide 1.2.1 (4.8.6)
-# and CEF Python v55.2+, only on Linux.
-#
-# Known issue on Linux: Keyboard focus sometimes doesn't work, type cursor
-#                       is blinking, but you can' type anything. It seems
-#                       to happen only during initial loading. In such
-#                       case clicking on url and then back inside browser
-#                       fixes it. There are multiple keyboard focus
-#                       issues in upstream CEF, see Issue #284 for details.
+# and CEF Python v55.3+, only on Linux.
 
 import os
 import sys
@@ -73,7 +66,7 @@ def check_versions():
         print("[qt.py] PySide {v1} ({v2})".format(
               v1=PySide.__version__, v2=QtCore.__version__))
     # CEF Python version requirement
-    assert cef.__version__ >= "55.2", "CEF Python v55.2+ required to run this"
+    assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
 
 
 class MainWindow(QMainWindow):
@@ -223,7 +216,7 @@ class CefWidget(CefWidgetParent):
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         self.browser.SetClientHandler(LoadHandler(self.parent.navigation_bar))
-        self.browser.SetClientHandler(FocusHandler(self))
+        self.browser.SetClientHandler(FocusHandler())
 
     def moveEvent(self, _):
         # pos = event.pos()
@@ -291,38 +284,52 @@ class CefApplication(QApplication):
 class LoadHandler(object):
 
     def __init__(self, navigation_bar):
+        self.initial_app_loading = True
         self.navigation_bar = navigation_bar
 
-    def OnLoadingStateChange(self, *_):
+    def OnLoadingStateChange(self, **_):
         self.navigation_bar.updateState()
 
-    def OnLoadStart(self, browser, *_):
+    def OnLoadStart(self, browser, **_):
         self.navigation_bar.url.setText(browser.GetUrl())
+        if self.initial_app_loading:
+            # Temporary fix no. 2 for focus issue during initial loading
+            # on Linux (Issue #284). If this is not applied then
+            # sometimes during initial loading, keyboard focus may
+            # break and it is not possible to type anything, even
+            # though a type cursor blinks in web view.
+            print("[qt.py] LoadHandler.OnLoadStart:"
+                  " keyboard focus fix no. 2 (#284)")
+            browser.SetFocus(True)
+            self.initial_app_loading = False
 
 
 class FocusHandler(object):
-    """FocusHandler must be set for the browser to partially fix
-    keyboard focus issues. However it seems there are still some
-    focus issues, see Issue #284 for more details."""
 
-    def __init__(self, cef_widget):
-        self.cef_widget = cef_widget
-
-    def OnTakeFocus(self, *args):
+    def __init__(self):
         pass
+
+    def OnTakeFocus(self, **kwargs):
         # print("[qt.py] FocusHandler.OnTakeFocus, next={next}"
-        #       .format(next=args[1]))
-
-    def OnSetFocus(self, *args):
+        #       .format(next=kwargs["next_component"]]))
         pass
+
+    def OnSetFocus(self, **kwargs):
         # source_enum = {cef.FOCUS_SOURCE_NAVIGATION: "navigation",
         #                cef.FOCUS_SOURCE_SYSTEM:     "system"}
         # print("[qt.py] FocusHandler.OnSetFocus, source={source}"
-        #       .format(source=source_enum[args[1]]))
+        #       .format(source=source_enum[kwargs["source"]]))
         # return False
+        pass
 
-    def OnGotFocus(self, browser):
-        # print("[qt.py] FocusHandler.OnGotFocus")
+    def OnGotFocus(self, browser, **_):
+        # Temporary fix no. 1 for focus issues on Linux (Issue #284).
+        # If this is not applied then when switching to another
+        # window (alt+tab) and then back to this example, keyboard
+        # focus becomes broken, you can't type anything, even
+        # though a type cursor blinks in web view.
+        print("[qt.py] FocusHandler.OnGotFocus:"
+              " keyboard focus fix no. 1 (#284)")
         browser.SetFocus(True)
 
 

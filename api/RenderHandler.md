@@ -54,10 +54,11 @@ Callbacks available in upstream CEF, but not yet exposed in CEF Python
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| out rect | list |
+| rect_out | list[x,y,width,height] |
 | __Return__ | bool |
 
-Called to retrieve the root window rectangle in screen coordinates. Return true if the rectangle was provided.
+Called to retrieve the root window rectangle in screen coordinates.
+Return true if the rectangle was provided.
 
 
 ### GetViewRect
@@ -65,12 +66,11 @@ Called to retrieve the root window rectangle in screen coordinates. Return true 
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| out rect | list |
+| rect_out | list[x,y,width,height] |
 | __Return__ | bool |
 
-Called to retrieve the view rectangle which is relative to screen coordinates. Return true if the rectangle was provided.
-
-The `rect` list should contain 4 elements: [x, y, width, height].
+Called to retrieve the view rectangle which is relative to screen
+coordinates. Return true if the rectangle was provided.
 
 
 ### GetScreenRect
@@ -78,12 +78,11 @@ The `rect` list should contain 4 elements: [x, y, width, height].
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| out rect | list |
+| rect_out | list[x,y,width,height] |
 | __Return__ | bool |
 
-Called to retrieve the simulated screen rectangle. Return true if the rectangle was provided.
-
-The `rect` list should contain 4 elements: [x, y, width, height].
+Called to retrieve the simulated screen rectangle. Return true
+if the rectangle was provided.
 
 
 ### GetScreenPoint
@@ -91,14 +90,13 @@ The `rect` list should contain 4 elements: [x, y, width, height].
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| viewX | int |
-| viewY | int |
-| out screenCoordinates | list |
+| view_x | int |
+| view_y | int |
+| screen_coordinates_out | list[x,y] |
 | __Return__ | bool |
 
-Called to retrieve the translation from view coordinates to actual screen coordinates. Return true if the screen coordinates were provided.
-
-The `screenCoordinates` list should contain 2 elements: [x, y].
+Called to retrieve the translation from view coordinates to actual
+screen coordinates. Return true if the screen coordinates were provided.
 
 
 ### OnPopupShow
@@ -109,7 +107,9 @@ The `screenCoordinates` list should contain 2 elements: [x, y].
 | show | bool |
 | __Return__ | void |
 
-Called when the browser wants to show or hide the popup widget. The popup should be shown if |show| is true and hidden if |show| is false.
+Called when the browser wants to show or hide the popup widget.
+The popup should be shown if |show| is true and hidden if|show|
+is false.
 
 
 ### OnPopupSize
@@ -117,12 +117,11 @@ Called when the browser wants to show or hide the popup widget. The popup should
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| rect | list |
+| rect_out | list[x,y,width,height] |
 | __Return__ | void |
 
-Called when the browser wants to move or resize the popup widget. |rect| contains the new location and size.
-
-The `rect` list should contain 4 elements: [x, y, width, height].
+Called when the browser wants to move or resize the popup widget.
+|rect_out| contains the new location and size.
 
 
 ### OnPaint
@@ -130,9 +129,9 @@ The `rect` list should contain 4 elements: [x, y, width, height].
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| paintElementType | int |
-| out  dirtyRects | list |
-| buffer | [PaintBuffer](PaintBuffer.md) |
+| element_type | int |
+| dirty_rects | list[[x,y,width,height],[..]] |
+| paint_buffer | [PaintBuffer](PaintBuffer.md) |
 | width | int |
 | height | int |
 | __Return__ | void |
@@ -141,7 +140,7 @@ Called when an element should be painted. Pixel values passed to this
 method are scaled relative to view coordinates based on the value of
 CefScreenInfo.device_scale_factor returned from GetScreenInfo. |type|
 indicates whether the element is the view or the popup widget. |buffer|
-contains the pixel data for the whole image. |dirtyRects| contains the set
+contains the pixel data for the whole image. |dirty_rects| contains the set
 of rectangles in pixel coordinates that need to be repainted. |buffer| will
 be |width|*|height|*4 bytes in size and represents a BGRA image with an
 upper-left origin.
@@ -149,8 +148,6 @@ upper-left origin.
 `paintElementType` constants in the cefpython module:
 * PET_VIEW
 * PET_POPUP
-
-`dirtyRects` is a list of rects: [[x, y, width, height], [..]]
 
 
 ### OnCursorChange

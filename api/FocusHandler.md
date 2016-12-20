@@ -22,7 +22,7 @@ Table of contents:
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| next | bool |
+| next_component | bool |
 | __Return__ | void |
 
 Description from upstream CEF:

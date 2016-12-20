@@ -18,7 +18,7 @@ cdef public void FocusHandler_OnTakeFocus(
         browser = GetPyBrowser(cef_browser)
         callback = browser.GetClientCallback("OnTakeFocus")
         if callback:
-            callback(browser, next_)
+            callback(browser=browser, next=next_)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -35,7 +35,7 @@ cdef public cpp_bool FocusHandler_OnSetFocus(
         browser = GetPyBrowser(cef_browser)
         callback = browser.GetClientCallback("OnSetFocus")
         if callback:
-            ret = callback(browser, source)
+            ret = callback(browser=browser, source=source)
             return bool(ret)
         else:
             return False
@@ -53,7 +53,7 @@ cdef public void FocusHandler_OnGotFocus(
         browser = GetPyBrowser(cef_browser)
         callback = browser.GetClientCallback("OnGotFocus")
         if callback:
-            callback(browser)
+            callback(browser=browser)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

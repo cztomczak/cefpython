@@ -132,7 +132,10 @@ cdef public void WebRequestClient_OnUploadProgress(
         if webRequest:
             userCallback = webRequest.GetCallback("OnUploadProgress")
             if userCallback:
-                userCallback(webRequest, current, total)
+                userCallback(
+                        web_request=webRequest,
+                        current=current,
+                        total=total)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace) 
@@ -150,7 +153,10 @@ cdef public void WebRequestClient_OnDownloadProgress(
         if webRequest:
             userCallback = webRequest.GetCallback("OnDownloadProgress")
             if userCallback:
-                userCallback(webRequest, current, total)
+                userCallback(
+                    web_request=webRequest,
+                    current=current,
+                    total=total)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace) 
@@ -168,7 +174,9 @@ cdef public void WebRequestClient_OnDownloadData(
         if webRequest:
             userCallback = webRequest.GetCallback("OnDownloadData")
             if userCallback:
-                userCallback(webRequest, VoidPtrToString(data, dataLength))
+                userCallback(
+                        web_request=webRequest,
+                        data=VoidPtrToString(data, dataLength))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -184,7 +192,7 @@ cdef public void WebRequestClient_OnRequestComplete(
         if webRequest:
             userCallback = webRequest.GetCallback("OnRequestComplete")
             if userCallback:
-                userCallback(webRequest)
+                userCallback(web_request=webRequest)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

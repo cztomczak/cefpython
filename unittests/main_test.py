@@ -192,7 +192,7 @@ class GlobalHandler(object):
         self.test_for_True = True  # Test whether asserts are working correctly
         self.OnAfterCreated_True = False
 
-    def _OnAfterCreated(self, browser):
+    def _OnAfterCreated(self, browser, **_):
         # For asserts that are checked automatically before shutdown its
         # values should be set first, so that when other asserts fail
         # (the ones called through the test_case member) they are reported
@@ -215,24 +215,23 @@ class LoadHandler(object):
         # self.OnLoadingStateChange_Start_True = False # FAILS
         self.OnLoadingStateChange_End_True = False
 
-    def OnLoadStart(self, browser, frame):
+    def OnLoadStart(self, browser, frame, **_):
         self.test_case.assertFalse(self.OnLoadStart_True)
         self.OnLoadStart_True = True
         self.test_case.assertEqual(browser.GetUrl(), frame.GetUrl())
         self.test_case.assertEqual(browser.GetUrl(), g_datauri)
 
-    def OnLoadEnd(self, browser, frame, http_code):
+    def OnLoadEnd(self, browser, frame, http_code, **_):
         # OnLoadEnd should be called only once
         self.test_case.assertFalse(self.OnLoadEnd_True)
         self.OnLoadEnd_True = True
         self.test_case.assertEqual(http_code, 200)
         self.frame_source_visitor = FrameSourceVisitor(self, self.test_case)
         frame.GetSource(self.frame_source_visitor)
-        browser.ExecuteJavascript(
-                "print('LoadHandler.OnLoadEnd() ok')")
+        browser.ExecuteJavascript("print('LoadHandler.OnLoadEnd() ok')")
 
-    def OnLoadingStateChange(self, browser, is_loading,
-                             can_go_back, can_go_forward):
+    def OnLoadingStateChange(self, browser, is_loading, can_go_back,
+                             can_go_forward, **_):
         if is_loading:
             # TODO: this test fails, looks like OnLoadingStaetChange with
             #       is_loading=False is being called very fast, before
@@ -259,8 +258,7 @@ class DisplayHandler(object):
         self.javascript_errors_False = False
         self.OnConsoleMessage_True = False
 
-    # noinspection PyUnusedLocal
-    def OnConsoleMessage(self, browser, message, source, line):
+    def OnConsoleMessage(self, message, **_):
         if "error" in message.lower() or "uncaught" in message.lower():
             self.javascript_errors_False = True
             raise Exception(message)
@@ -277,8 +275,7 @@ class FrameSourceVisitor(object):
         self.load_handler = load_handler
         self.test_case = test_case
 
-    # noinspection PyUnusedLocal
-    def Visit(self, value):
+    def Visit(self, **_):
         self.test_case.assertFalse(self.load_handler.FrameSourceVisitor_True)
         self.load_handler.FrameSourceVisitor_True = True
         self.test_case.assertIn("747ef3e6011b6a61e6b3c6e54bdd2dee",

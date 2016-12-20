@@ -385,7 +385,7 @@ The behavior for encode/decode errors is to replace the unknown character with "
 
 (int)
 The number of stack trace frames to capture for uncaught exceptions.  
-Specify a positive value to enable the [JavascriptContextHandler](JavascriptContextHandler.md).OnUncaughtException()
+Specify a positive value to enable the [V8ContextHandler](V8ContextHandler.md).OnUncaughtException()
 callback. Specify 0 (default value) and  
 OnUncaughtException() will not be called. Also configurable using the  
 "uncaught-exception-stack-size" [command-line switch](CommandLineSwitches.md).

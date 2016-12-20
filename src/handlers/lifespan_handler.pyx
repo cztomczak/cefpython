@@ -56,10 +56,18 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
         pyBrowserSettings = []
         callback = pyBrowser.GetClientCallback("OnBeforePopup")
         if callback:
-            returnValue = bool(callback(pyBrowser, pyFrame, pyTargetUrl,
-                    pyTargetFrameName, targetDisposition, userGesture, None,
-                    pyWindowInfo, None, pyBrowserSettings,
-                    pyNoJavascriptAccess))
+            returnValue = bool(callback(
+                    browser=pyBrowser,
+                    frame=pyFrame,
+                    target_url=pyTargetUrl,
+                    target_frame_name=pyTargetFrameName,
+                    target_disposition=targetDisposition,
+                    user_gesture=userGesture,
+                    popup_features=None,
+                    window_info_out=pyWindowInfo,
+                    client=None,
+                    browser_settings_out=pyBrowserSettings,
+                    no_javascript_access_out=pyNoJavascriptAccess))
             noJavascriptAccess[0] = <cpp_bool>bool(pyNoJavascriptAccess[0])
             if len(pyBrowserSettings):
                 SetBrowserSettings(pyBrowserSettings[0], &settings)
@@ -79,7 +87,7 @@ cdef public void LifespanHandler_OnAfterCreated(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = GetGlobalClientCallback("OnAfterCreated")
         if callback:
-            callback(pyBrowser)
+            callback(browser=pyBrowser)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -92,7 +100,7 @@ cdef public cpp_bool LifespanHandler_DoClose(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("DoClose")
         if callback:
-            return bool(callback(pyBrowser))
+            return bool(callback(browser=pyBrowser))
         return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
@@ -107,7 +115,7 @@ cdef public void LifespanHandler_OnBeforeClose(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("OnBeforeClose")
         if callback:
-            callback(pyBrowser)
+            callback(browser=pyBrowser)
         RemovePythonCallbacksForBrowser(pyBrowser.GetIdentifier())
         RemovePyFramesForBrowser(pyBrowser.GetIdentifier())
         RemovePyBrowser(pyBrowser.GetIdentifier())

@@ -90,7 +90,9 @@ cdef public cpp_bool ResourceHandler_ProcessRequest(
         if pyResourceHandler:
             userCallback = pyResourceHandler.GetCallback("ProcessRequest")
             if userCallback:
-                returnValue = userCallback(pyRequest, pyCallback)
+                returnValue = userCallback(
+                        request=pyRequest,
+                        callback=pyCallback)
                 return bool(returnValue)
         return False
     except:
@@ -154,8 +156,11 @@ cdef public cpp_bool ResourceHandler_ReadResponse(
         if pyResourceHandler:
             userCallback = pyResourceHandler.GetCallback("ReadResponse")
             if userCallback:
-                returnValue = userCallback(dataOut, bytesToRead, bytesReadOut,
-                        pyCallback)
+                returnValue = userCallback(
+                        data_out=dataOut,
+                        bytes_to_read=bytesToRead,
+                        bytes_read_out=bytesReadOut,
+                        callback=pyCallback)
                 pyBytesRead = int(bytesReadOut[0])
                 if dataOut[0] and IsString(dataOut[0]):
                     # The tempData pointer is tied to the lifetime 
@@ -192,7 +197,7 @@ cdef public cpp_bool ResourceHandler_CanGetCookie(
         if pyResourceHandler:
             userCallback = pyResourceHandler.GetCallback("CanGetCookie")
             if userCallback:
-                returnValue = userCallback(pyCookie)
+                returnValue = userCallback(cookie=pyCookie)
                 return bool(returnValue)
         return False
     except:
@@ -214,7 +219,7 @@ cdef public cpp_bool ResourceHandler_CanSetCookie(
         if pyResourceHandler:
             userCallback = pyResourceHandler.GetCallback("CanSetCookie")
             if userCallback:
-                returnValue = userCallback(pyCookie)
+                returnValue = userCallback(cookie=pyCookie)
                 return bool(returnValue)
         return False
     except:

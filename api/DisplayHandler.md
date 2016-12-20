@@ -48,12 +48,12 @@ Called when the page title changes.
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| textOut | list& |
+| text_out | list |
 | __Return__ | bool |
 
-Called when the browser is about to display a tooltip. `textOut[0]` contains the
+Called when the browser is about to display a tooltip. `text_out[0]` contains the
 text that will be displayed in the tooltip. To handle the display of the
-tooltip yourself return true. Otherwise, you can optionally modify `textOut[0]`
+tooltip yourself return true. Otherwise, you can optionally modify `text_out[0]`
 and then return false to allow the browser to display the tooltip.
 When window rendering is disabled the application is responsible for
 drawing tooltips and the return value is ignored.

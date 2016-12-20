@@ -16,7 +16,10 @@ cdef public void LoadHandler_OnLoadingStateChange(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("OnLoadingStateChange")
         if callback:
-            callback(pyBrowser, isLoading, canGoBack, canGoForward)
+            callback(browser=pyBrowser,
+                     is_loading=isLoading,
+                     can_go_back=canGoBack,
+                     can_go_forward=canGoForward)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -33,7 +36,7 @@ cdef public void LoadHandler_OnLoadStart(
         pyFrame = GetPyFrame(cefFrame)
         clientCallback = pyBrowser.GetClientCallback("OnLoadStart")
         if clientCallback:
-            clientCallback(pyBrowser, pyFrame)
+            clientCallback(browser=pyBrowser, frame=pyFrame)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -51,7 +54,9 @@ cdef public void LoadHandler_OnLoadEnd(
         pyFrame = GetPyFrame(cefFrame)
         clientCallback = pyBrowser.GetClientCallback("OnLoadEnd")
         if clientCallback:
-            clientCallback(pyBrowser, pyFrame, httpStatusCode)
+            clientCallback(browser=pyBrowser,
+                           frame=pyFrame,
+                           http_code=httpStatusCode)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -78,8 +83,11 @@ cdef public void LoadHandler_OnLoadError(
         clientCallback = pyBrowser.GetClientCallback("OnLoadError")
         if clientCallback:
             clientCallback(
-                    pyBrowser, pyFrame, cefErrorCode, errorTextOut,
-                    CefToPyString(cefFailedUrl))
+                    browser=pyBrowser,
+                    frame=pyFrame,
+                    error_code=cefErrorCode,
+                    error_text_out=errorTextOut,
+                    failed_url=CefToPyString(cefFailedUrl))
             # Providing custom error messsage not yet supported in CEF 3.
             # | PyToCefString(errorTextOut[0], cefErrorText)
     except:

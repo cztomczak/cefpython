@@ -59,9 +59,11 @@ cdef public cpp_bool KeyboardHandler_OnPreKeyEvent(
         pyIsKeyboardShortcutOut = [cefIsKeyboardShortcut[0]]
         callback = pyBrowser.GetClientCallback("OnPreKeyEvent")
         if callback:
-            returnValue = callback(pyBrowser, pyEvent, 
-                    <object>PyLong_FromVoidPtr(cefEventHandle),
-                    pyIsKeyboardShortcutOut)
+            returnValue = callback(
+                    browser=pyBrowser,
+                    event=pyEvent,
+                    event_handle=<object>PyLong_FromVoidPtr(cefEventHandle),
+                    is_keyboard_shortcut_out=pyIsKeyboardShortcutOut)
             cefIsKeyboardShortcut[0] = \
                     <cpp_bool>bool(pyIsKeyboardShortcutOut[0])
             return bool(returnValue)
@@ -84,8 +86,10 @@ cdef public cpp_bool KeyboardHandler_OnKeyEvent(
         pyEvent = CefToPyKeyEvent(cefEvent)
         callback = pyBrowser.GetClientCallback("OnKeyEvent")
         if callback:
-            returnValue = callback(pyBrowser, pyEvent,
-                    <object>PyLong_FromVoidPtr(cefEventHandle))
+            returnValue = callback(
+                    browser=pyBrowser,
+                    event=pyEvent,
+                    event_handle=<object>PyLong_FromVoidPtr(cefEventHandle))
             return bool(returnValue)
         return False
     except:

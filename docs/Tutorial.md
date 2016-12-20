@@ -40,18 +40,18 @@ cd cefpython/examples/
 
 ## Hello world
 
-The [hello_world.py](../../../examples/hello_world.py) example is the
+The [hello_world.py](../examples/hello_world.py) example is the
 most basic example. It doesn't depend on any third party GUI frameworks.
-It creates a browser widget which doesn't provide any window information
+It creates a browser widget without providing any window information
 (parent window not specified), thus CEF automatically takes care of creating
 a top-level window for us, and in that window a Chromium widget is embedded.
 When creating the browser, an "url" parameter is specified, which causes the
 browser to initially navigate to the Google website. Let's explain the code
 from this example:
 
-1. `from cefpython3 import cefpython as cef` - import the cefpython
-   module and bind it to a shorter name "cef"
-2. `sys.excepthook = cef.ExceptHook` - overwrite Python's default
+1. `from cefpython3 import cefpython as cef` - Import the cefpython
+   module and bind it to a shorter name "cef".
+2. `sys.excepthook = cef.ExceptHook` - Overwrite Python's default
    exception handler so that all CEF processes are terminated when
    Python exception occurs. To understand this better read the
    "CEF's multiprocess architecture" and "Handling Python exceptions"
@@ -63,25 +63,25 @@ from this example:
 4. `cef.CreateBrowserSync(url="https://www.google.com/")` - Create
    a browser synchronously, this function returns the Browser object.
 5. `cef.MessageLoop()` - Run CEF message loop. All desktop GUI programs
-   run a message loop that waits and dispatches events or messages.
+   run some message loop that waits and dispatches events or messages.
 6. `cef.Shutdown()` - Shut down CEF. This function must be called for
    CEF to shut down cleanly. It will free CEF system resources, it
    will terminate all subprocesses, and it will flush to disk any
-   yet unsaved data like for example cookies and other data. Call this
-   function at the very end of your program execution. When using third
-   party GUI frameworks such as Qt/wxWidgets, CEF should be shut down
+   yet unsaved data like for example cookies and/or local storage. Call
+   this function at the very end of your program execution. When using
+   third party GUI frameworks such as Qt/wxWidgets, CEF should be shut down
    after these frameworks' shutdown procedures were called. For example
    in Qt, shut down CEF only after QApplication object was destroyed.
 
 Documentation for the functions from this example can be found in
 API docs (the api/ directory in GitHub's repository):
 
-* [ExceptHook](../../../api/cefpython.md#excepthook)
-* [Initialize()](../../../api/cefpython.md#initialize)
-* [CreateBrowserSync()](../../../api/cefpython.md#createbrowsersync)
-* [Browser](../../../api/Browser.md) object
-* [MessageLoop()](../../../api/cefpython.md#messageloop)
-* [Shutdown()](../../../api/cefpython.md#shutdown)
+* [ExceptHook](../api/cefpython.md#excepthook)
+* [Initialize()](../api/cefpython.md#initialize)
+* [CreateBrowserSync()](../api/cefpython.md#createbrowsersync)
+* [Browser](../api/Browser.md) object
+* [MessageLoop()](../api/cefpython.md#messageloop)
+* [Shutdown()](../api/cefpython.md#shutdown)
 
 
 ## CEF's multiprocess architecture
@@ -90,5 +90,4 @@ API docs (the api/ directory in GitHub's repository):
 
 
 ## Handling Python exceptions
-
 ...

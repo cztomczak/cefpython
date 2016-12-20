@@ -1,7 +1,7 @@
 # Example of embedding CEF Python browser using Tkinter toolkit.
 # This example has two widgets: a navigation bar and a browser.
 #
-# Tested with Tk 8.6 and CEF Python v53.1+, only on Linux.
+# Tested with Tk 8.6 and CEF Python v55.3+, only on Linux.
 #
 # Known issue on Linux: When typing url, mouse must be over url
 # entry widget otherwise keyboard focus is lost (Issue #255
@@ -29,7 +29,7 @@ def main():
     logger.info("CEF Python {ver}".format(ver=cef.__version__))
     logger.info("Python {ver}".format(ver=sys.version[:6]))
     logger.info("Tk {ver}".format(ver=tk.TkVersion))
-    assert cef.__version__ >= "53.1", "CEF Python v53.1+ required to run this"
+    assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     cef.Initialize()
     app = MainFrame(tk.Tk())
@@ -256,9 +256,7 @@ class BrowserFrame(tk.Frame):
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         self.browser.SetClientHandler(LoadHandler(self))
-        # FocusHandler requires cefpython 53.2+
-        if cef.__version__ >= "53.2":
-            self.browser.SetClientHandler(FocusHandler(self))
+        self.browser.SetClientHandler(FocusHandler(self))
         self.message_loop_work()
 
     def message_loop_work(self):
@@ -302,27 +300,26 @@ class LoadHandler(object):
     def __init__(self, browser_frame):
         self.browser_frame = browser_frame
 
-    def OnLoadStart(self, browser, _):
+    def OnLoadStart(self, browser, **_):
         if self.browser_frame.master.navigation_bar:
             self.browser_frame.master.navigation_bar.set_url(browser.GetUrl())
 
 
 class FocusHandler(object):
-    """FocusHandler is available in CEF Python 53.2 and higher."""
 
     def __init__(self, browser_frame):
         self.browser_frame = browser_frame
 
-    def OnTakeFocus(self, _, next_component):
+    def OnTakeFocus(self, next_component, **_):
         logger.debug("FocusHandler.OnTakeFocus, next={next}"
                      .format(next=next_component))
 
-    def OnSetFocus(self, _, source):
+    def OnSetFocus(self, source, **_):
         logger.debug("FocusHandler.OnSetFocus, source={source}"
                      .format(source=source))
         return False
 
-    def OnGotFocus(self, _):
+    def OnGotFocus(self, **_):
         """Fix CEF focus issues (#255). Call browser frame's focus_set
            to get rid of type cursor in url entry widget."""
         logger.debug("FocusHandler.OnGotFocus")

@@ -25,7 +25,7 @@ cdef public void V8ContextHandler_OnContextCreated(
         # User defined callback.
         clientCallback = pyBrowser.GetClientCallback("OnContextCreated")
         if clientCallback:
-            clientCallback(pyBrowser, pyFrame)
+            clientCallback(browser=pyBrowser, frame=pyFrame)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -52,7 +52,7 @@ cdef public void V8ContextHandler_OnContextReleased(
         if pyBrowser and pyFrame:
             clientCallback = pyBrowser.GetClientCallback("OnContextReleased")
             if clientCallback:
-                clientCallback(pyBrowser, pyFrame)
+                clientCallback(browser=pyBrowser, frame=pyFrame)
         else:
             if not pyBrowser:
                 Debug("V8ContextHandler_OnContextReleased() WARNING: "

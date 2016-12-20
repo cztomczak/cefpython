@@ -32,7 +32,7 @@ cdef public cpp_bool RenderHandler_GetRootScreenRect(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("GetRootScreenRect")
         if callback:
-            ret = callback(pyBrowser, pyRect)
+            ret = callback(browser=pyBrowser, rect_out=pyRect)
             if ret:
                 assert (pyRect and len(pyRect) == 4), "rectangle not provided"
                 cefRect.x = pyRect[0]
@@ -59,7 +59,7 @@ cdef public cpp_bool RenderHandler_GetViewRect(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("GetViewRect")
         if callback:
-            ret = callback(pyBrowser, pyRect)
+            ret = callback(browser=pyBrowser, rect_out=pyRect)
             if ret:
                 assert (pyRect and len(pyRect) == 4), "rectangle not provided"
                 cefRect.x = pyRect[0]
@@ -86,7 +86,7 @@ cdef public cpp_bool RenderHandler_GetScreenRect(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("GetScreenRect")
         if callback:
-            ret = callback(pyBrowser, pyRect)
+            ret = callback(browser=pyBrowser, rect_out=pyRect)
             if ret:
                 assert (pyRect and len(pyRect) == 4), (
                         "rectangle not provided or invalid")
@@ -115,7 +115,10 @@ cdef public cpp_bool RenderHandler_GetScreenPoint(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("GetScreenPoint")
         if callback:
-            ret = callback(pyBrowser, viewX, viewY, screenCoordinates)
+            ret = callback(browser=pyBrowser,
+                           view_x=viewX,
+                           view_y=viewY,
+                           screen_coordinates_out=screenCoordinates)
             if ret:
                 assert (screenCoordinates and len(screenCoordinates) == 2), (
                         "screenCoordinates not provided or invalid")
@@ -146,7 +149,7 @@ cdef public void RenderHandler_OnPopupShow(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("OnPopupShow")
         if callback:
-            callback(pyBrowser, show)
+            callback(browser=pyBrowser, show=show)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -162,7 +165,7 @@ cdef public void RenderHandler_OnPopupSize(
         callback = pyBrowser.GetClientCallback("OnPopupSize")
         if callback:
             pyRect = [cefRect.x, cefRect.y, cefRect.width, cefRect.height]
-            callback(pyBrowser, pyRect)
+            callback(browser=pyBrowser, rect_out=pyRect)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -201,8 +204,13 @@ cdef public void RenderHandler_OnPaint(
 
         callback = pyBrowser.GetClientCallback("OnPaint")
         if callback:
-            callback(pyBrowser, paintElementType, pyDirtyRects, paintBuffer,
-                width, height)
+            callback(
+                    browser=pyBrowser,
+                    element_type=paintElementType,
+                    dirty_rects=pyDirtyRects,
+                    paint_buffer=paintBuffer,
+                    width=width,
+                    height=height)
         else:
             return
     except:
@@ -218,7 +226,7 @@ cdef public void RenderHandler_OnCursorChange(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("OnCursorChange")
         if callback:
-            callback(pyBrowser, <uintptr_t>cursor)
+            callback(browser=pyBrowser, cursor=<uintptr_t>cursor)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -231,7 +239,7 @@ cdef public void RenderHandler_OnScrollOffsetChanged(
         pyBrowser = GetPyBrowser(cefBrowser)
         callback = pyBrowser.GetClientCallback("OnScrollOffsetChanged")
         if callback:
-            callback(pyBrowser)
+            callback(browser=pyBrowser)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -250,7 +258,12 @@ cdef public cpp_bool RenderHandler_StartDragging(
         drag_data = DragData_Init(cef_drag_data)
         callback = browser.GetClientCallback("StartDragging")
         if callback:
-            ret = callback(browser, drag_data, allowed_ops, x, y)
+            ret = callback(
+                    browser=browser,
+                    drag_data=drag_data,
+                    allowed_ops=allowed_ops,
+                    x=x,
+                    y=y)
             if ret:
                 return True
             else:
@@ -270,7 +283,7 @@ cdef public void RenderHandler_UpdateDragCursor(
         browser = GetPyBrowser(cef_browser)
         callback = browser.GetClientCallback("UpdateDragCursor")
         if callback:
-            callback(browser, operation)
+            callback(browser=browser, operation=operation)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

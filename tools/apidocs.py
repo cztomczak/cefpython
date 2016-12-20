@@ -1,5 +1,4 @@
 # Copyright (c) 2016 CEF Python, see the Authors file. All rights reserved.
-# TODO: sort objects by name in API-index.md
 
 """Generate API docs from sources.
 
@@ -30,6 +29,7 @@ def api_index():
     contents = ("[API categories](API-categories.md) | " +
                 "[API index](API-index.md)\n\n" +
                 "# API index\n\n")
+    files = sorted(files, key=lambda s: s.lower())
     for file_ in files:
         if "API-" in file_:
             continue

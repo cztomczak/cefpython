@@ -71,8 +71,8 @@ __PYX_EXTERN_C DL_IMPORT(bool) ResourceHandler_ReadResponse(int, void *, int, in
 __PYX_EXTERN_C DL_IMPORT(bool) ResourceHandler_CanGetCookie(int, CefCookie const &);
 __PYX_EXTERN_C DL_IMPORT(bool) ResourceHandler_CanSetCookie(int, CefCookie const &);
 __PYX_EXTERN_C DL_IMPORT(void) ResourceHandler_Cancel(int);
-__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforeResourceLoad(CefRefPtr<CefBrowser> , CefRefPtr<CefFrame> , CefRefPtr<CefRequest> );
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforeBrowse(CefRefPtr<CefBrowser> , CefRefPtr<CefFrame> , CefRefPtr<CefRequest> , bool);
+__PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_OnBeforeResourceLoad(CefRefPtr<CefBrowser> , CefRefPtr<CefFrame> , CefRefPtr<CefRequest> );
 __PYX_EXTERN_C DL_IMPORT(CefRefPtr<CefResourceHandler> ) RequestHandler_GetResourceHandler(CefRefPtr<CefBrowser> , CefRefPtr<CefFrame> , CefRefPtr<CefRequest> );
 __PYX_EXTERN_C DL_IMPORT(void) RequestHandler_OnResourceRedirect(CefRefPtr<CefBrowser> , CefRefPtr<CefFrame> , CefString const &, CefString &, CefRefPtr<CefRequest> , CefRefPtr<CefResponse> );
 __PYX_EXTERN_C DL_IMPORT(bool) RequestHandler_GetAuthCredentials(CefRefPtr<CefBrowser> , CefRefPtr<CefFrame> , bool, CefString const &, int, CefString const &, CefString const &, CefRefPtr<CefAuthCallback> );

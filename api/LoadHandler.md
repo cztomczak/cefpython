@@ -25,9 +25,9 @@ Table of contents:
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| isLoading | bool |
-| canGoBack | bool |
-| canGoForward | bool |
+| is_loading | bool |
+| can_go_back | bool |
+| can_go_forward | bool |
 | __Return__ | void |
 
 Called when the loading state has changed. This callback will be executed
@@ -78,7 +78,7 @@ Not yet implemented. See [Issue #32](../issues/32).
 | --- | --- |
 | browser | [Browser](Browser.md) |
 | frame | [Frame](Frame.md) |
-| httpStatusCode | int |
+| http_code | int |
 | __Return__ | void |
 
 Called when the browser is done loading a frame. The |frame| value will
@@ -89,9 +89,12 @@ will always be called for all frames irrespective of whether the request
 completes successfully. For notification of overall browser load status use
 OnLoadingStateChange instead.
 
-This event behaves like window.onload, it waits for all the content to load (e.g. images), there is currently no callback for a DOMContentLoaded event, see [Issue #32](../issues/32).
+This event behaves like window.onload, it waits for all the content
+to load (e.g. images), there is currently no callback for
+a DOMContentLoaded event, see [Issue #32](../issues/32).
 
-There are some cases when this callback won't get called, see this topic: http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10906
+There are some cases when this callback won't get called, see this
+topic: http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10906
 
 
 ### OnLoadError
@@ -100,14 +103,15 @@ There are some cases when this callback won't get called, see this topic: http:/
 | --- | --- |
 | browser | [Browser](Browser.md) |
 | frame | [Frame](Frame.md) |
-| errorCode | [NetworkError](NetworkError.md) |
-| errorText | list& |
-| failedUrl | string |
+| error_code | [NetworkError](NetworkError.md) |
+| error_text_out | list[string] |
+| failed_url | string |
 | __Return__ | void |
 
 Called when the resource load for a navigation fails or is canceled.
-|errorCode| is the error code number, |`errorText[0]`| is the error text and
-|failedUrl| is the URL that failed to load. See net\base\net_error_list.h
-for complete descriptions of the error codes.
+|errorCode| is the error code number, |error_text_out[0]| is the error
+text and |failed_url| is the URL that failed to load. See
+net\base\net_error_list.h for complete descriptions of the error codes.
 
-This callback may get called when [Browser](Browser.md).`StopLoad` is called, or when file download is aborted (see DownloadHandler).
+This callback may get called when [Browser](Browser.md).`StopLoad`
+is called, or when file download is aborted (see DownloadHandler).

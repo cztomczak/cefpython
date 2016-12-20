@@ -323,7 +323,11 @@ cdef public cpp_bool CookieVisitor_Visit(
         if pyCookieVisitor:
             callback = pyCookieVisitor.GetCallback("Visit")
             if callback:
-                ret = callback(pyCookie, count, total, pyDeleteCookie)
+                ret = callback(
+                        cookie=pyCookie,
+                        count=count,
+                        total=total,
+                        delete_cookie_out=pyDeleteCookie)
                 (&deleteCookie)[0] = bool(pyDeleteCookie[0])
                 return bool(ret)
         return False

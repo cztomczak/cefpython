@@ -27,11 +27,11 @@ requests.
 | Parameter | Type |
 | --- | --- |
 | allow | bool |
-| userInput | str |
+| user_input | str |
 | __Return__ | void |
 
 Continue the javascript dialog request. Set |allow| to true if the OK button was
-pressed. The |userInput| value should be specified for prompt dialogs.
+pressed. The |user_input| value should be specified for prompt dialogs.
 
 
 ## Callbacks
@@ -47,17 +47,17 @@ pressed. The |userInput| value should be specified for prompt dialogs.
 | message_text | str |
 | default_prompt_text | str |
 | callback | JavascriptDialogCallback |
-| suppress_message[0] | bool& |
+| suppress_message_out | list |
 | __Return__ | bool |
 
 Called to run a JavaScript dialog. If |origin_url| is non-empty it can be
 passed to the CefFormatUrlForSecurityDisplay function to retrieve a secure
 and user-friendly display string. The |default_prompt_text| value will be
-specified for prompt dialogs only. Set |suppress_message| to true and
+specified for prompt dialogs only. Set |suppress_message_out[0]| to true and
 return false to suppress the message (suppressing messages is preferable to
 immediately executing the callback as this is used to detect presumably
 malicious behavior like spamming alert messages in onbeforeunload). Set
-|suppress_message| to false and return false to use the default
+|suppress_message_out[0]| to false and return false to use the default
 implementation (the default implementation will show one modal dialog at a
 time and suppress any additional dialog requests until the displayed dialog
 is dismissed). Return true if the application will use a custom dialog or

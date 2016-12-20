@@ -1,15 +1,23 @@
 [API categories](API-categories.md) | [API index](API-index.md)
 
 
-# JavascriptContextHandler (interface)
+# V8ContextHandler (interface)
 
 Implement this interface to handle javascript exceptions globally.
 
-For an example of how to implement handler see [cefpython](cefpython.md).CreateBrowser(). For a list of all handler interfaces see [API > Client handlers](API#Client_handlers).
+
 Table of contents:
+* [Notes](#notes)
 * [Callbacks](#callbacks)
   * [OnContextCreated](#oncontextcreated)
   * [OnContextReleased](#oncontextreleased)
+
+
+## Notes
+
+Callbacks available in upstream CEF, but not yet exposed in CEF Python:
+* OnUncaughtException
+
 
 ## Callbacks
 
@@ -22,9 +30,11 @@ Table of contents:
 | frame | [Frame](Frame.md) |
 | __Return__ | void |
 
-Called shortly after (process message delay) the V8 context for a frame has been created.
+Called shortly after (process message delay) the V8 context for
+a frame has been created.
 
-If the page does not contain `<script>` tags then this method won't get called.
+If the page does not contain `<script>` tags then this method
+won't get called.
 
 
 ### OnContextReleased
@@ -35,7 +45,8 @@ If the page does not contain `<script>` tags then this method won't get called.
 | frame | [Frame](Frame.md) |
 | __Return__ | void |
 
-Called shortly after (process message delay) the V8 context for a frame was released.
+Called shortly after (process message delay) the V8 context for
+a frame was released.
 
 Due to multi-process architecture in CEF 3, this function won't
 get called for the main frame in main browser. To send a message

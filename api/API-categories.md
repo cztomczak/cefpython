@@ -15,7 +15,7 @@
  * [CommandLineSwitches](CommandLineSwitches.md) dictionary
 
 
-### Objects
+### Classes and objects
 
  * [Browser](Browser.md) object
  * [Callback](Callback.md) object
@@ -36,12 +36,11 @@
  * [WindowUtils](WindowUtils.md) class
 
 
-### Handlers
+### Handlers (interfaces)
 
  * [DisplayHandler](DisplayHandler.md)
  * [DownloadHandler](DownloadHandler.md)
  * [FocusHandler](FocusHandler.md)
- * [JavascriptContextHandler](JavascriptContextHandler.md)
  * [JavascriptDialogHandler](JavascriptDialogHandler.md)
  * [KeyboardHandler](KeyboardHandler.md)
  * [LifespanHandler](LifespanHandler.md)
@@ -49,4 +48,12 @@
  * [RenderHandler](RenderHandler.md)
  * [RequestHandler](RequestHandler.md)
  * [ResourceHandler](ResourceHandler.md)
+ * [V8ContextHandler](V8ContextHandler.md)
+
+
+### Other interfaces
+
+ * [CookieVisitor](CookieVisitor.md) interface
+ * [StringVisitor](StringVisitor.md) interface
+ * [WebRequestClient](WebRequestClient.md) interface
 

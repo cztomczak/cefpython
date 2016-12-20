@@ -69,7 +69,7 @@ cdef public void StringVisitor_Visit(
         if userStringVisitor:
             callback = userStringVisitor.GetCallback("Visit")
             if callback:
-                callback(pyString)
+                callback(value=pyString)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

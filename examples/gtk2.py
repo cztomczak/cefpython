@@ -1,5 +1,5 @@
 # Example of embedding CEF Python browser using PyGTK library (GTK 2).
-# Tested with GTK 2.24 and CEF Python v54+, only on Linux.
+# Tested with GTK 2.24 and CEF Python v55.3+, only on Linux.
 # Known issue on Linux: Keyboard focus problem (Issue #284).
 
 from cefpython3 import cefpython as cef
@@ -40,7 +40,7 @@ def check_versions():
     print("[gkt2.py] Python {ver}".format(ver=sys.version[:6]))
     print("[gkt2.py] GTK {ver}".format(ver='.'.join(
                                            map(str, list(gtk.gtk_version)))))
-    assert cef.__version__ >= "54.0", "CEF Python v54+ required to run this"
+    assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
     pygtk.require('2.0')
 
 
@@ -86,6 +86,7 @@ class Gtk2Example:
         windowInfo.SetAsChild(self.main_window.window.xid)
         self.browser = cef.CreateBrowserSync(windowInfo, settings={},
                                              url="https://www.google.com/")
+        self.browser.SetClientHandler(LoadHandler())
 
         self.vbox.show()
         self.main_window.show()
@@ -143,6 +144,24 @@ class Gtk2Example:
             cef.QuitMessageLoop()
         else:
             gtk.main_quit()
+
+
+class LoadHandler(object):
+
+    def __init__(self):
+        self.initial_app_loading = True
+
+    def OnLoadStart(self, browser, **_):
+        if self.initial_app_loading:
+            # Temporary fix for focus issue during initial loading
+            # on Linux (Issue #284). If this is not applied then
+            # sometimes during initial loading, keyboard focus may
+            # break and it is not possible to type anything, even
+            # though a type cursor blinks in web view.
+            print("[gtk2.py] LoadHandler.OnLoadStart:"
+                  " keyboard focus fix (#284)")
+            browser.SetFocus(True)
+            self.initial_app_loading = False
 
 
 if __name__ == '__main__':
