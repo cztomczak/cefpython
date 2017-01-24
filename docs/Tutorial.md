@@ -91,3 +91,91 @@ API docs (the api/ directory in GitHub's repository):
 
 ## Handling Python exceptions
 ...
+
+
+## Message loop
+
+Message loop is a programming construct that waits for and
+dispatches events or messages in a program. All desktop GUI
+programs must run some kind of message loop.
+The hello_world.py example doesn't depend on any third party GUI
+framework and thus can run CEF message loop directly by calling call
+cef.MessageLoop(). However in most of other examples that show how
+to embed CEF Python browser inside GUI frameworks such as
+Qt/wxPython/Tkinter, you can't call cef.MessageLoop(), because these
+frameworks run a message loop of its own. For such cases CEF provides
+cef.MessageLoopWork() which is for integrating CEF message loop into
+existing application message loop. Usually cef.MessageLoopWork() is
+called in a 10ms timer.
+
+Calling cef.MessageLoopWork() in a timer is not the best performant
+way to run CEF message loop, also there are known bugs on some
+platforms when calling message loop work in a timer. CEF provides
+ApplicationSettings.[external_message_pump](../api/ApplicationSettings.md#external_message_pump)
+option for running an external message pump that you should use for
+best performance and to get rid of some bugs. However this option is
+still experimental, as during testing on Linux it actually made app
+x2 slower - it's a bug in upstream CEF that was reported. See
+[Issue #246](../../../issues/246) for more details. On Windows/Mac
+external message pump should work good, but it wasn't yet tested
+with CEF Python.
+
+On Windows for best performance a multi-threaded message loop should
+be used, instead of cef.MessageLoopWork / external message pump. To do
+so, set
+ApplicationSettings.[multi_threaded_message_loop](../ApplicationSettings.md#multi_threaded_message_loop)
+to True and run a native message loop in your app. Don't call CEF's
+message loop. Create browser using
+cef.PostTask(cef.TID_UI, cef.CreateBrowserSync, ...).
+Note that when using multi-threaded message loop, CEF's UI thread
+is no more application's main thread, and that makes it a bit harder
+to correctly use CEF API. API docs explain on which threads a function
+may be called and in case of handlers' callbacks (and other interfaces)
+it is stated on which thread a callback will be called.
+See also [Issue #133](../../../issues/133).
+
+
+## Settings
+
+ApplicationSettings, BrowserSettings, CommandLineSwitches, Chromium
+Preferences (not implemented yet) ...
+
+
+## Handlers
+
+...
+
+
+## Javascript integration
+
+...
+
+
+## Plugins
+
+...
+
+
+## Helper functions
+
+GetApplicationPath...
+GetModulePath...
+others...
+
+## Build executable
+
+Examples for building an executable are yet to be created:
+
+* On Windows use py2exe ([#35](../../../issues/35))
+  or pyinstaller ([#135](../../../issues/135))
+* On Mac use py2app or pyinstaller
+* On Linux use pyinstaller or cx_freeze
+
+
+## What's next?
+
+See more examples in the examples/ directory
+See API docs in the api/ directory
+Example usage of most of API is available in the unittests/ directory
+See the Knowledge base document
+Ask questions and report problems on the Forum
