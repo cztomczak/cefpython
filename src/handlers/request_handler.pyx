@@ -347,6 +347,7 @@ cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
         CefRefPtr[CefBrowser] browser,
         const CefString& mime_type,
         const CefString& plugin_url,
+        cpp_bool is_main_frame,
         const CefString& top_origin_url,
         CefRefPtr[CefWebPluginInfo] plugin_info,
         cef_types.cef_plugin_policy_t* plugin_policy
@@ -364,6 +365,7 @@ cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
                     browser=py_browser,
                     mime_type=CefToPyString(mime_type),
                     plugin_url=CefToPyString(plugin_url),
+                    is_main_frame=bool(is_main_frame),
                     top_origin_url=CefToPyString(top_origin_url),
                     plugin_info=py_plugin_info)
             if returnValue:
