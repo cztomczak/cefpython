@@ -35,11 +35,14 @@ void ContextMenuHandler::OnBeforeContextMenu(
         model->Clear();
         return;
     }
-    if (!navigation) {
+    if (!navigation && model->IsVisible(MENU_ID_BACK)
+                    && model->IsVisible(MENU_ID_FORWARD)) {
         model->Remove(MENU_ID_BACK);
         model->Remove(MENU_ID_FORWARD);
         // Remove separator
-        model->RemoveAt(0);
+        if (model->GetTypeAt(0) == MENUITEMTYPE_SEPARATOR) {
+            model->RemoveAt(0);
+        }
     }
     if (!print) {
         model->Remove(MENU_ID_PRINT);
