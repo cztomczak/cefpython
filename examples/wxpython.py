@@ -4,7 +4,7 @@
 # To install wxPython on Linux type "sudo apt-get install python-wxtools".
 
 # Tested with wxPython 2.8 on Linux, wxPython 3.0 on Windows/Mac
-# and CEF Python v55.3.
+# and CEF Python v55.3+.
 
 import wx
 from cefpython3 import cefpython as cef
@@ -22,7 +22,15 @@ HEIGHT = 600
 def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-    cef.Initialize()
+    settings = {}
+    if WINDOWS:
+        # High DPI support
+        settings["auto_zooming"] = "system_dpi"
+        # Embed DPI awareness xml manifest inside .exe (recommended,
+        # most reliable) or call the SetProcessDpiAware function.
+        # noinspection PyUnresolvedReferences
+        cef.DpiAware.SetProcessDpiAware()
+    cef.Initialize(settings=settings)
     app = CefApp(False)
     app.MainLoop()
     del app  # Must destroy before calling Shutdown
