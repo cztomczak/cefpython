@@ -190,7 +190,8 @@ def main():
 
     print("Copying wx/ to package dir")
     wx_subpackage_dir = os.path.abspath(INSTALLER_DIR+"/../../wx/")
-    ret = os.system("cp -rf "+wx_subpackage_dir+"/* "+package_dir+"/wx/")
+    ret = os.system("cp -rf " + wx_subpackage_dir + "/* " + package_dir
+                    + "/cefpython3.wx/")
     assert ret == 0
 
     # print("Moving wx examples from wx/examples to examples/wx")
