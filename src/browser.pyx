@@ -251,6 +251,11 @@ cdef class PyBrowser:
     # CEF API.
     # --------------
 
+    cpdef py_void AddWordToDictionary(self, py_string word):
+        cdef CefString cef_word
+        PyToCefString(word, cef_word)
+        self.GetCefBrowserHost().get().AddWordToDictionary(cef_word)
+
     cpdef py_bool CanGoBack(self):
         return self.GetCefBrowser().get().CanGoBack()
 
@@ -403,6 +408,11 @@ cdef class PyBrowser:
 
     cpdef py_void ReloadIgnoreCache(self):
         self.GetCefBrowser().get().ReloadIgnoreCache()
+
+    cpdef py_void ReplaceMisspelling(self, py_string word):
+        cdef CefString cef_word
+        PyToCefString(word, cef_word)
+        self.GetCefBrowserHost().get().ReplaceMisspelling(cef_word)
 
     cpdef py_void SetBounds(self, int x, int y, int width, int height):
         if platform.system() == "Linux":

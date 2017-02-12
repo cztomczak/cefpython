@@ -14,9 +14,13 @@ import sys
 import re
 import glob
 
+API_DIR = os.path.join(os.path.dirname(__file__), "..", "api")
+
 
 def main():
     """Main entry point."""
+    if len(sys.argv) == 1:
+        sys.argv.append(API_DIR)
     if (len(sys.argv) == 1 or
             "-h" in sys.argv or
             "--help" in sys.argv or

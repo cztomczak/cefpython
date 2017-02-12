@@ -12,6 +12,7 @@ just assign a None value to a "browser" variable.
 Table of contents:
 * [Notes](#notes)
 * [Methods](#methods)
+  * [AddWordToDictionary](#addwordtodictionary)
   * [CanGoBack](#cangoback)
   * [CanGoForward](#cangoforward)
   * [CloseBrowser](#closebrowser)
@@ -61,6 +62,7 @@ Table of contents:
   * [ParentWindowWillClose](#parentwindowwillclose)
   * [Reload](#reload)
   * [ReloadIgnoreCache](#reloadignorecache)
+  * [ReplaceMisspelling](#replacemisspelling)
   * [SetBounds](#setbounds)
   * [SendKeyEvent](#sendkeyevent)
   * [SendMouseClickEvent](#sendmouseclickevent)
@@ -97,6 +99,16 @@ Methods available in upstream CEF which were not yet exposed in CEF Python
 
 
 ## Methods
+
+
+### AddWordToDictionary
+
+| Parameter | Type |
+| --- | --- |
+| word | string |
+| __Return__ | void |
+
+Add the specified |word| to the spelling dictionary.
 
 
 ### CanGoBack
@@ -656,6 +668,17 @@ Reload the current page.
 | __Return__ | void |
 
 Reload the current page ignoring any cached data.
+
+
+### ReplaceMisspelling
+
+| Parameter | Type |
+| --- | --- |
+| word | string |
+| __Return__ | void |
+
+If a misspelled word is currently selected in an editable node calling
+this method will replace it with the specified |word|.
 
 
 ### SetBounds

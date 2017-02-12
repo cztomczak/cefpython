@@ -303,6 +303,7 @@ if KIVY_FLAG:
     run_examples = " && {python} ../src/linux/binaries_64bit/kivy_.py"
 else:
     run_examples = (" && {python} hello_world.py"
+                    " && {python} wxpython.py"
                     " && {python} gtk2.py"
                     " && {python} gtk2.py --message-loop-timer"
                     #  " && {python} gtk3.py"

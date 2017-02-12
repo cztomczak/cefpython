@@ -79,6 +79,10 @@ cdef extern from "include/cef_browser.h":
         void DragSourceEndedAt(int x, int y, cef_types.cef_drag_operations_mask_t op)
         void DragSourceSystemDragEnded()
 
+        # Spell checking
+        void ReplaceMisspelling(const CefString& word)
+        void AddWordToDictionary(const CefString& word)
+
 
     cdef cppclass CefBrowser:
 
