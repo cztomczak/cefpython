@@ -1,6 +1,0 @@
-build/
-cefpython.cpp
-cython_debug/
-*.pyx
-*.cpp
-*.a

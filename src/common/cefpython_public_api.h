@@ -26,13 +26,6 @@
 #include "include/cef_command_line.h"
 #include "util.h"
 
-// cefpython.h include depending on platform
-#if defined(OS_WIN)
-#include "windows/setup/cefpython.h"
-#elif defined(OS_LINUX)
-#include "linux/setup/cefpython.h"
-#elif defined(OS_MACOSX)
-#include "mac/setup/cefpython.h"
-#endif
+#include "../../build/build_cefpython/cefpython.h"
 
 #endif // CEFPYTHON_PUBLIC_API_H

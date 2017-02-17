@@ -300,7 +300,7 @@ else:
 # Make installer, install, run examples and unit tests,
 # and return to src/linux/ dir.
 if KIVY_FLAG:
-    run_examples = " && {python} ../src/linux/binaries_64bit/kivy_.py"
+    run_examples = " && {python} ../src/linux/deprecated_64bit/kivy_.py"
 else:
     run_examples = (" && {python} hello_world.py"
                     " && {python} wxpython.py"
@@ -310,7 +310,7 @@ else:
                     " && {python} tkinter_.py"
                     " && {python} qt.py pyqt"
                     " && {python} qt.py pyside"
-                    " && {python} ../src/linux/binaries_64bit/kivy_.py")
+                    " && {python} ../src/linux/deprecated_64bit/kivy_.py")
 commands = ("cd ./installer/"
             " && {python} make-setup.py --version {ver}"
             " && cd cefpython3-{ver}-*-setup/"

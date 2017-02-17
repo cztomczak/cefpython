@@ -80,6 +80,8 @@ Return the text/html fragment that is being dragged.
 | --- | --- |
 | __Return__ | [Image](Image.md) |
 
+Linux-only currently (#251).
+
 Get image representation of drag data. Check with HasImage() first,
 otherwise if there is no image an exception is thrown.
 
@@ -89,6 +91,8 @@ otherwise if there is no image an exception is thrown.
 | | |
 | --- | --- |
 | __Return__ | bool |
+
+Linux-only currently (#251).
 
 Whether image representation of drag data is available.
 

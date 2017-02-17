@@ -17,19 +17,20 @@ patches.extend([
         'name': 'issue125',
         'path': '../net/http/'
     },
-    {
-        # Discovery of the "icudtl.dat" file fails on Linux.
-        # Apply patch for all platforms just in case.
-        'name': 'issue231',
-        'path': './'
-    },
-    {
-        # Adds drag-image representation during drag & drop in OSR mode.
-        'name': 'issue251',
-        'path': './'
-    },
 ])
 
 # LINUX
 if OS_POSTFIX == "linux":
-    pass
+    # noinspection PyUnresolvedReferences
+    patches.extend([
+        {
+            # Discovery of the "icudtl.dat" file fails on Linux.
+            'name': 'issue231',
+            'path': './'
+        },
+        {
+            # Adds drag-image representation during drag & drop in OSR mode.
+            'name': 'issue251',
+            'path': './'
+        },
+    ])

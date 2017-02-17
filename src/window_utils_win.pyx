@@ -102,7 +102,7 @@ class WindowUtils:
         iconSmall = SendMessage(
                 <HWND>windowHandle, WM_GETICON, ICON_SMALL, 0)
 
-        cdef int parentWindowHandle
+        cdef long long parentWindowHandle
 
         if not iconBig and not iconSmall:
             parentWindowHandle = pyBrowser.GetOpenerWindowHandle()

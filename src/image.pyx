@@ -48,7 +48,8 @@ cdef class PyImage:
         if not self.cef_image.get():
             raise Exception("cef_image is NULL")
         cdef CefRefPtr[CefBinaryValue] binary_value =\
-                self.cef_image.get().GetAsPNG(scale_factor, with_transparency,
+                self.cef_image.get().GetAsPNG(scale_factor,
+                                              bool(with_transparency),
                                               pixel_width, pixel_height)
         cdef size_t size = binary_value.get().GetSize()
         cdef void* abuffer = malloc(size)

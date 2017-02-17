@@ -415,10 +415,10 @@ cdef class PyBrowser:
         self.GetCefBrowserHost().get().ReplaceMisspelling(cef_word)
 
     cpdef py_void SetBounds(self, int x, int y, int width, int height):
-        if platform.system() == "Linux":
+        IF UNAME_SYSNAME == "Linux":
             x11.SetX11WindowBounds(self.GetCefBrowser(), x, y, width, height)
-        else:
-            raise Exception("SetBounds() not impplemented on this platform")
+        ELSE:
+            raise Exception("SetBounds() not implemented on this platform")
 
     cpdef py_void SetFocus(self, enable):
         self.GetCefBrowserHost().get().SetFocus(bool(enable))
@@ -543,7 +543,7 @@ cdef class PyBrowser:
         if "native_key_code" in pyEvent:
             cefEvent.native_key_code = int(pyEvent["native_key_code"])
         if "is_system_key" in pyEvent:
-            cefEvent.is_system_key = int(pyEvent["is_system_key"])
+            cefEvent.is_system_key = int(bool(pyEvent["is_system_key"]))
         if "character" in pyEvent:
             cefEvent.character = int(pyEvent["character"])
         if "unmodified_character" in pyEvent:
@@ -551,7 +551,7 @@ cdef class PyBrowser:
                     int(pyEvent["unmodified_character"])
         if "focus_on_editable_field" in pyEvent:
             cefEvent.focus_on_editable_field = \
-                    int(pyEvent["focus_on_editable_field"])
+                    int(bool(pyEvent["focus_on_editable_field"]))
         self.GetCefBrowserHost().get().SendKeyEvent(cefEvent)
 
     cpdef py_void SendMouseClickEvent(self, int x, int y,

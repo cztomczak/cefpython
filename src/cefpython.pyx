@@ -580,15 +580,16 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if "switches" in kwargs:
         commandLineSwitches = kwargs["switches"]
 
-    # Fix Issue #231 - Discovery of the "icudtl.dat" file fails on Linux.
-    # Apply patch for all platforms just in case.
-    cdef str py_module_dir = GetModuleDirectory()
-    cdef CefString cef_module_dir
-    PyToCefString(py_module_dir, cef_module_dir)
-    CefOverridePath(PK_DIR_EXE, cef_module_dir)\
-            or Debug("ERROR: CefOverridePath failed")
-    CefOverridePath(PK_DIR_MODULE, cef_module_dir)\
-            or Debug("ERROR: CefOverridePath failed")
+    IF UNAME_SYSNAME == "Linux":
+        # Fix Issue #231 - Discovery of the "icudtl.dat" file fails on Linux.
+        cdef str py_module_dir = GetModuleDirectory()
+        cdef CefString cef_module_dir
+        PyToCefString(py_module_dir, cef_module_dir)
+        CefOverridePath(PK_DIR_EXE, cef_module_dir)\
+                or Debug("ERROR: CefOverridePath failed")
+        CefOverridePath(PK_DIR_MODULE, cef_module_dir)\
+                or Debug("ERROR: CefOverridePath failed")
+    # END IF UNAME_SYSNAME == "Linux":
 
     if not applicationSettings:
         applicationSettings = {}

@@ -101,8 +101,8 @@ def main():
         f.write(SETUP_CONTENT)
 
     # Create fat binaries if both 32bit and 64bit are available
-    b32 = os.path.abspath(installer_dir+"/../binaries_32bit/")
-    b64 = os.path.abspath(installer_dir+"/../binaries_64bit/")
+    b32 = os.path.abspath(installer_dir+"/../deprecated_32bit/")
+    b64 = os.path.abspath(installer_dir+"/../deprecated_64bit/")
     bfat = os.path.abspath(installer_dir+"/binaries_fat/")
     binaries_dir = get_binaries_dir(b32, b64, bfat)
     print("Copying binaries to package dir")
