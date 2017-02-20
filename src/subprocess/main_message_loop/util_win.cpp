@@ -1,4 +1,5 @@
 // Copied from upstream cefclient with minor modifications.
+// Windows UNICODE API calls were converted to ANSI or commented out.
 
 // Copyright (c) 2015 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
@@ -25,12 +26,12 @@ WNDPROC SetWndProcPtr(HWND hWnd, WNDPROC wndProc) {
   return old;
 }
 
-std::wstring GetResourceString(UINT id) {
-  #define MAX_LOADSTRING 100
-  TCHAR buff[MAX_LOADSTRING] = {0};
-  LoadString(::GetModuleHandle(NULL), id, buff, MAX_LOADSTRING);
-  return buff;
-}
+//std::wstring GetResourceString(UINT id) {
+//  #define MAX_LOADSTRING 100
+//  TCHAR buff[MAX_LOADSTRING] = {0};
+//  LoadString(::GetModuleHandle(NULL), id, buff, MAX_LOADSTRING);
+//  return buff;
+//}
 
 int GetCefMouseModifiers(WPARAM wparam) {
   int modifiers = 0;

@@ -1,16 +1,29 @@
+# Copyright (c) 2017 The CEF Python authors. All rights reserved.
+# Licensed under the BSD 3-clause license.
+
 """
 Build the cefpython module, install package and run example.
 
+Before running you must first put cefpython ready CEF binaries and
+libraries in the cefpython/build/ directory (create if doesn't exist).
+You have two options for obtaining these binaries and libraries.
+
+Option 1: Download upstream CEF binaries and libraries from cefpython
+GitHub Releases page. These binaries are tagged eg. "v55-upstream".
+Extract the archive so that for example you have such a directory:
+cefpython/build/cef55_3.2883.1553.g80bd606_win32/ .
+
+Option 2: Use the automate.py tool. With this tool you can build CEF
+from sources or use ready binaries from Spotify Automated Builds.
+
 Usage:
-    build.py VERSION [--debug] [--fast]
+    build.py VERSION [--rebuild-cpp] [--fast] [--kivy]
 
 Options:
-    VERSION     Version in format xx.xx
-    --debug     Debug mode
-    --fast      Fast mode, don't delete C++ .o .a files, nor the setup/build/
-                directory, and disable optimization flags when building
-                the so/pyd module.
-    --kivy      Run Kivy example
+    VERSION        Version in format xx.xx
+    --rebuild-cpp  Force rebuild of C++ projects
+    --fast         Fast mode
+    --kivy         Run only Kivy example
 """
 
 # How to debug on Linux:
@@ -56,21 +69,18 @@ if WINDOWS:
 else:
     MODULE_EXT = "so"
 
-# Compiler options
-if MAC:
-    os.environ["PATH"] = "/usr/local/bin:"+os.environ["PATH"]
-    os.environ["CC"] = "gcc"
-    os.environ["CXX"] = "g++"
-    os.environ["CEF_CCFLAGS"] = "-arch x86_64"
-    os.environ["ARCHFLAGS"] = "-arch x86_64"
-    if ARCH32:
-        raise Exception("Python 32bit is not supported on Mac")
+# First run
+FIRST_RUN = False
+CEFPYTHON_H = os.path.join(BUILD_CEFPYTHON, "cefpython.h")
 
 
 def main():
+    if len(sys.argv) <= 1:
+        print(__doc__)
+        sys.exit(1)
     print("[build.py] PYVERSION = %s" % PYVERSION)
     print("[build.py] OS_POSTFIX2 = %s" % OS_POSTFIX2)
-    setup_environ_path()
+    setup_environ()
     check_cython_version()
     command_line_args()
     check_directories()
@@ -87,28 +97,57 @@ def main():
     install_and_run()
 
 
-def setup_environ_path():
-    print("[build.py] Setup environment PATH")
+def setup_environ():
+    """Set environment variables. Set PATH so that it contains only
+    minimum set of directories,to avoid any possible issues. Set Python
+    include path. Set Mac compiler options. Etc."""
+    print("[build.py] Setup environment variables")
+
     if not WINDOWS:
         return
-    if ARCH32:
-        os.environ["PATH"] = ("C:\\Windows\\system32;C:\\Windows;"
-                              "C:\\Windows\\System32\\Wbem;C:\\Python27")
-    else:
-        raise Exception("Only 32-bit is currently supported")
 
-    print("[build.py] PATH: {path}".format(path=os.environ["PATH"]))
+    # PATH
+    if WINDOWS:
+        path = [
+            "C:\\Windows\\system32",
+            "C:\\Windows",
+            "C:\\Windows\\System32\\Wbem",
+            get_python_path(),
+        ]
+        os.environ["PATH"] = os.pathsep.join(path)
+        print("[build.py] environ PATH: {path}"
+              .format(path=os.environ["PATH"]))
 
-    """
-    set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;
-    C:\Python27_x64;C:\Python27_amd64;C:\Python27_64
+    # INCLUDE env for vcproj build
+    if WINDOWS:
+        if "INCLUDE" not in os.environ:
+            os.environ["INCLUDE"] = ""
+        os.environ["INCLUDE"] += os.pathsep + os.path.join(get_python_path(),
+                                                           "include")
+        print("[build.py] environ INCLUDE: {include}"
+              .format(include=os.environ["INCLUDE"]))
 
-    set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;
-    C:\Python34
+    # LIB env for vcproj build
+    if WINDOWS:
+        os.environ["AdditionalLibraryDirectories"] = os.path.join(
+                                                CEF_BINARIES_LIBRARIES, "lib")
+        print("[build.py] environ AdditionalLibraryDirectories: {lib}"
+              .format(lib=os.environ["AdditionalLibraryDirectories"]))
 
-    set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;
-    C:\Python34_x64;C:\Python34_amd64;C:\Python34_64
-    """
+    # Mac compiler options
+    if MAC:
+        os.environ["PATH"] = "/usr/local/bin:"+os.environ["PATH"]
+        os.environ["CC"] = "gcc"
+        os.environ["CXX"] = "g++"
+        os.environ["CEF_CCFLAGS"] = "-arch x86_64"
+        os.environ["ARCHFLAGS"] = "-arch x86_64"
+        if ARCH32:
+            raise Exception("Python 32-bit is not supported on Mac")
+
+
+def get_python_path():
+    """Get Python path."""
+    return os.path.dirname(sys.executable)
 
 
 def check_cython_version():
@@ -185,7 +224,7 @@ def check_directories():
     # Check directories exist
     assert os.path.exists(BUILD_DIR)
     assert os.path.exists(BUILD_CEFPYTHON)
-    assert os.path.exists(CEF_BINARY)
+    assert os.path.exists(CEF_BINARIES_LIBRARIES)
     assert os.path.exists(CEFPYTHON_BINARY)
 
 
@@ -204,31 +243,44 @@ def fix_cefpython_h():
     content = ("%s\n\n" % pragma) + content
     with open("cefpython.h", "w") as fo:
         fo.write(content)
-    print("[build.py] Saved cefpython.h")
+    print("[build.py] Save build_cefpython/cefpython.h")
 
 
 def compile_cpp_projects_windows():
     print("[build.py] Compile C++ projects")
 
-    print("[build.py] Build client_handler vcproj")
+    print("[build.py] ~~ Build CLIENT_HANDLER vcproj")
     vcproj = ("client_handler_py{pyver}_{os}.vcproj"
               .format(pyver=PYVERSION, os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "client_handler", vcproj)
     build_vcproj(vcproj)
 
-    print("[build.py] Build libcefpythonapp vcproj")
+    print("[build.py] ~~ Build LIBCEFPYTHONAPP vcproj")
     vcproj = ("libcefpythonapp_py{pyver}_{os}.vcproj"
               .format(pyver=PYVERSION, os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "subprocess", vcproj)
     build_vcproj(vcproj)
 
-    print("[build.py] Build subprocess vcproj")
+    print("[build.py] ~~ Build SUBPROCESS vcproj")
     vcproj = ("subprocess_{os}.vcproj"
               .format(os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "subprocess", vcproj)
-    build_vcproj(vcproj)
+    ret = build_vcproj(vcproj)
 
-    print("[build.py] Build cpp_utils vcproj")
+    # Copy subprocess executable
+    subprocess_from = os.path.join(
+            SUBPROCESS_DIR,
+            "Release_{os}".format(os=OS_POSTFIX2),
+            "subprocess_{os}.exe".format(os=OS_POSTFIX2))
+    subprocess_to = os.path.join(CEFPYTHON_BINARY, "subprocess.exe")
+    if os.path.exists(subprocess_to):
+        os.remove(subprocess_to)
+    if ret == 0:
+        print("[build.py] Copy subprocess executable")
+        # shutil.copy() will also copy Permission bits
+        shutil.copy(subprocess_from, subprocess_to)
+
+    print("[build.py] ~~ Build CPP_UTILS vcproj")
     vcproj = ("cpp_utils_{os}.vcproj"
               .format(os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "cpp_utils", vcproj)
@@ -236,11 +288,19 @@ def compile_cpp_projects_windows():
 
 
 def build_vcproj(vcproj):
+    if not os.path.exists(CEFPYTHON_H):
+        print("[build.py] INFO: Looks like first run, as cefpython.h"
+              " is missing. Skip building C++ project.")
+        global FIRST_RUN
+        FIRST_RUN = True
+        return
+
     if PYVERSION == "27":
         args = list()
-        args.append("%LocalAppData%\\Programs\\Common\\"
-                    "Microsoft\\Visual C++ for Python\\9.0\\"
-                    "VC\\bin\\amd64\\vcbuild.exe")
+        args.append(VS2008_VCVARS)
+        args.append(VS_PLATFORM_ARG)
+        args.append("&&")
+        args.append(VS2008_BUILD)
         args.append("/nocolor")
         args.append("/nologo")
         args.append("/nohtmllog")
@@ -250,20 +310,17 @@ def build_vcproj(vcproj):
         ret = subprocess.call(args, shell=True)
         if ret != 0:
             compile_ask_to_continue()
+        return ret
     else:
         raise Exception("Only Python 2.7 32-bit is currently supported")
 
-    """
-    In VS2010 vcbuild was replaced by msbuild.exe.
-    /clp:disableconsolecolor
-    msbuild /p:BuildProjectReferences=false project.proj
-    MSBuild.exe MyProject.proj /t:build
-    """
+    # In VS2010 vcbuild was replaced by msbuild.exe.
+    # /clp:disableconsolecolor
+    # msbuild /p:BuildProjectReferences=false project.proj
+    # MSBuild.exe MyProject.proj /t:build
 
 
 def compile_ask_to_continue():
-    print("[build.py] **INFO**: On first run you should continue despite"
-          " errors and after completion re-run the build.py script again")
     # noinspection PyUnboundLocalVariable
     what = input("[build.py] make failed, 'y' to continue, Enter to stop: ")
     if what != "y":
@@ -280,17 +337,8 @@ def compile_cpp_projects_unix():
     # fails and then run the compile.py script again and this time
     # make should succeed.
 
-    # -------- CPP_UTILS_DIR
-
-    os.chdir(CPP_UTILS_DIR)
-    if not FAST_FLAG:
-        subprocess.call("rm -f *.o *.a", shell=True)
-
-    ret = subprocess.call("make -f Makefile", shell=True)
-    if ret != 0:
-        compile_ask_to_continue()
-
-    # -------- CLIENT_HANDLER_DIR
+    # -- CLIENT_HANDLER
+    print("[build.py] ~~ Build CLIENT_HANDLER project")
 
     os.chdir(CLIENT_HANDLER_DIR)
     if not FAST_FLAG:
@@ -300,7 +348,8 @@ def compile_cpp_projects_unix():
     if ret != 0:
         compile_ask_to_continue()
 
-    # -------- SUBPROCESS_DIR
+    # -- LIBCEFPYTHONAPP
+    print("[build.py] ~~ Build LIBCEFPYTHONAPP project")
 
     os.chdir(SUBPROCESS_DIR)
     if not FAST_FLAG:
@@ -311,14 +360,29 @@ def compile_cpp_projects_unix():
     if ret != 0:
         compile_ask_to_continue()
 
+    # -- SUBPROCESS
+    print("[build.py] ~~ Build SUBPROCESS project")
     ret = subprocess.call("make -f Makefile", shell=True)
     if ret != 0:
         compile_ask_to_continue()
 
-    subprocess_exe = os.path.join(CEFPYTHON_BINARY, "subprocess")
-    if os.path.exists("./subprocess"):
-        # .copy() will also copy Permission bits
-        shutil.copy("./subprocess", subprocess_exe)
+    # Copy subprocess executable
+    subprocess_from = os.path.join(SUBPROCESS_DIR, "subprocess")
+    subprocess_to = os.path.join(CEFPYTHON_BINARY, "subprocess")
+    if os.path.exists(subprocess_from):
+        # shutil.copy() will also copy Permission bits
+        shutil.copy(subprocess_from, subprocess_to)
+
+    # -- CPP_UTILS
+    print("[build.py] ~~ Build CPP_UTILS project")
+
+    os.chdir(CPP_UTILS_DIR)
+    if not FAST_FLAG:
+        subprocess.call("rm -f *.o *.a", shell=True)
+
+    ret = subprocess.call("make -f Makefile", shell=True)
+    if ret != 0:
+        compile_ask_to_continue()
 
 
 def clear_cache():
@@ -510,7 +574,19 @@ def build_cefpython_module():
 
     # Check if built succeeded after pyx files were removed
     if ret != 0:
-        print("[build.py] FAILED to build the cefpython module")
+        if FIRST_RUN and os.path.exists(CEFPYTHON_H):
+            print("[build.py] INFO: looks like this was first run and"
+                  " linking is expected to fail in such case. Will re-run"
+                  " the build.py script programmatically now.")
+            args = list()
+            args.append(sys.executable)
+            args.append(os.path.join(TOOLS_DIR, os.path.basename(__file__)))
+            assert __file__ in sys.argv[0]
+            args.extend(sys.argv[1:])
+            ret = subprocess.call(args, shell=True)
+            sys.exit(ret)
+        else:
+            print("[build.py] ERROR: failed to build the cefpython module")
         sys.exit(1)
 
     # Move the cefpython module
@@ -521,7 +597,7 @@ def build_cefpython_module():
                                       .format(pyver=PYVERSION,
                                               ext=MODULE_EXT)))
 
-    print("[build.py] Done building the cefpython module")
+    print("[build.py] DONE building the cefpython module")
 
 
 def move_file_by_pattern(pattern, move_to):
@@ -553,60 +629,44 @@ def delete_directories_by_pattern(pattern):
 
 
 def install_and_run():
-    os.chdir(BUILD_CEFPYTHON)
-
     # if DEBUG_FLAG:
     #     os.chdir("./binaries_%s" % BITS)
     #     subprocess.call("cygdb . --args python-dbg wxpython.py", shell=True)
 
     print("[build.py] Install and run...")
+    os.chdir(BUILD_DIR)
 
-    # Clean installer directory from previous run
-    try:
-        delete_directories_by_pattern("./cefpython3-{ver}-*-setup/"
-                                      .format(ver=VERSION))
-    except:
-        if LINUX:
-            os.system("sudo rm -rf ./cefpython3-{ver}-*-setup/"
-                      .format(ver=VERSION))
-        else:
-            raise
+    # Setup installer directory
+    setup_installer_dir = ("./cefpython3-{version}-{os}-setup/"
+                           .format(version=VERSION, os=OS_POSTFIX2))
+    setup_installer_dir = os.path.join(BUILD_DIR, setup_installer_dir)
 
-    # System python requires sudo when installing package
-    if sys.executable in ["/usr/bin/python", "/usr/bin/python3"]:
-        sudo = "sudo"
-    else:
-        sudo = ""
-
-    os.chdir(BUILD_CEFPYTHON)
+    # Delete setup installer directory if exists
+    if os.path.exists(setup_installer_dir):
+        delete_directory_reliably(setup_installer_dir)
 
     # Make setup installer
     print("[build.py] Make setup installer")
-    os.system("{python} ../../tools/setup/make.py --version {ver}"
-              .format(python=sys.executable, ver=VERSION))
-
-    # Enter setup installer directory
-    os.chdir("cefpython3-{ver}-{os_postfix2}-setup/"
-             .format(ver=VERSION, os_postfix2=OS_POSTFIX2))
+    make_tool = os.path.join(TOOLS_DIR, "make_installer.py")
+    os.system("{python} {make_tool} --version {version}"
+              .format(python=sys.executable,
+                      make_tool=make_tool,
+                      version=VERSION))
 
     # Install
     print("[build.py] Install the cefpython package")
+    os.chdir(setup_installer_dir)
     os.system("{sudo} {python} setup.py install"
-              .format(sudo=sudo, python=sys.executable))
-
-    # Delete setup installer directory
-    print("[build.py] Delete the setup installer directory")
-    if WINDOWS:
-        shutil.rmtree("./cefpython3-{ver}-{os_postfix2}-setup/"
-                      .format(ver=VERSION, os_postfix2=OS_POSTFIX2))
-    else:
-        os.system("{sudo} rm -rf ./cefpython3-{ver}-*-setup/"
-                  .format(sudo=sudo, ver=VERSION))
+              .format(sudo=get_sudo(), python=sys.executable))
+    os.chdir(BUILD_DIR)
 
     # Run unittests
     print("[build.py] Run unittests")
-    os.system("cd {unittests_dir} && {python} _test_runner.py"
-              .format(unittests_dir=UNITTESTS_DIR, python=sys.executable))
+    test_runner = os.path.join(UNITTESTS_DIR, "_test_runner.py")
+    ret = os.system("{python} {test_runner}"
+                    .format(python=sys.executable, test_runner=test_runner))
+    if ret != 0:
+        sys.exit(ret)
 
     # Run examples
     print("[build.py] Run examples")
@@ -625,13 +685,37 @@ def install_and_run():
         if LINUX:
             run_examples += (" && {python}"
                              " {linux_dir}/deprecated_64bit/kivy_.py")
-    run_examples.format(linux_dir=LINUX_DIR, examples_dir=EXAMPLES_DIR)
+    run_examples.format(
+        python=sys.executable,
+        linux_dir=LINUX_DIR,
+        examples_dir=EXAMPLES_DIR)
     os.system(run_examples)
 
-    # Enter tools dir
-    os.system("cd {tools_dir}".format(tools_dir=TOOLS_DIR))
-
     print("[build.py] DONE")
+
+
+def get_sudo():
+    # System Python requires sudo when installing package
+    if sys.executable in ["/usr/bin/python", "/usr/bin/python3"]:
+        sudo = "sudo"
+    else:
+        sudo = ""
+    return sudo
+
+
+def delete_directory_reliably(adir):
+    assert len(adir) > 2
+    assert os.path.isdir(adir)
+    print("[build.py] Delete directory: {dir}"
+          .format(dir=adir.replace(ROOT_DIR, "")))
+    if WINDOWS:
+        shutil.rmtree(adir)
+    else:
+        # On Linux sudo might be required to delete directory, as this
+        # might be a setup installer directory with package installed
+        # using sudo and in such case files were created with sudo.
+        os.system("{sudo} rm -rf {dir}"
+                  .format(sudo=get_sudo(), dir=adir))
 
 
 if __name__ == "__main__":

@@ -69,6 +69,9 @@ __Windows__
 
 * Install an appropriate MS compiler for a specific Python version:
   https://wiki.python.org/moin/WindowsCompilers
+* When using "Visual C++ compiler for Python 2.7" you have to install
+  "Microsoft Visual C++ 2008 Redistributable Package (x64)" from
+  [here](https://www.microsoft.com/en-us/download/details.aspx?id=15336)
 * To build CEF from sources:
     * Use Win7 x64 or later. 32-bit OS'es are not supported. For more details
      see [here](https://www.chromium.org/developers/how-tos/build-instructions-windows).

@@ -101,11 +101,15 @@ class MainTest_IsolatedTest(unittest.TestCase):
         print("Python {ver}".format(ver=sys.version[:6]))
 
         # Test initialization of CEF
-        cef.Initialize({
+        settings = {
             "debug": False,
             "log_severity": cef.LOGSEVERITY_ERROR,
             "log_file": "",
-        })
+        }
+        if "--debug" in sys.argv:
+            settings["debug"] = True
+            settings["log_severity"] = cef.LOGSEVERITY_INFO
+        cef.Initialize(settings)
         subtest_message("cef.Initialize() ok")
 
         # Test global handler

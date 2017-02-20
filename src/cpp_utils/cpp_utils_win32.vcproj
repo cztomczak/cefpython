@@ -27,6 +27,7 @@
             <Tool Name="VCMIDLTool" />
             <Tool
                 Name="VCCLCompilerTool"
+                AdditionalIncludeDirectories="$(INCLUDE)"
                 PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
                 RuntimeLibrary="2"
                 UsePrecompiledHeader="0"

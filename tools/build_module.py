@@ -1,5 +1,10 @@
-# For internal use only - called by build.py.
-# This is Cython's setup for building the cefpython module.
+# Copyright (c) 2017 The CEF Python authors. All rights reserved.
+# Licensed under the BSD 3-clause license.
+
+"""
+build_module.py is for internal use only - called by build.py.
+This is Cython's setup for building the cefpython module
+"""
 
 # Use setuptools so that "Visual C++ compiler for Python 2.7" tools
 # can be used. Otherwise "Unable to find vcvarsall.bat" error occurs.
@@ -171,7 +176,7 @@ def get_include_dirs():
 def get_library_dirs():
     print("[build_module.py] Prepare library directories")
     library_dirs = [
-        os.path.join(CEF_BINARY, "lib"),
+        os.path.join(CEF_BINARIES_LIBRARIES, "lib"),
     ]
     if WINDOWS:
         library_dirs.extend([
@@ -182,8 +187,11 @@ def get_library_dirs():
             os.path.join(SRC_DIR, "subprocess",
                          "Release_{os}"
                          .format(os=OS_POSTFIX2)),
+            os.path.join(SRC_DIR, "subprocess",
+                         "Release_py{pyver}_{os}"
+                         .format(pyver=PYVERSION, os=OS_POSTFIX2)),
             os.path.join(SRC_DIR, "cpp_utils",
-                         "Release_py{os}"
+                         "Release_{os}"
                          .format(os=OS_POSTFIX2))
         ])
     if MAC or LINUX:
@@ -280,6 +288,9 @@ def compile_time_constants():
 
 
 def main():
+    if len(sys.argv) <= 1:
+        print(__doc__)
+        sys.exit(1)
     print("[build_module.py] Cython version: %s" % Cython.__version__)
     compile_time_constants()
     options = dict()

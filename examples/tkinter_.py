@@ -14,10 +14,13 @@ except ImportError:
     import Tkinter as tk
 import sys
 import os
+import platform
 import logging as _logging
 
 # Globals
 logger = _logging.getLogger("tkinter_.py")
+# Python 2.7 on Windows comes with Tk 8.5 which doesn't support PNG images
+IMAGE_EXT = ".gif" if platform.system() == "Windows" else ".png"
 
 
 def main():
@@ -112,7 +115,7 @@ class MainFrame(tk.Frame):
 
     def setup_icon(self):
         resources = os.path.join(os.path.dirname(__file__), "resources")
-        icon_path = os.path.join(resources, "tkinter.png")
+        icon_path = os.path.join(resources, "tkinter"+IMAGE_EXT)
         if os.path.exists(icon_path):
             self.icon = tk.PhotoImage(file=icon_path)
             # noinspection PyProtectedMember
@@ -132,7 +135,7 @@ class NavigationBar(tk.Frame):
         resources = os.path.join(os.path.dirname(__file__), "resources")
 
         # Back button
-        back_png = os.path.join(resources, "back.png")
+        back_png = os.path.join(resources, "back"+IMAGE_EXT)
         if os.path.exists(back_png):
             self.back_image = tk.PhotoImage(file=back_png)
         self.back_button = tk.Button(self, image=self.back_image,
@@ -140,7 +143,7 @@ class NavigationBar(tk.Frame):
         self.back_button.grid(row=0, column=0)
 
         # Forward button
-        forward_png = os.path.join(resources, "forward.png")
+        forward_png = os.path.join(resources, "forward"+IMAGE_EXT)
         if os.path.exists(forward_png):
             self.forward_image = tk.PhotoImage(file=forward_png)
         self.forward_button = tk.Button(self, image=self.forward_image,
@@ -148,7 +151,7 @@ class NavigationBar(tk.Frame):
         self.forward_button.grid(row=0, column=1)
 
         # Reload button
-        reload_png = os.path.join(resources, "reload.png")
+        reload_png = os.path.join(resources, "reload"+IMAGE_EXT)
         if os.path.exists(reload_png):
             self.reload_image = tk.PhotoImage(file=reload_png)
         self.reload_button = tk.Button(self, image=self.reload_image,
@@ -255,6 +258,7 @@ class BrowserFrame(tk.Frame):
         window_info.SetAsChild(self.winfo_id())
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
+        assert self.browser
         self.browser.SetClientHandler(LoadHandler(self))
         self.browser.SetClientHandler(FocusHandler(self))
         self.message_loop_work()
@@ -274,7 +278,11 @@ class BrowserFrame(tk.Frame):
 
     def on_mainframe_configure(self, width, height):
         if self.browser:
-            self.browser.SetBounds(0, 0, width, height)
+            if platform.system() == "Windows":
+                # noinspection PyUnresolvedReferences
+                cef.WindowUtils.OnSize(self.winfo_id(), 0, 0, 0)
+            elif platform.system() == "Linux":
+                self.browser.SetBounds(0, 0, width, height)
             self.browser.NotifyMoveOrResizeStarted()
 
     def on_focus_in(self, _):

@@ -1,4 +1,5 @@
 // Copied from upstream cefclient with minor modifications.
+// Windows UNICODE API calls were converted to ANSI or commented out.
 
 // Copyright (c) 2015 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
@@ -26,7 +27,7 @@ T GetUserDataPtr(HWND hWnd) {
 WNDPROC SetWndProcPtr(HWND hWnd, WNDPROC wndProc);
 
 // Return the resource string with the specified id.
-std::wstring GetResourceString(UINT id);
+//std::wstring GetResourceString(UINT id);
 
 int GetCefMouseModifiers(WPARAM wparam);
 int GetCefKeyboardModifiers(WPARAM wparam, LPARAM lparam);

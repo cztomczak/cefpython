@@ -29,32 +29,55 @@ MAC = (platform.system() == "Darwin")
 # Python version eg. 27
 PYVERSION = str(sys.version_info[0])+str(sys.version_info[1])
 
-# Directories
-TOOLS_DIR = os.path.abspath(os.path.dirname(__file__))
-SRC_DIR = os.path.abspath(os.path.join(TOOLS_DIR, "../src"))
-WINDOWS_DIR = os.path.abspath(os.path.join(SRC_DIR, "windows"))
-MAC_DIR = os.path.abspath(os.path.join(SRC_DIR, "mac"))
-LINUX_DIR = os.path.abspath(os.path.join(SRC_DIR, "linux"))
-CPP_UTILS_DIR = os.path.abspath(os.path.join(SRC_DIR, "cpp_utils"))
-CLIENT_HANDLER_DIR = os.path.abspath(os.path.join(SRC_DIR, "client_handler"))
-SUBPROCESS_DIR = os.path.abspath(os.path.join(SRC_DIR, "subprocess"))
-CEFPYTHON_DIR = os.path.abspath(os.path.join(SRC_DIR, ".."))
-EXAMPLES_DIR = os.path.abspath(os.path.join(CEFPYTHON_DIR, "examples"))
-UNITTESTS_DIR = os.path.abspath(os.path.join(CEFPYTHON_DIR, "unittests"))
-BUILD_DIR = os.path.abspath(os.path.join(CEFPYTHON_DIR, "build"))
-BUILD_CEFPYTHON = os.path.abspath(os.path.join(BUILD_DIR, "build_cefpython"))
-# CEF_BINARY may be auto-overwritten through detect_cef_binary_directory()
-CEF_BINARY = os.path.abspath(os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2))
-CEFPYTHON_BINARY = os.path.abspath(os.path.join(BUILD_DIR,
-                                                "cefpython_"+OS_POSTFIX2))
+# Root directory
+assert __file__
+ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
+# Other directories
+BUILD_DIR = os.path.join(ROOT_DIR, "build")
+if BUILD_DIR:
+    BUILD_CEFPYTHON = os.path.join(BUILD_DIR, "build_cefpython")
+    # -- Auto-detected directories.
+    # May be auto-overwritten through detect_cef_binaries_libraries_dir()
+    CEF_BINARIES_LIBRARIES = os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2)
+    # Will be overwritten through detect_cefpython_binary_dir()
+    CEFPYTHON_BINARY = "CEFPYTHON_BINARY"
+EXAMPLES_DIR = os.path.join(ROOT_DIR, "examples")
+SRC_DIR = os.path.join(ROOT_DIR, "src")
+if SRC_DIR:
+    CLIENT_HANDLER_DIR = os.path.join(SRC_DIR, "client_handler")
+    CPP_UTILS_DIR = os.path.join(SRC_DIR, "cpp_utils")
+    LINUX_DIR = os.path.join(SRC_DIR, "linux")
+    MAC_DIR = os.path.join(SRC_DIR, "mac")
+    SUBPROCESS_DIR = os.path.join(SRC_DIR, "subprocess")
+    WINDOWS_DIR = os.path.abspath(os.path.join(SRC_DIR, "windows"))
+TOOLS_DIR = os.path.join(ROOT_DIR, "tools")
+if TOOLS_DIR:
+    INSTALLER_DIR = os.path.join(TOOLS_DIR, "installer")
+UNITTESTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, "unittests"))
+
+# Visual Studio constants
+VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
+VS2015_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0"
+                 "\\VC\\vcvarsall.bat")
+VS2015_BUILD = ""  # TODO
+VS2013_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0"
+                 "\\VC\\vcvarsall.bat")
+VS2013_BUILD = ""  # TODO
+VS2008_VCVARS = ("%LocalAppData%\\Programs\\Common\\Microsoft"
+                 "\\Visual C++ for Python\\9.0\\vcvarsall.bat")
+VS2008_BUILD = ("%LocalAppData%\\Programs\\Common\\"
+                "Microsoft\\Visual C++ for Python\\9.0\\"
+                "VC\\bin\\amd64\\vcbuild.exe")
 
 
-def detect_cef_binary_directory():
-    # Detect cef binary directory created by automate.py
-    # eg. build/cef55_3.2883.1553.g80bd606_win32/
-    # and set CEF_BINARY to it. Otherwise CEF_BINARY will
-    # indicate to build/cef_{os_postfix2}/.
-    if not os.path.exists(CEF_BINARY):
+def detect_cef_binaries_libraries_dir():
+    """Detect cef binary directory created by automate.py
+    eg. build/cef55_3.2883.1553.g80bd606_win32/
+    and set CEF_BINARIES_LIBRARIES to it, otherwise it will
+    point to eg. build/cef_win32/ ."""
+    global CEF_BINARIES_LIBRARIES
+    if not os.path.exists(CEF_BINARIES_LIBRARIES):
         version = get_cefpython_version()
         dirs = glob.glob(os.path.join(
                 BUILD_DIR,
@@ -64,10 +87,19 @@ def detect_cef_binary_directory():
                         os=OS_POSTFIX2,
                         sep=os.sep)))
         if len(dirs) == 1:
-            print("[common.py] Auto detected CEF_BINARY directory: {dir}"
-                  .format(dir=dirs[0]))
-            global CEF_BINARY
-            CEF_BINARY = dirs[0]
+            CEF_BINARIES_LIBRARIES = os.path.normpath(dirs[0])
+
+
+def detect_cefpython_binary_dir():
+    """Detect cefpython binary directory where cefpython modules
+    will be put. Eg. buil/cefpython55_win32/."""
+    version = get_cefpython_version()
+    binary_dir = "cefpython{major}_{os}".format(
+            major=version["CHROME_VERSION_MAJOR"],
+            os=OS_POSTFIX2)
+    binary_dir = os.path.join(BUILD_DIR, binary_dir)
+    global CEFPYTHON_BINARY
+    CEFPYTHON_BINARY = binary_dir
 
 
 def get_cefpython_version():
@@ -88,4 +120,5 @@ def get_version_from_file(header_file):
     return ret
 
 
-detect_cef_binary_directory()
+detect_cef_binaries_libraries_dir()
+detect_cefpython_binary_dir()

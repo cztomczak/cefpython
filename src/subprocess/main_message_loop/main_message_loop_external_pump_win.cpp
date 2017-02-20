@@ -1,4 +1,5 @@
 // Copied from upstream cefclient with minor modifications.
+// Windows UNICODE API calls were converted to ANSI or commented out.
 
 // Copyright (c) 2016 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
@@ -50,7 +51,7 @@ MainMessageLoopExternalPumpWin::MainMessageLoopExternalPumpWin()
   : timer_pending_(false),
     main_thread_target_(NULL) {
   HINSTANCE hInstance = GetModuleHandle(NULL);
-  const wchar_t* const kClassName = L"CEFMainTargetHWND";
+  const char* const kClassName = "CEFMainTargetHWND";
 
   WNDCLASSEX wcex = {};
   wcex.cbSize = sizeof(WNDCLASSEX);
@@ -60,7 +61,7 @@ MainMessageLoopExternalPumpWin::MainMessageLoopExternalPumpWin()
   RegisterClassEx(&wcex);
 
   // Create the message handling window.
-  main_thread_target_ = CreateWindowW(kClassName, NULL, WS_OVERLAPPEDWINDOW,
+  main_thread_target_ = CreateWindowA(kClassName, NULL, WS_OVERLAPPEDWINDOW,
       0, 0, 0, 0, HWND_MESSAGE , NULL, hInstance, NULL);
   DCHECK(main_thread_target_);
   SetUserDataPtr(main_thread_target_, this);
@@ -140,8 +141,8 @@ LRESULT CALLBACK MainMessageLoopExternalPumpWin::WndProc(
 } // namespace
 
 // static
-scoped_ptr>MainMessageLoopExternalPump>
+scoped_ptr<MainMessageLoopExternalPump>
 MainMessageLoopExternalPump::Create() {
-  return scoped_ptr>MainMessageLoopExternalPump>(
+  return scoped_ptr<MainMessageLoopExternalPump>(
       new MainMessageLoopExternalPumpWin());
 }

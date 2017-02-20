@@ -4,7 +4,7 @@
     Version="9.00"
     Name="client_handler_py27_win32"
     RootNamespace="client_handler_py27_win32"
-    ProjectGUID="{15AD928F-FFD0-4FA5-B469-E42ABB0B4196}"
+    ProjectGUID="{15AD928F-FFD0-4FA5-B469-E42AAA0B4196}"
     Keyword="Win32Proj"
     TargetFrameworkVersion="0"
     >
@@ -27,7 +27,7 @@
             <Tool Name="VCMIDLTool" />
             <Tool
                 Name="VCCLCompilerTool"
-                AdditionalIncludeDirectories="../;$(PYTHON_INCLUDE_PATH);C:\Python27\include"
+                AdditionalIncludeDirectories="$(INCLUDE);..\;..\common"
                 PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;"
                 ExceptionHandling="1"
                 RuntimeLibrary="2"

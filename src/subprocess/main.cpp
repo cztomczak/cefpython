@@ -8,22 +8,21 @@
 
 #include <windows.h>
 int APIENTRY wWinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPTSTR    lpCmdLine,
-                     int       nCmdShow)
-
+                      HINSTANCE hPrevInstance,
+                      LPTSTR    lpCmdLine,
+                      int       nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	CefMainArgs mainArgs(hInstance);
 
-#else // Mac, Linux
+#else // defined(OS_WIN)
 
 int main(int argc, char **argv)
 {
 	CefMainArgs mainArgs(argc, argv);
 
-#endif
+#endif // Mac, Linux
 
 	CefRefPtr<CefPythonApp> app(new CefPythonApp);
 	int exitCode = CefExecuteProcess(mainArgs, app.get(), NULL);

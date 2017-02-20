@@ -111,6 +111,7 @@ class MainFrame(wx.Frame):
             (width, height) = self.browser_panel.GetSizeTuple()
             # noinspection PyUnresolvedReferences
             self.browser.SetBounds(x, y, width, height)
+        self.browser.NotifyMoveOrResizeStarted()
 
     def OnClose(self, event):
         # In cefpython3.wx.chromectrl example calling browser.CloseBrowser()

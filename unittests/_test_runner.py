@@ -3,9 +3,10 @@
 """Run unit tests. With no arguments all tests are run. Read notes below.
 
 Usage:
-    _test_runner.py [FILE | _TESTCASE]
+    _test_runner.py [--debug] [FILE | _TESTCASE]
 
 Options:
+    --debug    Enable debug info
     FILE       Run tests from single file
     _TESTCASE  Test cases matching pattern to run eg "file.TestCase".
                Calling with this argument is for internal use only.
@@ -27,6 +28,9 @@ from os.path import dirname, realpath
 import re
 import subprocess
 
+# Command line args
+CUSTOM_CMDLINE_ARG = ""
+
 
 def main(file_arg=""):
     # type: (str) -> None
@@ -37,7 +41,12 @@ def main(file_arg=""):
 
     # Script arguments
     testcase_arg = ""
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1 and sys.argv[1].startswith("--"):
+        # Will allow to pass custom args like --debug to isolated tests
+        # (main_test.py for example).
+        global CUSTOM_CMDLINE_ARG
+        CUSTOM_CMDLINE_ARG = sys.argv[1]
+    elif len(sys.argv) > 1:
         if ".py" in sys.argv[1]:
             file_arg = sys.argv[1]
         else:
@@ -141,7 +150,8 @@ class TestRunner(object):
             # Run test using new instance of Python interpreter
             try:
                 output = subprocess.check_output(
-                        [sys.executable, "_test_runner.py", testcase_id],
+                        [sys.executable, "_test_runner.py", testcase_id,
+                         CUSTOM_CMDLINE_ARG],
                         stderr=subprocess.STDOUT)
                 exit_code = 0
             except subprocess.CalledProcessError as exc:

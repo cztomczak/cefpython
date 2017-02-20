@@ -216,6 +216,8 @@ Custom flags that will be used when initializing the V8 Javascript engine.
 The consequences of using custom flags may not be well tested. Also  
 configurable using the --js-flags switch.
 
+To enable WebAssembly support set the `--expose-wasm` flag.
+
 
 ### locale
 

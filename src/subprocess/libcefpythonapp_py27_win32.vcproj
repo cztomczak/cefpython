@@ -4,7 +4,7 @@
     Version="9.00"
     Name="libcefpythonapp_py27_win32"
     RootNamespace="libcefpythonapp_py27_win32"
-    ProjectGUID="{55B8FF66-831C-42F9-8C30-635240439751}"
+    ProjectGUID="{55B8FF66-831C-42F9-8C30-635266639751}"
     Keyword="Win32Proj"
     TargetFrameworkVersion="0"
     >
@@ -27,7 +27,7 @@
             <Tool Name="VCMIDLTool" />
             <Tool
                 Name="VCCLCompilerTool"
-                AdditionalIncludeDirectories="../;$(PYTHON_INCLUDE_PATH);C:\Python27\include"
+                AdditionalIncludeDirectories="$(INCLUDE);..\;..\common"
                 PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;BROWSER_PROCESS;"
                 ExceptionHandling="1"
                 RuntimeLibrary="2"
@@ -75,6 +75,11 @@
             <File RelativePath=".\javascript_callback.cpp"></File>
             <File RelativePath=".\v8function_handler.cpp"></File>
             <File RelativePath=".\v8utils.cpp"></File>
+            <File RelativePath=".\main_message_loop\main_message_loop.cpp"></File>
+            <File RelativePath=".\main_message_loop\main_message_loop_std.cpp"></File>
+            <File RelativePath=".\main_message_loop\main_message_loop_external_pump.cpp"></File>
+            <File RelativePath=".\main_message_loop\util_win.cpp"></File>
+            <File RelativePath=".\main_message_loop\main_message_loop_external_pump_win.cpp"></File>
         </Filter>
     </Files>
     <Globals>

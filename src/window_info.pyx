@@ -81,7 +81,16 @@ cdef class WindowInfo:
 
     cpdef py_void SetAsChild(self, WindowHandle parentWindowHandle,
                              list windowRect=None):
-        if not WindowUtils.IsWindowHandle(parentWindowHandle):
+        # Allow parent window handle to be 0, in such case CEF will
+        # create top window automatically as in hello_world.py example.
+        IF UNAME_SYSNAME == "Windows":
+            # On Windows when parent window handle is 0 then SetAsPopup()
+            # must be called instead.
+            if parentWindowHandle == 0:
+                self.SetAsPopup(parentWindowHandle, "Popup")
+                return
+        if parentWindowHandle != 0\
+                and not WindowUtils.IsWindowHandle(parentWindowHandle):
             raise Exception("Invalid parentWindowHandle: %s"\
                     % parentWindowHandle)
         self.windowType = "child"
@@ -100,7 +109,10 @@ cdef class WindowInfo:
     IF UNAME_SYSNAME == "Windows":
         cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle,
                                  py_string windowName):
-            if not WindowUtils.IsWindowHandle(parentWindowHandle):
+            # Allow parent window handle to be 0, in such case CEF will
+            # create top window automatically as in hello_world.py example.
+            if parentWindowHandle != 0\
+                    and not WindowUtils.IsWindowHandle(parentWindowHandle):
                 raise Exception("Invalid parentWindowHandle: %s"\
                         % parentWindowHandle)
             self.parentWindowHandle = parentWindowHandle
@@ -109,7 +121,7 @@ cdef class WindowInfo:
 
     cpdef py_void SetAsOffscreen(self,
             WindowHandle parentWindowHandle):
-        # It is allowed to pass 0 as parentWindowHandle.
+        # It is allowed to pass 0 as parentWindowHandle in OSR mode
         if parentWindowHandle and \
                 not WindowUtils.IsWindowHandle(parentWindowHandle):
             raise Exception("Invalid parentWindowHandle: %s" \

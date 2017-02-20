@@ -1,6 +1,22 @@
 # Copyright (c) 2016 CEF Python, see the Authors file. All rights reserved.
 
-"""Automates building CEF from sources with CEF Python patches applied.
+"""
+Prepares CEF binaries and libraries for work with the build.py tool.
+
+Option 1 is to build CEF from sources with the CEF Python patches applied
+using the --build-cef flag.
+
+Option 2 is to use CEF binaries from Spotify Automated Builds using
+the --prebuilt-cef flag. In such case check the cefpython/src/version/
+directory to know which version of CEF to download from Spotify:
+http://opensource.spotify.com/cefbuilds/index.html
+Download and extract it so that for example you have such a directory:
+cefpython/build/cef_binary_3.2883.1553.g80bd606_windows32/ .
+
+This tool generates CEF binaries and libraries that are ready for work
+with cefpython, with the build.py script. When automate.py tool completes
+job you should see a new subdirectory in the build/ directory, for example:
+cefpython/build/cef55_3.2883.1553.g80bd606_win32/ .
 
 Usage:
     automate.py (--prebuilt-cef | --build-cef)
@@ -50,24 +66,6 @@ import multiprocessing
 
 CEF_GIT_URL = "https://bitbucket.org/chromiumembedded/cef.git"
 
-VS2015_VCVARS = "\"C:\Program Files (x86)\\Microsoft Visual Studio 14.0" \
-                "\\VC\\vcvarsall.bat\" x86" \
-                if ARCH32 else \
-                "\"C:\Program Files (x86)\\Microsoft Visual Studio 14.0" \
-                "\\VC\\vcvarsall.bat\" amd64"
-
-VS2013_VCVARS = "\"C:\Program Files (x86)\\Microsoft Visual Studio 12.0" \
-                "\\VC\\vcvarsall.bat\" x86" \
-                if ARCH32 else \
-                "\"C:\Program Files (x86)\\Microsoft Visual Studio 12.0" \
-                "\\VC\\cvarsall.bat\" amd64"
-
-VS2008_VCVARS = "\"%LocalAppData%\\Programs\\Common\\Microsoft" \
-                "\\Visual C++ for Python\\9.0\\vcvarsall.bat\" x86" \
-                if ARCH32 else \
-                "\"%LocalAppData%\\Programs\\Common\\Microsoft" \
-                "\\Visual C++ for Python\\9.0\\vcvarsall.bat\" amd64"
-
 
 class Options(object):
     """Options from command-line and internal options."""
@@ -94,6 +92,9 @@ class Options(object):
     release_build = True
     build_type = ""  # Will be set according to "release_build" value
     cef_binary = ""
+    build_cefclient_dir = ""
+    build_wrapper_mt_dir = ""
+    build_wrapper_md_dir = ""
 
 
 def main():
@@ -102,6 +103,10 @@ def main():
     if not ((2, 7) <= sys.version_info < (2, 8)):
         print("ERROR: to run this tool you need Python 2.7, as upstream")
         print("       automate-git.py works only with that version.")
+        sys.exit(1)
+
+    if len(sys.argv) <= 1:
+        print(__doc__)
         sys.exit(1)
 
     setup_options(docopt.docopt(__doc__))
@@ -303,7 +308,7 @@ def build_cef_projects():
 
     fix_cef_include_files()
 
-    # Find cef_binary directories and create the cef_binary/build/ dir
+    # Find cef_binary directory
     if not Options.cef_binary:
         if platform.system() == "Windows":
             files = glob.glob(os.path.join(Options.binary_distrib,
@@ -324,127 +329,224 @@ def build_cef_projects():
         assert os.path.exists(cef_binary)
         Options.cef_binary = cef_binary
 
+    # Set build directory
+    Options.build_cefclient_dir = os.path.join(Options.cef_binary,
+                                               "build_cefclient")
+
     print("[automate.py] Creating build_cefclient dir in cef_binary dir")
-    build_cefclient = os.path.join(Options.cef_binary, "build_cefclient")
+
+    # Check whether already built
     already_built = False
-    if os.path.exists(build_cefclient):
+    if build_cefclient_succeeded():
         already_built = True
+    elif os.path.exists(Options.build_cefclient_dir):
+        # Last build failed, clean directory
+        assert Options.build_cefclient_dir
+        shutil.rmtree(Options.build_cefclient_dir)
+        os.makedirs(Options.build_cefclient_dir)
     else:
-        os.makedirs(build_cefclient)
+        os.makedirs(Options.build_cefclient_dir)
 
     # Build cefclient, cefsimple, ceftests
     if already_built:
         print("[automate.py] Already built: cefclient, cefsimple, ceftests")
     else:
-        print("[automate.py] Building cefclient, cefsimple, ceftests ...")
+        print("[automate.py] Build cefclient, cefsimple, ceftests")
+        # Cmake
         command = prepare_build_command()
-        command += "cmake -G \"Ninja\" -DCMAKE_BUILD_TYPE=%s .." \
-                   % Options.build_type
-        run_command(command, build_cefclient)
+        command.extend(["cmake", "-G", "Ninja",
+                       "-DCMAKE_BUILD_TYPE="+Options.build_type, ".."])
+        run_command(command, Options.build_cefclient_dir)
         print("[automate.py] OK")
-        # On Linux cannot pass "&&" and run two commands using run_command()
+        # Ninja
         command = prepare_build_command()
-        command += "ninja cefclient cefsimple ceftests"
-        run_command(command, build_cefclient)
+        command.extend(["ninja", "cefclient", "cefsimple", "ceftests"])
+        run_command(command, Options.build_cefclient_dir)
         print("[automate.py] OK")
-        if platform.system() == "Windows":
-            assert(os.path.exists(os.path.join(build_cefclient,
-                                               "tests",
-                                               "cefclient",
-                                               Options.build_type,
-                                               "cefclient.exe")))
-        else:
-            assert (os.path.exists(os.path.join(build_cefclient,
-                                                "tests",
-                                                "cefclient",
-                                                Options.build_type,
-                                                "cefclient")))
+        assert build_cefclient_succeeded()
 
     # Build libcef_dll_wrapper libs
     if platform.system() == "Windows":
-        build_wrapper_windows(Options.cef_binary)
+        build_wrapper_windows()
+
+
+def build_wrapper_windows():
+    # When building library cmake variables file is being modified
+    # for the /MD build. If the build fails and variables aren't
+    # restored then the next /MT build would be broken. Make sure
+    # that original contents of cmake variables files is always
+    # restored.
+    fix_cmake_variables_for_md_library(try_undo=True)
+
+    # Command to build libcef_dll_wrapper
+    cmake_wrapper = prepare_build_command(build_lib=True)
+    cmake_wrapper.extend(["cmake", "-G", "Ninja",
+                         "-DCMAKE_BUILD_TYPE="+Options.build_type, ".."])
+
+    # Set build directory for /MT lib.
+    Options.build_wrapper_mt_dir = os.path.join(Options.cef_binary,
+                                                "build_wrapper_mt")
+
+    # Check whether already built
+    mt_already_built = False
+    if build_wrapper_mt_succeeded():
+        mt_already_built = True
+    elif os.path.exists(Options.build_wrapper_mt_dir):
+        # Last build failed, clean directory
+        assert Options.build_wrapper_mt_dir
+        shutil.rmtree(Options.build_wrapper_mt_dir)
+        os.makedirs(Options.build_wrapper_mt_dir)
+    else:
+        os.makedirs(Options.build_wrapper_mt_dir)
+
+    # Build /MT lib.
+    if mt_already_built:
+        print("[automate.py] Already built: libcef_dll_wrapper /MT")
+    else:
+        print("[automate.py] Build libcef_dll_wrapper /MT")
+        old_gyp_msvs_version = Options.gyp_msvs_version
+        Options.gyp_msvs_version = get_msvs_for_python()
+        # Cmake
+        run_command(cmake_wrapper, Options.build_wrapper_mt_dir)
+        Options.gyp_msvs_version = old_gyp_msvs_version
+        print("[automate.py] cmake OK")
+        # Ninja
+        ninja_wrapper = prepare_build_command(build_lib=True)
+        ninja_wrapper.extend(["ninja", "libcef_dll_wrapper"])
+        run_command(ninja_wrapper, Options.build_wrapper_mt_dir)
+        print("[automate.py] ninja OK")
+        assert build_wrapper_mt_succeeded()
+
+    # Set build directory for /MD lib.
+    Options.build_wrapper_md_dir = os.path.join(Options.cef_binary,
+                                                "build_wrapper_md")
+
+    # Check whether already built
+    md_already_built = False
+    if build_wrapper_md_succeeded():
+        md_already_built = True
+    elif os.path.exists(Options.build_wrapper_md_dir):
+        # Last build failed, clean directory
+        assert Options.build_wrapper_md_dir
+        shutil.rmtree(Options.build_wrapper_md_dir)
+        os.makedirs(Options.build_wrapper_md_dir)
+    else:
+        os.makedirs(Options.build_wrapper_md_dir)
+
+    # Build /MD lib.
+    if md_already_built:
+        print("[automate.py] Already built: libcef_dll_wrapper /MD")
+    else:
+        print("[automate.py] Build libcef_dll_wrapper /MD")
+        old_gyp_msvs_version = Options.gyp_msvs_version
+        Options.gyp_msvs_version = get_msvs_for_python()
+        # Fix cmake variables
+        # Cmake
+        fix_cmake_variables_for_md_library()
+        run_command(cmake_wrapper, Options.build_wrapper_md_dir)
+        Options.gyp_msvs_version = old_gyp_msvs_version
+        fix_cmake_variables_for_md_library(undo=True)
+        print("[automate.py] cmake OK")
+        # Ninja
+        ninja_wrapper = prepare_build_command(build_lib=True)
+        ninja_wrapper.extend(["ninja", "libcef_dll_wrapper"])
+        run_command(ninja_wrapper, Options.build_wrapper_md_dir)
+        print("[automate.py] ninja OK")
+        assert build_wrapper_md_succeeded()
+
+
+def fix_cmake_variables_for_md_library(undo=False, try_undo=False):
+    """Fix cmake variables or undo it. The try_undo param is
+    for a case when want to be sure that the file wasn't modified,
+    for example in case the last build failed."""
+
+    # Replace /MT with /MD /wd4275 in cef/cmake/cef_variables.cmake
+    # Warnings are treated as errors so this needs to be ignored:
+    # >> warning C4275: non dll-interface class 'stdext::exception'
+    # >> used as base for dll-interface class 'std::bad_cast'
+    # This warning occurs only in VS2008, in VS2013 not.
+    # This replacements must be unique for the undo operation
+    # to be reliable.
+
+    mt_find = r"/MT "
+    mt_replace = r"/MD /wd4275 "
+
+    mtd_find = r"/MTd "
+    mtd_replace = r"/MDd /wd4275 "
+
+    cmake_variables = os.path.join(Options.cef_binary, "cmake",
+                                   "cef_variables.cmake")
+    with open(cmake_variables, "rb") as fp:
+        contents = fp.read()
+
+    if try_undo:
+        matches1 = re.findall(re.escape(mt_replace), contents)
+        matches2 = re.findall(re.escape(mtd_replace), contents)
+        if len(matches1) or len(matches2):
+            undo = True
+        else:
+            return
+
+    if undo:
+        (contents, count) = re.subn(re.escape(mt_replace), mt_find,
+                                    contents)
+        assert count == 2
+        (contents, count) = re.subn(re.escape(mtd_replace), mtd_find,
+                                    contents)
+        assert count == 1
+    else:
+        (contents, count) = re.subn(re.escape(mt_find), mt_replace,
+                                    contents)
+        assert count == 2
+        (contents, count) = re.subn(re.escape(mtd_find), mtd_replace,
+                                    contents)
+        assert count == 1
+
+    with open(cmake_variables, "wb") as fp:
+        fp.write(contents)
+
+
+def build_cefclient_succeeded():
+    """Whether building cefclient/cefsimple/ceftests succeeded."""
+    assert Options.build_cefclient_dir
+    cefclient_exe = "cefclient.exe" if WINDOWS else "cefclient"
+    return os.path.exists(os.path.join(Options.build_cefclient_dir,
+                                       "tests",
+                                       "cefclient",
+                                       Options.build_type,
+                                       cefclient_exe))
+
+
+def build_wrapper_mt_succeeded():
+    """Whether building /MT library succeeded (Windows-only)."""
+    assert Options.build_wrapper_mt_dir
+    return os.path.exists(os.path.join(Options.build_wrapper_mt_dir,
+                                       "libcef_dll_wrapper",
+                                       "libcef_dll_wrapper.lib"))
+
+
+def build_wrapper_md_succeeded():
+    """Whether building /MD library succeeded (Windows-only)."""
+    assert Options.build_wrapper_md_dir
+    return os.path.exists(os.path.join(Options.build_wrapper_md_dir,
+                                       "libcef_dll_wrapper",
+                                       "libcef_dll_wrapper.lib"))
 
 
 def prepare_build_command(build_lib=False):
     """On Windows VS env variables must be set up by calling vcvarsall.bat"""
-    command = ""
+    command = list()
     if platform.system() == "Windows":
         if build_lib:
             msvs = get_msvs_for_python()
-            command = globals()["VS"+msvs+"_VCVARS"] + " && "
+            command.append(globals()["VS"+msvs+"_VCVARS"])
         else:
             if int(Options.cef_branch) >= 2704:
-                command = VS2015_VCVARS + " && "
+                command.append(VS2015_VCVARS)
             else:
-                command = VS2013_VCVARS + " && "
+                command.append(VS2013_VCVARS)
+        command.append("&&")
     return command
-
-
-def build_wrapper_windows(cef_binary):
-    # Command to build libcef_dll_wrapper
-    wrapper_cmake = prepare_build_command(build_lib=True)
-    wrapper_cmake += "cmake -G \"Ninja\" -DCMAKE_BUILD_TYPE=%s .." \
-                     % Options.build_type
-
-    # Build libcef_dll_wrapper_mt.lib
-    build_wrapper_mt = os.path.join(cef_binary, "build_wrapper_mt")
-    mt_already_built = False
-    if os.path.exists(build_wrapper_mt):
-        mt_already_built = True
-    else:
-        os.makedirs(build_wrapper_mt)
-    if mt_already_built:
-        print("[automate.py] Already built: libcef_dll_wrapper /MT")
-    else:
-        print("[automate.py] Building libcef_dll_wrapper /MT")
-        old_gyp_msvs_version = Options.gyp_msvs_version
-        Options.gyp_msvs_version = get_msvs_for_python()
-        run_command(wrapper_cmake, build_wrapper_mt)
-        Options.gyp_msvs_version = old_gyp_msvs_version
-        print("[automate.py] cmake OK")
-        ninja_wrapper = prepare_build_command(build_lib=True)
-        ninja_wrapper += "ninja libcef_dll_wrapper"
-        run_command(ninja_wrapper, build_wrapper_mt)
-        print("[automate.py] ninja OK")
-        assert(os.path.exists(os.path.join(build_wrapper_mt,
-                                           "libcef_dll_wrapper",
-                                           "libcef_dll_wrapper.lib")))
-
-    # Build libcef_dll_wrapper_md.lib
-    build_wrapper_md = os.path.join(cef_binary, "build_wrapper_md")
-    md_already_built = False
-    if os.path.exists(build_wrapper_md):
-        md_already_built = True
-    else:
-        os.makedirs(build_wrapper_md)
-    if md_already_built:
-        print("[automate.py] Already built: libcef_dll_wrapper /MD")
-    else:
-        print("[automate.py] Building libcef_dll_wrapper /MD")
-        old_gyp_msvs_version = Options.gyp_msvs_version
-        Options.gyp_msvs_version = get_msvs_for_python()
-        # Replace /MT with /MD /wd\"4275\" in CMakeLists.txt
-        # Warnings are treated as errors so this needs to be ignored:
-        # >> warning C4275: non dll-interface class 'stdext::exception'
-        # >> used as base for dll-interface class 'std::bad_cast'
-        # This warning occurs only in VS2008, in VS2013 not.
-        cmakelists = os.path.join(cef_binary, "CMakeLists.txt")
-        with open(cmakelists, "rb") as fp:
-            contents = fp.read()
-        contents = contents.replace(r"/MT ", r"/MD /wd\"4275\" ")
-        contents = contents.replace(r"/MTd ", r"/MDd /wd\"4275\" ")
-        with open(cmakelists, "wb") as fp:
-            fp.write(contents)
-        run_command(wrapper_cmake, build_wrapper_md)
-        Options.gyp_msvs_version = old_gyp_msvs_version
-        print("[automate.py] cmake OK")
-        ninja_wrapper = prepare_build_command(build_lib=True)
-        ninja_wrapper += "ninja libcef_dll_wrapper"
-        run_command(ninja_wrapper, build_wrapper_md)
-        print("[automate.py] ninja OK")
-        assert(os.path.exists(os.path.join(build_wrapper_md,
-                                           "libcef_dll_wrapper",
-                                           "libcef_dll_wrapper.lib")))
 
 
 def fix_cef_include_files():
@@ -600,13 +702,16 @@ def getenv():
     return env
 
 
-def run_command(command_line, working_dir):
+def run_command(command, working_dir):
     """Run command in a given directory with env variables set.
     On Linux multiple commands on one line with the use of && are not allowed.
     """
-    print("[automate.py] Running '"+command_line+"' in '" +
+    print("[automate.py] Running '"+" ".join(command)+"' in '" +
           working_dir+"'...")
-    args = shlex.split(command_line.replace("\\", "\\\\"))
+    if isinstance(command, str):
+        args = shlex.split(command.replace("\\", "\\\\"))
+    else:
+        args = command
     return subprocess.check_call(args, cwd=working_dir, env=getenv(),
                                  shell=(platform.system() == "Windows"))
 

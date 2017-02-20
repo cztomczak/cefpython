@@ -1,6 +1,8 @@
 // Copyright (c) 2016 CEF Python. See the Authors and License files.
 
 #include "lifespan_handler.h"
+#include "dpi_aware.h"
+#include "LOG_DEBUG.h"
 
 
 bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
