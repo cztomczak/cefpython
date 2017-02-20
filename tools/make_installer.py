@@ -5,7 +5,7 @@
 Create setup.py package installer.
 
 Usage:
-    make.py VERSION
+    make_installer.py VERSION
 
 Options:
     VERSION  Version number eg. 50.0

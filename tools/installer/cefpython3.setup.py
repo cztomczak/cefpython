@@ -16,7 +16,8 @@ Options:
 """
 
 # NOTE: Template variables like {{VERSION}} are replaced with actual
-#       values when make.py tool generates this package installer.
+#       values when make_installer.py tool generates this package
+#       installer.
 
 import copy
 import os

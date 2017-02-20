@@ -2,7 +2,8 @@
 # Licensed under BSD 3-clause license.
 
 # NOTE: Template variables like {{VERSION}} are replaced with actual
-#       values when make.py tool generates this package installer.
+#       values when make_installer.py tool generates this package
+#       installer.
 
 import os
 import sys

@@ -3,8 +3,11 @@
 
 # To install wxPython on Linux type "sudo apt-get install python-wxtools".
 
-# Tested with wxPython 2.8 on Linux, wxPython 3.0 on Windows/Mac
-# and CEF Python v55.3+.
+# Tested configurations:
+# - wxPython 2.8 on Linux
+# - wxPython 3.0.2.0 msw (classic) on Windows
+# - wxPython 3.0 on Mac
+# - CEF Python v55.3+
 
 import wx
 from cefpython3 import cefpython as cef
@@ -28,7 +31,7 @@ def main():
         settings["auto_zooming"] = "system_dpi"
         # Embed DPI awareness xml manifest inside .exe (recommended,
         # most reliable) or call the SetProcessDpiAware function.
-        # noinspection PyUnresolvedReferences
+        # noinspection PyUnresolvedReferences, PyArgumentList
         cef.DpiAware.SetProcessDpiAware()
     cef.Initialize(settings=settings)
     app = CefApp(False)
@@ -40,7 +43,7 @@ def main():
 def check_versions():
     print("[wxpython.py] CEF Python {ver}".format(ver=cef.__version__))
     print("[wxpython.py] Python {ver}".format(ver=sys.version[:6]))
-    print("[wxpython.py] wx {ver}".format(ver=wx.version()))
+    print("[wxpython.py] wxPython {ver}".format(ver=wx.version()))
     # CEF Python version requirement
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
 
@@ -75,11 +78,10 @@ class MainFrame(wx.Frame):
 
     def create_menu(self):
         filemenu = wx.Menu()
-        filemenu.Append(1, "Open")
-        exit_ = filemenu.Append(2, "Exit")
-        self.Bind(wx.EVT_MENU, self.OnClose, exit_)
+        filemenu.Append(1, "Some option")
+        exit_ = filemenu.Append(2, "Another option")
         aboutmenu = wx.Menu()
-        aboutmenu.Append(1, "CEF Python")
+        aboutmenu.Append(1, "Yet another option")
         menubar = wx.MenuBar()
         menubar.Append(filemenu, "&File")
         menubar.Append(aboutmenu, "&About")
@@ -93,11 +95,12 @@ class MainFrame(wx.Frame):
         self.browser.SetClientHandler(FocusHandler())
 
     def OnSetFocus(self, _):
-        if not self.brower:
+        if not self.browser:
             return
         if WINDOWS:
             # noinspection PyUnresolvedReferences
-            cef.WindowUtils.OnSetFocus(self.GetHandleForBrowser(), 0, 0, 0)
+            cef.WindowUtils.OnSetFocus(self.browser_panel.GetHandle(),
+                                       0, 0, 0)
         self.browser.SetFocus(True)
 
     def OnSize(self, _):
@@ -105,11 +108,11 @@ class MainFrame(wx.Frame):
             return
         if WINDOWS:
             # noinspection PyUnresolvedReferences
-            cef.WindowUtils.OnSize(self.GetHandleForBrowser(), 0, 0, 0)
+            cef.WindowUtils.OnSize(self.browser_panel.GetHandle(),
+                                   0, 0, 0)
         elif LINUX:
             (x, y) = (0, 0)
             (width, height) = self.browser_panel.GetSizeTuple()
-            # noinspection PyUnresolvedReferences
             self.browser.SetBounds(x, y, width, height)
         self.browser.NotifyMoveOrResizeStarted()
 
@@ -154,9 +157,10 @@ class FocusHandler(object):
         # window (alt+tab) and then back to this example, keyboard
         # focus becomes broken, you can't type anything, even
         # though a type cursor blinks in web view.
-        print("[wxpython.py] FocusHandler.OnGotFocus:"
-              " keyboard focus fix (#284)")
-        browser.SetFocus(True)
+        if LINUX:
+            print("[wxpython.py] FocusHandler.OnGotFocus:"
+                  " keyboard focus fix (#284)")
+            browser.SetFocus(True)
 
 
 class CefApp(wx.App):

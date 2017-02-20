@@ -648,16 +648,22 @@ def install_and_run():
     # Make setup installer
     print("[build.py] Make setup installer")
     make_tool = os.path.join(TOOLS_DIR, "make_installer.py")
-    os.system("{python} {make_tool} --version {version}"
-              .format(python=sys.executable,
-                      make_tool=make_tool,
-                      version=VERSION))
+    ret = os.system("{python} {make_tool} --version {version}"
+                    .format(python=sys.executable,
+                            make_tool=make_tool,
+                            version=VERSION))
+    if ret != 0:
+        print("[build.py] ERROR while making installer package")
+        sys.exit(ret)
 
     # Install
     print("[build.py] Install the cefpython package")
     os.chdir(setup_installer_dir)
-    os.system("{sudo} {python} setup.py install"
-              .format(sudo=get_sudo(), python=sys.executable))
+    ret = os.system("{sudo} {python} setup.py install"
+                    .format(sudo=get_sudo(), python=sys.executable))
+    if ret != 0:
+        print("[build.py] ERROR while installing package")
+        sys.exit(ret)
     os.chdir(BUILD_DIR)
 
     # Run unittests
@@ -666,32 +672,36 @@ def install_and_run():
     ret = os.system("{python} {test_runner}"
                     .format(python=sys.executable, test_runner=test_runner))
     if ret != 0:
+        print("[build.py] ERROR while running unit tests")
         sys.exit(ret)
 
     # Run examples
     print("[build.py] Run examples")
-    if KIVY_FLAG:
-        run_examples = "{python} {linux_dir}/deprecated_64bit/kivy_.py"
-    else:
-        run_examples = ("cd {examples_dir}"
-                        " && {python} hello_world.py"
-                        " && {python} wxpython.py"
-                        " && {python} gtk2.py"
-                        " && {python} gtk2.py --message-loop-timer"
-                        #  " && {python} gtk3.py"
-                        " && {python} tkinter_.py"
-                        " && {python} qt.py pyqt"
-                        " && {python} qt.py pyside")
-        if LINUX:
-            run_examples += (" && {python}"
-                             " {linux_dir}/deprecated_64bit/kivy_.py")
-    run_examples.format(
-        python=sys.executable,
-        linux_dir=LINUX_DIR,
-        examples_dir=EXAMPLES_DIR)
-    os.system(run_examples)
+    os.chdir(EXAMPLES_DIR)
+    examples = list()
+    if not KIVY_FLAG:
+        examples.extend([
+            "hello_world.py",
+            "wxpython.py",
+            "gtk2.py",
+            "gtk2.py --message-loop-timer",
+            "gtk3.py",
+            "tkinter_.py",
+            "qt.py pyqt",
+            "qt.py pyside",
+        ])
+    if LINUX:
+        examples.append("{linux_dir}/deprecated_64bit/kivy_.py"
+                        .format(linux_dir=LINUX_DIR))
+    for example in examples:
+        ret = os.system("{python} {example}"
+                        .format(python=sys.executable, example=example))
+        if ret != 0:
+            print("[build.py] ERROR while running example: {example}"
+                  .format(example=example))
+            sys.exit(1)
 
-    print("[build.py] DONE")
+    print("[build.py] Everything OK")
 
 
 def get_sudo():

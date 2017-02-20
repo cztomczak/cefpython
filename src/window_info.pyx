@@ -87,7 +87,7 @@ cdef class WindowInfo:
             # On Windows when parent window handle is 0 then SetAsPopup()
             # must be called instead.
             if parentWindowHandle == 0:
-                self.SetAsPopup(parentWindowHandle, "Popup")
+                self.SetAsPopup(parentWindowHandle, "")
                 return
         if parentWindowHandle != 0\
                 and not WindowUtils.IsWindowHandle(parentWindowHandle):
