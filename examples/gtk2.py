@@ -1,5 +1,5 @@
 # Example of embedding CEF Python browser using PyGTK library (GTK 2).
-# Tested with GTK 2.24 and CEF Python v55.3+, only on Linux.
+# Tested with GTK 2.24 and CEF Python v55.3+, on Windows/Linux.
 # Known issue on Linux: Keyboard focus problem (Issue #284).
 
 from cefpython3 import cefpython as cef
@@ -8,16 +8,25 @@ import gtk
 import gobject
 import sys
 import os
+import platform
+
+# Fix for PyCharm hints warnings
+WindowUtils = cef.WindowUtils()
+
+# Platforms
+WINDOWS = (platform.system() == "Windows")
+LINUX = (platform.system() == "Linux")
+MAC = (platform.system() == "Darwin")
 
 # In CEF you can run message loop in two ways (see API docs for more details):
-# 1. By calling cef.MessageLoop() instead of an application-provided
+# 1. By calling cef.MessageLoopWork() in a timer - each call performs
+#    a single iteration of CEF message loop processing.
+# 2. By calling cef.MessageLoop() instead of an application-provided
 #    message loop to get the best balance between performance and CPU
 #    usage. This function will block until a quit message is received by
-#    the system.
-# 2. By calling cef.MessageLoopWork() in a timer - each call performs
-#    a single iteration of CEF message loop processing.
-MESSAGE_LOOP_BEST = 1
-MESSAGE_LOOP_TIMER = 2  # Pass --message-loop-timer flag to script to use this
+#    the system. This seem to work only on Linux in GTK example.
+MESSAGE_LOOP_TIMER = 1
+MESSAGE_LOOP_CEF = 2  # Pass --message-loop-cef flag to script on Linux
 g_message_loop = None
 
 
@@ -28,7 +37,7 @@ def main():
     cef.Initialize()
     gobject.threads_init()
     Gtk2Example()
-    if g_message_loop == MESSAGE_LOOP_BEST:
+    if g_message_loop == MESSAGE_LOOP_CEF:
         cef.MessageLoop()
     else:
         gtk.main()
@@ -46,13 +55,13 @@ def check_versions():
 
 def configure_message_loop():
     global g_message_loop
-    if "--message-loop-timer" in sys.argv:
+    if "--message-loop-cef" in sys.argv:
+        print("[gkt2.py] Message loop mode: CEF (best performance)")
+        g_message_loop = MESSAGE_LOOP_CEF
+        sys.argv.remove("--message-loop-cef")
+    else:
         print("[gkt2.py] Message loop mode: TIMER")
         g_message_loop = MESSAGE_LOOP_TIMER
-        sys.argv.remove("--message-loop-timer")
-    else:
-        print("[gkt2.py] Message loop mode: BEST")
-        g_message_loop = MESSAGE_LOOP_BEST
     if len(sys.argv) > 1:
         print("[gkt2.py] ERROR: unknown argument passed")
         sys.exit(1)
@@ -83,7 +92,7 @@ class Gtk2Example:
         self.main_window.add(self.vbox)
 
         windowInfo = cef.WindowInfo()
-        windowInfo.SetAsChild(self.main_window.window.xid)
+        windowInfo.SetAsChild(self.get_handle())
         self.browser = cef.CreateBrowserSync(windowInfo, settings={},
                                              url="https://www.google.com/")
         self.browser.SetClientHandler(LoadHandler())
@@ -94,6 +103,12 @@ class Gtk2Example:
         self.main_window.get_window().focus()
         if g_message_loop == MESSAGE_LOOP_TIMER:
             gobject.timeout_add(10, self.on_timer)
+
+    def get_handle(self):
+        if LINUX:
+            return self.main_window.window.xid
+        else:
+            return self.main_window.window.handle
 
     def create_menu(self):
         item1 = gtk.MenuItem('MenuBar')
@@ -131,16 +146,22 @@ class Gtk2Example:
             y = data.y + self.menubar_height
             width = data.width
             height = data.height - self.menubar_height
-            self.browser.SetBounds(x, y, width, height)
+            if WINDOWS:
+                WindowUtils.OnSize(self.get_handle(), 0, 0, 0)
+            elif LINUX:
+                self.browser.SetBounds(x, y, width, height)
 
     def on_menubar_size_allocate(self, _, data):
         self.menubar_height = data.height
 
     def on_exit(self, *_):
+        if self.exiting:
+            print("[gtk2.py] on_exit() called, but already exiting")
+            return
         self.exiting = True
         self.browser.CloseBrowser(True)
         self.browser = None
-        if g_message_loop == MESSAGE_LOOP_BEST:
+        if g_message_loop == MESSAGE_LOOP_CEF:
             cef.QuitMessageLoop()
         else:
             gtk.main_quit()
@@ -158,9 +179,10 @@ class LoadHandler(object):
             # sometimes during initial loading, keyboard focus may
             # break and it is not possible to type anything, even
             # though a type cursor blinks in web view.
-            print("[gtk2.py] LoadHandler.OnLoadStart:"
-                  " keyboard focus fix (#284)")
-            browser.SetFocus(True)
+            if LINUX:
+                print("[gtk2.py] LoadHandler.OnLoadStart:"
+                      " keyboard focus fix (#284)")
+                browser.SetFocus(True)
             self.initial_app_loading = False
 
 

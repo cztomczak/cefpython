@@ -1,7 +1,9 @@
 # Example of embedding CEF Python browser using Tkinter toolkit.
 # This example has two widgets: a navigation bar and a browser.
 #
-# Tested with Tk 8.6 and CEF Python v55.3+, only on Linux.
+# Tested configurations:
+# - Tk 8.6 and CEF Python v55.3+ on Linux
+# - Tk 8.5 and CEF Python v55.4+ on Windows
 #
 # Known issue on Linux: When typing url, mouse must be over url
 # entry widget otherwise keyboard focus is lost (Issue #255
@@ -17,10 +19,18 @@ import os
 import platform
 import logging as _logging
 
+# Fix for PyCharm hints warnings
+WindowUtils = cef.WindowUtils()
+
+# Platforms
+WINDOWS = (platform.system() == "Windows")
+LINUX = (platform.system() == "Linux")
+MAC = (platform.system() == "Darwin")
+
 # Globals
 logger = _logging.getLogger("tkinter_.py")
 # Python 2.7 on Windows comes with Tk 8.5 which doesn't support PNG images
-IMAGE_EXT = ".gif" if platform.system() == "Windows" else ".png"
+IMAGE_EXT = ".gif" if WINDOWS else ".png"
 
 
 def main():
@@ -278,10 +288,9 @@ class BrowserFrame(tk.Frame):
 
     def on_mainframe_configure(self, width, height):
         if self.browser:
-            if platform.system() == "Windows":
-                # noinspection PyUnresolvedReferences
-                cef.WindowUtils.OnSize(self.winfo_id(), 0, 0, 0)
-            elif platform.system() == "Linux":
+            if WINDOWS:
+                WindowUtils.OnSize(self.winfo_id(), 0, 0, 0)
+            elif LINUX:
                 self.browser.SetBounds(0, 0, width, height)
             self.browser.NotifyMoveOrResizeStarted()
 

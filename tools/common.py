@@ -22,8 +22,8 @@ elif OS_POSTFIX == "linux":
     OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
 
 # Platforms
-LINUX = (platform.system() == "Linux")
 WINDOWS = (platform.system() == "Windows")
+LINUX = (platform.system() == "Linux")
 MAC = (platform.system() == "Darwin")
 
 # Python version eg. 27

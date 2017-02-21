@@ -1,21 +1,30 @@
 # Example of embedding CEF Python browser using PyQt/PySide libraries.
 # This example has two widgets: a navigation bar and a browser.
 #
-# Tested with PyQt 4.10.4 (4.8.6), PySide 1.2.1 (4.8.6)
-# and CEF Python v55.3+, only on Linux.
+# Tested configurations:
+# - PyQt 4.11.4 (4.8.7) on Windows
+# - PySide 1.2.4 (4.8.7) on Windows
+# - PyQt 4.10.4 (4.8.6) on Linux
+# - PySide 1.2.1 (4.8.6) on Linux
+# - CEF Python v55.4+
 
-import os
-import sys
-import platform
 from cefpython3 import cefpython as cef
+import ctypes
+import os
+import platform
+import sys
 
 # PyQt imports
 if "pyqt" in sys.argv:
+    # noinspection PyUnresolvedReferences
     from PyQt4.QtGui import *
+    # noinspection PyUnresolvedReferences
     from PyQt4.QtCore import *
 # PySide imports
 elif "pyside" in sys.argv:
+    # noinspection PyUnresolvedReferences
     import PySide
+    # noinspection PyUnresolvedReferences
     from PySide import QtCore
     # noinspection PyUnresolvedReferences
     from PySide.QtGui import *
@@ -27,9 +36,15 @@ else:
     print("  qt.py pyside")
     sys.exit(1)
 
-# Constants
-LINUX = (platform.system() == "Linux")
+# Fix for PyCharm hints warnings
+WindowUtils = cef.WindowUtils()
+
+# Platforms
 WINDOWS = (platform.system() == "Windows")
+LINUX = (platform.system() == "Linux")
+MAC = (platform.system() == "Darwin")
+
+# Configuration
 WIDTH = 800
 HEIGHT = 600
 
@@ -59,6 +74,7 @@ def check_versions():
     print("[qt.py] Python {ver}".format(ver=sys.version[:6]))
     # PyQt version
     if "pyqt" in sys.argv:
+        # noinspection PyUnresolvedReferences
         print("[qt.py] PyQt {v1} ({v2})".format(
               v1=PYQT_VERSION_STR, v2=qVersion()))
     # PySide version
@@ -91,6 +107,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.cef_widget, 1, 0)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+        layout.setRowStretch(0, 0)
+        layout.setRowStretch(1, 1)
         frame = QFrame()
         frame.setLayout(layout)
         self.setCentralWidget(frame)
@@ -98,20 +116,20 @@ class MainWindow(QMainWindow):
         self.cef_widget.embedBrowser()
 
     def focusInEvent(self, event):
-        # This event seems to never get called, as CEF is stealing all
-        # focus due to Issue #284.
-        if WINDOWS:
-            # noinspection PyUnresolvedReferences
-            cef.WindowUtils.OnSetFocus(int(self.centralWidget().winId()),
-                                       0, 0, 0)
-        print("[qt.py] focusInEvent")
+        # This event seems to never get called on Linux, as CEF is
+        # stealing all focus due to Issue #284.
+        # print("[qt.py] focusInEvent")
         if self.cef_widget.browser:
+            if WINDOWS:
+                WindowUtils.OnSetFocus(self.cef_widget.getHandle(),
+                                       0, 0, 0)
             self.cef_widget.browser.SetFocus(True)
 
     def focusOutEvent(self, event):
-        # This event seems to never get called, as CEF is stealing all
-        # focus due to Issue #284.
-        print("[qt.py] focusOutEvent")
+        # This event seems to never get called on Linux, as CEF is
+        # stealing all focus due to Issue #284.
+        # print("[qt.py] focusOutEvent")
+        pass
 
     def closeEvent(self, event):
         # Close browser (force=True) and free CEF reference
@@ -212,11 +230,33 @@ class CefWidget(CefWidgetParent):
         self.width = 0
         self.height = 0
         window_info = cef.WindowInfo()
-        window_info.SetAsChild(int(self.winId()))
+        window_info.SetAsChild(self.getHandle())
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         self.browser.SetClientHandler(LoadHandler(self.parent.navigation_bar))
         self.browser.SetClientHandler(FocusHandler())
+
+    def getHandle(self):
+        # PySide bug: QWidget.winId() returns <PyCObject object at 0x02FD8788>
+        # There is no easy way to convert it to int.
+        try:
+            return int(self.winId())
+        except:
+            if sys.version_info[0] == 2:
+                # Python 2
+                ctypes.pythonapi.PyCObject_AsVoidPtr.restype = (
+                        ctypes.c_void_p)
+                ctypes.pythonapi.PyCObject_AsVoidPtr.argtypes = (
+                        [ctypes.py_object])
+                return ctypes.pythonapi.PyCObject_AsVoidPtr(self.winId())
+            else:
+                # Python 3
+                ctypes.pythonapi.PyCapsule_GetPointer.restype = (
+                        ctypes.c_void_p)
+                ctypes.pythonapi.PyCapsule_GetPointer.argtypes = (
+                        [ctypes.py_object])
+                return ctypes.pythonapi.PyCapsule_GetPointer(
+                        self.winId(), None)
 
     def moveEvent(self, _):
         # pos = event.pos()
@@ -226,11 +266,11 @@ class CefWidget(CefWidgetParent):
         self.y = 0
         if self.browser:
             if WINDOWS:
-                # noinspection PyUnresolvedReferences
-                cef.WindowUtils.OnSize(int(self.winId()), 0, 0, 0)
+                WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
             elif LINUX:
-                # noinspection PyUnresolvedReferences
-                self.browser.SetBounds(self.x, self.y, self.width, self.height)
+                self.browser.SetBounds(self.x, self.y,
+                                       self.width, self.height)
+            self.browser.NotifyMoveOrResizeStarted()
 
     def resizeEvent(self, event):
         size = event.size()
@@ -238,11 +278,11 @@ class CefWidget(CefWidgetParent):
         self.height = size.height()
         if self.browser:
             if WINDOWS:
-                # noinspection PyUnresolvedReferences
-                cef.WindowUtils.OnSize(int(self.winId()), 0, 0, 0)
+                WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
             elif LINUX:
-                # noinspection PyUnresolvedReferences
-                self.browser.SetBounds(self.x, self.y, self.width, self.height)
+                self.browser.SetBounds(self.x, self.y,
+                                       self.width, self.height)
+            self.browser.NotifyMoveOrResizeStarted()
 
 
 class CefApplication(QApplication):
@@ -298,9 +338,10 @@ class LoadHandler(object):
             # sometimes during initial loading, keyboard focus may
             # break and it is not possible to type anything, even
             # though a type cursor blinks in web view.
-            print("[qt.py] LoadHandler.OnLoadStart:"
-                  " keyboard focus fix no. 2 (#284)")
-            browser.SetFocus(True)
+            if LINUX:
+                print("[qt.py] LoadHandler.OnLoadStart:"
+                      " keyboard focus fix no. 2 (#284)")
+                browser.SetFocus(True)
             self.initial_app_loading = False
 
 
@@ -328,9 +369,10 @@ class FocusHandler(object):
         # window (alt+tab) and then back to this example, keyboard
         # focus becomes broken, you can't type anything, even
         # though a type cursor blinks in web view.
-        print("[qt.py] FocusHandler.OnGotFocus:"
-              " keyboard focus fix no. 1 (#284)")
-        browser.SetFocus(True)
+        if LINUX:
+            print("[qt.py] FocusHandler.OnGotFocus:"
+                  " keyboard focus fix no. 1 (#284)")
+            browser.SetFocus(True)
 
 
 if __name__ == '__main__':

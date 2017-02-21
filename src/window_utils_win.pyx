@@ -4,10 +4,10 @@
 
 include "cefpython.pyx"
 
-class WindowUtils:
+class WindowUtils(object):
 
     @staticmethod
-    def OnSetFocus(int windowHandle, long msg, long wparam, long lparam):
+    def OnSetFocus(long windowHandle, long msg, long wparam, long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
             return 0
@@ -15,7 +15,7 @@ class WindowUtils:
         return 0
 
     @staticmethod
-    def OnSize(int windowHandle, long msg, long wparam, long lparam):
+    def OnSize(long windowHandle, long msg, long wparam, long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
             return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
@@ -35,7 +35,7 @@ class WindowUtils:
         return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
 
     @staticmethod
-    def OnEraseBackground(int windowHandle, long msg, long wparam,
+    def OnEraseBackground(long windowHandle, long msg, long wparam,
                           long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
@@ -134,11 +134,11 @@ class WindowUtils:
                             ICON_SMALL, parentIconSmall)
 
     @staticmethod
-    def GetParentHandle(int windowHandle):
-        return <int>GetParent(<HWND>windowHandle)
+    def GetParentHandle(long windowHandle):
+        return <long>GetParent(<HWND>windowHandle)
 
     @staticmethod
-    def IsWindowHandle(int windowHandle):
+    def IsWindowHandle(long windowHandle):
         IF UNAME_SYSNAME == "Windows":
             return bool(IsWindow(<HWND>windowHandle))
         ELSE:

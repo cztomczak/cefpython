@@ -678,28 +678,12 @@ def install_and_run():
     # Run examples
     print("[build.py] Run examples")
     os.chdir(EXAMPLES_DIR)
-    examples = list()
-    if not KIVY_FLAG:
-        examples.extend([
-            "hello_world.py",
-            "wxpython.py",
-            "gtk2.py",
-            "gtk2.py --message-loop-timer",
-            "gtk3.py",
-            "tkinter_.py",
-            "qt.py pyqt",
-            "qt.py pyside",
-        ])
-    if LINUX:
-        examples.append("{linux_dir}/deprecated_64bit/kivy_.py"
-                        .format(linux_dir=LINUX_DIR))
-    for example in examples:
-        ret = os.system("{python} {example}"
-                        .format(python=sys.executable, example=example))
-        if ret != 0:
-            print("[build.py] ERROR while running example: {example}"
-                  .format(example=example))
-            sys.exit(1)
+    run_examples = os.path.join(TOOLS_DIR, "run_examples.py")
+    ret = os.system("{python} {run_examples}"
+                    .format(python=sys.executable, run_examples=run_examples))
+    if ret != 0:
+        print("[build.py] ERROR while running examples")
+        sys.exit(1)
 
     print("[build.py] Everything OK")
 

@@ -1,5 +1,5 @@
 # Hello world example. Doesn't depend on any third party GUI framework.
-# Tested with CEF Python v55.3+, only on Linux.
+# Tested with CEF Python v55.3+.
 
 from cefpython3 import cefpython as cef
 import sys

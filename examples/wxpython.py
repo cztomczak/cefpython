@@ -5,9 +5,8 @@
 
 # Tested configurations:
 # - wxPython 2.8 on Linux
-# - wxPython 3.0.2.0 msw (classic) on Windows
-# - wxPython 3.0 on Mac
-# - CEF Python v55.3+
+# - wxPython 3.0 on Windows
+# - CEF Python v55.4+
 
 import wx
 from cefpython3 import cefpython as cef
@@ -15,9 +14,15 @@ import platform
 import sys
 import os
 
-# Constants
-LINUX = (platform.system() == "Linux")
+# Fix for PyCharm hints warnings
+WindowUtils = cef.WindowUtils()
+
+# Platforms
 WINDOWS = (platform.system() == "Windows")
+LINUX = (platform.system() == "Linux")
+MAC = (platform.system() == "Darwin")
+
+# Configuration
 WIDTH = 800
 HEIGHT = 600
 
@@ -79,7 +84,7 @@ class MainFrame(wx.Frame):
     def create_menu(self):
         filemenu = wx.Menu()
         filemenu.Append(1, "Some option")
-        exit_ = filemenu.Append(2, "Another option")
+        filemenu.Append(2, "Another option")
         aboutmenu = wx.Menu()
         aboutmenu.Append(1, "Yet another option")
         menubar = wx.MenuBar()
@@ -98,18 +103,16 @@ class MainFrame(wx.Frame):
         if not self.browser:
             return
         if WINDOWS:
-            # noinspection PyUnresolvedReferences
-            cef.WindowUtils.OnSetFocus(self.browser_panel.GetHandle(),
-                                       0, 0, 0)
+            WindowUtils.OnSetFocus(self.browser_panel.GetHandle(),
+                                   0, 0, 0)
         self.browser.SetFocus(True)
 
     def OnSize(self, _):
         if not self.browser:
             return
         if WINDOWS:
-            # noinspection PyUnresolvedReferences
-            cef.WindowUtils.OnSize(self.browser_panel.GetHandle(),
-                                   0, 0, 0)
+            WindowUtils.OnSize(self.browser_panel.GetHandle(),
+                               0, 0, 0)
         elif LINUX:
             (x, y) = (0, 0)
             (width, height) = self.browser_panel.GetSizeTuple()

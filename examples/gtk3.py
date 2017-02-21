@@ -1,12 +1,33 @@
-# ! CURRENTLY BROKEN ! with v54+ (Issue #261).
-# Example of embedding CEF Python browser using PyGObject library (GTK 3).
-# Tested with GTK 3.10 and CEF Python v53.1+, only on Linux.
+# Example of embedding CEF Python browser using PyGObject/PyGI (GTK 3).
+
+# Linux note: This example is currently broken in v54+ on Linux (Issue #261).
+#             It works fine with cefpython v53.
+
+# Tested configurations:
+# - GTK 3.18 on Windows
+# - GTK 3.10 on Linux
+# - CEF Python v53.1+
 
 from cefpython3 import cefpython as cef
+import ctypes
 # noinspection PyUnresolvedReferences
-from gi.repository import GdkX11, Gtk, GObject, GdkPixbuf
+from gi.repository import Gtk, GObject, Gdk, GdkPixbuf
 import sys
 import os
+import platform
+
+# Fix for PyCharm hints warnings
+WindowUtils = cef.WindowUtils()
+
+# Platforms
+WINDOWS = (platform.system() == "Windows")
+LINUX = (platform.system() == "Linux")
+MAC = (platform.system() == "Darwin")
+
+# Linux imports
+if LINUX:
+    # noinspection PyUnresolvedReferences
+    from gi.repository import GdkX11
 
 
 def main():
@@ -25,9 +46,10 @@ def main():
 class Gtk3Example(Gtk.Application):
 
     def __init__(self):
-        super(Gtk3Example, self).__init__(application_id='cefpython.gtk')
+        super(Gtk3Example, self).__init__(application_id='cefpython.gtk3')
         self.browser = None
         self.window = None
+        self.win32_handle = None
 
     def run(self, argv):
         GObject.threads_init()
@@ -35,6 +57,22 @@ class Gtk3Example(Gtk.Application):
         self.connect("activate", self.on_activate)
         self.connect("shutdown", self.on_shutdown)
         return super(Gtk3Example, self).run(argv)
+
+    def get_handle(self):
+        if LINUX:
+            return self.window.get_property("window").get_xid()
+        elif WINDOWS:
+            Gdk.threads_enter()
+            ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
+            ctypes.pythonapi.PyCapsule_GetPointer.argtypes = \
+                [ctypes.py_object]
+            gpointer = ctypes.pythonapi.PyCapsule_GetPointer(
+                    self.window.get_property("window").__gpointer__, None)
+            gdk_dll = ctypes.CDLL("libgdk-3-0.dll")
+            self.win32_handle = gdk_dll.gdk_win32_window_get_handle(
+                    gpointer)
+            Gdk.threads_leave()
+            return self.win32_handle
 
     def on_timer(self):
         cef.MessageLoopWork()
@@ -51,10 +89,13 @@ class Gtk3Example(Gtk.Application):
         self.setup_icon()
         self.window.realize()
         window_info = cef.WindowInfo()
-        window_info.SetAsChild(self.window.get_property("window").get_xid())
+        window_info.SetAsChild(self.get_handle())
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         self.window.show_all()
+        # Must set size of the window again after it was shown,
+        # otherwise browser occupies only part of the window area.
+        self.window.resize(*self.window.get_default_size())
 
     def on_configure(self, *_):
         if self.browser:
@@ -63,7 +104,11 @@ class Gtk3Example(Gtk.Application):
 
     def on_size_allocate(self, _, data):
         if self.browser:
-            self.browser.SetBounds(data.x, data.y, data.width, data.height)
+            if WINDOWS:
+                WindowUtils.OnSize(self.win32_handle, 0, 0, 0)
+            elif LINUX:
+                self.browser.SetBounds(data.x, data.y,
+                                       data.width, data.height)
 
     def on_focus_in(self, *_):
         if self.browser:
