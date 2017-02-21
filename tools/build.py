@@ -678,9 +678,12 @@ def install_and_run():
     # Run examples
     print("[build.py] Run examples")
     os.chdir(EXAMPLES_DIR)
+    kivy_flag = "--kivy" if KIVY_FLAG else ""
     run_examples = os.path.join(TOOLS_DIR, "run_examples.py")
-    ret = os.system("{python} {run_examples}"
-                    .format(python=sys.executable, run_examples=run_examples))
+    ret = os.system("{python} {run_examples} {kivy_flag}"
+                    .format(python=sys.executable,
+                            run_examples=run_examples,
+                            kivy_flag=kivy_flag))
     if ret != 0:
         print("[build.py] ERROR while running examples")
         sys.exit(1)

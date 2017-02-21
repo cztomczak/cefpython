@@ -24,6 +24,7 @@ import os
 import platform
 import subprocess
 import sys
+import sysconfig
 
 # The setuptools package is not installed by default on a clean
 # Ubuntu. Might be also a case on Windows. Also Python Eggs
@@ -92,6 +93,19 @@ if platform.system() == "Darwin" and "bdist_wheel" in sys.argv:
             return tag
 
     cmdclass["bdist_wheel"] = custom_bdist_wheel
+elif platform.system() in ["Windows", "Linux"] and "bdist_wheel" in sys.argv:
+    # On Windows and Linux platform tag is always "any".
+    print("[setup.py] Overload bdist_wheel command to fix platform tag")
+    from wheel.bdist_wheel import bdist_wheel
+
+    class custom_bdist_wheel(bdist_wheel):
+        def get_tag(self):
+            tag = bdist_wheel.get_tag(self)
+            platform_tag = sysconfig.get_platform()
+            tag = (tag[0], tag[1], platform_tag)
+            return tag
+
+    cmdclass["bdist_wheel"] = custom_bdist_wheel
 
 
 def main():
@@ -132,7 +146,12 @@ def main():
             "Topic :: Software Development :: User Interfaces",
         ],
     )
-    print("[setup.py] OK installed")
+    if "install" in sys.argv:
+        print("[setup.py] OK installed")
+    elif "bdist_wheel" in sys.argv:
+        print("[setup.py] OK created wheel package in dist/ directory")
+    else:
+        print("[setup.py] Unknown command line arguments")
 
 
 def get_package_data():
