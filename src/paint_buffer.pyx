@@ -18,8 +18,8 @@ cdef class PaintBuffer:
     cdef int height
     cdef Py_ssize_t length
 
-    cpdef long long GetIntPointer(self) except *:
-        return <long long>self.buffer
+    cpdef uintptr_t GetIntPointer(self) except *:
+        return <uintptr_t>self.buffer
 
     cpdef object GetString(self, str mode="bgra", str origin="top-left"):
         cdef void* dest

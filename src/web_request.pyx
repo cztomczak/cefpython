@@ -122,8 +122,8 @@ cdef class PyWebRequest:
 cdef public void WebRequestClient_OnUploadProgress(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
-        cef_types.int64 current,
-        cef_types.int64 total
+        int64 current,
+        int64 total
         ) except * with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
@@ -143,8 +143,8 @@ cdef public void WebRequestClient_OnUploadProgress(
 cdef public void WebRequestClient_OnDownloadProgress(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
-        cef_types.int64 current,
-        cef_types.int64 total
+        int64 current,
+        int64 total
         ) except * with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback

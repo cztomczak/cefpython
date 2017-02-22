@@ -267,7 +267,7 @@ cdef public cpp_bool RequestHandler_OnQuotaRequest(
             returnValue = clientCallback(
                     browser=pyBrowser,
                     origin_url=pyOriginUrl,
-                    new_size=long(newSize),
+                    new_size=newSize,
                     callback=CreatePyRequestCallback(cefRequestCallback))
             return bool(returnValue)
         else:

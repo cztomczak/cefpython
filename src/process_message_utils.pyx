@@ -49,8 +49,8 @@ cdef list CefListValueToPyList(
     cdef cef_types.cef_value_type_t valueType
     cdef list ret = []
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef cef_types.uint32 uint32_value
-    cdef cef_types.int64 int64_value
+    cdef uint32 uint32_value
+    cdef int64 int64_value
     cdef object originallyString
     for index in range(0, size):
         valueType = cefListValue.get().GetType(index)
@@ -111,8 +111,8 @@ cdef dict CefDictionaryValueToPyDict(
     cdef CefString cefKey
     cdef py_string pyKey
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef cef_types.uint32 uint32_value
-    cdef cef_types.int64 int64_value
+    cdef uint32 uint32_value
+    cdef int64 int64_value
     cdef object originallyString
     while iterator != keyList.end():
         cefKey = deref(iterator)

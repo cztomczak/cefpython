@@ -94,7 +94,7 @@ bool RenderHandler::StartDragging(CefRefPtr<CefBrowser> browser,
 {
     REQUIRE_UI_THREAD();
     return RenderHandler_StartDragging(browser, drag_data,
-                                       static_cast<long>(allowed_ops), x, y);
+                                       allowed_ops, x, y);
 }
 
 
@@ -102,5 +102,5 @@ void RenderHandler::UpdateDragCursor(CefRefPtr<CefBrowser> browser,
                                      DragOperation operation)
 {
     REQUIRE_UI_THREAD();
-    RenderHandler_UpdateDragCursor(browser, static_cast<long>(operation));
+    RenderHandler_UpdateDragCursor(browser, operation);
 }

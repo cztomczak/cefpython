@@ -7,16 +7,19 @@ include "compile_time_constants.pxi"
 from libcpp cimport bool as cpp_bool
 # noinspection PyUnresolvedReferences
 from libc.stddef cimport wchar_t
+# noinspection PyUnresolvedReferences
+from libc.stdint cimport int32_t, uint32_t, int64_t, uint64_t
 from cef_string cimport cef_string_t
 # noinspection PyUnresolvedReferences
 from libc.limits cimport UINT_MAX
 
 cdef extern from "include/internal/cef_types.h":
 
-    ctypedef unsigned int uint32
-    ctypedef int int32
-    ctypedef long long int64
-    ctypedef unsigned long long uint64
+    ctypedef int32_t int32
+    ctypedef uint32_t uint32
+    ctypedef int64_t int64
+    ctypedef uint64_t uint64
+
     IF UNAME_SYSNAME == "Windows":
         # noinspection PyUnresolvedReferences
         ctypedef wchar_t char16

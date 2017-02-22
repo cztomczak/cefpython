@@ -122,7 +122,7 @@ cdef public void ResourceHandler_GetResponseHeaders(
             if userCallback:
                 returnValue = userCallback(pyResponse, responseLengthOut,
                         redirectUrlOut)
-                (&cefResponseLength)[0] = <int64>long(responseLengthOut[0])
+                (&cefResponseLength)[0] = <int64>responseLengthOut[0]
                 if redirectUrlOut[0]:
                     PyToCefString(redirectUrlOut[0], cefRedirectUrl)
                 return

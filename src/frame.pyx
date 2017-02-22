@@ -21,8 +21,7 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
         Debug("GetPyFrame(): returning None")
         return
     cdef PyFrame pyFrame
-    # long long
-    cdef object frameId = cefFrame.get().GetIdentifier()
+    cdef object frameId = cefFrame.get().GetIdentifier()  # int64
     cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
     assert (frameId and browserId), "frameId or browserId empty"
     cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)

@@ -9,6 +9,14 @@ Table of contents:
 * [Hello world](#hello-world)
 * [CEF's multiprocess architecture](#cefs-multiprocess-architecture)
 * [Handling Python exceptions](#handling-python-exceptions)
+* [Message loop](#message-loop)
+* [Settings](#settings)
+* [Handlers](#handlers)
+* [Javascript integration](#javascript-integration)
+* [Plugins](#plugins)
+* [Helper functions](#helper-functions)
+* [Build executable](#build-executable)
+* [What's next?](#whats-next)
 
 
 ## Install and download examples

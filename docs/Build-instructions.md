@@ -1,27 +1,33 @@
 # Build instructions
 
-__IMPORTANT NOTE__: These instructions are for the new releases of CEF Python
-(Chrome v51 and later). Currently only Linux platform is being tested.
-For the old v31 release that is supported on all platforms, see build
-instructions on the wiki pages.
+These instructions are for the new releases of CEF Python v50+.
+For the old v31 release that is supported on all platforms, see
+the build instructions on the wiki pages.
+
+If you would like to quickly build cefpython then see the
+[Quick build instructions for Windows](#quick-build-instructions-for-windows)
+and [Quick build instructions for Linux](#quick-build-instructions-for-linux)
+sections for complete instructions.
 
 There are several types of builds you can perform:
 
-1. You can build CEF Python using prebuilt CEF binaries that were
-   uploaded to GH releases (tagged eg. v51-upstream)
-2. You can build both CEF Python and CEF from sources, but note
+1. You can build CEF Python using prebuilt CEF binaries and libraries
+   that were uploaded to GH releases (tagged eg. v55-upstream)
+2. You can build CEF Python using prebuilt CEF binaries from
+   Spotify Automated Builds.
+3. You can build both CEF and CEF Python from sources, but note
    that Building CEF is a long process that can take hours.
-   In the tools/ directory there is the automate.py script that
-   automates building CEF.
-3. You may also use prebuilt binaries from Spotify automated builds,
-   see the CEF automated builds section.
 
-Before you can build CEF Python or CEF you must satisfy requirements
-listed on this page.
+Detailed instructions for building can be found in module doc comments
+in the `automate.py` and `build.py` tools (the tools/ directory).
+
+Before you can build CEF Python or CEF you must satisfy some
+[requirements](#requirements) listed on this page.
 
 
 Table of contents:
-* [Build CEF Python on Linux](#build-cef-python-on-linux)
+* [Quick build instructions for Windows](#quick-build-instructions-for-windows)
+* [Quick build instructions for Linux](#quick-build-instructions-for-linux)
 * [Requirements](#requirements)
 * [Build CEF Python using prebuilt CEF binaries](#build-cef-python-using-prebuilt-cef-binaries)
 * [Build both CEF Python and CEF from sources](#build-both-cef-python-and-cef-from-sources)
@@ -30,7 +36,44 @@ Table of contents:
 * [How to patch](#how-to-patch)
 
 
-## Build CEF Python on Linux
+## Quick build instructions for Windows
+
+Complete steps for building CEF Python v50+ using prebuilt binaries
+and libraries from GitHub releases:
+
+1) Tested and works fine on Windows 7 64-bit
+
+2) Download [ninja](https://github.com/ninja-build/ninja) 1.7.2 or later
+   and add it to PATH.
+
+3) Download [cmake](https://cmake.org/download/) 3.7.2 or later and add
+   it to PATH.
+
+4) For Python 2.7 Install "Visual C++ Compiler for Python 2.7"
+  from [here](https://www.microsoft.com/en-us/download/details.aspx?id=44266)
+
+5) For Python 2.7 and when using using "Visual C++ compiler for Python 2.7"
+   you have to install "Visual C++ 2008 Redistributable Package (x64)"
+   from [here](https://www.microsoft.com/en-us/download/details.aspx?id=15336)
+
+6) Install python dependencies by running:
+  `cd cefpython/tools/ && pip install -r requirements.txt`
+  (Cython version from requirements.txt must match exactly)
+
+7) Download 32-bit Windows binaries and libraries from
+   [GH releases](https://github.com/cztomczak/cefpython/tags)
+   tagged e.g. 'v55-upstream' when building v55.
+
+8) Extract the archive it in the "cefpython/build/" directory.
+
+9) Build cefpython and run examples (xx.x is version number eg. 55.4):
+```
+cd cefpython/build/
+python ../tools/build.py xx.x
+```
+
+
+## Quick build instructions for Linux
 
 Complete steps for building CEF Python v50+ using prebuilt
 binaries from GitHub releases:
@@ -47,17 +90,18 @@ binaries from GitHub releases:
   (Cython version from requirements.txt must match exactly)
 
 5) Download 64-bit Linux binaries and libraries from
-   [GH releases](https://github.com/cztomczak/cefpython/releases)
-   tagged e.g. 'v50-upstream' when building v50.
+   [GH releases](https://github.com/cztomczak/cefpython/tags)
+   tagged e.g. 'v55-upstream' when building v55.
 
 6) Extract it in the cefpython/build/ directory and rename the extracted
    directory to "cef_linux64".
 
-8) Build cefpython and run examples (xx.x is version e.g. 50.0):
+7) Build cefpython and run examples (xx.x is version e.g. 50.0):
 ```
 cd cefpython/src/linux/
 python compile.py xx.x
 ```
+
 
 ## Requirements
 
@@ -69,6 +113,8 @@ __Windows__
 
 * Install an appropriate MS compiler for a specific Python version:
   https://wiki.python.org/moin/WindowsCompilers
+* For Python 2.7 install "Microsoft Visual C++ Compiler for Python 2.7"
+  from [here](https://www.microsoft.com/en-us/download/details.aspx?id=44266)
 * When using "Visual C++ compiler for Python 2.7" you have to install
   "Microsoft Visual C++ 2008 Redistributable Package (x64)" from
   [here](https://www.microsoft.com/en-us/download/details.aspx?id=15336)

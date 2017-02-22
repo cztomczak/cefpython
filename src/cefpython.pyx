@@ -312,11 +312,11 @@ import weakref
 #   would be a bad idea.
 ctypedef object py_string
 
-# You can't use "void" along with cpdef function returning None, it is planned to be
-# added to Cython in the future, creating this virtual type temporarily. If you
-# change it later to "void" then don't forget to add "except *".
+# You can't use "void" along with cpdef function returning None, it is
+# planned to be added to Cython in the future, creating this virtual
+# type temporarily. If you change it later to "void" then don't forget
+# to add "except *".
 ctypedef object py_void
-ctypedef long long WindowHandle
 
 # noinspection PyUnresolvedReferences
 from cpython cimport PyLong_FromVoidPtr
@@ -364,6 +364,9 @@ from libc.stdint cimport uint64_t
 from libc.stdint cimport uintptr_t
 
 # noinspection PyUnresolvedReferences
+ctypedef uintptr_t WindowHandle
+
+# noinspection PyUnresolvedReferences
 cimport ctime
 
 IF UNAME_SYSNAME == "Windows":
@@ -388,6 +391,7 @@ from cef_types cimport (
     CefSettings, CefBrowserSettings, CefRect, CefPoint,
     CefKeyEvent, CefMouseEvent, CefScreenInfo,
     PathKey, PK_DIR_EXE, PK_DIR_MODULE,
+    int32, uint32, int64, uint64,
 )
 
 from cef_task cimport *
@@ -938,7 +942,8 @@ def Shutdown():
     # If the the two code blocks above, that tried to close browsers
     # and free CEF references, failed, then display an error about it!
     if len(g_pyBrowsers):
-        Error("Shutdown called, but there are still browser references alive!")
+        NonCriticalError("Shutdown called, but there are still browser"
+                         " references alive")
 
     Debug("Shutdown()")
     with nogil:

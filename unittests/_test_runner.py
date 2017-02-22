@@ -266,7 +266,7 @@ class TestRunner(object):
             failed_str += ")"
             print(failed_str)
         else:
-            print("[_test_runner.py] OK")
+            print("[_test_runner.py] OK all unit tests succeeded")
         self._exit()
 
     def _exit(self):

@@ -12,19 +12,20 @@ class WindowUtils:
     # for these methods.
 
     @staticmethod
-    def OnSetFocus(long windowHandle, long msg, long wparam, long lparam):
+    def OnSetFocus(WindowHandle windowHandle, long msg, long wparam,
+                   long lparam):
         # Available only on Windows, but have it available on other
         # platforms so that PyCharm doesn't warn about unresolved reference.
         pass
 
     @staticmethod
-    def OnSize(long windowHandle, long msg, long wparam, long lparam):
+    def OnSize(WindowHandle windowHandle, long msg, long wparam, long lparam):
         # Available only on Windows, but have it available on other
         # platforms so that PyCharm doesn't warn about unresolved reference.
         pass
 
     @staticmethod
-    def OnEraseBackground(long windowHandle, long msg, long wparam,
+    def OnEraseBackground(WindowHandle windowHandle, long msg, long wparam,
                           long lparam):
         # Available only on Windows, but have it available on other
         # platforms so that PyCharm doesn't warn about unresolved reference.
@@ -41,11 +42,11 @@ class WindowUtils:
         return True
 
     @staticmethod
-    def gtk_plug_new(long long gdkNativeWindow):
-        return <long long>gtk_plug_new(<GdkNativeWindow>gdkNativeWindow)
+    def gtk_plug_new(WindowHandle gdkNativeWindow):
+        return <WindowHandle>gtk_plug_new(<GdkNativeWindow>gdkNativeWindow)
 
     @staticmethod
-    def gtk_widget_show(long long gtkWidgetPtr):
+    def gtk_widget_show(WindowHandle gtkWidgetPtr):
         with nogil:
             gtk_widget_show(<GtkWidget*>gtkWidgetPtr)
 

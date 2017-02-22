@@ -9,19 +9,20 @@ class WindowUtils:
     # for these methods.
 
     @staticmethod
-    def OnSetFocus(long windowHandle, long msg, long wparam, long lparam):
+    def OnSetFocus(WindowHandle windowHandle, long msg, long wparam,
+                   long lparam):
         # Available only on Windows, but have it available on other
         # platforms so that PyCharm doesn't warn about unresolved reference.
         pass
 
     @staticmethod
-    def OnSize(long windowHandle, long msg, long wparam, long lparam):
+    def OnSize(WindowHandle windowHandle, long msg, long wparam, long lparam):
         # Available only on Windows, but have it available on other
         # platforms so that PyCharm doesn't warn about unresolved reference.
         pass
 
     @staticmethod
-    def OnEraseBackground(long windowHandle, long msg, long wparam,
+    def OnEraseBackground(WindowHandle windowHandle, long msg, long wparam,
                           long lparam):
         # Available only on Windows, but have it available on other
         # platforms so that PyCharm doesn't warn about unresolved reference.
