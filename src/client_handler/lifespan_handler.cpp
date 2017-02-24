@@ -1,7 +1,9 @@
 // Copyright (c) 2016 CEF Python. See the Authors and License files.
 
 #include "lifespan_handler.h"
+#if defined(OS_WIN)
 #include "dpi_aware.h"
+#endif
 #include "LOG_DEBUG.h"
 
 

@@ -16,7 +16,7 @@ if len(sys.argv) > 1 and "--fast" in sys.argv:
     # Fast mode disables optimization flags
     FAST = True
     print("FAST mode On")
-    COMPILE_OPTIMIZE_FLAGS = ['-flto', '-std=gnu++11']
+    COMPILE_OPTIMIZE_FLAGS = ['-flto', '-std=c++11']
     LINK_OPTIMIZE_FLAGS = ['-flto']
 else:
     FAST = False
@@ -25,7 +25,7 @@ else:
     # prolongs compilation time significantly.
     # More on the other flags: https://stackoverflow.com/questions/6687630/
     COMPILE_OPTIMIZE_FLAGS = ['-flto', '-fdata-sections', '-ffunction-sections',
-                              '-std=gnu++11']
+                              '-std=c++11']
     LINK_OPTIMIZE_FLAGS = ['-flto', '-Wl,--gc-sections']
 
 

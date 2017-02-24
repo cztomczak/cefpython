@@ -198,7 +198,6 @@ requirements common for all platforms.
   are supported.
 
 
-
 ### All platforms
 
 * Install dependencies for the automate.py tool by executing:
@@ -267,10 +266,10 @@ python ../tools/build.py xx.x
 
 Building CEF from sources is a very long process that can take several
 hours depending on your CPU speed and the platform you're building on.
-If you would like to speed up the process you could modify automate.py
-tool and remove the `is_official_build=true` flag which slows down
-builds significantly (PR to add an option for that is welcome).
-You can optionally set how many parallel ninja jobs to run (by default cores/2) with the --ninja-jobs flag passed to automate.py.
+To speed up the process you can pass the --fast-build flag, however
+in such case result binaries won't be optimized.
+You can optionally set how many parallel ninja jobs to run (by default
+cores/2) with the --ninja-jobs flag passed to automate.py.
 
 To build CEF from sources run the automate.py tool using the --build-cef
 flag. The automate script will use version information from the

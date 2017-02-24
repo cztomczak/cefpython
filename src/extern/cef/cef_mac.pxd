@@ -6,7 +6,7 @@ include "compile_time_constants.pxi"
 
 from libcpp cimport bool as cpp_bool
 
-cdef extern from "include/internal/cef_linux.h":
+cdef extern from "include/internal/cef_mac.h":
 
     ctypedef void* CefWindowHandle
     ctypedef void* CefCursorHandle

@@ -77,36 +77,31 @@ def set_compiler_options(options):
         #
         # The above warning LNK4217 is caused by the warning below which occurs
         # when building the client_handler.lib static library:
-        #
-        #   cefpython.h(36): warning C4190: 'RequestHandler_GetResourceHandler'
-        #   has C-linkage specified, but returns UDT 'CefRefPtr<T>' which is
-        #   incompatible with C
-        #
-        # The C4190 warning is disabled with pragma in cefpython.h, see the
-        # fix_cefpython_h() in the build.py script.
-        extra_compile_args.extend(['/EHsc'])
-        extra_link_args.extend(['/ignore:4217'])
+        extra_compile_args.extend(["/EHsc"])
+        extra_link_args.extend(["/ignore:4217"])
 
     if LINUX:
         if len(sys.argv) > 1 and "--fast" in sys.argv:
             sys.argv.remove("--fast")
             # Fast mode disables optimization flags
             print("[build_module.py] FAST mode On")
-            extra_compile_args.extend(['-flto', '-std=gnu++11'])
-            extra_link_args.extend(['-flto'])
+            extra_compile_args.extend(["-flto", "-std=c++11"])
+            extra_link_args.extend(["-flto"])
         else:
             # Fix "ImportError ... undefined symbol ..." caused by CEF's
             # include/base/ headers by adding the -flto flag (Issue #230).
             # Unfortunately -flto prolongs compilation time significantly.
             # More on the other flags: https://stackoverflow.com/questions/
             # 6687630/ .
-            extra_compile_args.extend(['-flto', '-fdata-sections',
-                                      '-ffunction-sections', '-std=gnu++11'])
-            extra_link_args.extend(['-flto', '-Wl,--gc-sections'])
+            extra_compile_args.extend(["-flto", "-fdata-sections",
+                                      "-ffunction-sections", "-std=c++11"])
+            extra_link_args.extend(["-flto", "-Wl,--gc-sections"])
 
     if MAC:
-        os.environ["CC"] = "gcc"
-        os.environ["CXX"] = "g++"
+        extra_compile_args.extend(["-std=c++11"])
+        # extra_link_args.extend([])
+        # os.environ["CC"] = "gcc"
+        # os.environ["CXX"] = "g++"
 
     options["extra_compile_args"] = extra_compile_args
     options["extra_link_args"] = extra_link_args
@@ -254,7 +249,7 @@ def get_ext_modules(options):
             "c_string_encoding": "utf-8",
         },
 
-        language='c++',
+        language="c++",
 
         include_dirs=options["include_dirs"],
         library_dirs=options["library_dirs"],

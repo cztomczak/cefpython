@@ -35,10 +35,10 @@ Options:
 # 6. More commands: http://docs.cython.org/src/userguide/debugging.html
 
 # This will not show "Segmentation fault" error message:
-# | subprocess.call(["python", "./wxpython.py"])
-# You need to call it with shell=True for this kind of
-# error message to be shown:
-# | subprocess.call("python wxpython.py", shell=True)
+# > subprocess.call(["python", "./wxpython.py"])
+# You need to call it with command as string and shell=True
+# for this kind of error message to be shown:
+# > subprocess.call("python wxpython.py", shell=True)
 
 from common import *
 import sys
@@ -84,11 +84,17 @@ def main():
     check_cython_version()
     command_line_args()
     check_directories()
-    fix_cefpython_h()
-    if WINDOWS:
-        compile_cpp_projects_windows()
-    elif MAC or LINUX:
-        compile_cpp_projects_unix()
+    if os.path.exists(CEFPYTHON_H):
+        fix_cefpython_h()
+        if WINDOWS:
+            compile_cpp_projects_windows()
+        elif MAC or LINUX:
+            compile_cpp_projects_unix()
+    else:
+        print("[build.py] INFO: Looks like first run, as cefpython.h"
+              " is missing. Skip building C++ projects.")
+        global FIRST_RUN
+        FIRST_RUN = True
     clear_cache()
     copy_and_fix_pyx_files()
     create_version_pyx_file()
@@ -102,9 +108,6 @@ def setup_environ():
     minimum set of directories,to avoid any possible issues. Set Python
     include path. Set Mac compiler options. Etc."""
     print("[build.py] Setup environment variables")
-
-    if not WINDOWS:
-        return
 
     # PATH
     if WINDOWS:
@@ -133,6 +136,11 @@ def setup_environ():
                                                 CEF_BINARIES_LIBRARIES, "lib")
         print("[build.py] environ AdditionalLibraryDirectories: {lib}"
               .format(lib=os.environ["AdditionalLibraryDirectories"]))
+
+    # Mac env variables for makefiles
+    if MAC:
+        os.environ["CEF_BIN"] = os.path.join(CEF_BINARIES_LIBRARIES, "bin")
+        os.environ["CEF_LIB"] = os.path.join(CEF_BINARIES_LIBRARIES, "lib")
 
     # Mac compiler options
     if MAC:
@@ -235,14 +243,13 @@ def fix_cefpython_h():
         print("[build.py] cefpython.h was not yet generated")
         return
     with open("cefpython.h", "r") as fo:
-        content = fo.read()
-    pragma = "#pragma warning(disable:4190)"
-    if pragma in content:
-        print("[build.py] cefpython.h is already fixed")
-        return
-    content = ("%s\n\n" % pragma) + content
+        contents = fo.read()
+    # Error/warning depending on compiler:
+    # > has C-linkage specified, but returns user-defined type
+    contents = contents.replace("#define __PYX_EXTERN_C extern \"C\"",
+                                "#define __PYX_EXTERN_C extern")
     with open("cefpython.h", "w") as fo:
-        fo.write(content)
+        fo.write(contents)
     print("[build.py] Save build_cefpython/cefpython.h")
 
 
@@ -288,13 +295,6 @@ def compile_cpp_projects_windows():
 
 
 def build_vcproj(vcproj):
-    if not os.path.exists(CEFPYTHON_H):
-        print("[build.py] INFO: Looks like first run, as cefpython.h"
-              " is missing. Skip building C++ project.")
-        global FIRST_RUN
-        FIRST_RUN = True
-        return
-
     if PYVERSION == "27":
         args = list()
         args.append(VS2008_VCVARS)
@@ -451,7 +451,7 @@ def copy_and_fix_pyx_files():
             os.remove(pyxfile)
 
     # Copying pyxfiles and reading its contents.
-    print("[build.py] Copying pyx files to build_cefpython/: %s" % pyxfiles)
+    print("[build.py] Copying pyx files to build_cefpython/")
 
     # Copy cefpython.pyx and fix includes in cefpython.pyx, eg.:
     # include "handlers/focus_handler.pyx" becomes include "focus_handler.pyx"
@@ -467,7 +467,7 @@ def copy_and_fix_pyx_files():
         print("[build.py] %s includes fixed in %s" % (subs, mainfile))
 
     # Copy the rest of the files
-    print("[build.py] Fixing includes in .pyx files:")
+    print("[build.py] Fix includes in other .pyx files")
     for pyxfile in pyxfiles:
         newfile = "./%s" % os.path.basename(pyxfile)
         shutil.copy(pyxfile, newfile)
@@ -489,8 +489,9 @@ def copy_and_fix_pyx_files():
                     content,
                     flags=re.MULTILINE)
             if subs:
-                print("[build.py] %s includes removed in: %s"
-                      % (subs, os.path.basename(pyxfile)))
+                # print("[build.py] %s includes removed in: %s"
+                #       % (subs, os.path.basename(pyxfile)))
+                pass
         with open(pyxfile, "w") as pyxfileopened:
             pyxfileopened.write(content)
 
@@ -540,24 +541,26 @@ def create_version_pyx_file():
 
 
 def build_cefpython_module():
-    os.chdir(BUILD_CEFPYTHON)
     # if DEBUG_FLAG:
     #     ret = subprocess.call("python-dbg setup.py build_ext --inplace"
     #                           " --cython-gdb", shell=True)
 
     print("[build.py] Execute build_module.py script")
     print("")
+
+    os.chdir(BUILD_CEFPYTHON)
+
     if FAST_FLAG:
-        ret = subprocess.call([sys.executable,
-                               "{tools_dir}/build_module.py"
-                               .format(tools_dir=TOOLS_DIR),
-                               "build_ext", "--inplace", "--fast"],
+        ret = subprocess.call("{python} {tools_dir}/build_module.py"
+                              " build_ext --fast"
+                              .format(python=sys.executable,
+                                      tools_dir=TOOLS_DIR),
                               shell=True)
     else:
-        ret = subprocess.call([sys.executable,
-                               "{tools_dir}/build_module.py"
-                               .format(tools_dir=TOOLS_DIR),
-                               "build_ext", "--inplace"],
+        ret = subprocess.call("{python} {tools_dir}/build_module.py"
+                              " build_ext"
+                              .format(python=sys.executable,
+                                      tools_dir=TOOLS_DIR),
                               shell=True)
 
     # if DEBUG_FLAG:
@@ -585,7 +588,7 @@ def build_cefpython_module():
             args.append(os.path.join(TOOLS_DIR, os.path.basename(__file__)))
             assert __file__ in sys.argv[0]
             args.extend(sys.argv[1:])
-            ret = subprocess.call(args, shell=True)
+            ret = subprocess.call(" ".join(args), shell=True)
             sys.exit(ret)
         else:
             print("[build.py] ERROR: failed to build the cefpython module")

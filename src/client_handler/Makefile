@@ -10,16 +10,20 @@
 
 UNAME_S = $(shell uname -s)
 CC = g++
-CCFLAGS = -fPIC -std=gnu++11 -Wall -Werror $(CEF_CCFLAGS)
+CCFLAGS = -fPIC -std=c++11 -Wall -Werror $(CEF_CCFLAGS)
 
 SRC = client_handler.cpp cookie_visitor.cpp resource_handler.cpp \
 	web_request_client.cpp string_visitor.cpp request_context_handler.cpp \
-	task.cpp x11.cpp context_menu_handler.cpp display_handler.cpp \
+	task.cpp context_menu_handler.cpp display_handler.cpp \
 	download_handler.cpp focus_handler.cpp js_dialog_handler.cpp \
 	keyboard_handler.cpp lifespan_handler.cpp load_handler.cpp \
 	render_handler.cpp request_handler.cpp
 
 OBJ = $(SRC:.cpp=.o)
+
+ifeq ($(UNAME_S), Linux)
+	OBJ += x11.o
+endif
 
 ifeq ($(UNAME_S), Darwin)
 	OBJ += util_mac.o
@@ -55,6 +59,10 @@ INC = -I./../ -I./../common/ -I/usr/include/python2.7 \
 $(OUT): $(OBJ)
 	@echo [CLIENT HANDLER] Creating library $(OUT) from $(OBJ)...
 	ar rcs $(OUT) $(OBJ)
+
+x11.o: x11.cpp
+	@echo [CLIENT HANDLER] Building $@ from $<...
+	$(CC) $(CCFLAGS) $(INC) -c $< -o $@
 
 util_mac.o: util_mac.mm
 	@echo [CLIENT HANDLER] Building $@ from $<...

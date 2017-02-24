@@ -10,7 +10,7 @@
 
 UNAME_S = $(shell uname -s)
 CC = g++
-CCFLAGS = -fPIC -std=gnu++11 -Wall -Werror -DBROWSER_PROCESS \
+CCFLAGS = -fPIC -std=c++11 -Wall -Werror -DBROWSER_PROCESS \
 			$(CEF_CCFLAGS)
 
 ifeq ($(UNAME_S), Linux)

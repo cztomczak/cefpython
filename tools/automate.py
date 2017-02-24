@@ -20,6 +20,7 @@ cefpython/build/cef55_3.2883.1553.g80bd606_win32/ .
 
 Usage:
     automate.py (--prebuilt-cef | --build-cef)
+                [--fast-build FAST_BUILD]
                 [--force-chromium-update FORCE_CHROMIUM_UPDATE]
                 [--no-cef-update NO_CEF_UPDATE]
                 [--cef-branch BRANCH] [--cef-commit COMMIT]
@@ -34,6 +35,7 @@ Options:
                              binaries for Linux are built on Ubuntu.
     --build-cef              Whether to build CEF from sources with the
                              cefpython patches applied.
+    --fast-build             Fast build with is_official_build=False
     --force-chromium-update  Force Chromium update (gclient sync etc).
     --no-cef-update          Do not update CEF sources (by default both cef/
                              directories are deleted on every run).
@@ -73,6 +75,7 @@ class Options(object):
     # From command-line
     prebuilt_cef = False
     build_cef = False
+    fast_build = False
     force_chromium_update = False
     no_cef_update = False
     cef_branch = ""
@@ -354,8 +357,11 @@ def build_cef_projects():
         print("[automate.py] Build cefclient, cefsimple, ceftests")
         # Cmake
         command = prepare_build_command()
-        command.extend(["cmake", "-G", "Ninja",
-                       "-DCMAKE_BUILD_TYPE="+Options.build_type, ".."])
+        command.extend(["cmake", "-G", "Ninja"])
+        command.append("-DCMAKE_BUILD_TYPE="+Options.build_type)
+        if MAC:
+            command.append("-DPROJECT_ARCH=x86_64")
+        command.append("..")
         run_command(command, Options.build_cefclient_dir)
         print("[automate.py] OK")
         # Ninja
@@ -695,7 +701,7 @@ def getenv():
     # To perform an official build set GYP_DEFINES=buildtype=Official.
     # This will disable debugging code and enable additional link-time
     # optimizations in Release builds.
-    if Options.release_build:
+    if Options.release_build and not Options.fast_build:
         env["GN_DEFINES"] += " is_official_build=true"
     # Modifications to automate-git.py
     env["CEFPYTHON_NINJA_JOBS"] = str(Options.ninja_jobs)
