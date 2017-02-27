@@ -63,12 +63,6 @@ KIVY_FLAG = False
 REBUILD_CPP = False
 VERSION = ""
 
-# Module extension
-if WINDOWS:
-    MODULE_EXT = "pyd"
-else:
-    MODULE_EXT = "so"
-
 # First run
 FIRST_RUN = False
 CEFPYTHON_H = os.path.join(BUILD_CEFPYTHON, "cefpython.h")
@@ -97,7 +91,6 @@ def main():
         FIRST_RUN = True
     clear_cache()
     copy_and_fix_pyx_files()
-    create_version_pyx_file()
     build_cefpython_module()
     fix_cefpython_h()
     install_and_run()
@@ -137,6 +130,20 @@ def setup_environ():
         print("[build.py] environ AdditionalLibraryDirectories: {lib}"
               .format(lib=os.environ["AdditionalLibraryDirectories"]))
 
+    if LINUX or MAC:
+        # Used in makefiles
+        os.environ["CEF_CCFLAGS"] = "-std=gnu++11 -DNDEBUG -Wall -Werror"
+        if FAST_FLAG:
+            os.environ["CEF_CCFLAGS"] += " -O0"
+        else:
+            os.environ["CEF_CCFLAGS"] += " -O3"
+        os.environ["CEF_LINK_FLAGS"] = ""
+
+    if LINUX:
+        # TODO: Set CEF_CCFLAGS and CEF_LINK_FLAGS according to what is
+        #       in upstream cefclient, see cef/cmake/cef_variables.cmake.
+        pass
+
     # Mac env variables for makefiles
     if MAC:
         os.environ["CEF_BIN"] = os.path.join(CEF_BINARIES_LIBRARIES, "bin")
@@ -145,12 +152,42 @@ def setup_environ():
     # Mac compiler options
     if MAC:
         os.environ["PATH"] = "/usr/local/bin:"+os.environ["PATH"]
-        os.environ["CC"] = "gcc"
-        os.environ["CXX"] = "g++"
-        os.environ["CEF_CCFLAGS"] = "-arch x86_64"
-        os.environ["ARCHFLAGS"] = "-arch x86_64"
+        os.environ["CC"] = "c++"
+        os.environ["CXX"] = "c++"
+
         if ARCH32:
             raise Exception("Python 32-bit is not supported on Mac")
+        os.environ["ARCHFLAGS"] = "-arch x86_64"
+        os.environ["CEF_CCFLAGS"] += " -arch x86_64"
+        os.environ["CEF_LINK_FLAGS"] += " -mmacosx-version-min=10.7"
+
+        # -Wno-return-type-c-linkage to ignore:
+        # > warning: 'somefunc' has C-linkage specified, but returns
+        # > user-defined type 'sometype' which is incompatible with C
+        os.environ["CEF_CCFLAGS"] += " -Wno-return-type-c-linkage"
+
+        # Compile against libc++ otherwise error "symbol not found"
+        # with cef::logging::LogMessage symbol. Also include -lc++
+        # and -lc++abi libraries.
+        os.environ["CEF_CCFLAGS"] += " -stdlib=libc++"
+
+        # See compile/link flags in upstream cefclient
+        os.environ["CEF_CCFLAGS"] += (
+                " -fno-strict-aliasing"
+                " -fno-rtti"
+                " -fno-threadsafe-statics"
+                " -fobjc-call-cxx-cdtors"
+                " -fvisibility=hidden"
+                " -fvisibility-inlines-hidden"
+        )
+        os.environ["CEF_LINK_FLAGS"] += (
+                " -lc++"
+                " -lc++abi"
+                " -Wl,-search_paths_first"
+                " -Wl,-ObjC"
+                " -Wl,-pie"
+                " -Wl,-dead_strip"
+        )
 
 
 def get_python_path():
@@ -237,6 +274,13 @@ def check_directories():
 
 
 def fix_cefpython_h():
+    # Fix cefpython.h to disable this warning:
+    # > warning: 'somefunc' has C-linkage specified, but returns
+    # > user-defined type 'sometype' which is incompatible with C
+    # On Mac this warning must be disabled using -Wno-return-type-c-linkage
+    # flag in makefiles.
+    if MAC:
+        return
     os.chdir(BUILD_CEFPYTHON)
     print("[build.py] Fix cefpython.h to disable warnings")
     if not os.path.exists("cefpython.h"):
@@ -244,10 +288,11 @@ def fix_cefpython_h():
         return
     with open("cefpython.h", "r") as fo:
         contents = fo.read()
-    # Error/warning depending on compiler:
-    # > has C-linkage specified, but returns user-defined type
-    contents = contents.replace("#define __PYX_EXTERN_C extern \"C\"",
-                                "#define __PYX_EXTERN_C extern")
+    pragma = "#pragma warning(disable:4190)"
+    if pragma in contents:
+        print("[build.py] cefpython.h is already fixed")
+        return
+    contents = ("%s\n\n" % pragma) + contents
     with open("cefpython.h", "w") as fo:
         fo.write(contents)
     print("[build.py] Save build_cefpython/cefpython.h")
@@ -389,12 +434,14 @@ def clear_cache():
     print("[build.py] Clean build cache")
     # Cache in CEFPYTHON_BINARY directory (eg. cefpython_linux64/)
     os.chdir(CEFPYTHON_BINARY)
-    delete_files_by_pattern("./cefpython_py*.{ext}".format(ext=MODULE_EXT))
+    delete_files_by_pattern("./"+MODULE_NAME_TEMPLATE
+                            .format(pyversion="*", ext=MODULE_EXT))
 
     # Cache in build_cefpython/ directory
     os.chdir(BUILD_CEFPYTHON)
 
-    delete_files_by_pattern("./cefpython_py*.{ext}".format(ext=MODULE_EXT))
+    delete_files_by_pattern("./"+MODULE_NAME_TEMPLATE
+                            .format(pyversion="*", ext=MODULE_EXT))
     delete_files_by_pattern("./*.pyx")
 
     try:
@@ -451,7 +498,7 @@ def copy_and_fix_pyx_files():
             os.remove(pyxfile)
 
     # Copying pyxfiles and reading its contents.
-    print("[build.py] Copying pyx files to build_cefpython/")
+    print("[build.py] Copy pyx files to build_cefpython/")
 
     # Copy cefpython.pyx and fix includes in cefpython.pyx, eg.:
     # include "handlers/focus_handler.pyx" becomes include "focus_handler.pyx"
@@ -462,9 +509,12 @@ def copy_and_fix_pyx_files():
                                   "include \"",
                                   content,
                                   flags=re.MULTILINE)
+        # Add __version__ variable in cefpython.pyx
+        print("[build.py] Add __version__ variable to %s" % mainfile)
+        content = ('__version__ = "{}"\n'.format(VERSION)) + content
     with open("./%s" % mainfile, "w") as fo:
         fo.write(content)
-        print("[build.py] %s includes fixed in %s" % (subs, mainfile))
+        print("[build.py] Fix %s includes in %s" % (subs, mainfile))
 
     # Copy the rest of the files
     print("[build.py] Fix includes in other .pyx files")
@@ -533,13 +583,6 @@ def except_all_missing(content):
         return lineNumber
 
 
-def create_version_pyx_file():
-    os.chdir(BUILD_CEFPYTHON)
-    print("[build.py] Create __version__.pyx file")
-    with open("__version__.pyx", "w") as fo:
-        fo.write('__version__ = "{}"\n'.format(VERSION))
-
-
 def build_cefpython_module():
     # if DEBUG_FLAG:
     #     ret = subprocess.call("python-dbg setup.py build_ext --inplace"
@@ -595,12 +638,14 @@ def build_cefpython_module():
         sys.exit(1)
 
     # Move the cefpython module
-    move_file_by_pattern("./cefpython_py{pyver}*.{ext}"
-                         .format(pyver=PYVERSION, ext=MODULE_EXT),
-                         os.path.join(CEFPYTHON_BINARY,
-                                      "cefpython_py{pyver}.{ext}"
-                                      .format(pyver=PYVERSION,
-                                              ext=MODULE_EXT)))
+    module_pattern = MODULE_NAME_TEMPLATE.format(pyversion=PYVERSION+"*",
+                                                 ext=MODULE_EXT)
+    if MAC:
+        module_pattern = "./build/lib*/"+module_pattern
+    else:
+        module_pattern = "./"+module_pattern
+    move_file_by_pattern(module_pattern, os.path.join(CEFPYTHON_BINARY,
+                                                      MODULE_NAME))
 
     print("[build.py] DONE building the cefpython module")
 

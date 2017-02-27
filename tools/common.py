@@ -29,6 +29,18 @@ MAC = (platform.system() == "Darwin")
 # Python version eg. 27
 PYVERSION = str(sys.version_info[0])+str(sys.version_info[1])
 
+# Module extension
+if WINDOWS:
+    MODULE_EXT = "pyd"
+else:
+    MODULE_EXT = "so"
+
+# CEF Python module name
+MODULE_NAME_TEMPLATE = "cefpython_py{pyversion}.{ext}"
+MODULE_NAME_TEMPLATE_NOEXT = "cefpython_py{pyversion}"
+MODULE_NAME = MODULE_NAME_TEMPLATE.format(pyversion=PYVERSION, ext=MODULE_EXT)
+MODULE_NAME_NOEXT = MODULE_NAME_TEMPLATE_NOEXT.format(pyversion=PYVERSION)
+
 # Root directory
 assert __file__
 ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))

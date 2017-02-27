@@ -26,42 +26,25 @@ __author__ = "The CEF Python authors"
 package_dir = os.path.dirname(os.path.abspath(__file__))
 
 # This loads the libcef.so library for the subprocess executable.
+# On Mac it works without setting library paths.
 os.environ["LD_LIBRARY_PATH"] = package_dir
-
-# On Mac it works without setting library paths. Better not set it,
-# as maybe user's app will set it itself.
-# > os.environ["DYLD_LIBRARY_PATH"] = package_dir
-# > os.environ["DYLD_FRAMEWORK_PATH"] = package_dir
 
 # This env variable will be returned by cefpython.GetModuleDirectory().
 os.environ["CEFPYTHON3_PATH"] = package_dir
 
 # This loads the libcef library for the main python executable.
-# This is required only on linux and Mac.
+# Loading library dynamically using ctypes.CDLL is required on Linux.
+# TODO: Check if on Linux libcef.so can be linked like on Mac.
+# On Mac the CEF framework dependency information is added to
+# the cefpython*.so module by linking to CEF framework.
 # The libffmpegsumo.so library does not need to be loaded here,
 # it may cause issues to load it here in the browser process.
-libcef = None
-if platform.system() == "Darwin":
-    cef_framework = "Chromium Embedded Framework.framework"
-    libcef_name = "Chromium Embedded Framework"
-    # Search for it in current directory or in ../Frameworks/ dir
-    # in case this is user's app packaged for distribution.
-    libcef1 = os.path.join(package_dir, cef_framework, libcef_name)
-    libcef2 = os.path.join(package_dir, "..", "Frameworks", cef_framework,
-                           libcef_name)
-    if os.path.exists(libcef1):
-        libcef = libcef1
-    elif os.path.exists(libcef2):
-        libcef = libcef2
-    else:
-        raise Exception("Can't find: " + cef_framework)
-elif platform.system() == "Linux":
+if platform.system() == "Linux":
     libcef = os.path.join(package_dir, "libcef.so")
-if libcef:
     ctypes.CDLL(libcef, ctypes.RTLD_GLOBAL)
 
 # Load the cefpython module for proper Python version
-if sys.version_info[:2] == (2, 8):
+if sys.version_info[:2] == (2, 7):
     # noinspection PyUnresolvedReferences
     from . import cefpython_py27 as cefpython
 elif sys.version_info[:2] == (3, 4):

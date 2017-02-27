@@ -41,24 +41,18 @@ ifeq ($(UNAME_S), Linux)
 	LIBS = -lcef -lgobject-2.0 -lglib-2.0 -lgtk-x11-2.0
 else ifeq ($(UNAME_S), Darwin)
 	CPP_FILES =
-	LIBS = -framework Chromium\ Embedded\ Framework
+	# Include framework before libcef_dll_wrapper
+	LIBS = -framework "Chromium Embedded Framework"
 endif
 
-
-CCFLAGS = -g -std=c++11 -Wall -Werror -DRENDERER_PROCESS $(CEF_CCFLAGS)
-
-ifeq ($(UNAME_S), Darwin)
-    MACFLAGS = -O3 -DNDEBUG -stdlib=libstdc++ \
-				-Wl,-search_paths_first -Wl,-ObjC -Wl,-pie -Wl,-dead_strip
-else
-    MACFLAGS =
-endif
-
+CCFLAGS = -DRENDERER_PROCESS $(CEF_CCFLAGS)
 
 subprocess:
 	# -fPIC is required only for libraries included by Cython.
 	@echo [SUBPROCESS] Building the 'subprocess' executable
-	g++ $(CCFLAGS) $(MACFLAGS) $(INC) $(LIB_DIRS) main.cpp cefpython_app.cpp \
+	$(CXX) $(CCFLAGS) $(INC) $(LIB_DIRS) main.cpp cefpython_app.cpp \
 		v8function_handler.cpp v8utils.cpp javascript_callback.cpp \
 		$(CPP_FILES) \
-		$(LIBS) -lcef_dll_wrapper -o subprocess -Wl,-rpath,.
+		$(CEF_LINK_FLAGS) \
+		$(LIBS) -lcef_dll_wrapper \
+		-o subprocess -Wl,-rpath,.

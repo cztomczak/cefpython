@@ -18,15 +18,86 @@ except ImportError:
 # Use "Extension" from Cython.Distutils so that "cython_directives" works
 from Cython.Distutils import build_ext, Extension
 from Cython.Compiler import Options
+# noinspection PyUnresolvedReferences
+from Cython.Compiler.ModuleNode import ModuleNode
 from common import *
 import sys
 import platform
 import Cython
 import os
 
+# Must monkey patch Cython's ModuleNode to inject custom C++ code
+# in the generated cefpython.cpp. This is a fix for an error on Mac:
+# > ImportError: dynamic module does not define init function
+# To get rid of CEF's undefined symbol error when importing module
+# it was required to pass "-fvisibility=hidden" and "-Wl,-dead_strip"
+# flags. However these flags cause the "initcefpython_py27" Python
+# Module Initialization function to be hidden as well. To workaround
+# this it is required to add default visibility attribute to the
+# signature of that init function.
+#
+# Original definition in Python 2.7:
+# | https://github.com/python/cpython/blob/2.7/Include/pyport.h
+# > define PyMODINIT_FUNC extern "C" __declspec(dllexport) void
+#
+# Original definition in Python 3.4 / 3.5 / 3.6:
+# > define PyMODINIT_FUNC extern "C" __declspec(dllexport) PyObject*
+
+if MAC:
+    g_generate_extern_c_macro_definition_old = (
+            ModuleNode.generate_extern_c_macro_definition)
+
+    def generate_extern_c_macro_definition(self, code):
+        # This code is written to both cefpython.h and cefpython.cpp
+        g_generate_extern_c_macro_definition_old(self, code)
+        code.putln("// Added by: cefpython/tools/build_module.py")
+        code.putln("#undef PyMODINIT_FUNC")
+        if sys.version_info[:2] == (2, 7):
+            code.putln("#define PyMODINIT_FUNC extern \"C\""
+                       " __attribute__((visibility(\"default\"))) void")
+        else:
+            code.putln("#define PyMODINIT_FUNC extern \"C\""
+                       " __attribute__((visibility(\"default\"))) PyObject*")
+    # Overwrite Cython function
+    ModuleNode.generate_extern_c_macro_definition = (
+            generate_extern_c_macro_definition)
+
+
+# Constants
+FAST_FLAG = False
+
 # Cython options. Stop on first error, otherwise hundreds
 # of errors appear in the console.
 Options.fast_fail = True
+
+
+def main():
+    global FAST_FLAG
+    if len(sys.argv) > 1 and "--fast" in sys.argv:
+        # Fast mode disables optimization flags
+        print("[build_module.py] FAST mode On")
+        FAST_FLAG = True
+        sys.argv.remove("--fast")
+
+    if len(sys.argv) <= 1:
+        print(__doc__)
+        sys.exit(1)
+
+    print("[build_module.py] Cython version: %s" % Cython.__version__)
+
+    compile_time_constants()
+    options = dict()
+    set_compiler_options(options)
+    options["include_dirs"] = get_include_dirs()
+    options["library_dirs"] = get_library_dirs()
+    options["libraries"] = get_libraries()
+
+    print("[build_module.py] Execute setup()")
+    setup(
+        name='cefpython_py%s' % PYVERSION,
+        cmdclass={'build_ext': build_ext},
+        ext_modules=get_ext_modules(options)
+    )
 
 
 def get_winsdk_lib():
@@ -80,12 +151,25 @@ def set_compiler_options(options):
         extra_compile_args.extend(["/EHsc"])
         extra_link_args.extend(["/ignore:4217"])
 
+    if LINUX or MAC:
+        # Compiler flags
+        if FAST_FLAG:
+            extra_compile_args.append("-O0")
+        else:
+            extra_compile_args.append("-O3")
+
+        extra_compile_args.extend([
+                "-DNDEBUG",
+                "-std=gnu++11",
+        ])
+
     if LINUX:
-        if len(sys.argv) > 1 and "--fast" in sys.argv:
-            sys.argv.remove("--fast")
-            # Fast mode disables optimization flags
-            print("[build_module.py] FAST mode On")
-            extra_compile_args.extend(["-flto", "-std=c++11"])
+        os.environ["CC"] = "g++"
+        os.environ["CXX"] = "g++"
+
+        if FAST_FLAG:
+            extra_compile_args.extend(["-flto",
+                                       "-std=gnu++11"])
             extra_link_args.extend(["-flto"])
         else:
             # Fix "ImportError ... undefined symbol ..." caused by CEF's
@@ -93,15 +177,72 @@ def set_compiler_options(options):
             # Unfortunately -flto prolongs compilation time significantly.
             # More on the other flags: https://stackoverflow.com/questions/
             # 6687630/ .
-            extra_compile_args.extend(["-flto", "-fdata-sections",
-                                      "-ffunction-sections", "-std=c++11"])
-            extra_link_args.extend(["-flto", "-Wl,--gc-sections"])
+            extra_compile_args.extend(["-flto",
+                                       "-fdata-sections",
+                                       "-ffunction-sections",
+                                       "-std=gnu++11"])
+            extra_link_args.extend(["-flto",
+                                    "-Wl,--gc-sections"])
 
     if MAC:
-        extra_compile_args.extend(["-std=c++11"])
-        # extra_link_args.extend([])
-        # os.environ["CC"] = "gcc"
-        # os.environ["CXX"] = "g++"
+        # Compiler environment variables
+        os.environ["CC"] = "c++"
+        os.environ["CXX"] = "c++"
+
+        # COMPILER ARGS
+
+        # -Wno-return-type-c-linkage to ignore:
+        # > warning: 'somefunc' has C-linkage specified, but returns
+        # > user-defined type 'sometype' which is incompatible with C
+        #
+        # -Wno-constant-logical-operand to ignore:
+        # > warning: use of logical '||' with constant operand
+
+        extra_compile_args.extend([
+                # Compile against libc++ otherwise error "symbol not found"
+                # with cef::logging::LogMessage symbol. Also include -lc++
+                # and -lc++abi libraries.
+                "-stdlib=libc++",
+                "-Wno-return-type-c-linkage",
+                "-Wno-constant-logical-operand",
+        ])
+        # From upstream CEF cefclient
+        extra_compile_args.extend([
+                "-fno-strict-aliasing",
+                "-fno-rtti",
+                "-fno-threadsafe-statics",
+                "-fobjc-call-cxx-cdtors",
+                # Visibility of symbols:
+                "-fvisibility=hidden",
+                "-fvisibility-inlines-hidden",
+        ])
+        # Visibility of symbols
+        extra_compile_args.extend([
+                # "-flto",
+                # "-fdata-sections",
+                # "-ffunction-sections",
+        ])
+
+        # Build libcef_dll_wrapper:
+        # cmake -G "Ninja" -DPROJECT_ARCH="x86_64"
+        #       -DCMAKE_CXX_FLAGS="-stdlib=libc++"
+        #       -DCMAKE_BUILD_TYPE=Release ..
+        # ninja libcef_dll_wrapper
+
+        # LINKER ARGS
+        extra_link_args.extend([
+                "-mmacosx-version-min=10.7",
+                "-Wl,-search_paths_first",
+                "-F"+os.path.join(CEF_BINARIES_LIBRARIES, "bin"),
+                "-framework", "Chromium Embedded Framework",
+                "-Wl,-rpath,@loader_path",
+        ])
+        if not FAST_FLAG:
+            extra_link_args.extend([
+                    # "-force_flat_namespace",
+                    # "-flto",
+                    "-Wl,-dead_strip",
+            ])
 
     options["extra_compile_args"] = extra_compile_args
     options["extra_link_args"] = extra_link_args
@@ -189,6 +330,8 @@ def get_library_dirs():
                          "Release_{os}"
                          .format(os=OS_POSTFIX2))
         ])
+    if MAC:
+        library_dirs.append(os.path.join(CEF_BINARIES_LIBRARIES, "bin"))
     if MAC or LINUX:
         library_dirs.extend([
             os.path.join(SRC_DIR, "client_handler"),
@@ -215,10 +358,12 @@ def get_libraries():
         ])
     elif MAC:
         libraries.extend([
-            'client_handler',
-            'cef_dll_wrapper',
-            'cefpythonapp',
-            'cpp_utils'
+            "c++",
+            "c++abi",
+            "cef_dll_wrapper",
+            "cefpythonapp",
+            "client_handler",
+            "cpp_utils",
         ])
     elif LINUX:
         libraries.extend([
@@ -237,8 +382,8 @@ def get_libraries():
 
 def get_ext_modules(options):
     ext_modules = [Extension(
-        "cefpython_py%s" % PYVERSION,
-        ["cefpython.pyx"],
+        name=MODULE_NAME_NOEXT,
+        sources=["cefpython.pyx"],
 
         # Ignore the warning in the console:
         # > C:\Python27\lib\distutils\extension.py:133: UserWarning:
@@ -280,25 +425,6 @@ def compile_time_constants():
         # A way around Python 3.2 bug: UNAME_SYSNAME is not set
         fd.write('DEF UNAME_SYSNAME = "%s"\n' % platform.uname()[0])
         fd.write('DEF PY_MAJOR_VERSION = %s\n' % sys.version_info.major)
-
-
-def main():
-    if len(sys.argv) <= 1:
-        print(__doc__)
-        sys.exit(1)
-    print("[build_module.py] Cython version: %s" % Cython.__version__)
-    compile_time_constants()
-    options = dict()
-    set_compiler_options(options)
-    options["include_dirs"] = get_include_dirs()
-    options["library_dirs"] = get_library_dirs()
-    options["libraries"] = get_libraries()
-    print("[build_module.py] Execute setup()")
-    setup(
-        name='cefpython_py%s' % PYVERSION,
-        cmdclass={'build_ext': build_ext},
-        ext_modules=get_ext_modules(options)
-    )
 
 
 if __name__ == "__main__":

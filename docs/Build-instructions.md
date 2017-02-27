@@ -196,6 +196,8 @@ requirements common for all platforms.
 
 * MacOS 10.9+, Xcode5+ and Xcode command line tools. Only 64-bit builds
   are supported.
+* Upgrade setuptools package to latest version otherwise there will be
+  problems with Cython: `sudo pip install --upgrade setuptools`
 
 
 ### All platforms
