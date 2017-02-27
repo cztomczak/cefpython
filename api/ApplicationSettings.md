@@ -102,8 +102,12 @@ in a known order. Equivalent to the `SkColor` type.
 
 (string)
 The path to a separate executable that will be launched for sub-processes.
-By default the browser process executable is used. See the comments on
-CefExecuteProcess() for details. Also configurable using the --browser-subprocess-path switch.
+If this value is empty on Windows or Linux then the main process executable
+will be used. If this value is empty on macOS then a helper executable must
+exist at "Contents/Frameworks/<app> Helper.app/Contents/MacOS/<app> Helper"
+in the top-level app bundle. See the comments on CefExecuteProcess() for
+details. Also configurable using the "browser-subprocess-path" command-line
+switch.
 
 
 ### cache_path
@@ -175,6 +179,16 @@ Description from upstream CEF:
 > comments and warnings on CefDoMessageLoopWork). Enabling this option is not
 > recommended for most users; leave this option disabled and use either the
 > CefRunMessageLoop() function or multi_threaded_message_loop if possible.
+
+
+### framework_dir_path
+
+The path to the CEF framework directory on macOS. If this value is empty
+then the framework must exist at "Contents/Frameworks/Chromium Embedded
+Framework.framework" in the top-level app bundle. Also configurable using
+the "framework-dir-path" command-line switch.
+
+See also Issue #304.
 
 
 ### ignore_certificate_errors

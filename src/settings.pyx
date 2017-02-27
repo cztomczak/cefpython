@@ -119,6 +119,10 @@ cdef void SetApplicationSettings(
         elif key == "external_message_pump":
             cefAppSettings.external_message_pump = \
                     int(appSettings[key])
+        elif key == "framework_dir_path":
+            cefString = new CefString(&cefAppSettings.framework_dir_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
         else:
             raise Exception("Invalid appSettings key: %s" % key)
 
@@ -214,14 +218,10 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.javascript_dom_paste = (
                         cef_types.STATE_ENABLED)
         elif key == "caret_browsing_enabled":
-            if browserSettings[key]:
-                cefBrowserSettings.caret_browsing = (
-                        cef_types.STATE_ENABLED)
-            else:
-                cefBrowserSettings.caret_browsing = (
-                        cef_types.STATE_DISABLED)
+            # Keep the key for BC
+            Debug("DEPRECATED: 'caret_browsing_enabled' setting")
         elif key == "java_disabled":
-            # Keep for BC, just log info - no error
+            # Keep the key for BC
             Debug("DEPRECATED: 'java_disabled' setting")
         elif key == "plugins_disabled":
             if browserSettings[key]:

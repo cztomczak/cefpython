@@ -56,6 +56,7 @@ cdef extern from "include/internal/cef_types.h":
         int windowless_rendering_enabled
         int no_sandbox
         int external_message_pump
+        cef_string_t framework_dir_path
 
     ctypedef struct CefBrowserSettings:
         cef_string_t accept_language_list
@@ -77,7 +78,6 @@ cdef extern from "include/internal/cef_types.h":
         cef_state_t javascript_close_windows
         cef_state_t javascript_access_clipboard
         cef_state_t javascript_dom_paste
-        cef_state_t caret_browsing
         cef_state_t plugins
         cef_state_t universal_access_from_file_urls
         cef_state_t file_access_from_file_urls

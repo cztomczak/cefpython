@@ -223,15 +223,9 @@ def set_compiler_options(options):
                 # "-ffunction-sections",
         ])
 
-        # Build libcef_dll_wrapper:
-        # cmake -G "Ninja" -DPROJECT_ARCH="x86_64"
-        #       -DCMAKE_CXX_FLAGS="-stdlib=libc++"
-        #       -DCMAKE_BUILD_TYPE=Release ..
-        # ninja libcef_dll_wrapper
-
         # LINKER ARGS
         extra_link_args.extend([
-                "-mmacosx-version-min=10.7",
+                "-mmacosx-version-min=10.9",
                 "-Wl,-search_paths_first",
                 "-F"+os.path.join(CEF_BINARIES_LIBRARIES, "bin"),
                 "-framework", "Chromium Embedded Framework",

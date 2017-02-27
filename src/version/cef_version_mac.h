@@ -35,16 +35,16 @@
 #ifndef CEF_INCLUDE_CEF_VERSION_H_
 #define CEF_INCLUDE_CEF_VERSION_H_
 
-#define CEF_VERSION "3.2883.1553.g80bd606"
+#define CEF_VERSION "3.2924.1571.gcdcdfa9"
 #define CEF_VERSION_MAJOR 3
-#define CEF_COMMIT_NUMBER 1553
-#define CEF_COMMIT_HASH "80bd6062d7ac4c5fd1d7bc7ee78e8e59d4a040aa"
+#define CEF_COMMIT_NUMBER 1571
+#define CEF_COMMIT_HASH "cdcdfa99913a01f3617a0d25a2e2f2ed145987bd"
 #define COPYRIGHT_YEAR 2017
 
-#define CHROME_VERSION_MAJOR 55
+#define CHROME_VERSION_MAJOR 56
 #define CHROME_VERSION_MINOR 0
-#define CHROME_VERSION_BUILD 2883
-#define CHROME_VERSION_PATCH 87
+#define CHROME_VERSION_BUILD 2924
+#define CHROME_VERSION_PATCH 76
 
 #define DO_MAKE_STRING(p) #p
 #define MAKE_STRING(p) DO_MAKE_STRING(p)
@@ -63,13 +63,13 @@ extern "C" {
 // universal hash value will change if any platform is affected whereas the
 // platform hash values will change only if that particular platform is
 // affected.
-#define CEF_API_HASH_UNIVERSAL "87b7eefcb86c87b28f86bfd7919f7d7a6cffc0d8"
+#define CEF_API_HASH_UNIVERSAL "66de193ba22e1d92a99bb29d60f3107709aeefda"
 #if defined(OS_WIN)
-#define CEF_API_HASH_PLATFORM "00823905486d7b7222da5654fe35d2d15f65543a"
+#define CEF_API_HASH_PLATFORM "8055740cd08db66cefe838a826dc90806fadfb33"
 #elif defined(OS_MACOSX)
-#define CEF_API_HASH_PLATFORM "f0180f006643782254250f34e858b98110a40e6e"
+#define CEF_API_HASH_PLATFORM "12d8ab423df369b68d37c3667123a1812bc0d345"
 #elif defined(OS_LINUX)
-#define CEF_API_HASH_PLATFORM "14b19454a4231fa10a77b8955954dc95f073af6b"
+#define CEF_API_HASH_PLATFORM "86ab23c0d7dafbdff7f66764cf8dac5ec1712af4"
 #endif
 
 // Returns CEF version information for the libcef library. The |entry|

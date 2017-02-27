@@ -59,6 +59,7 @@ except NameError:
 # Command line args variables
 DEBUG_FLAG = False
 FAST_FLAG = False
+CLEAN_FLAG = False
 KIVY_FLAG = False
 REBUILD_CPP = False
 VERSION = ""
@@ -74,10 +75,10 @@ def main():
         sys.exit(1)
     print("[build.py] PYVERSION = %s" % PYVERSION)
     print("[build.py] OS_POSTFIX2 = %s" % OS_POSTFIX2)
-    setup_environ()
-    check_cython_version()
     command_line_args()
+    check_cython_version()
     check_directories()
+    setup_environ()
     if os.path.exists(CEFPYTHON_H):
         fix_cefpython_h()
         if WINDOWS:
@@ -159,7 +160,7 @@ def setup_environ():
             raise Exception("Python 32-bit is not supported on Mac")
         os.environ["ARCHFLAGS"] = "-arch x86_64"
         os.environ["CEF_CCFLAGS"] += " -arch x86_64"
-        os.environ["CEF_LINK_FLAGS"] += " -mmacosx-version-min=10.7"
+        os.environ["CEF_LINK_FLAGS"] += " -mmacosx-version-min=10.9"
 
         # -Wno-return-type-c-linkage to ignore:
         # > warning: 'somefunc' has C-linkage specified, but returns
@@ -235,6 +236,10 @@ def command_line_args():
         # Fast mode also disables optimization flags in setup/setup.py .
         FAST_FLAG = True
         print("[build.py] FAST mode On")
+
+    # --clean flag
+    if len(sys.argv) > 1 and "--clean" in sys.argv:
+        CLEAN_FLAG = True
 
     # --kivy flag
     if len(sys.argv) > 1 and "--kivy" in sys.argv:
@@ -372,8 +377,23 @@ def compile_ask_to_continue():
         sys.exit(1)
 
 
+def clean_cpp_projects_unix():
+    delete_files_by_pattern("{0}/*.o".format(CLIENT_HANDLER_DIR))
+    delete_files_by_pattern("{0}/*.a".format(CLIENT_HANDLER_DIR))
+
+    delete_files_by_pattern("{0}/*.o".format(SUBPROCESS_DIR))
+    delete_files_by_pattern("{0}/*.a".format(SUBPROCESS_DIR))
+    delete_files_by_pattern("{0}/subprocess".format(SUBPROCESS_DIR))
+
+    delete_files_by_pattern("{0}/*.o".format(CPP_UTILS_DIR))
+    delete_files_by_pattern("{0}/*.a".format(CPP_UTILS_DIR))
+
+
 def compile_cpp_projects_unix():
     print("[build.py] Compile C++ projects")
+    if CLEAN_FLAG:
+        print("[build.py] Clean C++ projects (--clean flag passed)")
+    clean_cpp_projects_unix()
 
     # Need to allow continuing even when make fails, as it may
     # fail because the "public" function declaration is not yet

@@ -85,11 +85,6 @@ of the specified value will be used. The alpha component must greater than
 0 to enable use of the background color but will be otherwise ignored.
 
 
-### caret_browsing_enabled
-
-(bool) Controls whether the caret position will be drawn. Also configurable using the --enable-caret-browsing switch.
-
-
 ### databases_disabled
 
 (bool) Controls whether databases can be used. Also configurable using the --disable-databases switch.
