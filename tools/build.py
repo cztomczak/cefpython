@@ -17,12 +17,13 @@ Option 2: Use the automate.py tool. With this tool you can build CEF
 from sources or use ready binaries from Spotify Automated Builds.
 
 Usage:
-    build.py VERSION [--rebuild-cpp] [--fast] [--kivy]
+    build.py VERSION [--rebuild-cpp] [--fast] [--clean] [--kivy]
 
 Options:
     VERSION        Version in format xx.xx
     --rebuild-cpp  Force rebuild of C++ projects
     --fast         Fast mode
+    --clean        Clean C++ projects build files (.o .a etc)
     --kivy         Run only Kivy example
 """
 
@@ -221,7 +222,8 @@ def check_cython_version():
 
 
 def command_line_args():
-    global DEBUG_FLAG, FAST_FLAG, KIVY_FLAG, REBUILD_CPP, VERSION
+    global DEBUG_FLAG, FAST_FLAG, CLEAN_FLAG, KIVY_FLAG,\
+           REBUILD_CPP, VERSION
 
     print("[build.py] Parse command line arguments")
 
@@ -393,7 +395,7 @@ def compile_cpp_projects_unix():
     print("[build.py] Compile C++ projects")
     if CLEAN_FLAG:
         print("[build.py] Clean C++ projects (--clean flag passed)")
-    clean_cpp_projects_unix()
+        clean_cpp_projects_unix()
 
     # Need to allow continuing even when make fails, as it may
     # fail because the "public" function declaration is not yet
@@ -686,6 +688,7 @@ def delete_files_by_pattern(pattern):
     files = glob.glob(pattern)
     for f in files:
         os.remove(f)
+    print("[build.py] Removed {0} files".format(len(files)))
 
 
 def delete_directories_by_pattern(pattern):

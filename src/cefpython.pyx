@@ -577,12 +577,18 @@ cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
 # is called. See Issue #73 in the CEF Python Issue Tracker.
 
 def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
+    # applicationSettings and commandLineSwitches argument
+    # names are kept for backward compatibility.
+    application_settings = applicationSettings
+    command_line_switches = commandLineSwitches
 
     # Alternative names for existing parameters
     if "settings" in kwargs:
-        applicationSettings = kwargs["settings"]
+        assert not applicationSettings, "Bad arguments"
+        application_settings = kwargs["settings"]
     if "switches" in kwargs:
-        commandLineSwitches = kwargs["switches"]
+        assert not command_line_switches, "Bad arguments"
+        command_line_switches = kwargs["switches"]
 
     IF UNAME_SYSNAME == "Linux":
         # Fix Issue #231 - Discovery of the "icudtl.dat" file fails on Linux.
@@ -595,16 +601,17 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
                 or Debug("ERROR: CefOverridePath failed")
     # END IF UNAME_SYSNAME == "Linux":
 
-    if not applicationSettings:
-        applicationSettings = {}
+    if not application_settings:
+        application_settings = {}
+
     # Debug settings need to be set before Debug() is called
     # and before the CefPythonApp class is instantiated.
     global g_debug
     global g_debugFile
-    if "debug" in applicationSettings:
-        g_debug = bool(applicationSettings["debug"])
-    if "log_file" in applicationSettings:
-        g_debugFile = applicationSettings["log_file"]
+    if "debug" in application_settings:
+        g_debug = bool(application_settings["debug"])
+    if "log_file" in application_settings:
+        g_debugFile = application_settings["log_file"]
 
     Debug("Initialize() called")
 
@@ -617,65 +624,79 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # -------------------------------------------------------------------------
     # CEF Python only options - default values
 
-    if "debug" not in applicationSettings:
-        applicationSettings["debug"] = False
-    if "log_severity" not in applicationSettings:
+    if "debug" not in application_settings:
+        application_settings["debug"] = False
+    if "log_severity" not in application_settings:
         # By default show only errors. Don't show on Linux X server non-fatal
         # errors like "WARNING:x11_util.cc(1409)] X error received".
-        applicationSettings["log_severity"] = LOGSEVERITY_ERROR
-    if "string_encoding" not in applicationSettings:
-        applicationSettings["string_encoding"] = "utf-8"
-    if "unique_request_context_per_browser" not in applicationSettings:
-        applicationSettings["unique_request_context_per_browser"] = False
-    if "downloads_enabled" not in applicationSettings:
-        applicationSettings["downloads_enabled"] = True
-    if "remote_debugging_port" not in applicationSettings:
-        applicationSettings["remote_debugging_port"] = 0
-    if "auto_zooming" not in applicationSettings:
+        application_settings["log_severity"] = LOGSEVERITY_ERROR
+    if "string_encoding" not in application_settings:
+        application_settings["string_encoding"] = "utf-8"
+    if "unique_request_context_per_browser" not in application_settings:
+        application_settings["unique_request_context_per_browser"] = False
+    if "downloads_enabled" not in application_settings:
+        application_settings["downloads_enabled"] = True
+    if "remote_debugging_port" not in application_settings:
+        application_settings["remote_debugging_port"] = 0
+    if "auto_zooming" not in application_settings:
         IF UNAME_SYSNAME == "Windows":
             if DpiAware.IsProcessDpiAware():
-                applicationSettings["auto_zooming"] = "system_dpi"
+                application_settings["auto_zooming"] = "system_dpi"
 
     # Paths
     cdef str module_dir = GetModuleDirectory()
-    if "locales_dir_path" not in applicationSettings:
+    if platform.system() == "Darwin":
+        if  "framework_dir_path" not in application_settings:
+            application_settings["framework_dir_path"] = os.path.join(
+                    module_dir, "Chromium Embedded Framework.framework")
+            # Bug in CEF: CefSettings.framework_dir_path doesn't work.
+            #             Can be worked around by setting command line switch.
+            if not command_line_switches:
+                command_line_switches = {}
+            if "framework-dir-path" not in command_line_switches:
+                command_line_switches["framework-dir-path"] = \
+                        application_settings["framework_dir_path"]
+    if "locales_dir_path" not in application_settings:
         if platform.system() != "Darwin":
-            applicationSettings["locales_dir_path"] = os.path.join(
+            application_settings["locales_dir_path"] = os.path.join(
                     module_dir, "locales")
-    if "resources_dir_path" not in applicationSettings:
-        applicationSettings["resources_dir_path"] = module_dir
+    if "resources_dir_path" not in application_settings:
+        application_settings["resources_dir_path"] = module_dir
         if platform.system() == "Darwin":
-            pass  # TODO: Check if this needs to be set in v56+
-    if "browser_subprocess_path" not in applicationSettings:
-        applicationSettings["browser_subprocess_path"] = os.path.join(
+            # "framework_dir_path" will always be set, see code above.
+            application_settings["resources_dir_path"] = os.path.join(
+                    application_settings["framework_dir_path"],
+                    "Resources")
+    if "browser_subprocess_path" not in application_settings:
+        application_settings["browser_subprocess_path"] = os.path.join(
                 module_dir, "subprocess")
 
     # Mouse context menu
-    if "context_menu" not in applicationSettings:
-        applicationSettings["context_menu"] = {}
+    if "context_menu" not in application_settings:
+        application_settings["context_menu"] = {}
     menuItems = ["enabled", "navigation", "print", "view_source",
             "external_browser", "devtools"]
     for item in menuItems:
-        if item not in applicationSettings["context_menu"]:
-            applicationSettings["context_menu"][item] = True
+        if item not in application_settings["context_menu"]:
+            application_settings["context_menu"][item] = True
 
     # Remote debugging port. If value is 0 we will generate a random
     # port. To disable remote debugging set value to -1.
-    if applicationSettings["remote_debugging_port"] == 0:
+    if application_settings["remote_debugging_port"] == 0:
         # Generate a random port.
-        applicationSettings["remote_debugging_port"] =\
+        application_settings["remote_debugging_port"] =\
                 random.randint(49152, 65535)
-    elif applicationSettings["remote_debugging_port"] == -1:
+    elif application_settings["remote_debugging_port"] == -1:
         # Disable remote debugging
-        applicationSettings["remote_debugging_port"] = 0
+        application_settings["remote_debugging_port"] = 0
 
     # -------------------------------------------------------------------------
 
     # CEF options - default values.
-    if not "multi_threaded_message_loop" in applicationSettings:
-        applicationSettings["multi_threaded_message_loop"] = False
-    if not "single_process" in applicationSettings:
-        applicationSettings["single_process"] = False
+    if not "multi_threaded_message_loop" in application_settings:
+        application_settings["multi_threaded_message_loop"] = False
+    if not "single_process" in application_settings:
+        application_settings["single_process"] = False
 
     cdef CefRefPtr[CefApp] cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
 
@@ -698,21 +719,21 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # Make a copy as applicationSettings is a reference only
     # that might get destroyed later.
     global g_applicationSettings
-    for key in applicationSettings:
-        g_applicationSettings[key] = copy.deepcopy(applicationSettings[key])
+    for key in application_settings:
+        g_applicationSettings[key] = copy.deepcopy(application_settings[key])
 
     cdef CefSettings cefApplicationSettings
     # No sandboxing for the subprocesses
     cefApplicationSettings.no_sandbox = 1
-    SetApplicationSettings(applicationSettings, &cefApplicationSettings)
+    SetApplicationSettings(application_settings, &cefApplicationSettings)
 
-    if commandLineSwitches:
+    if command_line_switches:
         # Make a copy as commandLineSwitches is a reference only
         # that might get destroyed later.
         global g_commandLineSwitches
-        for key in commandLineSwitches:
+        for key in command_line_switches:
             g_commandLineSwitches[key] = copy.deepcopy(
-                    commandLineSwitches[key])
+                    command_line_switches[key])
 
     # External message pump
     if GetAppSetting("external_message_pump")\

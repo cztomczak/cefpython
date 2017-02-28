@@ -55,4 +55,4 @@ subprocess:
 		$(CPP_FILES) \
 		$(CEF_LINK_FLAGS) \
 		$(LIBS) -lcef_dll_wrapper \
-		-o subprocess -Wl,-rpath,.
+		-o subprocess -Wl,-rpath,@loader_path/

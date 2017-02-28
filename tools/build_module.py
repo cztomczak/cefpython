@@ -229,7 +229,7 @@ def set_compiler_options(options):
                 "-Wl,-search_paths_first",
                 "-F"+os.path.join(CEF_BINARIES_LIBRARIES, "bin"),
                 "-framework", "Chromium Embedded Framework",
-                "-Wl,-rpath,@loader_path",
+                "-Wl,-rpath,@loader_path/",  # ending slash is crucial!
         ])
         if not FAST_FLAG:
             extra_link_args.extend([

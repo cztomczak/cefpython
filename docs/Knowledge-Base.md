@@ -50,6 +50,48 @@ they are all unicode strings. Be aware of this when porting cefpython
 based apps to Python 3, as it may cause issues.
 
 
+## Location of CEF framework in Mac apps
+
+This information here is for when creating apps for distribution
+on Mac.
+
+By default CEF expects that CEF framework is located at
+`Contents/Frameworks/Chromium Embedded Framework.framework`
+in the top-level app bundle. If that is not the case then you have
+to set ApplicationSettings.[framework_dir_path]
+(../api/ApplicationSettings.md#framework_dir_path) before calling
+cef.Initialize().
+
+You may also need to change the structure and embedded paths in
+CEF framework and in the cefpython module. Here are the default
+settings:
+```
+cefpython_package/
+    cefpython_py27.so
+        rpath=@loader_path
+        load:@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework
+    Chromium Embedded Framework.framework/
+        Chromium Embedded Framework
+            id:@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework
+```
+
+When creating Mac app for distribution you may want to change
+directory structure, so you might have to change these settings
+embedded in these libraries. You can do so with these commands:
+
+```
+install_name_tool -rpath old new
+install_name_tool -change old new
+install_name_tool -id name
+```
+
+To check whether it succeeded run these commands:
+```
+otool -l file
+otool -L file
+```
+
+
 ## Flash support
 
 See [Issue #235](../../../issues/235) ("Flash support in CEF 51+").

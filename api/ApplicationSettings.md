@@ -189,7 +189,7 @@ then the framework must exist at "Contents/Frameworks/Chromium Embedded
 Framework.framework" in the top-level app bundle. Also configurable using
 the "framework-dir-path" command-line switch.
 
-See also Issue #304.
+See also [Issue #304](../../../issues/304).
 
 
 ### ignore_certificate_errors
