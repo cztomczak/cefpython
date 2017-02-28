@@ -13,6 +13,9 @@ INC = -I./../ -I./../common/ -I/usr/include/python2.7 \
 	-I/usr/include/pango-1.0 \
 	-I/usr/include/gdk-pixbuf-2.0 \
 	-I/usr/include/atk-1.0 \
+	-I/usr/lib/arm-linux-gnueabihf/gtk-2.0/include \
+	-I/usr/lib/arm-linux-gnueabihf/gtk-unix-print-2.0 \
+	-I/usr/lib/arm-linux-gnueabihf/glib-2.0/include \
 	-I/usr/lib/x86_64-linux-gnu/gtk-2.0/include \
 	-I/usr/lib/x86_64-linux-gnu/gtk-unix-print-2.0 \
 	-I/usr/lib/x86_64-linux-gnu/glib-2.0/include \
@@ -29,8 +32,10 @@ INC = -I./../ -I./../common/ -I/usr/include/python2.7 \
 ifeq ($(UNAME_S), Linux)
 	LIB_DIRS = -L./../../build/cef_linux64/bin \
 			   -L./../../build/cef_linux32/bin \
+			   -L./../../build/cef_linuxarm/bin \
 			   -L./../../build/cef_linux64/lib \
-			   -L./../../build/cef_linux32/lib
+			   -L./../../build/cef_linux32/lib \
+			   -L./../../build/cef_linuxarm/lib
 else ifeq ($(UNAME_S), Darwin)
 	LIB_DIRS = -F$(CEF_BIN) \
 			   -L$(CEF_LIB)

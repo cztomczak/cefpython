@@ -20,6 +20,7 @@ cefpython/build/cef55_3.2883.1553.g80bd606_win32/ .
 
 Usage:
     automate.py (--prebuilt-cef | --build-cef)
+                [--arm-build]
                 [--fast-build FAST_BUILD]
                 [--force-chromium-update FORCE_CHROMIUM_UPDATE]
                 [--no-cef-update NO_CEF_UPDATE]
@@ -35,6 +36,7 @@ Options:
                              binaries for Linux are built on Ubuntu.
     --build-cef              Whether to build CEF from sources with the
                              cefpython patches applied.
+    --arm-build              Create an ARM build.
     --fast-build             Fast build with is_official_build=False
     --force-chromium-update  Force Chromium update (gclient sync etc).
     --no-cef-update          Do not update CEF sources (by default both cef/
@@ -75,6 +77,7 @@ class Options(object):
     # From command-line
     prebuilt_cef = False
     build_cef = False
+    arm_build = False
     fast_build = False
     force_chromium_update = False
     no_cef_update = False
@@ -325,6 +328,8 @@ def build_cef_projects():
                 cef_binary = symbols.replace("_debug_symbols", "")
             assert "symbols" not in os.path.basename(cef_binary)
         else:
+            if Options.arm_build:
+                OS_POSTFIX2 = "linuxarm"
             files = glob.glob(os.path.join(Options.binary_distrib,
                                            "cef_binary_*_"+OS_POSTFIX2))
             assert len(files) == 1, "Error finding binary distrib"
@@ -353,6 +358,8 @@ def build_cef_projects():
     # Build cefclient, cefsimple, ceftests
     if already_built:
         print("[automate.py] Already built: cefclient, cefsimple, ceftests")
+    elif Options.arm_build:
+        print("[automate.py] Skip built: cefclient, cefsimple, ceftests")
     else:
         print("[automate.py] Build cefclient, cefsimple, ceftests")
         # Cmake
@@ -597,7 +604,7 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "cefclient",
             Options.build_type,
             "cefclient")
-    if platform.system() != "Windows":
+    if platform.system() != "Windows" and not Options.arm_build:
         # On Windows resources/*.html files are embedded inside exe
         cefclient_files = os.path.join(
                 src,
@@ -619,7 +626,7 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "ceftests",
             Options.build_type,
             "ceftests")
-    if platform.system() != "Windows":
+    if platform.system() != "Windows" and not Options.arm_build:
         # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
                 src,
@@ -632,10 +639,10 @@ def create_prebuilt_binaries():
         cefclient += ".exe"
         cefsimple += ".exe"
         ceftests += ".exe"
-
-    shutil.copy(cefclient, bindir)
-    shutil.copy(cefsimple, bindir)
-    shutil.copy(ceftests, bindir)
+    if not Options.arm_build:
+        shutil.copy(cefclient, bindir)
+        shutil.copy(cefsimple, bindir)
+        shutil.copy(ceftests, bindir)
 
     # END: Copy cefclient, cefsimple, ceftests
 
@@ -654,8 +661,11 @@ def create_prebuilt_binaries():
         libdst = os.path.join(libdir, "libcef_dll_wrapper_md.lib")
         shutil.copy(libsrc, libdst)
     elif platform.system() == "Linux":
-        cpdir(os.path.join(src, "build_cefclient", "libcef_dll_wrapper"),
-              libdir)
+        if Options.arm_build:
+            shutil.copy(os.path.join(Options.cef_build_dir, "chromium/src/out/Release_GN_arm/obj/cef/")+"libcef_dll_wrapper.a", libdir)
+        else:
+            cpdir(os.path.join(src, "build_cefclient", "libcef_dll_wrapper"),
+                  libdir)
 
     # Remove .lib files from bin/ only after libraries were copied
     libs = glob.glob(os.path.join(bindir, "*.lib"))
@@ -745,7 +755,9 @@ def run_automate_git():
         ninja -v -j2 -Cout\Release cefclient
     """
     args = []
-    if ARCH64:
+    if Options.arm_build:
+        args.append("--arm-build")
+    elif ARCH64:
         args.append("--x64-build")
     args.append("--download-dir=" + Options.cef_build_dir)
     args.append("--branch=" + Options.cef_branch)
@@ -819,6 +831,8 @@ def get_prebuilt_name(header_file=""):
         version = get_version_from_file(header_file)
     else:
         version = get_cefpython_version()
+    if Options.arm_build:
+        OS_POSTFIX2 = "linuxarm"
     name = "cef%s_%s_%s" % (
         version["CHROME_VERSION_MAJOR"],
         version["CEF_VERSION"],

@@ -118,7 +118,10 @@ if OS_POSTFIX == "win":
 elif OS_POSTFIX == "mac":
     OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
 elif OS_POSTFIX == "linux":
-    OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
+    if os.uname()[4][:3] == "arm":
+        OS_POSTFIX2 = "linuxarm"
+    else:
+        OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
 
 PYVERSION = str(sys.version_info[0])+str(sys.version_info[1])
 print("PYVERSION = %s" % PYVERSION)

@@ -36,7 +36,10 @@ if OS_POSTFIX == "win":
 elif OS_POSTFIX == "mac":
     OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
 elif OS_POSTFIX == "linux":
-    OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
+    if os.uname()[4][:3] == "arm":
+        OS_POSTFIX2 = "linuxarm"
+    else:
+        OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
 
 # Directories
 INSTALLER_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -129,14 +132,16 @@ def main():
     # with open(setup_dir+"/setup.cfg", "w") as f:
     #     f.write(SETUP_CFG_CONTENT)
 
-    print("Copying binaries to package dir")
-    # Copy Kivy
-    old_binaries_dir = os.path.abspath(INSTALLER_DIR+"/../binaries_"+BITS+"/")
-    ret = os.system("cp -rf "+old_binaries_dir+"/kivy_.py "+package_dir)
-    assert ret == 0
-    ret = os.system("cp -rf "+old_binaries_dir+"/kivy-select-boxes/ "
-                    + package_dir)
-    assert ret == 0
+    if OS_POSTFIX2 != "linuxarm":
+        print("Copying binaries to package dir")
+        # Copy Kivy
+        old_binaries_dir = os.path.abspath(INSTALLER_DIR+"/../binaries_"+BITS+"/")
+        ret = os.system("cp -rf "+old_binaries_dir+"/kivy_.py "+package_dir)
+        assert ret == 0
+        ret = os.system("cp -rf "+old_binaries_dir+"/kivy-select-boxes/ "
+                        + package_dir)
+        assert ret == 0
+
     # Copy binaries
     ret = os.system("cp -rf "+CEF_BINARY+"/*.txt "+package_dir)
     assert ret == 0
@@ -163,10 +168,11 @@ def main():
     ret = os.system("cp -r ../../../examples/* "+package_dir+"/examples/")
     assert ret == 0
 
-    print("Moving kivy-select-boxes dir to examples dir")
-    assert os.path.exists(package_dir+"/kivy-select-boxes")
-    shutil.move(package_dir+"/kivy-select-boxes",
-                package_dir+"/examples/kivy-select-boxes")
+    if OS_POSTFIX2 != "linuxarm":
+        print("Moving kivy-select-boxes dir to examples dir")
+        assert os.path.exists(package_dir+"/kivy-select-boxes")
+        shutil.move(package_dir+"/kivy-select-boxes",
+                    package_dir+"/examples/kivy-select-boxes")
 
     print("Creating wx dir in package dir")
     os.mkdir(package_dir+"/wx/")

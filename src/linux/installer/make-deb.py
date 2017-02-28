@@ -24,7 +24,9 @@ import shutil
 BITS = platform.architecture()[0]
 assert (BITS == "32bit" or BITS == "64bit")
 ARCHITECTURE = "i386" if (BITS == "32bit") else "amd64"
-if BITS == "32bit":
+if os.uname()[4][:3] == "arm":
+    LINUX_BITS = "linuxarm"
+elif BITS == "32bit":
     LINUX_BITS = "linux32"
 else:
     LINUX_BITS = "linux64"

@@ -41,7 +41,10 @@ if OS_POSTFIX == "win":
 elif OS_POSTFIX == "mac":
     OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
 elif OS_POSTFIX == "linux":
-    OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
+    if os.uname()[4][:3] == "arm":
+        OS_POSTFIX2 = "linuxarm"
+    else:
+        OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
 
 # Directories
 SETUP_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -99,6 +102,10 @@ ext_modules = [Extension(
         '/usr/include/pango-1.0',
         '/usr/include/gdk-pixbuf-2.0',
         '/usr/include/atk-1.0',
+        # arm
+        '/usr/lib/arm-linux-gnueabihf/gtk-2.0/include',
+        '/usr/lib/arm-linux-gnueabihf/gtk-unix-print-2.0',
+        '/usr/lib/arm-linux-gnueabihf/glib-2.0/include',
         # Ubuntu
         '/usr/lib/x86_64-linux-gnu/gtk-2.0/include',
         '/usr/lib/x86_64-linux-gnu/gtk-unix-print-2.0',
