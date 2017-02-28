@@ -1,5 +1,25 @@
 # Build instructions
 
+Table of contents:
+* [Preface](#preface)
+* [Quick build instructions for Windows](#quick-build-instructions-for-windows)
+* [Quick build instructions for Linux](#quick-build-instructions-for-linux)
+* [Requirements](#requirements)
+  * [Windows](#windows)
+  * [Linux](#linux)
+  * [Mac](#mac)
+  * [All platforms](#all-platforms)
+* [Build using prebuilt CEF binaries and libraries](#build-using-prebuilt-cef-binaries-and-libraries)
+* [Build using CEF binaries from Spotify Automated Builds](#build-using-cef-binaries-from-spotify-automated-builds)
+* [Build upstream CEF from sources](#build-upstream-cef-from-sources)
+* [Build CEF manually](#build-cef-manually)
+* [CEF Automated Builds (Spotify and Adobe)](#cef-automated-builds-spotify-and-adobe)
+* [Notes](#notes)
+* [How to patch mini tutorial](#how-to-patch-mini-tutorial)
+
+
+## Preface
+
 These instructions are for the new releases of CEF Python v50+.
 For the old v31 release that is supported on all platforms, see
 the build instructions on the wiki pages.
@@ -23,23 +43,6 @@ There are several types of builds described in this document:
 
 Before you can build CEF Python or CEF you must satisfy
 [requirements](#requirements) listed on this page.
-
-
-Table of contents:
-* [Quick build instructions for Windows](#quick-build-instructions-for-windows)
-* [Quick build instructions for Linux](#quick-build-instructions-for-linux)
-* [Requirements](#requirements)
-  * [Windows](#windows)
-  * [Linux](#linux)
-  * [Mac](#mac)
-  * [All platforms](#all-platforms)
-* [Build using prebuilt CEF binaries and libraries](#build-using-prebuilt-cef-binaries-and-libraries)
-* [Build using CEF binaries from Spotify Automated Builds](#build-using-cef-binaries-from-spotify-automated-builds)
-* [Build upstream CEF from sources](#build-upstream-cef-from-sources)
-* [Build CEF manually](#build-cef-manually)
-* [CEF Automated Builds (Spotify and Adobe)](#cef-automated-builds-spotify-and-adobe)
-* [Notes](#notes)
-* [How to patch mini tutorial](#how-to-patch-mini-tutorial)
 
 
 ## Quick build instructions for Windows
