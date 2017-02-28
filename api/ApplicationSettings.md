@@ -16,6 +16,7 @@ Table of contents:
   * [context_menu](#context_menu)
   * [downloads_enabled](#downloads_enabled)
   * [external_message_pump](#external_message_pump)
+  * [framework_dir_path](#framework_dir_path)
   * [ignore_certificate_errors](#ignore_certificate_errors)
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)

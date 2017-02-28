@@ -11,7 +11,6 @@ Table of contents:
   * [accept_language_list](#accept_language_list)
   * [application_cache_disabled](#application_cache_disabled)
   * [background_color](#background_color)
-  * [caret_browsing_enabled](#caret_browsing_enabled)
   * [databases_disabled](#databases_disabled)
   * [default_encoding](#default_encoding)
   * [dom_paste_disabled](#dom_paste_disabled)
