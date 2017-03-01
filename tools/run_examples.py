@@ -65,8 +65,9 @@ def main():
         print("[run_examples.py] PASS: qt.py pyside (PySide not installed)")
         passed.append("qt.py pyside")
 
-    # tkinter
-    if packages["tkinter"] or packages["Tkinter"]:
+    # tkinter.
+    # This example often crashes on Mac (Issue #309), so don't run it.
+    if not MAC and (packages["tkinter"] or packages["Tkinter"]):
         examples.append("tkinter_.py")
     else:
         print(["run_examples.py] PASS: tkinter_.py (tkinter not installed)"])

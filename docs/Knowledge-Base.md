@@ -69,7 +69,7 @@ settings:
 ```
 cefpython_package/
     cefpython_py27.so
-        rpath=@loader_path
+        rpath=@loader_path/
         load:@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework
     Chromium Embedded Framework.framework/
         Chromium Embedded Framework
@@ -117,7 +117,8 @@ release perform the following steps:
    (http://opensource.spotify.com/cefbuilds/index.html)
    and download latest CEF for your platform. Choose "Standard
    Distribution" binaries.
-3. Follow the instructions in `CMakeLists.txt` file
+3. Follow the instructions in `CMakeLists.txt` file, choose steps
+   for building using Ninja
 4. Run either cefclient or cefsimple to test features
 
 
