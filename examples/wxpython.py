@@ -144,7 +144,10 @@ class MainFrame(wx.Frame):
             g_count_windows -= 1
             if g_count_windows == 0:
                 cef.Shutdown()
-                wx.GetApp().Exit()
+                wx.GetApp().ExitMainLoop()
+                # Call _exit otherwise app exits with code 255 (Issue #162).
+                # noinspection PyProtectedMember
+                os._exit(0)
         else:
             # Calling browser.CloseBrowser() and/or self.Destroy()
             # in OnClose may cause app crash on some paltforms in
@@ -160,7 +163,6 @@ class MainFrame(wx.Frame):
 
 
 class FocusHandler(object):
-
     def OnGotFocus(self, browser, **_):
         # Temporary fix for focus issues on Linux (Issue #284).
         if LINUX:

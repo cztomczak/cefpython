@@ -1,9 +1,12 @@
 # Example of embedding CEF Python browser using Tkinter toolkit.
 # This example has two widgets: a navigation bar and a browser.
 #
+# NOTE: This example doesn't work on Mac, details in Issue #306.
+#
 # Tested configurations:
-# - Tk 8.6 and CEF Python v55.3+ on Linux
-# - Tk 8.5 and CEF Python v55.4+ on Windows
+# - Tk 8.5 on Windows
+# - Tk 8.6 on Linux
+# - CEF Python v55.3+
 #
 # Known issue on Linux: When typing url, mouse must be over url
 # entry widget otherwise keyboard focus is lost (Issue #255
@@ -41,7 +44,7 @@ def main():
     logger.addHandler(stream_handler)
     logger.info("CEF Python {ver}".format(ver=cef.__version__))
     logger.info("Python {ver}".format(ver=sys.version[:6]))
-    logger.info("Tk {ver}".format(ver=tk.TkVersion))
+    logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     cef.Initialize()
