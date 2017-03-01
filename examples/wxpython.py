@@ -4,8 +4,8 @@
 # To install wxPython on Linux type "sudo apt-get install python-wxtools".
 
 # Tested configurations:
+# - wxPython 3.0 on Windows/Mac
 # - wxPython 2.8 on Linux
-# - wxPython 3.0 on Windows
 # - CEF Python v55.4+
 
 import wx
@@ -26,6 +26,9 @@ MAC = (platform.system() == "Darwin")
 WIDTH = 800
 HEIGHT = 600
 
+# Globals
+g_count_windows = 0
+
 
 def main():
     check_versions()
@@ -34,15 +37,15 @@ def main():
     if WINDOWS:
         # High DPI support
         settings["auto_zooming"] = "system_dpi"
-        # Embed DPI awareness xml manifest inside .exe (recommended,
-        # most reliable) or call the SetProcessDpiAware function.
         # noinspection PyUnresolvedReferences, PyArgumentList
-        cef.DpiAware.SetProcessDpiAware()
+        cef.DpiAware.SetProcessDpiAware()  # Alternative is to embed manifest
     cef.Initialize(settings=settings)
     app = CefApp(False)
     app.MainLoop()
     del app  # Must destroy before calling Shutdown
-    cef.Shutdown()
+    if not MAC:
+        # On Mac shutdown is called in OnClose
+        cef.Shutdown()
 
 
 def check_versions():
@@ -60,6 +63,9 @@ class MainFrame(wx.Frame):
                           title='wxPython example', size=(WIDTH, HEIGHT))
         self.browser = None
 
+        global g_count_windows
+        g_count_windows += 1
+
         self.setup_icon()
         self.create_menu()
         self.Bind(wx.EVT_CLOSE, self.OnClose)
@@ -70,9 +76,14 @@ class MainFrame(wx.Frame):
         self.browser_panel.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         self.browser_panel.Bind(wx.EVT_SIZE, self.OnSize)
 
-        # Must show so that handle is available when embedding browser
-        self.Show()
-        self.embed_browser()
+        # On Linux must show before embedding browser, so that handle
+        # is available.
+        if LINUX:
+            self.Show()
+            self.embed_browser()
+        else:
+            self.embed_browser()
+            self.Show()
 
     def setup_icon(self):
         icon_file = os.path.join(os.path.abspath(os.path.dirname(__file__)),
@@ -85,16 +96,15 @@ class MainFrame(wx.Frame):
         filemenu = wx.Menu()
         filemenu.Append(1, "Some option")
         filemenu.Append(2, "Another option")
-        aboutmenu = wx.Menu()
-        aboutmenu.Append(1, "Yet another option")
         menubar = wx.MenuBar()
         menubar.Append(filemenu, "&File")
-        menubar.Append(aboutmenu, "&About")
         self.SetMenuBar(menubar)
 
     def embed_browser(self):
         window_info = cef.WindowInfo()
-        window_info.SetAsChild(self.browser_panel.GetHandle())
+        (width, height) = self.browser_panel.GetClientSizeTuple()
+        window_info.SetAsChild(self.browser_panel.GetHandle(),
+                               [0, 0, width, height])
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         self.browser.SetClientHandler(FocusHandler())
@@ -120,49 +130,42 @@ class MainFrame(wx.Frame):
         self.browser.NotifyMoveOrResizeStarted()
 
     def OnClose(self, event):
-        # In cefpython3.wx.chromectrl example calling browser.CloseBrowser()
-        # and/or self.Destroy() in OnClose is causing crashes when
-        # embedding multiple browser tabs. The solution is to call only
-        # browser.ParentWindowWillClose. Behavior of this example
-        # seems different as it extends wx.Frame, while ChromeWindow
-        # from chromectrl extends wx.Window. Calling CloseBrowser
-        # and Destroy does not cause crashes, but is not recommended.
-        # Call ParentWindowWillClose and event.Skip() instead. See
-        # also Issue #107: https://github.com/cztomczak/cefpython/issues/107
-        self.browser.ParentWindowWillClose()
-        event.Skip()
+        print("[wxpython.py] OnClose called")
+        if not self.browser:
+            # May already be closing, may be called multiple times on Mac
+            return
 
-        # Clear all browser references for CEF to shutdown cleanly
-        del self.browser
+        if MAC:
+            # On Mac things work differently, other steps are required
+            self.browser.CloseBrowser()
+            self.clear_browser_references()
+            self.Destroy()
+            global g_count_windows
+            g_count_windows -= 1
+            if g_count_windows == 0:
+                cef.Shutdown()
+                wx.GetApp().Exit()
+        else:
+            # Calling browser.CloseBrowser() and/or self.Destroy()
+            # in OnClose may cause app crash on some paltforms in
+            # some use cases, details in Issue #107.
+            self.browser.ParentWindowWillClose()
+            event.Skip()
+            self.clear_browser_references()
+
+    def clear_browser_references(self):
+        # Clear browser references that you keep anywhere in your
+        # code. All references must be cleared for CEF to shutdown cleanly.
+        self.browser = None
 
 
 class FocusHandler(object):
 
-    def __init__(self):
-        pass
-
-    def OnTakeFocus(self, **kwargs):
-        # print("[wxpython.py] FocusHandler.OnTakeFocus, next={next}"
-        #       .format(next=kwargs["next_component"]]))
-        pass
-
-    def OnSetFocus(self, **kwargs):
-        # source_enum = {cef.FOCUS_SOURCE_NAVIGATION: "navigation",
-        #                cef.FOCUS_SOURCE_SYSTEM:     "system"}
-        # print("[wxpython.py] FocusHandler.OnSetFocus, source={source}"
-        #       .format(source=source_enum[kwargs["source"]]))
-        # return False
-        pass
-
     def OnGotFocus(self, browser, **_):
         # Temporary fix for focus issues on Linux (Issue #284).
-        # If this is not applied then when switching to another
-        # window (alt+tab) and then back to this example, keyboard
-        # focus becomes broken, you can't type anything, even
-        # though a type cursor blinks in web view.
         if LINUX:
             print("[wxpython.py] FocusHandler.OnGotFocus:"
-                  " keyboard focus fix (#284)")
+                  " keyboard focus fix (Issue #284)")
             browser.SetFocus(True)
 
 
@@ -185,7 +188,7 @@ class CefApp(wx.App):
         # http://wiki.wxwidgets.org/Making_a_render_loop
         # Another way would be to use EVT_IDLE in MainFrame.
         self.timer = wx.Timer(self, self.timer_id)
-        self.timer.Start(10)  # 10ms
+        self.timer.Start(10)  # 10ms timer
         wx.EVT_TIMER(self, self.timer_id, self.on_timer)
 
     def on_timer(self, _):
