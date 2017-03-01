@@ -4,6 +4,7 @@ Table of contents:
 * [Notifications on new releases](#notifications-on-new-releases)
 * [Changes in API after CEF updates](#changes-in-api-after-cef-updates)
 * [Differences between Python 2 and Python 3](#differences-between-python-2-and-python-3)
+* [Location of CEF framework in Mac apps](#location-of-cef-framework-in-mac-apps)
 * [Flash support](#flash-support)
 * [Feature X works in Google Chrome, but doesn't work in CEF Python](#feature-x-works-in-google-chrome-but-doesnt-work-in-cef-python)
 * [How to capture Audio and Video in HTML5?](#how-to-capture-audio-and-video-in-html5)
