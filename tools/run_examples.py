@@ -71,7 +71,7 @@ def main():
     # tkinter
     if MAC:
         # This example often crashes on Mac (Issue #309)
-        print(["run_examples.py] PASS: tkinter_.py (Issue #309)"])
+        print("[run_examples.py] PASS: tkinter_.py (Issue #309)")
         passed.append("tkinter_.py (Issue #309)")
     elif packages["tkinter"] or packages["Tkinter"]:
         examples.append("tkinter_.py")

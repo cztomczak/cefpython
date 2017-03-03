@@ -126,10 +126,10 @@ def copy_template_file(src, dst, variables):
     print("[make_installer.py] Copy_t: {src} ==> {dst}"
           .format(src=short_src_path(src), dst=short_dst_path(dst)))
     with open(src, "rb") as fo:
-        contents = fo.read()
+        contents = fo.read().decode("utf-8")
     contents = replace_template_vars(contents, variables)
     with open(dst, "wb") as fo:
-        fo.write(contents)
+        fo.write(contents.encode("utf-8"))
     return contents
 
 
@@ -280,7 +280,7 @@ def create_empty_log_file(log_file):
     print("[make_installer.py] Create: {file}"
           .format(file=short_dst_path(log_file)))
     with open(log_file, "wb") as fo:
-        fo.write("")
+        fo.write("".encode("utf-8"))
     # On Linux and Mac chmod so that for cases when package is
     # installed using sudo. When wheel package is created it
     # will remember file permissions set.

@@ -459,13 +459,13 @@ def clear_cache():
     # Cache in CEFPYTHON_BINARY directory (eg. cefpython_linux64/)
     os.chdir(CEFPYTHON_BINARY)
     delete_files_by_pattern("./"+MODULE_NAME_TEMPLATE
-                            .format(pyversion="*", ext=MODULE_EXT))
+                            .format(pyversion=PYVERSION, ext=MODULE_EXT))
 
     # Cache in build_cefpython/ directory
     os.chdir(BUILD_CEFPYTHON)
 
     delete_files_by_pattern("./"+MODULE_NAME_TEMPLATE
-                            .format(pyversion="*", ext=MODULE_EXT))
+                            .format(pyversion=PYVERSION, ext=MODULE_EXT))
     delete_files_by_pattern("./*.pyx")
 
     try:

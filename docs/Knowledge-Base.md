@@ -112,15 +112,12 @@ as of now.
 To see if some feature is working or a bug is fixed in newer CEF
 release perform the following steps:
 
-1. Download and install [CMake](https://cmake.org/download/) and
-   [Ninja](https://github.com/ninja-build/ninja/releases)
-2. Go to [Spotify Automated Builds]
+1. Go to [Spotify Automated Builds]
    (http://opensource.spotify.com/cefbuilds/index.html)
-   and download latest CEF for your platform. Choose "Standard
-   Distribution" binaries.
-3. Follow the instructions in `CMakeLists.txt` file, choose steps
-   for building using Ninja
-4. Run either cefclient or cefsimple to test features
+   to download latest CEF for your platform. Choose "Sample
+   Application" binaries.
+2. Extract the archive and run sample application from the
+   Release/ directory.
 
 
 ## How to capture Audio and Video in HTML5?

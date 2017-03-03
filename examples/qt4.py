@@ -9,6 +9,7 @@
 # Issues on Mac (tested with PySide):
 # - Keyboard focus issues when switching between controls (Issue #284)
 # - Mouse cursor never changes when hovering over links (Issue #311)
+# - Sometimes process hangs when quitting app
 
 from cefpython3 import cefpython as cef
 import ctypes
