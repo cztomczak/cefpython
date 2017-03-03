@@ -10,6 +10,7 @@ Table of contents:
 * [How to capture Audio and Video in HTML5?](#how-to-capture-audio-and-video-in-html5)
 * [Touch and multi-touch support](#touch-and-multi-touch-support)
 * [Black or white browser screen](#black-or-white-browser-screen)
+* [Python crashes with "Segmentation fault" - how to debug?](#python-crashes-with-segmentation-fault-how-to-debug)
 * [Windows XP support](#windows-xp-support)
 * [Mac 32-bit support](#mac-32-bit-support)
 * [Security](#security)
@@ -162,6 +163,59 @@ It will affect 2D accelerated content as well.
 Note that when web page uses WebGL then the black screen may still
 appear even after disabling GPU hardware acceleration. This is normal
 because GPU was disabled so WebGL cannot work.
+
+
+## How to enable debug information in examples?
+
+You can pass "--debug" command line flag to any of CEF Python
+examples and unit tests. It will also work with your app, as
+this feature is enabled in CEF Python's core. When this flag is
+passed the following settings will be set:
+```
+settings = {"debug": True, "log_severity": cef.LOGSEVERITY_WARNING}
+cef.Initialize(settings=settings)
+```
+
+Now you should see debug information displayed in console like this:
+```
+[CEF Python] Initialize() called
+[CEF Python] CefExecuteProcess(): exitCode = -1
+[CEF Python] CefInitialize()
+[CEF Python] App_OnBeforeCommandLineProcessing_BrowserProcess()
+[CEF Python] Command line string for the browser process:  ...
+```
+
+
+## Python crashes with "Segmentation fault" - how to debug?
+
+Install gdb:
+- On Linux type: `sudo apt-get install gdb`
+- On Mac type: `brew install gdb` and then [sign gdb]
+  (https://sourceware.org/gdb/wiki/BuildingOnDarwin#Giving_gdb_permission_to_control_other_processes)
+- Additionally on Mac to get a meaningful stack trace with gdb do these steps:
+    - Install [macports](https://www.macports.org/install.php)
+      and restart terminal
+    - Type `sudo port install gdb-apple`
+    - Type `sudo codesign -s "gdb-cert" /opt/local/bin/gdb-apple`
+    - Type `/opt/local/bin/gdb-apple python`
+
+Run python script using gdb:
+```
+gdb python
+run tkinter_.py
+```
+
+On segmentation fault to display stack trace type:
+```
+bt
+```
+
+On Mac to use lldb:
+```
+lldb python
+run tkinter_.py
+bt
+```
 
 
 ## Windows XP support

@@ -40,34 +40,40 @@ def main():
         passed.append("gtk2.py")
 
     # gtk3
-    if packages["gi"]:
-        if not LINUX:
-            examples.append("gtk3.py")
-        else:
-            # Gtk 3 example is currently broken on Linux (Issue #261)
-            print("[run_examples.py] PASS: gtk3.py (Issue #261)")
-            passed.append("gtk3.py")
+    if LINUX:
+        # Broken on Linux (Issue #261)
+        print("[run_examples.py] PASS: gtk3.py (Issue #261)")
+        passed.append("gtk3.py (Issue #261)")
+    elif MAC:
+        # Crashes on Mac (Issue #310)
+        print("[run_examples.py] PASS: gtk3.py (Issue #310)")
+        passed.append("gtk3.py (Issue #310)")
+    elif packages["gi"]:
+        examples.append("gtk3.py")
     else:
         print("[run_examples.py] PASS: gtk3.py (Gtk 3 not installed)")
         passed.append("gtk3.py")
 
     # pyqt
     if packages["PyQt4"]:
-        examples.append("qt.py pyqt")
+        examples.append("qt4.py pyqt")
     else:
-        print("[run_examples.py] PASS: qt.py pyqt (PyQt4 not installed)")
-        passed.append("qt.py pyqt")
+        print("[run_examples.py] PASS: qt4.py pyqt (PyQt4 not installed)")
+        passed.append("qt4.py pyqt")
 
     # pyside
     if packages["PySide"]:
-        examples.append("qt.py pyside")
+        examples.append("qt4.py pyside")
     else:
-        print("[run_examples.py] PASS: qt.py pyside (PySide not installed)")
-        passed.append("qt.py pyside")
+        print("[run_examples.py] PASS: qt4.py pyside (PySide not installed)")
+        passed.append("qt4.py pyside")
 
-    # tkinter.
-    # This example often crashes on Mac (Issue #309), so don't run it.
-    if not MAC and (packages["tkinter"] or packages["Tkinter"]):
+    # tkinter
+    if MAC:
+        # This example often crashes on Mac (Issue #309)
+        print(["run_examples.py] PASS: tkinter_.py (Issue #309)"])
+        passed.append("tkinter_.py (Issue #309)")
+    elif packages["tkinter"] or packages["Tkinter"]:
         examples.append("tkinter_.py")
     else:
         print(["run_examples.py] PASS: tkinter_.py (tkinter not installed)"])

@@ -1,9 +1,9 @@
 # Example of embedding CEF Python browser using Tkinter toolkit.
 # This example has two widgets: a navigation bar and a browser.
 #
-# NOTE: This example often crashes on Mac (Tk 8.5) during initial
-#       app loading with such message: "Segmentation fault: 11".
-#       Reported as Issue #309.
+# NOTE: This example often crashes on Mac (Python 2.7, Tk 8.5/8.6)
+#       during initial app loading with such message:
+#       "Segmentation fault: 11". Reported as Issue #309.
 #
 # Tested configurations:
 # - Tk 8.5 on Windows/Mac
@@ -217,10 +217,14 @@ class BrowserFrame(tk.Frame):
 
     def on_root_close(self):
         if self.browser:
-            # Close browser and free reference by setting to None
             self.browser.CloseBrowser(True)
-            self.browser = None
+            self.clear_browser_references()
         self.destroy()
+
+    def clear_browser_references(self):
+        # Clear browser references that you keep anywhere in your
+        # code. All references must be cleared for CEF to shutdown cleanly.
+        self.browser = None
 
 
 class LoadHandler(object):

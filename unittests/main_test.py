@@ -10,7 +10,7 @@ import base64
 import sys
 
 # To show the window for an extended period of time increase this number.
-MESSAGE_LOOP_RANGE = 25  # each iteration is 0.01 sec
+MESSAGE_LOOP_RANGE = 100  # each iteration is 0.01 sec
 
 g_datauri_data = """
 <!DOCTYPE html>
@@ -140,7 +140,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
 
-        # Run message loop for 0.5 sec.
+        # Run message loop for some time.
         # noinspection PyTypeChecker
         for i in range(MESSAGE_LOOP_RANGE):
             cef.MessageLoopWork()

@@ -608,6 +608,10 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # and before the CefPythonApp class is instantiated.
     global g_debug
     global g_debugFile
+    if "--debug" in sys.argv:
+        application_settings["debug"] = True
+        application_settings["log_severity"] = LOGSEVERITY_WARNING
+        sys.argv.remove("--debug")
     if "debug" in application_settings:
         g_debug = bool(application_settings["debug"])
     if "log_file" in application_settings:
@@ -649,13 +653,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         if  "framework_dir_path" not in application_settings:
             application_settings["framework_dir_path"] = os.path.join(
                     module_dir, "Chromium Embedded Framework.framework")
-            # Bug in CEF: CefSettings.framework_dir_path doesn't work.
-            #             Can be worked around by setting command line switch.
-            if not command_line_switches:
-                command_line_switches = {}
-            if "framework-dir-path" not in command_line_switches:
-                command_line_switches["framework-dir-path"] = \
-                        application_settings["framework_dir_path"]
     if "locales_dir_path" not in application_settings:
         if platform.system() != "Darwin":
             application_settings["locales_dir_path"] = os.path.join(

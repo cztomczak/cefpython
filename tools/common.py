@@ -1,4 +1,4 @@
-# Common stuff for tools: automate.py, build.py, build_module.py
+# Common stuff for tools such as automate.py, build.py, etc.
 
 import struct
 import platform
@@ -41,6 +41,20 @@ MODULE_NAME_TEMPLATE_NOEXT = "cefpython_py{pyversion}"
 MODULE_NAME = MODULE_NAME_TEMPLATE.format(pyversion=PYVERSION, ext=MODULE_EXT)
 MODULE_NAME_NOEXT = MODULE_NAME_TEMPLATE_NOEXT.format(pyversion=PYVERSION)
 
+# Executable extension
+if WINDOWS:
+    EXECUTABLE_EXT = ".exe"
+elif MAC:
+    EXECUTABLE_EXT = ".app"
+else:
+    EXECUTABLE_EXT = ""
+
+# Library extension
+if WINDOWS:
+    STATIC_LIBRARY_EXT = ".lib"
+else:
+    STATIC_LIBRARY_EXT = ".a"
+
 # Root directory
 assert __file__
 ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -70,12 +84,19 @@ UNITTESTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, "unittests"))
 
 # Visual Studio constants
 VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
+
 VS2015_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0"
                  "\\VC\\vcvarsall.bat")
-VS2015_BUILD = ""  # TODO
+VS2015_BUILD = ""  # TODO: add VS2015 Python 3.5/3.6 support
+
+# For CEF build
 VS2013_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0"
                  "\\VC\\vcvarsall.bat")
-VS2013_BUILD = ""  # TODO
+
+VS2010_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 10.0"
+                 "\\VC\\vcvarsall.bat")
+VS2010_BUILD = ""  # TODO: add VS2010 Python 3.4 support
+
 VS2008_VCVARS = ("%LocalAppData%\\Programs\\Common\\Microsoft"
                  "\\Visual C++ for Python\\9.0\\vcvarsall.bat")
 VS2008_BUILD = ("%LocalAppData%\\Programs\\Common\\"

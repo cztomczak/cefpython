@@ -14,7 +14,7 @@ import platform
 import sys
 import os
 
-# Fix for PyCharm hints warnings
+# Fix for PyCharm hints warnings when using static methods
 WindowUtils = cef.WindowUtils()
 
 # Platforms

@@ -74,6 +74,8 @@ def main():
     if len(sys.argv) <= 1:
         print(__doc__)
         sys.exit(1)
+    print("[build.py] Python version: %s" % platform.python_version())
+    print("[build.py] Python executable: %s" % sys.executable)
     print("[build.py] PYVERSION = %s" % PYVERSION)
     print("[build.py] OS_POSTFIX2 = %s" % OS_POSTFIX2)
     command_line_args()
@@ -610,19 +612,19 @@ def build_cefpython_module():
     #     ret = subprocess.call("python-dbg setup.py build_ext --inplace"
     #                           " --cython-gdb", shell=True)
 
-    print("[build.py] Execute build_module.py script")
+    print("[build.py] Execute cython_setup.py script")
     print("")
 
     os.chdir(BUILD_CEFPYTHON)
 
     if FAST_FLAG:
-        ret = subprocess.call("{python} {tools_dir}/build_module.py"
+        ret = subprocess.call("{python} {tools_dir}/cython_setup.py"
                               " build_ext --fast"
                               .format(python=sys.executable,
                                       tools_dir=TOOLS_DIR),
                               shell=True)
     else:
-        ret = subprocess.call("{python} {tools_dir}/build_module.py"
+        ret = subprocess.call("{python} {tools_dir}/cython_setup.py"
                               " build_ext"
                               .format(python=sys.executable,
                                       tools_dir=TOOLS_DIR),
@@ -766,7 +768,7 @@ def install_and_run():
 
 def get_sudo():
     # System Python requires sudo when installing package
-    if sys.executable in ["/usr/bin/python", "/usr/bin/python3"]:
+    if sys.executable.startswith("/usr/"):
         sudo = "sudo"
     else:
         sudo = ""

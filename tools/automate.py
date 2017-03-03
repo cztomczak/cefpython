@@ -96,6 +96,7 @@ class Options(object):
     build_type = ""  # Will be set according to "release_build" value
     cef_binary = ""
     build_cefclient_dir = ""
+    build_wrapper_dir = ""
     build_wrapper_mt_dir = ""
     build_wrapper_md_dir = ""
 
@@ -311,7 +312,8 @@ def build_cef_projects():
 
     fix_cef_include_files()
 
-    # Find cef_binary directory
+    # Find cef_binary directory.
+    # Might already be set if --prebuilt-cef flag was passed.
     if not Options.cef_binary:
         if platform.system() == "Windows":
             files = glob.glob(os.path.join(Options.binary_distrib,
@@ -366,14 +368,62 @@ def build_cef_projects():
         print("[automate.py] OK")
         # Ninja
         command = prepare_build_command()
-        command.extend(["ninja", "cefclient", "cefsimple", "ceftests"])
+        # On Mac cefclient fails with XCode 5:
+        # > cefclient_mac.mm:22:29: error: property 'mainMenu' not found
+        if MAC:
+            # Build only cefsimple
+            command.extend(["ninja", "cefsimple"])
+        else:
+            command.extend(["ninja", "cefclient", "cefsimple", "ceftests"])
         run_command(command, Options.build_cefclient_dir)
         print("[automate.py] OK")
         assert build_cefclient_succeeded()
 
     # Build libcef_dll_wrapper libs
-    if platform.system() == "Windows":
+    if WINDOWS:
         build_wrapper_windows()
+    elif MAC:
+        build_wrapper_mac()
+
+
+def build_wrapper_mac():
+    # On Mac it is required to link libcef_dll_wrapper against
+    # libc++ library, so must build this library separately
+    # from cefclient.
+    cmake_wrapper = prepare_build_command(build_lib=True)
+    cmake_wrapper.extend(["cmake", "-G", "Ninja",
+                          "-DPROJECT_ARCH=x86_64"
+                          "-DCMAKE_CXX_FLAGS=-stdlib=libc++",
+                          "-DCMAKE_BUILD_TYPE=" + Options.build_type,
+                          ".."])
+    Options.build_wrapper_dir = os.path.join(Options.cef_binary,
+                                             "build_wrapper")
+    # Check whether already built
+    already_built = False
+    if build_wrapper_mac_succeeded():
+        already_built = True
+    elif os.path.exists(Options.build_wrapper_dir):
+        # Last build failed, clean directory
+        assert Options.build_wrapper_dir
+        shutil.rmtree(Options.build_wrapper_dir)
+        os.makedirs(Options.build_wrapper_dir)
+    else:
+        os.makedirs(Options.build_wrapper_dir)
+
+    # Build libcef_dll_wrapper library
+    if already_built:
+        print("[automate.py] Already built: libcef_dll_wrapper")
+    else:
+        print("[automate.py] Build libcef_dll_wrapper")
+        # Cmake
+        run_command(cmake_wrapper, Options.build_wrapper_dir)
+        print("[automate.py] cmake OK")
+        # Ninja
+        ninja_wrapper = prepare_build_command(build_lib=True)
+        ninja_wrapper.extend(["ninja", "libcef_dll_wrapper"])
+        run_command(ninja_wrapper, Options.build_wrapper_dir)
+        print("[automate.py] ninja OK")
+        assert build_wrapper_mac_succeeded()
 
 
 def build_wrapper_windows():
@@ -515,12 +565,20 @@ def fix_cmake_variables_for_md_library(undo=False, try_undo=False):
 def build_cefclient_succeeded():
     """Whether building cefclient/cefsimple/ceftests succeeded."""
     assert Options.build_cefclient_dir
-    cefclient_exe = "cefclient.exe" if WINDOWS else "cefclient"
+    cefclient_exe = "cefclient" + EXECUTABLE_EXT
     return os.path.exists(os.path.join(Options.build_cefclient_dir,
                                        "tests",
                                        "cefclient",
                                        Options.build_type,
                                        cefclient_exe))
+
+
+def build_wrapper_mac_succeeded():
+    """Whether building libcef_dll_wrapper succeeded."""
+    return os.path.exists(os.path.join(
+            Options.build_wrapper_dir,
+            "libcef_dll_wrapper",
+            "libcef_dll_wrapper.a"))
 
 
 def build_wrapper_mt_succeeded():
@@ -557,6 +615,8 @@ def prepare_build_command(build_lib=False):
 
 def fix_cef_include_files():
     """Fixes to CEF include header files for eg. VS2008 on Windows."""
+    # TODO: This was fixed in upstream CEF, remove this code during
+    #       next CEF update on Windows.
     if platform.system() == "Windows" and get_msvs_for_python() == "2008":
         print("[automate.py] Fixing CEF include/ files")
         # cef_types_wrappers.h
@@ -571,8 +631,10 @@ def fix_cef_include_files():
             fp.write(contents)
 
 
-def create_prebuilt_binaries():
-    """After building copy binaries/libs to build/cef_xxxx/. """
+def create_prebuilt_binaries(copy_apps=True):
+    """After building copy binaries/libs to build/cef_xxxx/.
+    Not all projects may have been built on all platforms."""
+
     # Directories
     src = Options.cef_binary
     version_header = os.path.join(src, "include", "cef_version.h")
@@ -587,7 +649,20 @@ def create_prebuilt_binaries():
 
     # Copy Release/Debug and Resources
     cpdir(os.path.join(src, Options.build_type), bindir)
-    cpdir(os.path.join(src, "Resources"), bindir)
+    if not MAC:
+        cpdir(os.path.join(src, "Resources"), bindir)
+
+    # Fix id in CEF framework on Mac (currently it expects Frameworks/ dir)
+    if MAC:
+        new_id = ("@rpath/Chromium Embedded Framework.framework"
+                  "/Chromium Embedded Framework")
+        cef_framework_dir = os.path.join(
+                bindir, "Chromium Embedded Framework.framework")
+        cef_library = os.path.join(
+                cef_framework_dir, "Chromium Embedded Framework")
+        assert os.path.isdir(cef_framework_dir)
+        run_command(["install_name_tool", "-id", new_id, cef_library],
+                    working_dir=cef_framework_dir)
 
     # Copy cefclient, cefsimple, ceftests
 
@@ -596,8 +671,8 @@ def create_prebuilt_binaries():
             src,
             "build_cefclient", "tests", "cefclient",
             Options.build_type,
-            "cefclient")
-    if platform.system() != "Windows":
+            "cefclient" + EXECUTABLE_EXT)
+    if LINUX and os.path.exists(cefclient):
         # On Windows resources/*.html files are embedded inside exe
         cefclient_files = os.path.join(
                 src,
@@ -611,15 +686,15 @@ def create_prebuilt_binaries():
             src,
             "build_cefclient", "tests", "cefsimple",
             Options.build_type,
-            "cefsimple")
+            "cefsimple" + EXECUTABLE_EXT)
 
     # ceftests
     ceftests = os.path.join(
             src,
             "build_cefclient", "tests", "ceftests",
             Options.build_type,
-            "ceftests")
-    if platform.system() != "Windows":
+            "ceftests" + EXECUTABLE_EXT)
+    if LINUX and os.path.exists(ceftests):
         # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
                 src,
@@ -628,14 +703,21 @@ def create_prebuilt_binaries():
                 "ceftests_files")
         cpdir(ceftests_files, os.path.join(bindir, "ceftests_files"))
 
-    if platform.system() == "Windows":
-        cefclient += ".exe"
-        cefsimple += ".exe"
-        ceftests += ".exe"
+    def copy_app(app):
+        if os.path.exists(app):
+            if os.path.isdir(app):
+                # On Mac app is a directory
+                shutil.copytree(app,
+                                os.path.join(bindir,
+                                             os.path.basename(app)))
+            else:
+                shutil.copy(app, bindir)
 
-    shutil.copy(cefclient, bindir)
-    shutil.copy(cefsimple, bindir)
-    shutil.copy(ceftests, bindir)
+    if not MAC:
+        # Currently do not copy apps on Mac
+        copy_app(cefclient)
+        copy_app(cefsimple)
+        copy_app(ceftests)
 
     # END: Copy cefclient, cefsimple, ceftests
 
@@ -653,11 +735,12 @@ def create_prebuilt_binaries():
                               "libcef_dll_wrapper.lib")
         libdst = os.path.join(libdir, "libcef_dll_wrapper_md.lib")
         shutil.copy(libsrc, libdst)
-    elif platform.system() == "Linux":
-        cpdir(os.path.join(src, "build_cefclient", "libcef_dll_wrapper"),
-              libdir)
+    else:
+        shutil.copy(os.path.join(src, "build_cefclient", "libcef_dll_wrapper",
+                                 "libcef_dll_wrapper.a"),
+                    libdir)
 
-    # Remove .lib files from bin/ only after libraries were copied
+    # Remove .lib files from bin/ only after libraries were copied (Windows)
     libs = glob.glob(os.path.join(bindir, "*.lib"))
     for lib in libs:
         os.remove(lib)
