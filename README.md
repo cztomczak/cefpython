@@ -40,7 +40,7 @@ bots.
 2. Downloads are available on [GitHub Releases](../../releases) pages
 2. Windows support: 32-bit, Python 2.7
 3. Linux support: 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
-4. Mac support: 64-bit, Python 2.7
+4. Mac support: 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
 5. Documentation is in the [docs/](docs) directory
 6. API reference is in the [api/](api) directory
 7. Additional documentation is in issues labelled [Knowledge Base]
