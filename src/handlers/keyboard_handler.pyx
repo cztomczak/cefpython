@@ -90,7 +90,20 @@ cdef public cpp_bool KeyboardHandler_OnKeyEvent(
                     browser=pyBrowser,
                     event=pyEvent,
                     event_handle=<object>PyLong_FromVoidPtr(cefEventHandle))
-            return bool(returnValue)
+            # If returnValue is False then handle copy/paste on Mac
+            if returnValue:
+                return bool(returnValue)
+        if platform.system() == "Darwin":
+            # Handle copy: command + c
+            if pyEvent["modifiers"] == 128 \
+                    and pyEvent["native_key_code"] == 8:
+                pyBrowser.GetFocusedFrame().Copy()
+                return True
+            # Handle paste: command + v
+            elif pyEvent["modifiers"] == 128 \
+                    and pyEvent["native_key_code"] == 9:
+                pyBrowser.GetFocusedFrame().Paste()
+                return True
         return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
