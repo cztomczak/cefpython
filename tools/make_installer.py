@@ -5,10 +5,14 @@
 Create setup.py package installer.
 
 Usage:
-    make_installer.py VERSION
+    make_installer.py VERSION [--wheel] [--python-tag xx] [--universal]
 
 Options:
     VERSION  Version number eg. 50.0
+    --wheel  Generate wheel package.
+             Additional args for the wheel package:
+             --python-tag xx (eg. cp27 - cpython 2.7)
+             --universal (any python 2 or 3)
 """
 
 from common import *
@@ -23,6 +27,8 @@ import sysconfig
 
 # Command line args
 VERSION = ""
+WHEEL = False
+WHEEL_ARGS = list()
 
 # Globals
 SETUP_DIR = ""
@@ -89,16 +95,43 @@ def main():
     print("[make_installer.py] DONE. Installer package created: {setup_dir}"
           .format(setup_dir=SETUP_DIR))
 
+    # Optional generation of wheel package
+    if WHEEL:
+        print("[make_installer.py] Create Wheel package")
+        if not len(WHEEL_ARGS):
+            print("[make_installer.py] ERROR: you must specify flags"
+                  " eg. --python-tag cp27 or --universal")
+            sys.exit(1)
+        command = ("{python} setup.py bdist_wheel {wheel_args}"
+                   .format(python=sys.executable,
+                           wheel_args=" ".join(WHEEL_ARGS)))
+        print("[make_installer.py] Run command: '{0}' in setup directory"
+              .format(command))
+        subprocess.check_call(command, cwd=SETUP_DIR, shell=True)
+        dist_dir = os.path.join(SETUP_DIR, "dist")
+        files = glob.glob(os.path.join(dist_dir, "*.whl"))
+        assert len(files) == 1
+        print("[make_installer.py] DONE. Wheel package created: {0}"
+              .format(files[0]))
+
 
 def command_line_args():
+    global VERSION, WHEEL, WHEEL_ARGS
     args = " ".join(sys.argv)
     match = re.search(r"\d+\.\d+", args)
     if match:
-        global VERSION
         VERSION = match.group(0)
     else:
         print(__doc__)
         sys.exit(1)
+    for arg in sys.argv:
+        if arg == VERSION:
+            continue
+        if arg == "--wheel":
+            WHEEL = True
+            continue
+        if WHEEL:
+            WHEEL_ARGS.append(arg)
 
 
 def copy_tools_installer_files(setup_dir, pkg_dir):
@@ -288,7 +321,7 @@ def create_empty_log_file(log_file):
         command = "chmod 666 {file}".format(file=log_file)
         print("[make_installer.py] {command}"
               .format(command=command.replace(SETUP_DIR, "")))
-        subprocess.call(command, shell=True)
+        subprocess.check_call(command, shell=True)
 
 
 def short_src_path(path):

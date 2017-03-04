@@ -66,35 +66,13 @@ class custom_install(install):
         post_install_hook()
 
 
-class BinaryDistribution(Distribution):
-    def is_pure(self):
-        return False
-
-
 # Provide a custom install command
 print("[setup.py] Overload install command to enable execution of"
       " post install hook")
 cmdclass = {"install": custom_install}
 
-# Set custom platform tags on Mac when generating wheel package. See:
-# http://lepture.com/en/2014/python-on-a-hard-wheel
-if platform.system() == "Darwin" and "bdist_wheel" in sys.argv:
-    print("[setup.py] Overload bdist_wheel command to add custom"
-          " platform tags")
-    from wheel.bdist_wheel import bdist_wheel
-
-    class custom_bdist_wheel(bdist_wheel):
-        def get_tag(self):
-            tag = bdist_wheel.get_tag(self)
-            platform_tag = ("macosx_10_6_intel"
-                            ".macosx_10_9_intel.macosx_10_9_x86_64"
-                            ".macosx_10_10_intel.macosx_10_10_x86_64")
-            tag = (tag[0], tag[1], platform_tag)
-            return tag
-
-    cmdclass["bdist_wheel"] = custom_bdist_wheel
-elif platform.system() in ["Windows", "Linux"] and "bdist_wheel" in sys.argv:
-    # On Windows and Linux platform tag is always "any".
+# Fix platform tag in wheel package
+if "bdist_wheel" in sys.argv:
     print("[setup.py] Overload bdist_wheel command to fix platform tag")
     from wheel.bdist_wheel import bdist_wheel
 
@@ -102,20 +80,52 @@ elif platform.system() in ["Windows", "Linux"] and "bdist_wheel" in sys.argv:
         def get_tag(self):
             tag = bdist_wheel.get_tag(self)
             platform_tag = sysconfig.get_platform()
+            if platform.system() == "Linux":
+                assert "linux" in platform_tag
+                # "linux-x86_64" replace with "manylinux1_x86_64"
+                platform_tag = platform_tag.replace("linux", "manylinux1")
+                platform_tag = platform_tag.replace("-", "_")
+            elif platform.system() == "Darwin":
+                # For explanation of Mac platform tags, see:
+                # http://lepture.com/en/2014/python-on-a-hard-wheel
+                platform_tag = ("macosx_10_6_intel"
+                                ".macosx_10_9_intel.macosx_10_9_x86_64"
+                                ".macosx_10_10_intel.macosx_10_10_x86_64")
             tag = (tag[0], tag[1], platform_tag)
             return tag
 
+    # Overwrite bdist_wheel command
     cmdclass["bdist_wheel"] = custom_bdist_wheel
 
 
 def main():
     setup(
-        distclass=BinaryDistribution,
+        distclass=Distribution,
         cmdclass=cmdclass,
         name="cefpython3",  # No spaces here, so that it works with deb pkg
         version="{{VERSION}}",
         description="GUI toolkit for embedding a Chromium widget"
                     " in desktop applications",
+        long_description="CEF Python is an open source project founded"
+                         " by Czarek Tomczak in 2012 to provide python"
+                         " bindings for the Chromium Embedded Framework."
+                         " Examples of embedding CEF browser are available"
+                         " for many popular GUI toolkits including:"
+                         " wxPython, PyQt, PySide, Kivy, Panda3D, PyGTK,"
+                         " PyGObject, PyGame/PyOpenGL and PyWin32.\n\n"
+                         "There are many use cases for CEF. You can embed"
+                         " a web browser control based on Chromium with"
+                         " great HTML 5 support. You can use it to create"
+                         " a HTML 5 based GUI in an application, this can"
+                         " act as a replacement for standard GUI toolkits"
+                         " like wxWidgets, Qt or GTK. You can render web"
+                         " content off-screen in application that use custom"
+                         " drawing frameworks. You can use it for automated"
+                         " testing of existing applications. You can use it"
+                         " for web scraping or as a web crawler, or other"
+                         " kind of internet bots.\n\n"
+                         "Project website:\n"
+                         "https://github.com/cztomczak/cefpython",
         license="BSD 3-clause",
         author="Czarek Tomczak",
         author_email="czarek.tomczak@@gmail.com",
