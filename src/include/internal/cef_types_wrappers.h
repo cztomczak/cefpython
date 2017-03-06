@@ -555,6 +555,7 @@ struct CefSettingsTraits {
 
   static inline void clear(struct_type* s) {
     cef_string_clear(&s->browser_subprocess_path);
+    cef_string_clear(&s->framework_dir_path);
     cef_string_clear(&s->cache_path);
     cef_string_clear(&s->user_data_path);
     cef_string_clear(&s->user_agent);
@@ -574,7 +575,11 @@ struct CefSettingsTraits {
     cef_string_set(src->browser_subprocess_path.str,
         src->browser_subprocess_path.length,
         &target->browser_subprocess_path, copy);
+    cef_string_set(src->framework_dir_path.str,
+        src->framework_dir_path.length,
+        &target->framework_dir_path, copy);
     target->multi_threaded_message_loop = src->multi_threaded_message_loop;
+    target->external_message_pump = src->external_message_pump;
     target->windowless_rendering_enabled = src->windowless_rendering_enabled;
     target->command_line_args_disabled = src->command_line_args_disabled;
 
@@ -606,6 +611,8 @@ struct CefSettingsTraits {
     target->uncaught_exception_stack_size = src->uncaught_exception_stack_size;
     target->context_safety_implementation = src->context_safety_implementation;
     target->ignore_certificate_errors = src->ignore_certificate_errors;
+    target->enable_net_security_expiration =
+        src->enable_net_security_expiration;
     target->background_color = src->background_color;
 
     cef_string_set(src->accept_language_list.str,
@@ -638,6 +645,8 @@ struct CefRequestContextSettingsTraits {
     target->persist_session_cookies = src->persist_session_cookies;
     target->persist_user_preferences = src->persist_user_preferences;
     target->ignore_certificate_errors = src->ignore_certificate_errors;
+    target->enable_net_security_expiration =
+        src->enable_net_security_expiration;
     cef_string_set(src->accept_language_list.str,
         src->accept_language_list.length, &target->accept_language_list, copy);
   }
@@ -700,7 +709,6 @@ struct CefBrowserSettingsTraits {
     target->javascript_close_windows = src->javascript_close_windows;
     target->javascript_access_clipboard = src->javascript_access_clipboard;
     target->javascript_dom_paste = src->javascript_dom_paste;
-    target->caret_browsing = src->caret_browsing;
     target->plugins = src->plugins;
     target->universal_access_from_file_urls =
         src->universal_access_from_file_urls;
@@ -973,5 +981,33 @@ struct CefBoxLayoutSettingsTraits {
 // Class representing CefBoxLayout settings.
 ///
 typedef CefStructBase<CefBoxLayoutSettingsTraits> CefBoxLayoutSettings;
+
+struct CefCompositionUnderlineTraits {
+  typedef cef_composition_underline_t struct_type;
+
+  static inline void init(struct_type* s) {
+    s->range.from = 0;
+    s->range.to = 0;
+    s->color = 0;
+    s->background_color = 0;
+    s->thick = 0;
+  }
+
+  static inline void clear(struct_type* s) {
+  }
+
+  static inline void set(const struct_type* src, struct_type* target,
+                         bool copy) {
+    target->range = src->range;
+    target->color = src->color;
+    target->background_color = src->background_color;
+    target->thick = src->thick;
+  }
+};
+
+///
+// Class representing IME composition underline.
+///
+typedef CefStructBase<CefCompositionUnderlineTraits> CefCompositionUnderline;
 
 #endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WRAPPERS_H_

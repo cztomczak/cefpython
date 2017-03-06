@@ -15,7 +15,8 @@ cdef void SetCefWindowInfo(
     # some things like context menus and plugins may not display correctly.
     if windowInfo.windowType != "offscreen":
         if not windowInfo.parentWindowHandle:
-            raise Exception("WindowInfo: parentWindowHandle is not set")
+            # raise Exception("WindowInfo: parentWindowHandle is not set")
+            pass
 
     IF UNAME_SYSNAME == "Windows":
         cdef RECT windowRect
@@ -62,7 +63,7 @@ cdef void SetCefWindowInfo(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowName)
 
-    cdef cpp_bool transparent = windowInfo.transparentPainting
+    cdef cpp_bool transparent = bool(windowInfo.transparentPainting)
     if windowInfo.windowType == "offscreen":
         cefWindowInfo.SetAsWindowless(
                 <CefWindowHandle>windowInfo.parentWindowHandle,
@@ -80,15 +81,23 @@ cdef class WindowInfo:
 
     cpdef py_void SetAsChild(self, WindowHandle parentWindowHandle,
                              list windowRect=None):
-        if not WindowUtils.IsWindowHandle(parentWindowHandle):
+        # Allow parent window handle to be 0, in such case CEF will
+        # create top window automatically as in hello_world.py example.
+        IF UNAME_SYSNAME == "Windows":
+            # On Windows when parent window handle is 0 then SetAsPopup()
+            # must be called instead.
+            if parentWindowHandle == 0:
+                self.SetAsPopup(parentWindowHandle, "")
+                return
+        if parentWindowHandle != 0\
+                and not WindowUtils.IsWindowHandle(parentWindowHandle):
             raise Exception("Invalid parentWindowHandle: %s"\
                     % parentWindowHandle)
         self.windowType = "child"
         self.parentWindowHandle = parentWindowHandle
         IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
             if not windowRect:
-                raise Exception("WindowInfo.SetAsChild() failed: "
-                        "windowRect is required")
+                windowRect = [0,0,0,0]
         if windowRect:
             if type(windowRect) == list and len(windowRect) == 4:
                 self.windowRect = [windowRect[0], windowRect[1],
@@ -100,7 +109,10 @@ cdef class WindowInfo:
     IF UNAME_SYSNAME == "Windows":
         cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle,
                                  py_string windowName):
-            if not WindowUtils.IsWindowHandle(parentWindowHandle):
+            # Allow parent window handle to be 0, in such case CEF will
+            # create top window automatically as in hello_world.py example.
+            if parentWindowHandle != 0\
+                    and not WindowUtils.IsWindowHandle(parentWindowHandle):
                 raise Exception("Invalid parentWindowHandle: %s"\
                         % parentWindowHandle)
             self.parentWindowHandle = parentWindowHandle
@@ -109,7 +121,7 @@ cdef class WindowInfo:
 
     cpdef py_void SetAsOffscreen(self,
             WindowHandle parentWindowHandle):
-        # It is allowed to pass 0 as parentWindowHandle.
+        # It is allowed to pass 0 as parentWindowHandle in OSR mode
         if parentWindowHandle and \
                 not WindowUtils.IsWindowHandle(parentWindowHandle):
             raise Exception("Invalid parentWindowHandle: %s" \

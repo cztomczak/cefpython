@@ -4,10 +4,10 @@
 
 include "cefpython.pyx"
 
-class WindowUtils:
+class WindowUtils(object):
 
     @staticmethod
-    def OnSetFocus(int windowHandle, long msg, long wparam, long lparam):
+    def OnSetFocus(WindowHandle windowHandle, long msg, long wparam, long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
             return 0
@@ -15,7 +15,7 @@ class WindowUtils:
         return 0
 
     @staticmethod
-    def OnSize(int windowHandle, long msg, long wparam, long lparam):
+    def OnSize(WindowHandle windowHandle, long msg, long wparam, long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
             return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
@@ -35,7 +35,7 @@ class WindowUtils:
         return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
 
     @staticmethod
-    def OnEraseBackground(int windowHandle, long msg, long wparam,
+    def OnEraseBackground(WindowHandle windowHandle, long msg, long wparam,
                           long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
@@ -58,7 +58,8 @@ class WindowUtils:
 
         cdef WindowHandle windowHandle
         if pyBrowser.GetUserData("__outerWindowHandle"):
-            windowHandle = <int>pyBrowser.GetUserData("__outerWindowHandle")
+            windowHandle = <WindowHandle>\
+                    pyBrowser.GetUserData("__outerWindowHandle")
         else:
             windowHandle = pyBrowser.GetWindowHandle()
 
@@ -102,7 +103,7 @@ class WindowUtils:
         iconSmall = SendMessage(
                 <HWND>windowHandle, WM_GETICON, ICON_SMALL, 0)
 
-        cdef int parentWindowHandle
+        cdef WindowHandle parentWindowHandle
 
         if not iconBig and not iconSmall:
             parentWindowHandle = pyBrowser.GetOpenerWindowHandle()
@@ -134,11 +135,11 @@ class WindowUtils:
                             ICON_SMALL, parentIconSmall)
 
     @staticmethod
-    def GetParentHandle(int windowHandle):
-        return <int>GetParent(<HWND>windowHandle)
+    def GetParentHandle(WindowHandle windowHandle):
+        return <WindowHandle>GetParent(<HWND>windowHandle)
 
     @staticmethod
-    def IsWindowHandle(int windowHandle):
+    def IsWindowHandle(WindowHandle windowHandle):
         IF UNAME_SYSNAME == "Windows":
             return bool(IsWindow(<HWND>windowHandle))
         ELSE:

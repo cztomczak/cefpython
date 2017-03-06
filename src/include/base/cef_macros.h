@@ -36,9 +36,6 @@
 // When building CEF include the Chromium header directly.
 #include "base/macros.h"
 
-// Chromium uses movable types.
-#define MOVE_SCOPED_PTR(var) std::move(var)
-
 #else  // !USING_CHROMIUM_INCLUDES
 // The following is substantially similar to the Chromium implementation.
 // If the Chromium implementation diverges the below implementation should be
@@ -46,9 +43,6 @@
 
 #include <stddef.h>  // For size_t.
 #include "include/base/cef_build.h"  // For COMPILER_MSVC
-
-// CEF does not use movable types.
-#define MOVE_SCOPED_PTR(var) var.Pass()
 
 #if !defined(arraysize)
 

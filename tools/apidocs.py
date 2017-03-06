@@ -26,9 +26,10 @@ def main():
 def api_index():
     """Generate API-index.md file with all modules/classes/funcs/methods."""
     files = glob.glob(os.path.join(API_DIR, "*.md"))
-    contents = ("[API categories](API-categories.md) | " +
-                "[API index](API-index.md)\n\n" +
+    contents = ("[API categories](API-categories.md#api-categories) | " +
+                "[API index](API-index.md#api-index)\n\n" +
                 "# API index\n\n")
+    files = sorted(files, key=lambda s: s.lower())
     for file_ in files:
         if "API-" in file_:
             continue
@@ -44,7 +45,7 @@ def api_index():
             title = title.strip()
             if hlevel == "#":
                 indent = ""
-                link = os.path.basename(file_)
+                link = os.path.basename(file_) + "#" + headinghash(title)
             elif hlevel == "###":
                 indent = "  "
                 link = os.path.basename(file_) + "#" + headinghash(title)

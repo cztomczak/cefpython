@@ -1,84 +1,65 @@
 # An example of embedding CEF browser in the Kivy framework.
 # The browser is embedded using off-screen rendering mode.
 
-# Tested using Kivy 1.7.2 stable on Ubuntu 12.04 64-bit.
+# Tested using Kivy 1.7.2 stable, only on Linux.
 
 # In this example kivy-lang is used to declare the layout which
 # contains two buttons (back, forward) and the browser view.
 
-# The official CEF Python binaries come with tcmalloc hook
-# disabled. But if you've built custom binaries and kept tcmalloc
-# hook enabled, then be aware that in such case it is required
-# for the cefpython module to be the very first import in
-# python scripts. See Issue 73 in the CEF Python Issue Tracker
-# for more details.
-
-import ctypes, os, sys
-cur_dir = os.path.dirname(os.path.abspath(__file__))
-libcef_so = os.path.join(cur_dir, 'libcef.so')
-if os.path.exists(libcef_so):
-    # Import local module
-    LD_LIBRARY_PATH = os.environ.get('LD_LIBRARY_PATH', None)
-    if not LD_LIBRARY_PATH:
-        LD_LIBRARY_PATH = cur_dir
-    else:
-        LD_LIBRARY_PATH += os.path.sep + cur_dir
-    os.putenv('LD_LIBRARY_PATH', LD_LIBRARY_PATH)
-    ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
-    if 0x02070000 <= sys.hexversion < 0x03000000:
-        import cefpython_py27 as cefpython
-    else:
-        raise Exception("Unsupported python version: %s" % sys.version)
-else:
-    # Import from package
-    from cefpython3 import cefpython
+from cefpython3 import cefpython as cef
 
 import pygtk
-pygtk.require('2.0')
 import gtk
+import sys
+import os
 
-import kivy
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
-from kivy.graphics import Color, Rectangle, GraphicException
+from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
-from kivy.core.window import Window
-from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.base import EventLoop
 
 # Global variables
 g_switches = None
 
+# PyGTK required
+pygtk.require('2.0')
+
 
 class BrowserLayout(BoxLayout):
-    browser = None
 
     def __init__(self, **kwargs):
         super(BrowserLayout, self).__init__(**kwargs)
         self.orientation = "vertical"
 
-        browser = CefBrowser(id="browser")
+        self.browser_widget = CefBrowser(id="browser")
 
         layout = BoxLayout()
         layout.size_hint_y = None
         layout.height = 40
-        layout.add_widget(Button(text="Back", on_press=browser.go_back))
-        layout.add_widget(Button(text="Forward", on_press=browser.go_forward))
-        layout.add_widget(Button(text="Reload", on_press=browser.reload))
-        layout.add_widget(Button(text="Print", on_press=browser.print_page))
-        layout.add_widget(Button(text="DevTools", on_press=browser.devtools))
+        layout.add_widget(Button(text="Back",
+                                 on_press=self.browser_widget.go_back))
+        layout.add_widget(Button(text="Forward",
+                                 on_press=self.browser_widget.go_forward))
+        layout.add_widget(Button(text="Reload",
+                                 on_press=self.browser_widget.reload))
+        layout.add_widget(Button(text="Print",
+                                 on_press=self.browser_widget.print_page))
+        layout.add_widget(Button(text="DevTools",
+                                 on_press=self.browser_widget.devtools))
 
         self.add_widget(layout)
-        self.add_widget(browser)
-
+        self.add_widget(self.browser_widget)
 
 
 class CefBrowser(Widget):
+    """Represent a browser widget for kivy, which can be used
+    like a normal widget."""
 
     # Keyboard mode: "global" or "local".
     # 1. Global mode forwards keys to CEF all the time.
@@ -86,8 +67,6 @@ class CefBrowser(Widget):
     #    control is focused (input type=text|password or textarea).
     keyboard_mode = "global"
 
-    '''Represent a browser widget for kivy, which can be used like a normal widget.
-    '''
     def __init__(self, start_url='https://www.google.com/', **kwargs):
         super(CefBrowser, self).__init__(**kwargs)
 
@@ -96,23 +75,26 @@ class CefBrowser(Widget):
                 start_url = arg
         self.start_url = start_url
 
-        #Workaround for flexible size:
-        #start browser when the height has changed (done by layout)
-        #This has to be done like this because I wasn't able to change
-        #the texture size
-        #until runtime without core-dump.
-        self.bind(size = self.size_changed)
+        # Workaround for flexible size:
+        # start browser when the height has changed (done by layout)
+        # This has to be done like this because I wasn't able to change
+        # the texture size
+        # until runtime without core-dump.
+        self.bind(size=self.size_changed)
 
+        self.browser = None
 
     starting = True
-    def size_changed(self, *kwargs):
-        '''When the height of the cefbrowser widget got changed, create the browser
-        '''
+
+    def size_changed(self, *_):
+        """When the height of the cefbrowser widget got changed,
+        create the browser."""
         if self.starting:
             if self.height != 100:
                 self.start_cef()
                 self.starting = False
         else:
+            # noinspection PyArgumentList
             self.texture = Texture.create(
                 size=self.size, colorfmt='rgba', bufferfmt='ubyte')
             self.texture.flip_vertical()
@@ -124,14 +106,13 @@ class CefBrowser(Widget):
                 self.rect.size = self.size
             self.browser.WasResized()
 
-
     count = 0
-    def _message_loop_work(self, *kwargs):
-        '''Get called every frame.
-        '''
+
+    def _message_loop_work(self, *_):
+        """Get called every frame."""
         self.count += 1
         # print(self.count)
-        cefpython.MessageLoopWork()
+        cef.MessageLoopWork()
         self.on_mouse_move_emulate()
 
         # From Kivy docs:
@@ -148,18 +129,16 @@ class CefBrowser(Widget):
         else:
             Clock.schedule_once(self._message_loop_work, -1)
 
-
-    def _update_rect(self, *kwargs):
-        '''Get called whenever the texture got updated.
+    def update_rect(self, *_):
+        """Get called whenever the texture got updated.
         => we need to reset the texture for the rectangle
-        '''
+        """
         self.rect.texture = self.texture
 
-
     def start_cef(self):
-        '''Starts CEF.
-        '''
+        """Starts CEF."""
         # create texture & add it to canvas
+        # noinspection PyArgumentList
         self.texture = Texture.create(
                 size=self.size, colorfmt='rgba', bufferfmt='ubyte')
         self.texture.flip_vertical()
@@ -169,14 +148,14 @@ class CefBrowser(Widget):
 
         # Configure CEF
         settings = {
-            "debug": True, # cefpython debug messages in console and in log_file
-            "log_severity": cefpython.LOGSEVERITY_INFO,
+            "debug": True,  # debug messages in console and in log_file
+            "log_severity": cef.LOGSEVERITY_INFO,
             "log_file": "debug.log",
             # This directories must be set on Linux
-            "locales_dir_path": cefpython.GetModuleDirectory()+"/locales",
-            "resources_dir_path": cefpython.GetModuleDirectory(),
+            "locales_dir_path": cef.GetModuleDirectory()+"/locales",
+            "resources_dir_path": cef.GetModuleDirectory(),
             "browser_subprocess_path": "%s/%s" % (
-                cefpython.GetModuleDirectory(), "subprocess"),
+                cef.GetModuleDirectory(), "subprocess"),
             "windowless_rendering_enabled": True,
             "context_menu": {
                 # Disable context menu, popup widgets not supported
@@ -197,11 +176,13 @@ class CefBrowser(Widget):
         }
 
         # Initialize CEF
-        cefpython.WindowUtils.InstallX11ErrorHandlers()
+
+        # noinspection PyArgumentList
+        cef.WindowUtils.InstallX11ErrorHandlers()
 
         global g_switches
         g_switches = switches
-        cefpython.Initialize(settings, switches)
+        cef.Initialize(settings, switches)
 
         # Start idle - CEF message loop work.
         Clock.schedule_once(self._message_loop_work, 0)
@@ -213,7 +194,7 @@ class CefBrowser(Widget):
         gtkwin.realize()
 
         # WindowInfo offscreen flag
-        windowInfo = cefpython.WindowInfo()
+        windowInfo = cef.WindowInfo()
         windowInfo.SetAsOffscreen(gtkwin.window.xid)
 
         # Create Broswer and naviagte to empty page <= OnPaint won't get
@@ -231,7 +212,9 @@ class CefBrowser(Widget):
         # Do not use "about:blank" as navigateUrl - this will cause
         # the GoBack() and GoForward() methods to not work.
         #
-        self.browser = cefpython.CreateBrowserSync(windowInfo, browserSettings,
+        self.browser = cef.CreateBrowserSync(
+                windowInfo,
+                browserSettings,
                 navigateUrl=self.start_url)
 
         # Set focus
@@ -253,22 +236,20 @@ class CefBrowser(Widget):
 
         # Clock.schedule_once(self.change_url, 5)
 
-
     _client_handler = None
     _js_bindings = None
 
     def set_js_bindings(self):
         if not self._js_bindings:
-            self._js_bindings = cefpython.JavascriptBindings(
+            self._js_bindings = cef.JavascriptBindings(
                 bindToFrames=True, bindToPopups=True)
             self._js_bindings.SetFunction("__kivy__request_keyboard",
-                    self.request_keyboard)
+                                          self.request_keyboard)
             self._js_bindings.SetFunction("__kivy__release_keyboard",
-                    self.release_keyboard)
+                                          self.release_keyboard)
         self.browser.SetJavascriptBindings(self._js_bindings)
 
-
-    def change_url(self, *kwargs):
+    def change_url(self, *_):
         # Doing a javascript redirect instead of Navigate()
         # solves the js bindings error. The url here need to
         # be preceded with "http://". Calling StopLoad()
@@ -307,7 +288,6 @@ class CefBrowser(Widget):
         # (some earlier bug), but it shouldn't hurt to call it.
         self.browser.SendFocusEvent(True)
 
-
     def release_keyboard(self):
         # When using local keyboard mode, do all the request
         # and releases of the keyboard through js bindings,
@@ -334,14 +314,15 @@ class CefBrowser(Widget):
     is_alt1 = False
     is_alt2 = False
 
-    def on_key_down(self, keyboard, key, text, modifiers):
+    def on_key_down(self, _, key, text, modifiers):
         # NOTE: Right alt modifier is not sent by Kivy through modifiers param.
-        print("---- on_key_down")
-        print("-- key="+str(key))
+        # print("---- on_key_down")
+        # print("-- key="+str(key))
         # print(text) - utf-8 char
-        print("-- modifiers="+str(modifiers))
+        # print("-- modifiers="+str(modifiers))
         if text:
-            print("-- ord(text)="+str(ord(text)))
+            # print("-- ord(text)="+str(ord(text)))
+            pass
 
         # CEF key event type:
         #   KEYEVENT_RAWKEYDOWN = 0
@@ -364,15 +345,15 @@ class CefBrowser(Widget):
         # When pressing ctrl also set modifiers for ctrl
         if key[0] in (306, 305):
             modifiers.append('ctrl')
-        cef_modifiers = cefpython.EVENTFLAG_NONE
+        cef_modifiers = cef.EVENTFLAG_NONE
         if "shift" in modifiers:
-            cef_modifiers |= cefpython.EVENTFLAG_SHIFT_DOWN
+            cef_modifiers |= cef.EVENTFLAG_SHIFT_DOWN
         if "ctrl" in modifiers:
-            cef_modifiers |= cefpython.EVENTFLAG_CONTROL_DOWN
+            cef_modifiers |= cef.EVENTFLAG_CONTROL_DOWN
         if "alt" in modifiers:
-            cef_modifiers |= cefpython.EVENTFLAG_ALT_DOWN
+            cef_modifiers |= cef.EVENTFLAG_ALT_DOWN
         if "capslock" in modifiers:
-            cef_modifiers |= cefpython.EVENTFLAG_CAPS_LOCK_ON
+            cef_modifiers |= cef.EVENTFLAG_CAPS_LOCK_ON
 
         keycode = self.get_windows_key_code(key[0])
         charcode = key[0]
@@ -381,25 +362,25 @@ class CefBrowser(Widget):
 
         # Send key event to cef: RAWKEYDOWN
         keyEvent = {
-                "type": cefpython.KEYEVENT_RAWKEYDOWN,
+                "type": cef.KEYEVENT_RAWKEYDOWN,
                 "windows_key_code": keycode,
                 "character": charcode,
                 "unmodified_character": charcode,
                 "modifiers": cef_modifiers,
         }
-        print("- SendKeyEvent: %s" % keyEvent)
+        # print("- SendKeyEvent: %s" % keyEvent)
         self.browser.SendKeyEvent(keyEvent)
 
         # Send key event to cef: CHAR
         if text:
             keyEvent = {
-                    "type": cefpython.KEYEVENT_CHAR,
+                    "type": cef.KEYEVENT_CHAR,
                     "windows_key_code": keycode,
                     "character": charcode,
                     "unmodified_character": charcode,
                     "modifiers": cef_modifiers
             }
-            print("- SendKeyEvent: %s" % keyEvent)
+            # print("- SendKeyEvent: %s" % keyEvent)
             self.browser.SendKeyEvent(keyEvent)
 
         if key[0] == 304:
@@ -415,10 +396,9 @@ class CefBrowser(Widget):
         elif key[0] == 313:
             self.is_alt2 = True
 
-
-    def on_key_up(self, keyboard, key):
-        print("---- on_key_up")
-        print("-- key="+str(key))
+    def on_key_up(self, _, key):
+        # print("---- on_key_up")
+        # print("-- key="+str(key))
 
         # Kivy code -1 is a special key eg. Change keyboard layout.
         # Sending it to CEF would crash it.
@@ -426,26 +406,26 @@ class CefBrowser(Widget):
             return
 
         # CEF modifiers
-        cef_modifiers = cefpython.EVENTFLAG_NONE
+        cef_modifiers = cef.EVENTFLAG_NONE
         if self.is_shift1 or self.is_shift2:
-            cef_modifiers |= cefpython.EVENTFLAG_SHIFT_DOWN
+            cef_modifiers |= cef.EVENTFLAG_SHIFT_DOWN
         if self.is_ctrl1 or self.is_ctrl2:
-            cef_modifiers |= cefpython.EVENTFLAG_CONTROL_DOWN
+            cef_modifiers |= cef.EVENTFLAG_CONTROL_DOWN
         if self.is_alt1:
-            cef_modifiers |= cefpython.EVENTFLAG_ALT_DOWN
+            cef_modifiers |= cef.EVENTFLAG_ALT_DOWN
 
         keycode = self.get_windows_key_code(key[0])
         charcode = key[0]
 
         # Send key event to cef: KEYUP
         keyEvent = {
-                "type": cefpython.KEYEVENT_KEYUP,
+                "type": cef.KEYEVENT_KEYUP,
                 "windows_key_code": keycode,
                 "character": charcode,
                 "unmodified_character": charcode,
                 "modifiers": cef_modifiers
         }
-        print("- SendKeyEvent: %s" % keyEvent)
+        # print("- SendKeyEvent: %s" % keyEvent)
         self.browser.SendKeyEvent(keyEvent)
 
         if key[0] == 304:
@@ -461,9 +441,7 @@ class CefBrowser(Widget):
         elif key[0] == 313:
             self.is_alt2 = False
 
-
     def get_windows_key_code(self, kivycode):
-
         cefcode = kivycode
 
         # NOTES:
@@ -482,81 +460,74 @@ class CefBrowser(Widget):
 
         other_keys_map = {
             # Escape
-            "27":27,
+            "27": 27,
             # F1-F12
-            "282":112, "283":113, "284":114, "285":115,
-            "286":116, "287":117, "288":118, "289":119,
-            "290":120, "291":121, "292":122, "293":123,
+            "282": 112, "283": 113, "284": 114, "285": 115,
+            "286": 116, "287": 117, "288": 118, "289": 119,
+            "290": 120, "291": 121, "292": 122, "293": 123,
             # Tab
-            "9":9,
+            "9": 9,
             # Left Shift, Right Shift
-            "304":16, "303":16,
+            "304": 16, "303": 16,
             # Left Ctrl, Right Ctrl
-            "306":17, "305": 17,
+            "306": 17, "305": 17,
             # Left Alt, Right Alt
             # TODO: left alt is_system_key=True in CEF but only when RAWKEYDOWN
-            "308":18, "313":225,
+            "308": 18, "313": 225,
             # Backspace
-            "8":8,
+            "8": 8,
             # Enter
-            "13":13,
+            "13": 13,
             # PrScr, ScrLck, Pause
-            "316":42, "302":145, "19":19,
+            "316": 42, "302": 145, "19": 19,
             # Insert, Delete,
             # Home, End,
             # Pgup, Pgdn
-            "277":45, "127":46,
-            "278":36, "279":35,
-            "280":33, "281":34,
+            "277": 45, "127": 46,
+            "278": 36, "279": 35,
+            "280": 33, "281": 34,
             # Arrows (left, up, right, down)
-            "276":37, "273":38, "275":39, "274":40,
+            "276": 37, "273": 38, "275": 39, "274": 40,
             # tilde
-            "96":192,
+            "96": 192,
             # minus, plus
-            "45":189, "61":187,
+            "45": 189, "61": 187,
             # square brackets / curly brackets, backslash
-            "91":219, "93":221, "92":220,
+            "91": 219, "93": 221, "92": 220,
             # windows key
-            "311":91,
+            "311": 91,
             # colon / semicolon
             "59": 186,
             # single quote / double quote
-            "39":222,
+            "39": 222,
             # comma, dot, slash
-            "44":188, "46":190, "47":91,
+            "44": 188, "46": 190, "47": 91,
             # context menu key is 93, but disable as it crashes app after
             # context menu is shown.
-            "319":0,
+            "319": 0,
         }
         if str(kivycode) in other_keys_map:
             cefcode = other_keys_map[str(kivycode)]
 
         return cefcode
 
-
-    def go_forward(self, *kwargs):
-        '''Going to forward in browser history
-        '''
+    def go_forward(self, *_):
+        """Going to forward in browser history."""
         print "go forward"
         self.browser.GoForward()
 
-
-    def go_back(self, *kwargs):
-        '''Going back in browser history
-        '''
+    def go_back(self, *_):
+        """Going back in browser history."""
         print "go back"
         self.browser.GoBack()
 
-
-    def reload(self, *kwargs):
+    def reload(self, *_):
         self.browser.Reload()
 
-
-    def print_page(self, *kwargs):
+    def print_page(self, *_):
         self.browser.Print()
 
-
-    def devtools(self, *kwargs):
+    def devtools(self, *_):
         # ShowDevTools doesn't work with the 'enable-begin-frame-scheduling'
         # switch. This might be fixed by implementing native popup widgets,
         # see Issue #69. The solution for now is to remove that switch,
@@ -564,7 +535,7 @@ class CefBrowser(Widget):
         if "enable-begin-frame-scheduling" in g_switches:
             text = ("To enable DevTools you need to remove the\n"
                     "'enable-begin-frame-scheduling' switch that\n"
-                    "is passed to cefpython.Initialize(). See also\n"
+                    "is passed to cef.Initialize(). See also\n"
                     "comment in CefBrowser.devtools().")
             popup = Popup(title='DevTools INFO', content=Label(text=text),
                           size_hint=(None, None), size=(400, 400))
@@ -573,6 +544,11 @@ class CefBrowser(Widget):
         else:
             self.browser.ShowDevTools()
 
+    is_mouse_down = False
+    is_drag = False
+    is_drag_leave = False  # Mouse leaves web view
+    drag_data = None
+    current_drag_operation = cef.DRAG_OPERATION_NONE
 
     def on_touch_down(self, touch, *kwargs):
         # Mouse scrolling
@@ -591,18 +567,18 @@ class CefBrowser(Widget):
             # Context menu is currently disabled see
             # settings["context_menu"] in cef_start().
             self.browser.SendMouseClickEvent(
-                touch.x, y, cefpython.MOUSEBUTTON_RIGHT,
+                touch.x, y, cef.MOUSEBUTTON_RIGHT,
                 mouseUp=False, clickCount=1
             )
             self.browser.SendMouseClickEvent(
-                touch.x, y, cefpython.MOUSEBUTTON_RIGHT,
+                touch.x, y, cef.MOUSEBUTTON_RIGHT,
                 mouseUp=True, clickCount=1
             )
         else:
             self.browser.SendMouseClickEvent(touch.x, y,
-                                             cefpython.MOUSEBUTTON_LEFT,
+                                             cef.MOUSEBUTTON_LEFT,
                                              mouseUp=False, clickCount=1)
-
+            self.is_mouse_down = True
 
     def on_touch_up(self, touch, *kwargs):
         # Mouse scrolling
@@ -618,12 +594,44 @@ class CefBrowser(Widget):
             return
 
         y = self.height-touch.pos[1]
-        self.browser.SendMouseClickEvent(touch.x, y, cefpython.MOUSEBUTTON_LEFT,
+        self.browser.SendMouseClickEvent(touch.x, y, cef.MOUSEBUTTON_LEFT,
                                          mouseUp=True, clickCount=1)
+        self.is_mouse_down = False
+
+        if self.is_drag:
+            # print("on_touch_up=%s/%s" % (touch.x,y))
+            if self.is_drag_leave or not self.is_inside_web_view(touch.x, y):
+                # See comment in is_inside_web_view() - x/y at borders
+                # should be treated as outside of web view.
+                x = touch.x
+                if x == 0:
+                    x = -1
+                if x == self.width-1:
+                    x = self.width
+                if y == 0:
+                    y = -1
+                if y == self.height-1:
+                    y = self.height
+                print("~~ DragSourceEndedAt")
+                print("~~ current_drag_operation=%s"
+                      % self.current_drag_operation)
+                self.browser.DragSourceEndedAt(x, y,
+                                               self.current_drag_operation)
+                self.drag_ended()
+            else:
+                print("~~ DragTargetDrop")
+                print("~~ DragSourceEndedAt")
+                print("~~ current_drag_operation=%s"
+                      % self.current_drag_operation)
+                self.browser.DragTargetDrop(touch.x, y)
+                self.browser.DragSourceEndedAt(touch.x, y,
+                                               self.current_drag_operation)
+                self.drag_ended()
+
         touch.ungrab(self)
 
-
     last_mouse_pos = None
+
     def on_mouse_move_emulate(self):
         if not hasattr(self.get_root_window(), "mouse_pos"):
             # Not all Kivy window providers have the "mouse_pos" attribute.
@@ -636,27 +644,100 @@ class CefBrowser(Widget):
         # Fix mouse pos: realy = 0, kivy y = 600 / realy = 600, kivy y = 0
         x = mouse_pos[0]
         y = int(mouse_pos[1]-self.height)
-        if x >= 0 and y <= 0:
+        if x >= 0 >= y:
             y = abs(y)
-            self.browser.SendMouseMoveEvent(x, y, mouseLeave=False)
-
+            if not self.is_mouse_down and not self.is_drag:
+                # When mouse is down on_touch_move will be called. Calling
+                # mouse move event here caused issues with drag&drop.
+                self.browser.SendMouseMoveEvent(x, y, mouseLeave=False)
 
     def on_touch_move(self, touch, *kwargs):
         if touch.grab_current is not self:
             return
 
         y = self.height-touch.pos[1]
-        modifiers = cefpython.EVENTFLAG_LEFT_MOUSE_BUTTON
+
+        modifiers = cef.EVENTFLAG_LEFT_MOUSE_BUTTON
         self.browser.SendMouseMoveEvent(touch.x, y, mouseLeave=False,
                                         modifiers=modifiers)
+        if self.is_drag:
+            # print("on_touch_move=%s/%s" % (touch.x, y))
+            if self.is_inside_web_view(touch.x, y):
+                if self.is_drag_leave:
+                    print("~~ DragTargetDragEnter")
+                    self.browser.DragTargetDragEnter(
+                            self.drag_data, touch.x, y,
+                            cef.DRAG_OPERATION_EVERY)
+                    self.is_drag_leave = False
+                print("~~ DragTargetDragOver")
+                self.browser.DragTargetDragOver(
+                        touch.x, y, cef.DRAG_OPERATION_EVERY)
+                self.update_drag_icon(touch.x, y)
+            else:
+                if not self.is_drag_leave:
+                    self.is_drag_leave = True
+                    print("~~ DragTargetDragLeave")
+                    self.browser.DragTargetDragLeave()
 
+    def is_inside_web_view(self, x, y):
+        # When mouse is out of app window Kivy still generates move events
+        # at the borders with x=0, x=width-1, y=0, y=height-1.
+        if (0 < x < self.width-1) and (0 < y < self.height-1):
+            return True
+        return False
+
+    def drag_ended(self):
+        # Either success or cancelled.
+        self.is_drag = False
+        self.is_drag_leave = False
+        del self.drag_data
+        self.current_drag_operation = cef.DRAG_OPERATION_NONE
+        self.update_drag_icon(None, None)
+        print("~~ DragSourceSystemDragEnded")
+        self.browser.DragSourceSystemDragEnded()
+
+    drag_icon = None
+
+    def update_drag_icon(self, x, y):
+        if self.is_drag:
+            if self.drag_icon:
+                self.drag_icon.pos = self.flip_pos_vertical(x, y)
+            else:
+                image = self.drag_data.GetImage()
+                width = image.GetWidth()
+                height = image.GetHeight()
+                abuffer = image.GetAsBitmap(
+                        1.0,
+                        cef.CEF_COLOR_TYPE_BGRA_8888,
+                        cef.CEF_ALPHA_TYPE_PREMULTIPLIED)
+                # noinspection PyArgumentList
+                texture = Texture.create(size=(width, height))
+                texture.blit_buffer(abuffer, colorfmt='bgra', bufferfmt='ubyte')
+                texture.flip_vertical()
+                self.drag_icon = Rectangle(texture=texture,
+                                           pos=self.flip_pos_vertical(x, y),
+                                           size=(width, height))
+                self.canvas.add(self.drag_icon)
+        elif self.drag_icon:
+            self.canvas.remove(self.drag_icon)
+            del self.drag_icon
+
+    def flip_pos_vertical(self, x, y):
+        half = self.height / 2
+        if y > half:
+            y = half - (y-half)
+        elif y < half:
+            y = half + (half-y)
+        # Additionally position drag icon to the center of mouse cursor
+        y -= 20
+        x -= 20
+        return x, y
 
 
 class ClientHandler:
 
     def __init__(self, browserWidget):
         self.browserWidget = browserWidget
-
 
     def _fix_select_boxes(self, frame):
         # This is just a temporary fix, until proper Popup widgets
@@ -686,8 +767,8 @@ class ClientHandler:
                 os.path.dirname(os.path.abspath(__file__)),
                 "kivy-select-boxes")
         if not os.path.exists(resources_dir):
-            print("The kivy-select-boxes directory does not exist, " \
-                    "select boxes fix won't be applied.")
+            print("The kivy-select-boxes directory does not exist, "
+                  "select boxes fix won't be applied.")
             return
         js_file = os.path.join(resources_dir, "kivy-selectBox.js")
         js_content = ""
@@ -707,12 +788,12 @@ class ClientHandler:
             __kivy_temp_style.appendChild(document.createTextNode("%(css_content)s"));
             __kivy_temp_head.appendChild(__kivy_temp_style);
         """ % locals()
-        frame.ExecuteJavascript(jsCode,
-                "kivy_.py > ClientHandler > OnLoadStart > _fix_select_boxes()")
+        frame.ExecuteJavascript(
+            jsCode,
+            "kivy_.py > ClientHandler > OnLoadStart > _fix_select_boxes()")
 
-
-    def OnLoadStart(self, browser, frame):
-        self._fix_select_boxes(frame);
+    def OnLoadStart(self, browser, frame, **_):
+        self._fix_select_boxes(frame)
         browserWidget = browser.GetUserData("browserWidget")
         if browserWidget and browserWidget.keyboard_mode == "local":
             print("OnLoadStart(): injecting focus listeners for text controls")
@@ -751,11 +832,11 @@ class ClientHandler:
                 }
                 setInterval(__kivy__keyboard_interval, 100);
             """
-            frame.ExecuteJavascript(jsCode,
+            frame.ExecuteJavascript(
+                    jsCode,
                     "kivy_.py > ClientHandler > OnLoadStart")
 
-
-    def OnLoadEnd(self, browser, frame, httpStatusCode):
+    def OnLoadEnd(self, browser, **_):
         # Browser lost its focus after the LoadURL() and the
         # OnBrowserDestroyed() callback bug. When keyboard mode
         # is local the fix is in the request_keyboard() method.
@@ -764,59 +845,110 @@ class ClientHandler:
         if browserWidget and browserWidget.keyboard_mode == "global":
             browser.SendFocusEvent(True)
 
+    def OnLoadingStateChange(self, is_loading, **_):
+        print("OnLoadingStateChange(): isLoading = %s" % is_loading)
+        # browserWidget = browser.GetUserData("browserWidget")
 
-    def OnLoadingStateChange(self, browser, isLoading, canGoBack,
-            canGoForward):
-        print("OnLoadingStateChange(): isLoading = %s" % isLoading)
-        browserWidget = browser.GetUserData("browserWidget")
-
-
-    def OnPaint(self, browser, paintElementType, dirtyRects, buffer, width,
-            height):
+    def OnPaint(self, element_type, paint_buffer, **_):
         # print "OnPaint()"
-        if paintElementType != cefpython.PET_VIEW:
+        if element_type != cef.PET_VIEW:
             print "Popups aren't implemented yet"
             return
 
-        #update buffer
-        buffer = buffer.GetString(mode="bgra", origin="top-left")
+        # update buffer
+        paint_buffer = paint_buffer.GetString(mode="bgra", origin="top-left")
 
-        #update texture of canvas rectangle
-        self.browserWidget.texture.blit_buffer(buffer, colorfmt='bgra',
+        # update texture of canvas rectangle
+        self.browserWidget.texture.blit_buffer(
+                paint_buffer,
+                colorfmt='bgra',
                 bufferfmt='ubyte')
-        self.browserWidget._update_rect()
+
+        self.browserWidget.update_rect()
 
         return True
 
-
-    def GetViewRect(self, browser, rect):
+    def GetViewRect(self, rect_out, **_):
         width, height = self.browserWidget.texture.size
-        rect.append(0)
-        rect.append(0)
-        rect.append(width)
-        rect.append(height)
-        # print("GetViewRect(): %s x %s" % (width, height))
+        rect_out.append(0)
+        rect_out.append(0)
+        rect_out.append(width)
+        rect_out.append(height)
+        return True
+
+    """
+
+    def GetRootScreenRect(self, rect_out, **_):
+        width, height = self.browserWidget.texture.size
+        rect_out.append(0)
+        rect_out.append(0)
+        rect_out.append(width)
+        rect_out.append(height)
         return True
 
 
-    def OnJavascriptDialog(self, browser, originUrl, dialogType,
-                   messageText, defaultPromptText, callback,
-                   suppressMessage):
-        suppressMessage[0] = True
+    def GetScreenRect(self, rect_out, **_):
+        width, height = self.browserWidget.texture.size
+        rect_out.append(0)
+        rect_out.append(0)
+        rect_out.append(width)
+        rect_out.append(height)
+        return True
+
+
+    def GetScreenPoint(self, screen_coordinates_out, **kwargs):
+        screen_coordinates_out.append(view_x)
+        screen_coordinates_out.append(view_y)
+        return True
+
+    """
+
+    def OnJavascriptDialog(self, suppress_message_out, **_):
+        suppress_message_out[0] = True
         return False
 
-
-    def OnBeforeUnloadJavascriptDialog(self, browser, messageText, isReload,
-            callback):
+    def OnBeforeUnloadJavascriptDialog(self, callback, **_):
         callback.Continue(allow=True, userInput="")
         return True
 
+    def StartDragging(self, drag_data, x, y, **_):
+        print("~~ StartDragging")
+        # Succession of d&d calls:
+        #   DragTargetDragEnter
+        #   DragTargetDragOver - in touch move event
+        #   DragTargetDragLeave - optional
+        #   DragSourceSystemDragEnded - optional, to cancel dragging
+        #   DragTargetDrop - on mouse up
+        #   DragSourceEndedAt - on mouse up
+        #   DragSourceSystemDragEnded - on mouse up
+        print("~~ DragTargetDragEnter")
+        self.browserWidget.browser.DragTargetDragEnter(
+                drag_data, x, y, cef.DRAG_OPERATION_EVERY)
+        self.browserWidget.is_drag = True
+        self.browserWidget.is_drag_leave = False
+        self.browserWidget.drag_data = drag_data
+        self.browserWidget.current_drag_operation = \
+            cef.DRAG_OPERATION_NONE
+        self.browserWidget.update_drag_icon(x, y)
+        return True
+
+    def UpdateDragCursor(self, **kwargs):
+        # print("~~ UpdateDragCursor(): operation=%s" % operation)
+        self.browserWidget.current_drag_operation = kwargs["operation"]
+
+
+class CefBrowserApp(App):
+
+    def build(self):
+        self.layout = BrowserLayout()
+        return self.layout
+
+    def on_stop(self):
+        # This is required for a clean shutdown of CEF.
+        self.layout.browser_widget.browser.CloseBrowser(True)
+        del self.layout.browser_widget.browser
 
 
 if __name__ == '__main__':
-
-    class CefBrowserApp(App):
-        def build(self):
-            return BrowserLayout()
     CefBrowserApp().run()
-    cefpython.Shutdown()
+    cef.Shutdown()

@@ -1,2 +1,4 @@
-cython == 0.19.2
+Cython == 0.25.2
 docopt >= 0.6.2
+setuptools
+wheel

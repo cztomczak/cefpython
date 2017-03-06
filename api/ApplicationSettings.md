@@ -15,6 +15,8 @@ Table of contents:
   * [command_line_args_disabled](#command_line_args_disabled)
   * [context_menu](#context_menu)
   * [downloads_enabled](#downloads_enabled)
+  * [external_message_pump](#external_message_pump)
+  * [framework_dir_path](#framework_dir_path)
   * [ignore_certificate_errors](#ignore_certificate_errors)
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
@@ -23,6 +25,7 @@ Table of contents:
   * [log_file](#log_file)
   * [log_severity](#log_severity)
   * [multi_threaded_message_loop](#multi_threaded_message_loop)
+  * [net_security_expiration_enabled](#net_security_expiration_enabled)
   * [pack_loading_disabled](#pack_loading_disabled)
   * [persist_session_cookies](#persist_session_cookies)
   * [persist_user_preferences](#persist_user_preferences)
@@ -45,6 +48,9 @@ These settings can be passed when calling [cefpython](cefpython.md).Initialize()
 The default values of options that are suggested in descriptions may not always be correct, it may be best to set them explicitily.
 
 There are hundreds of options that can be set through CEF/Chromium command line switches. These switches can be set programmatically by passing a dictionary with switches as second argument to [cefpython](cefpython.md).Initialize(). See the [CommandLineSwitches](CommandLineSwitches.md) wiki page for more information.
+
+Issue #244 is to add even more configurable settings by exposing API
+to Chromium Preferences.
 
 
 ## Settings
@@ -97,8 +103,12 @@ in a known order. Equivalent to the `SkColor` type.
 
 (string)
 The path to a separate executable that will be launched for sub-processes.
-By default the browser process executable is used. See the comments on
-CefExecuteProcess() for details. Also configurable using the --browser-subprocess-path switch.
+If this value is empty on Windows or Linux then the main process executable
+will be used. If this value is empty on macOS then a helper executable must
+exist at "Contents/Frameworks/<app> Helper.app/Contents/MacOS/<app> Helper"
+in the top-level app bundle. See the comments on CefExecuteProcess() for
+details. Also configurable using the "browser-subprocess-path" command-line
+switch.
 
 
 ### cache_path
@@ -148,6 +158,40 @@ Default: True
 Downloads are handled automatically. A default `SaveAs` file dialog provided by OS is displayed. See also the [DownloadHandler](DownloadHandler.md) wiki page.
 
 
+### external_message_pump
+
+(bool)
+Default: False
+
+EXPERIMENTAL: currently this option makes browser slower, so don't use it.
+              Reported issue in upstream, see Issue #246 for details.
+
+It is recommended to use this option as a replacement for calls to
+cefpython.MessageLoopWork(). CEF Python will do these calls automatically
+using CEF's OnScheduleMessagePumpWork. This results in improved performance
+and resolves some bugs. See Issue #246 for more details.
+
+Description from upstream CEF:
+> Set to true (1) to control browser process main (UI) thread message pump
+> scheduling via the CefBrowserProcessHandler::OnScheduleMessagePumpWork()
+> callback. This option is recommended for use in combination with the
+> CefDoMessageLoopWork() function in cases where the CEF message loop must be
+> integrated into an existing application message loop (see additional
+> comments and warnings on CefDoMessageLoopWork). Enabling this option is not
+> recommended for most users; leave this option disabled and use either the
+> CefRunMessageLoop() function or multi_threaded_message_loop if possible.
+
+
+### framework_dir_path
+
+The path to the CEF framework directory on macOS. If this value is empty
+then the framework must exist at "Contents/Frameworks/Chromium Embedded
+Framework.framework" in the top-level app bundle. Also configurable using
+the "framework-dir-path" command-line switch.
+
+See also [Issue #304](../../../issues/304).
+
+
 ### ignore_certificate_errors
 
 (bool)
@@ -186,6 +230,8 @@ referenced CEF topic in [Issue #125](../issues/125) for more details.
 Custom flags that will be used when initializing the V8 Javascript engine.  
 The consequences of using custom flags may not be well tested. Also  
 configurable using the --js-flags switch.
+
+To enable WebAssembly support set the `--expose-wasm` flag.
 
 
 ### locale
@@ -253,6 +299,19 @@ function must be called from your application message loop. This option is
 only supported on Windows.
 
 This option is not and cannot be supported on OS-X for architectural reasons.
+
+
+### net_security_expiration_enabled
+
+(bool)
+Set to true (1) to enable date-based expiration of built in network
+security information (i.e. certificate transparency logs, HSTS preloading
+and pinning information). Enabling this option improves network security
+but may cause HTTPS load failures when using CEF binaries built more than
+10 weeks in the past. See https://www.certificate-transparency.org/ and
+https://www.chromium.org/hsts for details. Can be set globally using the
+CefSettings.enable_net_security_expiration value.
+
 
 
 ### pack_loading_disabled
@@ -343,7 +402,7 @@ The behavior for encode/decode errors is to replace the unknown character with "
 
 (int)
 The number of stack trace frames to capture for uncaught exceptions.  
-Specify a positive value to enable the [JavascriptContextHandler](JavascriptContextHandler.md).OnUncaughtException()
+Specify a positive value to enable the [V8ContextHandler](V8ContextHandler.md).OnUncaughtException()
 callback. Specify 0 (default value) and  
 OnUncaughtException() will not be called. Also configurable using the  
 "uncaught-exception-stack-size" [command-line switch](CommandLineSwitches.md).
@@ -364,6 +423,11 @@ browser.
 To successfully implement separate cookie manager per browser session  
 with the use of the RequestHandler.`GetCookieManager` callback, you have to  
 set `unique_request_context_per_browser` to True.
+
+In upstream CEF each request context may have separate settings like
+cache_path, persist_session_cookies, persist_user_preferences,
+ignore_certificate_errors, enable_net_security_expiration,
+accept_language_list. Such functionality wasn't yet exposed in CEF Python.
 
 
 ### user_agent

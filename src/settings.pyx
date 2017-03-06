@@ -43,8 +43,6 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.accept_language_list)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
-        elif key == "multi_threaded_message_loop":
-            cefAppSettings.multi_threaded_message_loop = int(appSettings[key])
         elif key == "cache_path":
             cefString = new CefString(&cefAppSettings.cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
@@ -69,6 +67,11 @@ cdef void SetApplicationSettings(
             del cefString
         elif key == "log_severity":
             cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
+        elif key == "multi_threaded_message_loop":
+            cefAppSettings.multi_threaded_message_loop = int(appSettings[key])
+        elif key == "net_security_expiration_enabled":
+            cefAppSettings.enable_net_security_expiration =\
+                    int(appSettings[key])
         elif key == "release_dcheck_enabled":
             # Keep for BC, just log info - no error
             Debug("DEPRECATED: 'release_dcheck_enabled' setting")
@@ -113,6 +116,13 @@ cdef void SetApplicationSettings(
         elif key == "windowless_rendering_enabled":
             cefAppSettings.windowless_rendering_enabled = \
                     int(appSettings[key])
+        elif key == "external_message_pump":
+            cefAppSettings.external_message_pump = \
+                    int(appSettings[key])
+        elif key == "framework_dir_path":
+            cefString = new CefString(&cefAppSettings.framework_dir_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
         else:
             raise Exception("Invalid appSettings key: %s" % key)
 
@@ -208,14 +218,10 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.javascript_dom_paste = (
                         cef_types.STATE_ENABLED)
         elif key == "caret_browsing_enabled":
-            if browserSettings[key]:
-                cefBrowserSettings.caret_browsing = (
-                        cef_types.STATE_ENABLED)
-            else:
-                cefBrowserSettings.caret_browsing = (
-                        cef_types.STATE_DISABLED)
+            # Keep the key for BC
+            Debug("DEPRECATED: 'caret_browsing_enabled' setting")
         elif key == "java_disabled":
-            # Keep for BC, just log info - no error
+            # Keep the key for BC
             Debug("DEPRECATED: 'java_disabled' setting")
         elif key == "plugins_disabled":
             if browserSettings[key]:

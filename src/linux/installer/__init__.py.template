@@ -28,7 +28,13 @@ libcef_so = os.path.join(package_dir, "libcef.so")
 ctypes.CDLL(libcef_so, ctypes.RTLD_GLOBAL)
 
 import sys
-if 0x02070000 <=  sys.hexversion < 0x03000000:
+if (2, 7) <=  sys.version_info < (2, 8):
     from . import cefpython_py27 as cefpython
+elif (3, 4) <=  sys.version_info < (3, 5):
+    from . import cefpython_py34 as cefpython
+elif (3, 5) <=  sys.version_info < (3, 6):
+    from . import cefpython_py35 as cefpython
+elif (3, 6) <=  sys.version_info < (3, 7):
+    from . import cefpython_py36 as cefpython
 else:
     raise Exception("Unsupported python version: " + sys.version)

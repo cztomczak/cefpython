@@ -1,0 +1,335 @@
+diff --git include/capi/cef_drag_data_capi.h include/capi/cef_drag_data_capi.h
+index 5f86225..1684de2 100644
+--- include/capi/cef_drag_data_capi.h
++++ include/capi/cef_drag_data_capi.h
+@@ -39,6 +39,7 @@
+ #pragma once
+ 
+ #include "include/capi/cef_base_capi.h"
++#include "include/capi/cef_image_capi.h"
+ #include "include/capi/cef_stream_capi.h"
+ 
+ #ifdef __cplusplus
+@@ -195,6 +196,22 @@ typedef struct _cef_drag_data_t {
+   ///
+   void (CEF_CALLBACK *add_file)(struct _cef_drag_data_t* self,
+       const cef_string_t* path, const cef_string_t* display_name);
++
++  ///
++  // Set image representation of drag data.
++  ///
++  void (CEF_CALLBACK *set_image)(struct _cef_drag_data_t* self,
++      struct _cef_image_t* image);
++
++  ///
++  // Get image representation of drag data (may be NULL).
++  ///
++  struct _cef_image_t* (CEF_CALLBACK *get_image)(struct _cef_drag_data_t* self);
++
++  ///
++  // Whether image representation of drag data is available.
++  ///
++  int (CEF_CALLBACK *has_image)(struct _cef_drag_data_t* self);
+ } cef_drag_data_t;
+ 
+ 
+diff --git include/cef_drag_data.h include/cef_drag_data.h
+index 8f8094b..8b4602b 100644
+--- include/cef_drag_data.h
++++ include/cef_drag_data.h
+@@ -39,6 +39,7 @@
+ #pragma once
+ 
+ #include "include/cef_base.h"
++#include "include/cef_image.h"
+ #include "include/cef_stream.h"
+ #include <vector>
+ 
+@@ -193,6 +194,24 @@ class CefDragData : public virtual CefBase {
+   ///
+   /*--cef(optional_param=display_name)--*/
+   virtual void AddFile(const CefString& path, const CefString& display_name) =0;
++
++  ///
++  // Set image representation of drag data.
++  ///
++  /*--cef()--*/
++  virtual void SetImage(CefRefPtr<CefImage> image) =0;
++
++  ///
++  // Get image representation of drag data (may be NULL).
++  ///
++  /*--cef()--*/
++  virtual CefRefPtr<CefImage> GetImage() =0;
++
++  ///
++  // Whether image representation of drag data is available.
++  ///
++  /*--cef()--*/
++  virtual bool HasImage() =0;
+ };
+ 
+ #endif  // CEF_INCLUDE_CEF_DRAG_DATA_H_
+diff --git libcef/browser/osr/web_contents_view_osr.cc libcef/browser/osr/web_contents_view_osr.cc
+index c39a29c..8b3c30a 100644
+--- libcef/browser/osr/web_contents_view_osr.cc
++++ libcef/browser/osr/web_contents_view_osr.cc
+@@ -6,6 +6,7 @@
+ #include "libcef/browser/osr/web_contents_view_osr.h"
+ 
+ #include "libcef/browser/browser_host_impl.h"
++#include "libcef/browser/image_impl.h"
+ #include "libcef/browser/osr/render_widget_host_view_osr.h"
+ #include "libcef/common/drag_data_impl.h"
+ 
+@@ -230,7 +231,9 @@ void CefWebContentsViewOSR::StartDragging(
+   if (browser.get())
+     handler = browser->GetClient()->GetRenderHandler();
+   if (handler.get()) {
+-    CefRefPtr<CefDragDataImpl> drag_data(new CefDragDataImpl(drop_data));
++    CefRefPtr<CefImage> cef_image(new CefImageImpl(image));
++    CefRefPtr<CefDragDataImpl> drag_data(new CefDragDataImpl(drop_data,
++                                                             cef_image));
+     drag_data->SetReadOnly(true);
+     base::MessageLoop::ScopedNestableTaskAllower allow(
+         base::MessageLoop::current());
+diff --git libcef/common/drag_data_impl.cc libcef/common/drag_data_impl.cc
+index 6b632ab..2f12b92 100644
+--- libcef/common/drag_data_impl.cc
++++ libcef/common/drag_data_impl.cc
+@@ -20,6 +20,13 @@ CefDragDataImpl::CefDragDataImpl(const content::DropData& data)
+       read_only_(false) {
+ }
+ 
++CefDragDataImpl::CefDragDataImpl(const content::DropData& data,
++                                 CefRefPtr<CefImage> image)
++    : data_(data),
++      image_(image),
++      read_only_(false) {
++}
++
+ CefDragDataImpl::CefDragDataImpl()
+     : read_only_(false) {
+ }
+@@ -32,7 +39,7 @@ CefRefPtr<CefDragData> CefDragDataImpl::Clone() {
+   CefDragDataImpl* drag_data = NULL;
+   {
+     base::AutoLock lock_scope(lock_);
+-    drag_data = new CefDragDataImpl(data_);
++    drag_data = new CefDragDataImpl(data_, image_);
+   }
+   return drag_data;
+ }
+@@ -191,3 +198,20 @@ void CefDragDataImpl::SetReadOnly(bool read_only) {
+ 
+   read_only_ = read_only;
+ }
++
++void CefDragDataImpl::SetImage(CefRefPtr<CefImage> image) {
++  base::AutoLock lock_scope(lock_);
++  CHECK_READONLY_RETURN_VOID();
++  image_ = image;
++}
++
++CefRefPtr<CefImage> CefDragDataImpl::GetImage() {
++  base::AutoLock lock_scope(lock_);
++  return image_;
++}
++
++bool CefDragDataImpl::HasImage() {
++  base::AutoLock lock_scope(lock_);
++  if (image_) return true;
++  else return false;
++}
+diff --git libcef/common/drag_data_impl.h libcef/common/drag_data_impl.h
+index 64f29ed..9870726 100644
+--- libcef/common/drag_data_impl.h
++++ libcef/common/drag_data_impl.h
+@@ -7,6 +7,7 @@
+ #pragma once
+ 
+ #include "include/cef_drag_data.h"
++#include "include/cef_image.h"
+ 
+ #include <vector>
+ 
+@@ -18,6 +19,8 @@ class CefDragDataImpl : public CefDragData {
+  public:
+   CefDragDataImpl();
+   explicit CefDragDataImpl(const content::DropData& data);
++  explicit CefDragDataImpl(const content::DropData& data,
++                           CefRefPtr<CefImage> image);
+ 
+   CefRefPtr<CefDragData> Clone() override;
+   bool IsReadOnly() override;
+@@ -41,6 +44,9 @@ class CefDragDataImpl : public CefDragData {
+   void SetFragmentBaseURL(const CefString& fragment) override;
+   void ResetFileContents() override;
+   void AddFile(const CefString& path, const CefString& display_name) override;
++  void SetImage(CefRefPtr<CefImage> image) override;
++  CefRefPtr<CefImage> GetImage() override;
++  bool HasImage() override;
+ 
+   // This method is not safe. Use Lock/Unlock to get mutually exclusive access.
+   content::DropData* drop_data() {
+@@ -53,6 +59,7 @@ class CefDragDataImpl : public CefDragData {
+ 
+  private:
+   content::DropData data_;
++  CefRefPtr<CefImage> image_;
+ 
+   // True if this object is read-only.
+   bool read_only_;
+diff --git libcef_dll/cpptoc/drag_data_cpptoc.cc libcef_dll/cpptoc/drag_data_cpptoc.cc
+index c36069e..ddb5729 100644
+--- libcef_dll/cpptoc/drag_data_cpptoc.cc
++++ libcef_dll/cpptoc/drag_data_cpptoc.cc
+@@ -11,6 +11,7 @@
+ //
+ 
+ #include "libcef_dll/cpptoc/drag_data_cpptoc.h"
++#include "libcef_dll/cpptoc/image_cpptoc.h"
+ #include "libcef_dll/cpptoc/stream_writer_cpptoc.h"
+ #include "libcef_dll/transfer_util.h"
+ 
+@@ -367,6 +368,52 @@ void CEF_CALLBACK drag_data_add_file(struct _cef_drag_data_t* self,
+       CefString(display_name));
+ }
+ 
++void CEF_CALLBACK drag_data_set_image(struct _cef_drag_data_t* self,
++    struct _cef_image_t* image) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return;
++  // Verify param: image; type: refptr_same
++  DCHECK(image);
++  if (!image)
++    return;
++
++  // Execute
++  CefDragDataCppToC::Get(self)->SetImage(
++      CefImageCppToC::Unwrap(image));
++}
++
++struct _cef_image_t* CEF_CALLBACK drag_data_get_image(
++    struct _cef_drag_data_t* self) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return NULL;
++
++  // Execute
++  CefRefPtr<CefImage> _retval = CefDragDataCppToC::Get(self)->GetImage();
++
++  // Return type: refptr_same
++  return CefImageCppToC::Wrap(_retval);
++}
++
++int CEF_CALLBACK drag_data_has_image(struct _cef_drag_data_t* self) {
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  DCHECK(self);
++  if (!self)
++    return 0;
++
++  // Execute
++  bool _retval = CefDragDataCppToC::Get(self)->HasImage();
++
++  // Return type: bool
++  return _retval;
++}
++
+ }  // namespace
+ 
+ 
+@@ -395,6 +442,9 @@ CefDragDataCppToC::CefDragDataCppToC() {
+   GetStruct()->set_fragment_base_url = drag_data_set_fragment_base_url;
+   GetStruct()->reset_file_contents = drag_data_reset_file_contents;
+   GetStruct()->add_file = drag_data_add_file;
++  GetStruct()->set_image = drag_data_set_image;
++  GetStruct()->get_image = drag_data_get_image;
++  GetStruct()->has_image = drag_data_has_image;
+ }
+ 
+ template<> CefRefPtr<CefDragData> CefCppToC<CefDragDataCppToC, CefDragData,
+diff --git libcef_dll/ctocpp/drag_data_ctocpp.cc libcef_dll/ctocpp/drag_data_ctocpp.cc
+index c6b0ee8..3873e9f 100644
+--- libcef_dll/ctocpp/drag_data_ctocpp.cc
++++ libcef_dll/ctocpp/drag_data_ctocpp.cc
+@@ -11,6 +11,7 @@
+ //
+ 
+ #include "libcef_dll/ctocpp/drag_data_ctocpp.h"
++#include "libcef_dll/ctocpp/image_ctocpp.h"
+ #include "libcef_dll/ctocpp/stream_writer_ctocpp.h"
+ #include "libcef_dll/transfer_util.h"
+ 
+@@ -372,6 +373,51 @@ void CefDragDataCToCpp::AddFile(const CefString& path,
+       display_name.GetStruct());
+ }
+ 
++void CefDragDataCToCpp::SetImage(CefRefPtr<CefImage> image) {
++  cef_drag_data_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, set_image))
++    return;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Verify param: image; type: refptr_same
++  DCHECK(image.get());
++  if (!image.get())
++    return;
++
++  // Execute
++  _struct->set_image(_struct,
++      CefImageCToCpp::Unwrap(image));
++}
++
++CefRefPtr<CefImage> CefDragDataCToCpp::GetImage() {
++  cef_drag_data_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, get_image))
++    return NULL;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  cef_image_t* _retval = _struct->get_image(_struct);
++
++  // Return type: refptr_same
++  return CefImageCToCpp::Wrap(_retval);
++}
++
++bool CefDragDataCToCpp::HasImage() {
++  cef_drag_data_t* _struct = GetStruct();
++  if (CEF_MEMBER_MISSING(_struct, has_image))
++    return false;
++
++  // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
++
++  // Execute
++  int _retval = _struct->has_image(_struct);
++
++  // Return type: bool
++  return _retval?true:false;
++}
++
+ 
+ // CONSTRUCTOR - Do not edit by hand.
+ 
+diff --git libcef_dll/ctocpp/drag_data_ctocpp.h libcef_dll/ctocpp/drag_data_ctocpp.h
+index 225f57a..2f0b67d 100644
+--- libcef_dll/ctocpp/drag_data_ctocpp.h
++++ libcef_dll/ctocpp/drag_data_ctocpp.h
+@@ -53,6 +53,9 @@ class CefDragDataCToCpp
+   void SetFragmentBaseURL(const CefString& base_url) OVERRIDE;
+   void ResetFileContents() OVERRIDE;
+   void AddFile(const CefString& path, const CefString& display_name) OVERRIDE;
++  void SetImage(CefRefPtr<CefImage> image) OVERRIDE;
++  CefRefPtr<CefImage> GetImage() OVERRIDE;
++  bool HasImage() OVERRIDE;
+ };
+ 
+ #endif  // USING_CEF_SHARED

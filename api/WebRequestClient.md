@@ -10,12 +10,18 @@ during the request, otherwise it gets destroyed and
 the [WebRequestClient](WebRequestClient.md) callbacks won't get called.
 
 Table of contents:
+* [Notes](#notes)
 * [Callbacks](#callbacks)
   * [OnUploadProgress](#onuploadprogress)
   * [OnDownloadProgress](#ondownloadprogress)
   * [OnDownloadData](#ondownloaddata)
   * [OnRequestComplete](#onrequestcomplete)
-  * [GetAuthCredentials](#getauthcredentials)
+
+
+## Notes
+
+Callbacks available in upstream CEF, but not yet exposed in CEF Python:
+* GetAuthCredentials
 
 
 ## Callbacks
@@ -28,7 +34,7 @@ created the request unless otherwise documented.
 
 | Parameter | Type |
 | --- | --- |
-| webRequest | [WebRequest](WebRequest.md) |
+| web_request | [WebRequest](WebRequest.md) |
 | current | long |
 | total | long |
 | __Return__ | void |
@@ -44,7 +50,7 @@ and SetFlags())
 
 | Parameter | Type |
 | --- | --- |
-| webRequest | [WebRequest](WebRequest.md) |
+| web_request | [WebRequest](WebRequest.md) |
 | current | long |
 | total | long |
 | __Return__ | void |
@@ -58,7 +64,7 @@ response (or -1 if not determined).
 
 | Parameter | Type |
 | --- | --- |
-| webRequest | [WebRequest](WebRequest.md) |
+| web_request | [WebRequest](WebRequest.md) |
 | data | string |
 | __Return__ | void |
 
@@ -72,29 +78,10 @@ and SetFlags()).
 
 | Parameter | Type |
 | --- | --- |
-| webRequest | [WebRequest](WebRequest.md) |
+| web_request | [WebRequest](WebRequest.md) |
 | __Return__ | void |
 
 Notifies the client that the request has completed. Use the
 [WebRequest](WebRequest.md).GetRequestStatus() method to determine if the request was
 successful or not.
 
-
-### GetAuthCredentials
-
-| Parameter | Type |
-| --- | --- |
-| isProxy | bool |
-| host | string |
-| port | int |
-| realm | string |
-| scheme | string |
-| callback | [Callback](Callback.md) |
-| __Return__ | bool |
-
- Called on the IO thread when the browser needs credentials from the user.
- |isProxy| indicates whether the host is a proxy server. |host| contains the
- hostname and |port| contains the port number. Return true to continue the
- request and call [Callback](Callback.md).Continue() when the authentication
- information is available. Return false to cancel the request. This method
- will only be called for requests initiated from the browser process.

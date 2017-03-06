@@ -30,103 +30,106 @@ class CefPythonApp :
  public:
   CefPythonApp();
 
-  virtual void OnBeforeCommandLineProcessing(
+  void OnBeforeCommandLineProcessing(
       const CefString& process_type,
-      CefRefPtr<CefCommandLine> command_line) OVERRIDE;
+      CefRefPtr<CefCommandLine> command_line) override;
 
-  virtual void OnRegisterCustomSchemes(
-      CefRefPtr<CefSchemeRegistrar> registrar) OVERRIDE;
+  void OnRegisterCustomSchemes(
+      CefRefPtr<CefSchemeRegistrar> registrar) override;
 
-  virtual CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler()
-        OVERRIDE;
+  CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler()
+        override;
 
-  virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler()
-        OVERRIDE;
+  CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler()
+        override;
 
-  virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler()
-        OVERRIDE;
-
-  virtual CefRefPtr<CefPrintHandler> GetPrintHandler() OVERRIDE;
+  CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler()
+        override;
 
   // ---------------------------------------------------------------------------
   // CefBrowserProcessHandler
   // ---------------------------------------------------------------------------
 
-  virtual void OnContextInitialized() OVERRIDE;
+  void OnContextInitialized() override;
 
-  virtual void OnBeforeChildProcessLaunch(
-      CefRefPtr<CefCommandLine> command_line) OVERRIDE;
+  void OnBeforeChildProcessLaunch(
+      CefRefPtr<CefCommandLine> command_line) override;
 
-  virtual void OnRenderProcessThreadCreated(
-      CefRefPtr<CefListValue> extra_info) OVERRIDE;
+  void OnRenderProcessThreadCreated(
+      CefRefPtr<CefListValue> extra_info) override;
+
+  CefRefPtr<CefPrintHandler> GetPrintHandler() override;
+
+  void OnScheduleMessagePumpWork(int64 delay_ms) override;
+
 
   // ---------------------------------------------------------------------------
   // CefRenderProcessHandler
   // ---------------------------------------------------------------------------
 
-  virtual void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info)
-        OVERRIDE;
+  void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info)
+        override;
 
-  virtual void OnWebKitInitialized()
-        OVERRIDE;
+  void OnWebKitInitialized()
+        override;
 
-  virtual void OnBrowserCreated(CefRefPtr<CefBrowser> browser)
-        OVERRIDE;
+  void OnBrowserCreated(CefRefPtr<CefBrowser> browser)
+        override;
 
-  virtual void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
-        OVERRIDE;
+  void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
+        override;
 
-  virtual bool OnBeforeNavigation(CefRefPtr<CefBrowser> browser,
+  bool OnBeforeNavigation(CefRefPtr<CefBrowser> browser,
                                   CefRefPtr<CefFrame> frame,
                                   CefRefPtr<CefRequest> request,
                                   cef_navigation_type_t navigation_type,
                                   bool is_redirect)
-        OVERRIDE;
+        override;
 
-  virtual void OnContextCreated(CefRefPtr<CefBrowser> browser,
+  void OnContextCreated(CefRefPtr<CefBrowser> browser,
                                 CefRefPtr<CefFrame> frame,
                                 CefRefPtr<CefV8Context> context)
-        OVERRIDE;
+        override;
 
-  virtual void OnContextReleased(CefRefPtr<CefBrowser> browser,
+  void OnContextReleased(CefRefPtr<CefBrowser> browser,
                                  CefRefPtr<CefFrame> frame,
                                  CefRefPtr<CefV8Context> context)
-        OVERRIDE;
+        override;
 
-  virtual void OnUncaughtException(CefRefPtr<CefBrowser> browser,
+  void OnUncaughtException(CefRefPtr<CefBrowser> browser,
                                    CefRefPtr<CefFrame> frame,
                                    CefRefPtr<CefV8Context> context,
                                    CefRefPtr<CefV8Exception> exception,
                                    CefRefPtr<CefV8StackTrace> stackTrace)
-        OVERRIDE;
+        override;
 
-  virtual void OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser,
+  void OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefDOMNode> node)
-        OVERRIDE;
+        override;
 
-  virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+  bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message)
-        OVERRIDE;
+        override;
 
   // ---------------------------------------------------------------------------
   // Javascript bindings
   // ---------------------------------------------------------------------------
 
-  virtual void SetJavascriptBindings(CefRefPtr<CefBrowser> browser,
+  void SetJavascriptBindings(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefDictionaryValue> data);
-  virtual CefRefPtr<CefDictionaryValue> GetJavascriptBindings(
+  CefRefPtr<CefDictionaryValue> GetJavascriptBindings(
                                     CefRefPtr<CefBrowser> browser);
 
-  virtual void RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser);
+  void RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser);
 
-  virtual bool BindedFunctionExists(CefRefPtr<CefBrowser> browser,
+  bool BindedFunctionExists(CefRefPtr<CefBrowser> browser,
                                     const CefString& funcName);
 
-  virtual void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser);
+  void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser);
 
-  virtual void DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
+  void DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefV8Context> context);
 

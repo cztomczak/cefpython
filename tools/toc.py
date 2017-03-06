@@ -14,9 +14,13 @@ import sys
 import re
 import glob
 
+API_DIR = os.path.join(os.path.dirname(__file__), "..", "api")
+
 
 def main():
     """Main entry point."""
+    if len(sys.argv) == 1:
+        sys.argv.append(API_DIR)
     if (len(sys.argv) == 1 or
             "-h" in sys.argv or
             "--help" in sys.argv or
@@ -44,14 +48,14 @@ def toc_file(file_):
     """A single file was passed to doctoc. Return bool whether modified
     and the number of warnings."""
     with open(file_, "rb") as fo:
-        orig_contents = fo.read()
+        orig_contents = fo.read().decode("utf-8", "ignore")
         # Fix new lines just in case. Not using Python's "rU",
         # it is causing strange issues.
         orig_contents = re.sub(r"(\r\n|\r|\n)", os.linesep, orig_contents)
     (tocsize, contents, warnings) = create_toc(orig_contents, file_)
     if contents != orig_contents:
         with open(file_, "wb") as fo:
-            fo.write(contents)
+            fo.write(contents.encode("utf-8"))
         tocsize_str = ("TOC size: "+str(tocsize) if tocsize
                        else "TOC removed")
         print("Modified: "+file_+" ("+tocsize_str+")")
@@ -156,10 +160,12 @@ def parse_headings(raw_contents, file_):
 def headinghash(title):
     """Get a link hash for a heading H1,H2,H3."""
     hash_ = title.lower()
+    hash_ = hash_.replace(" - ", "specialcase1")
     hash_ = re.sub(r"[^a-z0-9_\- ]+", r"", hash_)
     hash_ = hash_.replace(" ", "-")
     hash_ = re.sub(r"[-]+", r"-", hash_)
     hash_ = re.sub(r"-$", r"", hash_)
+    hash_ = hash_.replace("specialcase1", "---")
     return hash_
 
 

@@ -3,14 +3,26 @@
 
 # Browser (object)
 
+Remember to free all browser references for the browser to shut down cleanly.
+Otherwise data such as cookies or other storage might not be flushed to disk
+when closing app, and other issues might occur as well. To free a reference
+just assign a None value to a "browser" variable.
+
 
 Table of contents:
 * [Notes](#notes)
 * [Methods](#methods)
+  * [AddWordToDictionary](#addwordtodictionary)
   * [CanGoBack](#cangoback)
   * [CanGoForward](#cangoforward)
   * [CloseBrowser](#closebrowser)
   * [CloseDevTools](#closedevtools)
+  * [DragTargetDragEnter](#dragtargetdragenter)
+  * [DragTargetDragOver](#dragtargetdragover)
+  * [DragTargetDragLeave](#dragtargetdragleave)
+  * [DragTargetDrop](#dragtargetdrop)
+  * [DragSourceEndedAt](#dragsourceendedat)
+  * [DragSourceSystemDragEnded](#dragsourcesystemdragended)
   * [ExecuteFunction](#executefunction)
   * [ExecuteJavascript](#executejavascript)
   * [Find](#find)
@@ -50,6 +62,7 @@ Table of contents:
   * [ParentWindowWillClose](#parentwindowwillclose)
   * [Reload](#reload)
   * [ReloadIgnoreCache](#reloadignorecache)
+  * [ReplaceMisspelling](#replacemisspelling)
   * [SetBounds](#setbounds)
   * [SendKeyEvent](#sendkeyevent)
   * [SendMouseClickEvent](#sendmouseclickevent)
@@ -76,13 +89,26 @@ Table of contents:
 
 ## Notes
 
-**Closing browser cleanly**
+Methods available in upstream CEF which were not yet exposed in CEF Python
+(see src/include/cef_browser.h):
 
-Remember to delete all browser references for the browser to shut down cleanly. See the wxpython.py example > MainFrame.OnClose() for how to
-do it.
+* ImeSetComposition
+* ImeCommitText
+* ImeFinishComposingText
+* ImeCancelComposition
 
 
 ## Methods
+
+
+### AddWordToDictionary
+
+| Parameter | Type |
+| --- | --- |
+| word | string |
+| __Return__ | void |
+
+Add the specified |word| to the spelling dictionary.
 
 
 ### CanGoBack
@@ -131,6 +157,116 @@ information.
 Explicitly close the associated DevTools browser, if any.
 
 
+### DragTargetDragEnter
+
+| | |
+| --- | --- |
+| drag_data | [DragData](DragData.md) |
+| x | int |
+| y | int |
+| allowed_ops | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the user drags the mouse into the web view (before
+> calling DragTargetDragOver/DragTargetLeave/DragTargetDrop).
+> |drag_data| should not contain file contents as this type of data is not
+> allowed to be dragged into the web view. File contents can be removed using
+> CefDragData::ResetFileContents (for example, if |drag_data| comes from
+> CefRenderHandler::StartDragging).
+> This method is only used when window rendering is disabled.
+
+
+### DragTargetDragOver
+
+| | |
+| --- | --- |
+| x | int |
+| y | int |
+| allowed_ops | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method each time the mouse is moved across the web view during
+> a drag operation (after calling DragTargetDragEnter and before calling
+> DragTargetDragLeave/DragTargetDrop).
+> This method is only used when window rendering is disabled.
+
+
+### DragTargetDragLeave
+
+| | |
+| --- | --- |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the user drags the mouse out of the web view (after
+> calling DragTargetDragEnter).
+> This method is only used when window rendering is disabled.
+
+
+### DragTargetDrop
+
+| | |
+| --- | --- |
+| x | int |
+| y | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the user completes the drag operation by dropping
+> the object onto the web view (after calling DragTargetDragEnter).
+> The object being dropped is |drag_data|, given as an argument to
+> the previous DragTargetDragEnter call.
+> This method is only used when window rendering is disabled.
+
+
+### DragSourceEndedAt
+
+| | |
+| --- | --- |
+| x | int |
+| y | int |
+| operation | int |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the drag operation started by a
+> CefRenderHandler::StartDragging call has ended either in a drop or
+> by being cancelled. |x| and |y| are mouse coordinates relative to the
+> upper-left corner of the view. If the web view is both the drag source
+> and the drag target then all DragTarget* methods should be called before
+> DragSource* mthods.
+> This method is only used when window rendering is disabled.
+
+Operation enum from upstream CEF - these constants are declared in the
+`cefpython` module:
+> DRAG_OPERATION_NONE    = 0,
+> DRAG_OPERATION_COPY    = 1,
+> DRAG_OPERATION_LINK    = 2,
+> DRAG_OPERATION_GENERIC = 4,
+> DRAG_OPERATION_PRIVATE = 8,
+> DRAG_OPERATION_MOVE    = 16,
+> DRAG_OPERATION_DELETE  = 32,
+> DRAG_OPERATION_EVERY   = UINT_MAX
+
+
+### DragSourceSystemDragEnded
+
+| | |
+| --- | --- |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Call this method when the drag operation started by a
+> CefRenderHandler::StartDragging call has completed. This method may be
+> called immediately without first calling DragSourceEndedAt to cancel a
+> drag operation. If the web view is both the drag source and the drag
+> target then all DragTarget* methods should be called before DragSource*
+> mthods.
+> This method is only used when window rendering is disabled.
+
+
 ### ExecuteFunction
 
 | Parameter | Type |
@@ -151,8 +287,8 @@ Passing a python function here is not allowed, it is only possible through [Java
 | Parameter | Type |
 | --- | --- |
 | jsCode | string |
-| scriptURL=None | string |
-| startLine=None | int |
+| scriptUrl="" | string |
+| startLine=1 | int |
 | __Return__ | void |
 
 Execute a string of JavaScript code in this frame. The `sciptURL` parameter is the URL where the script in question can be found, if any. The renderer may request this URL to show the developer the source of the error.  The `startLine` parameter is the base line number to use for error reporting.
@@ -486,10 +622,11 @@ This is an alias for the `LoadUrl` method.
 | --- | --- |
 | __Return__ | void |
 
-Notify the browser of move or resize events so that popup windows are
-displayed in the correct location and dismissed when the window moves.
-Also so that drag&drop areas are updated accordingly. In upstream
-cefclient this method is being called only on Linux and Windows.
+Notify the browser of move or resize events so that popup widgets
+(e.g. `<select>`) are displayed in the correct location and dismissed
+when the window moves. Also so that drag&drop areas are updated
+accordingly. In upstream cefclient this method is being called
+only on Linux and Windows.
 
 
 ### NotifyScreenInfoChanged
@@ -531,6 +668,17 @@ Reload the current page.
 | __Return__ | void |
 
 Reload the current page ignoring any cached data.
+
+
+### ReplaceMisspelling
+
+| Parameter | Type |
+| --- | --- |
+| word | string |
+| __Return__ | void |
+
+If a misspelled word is currently selected in an editable node calling
+this method will replace it with the specified |word|.
 
 
 ### SetBounds
@@ -660,7 +808,13 @@ Set client callback.
 | clientHandler | object |
 | __Return__ | void |
 
-Set client handler object (class instance), its members will be inspected. Private methods that are not meant to be callbacks should have their names prepended with an underscore.
+Set client handler object (class instance), its members will be inspected.
+Private methods that are not meant to be callbacks should have their names
+prepended with an underscore.
+
+You can call this method multiple times with to set many handlers. For
+example you can create in your code several objects named LoadHandler,
+LifespanHandler etc.
 
 
 ### SetFocus

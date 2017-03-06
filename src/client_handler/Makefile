@@ -4,27 +4,33 @@
 # -Wall - show important warnings
 # -Werror - treat warnings as errors
 
-# Cython compiler options:
+# Cython compiler options on Linux:
 # -fPIC -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-Bsymbolic-functions \
 # -Wl,-z,relro
 
 UNAME_S = $(shell uname -s)
-CC = g++
-CCFLAGS = -fPIC -std=gnu++11 -Wall -Werror $(CEF_CCFLAGS)
+CCFLAGS = -fPIC $(CEF_CCFLAGS)
+
+ifeq ($(UNAME_S), Linux)
+	SRC_MORE = x11.cpp
+else ifeq ($(UNAME_S), Darwin)
+	SRC_MORE = util_mac.mm
+endif
 
 SRC = client_handler.cpp cookie_visitor.cpp resource_handler.cpp \
 	web_request_client.cpp string_visitor.cpp request_context_handler.cpp \
-	task.cpp x11.cpp
+	task.cpp context_menu_handler.cpp display_handler.cpp \
+	download_handler.cpp focus_handler.cpp js_dialog_handler.cpp \
+	keyboard_handler.cpp lifespan_handler.cpp load_handler.cpp \
+	render_handler.cpp request_handler.cpp \
+	$(SRC_MORE)
 
-OBJ = $(SRC:.cpp=.o)
-
-ifeq ($(UNAME_S), Darwin)
-	OBJ += util_mac.o
-endif
+OBJ = $(filter %.o, $(SRC:.cpp=.o) $(SRC:.mm=.o))
+.SUFFIXES: .cpp .mm .o
 
 OUT = libclient_handler.a
 
-INC = -I./../ -I/usr/include/python2.7 \
+INC = -I./../ -I./../common/ -I/usr/include/python2.7 \
 	-I/usr/include/gtk-2.0 \
 	-I/usr/include/gtk-unix-print-2.0 \
 	-I/usr/include/glib-2.0 \
@@ -45,17 +51,19 @@ INC = -I./../ -I/usr/include/python2.7 \
 	-I/usr/lib/gtk-2.0/gtk-unix-print-2.0 \
 	-I/usr/lib/glib-2.0/include
 
-.cpp.o:
-	@echo [CLIENT HANDLER] Building $@ from $<...
-	$(CC) $(CCFLAGS) $(INC) -c $< -o $@
 
 $(OUT): $(OBJ)
 	@echo [CLIENT HANDLER] Creating library $(OUT) from $(OBJ)...
 	ar rcs $(OUT) $(OBJ)
 
-util_mac.o: util_mac.mm
+.cpp.o:
 	@echo [CLIENT HANDLER] Building $@ from $<...
-	$(CC) $(CCFLAGS) $(INC) -c $< -o $@
+	$(CXX) $(CCFLAGS) $(INC) -c $< -o $@
+
+.mm.o:
+	@echo [CLIENT HANDLER] Building $@ from $<...
+	$(CXX) $(CCFLAGS) $(INC) -c $< -o $@
+
 
 clean:
 	@echo [CLIENT HANDLER] Cleaning...

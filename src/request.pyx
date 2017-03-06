@@ -68,6 +68,8 @@ cdef class PyRequest:
         cdef cpp_vector[CefRefPtr[CefPostDataElement]] elementVector
         cdef CefRefPtr[CefPostData] postData = (
                 self.GetCefRequest().get().GetPostData())
+        if postData.get() == NULL:
+            return {}
         if postData.get().GetElementCount() == 0:
             return {}
         postData.get().GetElements(elementVector)
@@ -113,9 +115,7 @@ cdef class PyRequest:
             return retUrlEncoded
 
     cpdef py_void SetPostData(self, object pyPostData):
-        cdef CefRefPtr[CefPostData] postData = (
-                self.GetCefRequest().get().GetPostData())
-        postData.get().RemoveElements()
+        cdef CefRefPtr[CefPostData] postData = CefPostData_Create()
         cdef CefRefPtr[CefPostDataElement] postDataElement
         cdef py_string pyElement
         cdef CefString sfile

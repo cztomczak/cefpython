@@ -3,7 +3,18 @@
 
 # WebPluginInfo (object)
 
-See [RequestHandler](RequestHandler.md).OnBeforePluginLoad().
+See also [RequestHandler](RequestHandler.md)._OnBeforePluginLoad().
+
+Web Plugin API available in upstream CEF, but not yet exposed in CEF Python
+(see src/include/cef_web_plugin.h):
+
+* CefRegisterCdmCallback
+* CefRegisterWidevineCdm
+* CefIsWebPluginUnstable
+* CefRegisterWebPluginCrash
+* CefUnregisterInternalWebPlugin
+* CefRefreshWebPlugins
+* CefVisitWebPluginInfo
 
 
 Table of contents:

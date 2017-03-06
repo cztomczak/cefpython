@@ -8,7 +8,7 @@
 #include "../windows/stdint.h"
 #endif
 
-#include "cefpython_public_api.h"
+#include "common/cefpython_public_api.h"
 
 class ResourceHandler : public CefResourceHandler
 {
@@ -20,23 +20,23 @@ public:
     }    
 
   virtual bool ProcessRequest(CefRefPtr<CefRequest> request,
-                              CefRefPtr<CefCallback> callback) OVERRIDE;
+                              CefRefPtr<CefCallback> callback) override;
 
   virtual void GetResponseHeaders(CefRefPtr<CefResponse> response,
                                   int64& response_length,
-                                  CefString& redirectUrl) OVERRIDE;
+                                  CefString& redirectUrl) override;
 
   virtual bool ReadResponse(void* data_out,
                             int bytes_to_read,
                             int& bytes_read,
-                            CefRefPtr<CefCallback> callback) OVERRIDE;
+                            CefRefPtr<CefCallback> callback) override;
 
-  virtual bool CanGetCookie(const CefCookie& cookie) OVERRIDE;
+  virtual bool CanGetCookie(const CefCookie& cookie) override;
 
-  virtual bool CanSetCookie(const CefCookie& cookie) OVERRIDE;
+  virtual bool CanSetCookie(const CefCookie& cookie) override;
 
   virtual void Cancel() OVERRIDE;
     
-protected:
+private:
   IMPLEMENT_REFCOUNTING(ResourceHandler);
 };

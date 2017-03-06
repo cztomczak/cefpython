@@ -11,7 +11,6 @@ Table of contents:
   * [accept_language_list](#accept_language_list)
   * [application_cache_disabled](#application_cache_disabled)
   * [background_color](#background_color)
-  * [caret_browsing_enabled](#caret_browsing_enabled)
   * [databases_disabled](#databases_disabled)
   * [default_encoding](#default_encoding)
   * [dom_paste_disabled](#dom_paste_disabled)
@@ -83,11 +82,6 @@ and when no document color is specified. By default the background color
 will be the same as CefSettings.background_color. Only the RGB compontents
 of the specified value will be used. The alpha component must greater than
 0 to enable use of the background color but will be otherwise ignored.
-
-
-### caret_browsing_enabled
-
-(bool) Controls whether the caret position will be drawn. Also configurable using the --enable-caret-browsing switch.
 
 
 ### databases_disabled

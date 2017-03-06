@@ -41,10 +41,16 @@ cpdef py_bool IsThread(int threadID):
 #       unicode strings and writing them to file (codecs.open).
 #       This change is required to work with Cython 0.20.
 
-cpdef object Debug(str msg):
+cpdef object Debug(py_string msg):
+    """Print debug message. Will be shown only when settings.debug=True."""
     if not g_debug:
         return
-    msg = "[CEF Python] "+str(msg)
+    # In Python 3 str or bytes may be passed
+    if type(msg) != str and type(msg) == bytes:
+        msg = msg.decode("utf-8", "replace")
+    # Convert to str in case other kind of object was passed
+    msg = str(msg)
+    msg = "[CEF Python] "+msg
     print(msg)
     if g_debugFile:
         try:
@@ -54,6 +60,22 @@ cpdef object Debug(str msg):
             print("[CEF Python] WARNING: failed writing to debug file: %s" % (
                     g_debugFile))
 
+cdef void NonCriticalError(py_string msg) except *:
+    """Notify about error gently. Does not terminate application."""
+    # In Python 3 str or bytes may be passed
+    if type(msg) != str and type(msg) == bytes:
+        msg = msg.decode("utf-8", "replace")
+    # Convert to str in case other kind of object was passed
+    msg = str(msg)
+    msg = "[CEF Python] ERROR: "+msg
+    print(msg)
+    if g_debugFile:
+        try:
+            with open(g_debugFile, "a") as file_:
+                file_.write(msg+"\n")
+        except:
+            print("[CEF Python] WARNING: failed writing to debug file: %s" % (
+                    g_debugFile))
 
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":
@@ -96,28 +118,17 @@ cpdef str GetNavigateUrl(py_string url):
         url = re.sub(r"^([a-zA-Z])%3A", r"\1:", url)
 
         # Allow hash when loading urls. The pathname2url function
-        # replaced hashes with "%23" (Issue 114).
+        # replaced hashes with "%23" (Issue #114).
         url = url.replace("%23", "#")
 
-    return str(url)
+        # Allow more special characters when loading urls. The pathname2url
+        # function encoded them and need to decode them back here
+        # Characters: ? & = (Issue #273).
+        url = url.replace("%3F", "?")
+        url = url.replace("%26", "&")
+        url = url.replace("%3D", "=")
 
-cpdef str GetModuleDirectory():
-    import re, os, platform
-    if platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):
-        # cefpython3 package __init__.py sets CEFPYTHON3_PATH.
-        # When cefpython3 is installed as debian package, this
-        # env variable is the only way of getting valid path.
-        return os.getenv("CEFPYTHON3_PATH")
-    if hasattr(sys, "frozen"):
-        path = os.path.dirname(sys.executable)
-    elif "__file__" in globals():
-        path = os.path.dirname(os.path.realpath(__file__))
-    else:
-        path = os.getcwd()
-    if platform.system() == "Windows":
-        path = re.sub(r"[/\\]+", re.escape(os.sep), path)
-    path = re.sub(r"[/\\]+$", "", path)
-    return os.path.abspath(path)
+    return str(url)
 
 cpdef py_bool IsFunctionOrMethod(object valueType):
     if (valueType == types.FunctionType

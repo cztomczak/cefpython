@@ -44,6 +44,19 @@ cdef py_string CharToPyString(
                 g_applicationSettings["string_encoding"],
                 errors=BYTES_DECODE_ERRORS))
 
+
+cdef bytes PyStringToChar(py_string pyString):
+    if PY_MAJOR_VERSION < 3:
+        return <bytes>pyString
+    else:
+        # The unicode type is not defined in Python 3.
+        if type(pyString) == str:
+            pyString = <bytes>(pyString.encode(
+                    g_applicationSettings["string_encoding"],
+                    errors=UNICODE_ENCODE_ERRORS))
+        return pyString
+
+
 # Not used anywhere so commented out.
 # ---
 # cdef py_string CppToPyString(
@@ -123,7 +136,6 @@ cdef void PyToCefStringPointer(
             pyString = <bytes>(pyString.encode(
                     g_applicationSettings["string_encoding"],
                     errors=UNICODE_ENCODE_ERRORS))
-
     cdef cpp_string cppString = pyString
     # When used cefString.FromASCII(), a DCHECK failed
     # when passed a unicode string.

@@ -25,15 +25,15 @@ Table of contents:
 | --- | --- |
 | browser | [Browser](Browser.md) |
 | frame | [Frame](Frame.md) |
-| targetUrl | string |
-| targetFrameName | string |
-| targetDisposition | WindowOpenDisposition |
-| userGesture | bool |
-| popupFeatures | None |
-| out windowInfo[0] | [WindowInfo](WindowInfo.md) |
+| target_url | string |
+| target_frame_name | string |
+| target_disposition | WindowOpenDisposition |
+| user_gesture | bool |
+| popup_features | None |
+| window_info_out | list[[WindowInfo](WindowInfo.md)] |
 | client | None |
-| out browserSettings[0] | [BrowserSettings](BrowserSettings.md) |
-| out noJavascriptAccess[0] | bool |
+| browser_settings_out | list[[BrowserSettings](BrowserSettings.md)] |
+| no_javascript_access_out | list[bool] |
 | __Return__ | bool |
 
 Called on the IO thread before a new popup browser is created. The
@@ -44,15 +44,15 @@ The |target_disposition| value indicates where the user intended to open
 the popup (e.g. current tab, new tab, etc). The |user_gesture| value will
 be true if the popup was opened via explicit user gesture (e.g. clicking a
 link) or false if the popup opened automatically (e.g. via the
-DomContentLoaded event). The |popupFeatures| structure contains additional
+DomContentLoaded event). The |popup_features| structure contains additional
 information about the requested popup window. To allow creation of the
 popup browser optionally modify |windowInfo|, |client|, |browserSettings| and
-|noJavascriptAccess| and return false. To cancel creation of the popup
+|no_javascript_access| and return false. To cancel creation of the popup
 browser return true. The |client| and |settings| values will default to the
 source browser's values. If the |no_javascript_access| value is set to
 false the new browser will not be scriptable and may not be hosted in the
 same renderer process as the source browser. Any modifications to
-|windowInfo| will be ignored if the parent browser is wrapped in a
+|window_info| will be ignored if the parent browser is wrapped in a
 CefBrowserView.
 
 Note that if you return True and create the popup window yourself, then
@@ -61,7 +61,6 @@ There will be no "window.opener" property available in the popup window.
 
 `WindowOpenDisposition` constants in the cefpython module:
 * WOD_UNKNOWN,
-* WOD_SUPPRESS_OPEN,
 * WOD_CURRENT_TAB,
 * WOD_SINGLETON_TAB,
 * WOD_NEW_FOREGROUND_TAB,

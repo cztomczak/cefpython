@@ -1,5 +1,4 @@
-CC = g++
-CCFLAGS = -g $(CEF_CCFLAGS)
+CCFLAGS = -fPIC $(CEF_CCFLAGS)
 
 SRC = PaintBuffer.cpp
 OBJ = $(SRC:.cpp=.o)
@@ -15,7 +14,7 @@ INC = -I./../ -I/usr/include/gtk-2.0 \
 	-I/usr/lib/glib-2.0/include -I/usr/lib/gtk-2.0/include
 
 .cpp.o:
-	$(CC) -fPIC $(INC) $(CCFLAGS) -c $< -o $@
+	$(CXX) $(INC) $(CCFLAGS) -c $< -o $@
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)

@@ -1,8 +1,8 @@
 diff --git http_cache_transaction.cc http_cache_transaction.cc
-index 178df98..85dc6d1 100644
+index 45f3db6aed3c..373b1e3c5b45 100644
 --- http_cache_transaction.cc
 +++ http_cache_transaction.cc
-@@ -2489,7 +2489,8 @@ int HttpCache::Transaction::WriteResponseInfoToEntry(bool truncated) {
+@@ -2552,7 +2552,8 @@ int HttpCache::Transaction::WriteResponseInfoToEntry(bool truncated) {
    // blocking page is shown.  An alternative would be to reverse-map the cert
    // status to a net error and replay the net error.
    if ((response_.headers->HasHeaderValue("cache-control", "no-store")) ||
@@ -11,4 +11,4 @@ index 178df98..85dc6d1 100644
 +       IsCertStatusError(response_.ssl_info.cert_status))) {
      DoneWritingToEntry(false);
      if (net_log_.IsCapturing())
-       net_log_.EndEvent(NetLog::TYPE_HTTP_CACHE_WRITE_INFO);
+       net_log_.EndEvent(NetLogEventType::HTTP_CACHE_WRITE_INFO);

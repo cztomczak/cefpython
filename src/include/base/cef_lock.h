@@ -45,18 +45,20 @@
 // If the Chromium implementation diverges the below implementation should be
 // updated to match.
 
+#include "include/base/cef_logging.h"
 #include "include/base/cef_macros.h"
 #include "include/base/cef_platform_thread.h"
 #include "include/base/internal/cef_lock_impl.h"
 
 namespace base {
+namespace cef_internal {
 
 // A convenient wrapper for an OS specific critical section.  The only real
 // intelligence in this class is in debug mode for the support for the
 // AssertAcquired() method.
 class Lock {
  public:
-#if defined(NDEBUG)             // Optimized wrapper implementation
+#if !DCHECK_IS_ON()  // Optimized wrapper implementation
   Lock() : lock_() {}
   ~Lock() {}
   void Acquire() { lock_.Lock(); }
@@ -95,10 +97,10 @@ class Lock {
   }
 
   void AssertAcquired() const;
-#endif                          // NDEBUG
+#endif  // !DCHECK_IS_ON()
 
  private:
-#if !defined(NDEBUG)
+#if DCHECK_IS_ON()
   // Members and routines taking care of locks assertions.
   // Note that this checks for recursive locks and allows them
   // if the variable is set.  This is allowed by the underlying implementation
@@ -110,10 +112,10 @@ class Lock {
   // All private data is implicitly protected by lock_.
   // Be VERY careful to only access members under that lock.
   base::PlatformThreadRef owning_thread_ref_;
-#endif  // NDEBUG
+#endif  // DCHECK_IS_ON()
 
   // Platform specific underlying lock implementation.
-  cef_internal::LockImpl lock_;
+  LockImpl lock_;
 
   DISALLOW_COPY_AND_ASSIGN(Lock);
 };
@@ -159,6 +161,15 @@ class AutoUnlock {
   Lock& lock_;
   DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
 };
+
+}  // namespace cef_internal
+
+// Implement classes in the cef_internal namespace and then expose them to the
+// base namespace. This avoids conflicts with the base.lib implementation when
+// linking sandbox support on Windows.
+using cef_internal::Lock;
+using cef_internal::AutoLock;
+using cef_internal::AutoUnlock;
 
 }  // namespace base
 

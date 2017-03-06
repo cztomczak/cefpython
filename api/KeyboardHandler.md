@@ -21,15 +21,15 @@ Table of contents:
 | --- | --- |
 | browser | [Browser](Browser.md) |
 | event | KeyEvent |
-| eventHandle | MSG\* / GdkEvent\* / NSEvent\*` |
-| isKeyboardShortcutOut | out list[0] -> bool |
-| __Return__ | void |
+| event_handle | MSG\* / GdkEvent\* / NSEvent\*` |
+| is_keyboard_shortcut_out | list |
+| __Return__ | bool |
 
 Called before a keyboard event is sent to the renderer. |event| contains
-information about the keyboard event. |eventHandle| is the operating system
+information about the keyboard event. |event_handle| is the operating system
 event message, if any. Return true if the event was handled or false
 otherwise. If the event will be handled in OnKeyEvent() as a keyboard
-shortcut, set isKeyboardShortcutOut[0] to True and return False.
+shortcut, set |is_keyboard_shortcut_out[0]| to True and return False.
 
 KeyEvent is a dictionary with the following keys:
 
@@ -77,10 +77,11 @@ KeyEventFlags constants defined in the cefpython module:
 | --- | --- |
 | browser | [Browser](Browser.md) |
 | event | KeyEvent |
-| eventHandle | MSG\* / GdkEvent\* / NSEvent\* |
-| __Return__ | void |
+| event_handle | MSG\* / GdkEvent\* / NSEvent\* |
+| __Return__ | bool |
 
 Called after the renderer and javascript in the page has had a chance to
 handle the event. |event| contains information about the keyboard event.
 |os_event| is the operating system event message, if any. Return true if
-the keyboard event was handled or false otherwise. Description of the KeyEvent type is in the OnPreKeyEvent() callback.
+the keyboard event was handled or false otherwise. Description of the
+KeyEvent type is in the OnPreKeyEvent() callback.

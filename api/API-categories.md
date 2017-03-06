@@ -3,6 +3,11 @@
 # API categories
 
 
+### Modules
+
+ * [cefpython](cefpython.md) module
+
+
 ### Settings
 
  * [ApplicationSettings](ApplicationSettings.md) dictionary
@@ -10,14 +15,16 @@
  * [CommandLineSwitches](CommandLineSwitches.md) dictionary
 
 
-### Objects
+### Classes and objects
 
  * [Browser](Browser.md) object
  * [Callback](Callback.md) object
  * [Cookie](Cookie.md) class
  * [CookieManager](CookieManager.md) class
  * [DpiAware](DpiAware.md) class (Win)
+ * [DragData](DragData.md) object
  * [Frame](Frame.md) object
+ * [Image](Image.md) object
  * [JavascriptBindings](JavascriptBindings.md) class
  * [JavascriptCallback](JavascriptCallback.md) object
  * [PaintBuffer](PaintBuffer.md) object
@@ -29,11 +36,11 @@
  * [WindowUtils](WindowUtils.md) class
 
 
-### Handlers
+### Handlers (interfaces)
 
  * [DisplayHandler](DisplayHandler.md)
  * [DownloadHandler](DownloadHandler.md)
- * [JavascriptContextHandler](JavascriptContextHandler.md)
+ * [FocusHandler](FocusHandler.md)
  * [JavascriptDialogHandler](JavascriptDialogHandler.md)
  * [KeyboardHandler](KeyboardHandler.md)
  * [LifespanHandler](LifespanHandler.md)
@@ -41,8 +48,12 @@
  * [RenderHandler](RenderHandler.md)
  * [RequestHandler](RequestHandler.md)
  * [ResourceHandler](ResourceHandler.md)
+ * [V8ContextHandler](V8ContextHandler.md)
 
 
-### Modules
+### Other interfaces
 
- * [cefpython](cefpython.md) module
+ * [CookieVisitor](CookieVisitor.md) interface
+ * [StringVisitor](StringVisitor.md) interface
+ * [WebRequestClient](WebRequestClient.md) interface
+

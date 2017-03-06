@@ -9,23 +9,28 @@
 #   -Wl,-z,relro
 
 UNAME_S = $(shell uname -s)
-CC = g++
-CCFLAGS = -fPIC -std=gnu++11 -Wall -Werror -DBROWSER_PROCESS \
-			$(CEF_CCFLAGS)
+CCFLAGS = -fPIC -DBROWSER_PROCESS $(CEF_CCFLAGS)
 
 ifeq ($(UNAME_S), Linux)
-	CPP_FILES = print_handler_gtk.cpp
-else
-	CPP_FILES =
+	SRC_MORE = print_handler_gtk.cpp \
+			main_message_loop/main_message_loop_external_pump_linux.cpp
+else ifeq ($(UNAME_S), Darwin)
+    SRC_MORE = main_message_loop/main_message_loop_external_pump_mac.mm
 endif
 
-
 SRC = cefpython_app.cpp v8function_handler.cpp v8utils.cpp \
-		javascript_callback.cpp $(CPP_FILES)
-OBJ = $(SRC:.cpp=.o)
+		javascript_callback.cpp \
+		main_message_loop/main_message_loop.cpp \
+		main_message_loop/main_message_loop_std.cpp \
+		main_message_loop/main_message_loop_external_pump.cpp \
+		$(SRC_MORE)
+
+OBJ = $(filter %.o, $(SRC:.cpp=.o) $(SRC:.mm=.o))
+.SUFFIXES: .cpp .mm .o
+
 OUT = libcefpythonapp.a
 
-INC = -I./../ -I/usr/include/python2.7 \
+INC = -I./../ -I./../common/ -I/usr/include/python2.7 \
 	-I/usr/include/gtk-2.0 \
 	-I/usr/include/gtk-unix-print-2.0 \
 	-I/usr/include/glib-2.0 \
@@ -46,10 +51,14 @@ INC = -I./../ -I/usr/include/python2.7 \
 	-I/usr/lib/gtk-2.0/gtk-unix-print-2.0 \
 	-I/usr/lib/glib-2.0/include
 
-.cpp.o:
-	@echo [CEFPYTHONAPP] Building $@ from $<...
-	$(CC) $(CCFLAGS) $(INC) -c $< -o $@
-
 $(OUT): $(OBJ)
 	@echo [CEFPYTHONAPP] Creating library $(OUT) from $(OBJ)...
 	ar rcs $(OUT) $(OBJ)
+
+.cpp.o:
+	@echo [CEFPYTHONAPP] Building $@ from $<...
+	$(CXX) $(CCFLAGS) $(INC) -c $< -o $@
+
+.mm.o:
+	@echo [CEFPYTHONAPP] Building $@ from $<...
+	$(CXX) $(CCFLAGS) $(INC) -c $< -o $@

@@ -5,7 +5,7 @@
 # -Werror - treat warnings as errors
 
 UNAME_S = $(shell uname -s)
-INC = -I./../ -I/usr/include/python2.7 \
+INC = -I./../ -I./../common/ -I/usr/include/python2.7 \
 	-I/usr/include/gtk-2.0 \
 	-I/usr/include/gtk-unix-print-2.0 \
 	-I/usr/include/glib-2.0 \
@@ -27,28 +27,32 @@ INC = -I./../ -I/usr/include/python2.7 \
 	-I/usr/lib/glib-2.0/include
 
 ifeq ($(UNAME_S), Linux)
-	LIB_DIRS = -L./../linux/binaries_64bit -L./../linux/binaries_32bit \
-			   -L./../linux/setup/lib_64bit -L./../linux/setup/lib_32bit
+	LIB_DIRS = -L./../../build/cef_linux64/bin \
+			   -L./../../build/cef_linux32/bin \
+			   -L./../../build/cef_linux64/lib \
+			   -L./../../build/cef_linux32/lib
 else ifeq ($(UNAME_S), Darwin)
-	LIB_DIRS = -L./../mac/binaries_64bit/ -L./../mac/binaries_32bit/ \
-			   -L./../mac/setup/lib_64bit -L./../mac/setup/lib_32bit
+	LIB_DIRS = -F$(CEF_BIN) \
+			   -L$(CEF_LIB)
 endif
 
 ifeq ($(UNAME_S), Linux)
 	CPP_FILES = print_handler_gtk.cpp
-	LIBS = -lgobject-2.0 -lglib-2.0 -lgtk-x11-2.0
-else
+	LIBS = -lcef -lgobject-2.0 -lglib-2.0 -lgtk-x11-2.0
+else ifeq ($(UNAME_S), Darwin)
 	CPP_FILES =
-	LIBS =
+	# Include framework before libcef_dll_wrapper
+	LIBS = -framework "Chromium Embedded Framework"
 endif
 
-CCFLAGS = -g -std=gnu++11 -Wall -Werror -DRENDERER_PROCESS $(CEF_CCFLAGS)
-
+CCFLAGS = -DRENDERER_PROCESS $(CEF_CCFLAGS)
 
 subprocess:
 	# -fPIC is required only for libraries included by Cython.
 	@echo [SUBPROCESS] Building the 'subprocess' executable
-	g++ $(CCFLAGS) $(INC) $(LIB_DIRS) main.cpp cefpython_app.cpp \
+	$(CXX) $(CCFLAGS) $(INC) $(LIB_DIRS) main.cpp cefpython_app.cpp \
 		v8function_handler.cpp v8utils.cpp javascript_callback.cpp \
 		$(CPP_FILES) \
-		$(LIBS) -lcef -lcef_dll_wrapper -o subprocess -Wl,-rpath,.
+		$(CEF_LINK_FLAGS) \
+		$(LIBS) -lcef_dll_wrapper \
+		-o subprocess -Wl,-rpath,@loader_path/

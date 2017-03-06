@@ -23,6 +23,10 @@ Table of contents:
 
 Get int pointer to the `void*` buffer.
 
+Description from upstream CEF:
+> |buffer| will be |width|*|height|*4 bytes in size and represents a BGRA
+> image with an upper-left origin.
+
 
 ### GetString
 

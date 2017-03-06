@@ -8,7 +8,7 @@
 #include "../windows/stdint.h"
 #endif
 
-#include "cefpython_public_api.h"
+#include "common/cefpython_public_api.h"
 
 class RequestContextHandler :
         public CefRequestContextHandler
@@ -32,6 +32,7 @@ public:
     virtual CefRefPtr<CefCookieManager> GetCookieManager() OVERRIDE;
     virtual bool OnBeforePluginLoad(const CefString& mime_type,
                                   const CefString& plugin_url,
+                                  bool is_main_frame,
                                   const CefString& top_origin_url,
                                   CefRefPtr<CefWebPluginInfo> plugin_info,
                                   PluginPolicy* plugin_policy) OVERRIDE;

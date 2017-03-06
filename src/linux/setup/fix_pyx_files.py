@@ -61,10 +61,18 @@ mainfile = "cefpython.pyx"
 
 pyxfiles = glob.glob("../../*.pyx")
 if not len(pyxfiles):
+    print("ERROR: no .pyx files found in root")
     sys.exit(1)
 pyxfiles = [file for file in pyxfiles if file.find(mainfile) == -1]
 # Now, pyxfiles contains all pyx files except the mainfile (cefpython.pyx),
 # we do not fix includes in mainfile.
+
+pyxfiles2 = glob.glob("../../handlers/*.pyx")
+if not len(pyxfiles2):
+    print("ERROR: no .pyx files found in handlers/")
+    sys.exit(1)
+
+pyxfiles = pyxfiles + pyxfiles2
 
 # So that this is the right directory we're in.
 if os.path.exists("setup"):
@@ -79,9 +87,23 @@ for pyxfile in oldpyxfiles:
         os.remove(pyxfile)
 
 # Copying pyxfiles and reading its contents.
-
 print("Copying .pyx files to /setup/: %s" % pyxfiles)
+
+# Copying cefpython.pyx
+# and Fix includes in cefpython.pyx
+# * include "handlers/focus_handler.pyx" becomes include "focus_handler.pyx"
 shutil.copy("../../%s" % mainfile, "./%s" % mainfile)
+with open("./%s" % mainfile, "r") as fo:
+    content = fo.read()
+    (content, subs) = re.subn(r"^include \"handlers/",
+                              "include \"",
+                              content,
+                              flags=re.MULTILINE)
+with open("./%s" % mainfile, "w") as fo:
+    fo.write(content)
+    print("%s includes fixed in %s" % (subs, mainfile))
+
+
 # Rest of the files will be copied in for loop below.
 
 print("Fixing includes in .pyx files:")

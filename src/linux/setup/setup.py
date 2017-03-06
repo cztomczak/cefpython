@@ -6,17 +6,59 @@ import sys
 import platform
 from Cython.Compiler import Options
 import Cython
+import os
+import struct
 
 print("Cython version: %s" % Cython.__version__)
 
-BITS = platform.architecture()[0]
-assert (BITS == "32bit" or BITS == "64bit")
+if len(sys.argv) > 1 and "--fast" in sys.argv:
+    sys.argv.remove("--fast")
+    # Fast mode disables optimization flags
+    FAST = True
+    print("FAST mode On")
+    COMPILE_OPTIMIZE_FLAGS = ['-flto', '-std=gnu++11']
+    LINK_OPTIMIZE_FLAGS = ['-flto']
+else:
+    FAST = False
+    # Fix "ImportError ... undefined symbol ..." caused by CEF's include/base/
+    # headers by adding the -flto flag (Issue #230). Unfortunately -flto
+    # prolongs compilation time significantly.
+    # More on the other flags: https://stackoverflow.com/questions/6687630/
+    COMPILE_OPTIMIZE_FLAGS = ['-flto', '-fdata-sections', '-ffunction-sections',
+                              '-std=gnu++11']
+    LINK_OPTIMIZE_FLAGS = ['-flto', '-Wl,--gc-sections']
+
+
+# Architecture and OS postfixes
+ARCH32 = (8 * struct.calcsize('P') == 32)
+ARCH64 = (8 * struct.calcsize('P') == 64)
+OS_POSTFIX = ("win" if platform.system() == "Windows" else
+              "linux" if platform.system() == "Linux" else
+              "mac" if platform.system() == "Darwin" else "unknown")
+OS_POSTFIX2 = "unknown"
+if OS_POSTFIX == "win":
+    OS_POSTFIX2 = "win32" if ARCH32 else "win64"
+elif OS_POSTFIX == "mac":
+    OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
+elif OS_POSTFIX == "linux":
+    OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
+
+# Directories
+SETUP_DIR = os.path.abspath(os.path.dirname(__file__))
+LINUX_DIR = os.path.abspath(os.path.join(SETUP_DIR, ".."))
+SRC_DIR = os.path.abspath(os.path.join(LINUX_DIR, ".."))
+CEFPYTHON_DIR = os.path.abspath(os.path.join(SRC_DIR, ".."))
+BUILD_DIR = os.path.abspath(os.path.join(CEFPYTHON_DIR, "build"))
+CEF_BINARY = os.path.abspath(os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2))
+CEFPYTHON_BINARY = os.path.abspath(os.path.join(BUILD_DIR,
+                                                "cefpython_"+OS_POSTFIX2))
 
 # Stop on first error, otherwise hundreds of errors appear in the console.
 Options.fast_fail = True
 
 # Python version string: "27" or "32".
 PYTHON_VERSION = str(sys.version_info.major) + str(sys.version_info.minor)
+
 
 def CompileTimeConstants():
 
@@ -47,7 +89,9 @@ ext_modules = [Extension(
     include_dirs=[
         r'./../',
         r'./../../',
-        r'./../../cython_includes/',
+        r'./../../common/',
+        r'./../../extern/',
+        r'./../../extern/cef/',
         '/usr/include/gtk-2.0',
         '/usr/include/glib-2.0',
         '/usr/include/gtk-unix-print-2.0',
@@ -71,11 +115,10 @@ ext_modules = [Extension(
         '/usr/lib/glib-2.0/include',
     ],
 
-    # http_authentication not implemented on Linux.
     library_dirs=[
-        r'./lib_%s' % BITS,
+        os.path.join(CEF_BINARY, "lib"),
         r'./../../client_handler/',
-        r'./../../subprocess/', # libcefpythonapp
+        r'./../../subprocess/',  # libcefpythonapp
         r'./../../cpp_utils/'
     ],
 
@@ -97,22 +140,17 @@ ext_modules = [Extension(
     # running scripts from the same directory that libcef.so resides in.
     # runtime_library_dirs=[
     #    './'
-    #],
+    # ],
 
-    # Fix "ImportError ... undefined symbol ..." caused by CEF's include/base/
-    # headers by adding the -flto flag (Issue #230). Unfortunately -flto
-    # prolongs compilation time significantly.
-    # More on the other flags: https://stackoverflow.com/questions/6687630/
-    extra_compile_args=['-flto', '-fdata-sections', '-ffunction-sections',
-                        '-std=gnu++11'],
-    extra_link_args=['-flto', '-Wl,--gc-sections'],
+    extra_compile_args=COMPILE_OPTIMIZE_FLAGS,
+    extra_link_args=LINK_OPTIMIZE_FLAGS,
 
     # Defining macros:
     # define_macros = [("UNICODE","1"), ("_UNICODE","1"), ]
 )]
 
 setup(
-    name = 'cefpython_py%s' % PYTHON_VERSION,
-    cmdclass = {'build_ext': build_ext},
-    ext_modules = ext_modules
+    name='cefpython_py%s' % PYTHON_VERSION,
+    cmdclass={'build_ext': build_ext},
+    ext_modules=ext_modules
 )

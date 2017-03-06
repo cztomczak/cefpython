@@ -3,7 +3,7 @@
 // Website: http://code.google.com/p/cefpython/
 
 #include "request_context_handler.h"
-#include "cefpython_public_api.h"
+#include "common/cefpython_public_api.h"
 #include "DebugLog.h"
 
 // --------------------------------------------------------------------------
@@ -25,11 +25,16 @@ CefRefPtr<CefCookieManager> RequestContextHandler::GetCookieManager() {
 bool RequestContextHandler::OnBeforePluginLoad(
                         const CefString& mime_type,
                         const CefString& plugin_url,
+                        bool is_main_frame,
                         const CefString& top_origin_url,
                         CefRefPtr<CefWebPluginInfo> plugin_info,
                         PluginPolicy* plugin_policy) {
     // Called on multiple threads
-    return RequestHandler_OnBeforePluginLoad(browser_, mime_type, plugin_url,
-                                             top_origin_url, plugin_info,
+    return RequestHandler_OnBeforePluginLoad(browser_,
+                                             mime_type,
+                                             plugin_url,
+                                             is_main_frame,
+                                             top_origin_url,
+                                             plugin_info,
                                              plugin_policy);
 }

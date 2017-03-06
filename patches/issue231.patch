@@ -1,5 +1,5 @@
 diff --git include/capi/cef_path_util_capi.h include/capi/cef_path_util_capi.h
-index 23befac..de31b3d 100644
+index de99ebd8..dd2f21c5 100644
 --- include/capi/cef_path_util_capi.h
 +++ include/capi/cef_path_util_capi.h
 @@ -51,6 +51,16 @@ extern "C" {
@@ -20,7 +20,7 @@ index 23befac..de31b3d 100644
  }
  #endif
 diff --git include/cef_path_util.h include/cef_path_util.h
-index 552f4ba..95af66e 100644
+index 552f4ba5..95af66ef 100644
 --- include/cef_path_util.h
 +++ include/cef_path_util.h
 @@ -49,4 +49,15 @@ typedef cef_path_key_t PathKey;
@@ -40,7 +40,7 @@ index 552f4ba..95af66e 100644
 +
  #endif  // CEF_INCLUDE_CEF_PATH_UTIL_H_
 diff --git libcef/browser/path_util_impl.cc libcef/browser/path_util_impl.cc
-index 6a75930..ad620d7 100644
+index 6a759309..ad620d7f 100644
 --- libcef/browser/path_util_impl.cc
 +++ libcef/browser/path_util_impl.cc
 @@ -51,3 +51,38 @@ bool CefGetPath(PathKey key, CefString& path) {
@@ -83,10 +83,10 @@ index 6a75930..ad620d7 100644
 +  return PathService::Override(pref_key, file_path);
 +}
 diff --git libcef_dll/libcef_dll.cc libcef_dll/libcef_dll.cc
-index cde4fde..7a5b13a 100644
+index cc1aafe5..bde00c09 100644
 --- libcef_dll/libcef_dll.cc
 +++ libcef_dll/libcef_dll.cc
-@@ -739,6 +739,23 @@ CEF_EXPORT int cef_get_path(cef_path_key_t key, cef_string_t* path) {
+@@ -930,6 +930,23 @@ CEF_EXPORT int cef_get_path(cef_path_key_t key, cef_string_t* path) {
    return _retval;
  }
  
@@ -111,10 +111,10 @@ index cde4fde..7a5b13a 100644
    // AUTO-GENERATED CONTENT - DELETE THIS COMMENT BEFORE MODIFYING
  
 diff --git libcef_dll/wrapper/libcef_dll_wrapper.cc libcef_dll/wrapper/libcef_dll_wrapper.cc
-index 74827e3..cf35e11 100644
+index 08ddbd83..42e7dca1 100644
 --- libcef_dll/wrapper/libcef_dll_wrapper.cc
 +++ libcef_dll/wrapper/libcef_dll_wrapper.cc
-@@ -683,6 +683,23 @@ CEF_GLOBAL bool CefGetPath(PathKey key, CefString& path) {
+@@ -851,6 +851,23 @@ CEF_GLOBAL bool CefGetPath(PathKey key, CefString& path) {
    return _retval?true:false;
  }
  

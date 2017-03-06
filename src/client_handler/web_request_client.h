@@ -8,7 +8,7 @@
 #include "../windows/stdint.h"
 #endif
 
-#include "cefpython_public_api.h"
+#include "common/cefpython_public_api.h"
 
 class WebRequestClient : public CefURLRequestClient
 {

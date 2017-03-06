@@ -6,7 +6,7 @@
 // RENDERER_PROCESS macro is define when compiling the subprocess executable.
 
 #ifdef BROWSER_PROCESS
-#include "cefpython_public_api.h"
+#include "common/cefpython_public_api.h"
 #endif
 
 #include "cefpython_app.h"
@@ -20,6 +20,10 @@
 #include "v8utils.h"
 #include "javascript_callback.h"
 #include "v8function_handler.h"
+
+#ifdef BROWSER_PROCESS
+#include "main_message_loop/main_message_loop_external_pump.h"
+#endif
 
 bool g_debug = false;
 std::string g_logFile = "debug.log";
@@ -83,19 +87,17 @@ CefRefPtr<CefRenderProcessHandler> CefPythonApp::GetRenderProcessHandler() {
     return this;
 }
 
-CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
-    return print_handler_;
-}
-
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // CefBrowserProcessHandler
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 void CefPythonApp::OnContextInitialized() {
+#ifdef BROWSER_PROCESS
     REQUIRE_UI_THREAD();
 #if defined(OS_LINUX)
     print_handler_ = new ClientPrintHandlerGtk();
-#endif
+#endif // OS_LINUX
+#endif // BROWSER_PROCESS
 }
 
 void CefPythonApp::OnBeforeChildProcessLaunch(
@@ -104,11 +106,12 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
     // This is included only in the Browser process, when building
     // the libcefpythonapp library.
     BrowserProcessHandler_OnBeforeChildProcessLaunch(command_line);
-#endif
+#endif // BROWSER_PROCESS
 }
 
 void CefPythonApp::OnRenderProcessThreadCreated(
         CefRefPtr<CefListValue> extra_info) {
+#ifdef BROWSER_PROCESS
     // If you have an existing CefListValue that you would like
     // to provide, do this:
     // | extra_info = mylist.get()
@@ -117,11 +120,24 @@ void CefPythonApp::OnRenderProcessThreadCreated(
     REQUIRE_IO_THREAD();
     extra_info->SetBool(0, g_debug);
     extra_info->SetString(1, g_logFile);
-#ifdef BROWSER_PROCESS
     // This is included only in the Browser process, when building
     // the libcefpythonapp library.
     BrowserProcessHandler_OnRenderProcessThreadCreated(extra_info);
-#endif
+#endif // BROWSER_PROCESS
+}
+
+CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
+    return print_handler_;
+}
+
+void CefPythonApp::OnScheduleMessagePumpWork(int64 delay_ms) {
+#ifdef BROWSER_PROCESS
+    MainMessageLoopExternalPump* message_pump =\
+            MainMessageLoopExternalPump::Get();
+    if (message_pump) {
+        message_pump->OnScheduleMessagePumpWork(delay_ms);
+    }
+#endif // BROWSER_PROCESS
 }
 
 // -----------------------------------------------------------------------------
@@ -563,7 +579,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     for (std::vector<CefString>::iterator it = objectsVector.begin(); \
             it != objectsVector.end(); ++it) {
         CefString objectName = *it;
-        CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(NULL);
+        CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(NULL, NULL);
         v8Window->SetValue(objectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
         // METHODS.
         if (!(objects->GetType(objectName) == VTYPE_DICTIONARY)) {

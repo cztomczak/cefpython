@@ -25,13 +25,12 @@ Table of contents:
 | Parameter | Type |
 | --- | --- |
 | parentWindowHandle | int |
-| windowRect | list |
+| windowRect (optional) | list |
 | __Return__ | void |
 
 Create the browser as a child window/view.
 
-`windowRect` param is optional on Windows. On Linux & Mac it is required.
-Example value: [left, top, right, bottom].
+`windowRect` example value: [left, top, right, bottom].
 
 
 ### SetAsPopup

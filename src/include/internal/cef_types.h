@@ -166,11 +166,22 @@ typedef struct _cef_settings_t {
 
   ///
   // The path to a separate executable that will be launched for sub-processes.
-  // By default the browser process executable is used. See the comments on
-  // CefExecuteProcess() for details. Also configurable using the
-  // "browser-subprocess-path" command-line switch.
+  // If this value is empty on Windows or Linux then the main process executable
+  // will be used. If this value is empty on macOS then a helper executable must
+  // exist at "Contents/Frameworks/<app> Helper.app/Contents/MacOS/<app> Helper"
+  // in the top-level app bundle. See the comments on CefExecuteProcess() for
+  // details. Also configurable using the "browser-subprocess-path" command-line
+  // switch.
   ///
   cef_string_t browser_subprocess_path;
+
+  ///
+  // The path to the CEF framework directory on macOS. If this value is empty
+  // then the framework must exist at "Contents/Frameworks/Chromium Embedded
+  // Framework.framework" in the top-level app bundle. Also configurable using
+  // the "framework-dir-path" command-line switch.
+  ///
+  cef_string_t framework_dir_path;
 
   ///
   // Set to true (1) to have the browser process message loop run in a separate
@@ -179,6 +190,18 @@ typedef struct _cef_settings_t {
   // Windows.
   ///
   int multi_threaded_message_loop;
+
+  ///
+  // Set to true (1) to control browser process main (UI) thread message pump
+  // scheduling via the CefBrowserProcessHandler::OnScheduleMessagePumpWork()
+  // callback. This option is recommended for use in combination with the
+  // CefDoMessageLoopWork() function in cases where the CEF message loop must be
+  // integrated into an existing application message loop (see additional
+  // comments and warnings on CefDoMessageLoopWork). Enabling this option is not
+  // recommended for most users; leave this option disabled and use either the
+  // CefRunMessageLoop() function or multi_threaded_message_loop if possible.
+  ///
+  int external_message_pump;
 
   ///
   // Set to true (1) to enable windowless (off-screen) rendering support. Do not
@@ -365,6 +388,19 @@ typedef struct _cef_settings_t {
   int ignore_certificate_errors;
 
   ///
+  // Set to true (1) to enable date-based expiration of built in network
+  // security information (i.e. certificate transparency logs, HSTS preloading
+  // and pinning information). Enabling this option improves network security
+  // but may cause HTTPS load failures when using CEF binaries built more than
+  // 10 weeks in the past. See https://www.certificate-transparency.org/ and
+  // https://www.chromium.org/hsts for details. Also configurable using the
+  // "enable-net-security-expiration" command-line switch. Can be overridden for
+  // individual CefRequestContext instances via the
+  // CefRequestContextSettings.enable_net_security_expiration value.
+  ///
+  int enable_net_security_expiration;
+
+  ///
   // Opaque background color used for accelerated content. By default the
   // background color will be white. Only the RGB compontents of the specified
   // value will be used. The alpha component must greater than 0 to enable use
@@ -430,6 +466,17 @@ typedef struct _cef_request_context_settings_t {
   // |cache_path| matches the CefSettings.cache_path value.
   ///
   int ignore_certificate_errors;
+
+  ///
+  // Set to true (1) to enable date-based expiration of built in network
+  // security information (i.e. certificate transparency logs, HSTS preloading
+  // and pinning information). Enabling this option improves network security
+  // but may cause HTTPS load failures when using CEF binaries built more than
+  // 10 weeks in the past. See https://www.certificate-transparency.org/ and
+  // https://www.chromium.org/hsts for details. Can be set globally using the
+  // CefSettings.enable_net_security_expiration value.
+  ///
+  int enable_net_security_expiration;
 
   ///
   // Comma delimited ordered list of language codes without any whitespace that
@@ -526,12 +573,6 @@ typedef struct _cef_browser_settings_t {
   // command-line switch.
   ///
   cef_state_t javascript_dom_paste;
-
-  ///
-  // Controls whether the caret position will be drawn. Also configurable using
-  // the "enable-caret-browsing" command-line switch.
-  ///
-  cef_state_t caret_browsing;
 
   ///
   // Controls whether any plugins will be loaded. Also configurable using the
@@ -930,11 +971,12 @@ typedef enum {
 } cef_cert_status_t;
 
 ///
-// The manner in which a link click should be opened.
+// The manner in which a link click should be opened. These constants match
+// their equivalents in Chromium's window_open_disposition.h and should not be
+// renumbered.
 ///
 typedef enum {
   WOD_UNKNOWN,
-  WOD_SUPPRESS_OPEN,
   WOD_CURRENT_TAB,
   WOD_SINGLETON_TAB,
   WOD_NEW_FOREGROUND_TAB,
@@ -1382,6 +1424,73 @@ typedef enum {
   ///
   TID_RENDERER,
 } cef_thread_id_t;
+
+///
+// Thread priority values listed in increasing order of importance.
+///
+typedef enum {
+  ///
+  // Suitable for threads that shouldn't disrupt high priority work.
+  ///
+  TP_BACKGROUND,
+
+  ///
+  // Default priority level.
+  ///
+  TP_NORMAL,
+
+  ///
+  // Suitable for threads which generate data for the display (at ~60Hz).
+  ///
+  TP_DISPLAY,
+
+  ///
+  // Suitable for low-latency, glitch-resistant audio.
+  ///
+  TP_REALTIME_AUDIO,
+} cef_thread_priority_t;
+
+///
+// Message loop types. Indicates the set of asynchronous events that a message
+// loop can process.
+///
+typedef enum {
+  ///
+  // Supports tasks and timers.
+  ///
+  ML_TYPE_DEFAULT,
+
+  ///
+  // Supports tasks, timers and native UI events (e.g. Windows messages).
+  ///
+  ML_TYPE_UI,
+
+  ///
+  // Supports tasks, timers and asynchronous IO events.
+  ///
+  ML_TYPE_IO,
+} cef_message_loop_type_t;
+
+///
+// Windows COM initialization mode. Specifies how COM will be initialized for a
+// new thread.
+///
+typedef enum {
+  ///
+  // No COM initialization.
+  ///
+  COM_INIT_MODE_NONE,
+
+  ///
+  // Initialize COM using single-threaded apartments.
+  ///
+  COM_INIT_MODE_STA,
+
+  ///
+  // Initialize COM using multi-threaded apartments.
+  ///
+  COM_INIT_MODE_MTA,
+} cef_com_init_mode_t;
 
 ///
 // Supported value types.
@@ -2622,6 +2731,79 @@ typedef enum {
   CEF_MENU_ANCHOR_TOPRIGHT,
   CEF_MENU_ANCHOR_BOTTOMCENTER,
 } cef_menu_anchor_position_t;
+
+// Supported SSL version values. See net/ssl/ssl_connection_status_flags.h
+// for more information.
+typedef enum {
+  SSL_CONNECTION_VERSION_UNKNOWN = 0,  // Unknown SSL version.
+  SSL_CONNECTION_VERSION_SSL2 = 1,
+  SSL_CONNECTION_VERSION_SSL3 = 2,
+  SSL_CONNECTION_VERSION_TLS1 = 3,
+  SSL_CONNECTION_VERSION_TLS1_1 = 4,
+  SSL_CONNECTION_VERSION_TLS1_2 = 5,
+  // Reserve 6 for TLS 1.3.
+  SSL_CONNECTION_VERSION_QUIC = 7,
+} cef_ssl_version_t;
+
+// Supported SSL content status flags. See content/public/common/ssl_status.h
+// for more information.
+typedef enum {
+  SSL_CONTENT_NORMAL_CONTENT = 0,
+  SSL_CONTENT_DISPLAYED_INSECURE_CONTENT = 1 << 0,
+  SSL_CONTENT_RAN_INSECURE_CONTENT = 1 << 1,
+} cef_ssl_content_status_t;
+
+///
+// Error codes for CDM registration. See cef_web_plugin.h for details.
+///
+typedef enum {
+  ///
+  // No error. Registration completed successfully.
+  ///
+  CEF_CDM_REGISTRATION_ERROR_NONE,
+
+  ///
+  // Required files or manifest contents are missing.
+  ///
+  CEF_CDM_REGISTRATION_ERROR_INCORRECT_CONTENTS,
+
+  ///
+  // The CDM is incompatible with the current Chromium version.
+  ///
+  CEF_CDM_REGISTRATION_ERROR_INCOMPATIBLE,
+
+  ///
+  // CDM registration is not supported at this time.
+  ///
+  CEF_CDM_REGISTRATION_ERROR_NOT_SUPPORTED,
+} cef_cdm_registration_error_t;
+
+///
+// Structure representing IME composition underline information. This is a thin
+// wrapper around Blink's WebCompositionUnderline class and should be kept in
+// sync with that.
+///
+typedef struct _cef_composition_underline_t {
+  ///
+  // Underline character range.
+  ///
+  cef_range_t range;
+
+  ///
+  // Text color.
+  ///
+  cef_color_t color;
+
+  ///
+  // Background color.
+  ///
+  cef_color_t background_color;
+
+  ///
+  // Set to true (1) for thick underline.
+  ///
+  int thick;
+} cef_composition_underline_t;
 
 #ifdef __cplusplus
 }
