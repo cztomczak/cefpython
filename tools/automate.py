@@ -221,20 +221,22 @@ def prebuilt_cef():
     # Find cef_binary directory in the build directory
     if Options.cef_version:
         cef_binary = os.path.join(Options.build_dir,
-                                  "cef_binary_{cef_version}_*{sep}"
+                                  "cef_binary_{cef_version}_{os}{sep}"
                                   .format(cef_version=Options.cef_version,
+                                          os=CEF_POSTFIX2,
                                           sep=os.sep))
     else:
         cef_binary = os.path.join(Options.build_dir,
-                                  "cef_binary_3.{cef_branch}.*{sep}"
+                                  "cef_binary_3.{cef_branch}.*_{os}{sep}"
                                   .format(cef_branch=Options.cef_branch,
+                                          os=CEF_POSTFIX2,
                                           sep=os.sep))
     dirs = glob.glob(cef_binary)
     if len(dirs) == 1:
         Options.cef_binary = dirs[0]
     else:
-        print("ERROR: Could not find prebuilt binaries in the build dir.")
-        print("       Eg. cef_binary_3.2883.1553.g80bd606_windows32/")
+        print("ERROR: Could not find prebuilt binaries in the build dir:")
+        print("       {cef_binary}".format(cef_binary=cef_binary))
         sys.exit(1)
 
     build_cef_projects()

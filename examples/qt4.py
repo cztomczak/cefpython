@@ -143,8 +143,7 @@ class CefWidget(CefWidgetParent):
         # stealing all focus due to Issue #284.
         if self.browser:
             if WINDOWS:
-                WindowUtils.OnSetFocus(self.cef_widget.getHandle(),
-                                       0, 0, 0)
+                WindowUtils.OnSetFocus(self.getHandle(), 0, 0, 0)
             self.browser.SetFocus(True)
 
     def focusOutEvent(self, event):

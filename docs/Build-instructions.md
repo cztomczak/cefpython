@@ -75,7 +75,7 @@ cd build/
 
 7) Install python dependencies:
 ```
-pip install -r ../tools/requirements.txt
+pip install --upgrade -r ../tools/requirements.txt
 ```
 
 8) Download Windows binaries and libraries from
@@ -119,7 +119,7 @@ cd build/
 
 5) Install python dependencies:
 ```
-sudo pip install -r ../tools/requirements.txt
+sudo pip install --upgrade -r ../tools/requirements.txt
 ```
 
 6) Download Linux binaries and libraries from
@@ -199,15 +199,14 @@ requirements common for all platforms.
 
 * MacOS 10.9+, Xcode5+ and Xcode command line tools. Only 64-bit builds
   are supported.
-* Upgrade setuptools package to latest version otherwise there will be
-  problems with Cython: `sudo pip install --upgrade setuptools`
 
 
 ### All platforms
 
-* Install dependencies for the automate.py tool by executing:
-  `cd tools/ && pip install -r requirements.txt` (on Linux use `sudo`).
-  This will install some PyPI packages including Cython.
+* Install/update dependencies for the tools by executing:
+  `cd cefpython/tools/ && pip install --upgrade -r requirements.txt`.
+  On Linux use `sudo`. You should run it each time you update to newer
+  cefpython version to avoid issues.
 
 
 ## Build using prebuilt CEF binaries and libraries

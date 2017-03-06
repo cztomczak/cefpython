@@ -10,16 +10,23 @@ import re
 # Architecture and OS postfixes
 ARCH32 = (8 * struct.calcsize('P') == 32)
 ARCH64 = (8 * struct.calcsize('P') == 64)
+# OS_POSTFIX is for directories/files names in cefpython sources
+# OS_POSTFIX2 is for platform name in cefpython binaries
+# CEF_POSTFIX2 is for platform name in upstream CEF binaries
 OS_POSTFIX = ("win" if platform.system() == "Windows" else
               "linux" if platform.system() == "Linux" else
               "mac" if platform.system() == "Darwin" else "unknown")
 OS_POSTFIX2 = "unknown"
+CEF_POSTFIX2 = "unknown"  # Upstream CEF binaries postfix
 if OS_POSTFIX == "win":
     OS_POSTFIX2 = "win32" if ARCH32 else "win64"
+    CEF_POSTFIX2 = "windows32" if ARCH32 else "windows64"
 elif OS_POSTFIX == "mac":
     OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
+    CEF_POSTFIX2 = "macosx32" if ARCH32 else "macosx64"
 elif OS_POSTFIX == "linux":
     OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
+    CEF_POSTFIX2 = "linux32" if ARCH32 else "linux64"
 
 # Platforms
 WINDOWS = (platform.system() == "Windows")

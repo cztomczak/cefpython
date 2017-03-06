@@ -664,10 +664,7 @@ def build_cefpython_module():
     # Move the cefpython module
     module_pattern = MODULE_NAME_TEMPLATE.format(pyversion=PYVERSION+"*",
                                                  ext=MODULE_EXT)
-    if MAC:
-        module_pattern = "./build/lib*/"+module_pattern
-    else:
-        module_pattern = "./"+module_pattern
+    module_pattern = "./build/lib*/" + module_pattern
     move_file_by_pattern(module_pattern, os.path.join(CEFPYTHON_BINARY,
                                                       MODULE_NAME))
 
