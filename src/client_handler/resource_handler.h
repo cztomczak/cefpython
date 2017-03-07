@@ -5,7 +5,7 @@
 #pragma once
 
 #if defined(_WIN32)
-#include "../windows/stdint.h"
+#include <stdint.h>
 #endif
 
 #include "common/cefpython_public_api.h"

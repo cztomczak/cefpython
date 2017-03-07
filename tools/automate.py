@@ -633,7 +633,7 @@ def fix_cef_include_files():
             fp.write(contents)
 
 
-def create_prebuilt_binaries(copy_apps=True):
+def create_prebuilt_binaries():
     """After building copy binaries/libs to build/cef_xxxx/.
     Not all projects may have been built on all platforms."""
 

@@ -8,12 +8,12 @@
 // _WIN32 is defined on both 32bit and 64bit.
 #if defined(_WIN32)
 #include "windows.h"
-#include "stdint_win.h"
 #include <stdio.h>
 #else
-#include <stdint.h>
 #include <string.h>
 #endif
+
+#include <stdint.h>
 
 void FlipBufferUpsideDown(void* _dest, const void* _src, int width, int height \
         ) {

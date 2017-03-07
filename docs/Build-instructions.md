@@ -149,11 +149,22 @@ requirements common for all platforms.
 
 * Install an appropriate MS compiler for a specific Python version:
   https://wiki.python.org/moin/WindowsCompilers
-* For Python 2.7 install "Microsoft Visual C++ Compiler for Python 2.7"
-  from [here](https://www.microsoft.com/en-us/download/details.aspx?id=44266)
-* When using "Visual C++ compiler for Python 2.7" you have to install
-  "Microsoft Visual C++ 2008 Redistributable Package (x64)" from
-  [here](https://www.microsoft.com/en-us/download/details.aspx?id=15336)
+    * For Python 2.7 install "Microsoft Visual C++ Compiler for Python 2.7"
+      from [here](https://www.microsoft.com/en-us/download/details.aspx?id=44266)
+    * When using "Visual C++ compiler for Python 2.7" you have to install
+      "Microsoft Visual C++ 2008 Redistributable Package (x64)" from
+      [here](https://www.microsoft.com/en-us/download/details.aspx?id=15336)
+    * For Python 2.7 copy "cefpython/src/windows/py27/stdint.h" to
+      "%LocalAppData%\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\include\"
+      if does not exist
+    * For Python 3.4 follow the instructions for installing Windows SDK 7.1.
+      If you encounter issue with .NET Framework 4 then make registry edits
+      as suggested here: [Windows SDK setup failure]
+      (http://stackoverflow.com/a/33260090/623622).
+    * For Python 3.4, if getting error:
+      `Cannot open include file 'ammintrin.h': No such file or directory`
+      then Copy that `ammitrin.h` file from for example VS 2015 installation
+      directory or find this file on the web. This is a Microsoft issue.
 * To build CEF from sources:
     * Use Win7 x64 or later. 32-bit OS'es are not supported. For more details
      see [here](https://www.chromium.org/developers/how-tos/build-instructions-windows).
@@ -165,8 +176,6 @@ requirements common for all platforms.
         to PATH
     * You need about 16 GB of RAM during linking. If there is an error
         just add additional virtual memory.
-    * For Python 2.7 copy "cefpython/src/windows/stdint.h" to
-      "%LocalAppData%\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\include\"
 
 
 ### Linux

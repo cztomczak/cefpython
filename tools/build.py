@@ -67,7 +67,6 @@ VERSION = ""
 
 # First run
 FIRST_RUN = False
-CEFPYTHON_H = os.path.join(BUILD_CEFPYTHON, "cefpython.h")
 
 
 def main():
@@ -283,31 +282,62 @@ def check_directories():
 
 
 def fix_cefpython_h():
+    """This function does two things: 1) Disable warnings in cefpython.h
+    and 2) Make a copy named cefpython_fixed.h - this copy will be used
+    by C++ projects and its modification time won't change every time
+    you run build.py script, thus C++ won't rebuild each time."""
+
     # Fix cefpython.h to disable this warning:
     # > warning: 'somefunc' has C-linkage specified, but returns
     # > user-defined type 'sometype' which is incompatible with C
     # On Mac this warning must be disabled using -Wno-return-type-c-linkage
     # flag in makefiles.
-    if MAC:
-        return
-    os.chdir(BUILD_CEFPYTHON)
-    print("[build.py] Fix cefpython.h to disable warnings")
-    if not os.path.exists("cefpython.h"):
+
+    print("[build.py] Fix cefpython.h in the build_cefpython/ directory")
+    if not os.path.exists(CEFPYTHON_H):
+        assert not os.path.exists(CEFPYTHON_H_FIXED)
         print("[build.py] cefpython.h was not yet generated")
         return
-    with open("cefpython.h", "r") as fo:
+
+    with open(CEFPYTHON_H, "r") as fo:
         contents = fo.read()
+
+    already_fixed = False
     pragma = "#pragma warning(disable:4190)"
     if pragma in contents:
+        already_fixed = True
         print("[build.py] cefpython.h is already fixed")
-        return
-    contents = ("%s\n\n" % pragma) + contents
-    with open("cefpython.h", "w") as fo:
-        fo.write(contents)
-    print("[build.py] Save build_cefpython/cefpython.h")
+    else:
+        if not MAC:
+            contents = ("%s\n\n" % pragma) + contents
+
+    if not already_fixed:
+        with open(CEFPYTHON_H, "w") as fo:
+            fo.write(contents)
+        print("[build.py] Save cefpython.h")
+
+    if os.path.exists(CEFPYTHON_H_FIXED):
+        with open(CEFPYTHON_H_FIXED, "r") as fo:
+            contents_fixed = fo.read()
+    else:
+        contents_fixed = ""
+    if contents != contents_fixed:
+        print("[build.py] Save cefpython_fixed.h")
+        with open(CEFPYTHON_H_FIXED, "w") as fo:
+            fo.write(contents)
+
+
+def compile_cpp_projects_windows_v2():
+    """Use setuptools to build static libraries / executable."""
+    compile_cpp_projects = os.path.join(TOOLS_DIR, "build_cpp_projects.py")
+    retcode = subprocess.call([sys.executable, compile_cpp_projects])
+    if retcode != 0:
+        print("[build.py] ERROR: Failed to compile C++ projects")
+        sys.exit(1)
 
 
 def compile_cpp_projects_windows():
+    """Build C++ projects using .vcproj files."""
     print("[build.py] Compile C++ projects")
 
     print("[build.py] ~~ Build CLIENT_HANDLER vcproj")

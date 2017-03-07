@@ -58,36 +58,73 @@ else:
 
 # Library extension
 if WINDOWS:
-    STATIC_LIBRARY_EXT = ".lib"
+    LIB_EXT = ".lib"
 else:
-    STATIC_LIBRARY_EXT = ".a"
+    LIB_EXT = ".a"
 
-# Root directory
+# Compiled object extension
+if WINDOWS:
+    OBJ_EXT = ".obj"
+else:
+    OBJ_EXT = ".o"
+
+# ----------------------------------------------------------------------------
+# Directories
+# ----------------------------------------------------------------------------
 assert __file__
 ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-# Other directories
+# Build directories
 BUILD_DIR = os.path.join(ROOT_DIR, "build")
-if BUILD_DIR:
-    BUILD_CEFPYTHON = os.path.join(BUILD_DIR, "build_cefpython")
-    # -- Auto-detected directories.
-    # May be auto-overwritten through detect_cef_binaries_libraries_dir()
-    CEF_BINARIES_LIBRARIES = os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2)
-    # Will be overwritten through detect_cefpython_binary_dir()
-    CEFPYTHON_BINARY = "CEFPYTHON_BINARY"
+BUILD_CEFPYTHON = os.path.join(BUILD_DIR, "build_cefpython")
+
+# May be auto-overwritten through detect_cef_binaries_libraries_dir()
+CEF_BINARIES_LIBRARIES = os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2)
+
+# Will be overwritten through detect_cefpython_binary_dir()
+CEFPYTHON_BINARY = "CEFPYTHON_BINARY"
+
+# Build C++ projects directories
+BUILD_CEFPYTHON_APP = os.path.join(BUILD_CEFPYTHON,
+                                   "cefpython_app_" + OS_POSTFIX2)
+BUILD_CLIENT_HANDLER = os.path.join(BUILD_CEFPYTHON,
+                                    "client_handler_" + OS_POSTFIX2)
+BUILD_CPP_UTILS = os.path.join(BUILD_CEFPYTHON,
+                               "cpp_utils_" + OS_POSTFIX2)
+BUILD_SUBPROCESS = os.path.join(BUILD_CEFPYTHON,
+                                "subprocess_" + OS_POSTFIX2)
+# -- end build directories
+
 EXAMPLES_DIR = os.path.join(ROOT_DIR, "examples")
 SRC_DIR = os.path.join(ROOT_DIR, "src")
-if SRC_DIR:
-    CLIENT_HANDLER_DIR = os.path.join(SRC_DIR, "client_handler")
-    CPP_UTILS_DIR = os.path.join(SRC_DIR, "cpp_utils")
-    LINUX_DIR = os.path.join(SRC_DIR, "linux")
-    MAC_DIR = os.path.join(SRC_DIR, "mac")
-    SUBPROCESS_DIR = os.path.join(SRC_DIR, "subprocess")
-    WINDOWS_DIR = os.path.abspath(os.path.join(SRC_DIR, "windows"))
+
+# Subdirectories in src/
+CLIENT_HANDLER_DIR = os.path.join(SRC_DIR, "client_handler")
+CPP_UTILS_DIR = os.path.join(SRC_DIR, "cpp_utils")
+LINUX_DIR = os.path.join(SRC_DIR, "linux")
+MAC_DIR = os.path.join(SRC_DIR, "mac")
+SUBPROCESS_DIR = os.path.join(SRC_DIR, "subprocess")
+WINDOWS_DIR = os.path.abspath(os.path.join(SRC_DIR, "windows"))
+# -- end subdirectories in src/
+
 TOOLS_DIR = os.path.join(ROOT_DIR, "tools")
-if TOOLS_DIR:
-    INSTALLER_DIR = os.path.join(TOOLS_DIR, "installer")
+INSTALLER_DIR = os.path.join(TOOLS_DIR, "installer")
 UNITTESTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, "unittests"))
+# ----------------------------------------------------------------------------
+
+# cefpython.h and fixed version
+CEFPYTHON_H = os.path.join(BUILD_CEFPYTHON, "cefpython.h")
+CEFPYTHON_H_FIXED = os.path.join(BUILD_CEFPYTHON, "cefpython_fixed.h")
+
+# Result libraries paths
+CEFPYTHON_APP_LIB = os.path.join(BUILD_CEFPYTHON_APP,
+                                 "cefpython_app" + LIB_EXT)
+CLIENT_HANDLER_LIB = os.path.join(BUILD_CLIENT_HANDLER,
+                                  "client_handler" + LIB_EXT)
+CPP_UTILS_LIB = os.path.join(BUILD_CPP_UTILS,
+                             "cpp_utils" + LIB_EXT)
+SUBPROCESS_EXE = os.path.join(BUILD_SUBPROCESS,
+                              "subprocess" + EXECUTABLE_EXT)
 
 # Visual Studio constants
 VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"

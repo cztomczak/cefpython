@@ -137,3 +137,6 @@ Linux-only. This method is utilized in the PyQt example.
 Linux-only. Install xlib error handlers so that the application
 won't be terminated on non-fatal errors. Must be done after
 initializing GTK.
+
+CEF Python calls this function automatically during a call to
+Initialize, so there is no need to call it manually anymore.

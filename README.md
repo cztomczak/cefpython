@@ -36,11 +36,14 @@ bots.
 
 ### v50+ releases
 
-1. Can be installed on all platforms using `pip install` command
+1. Can be installed on all platforms using `pip install cefpython3` command
 2. Downloads are available on [GitHub Releases](../../releases) pages
 2. Windows support: 32-bit, Python 2.7
+   (requirements: Windows 7+)
 3. Linux support: 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
+   (requirements: Debian 7+ / Ubuntu 12.04+)
 4. Mac support: 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
+   (requirements: MacOS 10.9+)
 5. Documentation is in the [docs/](docs) directory
 6. API reference is in the [api/](api) directory
 7. Additional documentation is in issues labelled [Knowledge Base]
@@ -51,9 +54,9 @@ bots.
 1. Downloads are available on [wiki pages](../../wiki#downloads)
    and on GH Releases tagged [v31.2](../../releases/tag/v31.2)
 2. Supports only Python 2.7
-3. Windows support: 32-bit and 64-bit
-4. Linux support: 32-bit and 64-bit
-5. Mac support: 32-bit and 64-bit
+3. Windows support: 32-bit and 64-bit (requirements: Windows XP+)
+4. Linux support: 32-bit and 64-bit (requirements: Debian 7+ / Ubuntu 12.04+)
+5. Mac support: 32-bit and 64-bit (requirements: MacOS 10.7+)
 6. Documentation is on [wiki pages](../../wiki)
 7. API reference is available in revision [169a1b2]
    (../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
