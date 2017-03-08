@@ -85,7 +85,7 @@ def main():
     if os.path.exists(CEFPYTHON_H):
         fix_cefpython_h()
         if WINDOWS:
-            compile_cpp_projects_windows()
+            compile_cpp_projects_with_setuptools()
         elif MAC or LINUX:
             compile_cpp_projects_unix()
     else:
@@ -201,8 +201,8 @@ def get_python_path():
 
 def check_cython_version():
     print("[build.py] Check Cython version")
-    with open(os.path.join(TOOLS_DIR, "requirements.txt"), "r") as fileobj:
-        contents = fileobj.read()
+    with open(os.path.join(TOOLS_DIR, "requirements.txt"), "rb") as fileobj:
+        contents = fileobj.read().decode("utf-8")
         match = re.search(r"cython\s*==\s*([\d.]+)", contents,
                           flags=re.IGNORECASE)
         assert match, "cython package not found in requirements.txt"
@@ -300,8 +300,8 @@ def fix_cefpython_h():
         print("[build.py] cefpython.h was not yet generated")
         return
 
-    with open(CEFPYTHON_H, "r") as fo:
-        contents = fo.read()
+    with open(CEFPYTHON_H, "rb") as fo:
+        contents = fo.read().decode("utf-8")
 
     already_fixed = False
     pragma = "#pragma warning(disable:4190)"
@@ -313,51 +313,55 @@ def fix_cefpython_h():
             contents = ("%s\n\n" % pragma) + contents
 
     if not already_fixed:
-        with open(CEFPYTHON_H, "w") as fo:
-            fo.write(contents)
+        with open(CEFPYTHON_H, "wb") as fo:
+            fo.write(contents.encode("utf-8"))
         print("[build.py] Save cefpython.h")
 
     if os.path.exists(CEFPYTHON_H_FIXED):
-        with open(CEFPYTHON_H_FIXED, "r") as fo:
-            contents_fixed = fo.read()
+        with open(CEFPYTHON_H_FIXED, "rb") as fo:
+            contents_fixed = fo.read().decode("utf-8")
     else:
         contents_fixed = ""
     if contents != contents_fixed:
         print("[build.py] Save cefpython_fixed.h")
-        with open(CEFPYTHON_H_FIXED, "w") as fo:
-            fo.write(contents)
+        with open(CEFPYTHON_H_FIXED, "wb") as fo:
+            fo.write(contents.encode("utf-8"))
 
 
-def compile_cpp_projects_windows_v2():
+def compile_cpp_projects_with_setuptools():
     """Use setuptools to build static libraries / executable."""
     compile_cpp_projects = os.path.join(TOOLS_DIR, "build_cpp_projects.py")
     retcode = subprocess.call([sys.executable, compile_cpp_projects])
     if retcode != 0:
         print("[build.py] ERROR: Failed to compile C++ projects")
         sys.exit(1)
+    # Copy subprocess executable
+    print("[build.py] Copy subprocess executable")
+    shutil.copy(SUBPROCESS_EXE, CEFPYTHON_BINARY)
 
 
-def compile_cpp_projects_windows():
-    """Build C++ projects using .vcproj files."""
+def compile_cpp_projects_windows_deprecated():
+    """DEPRECATED. Not used currently.
+    Build C++ projects using .vcproj files."""
     print("[build.py] Compile C++ projects")
 
     print("[build.py] ~~ Build CLIENT_HANDLER vcproj")
     vcproj = ("client_handler_py{pyver}_{os}.vcproj"
               .format(pyver=PYVERSION, os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "client_handler", vcproj)
-    build_vcproj(vcproj)
+    build_vcproj_deprecated(vcproj)
 
     print("[build.py] ~~ Build LIBCEFPYTHONAPP vcproj")
     vcproj = ("libcefpythonapp_py{pyver}_{os}.vcproj"
               .format(pyver=PYVERSION, os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "subprocess", vcproj)
-    build_vcproj(vcproj)
+    build_vcproj_deprecated(vcproj)
 
     print("[build.py] ~~ Build SUBPROCESS vcproj")
     vcproj = ("subprocess_{os}.vcproj"
               .format(os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "subprocess", vcproj)
-    ret = build_vcproj(vcproj)
+    ret = build_vcproj_deprecated(vcproj)
 
     # Copy subprocess executable
     subprocess_from = os.path.join(
@@ -376,10 +380,11 @@ def compile_cpp_projects_windows():
     vcproj = ("cpp_utils_{os}.vcproj"
               .format(os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "cpp_utils", vcproj)
-    build_vcproj(vcproj)
+    build_vcproj_deprecated(vcproj)
 
 
-def build_vcproj(vcproj):
+def build_vcproj_deprecated(vcproj):
+    """DEPRECATED. Not used currently."""
     if PYVERSION == "27":
         args = list()
         args.append(VS2008_VCVARS)
@@ -558,8 +563,8 @@ def copy_and_fix_pyx_files():
     # Copy cefpython.pyx and fix includes in cefpython.pyx, eg.:
     # include "handlers/focus_handler.pyx" becomes include "focus_handler.pyx"
     shutil.copy("../../src/%s" % mainfile, "./%s" % mainfile)
-    with open("./%s" % mainfile, "r") as fo:
-        content = fo.read()
+    with open("./%s" % mainfile, "rb") as fo:
+        content = fo.read().decode("utf-8")
         (content, subs) = re.subn(r"^include \"handlers/",
                                   "include \"",
                                   content,
@@ -567,8 +572,8 @@ def copy_and_fix_pyx_files():
         # Add __version__ variable in cefpython.pyx
         print("[build.py] Add __version__ variable to %s" % mainfile)
         content = ('__version__ = "{}"\n'.format(VERSION)) + content
-    with open("./%s" % mainfile, "w") as fo:
-        fo.write(content)
+    with open("./%s" % mainfile, "wb") as fo:
+        fo.write(content.encode("utf-8"))
         print("[build.py] Fix %s includes in %s" % (subs, mainfile))
 
     # Copy the rest of the files
@@ -577,8 +582,8 @@ def copy_and_fix_pyx_files():
         newfile = "./%s" % os.path.basename(pyxfile)
         shutil.copy(pyxfile, newfile)
         pyxfile = newfile
-        with open(pyxfile, "r") as pyxfileopened:
-            content = pyxfileopened.read()
+        with open(pyxfile, "rb") as pyxfileopened:
+            content = pyxfileopened.read().decode("utf-8")
             lineNumber = except_all_missing(content)
             if lineNumber:
                 print("[build.py] WARNING: 'except *' missing"
@@ -597,8 +602,8 @@ def copy_and_fix_pyx_files():
                 # print("[build.py] %s includes removed in: %s"
                 #       % (subs, os.path.basename(pyxfile)))
                 pass
-        with open(pyxfile, "w") as pyxfileopened:
-            pyxfileopened.write(content)
+        with open(pyxfile, "wb") as pyxfileopened:
+            pyxfileopened.write(content.encode("utf-8"))
 
     print("\n")
 

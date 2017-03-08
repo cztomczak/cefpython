@@ -36,7 +36,7 @@ def api_index():
         if "API-" in file_:
             continue
         with open(file_, "rb") as fo:
-            raw_mdcontents = fo.read()
+            raw_mdcontents = fo.read().decode("utf-8")
 
         parsable_mdcontents = re.sub(r"```[\s\S]+?```", "", raw_mdcontents)
         allmatches = re.findall(r"^(#|###)\s+(.*)", parsable_mdcontents,
@@ -58,7 +58,7 @@ def api_index():
             contents += (indent + "* " + "[%s](%s)\n" % (title, link))
     indexfile = os.path.join(API_DIR, "API-index.md")
     with open(indexfile, "wb") as fo:
-        fo.write(contents)
+        fo.write(contents.encode("utf-8"))
     print("Created %s in %s" % (os.path.basename(indexfile), API_DIR))
     print("Done")
 

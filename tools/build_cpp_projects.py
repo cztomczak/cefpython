@@ -154,12 +154,14 @@ def build_subprocess_executable():
                                    "subprocess" + EXECUTABLE_EXT)
     if changed or not os.path.exists(executable_path):
         lib_dir = os.path.join(CEF_BINARIES_LIBRARIES, "lib")
+        lib_dir_vs = os.path.join(lib_dir,
+                                  get_msvs_for_python(vs_prefix=True))
         compiler.link_executable(objects,
                                  output_progname="subprocess",
                                  output_dir=BUILD_SUBPROCESS,
                                  libraries=["libcef",
-                                            "libcef_dll_wrapper_mt"],
-                                 library_dirs=[lib_dir],
+                                            "libcef_dll_wrapper_MT"],
+                                 library_dirs=[lib_dir, lib_dir_vs],
                                  # TODO linker flags for Linux/Mac
                                  extra_preargs=None,
                                  extra_postargs=subprocess_LINKER_ARGS)

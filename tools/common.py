@@ -90,13 +90,17 @@ CEFPYTHON_BINARY = "CEFPYTHON_BINARY"
 
 # Build C++ projects directories
 BUILD_CEFPYTHON_APP = os.path.join(BUILD_CEFPYTHON,
-                                   "cefpython_app_" + OS_POSTFIX2)
+                                   "cefpython_app_py{pyver}_{os}"
+                                   .format(pyver=PYVERSION, os=OS_POSTFIX2))
 BUILD_CLIENT_HANDLER = os.path.join(BUILD_CEFPYTHON,
-                                    "client_handler_" + OS_POSTFIX2)
+                                    "client_handler_py{pyver}_{os}"
+                                    .format(pyver=PYVERSION, os=OS_POSTFIX2))
 BUILD_CPP_UTILS = os.path.join(BUILD_CEFPYTHON,
-                               "cpp_utils_" + OS_POSTFIX2)
+                               "cpp_utils_py{pyver}_{os}"
+                               .format(pyver=PYVERSION, os=OS_POSTFIX2))
 BUILD_SUBPROCESS = os.path.join(BUILD_CEFPYTHON,
-                                "subprocess_" + OS_POSTFIX2)
+                                "subprocess_py{pyver}_{os}"
+                                .format(pyver=PYVERSION, os=OS_POSTFIX2))
 # -- end build directories
 
 EXAMPLES_DIR = os.path.join(ROOT_DIR, "examples")
@@ -135,21 +139,25 @@ VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 
 VS2015_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0"
                  "\\VC\\vcvarsall.bat")
-VS2015_BUILD = ""  # TODO: add VS2015 Python 3.5/3.6 support
 
 # For CEF build
 VS2013_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0"
                  "\\VC\\vcvarsall.bat")
 
+# VS2010 vcvarsall not used, using detection with setuptools instead
 VS2010_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 10.0"
                  "\\VC\\vcvarsall.bat")
-VS2010_BUILD = ""  # TODO: add VS2010 Python 3.4 support
 
 VS2008_VCVARS = ("%LocalAppData%\\Programs\\Common\\Microsoft"
                  "\\Visual C++ for Python\\9.0\\vcvarsall.bat")
 VS2008_BUILD = ("%LocalAppData%\\Programs\\Common\\"
                 "Microsoft\\Visual C++ for Python\\9.0\\"
                 "VC\\bin\\amd64\\vcbuild.exe")
+if "LOCALAPPDATA" in os.environ:
+    VS2008_VCVARS = VS2008_VCVARS.replace("%LocalAppData%",
+                                          os.environ["LOCALAPPDATA"])
+    VS2008_BUILD = VS2008_BUILD.replace("%LocalAppData%",
+                                        os.environ["LOCALAPPDATA"])
 
 
 def detect_cef_binaries_libraries_dir():
@@ -192,13 +200,28 @@ def get_cefpython_version():
 
 def get_version_from_file(header_file):
     with open(header_file, "rU") as fp:
-        contents = fp.read()
+        contents = fp.read()  # no need to decode() as "rU" specified
     ret = dict()
     matches = re.findall(r'^#define (\w+) "?([^\s"]+)"?', contents,
                          re.MULTILINE)
     for match in matches:
         ret[match[0]] = match[1]
     return ret
+
+
+def get_msvs_for_python(vs_prefix=False):
+    """Get MSVS version (eg 2008) for current python running."""
+    if sys.version_info[:2] == (2, 7):
+        return "VS2008" if vs_prefix else "2008"
+    elif sys.version_info[:2] == (3, 4):
+        return "VS2010" if vs_prefix else "2010"
+    elif sys.version_info[:2] == (3, 5):
+        return "VS2015" if vs_prefix else "2015"
+    elif sys.version_info[:2] == (3, 6):
+        return "VS2015" if vs_prefix else "2015"
+    else:
+        print("ERROR: This version of Python is not supported")
+        sys.exit(1)
 
 
 detect_cef_binaries_libraries_dir()

@@ -55,7 +55,7 @@ and libraries from GitHub Releases:
 2) Download [ninja](https://github.com/ninja-build/ninja) 1.7.2 or later
    and add it to PATH.
 
-3) Download [cmake](https://cmake.org/download/) 3.7.2 or later and add
+3) Download [cmake](https://cmake.org/download/) and add
    it to PATH.
 
 4) For Python 2.7 Install "Visual C++ Compiler for Python 2.7"
@@ -147,6 +147,9 @@ requirements common for all platforms.
 
 ### Windows
 
+* Download [ninja](https://github.com/ninja-build/ninja) 1.7.2 or later
+  and add it to PATH.
+* Download [cmake](https://cmake.org/download/) and add it to PATH.
 * Install an appropriate MS compiler for a specific Python version:
   https://wiki.python.org/moin/WindowsCompilers
     * For Python 2.7 install "Microsoft Visual C++ Compiler for Python 2.7"
@@ -208,6 +211,10 @@ requirements common for all platforms.
 
 * MacOS 10.9+, Xcode5+ and Xcode command line tools. Only 64-bit builds
   are supported.
+* Download [ninja](https://github.com/ninja-build/ninja) 1.7.2 or later
+  and add it to PATH.
+* Download [cmake](https://cmake.org/download/) and add it to PATH.
+
 
 
 ### All platforms
