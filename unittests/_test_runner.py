@@ -1,4 +1,6 @@
-# Copyright (c) 2016 The CEF Python authors. All rights reserved.
+# Copyright (c) 2016 CEF Python, see the Authors file.
+# All rights reserved. Licensed under BSD 3-clause license.
+# Project website: https://github.com/cztomczak/cefpython
 
 """Run unit tests. With no arguments all tests are run. Read notes below.
 

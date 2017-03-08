@@ -1,6 +1,6 @@
-// Copyright (c) 2012-2014 The CEF Python authors. All rights reserved.
-// License: New BSD License.
-// Website: http://code.google.com/p/cefpython/
+// Copyright (c) 2013 CEF Python, see the Authors file.
+// All rights reserved. Licensed under BSD 3-clause license.
+// Project website: https://github.com/cztomczak/cefpython
 
 // CefListValue->SetXxxx() functions need first param to be be cast
 // to (int) because GetSize() returns size_t and generates a warning

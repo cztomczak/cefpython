@@ -1,3 +1,7 @@
+# Copyright (c) 2016 CEF Python, see the Authors file.
+# All rights reserved. Licensed under BSD 3-clause license.
+# Project website: https://github.com/cztomczak/cefpython
+
 """
 Test isolated test. Isolated tests are run each using a new instance
 of Python interpreter. They also implement some unique features for

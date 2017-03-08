@@ -1,6 +1,6 @@
 // Taken from here: http://www.drdobbs.com/cpp/logging-in-c/201804215
 // Original author: Petru Marginean <petru.marginean@gmail.com>
-// Modified by: Czarek Tomczak <czarek.tomczak@gmail.com>
+// Modified by: Czarek Tomczak
 
 // Usage:
 //   LOG_DEBUG << "Browser: someVar = " << someVar;

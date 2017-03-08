@@ -1,4 +1,6 @@
-# Copyright (c) 2016 The CEF Python Authors. All rights reserved.
+# Copyright (c) 2016 CEF Python, see the Authors file.
+# All rights reserved. Licensed under BSD 3-clause license.
+# Project website: https://github.com/cztomczak/cefpython
 
 from cef_types cimport PathKey
 from cef_string cimport CefString

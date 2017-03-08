@@ -1,3 +1,5 @@
+# Copyright (c) Cython
+
 from libc.stddef cimport wchar_t
 from libcpp.string cimport string
 

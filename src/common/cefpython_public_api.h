@@ -1,3 +1,7 @@
+// Copyright (c) 2012 CEF Python, see the Authors file.
+// All rights reserved. Licensed under BSD 3-clause license.
+// Project website: https://github.com/cztomczak/cefpython
+
 /* This is a wrapper around including cefpython_fixed.h that is generated
    by Cython. Functions marked with the 'public' keyword are exposed
    to C through that header file. */

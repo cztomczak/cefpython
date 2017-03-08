@@ -1,3 +1,7 @@
+# Copyright (c) 2017 CEF Python, see the Authors file.
+# All rights reserved. Licensed under BSD 3-clause license.
+# Project website: https://github.com/cztomczak/cefpython
+
 """Build C++ projects. This tool is executed by build.py on Windows
 only currently. Output directories are in build/build_cefpython/.
 

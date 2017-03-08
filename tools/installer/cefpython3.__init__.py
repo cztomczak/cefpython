@@ -1,5 +1,6 @@
-# Copyright (c) 2017 The CEF Python authors. All rights reserved.
-# Licensed under BSD 3-clause license.
+# Copyright (c) 2013 CEF Python, see the Authors file.
+# All rights reserved. Licensed under BSD 3-clause license.
+# Project website: https://github.com/cztomczak/cefpython
 
 # NOTE: Template variables like {{VERSION}} are replaced with actual
 #       values when make_installer.py tool generates this package
