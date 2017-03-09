@@ -49,7 +49,8 @@ if MAC:
             ModuleNode.generate_extern_c_macro_definition)
 
     def generate_extern_c_macro_definition(self, code):
-        # This code is written to both cefpython.h and cefpython.cpp
+        # This code is written by Cython to both cefpython API header file
+        # and cefpython module cpp file.
         g_generate_extern_c_macro_definition_old(self, code)
         code.putln("// Added by: cefpython/tools/cython_setup.py")
         code.putln("#undef PyMODINIT_FUNC")
@@ -97,8 +98,8 @@ def main():
 
     print("[cython_setup.py] Execute setup()")
     setup(
-        name='cefpython_py%s' % PYVERSION,
-        cmdclass={'build_ext': build_ext},
+        name="cefpython_py{pyver}".format(pyver=PYVERSION),
+        cmdclass={"build_ext": build_ext},
         ext_modules=get_ext_modules(options)
     )
 
@@ -370,7 +371,7 @@ def get_libraries():
 def get_ext_modules(options):
     ext_modules = [Extension(
         name=MODULE_NAME_NOEXT,
-        sources=["cefpython.pyx"],
+        sources=["cefpython_py{pyver}.pyx".format(pyver=PYVERSION)],
 
         # Ignore the warning in the console:
         # > C:\Python27\lib\distutils\extension.py:133: UserWarning:

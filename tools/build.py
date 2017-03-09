@@ -82,21 +82,23 @@ def main():
     check_cython_version()
     check_directories()
     setup_environ()
-    if os.path.exists(CEFPYTHON_H):
-        fix_cefpython_h()
+    if os.path.exists(CEFPYTHON_API_HFILE):
+        fix_cefpython_api_header_file()
         if WINDOWS:
             compile_cpp_projects_with_setuptools()
         elif MAC or LINUX:
             compile_cpp_projects_unix()
     else:
-        print("[build.py] INFO: Looks like first run, as cefpython.h"
-              " is missing. Skip building C++ projects.")
+        print("[build.py] INFO: Looks like first run, as"
+              " cefpython_py{pyver}.h is missing. Skip building"
+              " C++ projects."
+              .format(pyver=PYVERSION))
         global FIRST_RUN
         FIRST_RUN = True
     clear_cache()
     copy_and_fix_pyx_files()
     build_cefpython_module()
-    fix_cefpython_h()
+    fix_cefpython_api_header_file()
     install_and_run()
 
 
@@ -282,49 +284,52 @@ def check_directories():
     assert os.path.exists(CEFPYTHON_BINARY)
 
 
-def fix_cefpython_h():
-    """This function does two things: 1) Disable warnings in cefpython.h
-    and 2) Make a copy named cefpython_fixed.h - this copy will be used
-    by C++ projects and its modification time won't change every time
-    you run build.py script, thus C++ won't rebuild each time."""
+def fix_cefpython_api_header_file():
+    """This function does two things: 1) Disable warnings in cefpython
+    API header file and 2) Make a copy named cefpython_pyXX_fixed.h,
+    this copy will be used by C++ projects and its modification time
+    won't change every time you run build.py script, thus C++ won't
+    rebuild each time."""
 
-    # Fix cefpython.h to disable this warning:
+    # Fix cefpython_pyXX.h to disable this warning:
     # > warning: 'somefunc' has C-linkage specified, but returns
     # > user-defined type 'sometype' which is incompatible with C
     # On Mac this warning must be disabled using -Wno-return-type-c-linkage
     # flag in makefiles.
 
-    print("[build.py] Fix cefpython.h in the build_cefpython/ directory")
-    if not os.path.exists(CEFPYTHON_H):
-        assert not os.path.exists(CEFPYTHON_H_FIXED)
-        print("[build.py] cefpython.h was not yet generated")
+    print("[build.py] Fix cefpython API header file in the build_cefpython/"
+          " directory")
+    if not os.path.exists(CEFPYTHON_API_HFILE):
+        assert not os.path.exists(CEFPYTHON_API_HFILE_FIXED)
+        print("[build.py] cefpython API header file was not yet generated")
         return
 
-    with open(CEFPYTHON_H, "rb") as fo:
+    with open(CEFPYTHON_API_HFILE, "rb") as fo:
         contents = fo.read().decode("utf-8")
 
     already_fixed = False
     pragma = "#pragma warning(disable:4190)"
     if pragma in contents:
         already_fixed = True
-        print("[build.py] cefpython.h is already fixed")
+        print("[build.py] cefpython API header file is already fixed")
     else:
         if not MAC:
             contents = ("%s\n\n" % pragma) + contents
 
     if not already_fixed:
-        with open(CEFPYTHON_H, "wb") as fo:
+        with open(CEFPYTHON_API_HFILE, "wb") as fo:
             fo.write(contents.encode("utf-8"))
-        print("[build.py] Save cefpython.h")
+        print("[build.py] Save {filename}"
+              .format(filename=CEFPYTHON_API_HFILE))
 
-    if os.path.exists(CEFPYTHON_H_FIXED):
-        with open(CEFPYTHON_H_FIXED, "rb") as fo:
+    if os.path.exists(CEFPYTHON_API_HFILE_FIXED):
+        with open(CEFPYTHON_API_HFILE_FIXED, "rb") as fo:
             contents_fixed = fo.read().decode("utf-8")
     else:
         contents_fixed = ""
     if contents != contents_fixed:
         print("[build.py] Save cefpython_fixed.h")
-        with open(CEFPYTHON_H_FIXED, "wb") as fo:
+        with open(CEFPYTHON_API_HFILE_FIXED, "wb") as fo:
             fo.write(contents.encode("utf-8"))
 
 
@@ -437,9 +442,9 @@ def compile_cpp_projects_unix():
 
     # Need to allow continuing even when make fails, as it may
     # fail because the "public" function declaration is not yet
-    # in "cefpython.h", but for it to be generated we need to run
-    # cython compiling, so in this case you continue even when make
-    # fails and then run the compile.py script again and this time
+    # in cefpython API header file, but for it to be generated we need
+    # to run cython compiling, so in this case you continue even when
+    # make fails and then run the compile.py script again and this time
     # make should succeed.
 
     # -- CLIENT_HANDLER
@@ -533,15 +538,16 @@ def copy_and_fix_pyx_files():
 
     os.chdir(BUILD_CEFPYTHON)
     print("\n")
-    mainfile = "cefpython.pyx"
+    mainfile_original = "cefpython.pyx"
+    mainfile_newname = "cefpython_py{pyver}.pyx".format(pyver=PYVERSION)
 
     pyxfiles = glob.glob("../../src/*.pyx")
     if not len(pyxfiles):
         print("[build.py] ERROR: no .pyx files found in root")
         sys.exit(1)
-    pyxfiles = [f for f in pyxfiles if f.find(mainfile) == -1]
-    # Now, pyxfiles contains all pyx files except the mainfile (cefpython.pyx),
-    # we do not fix includes in mainfile.
+    pyxfiles = [f for f in pyxfiles if f.find(mainfile_original) == -1]
+    # Now, pyxfiles contains all pyx files except mainfile_original
+    # (cefpython.pyx), we do not fix includes in mainfile.
 
     pyxfiles2 = glob.glob("../../src/handlers/*.pyx")
     if not len(pyxfiles2):
@@ -562,19 +568,19 @@ def copy_and_fix_pyx_files():
 
     # Copy cefpython.pyx and fix includes in cefpython.pyx, eg.:
     # include "handlers/focus_handler.pyx" becomes include "focus_handler.pyx"
-    shutil.copy("../../src/%s" % mainfile, "./%s" % mainfile)
-    with open("./%s" % mainfile, "rb") as fo:
+    shutil.copy("../../src/%s" % mainfile_original, "./%s" % mainfile_newname)
+    with open("./%s" % mainfile_newname, "rb") as fo:
         content = fo.read().decode("utf-8")
         (content, subs) = re.subn(r"^include \"handlers/",
                                   "include \"",
                                   content,
                                   flags=re.MULTILINE)
         # Add __version__ variable in cefpython.pyx
-        print("[build.py] Add __version__ variable to %s" % mainfile)
+        print("[build.py] Add __version__ variable to %s" % mainfile_newname)
         content = ('__version__ = "{}"\n'.format(VERSION)) + content
-    with open("./%s" % mainfile, "wb") as fo:
+    with open("./%s" % mainfile_newname, "wb") as fo:
         fo.write(content.encode("utf-8"))
-        print("[build.py] Fix %s includes in %s" % (subs, mainfile))
+        print("[build.py] Fix %s includes in %s" % (subs, mainfile_newname))
 
     # Copy the rest of the files
     print("[build.py] Fix includes in other .pyx files")
@@ -682,10 +688,12 @@ def build_cefpython_module():
 
     # Check if built succeeded after pyx files were removed
     if ret != 0:
-        if FIRST_RUN and os.path.exists(CEFPYTHON_H):
+        if FIRST_RUN and os.path.exists(CEFPYTHON_API_HFILE):
             print("[build.py] INFO: looks like this was first run and"
-                  " linking is expected to fail in such case. Will re-run"
-                  " the build.py script programmatically now.")
+                  " building the cefpython module is expected to fail"
+                  " in such case due to cefpython API header file not"
+                  " being generated yet. Will re-run the build.py script"
+                  " programmatically now.")
             args = list()
             args.append(sys.executable)
             args.append(os.path.join(TOOLS_DIR, os.path.basename(__file__)))

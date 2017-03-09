@@ -10,7 +10,7 @@
 #define CEFPYTHON_PUBLIC_API_H
 
 #if defined(OS_WIN)
-#pragma warning(disable:4190)  // cefpython_fixed.h extern C-linkage warnings
+#pragma warning(disable:4190)  // cefpython API extern C-linkage warnings
 #endif
 
 #include "Python.h"
@@ -30,6 +30,18 @@
 #include "include/cef_command_line.h"
 #include "util.h"
 
-#include "../../build/build_cefpython/cefpython_fixed.h"
+#if PY_MAJOR_VERSION == 2
+#if PY_MINOR_VERSION == 7
+#include "../../build/build_cefpython/cefpython_py27_fixed.h"
+#endif // PY_MINOR_VERSION
+#elif PY_MAJOR_VERSION == 3
+#if PY_MINOR_VERSION == 4
+#include "../../build/build_cefpython/cefpython_py34_fixed.h"
+#elif PY_MINOR_VERSION == 5
+#include "../../build/build_cefpython/cefpython_py35_fixed.h"
+#elif PY_MINOR_VERSION == 6
+#include "../../build/build_cefpython/cefpython_py36_fixed.h"
+#endif // PY_MINOR_VERSION
+#endif // PY_MAJOR_VERSION
 
 #endif // CEFPYTHON_PUBLIC_API_H

@@ -120,9 +120,13 @@ INSTALLER_DIR = os.path.join(TOOLS_DIR, "installer")
 UNITTESTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, "unittests"))
 # ----------------------------------------------------------------------------
 
-# cefpython.h and fixed version
-CEFPYTHON_H = os.path.join(BUILD_CEFPYTHON, "cefpython.h")
-CEFPYTHON_H_FIXED = os.path.join(BUILD_CEFPYTHON, "cefpython_fixed.h")
+# cefpython API header file and a fixed copy of it
+CEFPYTHON_API_HFILE = os.path.join(BUILD_CEFPYTHON,
+                                   "cefpython_py{pyver}.h"
+                                   .format(pyver=PYVERSION))
+CEFPYTHON_API_HFILE_FIXED = os.path.join(BUILD_CEFPYTHON,
+                                         "cefpython_py{pyver}_fixed.h"
+                                         .format(pyver=PYVERSION))
 
 # Result libraries paths
 CEFPYTHON_APP_LIB = os.path.join(BUILD_CEFPYTHON_APP,
