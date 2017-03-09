@@ -76,7 +76,8 @@ def main():
 
 def check_versions():
     print("[qt4.py] CEF Python {ver}".format(ver=cef.__version__))
-    print("[qt4.py] Python {ver}".format(ver=sys.version[:6]))
+    print("[qt4.py] Python {ver} {arch}".format(
+            ver=platform.python_version(), arch=platform.architecture()[0]))
     # PyQt version
     if "pyqt" in sys.argv:
         # noinspection PyUnresolvedReferences

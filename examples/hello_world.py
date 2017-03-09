@@ -2,6 +2,7 @@
 # Tested with CEF Python v55.3+.
 
 from cefpython3 import cefpython as cef
+import platform
 import sys
 
 
@@ -16,7 +17,8 @@ def main():
 
 def check_versions():
     print("[hello_world.py] CEF Python {ver}".format(ver=cef.__version__))
-    print("[hello_world.py] Python {ver}".format(ver=sys.version[:6]))
+    print("[hello_world.py] Python {ver} {arch}".format(
+            ver=platform.python_version(), arch=platform.architecture()[0]))
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
 
 

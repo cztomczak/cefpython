@@ -118,11 +118,8 @@ def main():
 
 def command_line_args():
     global VERSION, WHEEL, WHEEL_ARGS
-    args = " ".join(sys.argv)
-    match = re.search(r"\d+\.\d+", args)
-    if match:
-        VERSION = match.group(0)
-    else:
+    VERSION = get_version_from_command_line_args()
+    if not VERSION:
         print(__doc__)
         sys.exit(1)
     for arg in sys.argv:

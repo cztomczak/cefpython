@@ -21,7 +21,7 @@ Usage:
     build.py VERSION [--rebuild-cpp] [--fast] [--clean] [--kivy]
 
 Options:
-    VERSION        Version in format xx.xx
+    VERSION        Version number eg. 50.0
     --rebuild-cpp  Force rebuild of C++ projects
     --fast         Fast mode
     --clean        Clean C++ projects build files (.o .a etc)
@@ -71,14 +71,12 @@ FIRST_RUN = False
 
 
 def main():
-    if len(sys.argv) <= 1:
-        print(__doc__)
-        sys.exit(1)
-    print("[build.py] Python version: %s" % platform.python_version())
+    command_line_args()
+    print("[build.py] Python version: {ver} {arch}"
+          .format(ver=platform.python_version(), arch=ARCH_STR))
     print("[build.py] Python executable: %s" % sys.executable)
     print("[build.py] PYVERSION = %s" % PYVERSION)
     print("[build.py] OS_POSTFIX2 = %s" % OS_POSTFIX2)
-    command_line_args()
     check_cython_version()
     check_directories()
     setup_environ()
@@ -100,6 +98,86 @@ def main():
     build_cefpython_module()
     fix_cefpython_api_header_file()
     install_and_run()
+
+
+def command_line_args():
+    global DEBUG_FLAG, FAST_FLAG, CLEAN_FLAG, KIVY_FLAG,\
+           REBUILD_CPP, VERSION
+
+    VERSION = get_version_from_command_line_args()
+    if not VERSION:
+        print(__doc__)
+        sys.exit(1)
+
+    print("[build.py] Parse command line arguments")
+
+    # -- debug flag
+    if len(sys.argv) > 1 and "--debug" in sys.argv:
+        DEBUG_FLAG = True
+        print("[build.py] DEBUG mode On")
+
+    # --fast flag
+    if len(sys.argv) > 1 and "--fast" in sys.argv:
+        # Fast mode doesn't delete C++ .o .a files.
+        # Fast mode also disables optimization flags in setup/setup.py .
+        FAST_FLAG = True
+        print("[build.py] FAST mode On")
+
+    # --clean flag
+    if len(sys.argv) > 1 and "--clean" in sys.argv:
+        CLEAN_FLAG = True
+
+    # --kivy flag
+    if len(sys.argv) > 1 and "--kivy" in sys.argv:
+        KIVY_FLAG = True
+        print("[build.py] KIVY mode enabled")
+
+    # --rebuild-cpp flag
+    # Rebuild c++ projects
+    if len(sys.argv) > 1 and "--rebuild-cpp" in sys.argv:
+        REBUILD_CPP = True
+        print("[build.py] REBUILD_CPP mode enabled")
+
+    print("[build.py] VERSION=%s" % VERSION)
+
+
+def check_cython_version():
+    print("[build.py] Check Cython version")
+    with open(os.path.join(TOOLS_DIR, "requirements.txt"), "rb") as fileobj:
+        contents = fileobj.read().decode("utf-8")
+        match = re.search(r"cython\s*==\s*([\d.]+)", contents,
+                          flags=re.IGNORECASE)
+        assert match, "cython package not found in requirements.txt"
+        require_version = match.group(1)
+    try:
+        import Cython
+        version = Cython.__version__
+    except ImportError:
+        # noinspection PyUnusedLocal
+        Cython = None
+        print("[build.py] ERROR: Cython is not installed ({0} required)"
+              .format(require_version))
+        sys.exit(1)
+    if version != require_version:
+        print("[build.py] ERROR: Wrong Cython version: {0}. Required: {1}"
+              .format(version, require_version))
+        sys.exit(1)
+    print("[build.py] Cython version: {0}".format(version))
+
+
+def check_directories():
+    print("[build.py] Check directories")
+    # Create directories if necessary
+    if not os.path.exists(CEFPYTHON_BINARY):
+        os.makedirs(CEFPYTHON_BINARY)
+    if not os.path.exists(BUILD_CEFPYTHON):
+        os.makedirs(BUILD_CEFPYTHON)
+
+    # Check directories exist
+    assert os.path.exists(BUILD_DIR)
+    assert os.path.exists(BUILD_CEFPYTHON)
+    assert os.path.exists(CEF_BINARIES_LIBRARIES)
+    assert os.path.exists(CEFPYTHON_BINARY)
 
 
 def setup_environ():
@@ -201,89 +279,6 @@ def get_python_path():
     return os.path.dirname(sys.executable)
 
 
-def check_cython_version():
-    print("[build.py] Check Cython version")
-    with open(os.path.join(TOOLS_DIR, "requirements.txt"), "rb") as fileobj:
-        contents = fileobj.read().decode("utf-8")
-        match = re.search(r"cython\s*==\s*([\d.]+)", contents,
-                          flags=re.IGNORECASE)
-        assert match, "cython package not found in requirements.txt"
-        require_version = match.group(1)
-    try:
-        import Cython
-        version = Cython.__version__
-    except ImportError:
-        # noinspection PyUnusedLocal
-        Cython = None
-        print("[build.py] ERROR: Cython is not installed ({0} required)"
-              .format(require_version))
-        sys.exit(1)
-    if version != require_version:
-        print("[build.py] ERROR: Wrong Cython version: {0}. Required: {1}"
-              .format(version, require_version))
-        sys.exit(1)
-    print("[build.py] Cython version: {0}".format(version))
-
-
-def command_line_args():
-    global DEBUG_FLAG, FAST_FLAG, CLEAN_FLAG, KIVY_FLAG,\
-           REBUILD_CPP, VERSION
-
-    print("[build.py] Parse command line arguments")
-
-    # -- debug flag
-    if len(sys.argv) > 1 and "--debug" in sys.argv:
-        DEBUG_FLAG = True
-        print("[build.py] DEBUG mode On")
-
-    # --fast flag
-    if len(sys.argv) > 1 and "--fast" in sys.argv:
-        # Fast mode doesn't delete C++ .o .a files.
-        # Fast mode also disables optimization flags in setup/setup.py .
-        FAST_FLAG = True
-        print("[build.py] FAST mode On")
-
-    # --clean flag
-    if len(sys.argv) > 1 and "--clean" in sys.argv:
-        CLEAN_FLAG = True
-
-    # --kivy flag
-    if len(sys.argv) > 1 and "--kivy" in sys.argv:
-        KIVY_FLAG = True
-        print("[build.py] KIVY mode enabled")
-
-    # --rebuild-cpp flag
-    # Rebuild c++ projects
-    if len(sys.argv) > 1 and "--rebuild-cpp" in sys.argv:
-        REBUILD_CPP = True
-        print("[build.py] REBUILD_CPP mode enabled")
-
-    # version arg
-    if len(sys.argv) > 1 and re.search(r"^\d+\.\d+$", sys.argv[1]):
-        VERSION = sys.argv[1]
-    else:
-        print("[build.py] ERROR: expected first arg to be a version number")
-        print("             Allowed version format: \\d+\.\\d+")
-        sys.exit(1)
-
-    print("[build.py] VERSION=%s" % VERSION)
-
-
-def check_directories():
-    print("[build.py] Check directories")
-    # Create directories if necessary
-    if not os.path.exists(CEFPYTHON_BINARY):
-        os.makedirs(CEFPYTHON_BINARY)
-    if not os.path.exists(BUILD_CEFPYTHON):
-        os.makedirs(BUILD_CEFPYTHON)
-
-    # Check directories exist
-    assert os.path.exists(BUILD_DIR)
-    assert os.path.exists(BUILD_CEFPYTHON)
-    assert os.path.exists(CEF_BINARIES_LIBRARIES)
-    assert os.path.exists(CEFPYTHON_BINARY)
-
-
 def fix_cefpython_api_header_file():
     """This function does two things: 1) Disable warnings in cefpython
     API header file and 2) Make a copy named cefpython_pyXX_fixed.h,
@@ -345,28 +340,31 @@ def compile_cpp_projects_with_setuptools():
     shutil.copy(SUBPROCESS_EXE, CEFPYTHON_BINARY)
 
 
-def compile_cpp_projects_windows_deprecated():
+def compile_cpp_projects_windows_DEPRECATED():
     """DEPRECATED. Not used currently.
     Build C++ projects using .vcproj files."""
+
+    # TODO: Remove code after setuptools compilation was tested for some time
+
     print("[build.py] Compile C++ projects")
 
     print("[build.py] ~~ Build CLIENT_HANDLER vcproj")
     vcproj = ("client_handler_py{pyver}_{os}.vcproj"
               .format(pyver=PYVERSION, os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "client_handler", vcproj)
-    build_vcproj_deprecated(vcproj)
+    build_vcproj_DEPRECATED(vcproj)
 
     print("[build.py] ~~ Build LIBCEFPYTHONAPP vcproj")
     vcproj = ("libcefpythonapp_py{pyver}_{os}.vcproj"
               .format(pyver=PYVERSION, os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "subprocess", vcproj)
-    build_vcproj_deprecated(vcproj)
+    build_vcproj_DEPRECATED(vcproj)
 
     print("[build.py] ~~ Build SUBPROCESS vcproj")
     vcproj = ("subprocess_{os}.vcproj"
               .format(os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "subprocess", vcproj)
-    ret = build_vcproj_deprecated(vcproj)
+    ret = build_vcproj_DEPRECATED(vcproj)
 
     # Copy subprocess executable
     subprocess_from = os.path.join(
@@ -385,11 +383,28 @@ def compile_cpp_projects_windows_deprecated():
     vcproj = ("cpp_utils_{os}.vcproj"
               .format(os=OS_POSTFIX2))
     vcproj = os.path.join(SRC_DIR, "cpp_utils", vcproj)
-    build_vcproj_deprecated(vcproj)
+    build_vcproj_DEPRECATED(vcproj)
 
 
-def build_vcproj_deprecated(vcproj):
+def build_vcproj_DEPRECATED(vcproj):
     """DEPRECATED. Not used currently."""
+
+    # TODO: Remove code after setuptools compilation was tested for some time
+
+    # In VS2010 vcbuild.exe was replaced by msbuild.exe.
+    # Ufortunately WinSDK 7.1 does not come with msbuild.exe,
+    # so it would be required to install Visual Studio 2010,
+    # and to support both 32-bit ad 64-bit compilations it
+    # a non-express version would have to be installed, which
+    # is not free. So to make it free open-source it was
+    # required migrate to a new compilation system that uses
+    # distutils/setuptools packages.
+
+    # msbuild.exe flags:
+    # /clp:disableconsolecolor
+    # msbuild /p:BuildProjectReferences=false project.proj
+    # MSBuild.exe MyProject.proj /t:build
+
     if PYVERSION == "27":
         args = list()
         args.append(VS2008_VCVARS)
@@ -408,11 +423,6 @@ def build_vcproj_deprecated(vcproj):
         return ret
     else:
         raise Exception("Only Python 2.7 32-bit is currently supported")
-
-    # In VS2010 vcbuild was replaced by msbuild.exe.
-    # /clp:disableconsolecolor
-    # msbuild /p:BuildProjectReferences=false project.proj
-    # MSBuild.exe MyProject.proj /t:build
 
 
 def compile_ask_to_continue():
@@ -577,7 +587,7 @@ def copy_and_fix_pyx_files():
                                   flags=re.MULTILINE)
         # Add __version__ variable in cefpython.pyx
         print("[build.py] Add __version__ variable to %s" % mainfile_newname)
-        content = ('__version__ = "{}"\n'.format(VERSION)) + content
+        content = generate_cefpython_module_variables() + content
     with open("./%s" % mainfile_newname, "wb") as fo:
         fo.write(content.encode("utf-8"))
         print("[build.py] Fix %s includes in %s" % (subs, mainfile_newname))
@@ -612,6 +622,26 @@ def copy_and_fix_pyx_files():
             pyxfileopened.write(content.encode("utf-8"))
 
     print("\n")
+
+
+def generate_cefpython_module_variables():
+    """Global variables that will be appended to cefpython.pyx sources."""
+    ret = ('__version__ = "{0}"\n'.format(VERSION))
+    version = get_cefpython_version()
+    chrome_version = "{0}.{1}.{2}.{3}".format(
+            version["CHROME_VERSION_MAJOR"], version["CHROME_VERSION_MINOR"],
+            version["CHROME_VERSION_BUILD"], version["CHROME_VERSION_PATCH"])
+    ret += ('__chrome_version__ = "{0}"\n'.format(chrome_version))
+    ret += ('__cef_version__ = "{0}"\n'.format(version["CEF_VERSION"]))
+    ret += ('__cef_api_hash_platform__ = "{0}"\n'
+            .format(version["CEF_API_HASH_PLATFORM"]))
+    ret += ('__cef_api_hash_universal__ = "{0}"\n'
+            .format(version["CEF_API_HASH_UNIVERSAL"]))
+    ret += ('__cef_commit_hash__ = "{0}"\n'
+            .format(version["CEF_COMMIT_HASH"]))
+    ret += ('__cef_commit_number__ = "{0}"\n'
+            .format(version["CEF_COMMIT_NUMBER"]))
+    return ret
 
 
 def except_all_missing(content):
@@ -781,6 +811,9 @@ def install_and_run():
         print("[build.py] ERROR while installing package")
         sys.exit(ret)
     os.chdir(BUILD_DIR)
+
+    # Delete setup installer directory after the package was installed
+    delete_directory_reliably(setup_installer_dir)
 
     # Run unittests
     print("[build.py] Run unittests")

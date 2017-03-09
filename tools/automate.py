@@ -466,6 +466,12 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
             # When Using WinSDK 7.1 vcvarsall.bat doesn't work. Use
             # setuptools.msvc.msvc9_query_vcvarsall to query env vars.
             env.update(msvc9_query_vcvarsall(10.0, arch=VS_PLATFORM_ARG))
+            # On Python 2.7 64-bit env values returned by setuptools
+            # are unicode. On 32-bit they are strings.
+            for env_key in env:
+                env_value = env[env_key]
+                if type(env_value) != str:
+                    env[env_key] = env_value.encode("utf-8")
         run_command(cmake_wrapper, working_dir=build_wrapper_dir, env=env)
         Options.gyp_msvs_version = old_gyp_msvs_version
         if runtime_library == RUNTIME_MD:
@@ -622,6 +628,7 @@ def prepare_build_command(build_lib=False, vcvars=None):
                 command.append(VS2015_VCVARS)
             else:
                 command.append(VS2013_VCVARS)
+            command.append(VS_PLATFORM_ARG)
         command.append("&&")
     return command
 

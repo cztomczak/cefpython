@@ -74,7 +74,8 @@ Options.fast_fail = True
 
 
 def main():
-    print("[cython_setup.py] Python version: %s" % platform.python_version())
+    print("[cython_setup.py] Python version: {ver} {arch}"
+          .format(ver=platform.python_version(), arch=ARCH_STR))
     print("[cython_setup.py] Python executable: %s" % sys.executable)
     print("[cython_setup.py] Cython version: %s" % Cython.__version__)
 

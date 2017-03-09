@@ -47,7 +47,8 @@ def main():
     stream_handler.setFormatter(formatter)
     logger.addHandler(stream_handler)
     logger.info("CEF Python {ver}".format(ver=cef.__version__))
-    logger.info("Python {ver}".format(ver=sys.version[:6]))
+    logger.info("Python {ver} {arch}".format(
+            ver=platform.python_version(), arch=platform.architecture()[0]))
     logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error

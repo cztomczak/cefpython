@@ -50,7 +50,8 @@ def main():
 
 def check_versions():
     print("[wxpython.py] CEF Python {ver}".format(ver=cef.__version__))
-    print("[wxpython.py] Python {ver}".format(ver=sys.version[:6]))
+    print("[wxpython.py] Python {ver} {arch}".format(
+            ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[wxpython.py] wxPython {ver}".format(ver=wx.version()))
     # CEF Python version requirement
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"

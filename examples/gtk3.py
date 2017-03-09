@@ -39,7 +39,8 @@ if LINUX:
 
 def main():
     print("[gkt3.py] CEF Python {ver}".format(ver=cef.__version__))
-    print("[gkt3.py] Python {ver}".format(ver=sys.version[:6]))
+    print("[gkt3.py] Python {ver} {arch}".format(
+            ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[gkt3.py] GTK {major}.{minor}".format(
             major=Gtk.get_major_version(),
             minor=Gtk.get_minor_version()))

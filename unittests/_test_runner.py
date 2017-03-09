@@ -25,6 +25,7 @@ Notes:
 
 import unittest
 import os
+import platform
 import sys
 from os.path import dirname, realpath
 import re
@@ -254,7 +255,9 @@ class TestRunner(object):
         print("-"*70)
         print("[_test_runner.py] CEF Python {ver}"
               .format(ver=self.cefpython_version))
-        print("[_test_runner.py] Python {ver}".format(ver=sys.version[:6]))
+        print("[_test_runner.py] Python {ver} {arch}"
+              .format(ver=platform.python_version(),
+                      arch=platform.architecture()[0]))
         print("[_test_runner.py] Ran {ran} tests in total"
               .format(ran=self.ran))
         if self.errors or self.failures:

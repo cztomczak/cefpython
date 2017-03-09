@@ -17,6 +17,7 @@ Table of contents:
   * [GetCommandLineSwitch](#getcommandlineswitch)
   * [GetGlobalClientCallback](#getglobalclientcallback)
   * [GetModuleDirectory](#getmoduledirectory)
+  * [GetVersion](#getversion)
   * [Initialize](#initialize)
   * [IsThread](#isthread)
   * [MessageLoop](#messageloop)
@@ -142,6 +143,22 @@ Returns a global client callback that was set using SetGlobalClientCallback(). R
 | __Return__ | string |
 
 Get the cefpython module directory. This method is useful to get full path to CEF binaries. This is required when setting [ApplicationSettings](ApplicationSettings.md) options like: 'browser_subprocess_path', 'resources_dir_pat' and 'locales_dir_path'.
+
+
+### GetVersion
+
+| | |
+| --- | --- |
+| __Return__ | dict |
+
+Return CEF Python and CEF versions dictionary with keys:
+* version
+* chrome_version
+* cef_version
+* cef_api_hash_platform
+* cef_api_hash_universal
+* cef_commit_hash
+* cef_commit_number
 
 
 ### Initialize

@@ -14,6 +14,7 @@ import re
 # Architecture and OS postfixes
 ARCH32 = (8 * struct.calcsize('P') == 32)
 ARCH64 = (8 * struct.calcsize('P') == 64)
+ARCH_STR = "32-bit" if (8 * struct.calcsize('P') == 32) else "64-bit"
 # OS_POSTFIX is for directories/files names in cefpython sources
 # OS_POSTFIX2 is for platform name in cefpython binaries
 # CEF_POSTFIX2 is for platform name in upstream CEF binaries
@@ -86,7 +87,7 @@ BUILD_CEFPYTHON = os.path.join(BUILD_DIR, "build_cefpython")
 CEF_BINARIES_LIBRARIES = os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2)
 
 # Will be overwritten through detect_cefpython_binary_dir()
-CEFPYTHON_BINARY = "CEFPYTHON_BINARY"
+CEFPYTHON_BINARY = "CEFPYTHON_BINARY_NOTSET"
 
 # Build C++ projects directories
 BUILD_CEFPYTHON_APP = os.path.join(BUILD_CEFPYTHON,
@@ -185,14 +186,37 @@ def detect_cef_binaries_libraries_dir():
 
 def detect_cefpython_binary_dir():
     """Detect cefpython binary directory where cefpython modules
-    will be put. Eg. buil/cefpython55_win32/."""
-    version = get_cefpython_version()
-    binary_dir = "cefpython{major}_{os}".format(
-            major=version["CHROME_VERSION_MAJOR"],
+    will be put. Eg. build/cefpython_56.0_win32/."""
+    # Check cef version from header file and check cefpython version
+    # that was passed as command line argument to either build.py
+    # or make-installer.py. The CEFPYTHON_BINARY constant should
+    # only be used in those two scripts, so version number in sys.argv
+    # is expected. If not found then keep the default
+    # "CEFPYTHON_BINARY_NOTSET" value intact.
+    cef_version = get_cefpython_version()
+    cmdline_version = get_version_from_command_line_args()
+    if not cmdline_version:
+        return
+    # If cef_version is 56 then expect version from command line to
+    # start with "56.".
+    cef_major = cef_version["CHROME_VERSION_MAJOR"]
+    if not cmdline_version.startswith("{major}.".format(major=cef_major)):
+        return
+    binary_dir = "cefpython_binary_{version}_{os}".format(
+            version=cmdline_version,
             os=OS_POSTFIX2)
     binary_dir = os.path.join(BUILD_DIR, binary_dir)
     global CEFPYTHON_BINARY
     CEFPYTHON_BINARY = binary_dir
+
+
+def get_version_from_command_line_args():
+    args = " ".join(sys.argv)
+    match = re.search(r"\b\d+\.\d+\b", args)
+    if match:
+        version = match.group(0)
+        return version
+    return ""
 
 
 def get_cefpython_version():

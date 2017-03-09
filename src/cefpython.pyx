@@ -998,3 +998,16 @@ cpdef object GetAppSetting(py_string key):
     if key in g_applicationSettings:
         return g_applicationSettings[key]
     return None
+
+cpdef dict GetVersion():
+    # These variable are set when building the module.
+    # noinspection PyUnresolvedReferences
+    return dict(
+        version=__version__,
+        chrome_version=__chrome_version__,
+        cef_version=__cef_version__,
+        cef_api_hash_platform=__cef_api_hash_platform__,
+        cef_api_hash_universal=__cef_api_hash_universal__,
+        cef_commit_hash=__cef_commit_hash__,
+        cef_commit_number=__cef_commit_number__,
+    )

@@ -117,7 +117,8 @@ class WindowUtils(object):
             # of the parent window, try again.
 
             if not parentIconBig and not parentIconSmall:
-                parentWindowHandle = <int>GetParent(<HWND>parentWindowHandle)
+                parentWindowHandle = <uintptr_t>GetParent(
+                                                    <HWND>parentWindowHandle)
 
             Debug("WindowUtils.SetIcon(): popup inherits icon from "
                     "parent window: %s" % parentWindowHandle)

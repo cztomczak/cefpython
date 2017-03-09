@@ -8,9 +8,9 @@ from cefpython3 import cefpython as cef
 import pygtk
 import gtk
 import gobject
-import sys
 import os
 import platform
+import sys
 
 # Fix for PyCharm hints warnings when using static methods
 WindowUtils = cef.WindowUtils()
@@ -50,7 +50,8 @@ def main():
 
 def check_versions():
     print("[gkt2.py] CEF Python {ver}".format(ver=cef.__version__))
-    print("[gkt2.py] Python {ver}".format(ver=sys.version[:6]))
+    print("[gkt2.py] Python {ver} {arch}".format(
+            ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[gkt2.py] GTK {ver}".format(ver='.'.join(
                                            map(str, list(gtk.gtk_version)))))
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
