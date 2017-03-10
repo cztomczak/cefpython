@@ -690,14 +690,14 @@ def build_cefpython_module():
     os.chdir(BUILD_CEFPYTHON)
 
     if FAST_FLAG:
-        ret = subprocess.call("{python} {tools_dir}/cython_setup.py"
-                              " build_ext --fast"
+        ret = subprocess.call('"{python}" {tools_dir}/cython_setup.py'
+                              ' build_ext --fast'
                               .format(python=sys.executable,
                                       tools_dir=TOOLS_DIR),
                               shell=True)
     else:
-        ret = subprocess.call("{python} {tools_dir}/cython_setup.py"
-                              " build_ext"
+        ret = subprocess.call('"{python}" {tools_dir}/cython_setup.py'
+                              ' build_ext'
                               .format(python=sys.executable,
                                       tools_dir=TOOLS_DIR),
                               shell=True)
