@@ -851,19 +851,13 @@ def run_command(command, working_dir, env=None):
                                  shell=(platform.system() == "Windows"))
 
 
-def run_python(command_line, working_dir):
-    """Run python script using depot_tools."""
-    python = "python"
-    return run_command("%s %s" % (python, command_line), working_dir)
-
-
 def run_git(command_line, working_dir):
     """Run git command using depot_tools."""
     return run_command("git %s" % command_line, working_dir)
 
 
 def run_automate_git():
-    """Run CEF automate-git.py."""
+    """Run CEF automate-git.py using Python 2.7."""
     script = os.path.join(Options.cefpython_dir, "tools", "automate-git.py")
     """
     Example automate-git.py command:
@@ -898,8 +892,13 @@ def run_automate_git():
         # later in cef_binary/ with cmake/ninja do works fine.
         args.append("--build-target=cefsimple")
 
+    # On Windows automate-git.py must be run using Python 2.7
+    # from depot_tools. depot_tools should already be added to PATH.
+    python = "python"  # *do not* replace with sys.executable!
     args = " ".join(args)
-    return run_python(script+" "+args, Options.cef_build_dir)
+    command = script + " " + args
+    working_dir = Options.cef_build_dir
+    return run_command("%s %s" % (python, command), working_dir)
 
 
 def rmdir(path):

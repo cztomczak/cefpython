@@ -103,7 +103,7 @@ def main():
             print("[make_installer.py] ERROR: you must specify flags"
                   " eg. --python-tag cp27 or --universal")
             sys.exit(1)
-        command = ("{python} setup.py bdist_wheel {wheel_args}"
+        command = ("\"{python}\" setup.py bdist_wheel {wheel_args}"
                    .format(python=sys.executable,
                            wheel_args=" ".join(WHEEL_ARGS)))
         print("[make_installer.py] Run command: '{0}' in setup directory"

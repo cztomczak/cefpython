@@ -690,13 +690,13 @@ def build_cefpython_module():
     os.chdir(BUILD_CEFPYTHON)
 
     if FAST_FLAG:
-        ret = subprocess.call("{python} {tools_dir}/cython_setup.py"
+        ret = subprocess.call("\"{python}\" {tools_dir}/cython_setup.py"
                               " build_ext --fast"
                               .format(python=sys.executable,
                                       tools_dir=TOOLS_DIR),
                               shell=True)
     else:
-        ret = subprocess.call("{python} {tools_dir}/cython_setup.py"
+        ret = subprocess.call("\"{python}\" {tools_dir}/cython_setup.py"
                               " build_ext"
                               .format(python=sys.executable,
                                       tools_dir=TOOLS_DIR),
@@ -725,7 +725,7 @@ def build_cefpython_module():
                   " being generated yet. Will re-run the build.py script"
                   " programmatically now.")
             args = list()
-            args.append(sys.executable)
+            args.append("\"{python}\"".format(python=sys.executable))
             args.append(os.path.join(TOOLS_DIR, os.path.basename(__file__)))
             assert __file__ in sys.argv[0]
             args.extend(sys.argv[1:])
@@ -794,7 +794,7 @@ def install_and_run():
     # Make setup installer
     print("[build.py] Make setup installer")
     make_tool = os.path.join(TOOLS_DIR, "make_installer.py")
-    ret = os.system("{python} {make_tool} --version {version}"
+    ret = os.system("\"{python}\" {make_tool} --version {version}"
                     .format(python=sys.executable,
                             make_tool=make_tool,
                             version=VERSION))
@@ -805,7 +805,7 @@ def install_and_run():
     # Install
     print("[build.py] Install the cefpython package")
     os.chdir(setup_installer_dir)
-    ret = os.system("{sudo} {python} setup.py install"
+    ret = os.system("{sudo} \"{python}\" setup.py install"
                     .format(sudo=get_sudo(), python=sys.executable))
     if ret != 0:
         print("[build.py] ERROR while installing package")
@@ -818,7 +818,7 @@ def install_and_run():
     # Run unittests
     print("[build.py] Run unittests")
     test_runner = os.path.join(UNITTESTS_DIR, "_test_runner.py")
-    ret = os.system("{python} {test_runner}"
+    ret = os.system("\"{python}\" {test_runner}"
                     .format(python=sys.executable, test_runner=test_runner))
     if ret != 0:
         print("[build.py] ERROR while running unit tests")
@@ -829,7 +829,7 @@ def install_and_run():
     os.chdir(EXAMPLES_DIR)
     kivy_flag = "--kivy" if KIVY_FLAG else ""
     run_examples = os.path.join(TOOLS_DIR, "run_examples.py")
-    ret = os.system("{python} {run_examples} {kivy_flag}"
+    ret = os.system("\"{python}\" {run_examples} {kivy_flag}"
                     .format(python=sys.executable,
                             run_examples=run_examples,
                             kivy_flag=kivy_flag))
