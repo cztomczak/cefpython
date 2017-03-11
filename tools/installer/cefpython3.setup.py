@@ -81,11 +81,11 @@ if "bdist_wheel" in sys.argv:
         def get_tag(self):
             tag = bdist_wheel.get_tag(self)
             platform_tag = sysconfig.get_platform()
+            platform_tag = platform_tag.replace("-", "_")
             if platform.system() == "Linux":
                 assert "linux" in platform_tag
                 # "linux-x86_64" replace with "manylinux1_x86_64"
                 platform_tag = platform_tag.replace("linux", "manylinux1")
-                platform_tag = platform_tag.replace("-", "_")
             elif platform.system() == "Darwin":
                 # For explanation of Mac platform tags, see:
                 # http://lepture.com/en/2014/python-on-a-hard-wheel

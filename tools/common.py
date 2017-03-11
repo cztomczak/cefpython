@@ -50,6 +50,11 @@ OS_POSTFIX2_ARCH = dict(
     Linux={"32bit": "linux32", "64bit": "linux64"},
     Darwin={"32bit": "mac32", "64bit": "mac64"},
 )
+PYPI_POSTFIX2_ARCH = dict(
+    Windows={"32bit": "win32", "64bit": "win-amd64"},
+    Linux={"32bit": "i686", "64bit": "x86_64"},
+    Darwin={"64bit": "x86_64"},
+)
 
 # Python version eg. 27
 PYVERSION = str(sys.version_info[0])+str(sys.version_info[1])

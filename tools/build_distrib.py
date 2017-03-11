@@ -6,6 +6,7 @@
 Build distribution packages for all architectures and all supported
 python versions.
 
+TODO: test_wheel_package_installation()
 TODO: Linux/Mac support. Currently runs only on Windows.
 
 Usage:
@@ -89,6 +90,7 @@ def main():
         make_packages(pythons_32bit[0], "32bit")
     if pythons_64bit:
         make_packages(pythons_64bit[0], "64bit")
+    test_wheel_package_installation()
     show_summary(pythons_32bit, pythons_64bit)
 
 
@@ -413,6 +415,11 @@ def make_packages(python, arch):
     print("[build_distrib.py] Delete setup directory: {setup_dir}/"
           .format(setup_dir=os.path.basename(setup_dir)))
     shutil.rmtree(setup_dir)
+
+
+def test_wheel_package_installation():
+    # PYPI_POSTFIX2_ARCH
+    pass  # TODO
 
 
 def show_summary(pythons_32bit, pythons_64bit):
