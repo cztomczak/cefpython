@@ -12,20 +12,23 @@ Table of contents:
 
 ## Introduction
 
-CEF Python is an open source project founded by [Czarek Tomczak]
-(http://www.linkedin.com/in/czarektomczak)
-in 2012 to provide python bindings for the [Chromium Embedded Framework]
-(https://bitbucket.org/chromiumembedded/cef).
-See the growing list of [applications using CEF]
+CEF Python is a BSD-licensed open source project founded by [Czarek Tomczak]
+(http://www.linkedin.com/in/czarektomczak) in 2012 and is based on
+Google Chromium and the [CEF Framework]
+(https://bitbucket.org/chromiumembedded/cef) projects. The Chromium
+project focuses mainly on Google Chrome application development, while
+CEF focuses on facilitating embedded browser use cases in third-party
+applications. Lots of applications use CEF control, there are more than
+[100 million CEF instances]
 (http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
-on wikipedia. Examples of embedding CEF browser are available for many
-popular GUI toolkits including: wxPython, PyGTK, PyQt, PySide, Kivy,
-Panda3D, PyWin32 and PyGame/PyOpenGL.
+installed around the world. Examples of embedding Chrome browser are
+available for many popular GUI toolkits including: wxPython, PyGTK,
+PyQt, PySide, Kivy, Panda3D and PyGame/PyOpenGL.
 
 There are many use cases for CEF. You can embed a web browser control
 based on Chromium with great HTML 5 support. You can use it to create
 a HTML 5 based GUI in an application, this can act as a replacement for
-standard GUI toolkits like wxWidgets, Qt or GTK. You can render web
+standard GUI toolkits such as wxWidgets, Qt or GTK. You can render web
 content off-screen in application that use custom drawing frameworks.
 You can use it for automated testing of existing applications. You can
 use it for web scraping or as a web crawler, or other kind of internet
