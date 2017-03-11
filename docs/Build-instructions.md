@@ -47,8 +47,8 @@ Before you can build CEF Python or CEF you must satisfy
 
 ## Quick build instructions for Windows
 
-Complete steps for building CEF Python v50+ using prebuilt binaries
-and libraries from GitHub Releases:
+Complete steps for building CEF Python v50+ with Python 2.7 using
+prebuilt binaries and libraries from GitHub Releases:
 
 1) Tested and works fine on Windows 7 64-bit
 

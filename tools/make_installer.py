@@ -45,8 +45,7 @@ def main():
 
     # Setup and package directories
     global SETUP_DIR, PKG_DIR
-    setup_dir_name = ("cefpython3-{version}-{os}-setup"
-                      .format(version=VERSION, os=OS_POSTFIX2))
+    setup_dir_name = get_setup_installer_basename(VERSION, OS_POSTFIX2)
     SETUP_DIR = os.path.join(BUILD_DIR, setup_dir_name)
     PKG_DIR = os.path.join(SETUP_DIR, "cefpython3")
 
@@ -93,7 +92,7 @@ def main():
     create_empty_log_file(os.path.join(PKG_DIR, "debug.log"))
     create_empty_log_file(os.path.join(PKG_DIR, "examples/debug.log"))
 
-    print("[make_installer.py] DONE. Installer package created: {setup_dir}"
+    print("[make_installer.py] Done. Installer package created: {setup_dir}"
           .format(setup_dir=SETUP_DIR))
 
     # Optional generation of wheel package
@@ -112,13 +111,13 @@ def main():
         dist_dir = os.path.join(SETUP_DIR, "dist")
         files = glob.glob(os.path.join(dist_dir, "*.whl"))
         assert len(files) == 1
-        print("[make_installer.py] DONE. Wheel package created: {0}"
+        print("[make_installer.py] Done. Wheel package created: {0}"
               .format(files[0]))
 
 
 def command_line_args():
     global VERSION, WHEEL, WHEEL_ARGS
-    VERSION = get_version_from_command_line_args()
+    VERSION = get_version_from_command_line_args(__file__)
     if not VERSION:
         print(__doc__)
         sys.exit(1)

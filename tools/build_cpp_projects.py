@@ -221,7 +221,8 @@ def smart_compile(compiler, macros, extra_args, sources, output_dir):
             obj_time = os.path.getmtime(obj_file)
             source_time = os.path.getmtime(source_file)
             header_time = os.path.getmtime(header_file) if header_file else 0
-            cefpython_h_fixed_time = os.path.getmtime(CEFPYTHON_API_HFILE_FIXED)
+            cefpython_h_fixed_time = os.path.getmtime(
+                    CEFPYTHON_API_HFILE_FIXED)
             common_files_time = get_directory_mtime(os.path.join(SRC_DIR,
                                                                  "common"))
             changed = ((source_time > obj_time)

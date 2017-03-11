@@ -14,7 +14,13 @@ import re
 # Architecture and OS postfixes
 ARCH32 = (8 * struct.calcsize('P') == 32)
 ARCH64 = (8 * struct.calcsize('P') == 64)
-ARCH_STR = "32-bit" if (8 * struct.calcsize('P') == 32) else "64-bit"
+# Make sure platform.architecture()[0] shows correctly 32bit when
+# running Python 32bit on Windows 64bit.
+if ARCH32:
+    assert platform.architecture()[0] == "32bit"
+if ARCH64:
+    assert platform.architecture()[0] == "64bit"
+ARCH_STR = platform.architecture()[0]
 # OS_POSTFIX is for directories/files names in cefpython sources
 # OS_POSTFIX2 is for platform name in cefpython binaries
 # CEF_POSTFIX2 is for platform name in upstream CEF binaries
@@ -34,9 +40,16 @@ elif OS_POSTFIX == "linux":
     CEF_POSTFIX2 = "linux32" if ARCH32 else "linux64"
 
 # Platforms
-WINDOWS = (platform.system() == "Windows")
-LINUX = (platform.system() == "Linux")
-MAC = (platform.system() == "Darwin")
+SYSTEM = platform.system()
+WINDOWS = SYSTEM if SYSTEM == "Windows" else False
+LINUX = SYSTEM if SYSTEM == "Linux" else False
+MAC = SYSTEM if SYSTEM == "Darwin" else False
+
+OS_POSTFIX2_ARCH = dict(
+    Windows={"32bit": "win32", "64bit": "win64"},
+    Linux={"32bit": "linux32", "64bit": "linux64"},
+    Darwin={"32bit": "mac32", "64bit": "mac64"},
+)
 
 # Python version eg. 27
 PYVERSION = str(sys.version_info[0])+str(sys.version_info[1])
@@ -88,6 +101,9 @@ CEF_BINARIES_LIBRARIES = os.path.join(BUILD_DIR, "cef_"+OS_POSTFIX2)
 
 # Will be overwritten through detect_cefpython_binary_dir()
 CEFPYTHON_BINARY = "CEFPYTHON_BINARY_NOTSET"
+
+# Distrib directory
+DISTRIB_DIR = os.path.join(BUILD_DIR, "DISTRIB_NOTSET")
 
 # Build C++ projects directories
 BUILD_CEFPYTHON_APP = os.path.join(BUILD_CEFPYTHON,
@@ -165,26 +181,60 @@ if "LOCALAPPDATA" in os.environ:
                                         os.environ["LOCALAPPDATA"])
 
 
-def detect_cef_binaries_libraries_dir():
+def get_postfix2_for_arch(arch):
+    return OS_POSTFIX2_ARCH[SYSTEM][arch]
+
+
+def _detect_cef_binaries_libraries_dir():
     """Detect cef binary directory created by automate.py
     eg. build/cef55_3.2883.1553.g80bd606_win32/
     and set CEF_BINARIES_LIBRARIES to it, otherwise it will
     point to eg. build/cef_win32/ ."""
     global CEF_BINARIES_LIBRARIES
     if not os.path.exists(CEF_BINARIES_LIBRARIES):
-        version = get_cefpython_version()
         dirs = glob.glob(os.path.join(
                 BUILD_DIR,
-                "cef{major}_{cef_version}_{os}{sep}"
-                .format(major=version["CHROME_VERSION_MAJOR"],
-                        cef_version=version["CEF_VERSION"],
-                        os=OS_POSTFIX2,
-                        sep=os.sep)))
+                get_cef_binaries_libraries_basename(OS_POSTFIX2)))
         if len(dirs) == 1:
             CEF_BINARIES_LIBRARIES = os.path.normpath(dirs[0])
 
 
-def detect_cefpython_binary_dir():
+def get_cef_binaries_libraries_basename(postfix2):
+    version = get_cefpython_version()
+    return ("cef{major}_{cef_version}_{os}"
+            .format(major=version["CHROME_VERSION_MAJOR"],
+                    cef_version=version["CEF_VERSION"],
+                    os=postfix2))
+
+
+def get_cefpython_binary_basename(postfix2, ignore_error=False):
+    cef_version = get_cefpython_version()
+    cmdline_version = get_version_from_command_line_args(
+            __file__, ignore_error=ignore_error)
+    if not cmdline_version:
+        if not ignore_error:
+            raise Exception("Version arg not found in command line args")
+        return
+    # If cef_version is 56 then expect version from command line to
+    # start with "56.".
+    cef_major = cef_version["CHROME_VERSION_MAJOR"]
+    if not cmdline_version.startswith("{major}.".format(major=cef_major)):
+        if not ignore_error:
+            raise Exception("cmd line arg major version != Chrome version")
+        return
+    dirname = "cefpython_binary_{version}_{os}".format(
+            version=cmdline_version,
+            os=postfix2)
+    return dirname
+
+
+def get_setup_installer_basename(version, postfix2):
+    setup_basename = ("cefpython3-{version}-{os}-setup"
+                      .format(version=version, os=postfix2))
+    return setup_basename
+
+
+def _detect_cefpython_binary_dir():
     """Detect cefpython binary directory where cefpython modules
     will be put. Eg. build/cefpython_56.0_win32/."""
     # Check cef version from header file and check cefpython version
@@ -193,30 +243,40 @@ def detect_cefpython_binary_dir():
     # only be used in those two scripts, so version number in sys.argv
     # is expected. If not found then keep the default
     # "CEFPYTHON_BINARY_NOTSET" value intact.
-    cef_version = get_cefpython_version()
-    cmdline_version = get_version_from_command_line_args()
-    if not cmdline_version:
+    dirname = get_cefpython_binary_basename(OS_POSTFIX2, ignore_error=True)
+    if not dirname:
         return
-    # If cef_version is 56 then expect version from command line to
-    # start with "56.".
-    cef_major = cef_version["CHROME_VERSION_MAJOR"]
-    if not cmdline_version.startswith("{major}.".format(major=cef_major)):
-        return
-    binary_dir = "cefpython_binary_{version}_{os}".format(
-            version=cmdline_version,
-            os=OS_POSTFIX2)
-    binary_dir = os.path.join(BUILD_DIR, binary_dir)
+    binary_dir = os.path.join(BUILD_DIR, dirname)
     global CEFPYTHON_BINARY
     CEFPYTHON_BINARY = binary_dir
 
 
-def get_version_from_command_line_args():
+def _detect_distrib_dir():
+    global DISTRIB_DIR
+    version = get_version_from_command_line_args(__file__, ignore_error=True)
+    if version:
+        # Will only be set when called from scripts that had version
+        # number arg passed on command line: build.py, build_distrib.py,
+        # make_installer.py, etc.
+        dirname = "distrib_{version}".format(version=version)
+        DISTRIB_DIR = os.path.join(BUILD_DIR, dirname)
+
+
+def get_version_from_command_line_args(caller_script, ignore_error=False):
     args = " ".join(sys.argv)
-    match = re.search(r"\b\d+\.\d+\b", args)
+    match = re.search(r"\b(\d+)\.\d+\b", args)
     if match:
         version = match.group(0)
+        major = match.group(1)
+        cef_version = get_cefpython_version()
+        if major != cef_version["CHROME_VERSION_MAJOR"]:
+            if ignore_error:
+                return ""
+            print("[{script}] ERROR: cmd arg major version != Chrome version"
+                  .format(script=os.path.basename(caller_script)))
+            sys.exit(1)
         return version
-    return ""
+    return
 
 
 def get_cefpython_version():
@@ -252,5 +312,6 @@ def get_msvs_for_python(vs_prefix=False):
         sys.exit(1)
 
 
-detect_cef_binaries_libraries_dir()
-detect_cefpython_binary_dir()
+_detect_cef_binaries_libraries_dir()
+_detect_cefpython_binary_dir()
+_detect_distrib_dir()

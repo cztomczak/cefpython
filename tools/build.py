@@ -21,11 +21,12 @@ Usage:
     build.py VERSION [--rebuild-cpp] [--fast] [--clean] [--kivy]
 
 Options:
-    VERSION        Version number eg. 50.0
-    --rebuild-cpp  Force rebuild of C++ projects
-    --fast         Fast mode
-    --clean        Clean C++ projects build files (.o .a etc)
-    --kivy         Run only Kivy example
+    VERSION            Version number eg. 50.0
+    --no-run-examples  Do not run examples after build, only unit tests
+    --rebuild-cpp      Force rebuild of .vcproj C++ projects (DISABLED)
+    --fast             Fast mode
+    --clean            Clean C++ projects build files on Linux/Mac
+    --kivy             Run only Kivy example
 """
 
 # How to debug on Linux:
@@ -59,12 +60,13 @@ except NameError:
     pass
 
 # Command line args variables
+VERSION = ""
+NO_RUN_EXAMPLES = False
 DEBUG_FLAG = False
 FAST_FLAG = False
 CLEAN_FLAG = False
 KIVY_FLAG = False
 REBUILD_CPP = False
-VERSION = ""
 
 # First run
 FIRST_RUN = False
@@ -102,39 +104,44 @@ def main():
 
 def command_line_args():
     global DEBUG_FLAG, FAST_FLAG, CLEAN_FLAG, KIVY_FLAG,\
-           REBUILD_CPP, VERSION
+           REBUILD_CPP, VERSION, NO_RUN_EXAMPLES
 
-    VERSION = get_version_from_command_line_args()
+    VERSION = get_version_from_command_line_args(__file__)
     if not VERSION:
         print(__doc__)
         sys.exit(1)
 
     print("[build.py] Parse command line arguments")
 
-    # -- debug flag
-    if len(sys.argv) > 1 and "--debug" in sys.argv:
+    # --no-run-examples
+    if "--no-run-examples" in sys.argv:
+        NO_RUN_EXAMPLES = True
+        print("[build.py] Running examples disabled (--no-run-examples)")
+
+    # -- debug
+    if "--debug" in sys.argv:
         DEBUG_FLAG = True
         print("[build.py] DEBUG mode On")
 
-    # --fast flag
-    if len(sys.argv) > 1 and "--fast" in sys.argv:
+    # --fast
+    if "--fast" in sys.argv:
         # Fast mode doesn't delete C++ .o .a files.
         # Fast mode also disables optimization flags in setup/setup.py .
         FAST_FLAG = True
         print("[build.py] FAST mode On")
 
-    # --clean flag
-    if len(sys.argv) > 1 and "--clean" in sys.argv:
+    # --clean
+    if "--clean" in sys.argv:
         CLEAN_FLAG = True
 
-    # --kivy flag
-    if len(sys.argv) > 1 and "--kivy" in sys.argv:
+    # --kivy
+    if "--kivy" in sys.argv:
         KIVY_FLAG = True
         print("[build.py] KIVY mode enabled")
 
-    # --rebuild-cpp flag
+    # --rebuild-cpp
     # Rebuild c++ projects
-    if len(sys.argv) > 1 and "--rebuild-cpp" in sys.argv:
+    if "--rebuild-cpp" in sys.argv:
         REBUILD_CPP = True
         print("[build.py] REBUILD_CPP mode enabled")
 
@@ -825,17 +832,18 @@ def install_and_run():
         sys.exit(ret)
 
     # Run examples
-    print("[build.py] Run examples")
-    os.chdir(EXAMPLES_DIR)
-    kivy_flag = "--kivy" if KIVY_FLAG else ""
-    run_examples = os.path.join(TOOLS_DIR, "run_examples.py")
-    ret = os.system("\"{python}\" {run_examples} {kivy_flag}"
-                    .format(python=sys.executable,
-                            run_examples=run_examples,
-                            kivy_flag=kivy_flag))
-    if ret != 0:
-        print("[build.py] ERROR while running examples")
-        sys.exit(1)
+    if not NO_RUN_EXAMPLES:
+        print("[build.py] Run examples")
+        os.chdir(EXAMPLES_DIR)
+        kivy_flag = "--kivy" if KIVY_FLAG else ""
+        run_examples = os.path.join(TOOLS_DIR, "run_examples.py")
+        ret = os.system("\"{python}\" {run_examples} {kivy_flag}"
+                        .format(python=sys.executable,
+                                run_examples=run_examples,
+                                kivy_flag=kivy_flag))
+        if ret != 0:
+            print("[build.py] ERROR while running examples")
+            sys.exit(1)
 
     print("[build.py] Everything OK")
 
