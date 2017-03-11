@@ -38,7 +38,7 @@ bots.
 
 1. Can be installed on all platforms using `pip install cefpython3` command
 2. Downloads are available on [GitHub Releases](../../releases) pages
-2. Windows support: 32-bit, Python 2.7
+2. Windows support: 32-bit and 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
    (requirements: Windows 7+)
 3. Linux support: 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
    (requirements: Debian 7+ / Ubuntu 12.04+)
