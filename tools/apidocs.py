@@ -64,6 +64,7 @@ def update_readme_file(api_links):
         assert match and match.group(1), "Failed to parse API categories"
         categories_contents = match.group(1)
         categories_contents = categories_contents.replace("###", "####")
+        categories_contents = categories_contents.replace("](", "](api/")
     re_find = r"### API categories[\s\S]+### API index"
     assert re.search(re_find, readme_contents), ("API categories not found"
                                                  " in README")
