@@ -2,8 +2,10 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
-"""Build C++ projects. This tool is executed by build.py on Windows
-only currently. Output directories are in build/build_cefpython/.
+"""Called by build.py internally. Builds C++ projects using
+distutils/setuptools compilers. This tool is executed by build.py
+on Windows only currently. Output directories are in
+build/build_cefpython/.
 
 Usage:
     build_cpp_projects.py [--force]

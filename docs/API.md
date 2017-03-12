@@ -1,3 +1,3 @@
 # API
 
-API reference is available in the [api/](../api) root directory.
+API reference is available in the [api/ root directory](../api).

@@ -28,8 +28,10 @@ wxPython, PyGTK, PyQt, PySide, Kivy, Panda3D and PyGame/PyOpenGL.
 There are many use cases for CEF. You can embed a web browser control
 based on Chromium with great HTML 5 support. You can use it to create
 a HTML 5 based GUI in an application, this can act as a replacement for
-standard GUI toolkits such as wxWidgets, Qt or GTK. You can render web
-content off-screen in application that use custom drawing frameworks.
+standard GUI toolkits such as wxWidgets, Qt or GTK. In such case to
+communicate between Python<>Javascript use javascript bindings or
+embed an internal web server and talk using http requests. You can render
+web content off-screen in application that use custom drawing frameworks.
 You can use it for automated testing of existing applications. You can
 use it for web scraping or as a web crawler, or other kind of internet
 bots.

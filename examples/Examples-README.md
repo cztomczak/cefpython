@@ -1,4 +1,4 @@
-# Examples
+# Examples README
 
 Table of contents:
 * [Supported examples](#supported-examples)
