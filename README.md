@@ -21,9 +21,9 @@ CEF focuses on facilitating embedded browser use cases in third-party
 applications. Lots of applications use CEF control, there are more than
 [100 million CEF instances]
 (http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
-installed around the world. Examples of embedding Chrome browser are
-available for many popular GUI toolkits including: wxPython, PyGTK,
-PyQt, PySide, Kivy, Panda3D and PyGame/PyOpenGL.
+installed around the world. [Examples of embedding](examples/Examples-README.md)
+Chrome browser are available for many popular GUI toolkits including:
+wxPython, PyGTK, PyQt, PySide, Kivy, Panda3D and PyGame/PyOpenGL.
 
 There are many use cases for CEF. You can embed a web browser control
 based on Chromium with great HTML 5 support. You can use it to create
