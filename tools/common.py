@@ -97,6 +97,9 @@ else:
 assert __file__
 ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
+# API reference
+API_DIR = os.path.join(ROOT_DIR, "api")
+
 # Build directories
 BUILD_DIR = os.path.join(ROOT_DIR, "build")
 BUILD_CEFPYTHON = os.path.join(BUILD_DIR, "build_cefpython")

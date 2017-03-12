@@ -1,4 +1,8 @@
-Please read this:
-1. Do not create Issues to report problems and/or ask questions. Use the Forum for that.
-2. Before creating an Issue it must first be discussed and confirmed on the Forum.
-3. Always use the Forum: https://goo.gl/xz4cEF
+Please do not create Issues using this form. Issues must
+first be discussed and confirmed on the Forum. Report issues
+on the Forum here:
+
+https://goo.gl/xz4cEF
+
+Please do not ask questions in existing issues. Ask questions
+on the Forum, link above.

@@ -2,7 +2,7 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
-"""Generate API docs from sources.
+"""Generate API reference index in api/ directory and in root/README.md.
 
 TODO:
 - generate api/ docs from Cython sources
@@ -12,59 +12,93 @@ TODO:
   (eg. TerminationStatus, KeyEvent, KeyEventFlags)
 """
 
-import os
-import glob
-import re
+from common import *
 
-# Constants
-API_DIR = os.path.join(os.path.dirname(__file__), "..", "api")
+import glob
+import os
+import re
 
 
 def main():
     """Main entry point."""
-    api_index()
+    api_links = generate_api_links()
+    update_api_index_file(api_links)
+    update_readme_file(api_links)
 
 
-def api_index():
-    """Generate API-index.md file with all modules/classes/funcs/methods."""
-    files = glob.glob(os.path.join(API_DIR, "*.md"))
+def update_api_index_file(api_links):
+    """Create or update API-index.md file."""
     contents = ("[API categories](API-categories.md#api-categories) | " +
                 "[API index](API-index.md#api-index)\n\n" +
                 "# API index\n\n")
+    contents += api_links
+    index_file = os.path.join(API_DIR, "API-index.md")
+    with open(index_file, "rb") as fo:
+        current_contents = fo.read().decode("utf-8")
+    if contents == current_contents:
+        print("No changes: %s/%s" % (os.path.basename(API_DIR),
+                                     os.path.basename(index_file)))
+        return
+    with open(index_file, "wb") as fo:
+        fo.write(contents.encode("utf-8"))
+    print("Updated: %s/%s" % (os.path.basename(API_DIR),
+                              os.path.basename(index_file)))
+
+
+def update_readme_file(api_links):
+    """Update root/README.md with API reference links."""
+    api_links = api_links.replace("](", "](api/")
+    readme_file = os.path.join(ROOT_DIR, "README.md")
+    with open(readme_file, "rb") as fo:
+        current_contents = fo.read().decode("utf-8")
+    contents = current_contents
+    contents = re.sub((r"### API reference\s+"
+                       r"(\s*\*[ ]\[[^\r\n\[\]]+\]\([^\r\n()]+\)\s+)*"),
+                      ("### API reference\r\n\r\n{api_links}"
+                       .format(api_links=api_links)),
+                      contents)
+    if contents == current_contents:
+        print("No changes: /%s" % (os.path.basename(readme_file)))
+        return
+    with open(readme_file, "wb") as fo:
+        fo.write(contents.encode("utf-8"))
+    print("Updated: /%s" % (os.path.basename(readme_file)))
+
+
+def generate_api_links():
+    """Generate API index with all modules / classes / functions."""
+    contents = ""
+    files = glob.glob(os.path.join(API_DIR, "*.md"))
     files = sorted(files, key=lambda s: s.lower())
     for file_ in files:
+        # Ignore API-index.md and API-categories.md files
         if "API-" in file_:
             continue
         with open(file_, "rb") as fo:
-            raw_mdcontents = fo.read().decode("utf-8")
-
-        parsable_mdcontents = re.sub(r"```[\s\S]+?```", "", raw_mdcontents)
-        allmatches = re.findall(r"^(#|###)\s+(.*)", parsable_mdcontents,
-                                re.MULTILINE)
-        for allmatch in allmatches:
-            hlevel = allmatch[0].strip()
-            title = allmatch[1].strip()
+            md_contents = fo.read().decode("utf-8")
+        md_contents = re.sub(r"```[\s\S]+?```", "", md_contents)
+        matches = re.findall(r"^(#|###)\s+(.*)", md_contents,
+                             re.MULTILINE)
+        for match in matches:
+            heading_level = match[0].strip()
+            title = match[1].strip()
             title = title.strip()
-            if hlevel == "#":
+            if heading_level == "#":
                 indent = ""
-                link = os.path.basename(file_) + "#" + headinghash(title)
-            elif hlevel == "###":
+                link = os.path.basename(file_) + "#" + get_heading_hash(title)
+            elif heading_level == "###":
                 indent = "  "
-                link = os.path.basename(file_) + "#" + headinghash(title)
+                link = os.path.basename(file_) + "#" + get_heading_hash(title)
                 # hash generation needs complete title. Now we can strip some.
                 title = re.sub(r"\(.*", r"", title)
             else:
                 assert False, "Heading level unsupported"
             contents += (indent + "* " + "[%s](%s)\n" % (title, link))
-    indexfile = os.path.join(API_DIR, "API-index.md")
-    with open(indexfile, "wb") as fo:
-        fo.write(contents.encode("utf-8"))
-    print("Created %s in %s" % (os.path.basename(indexfile), API_DIR))
-    print("Done")
+    return contents
 
 
-def headinghash(title):
-    """Get a link hash for a heading H1,H2,H3."""
+def get_heading_hash(title):
+    """Get a link hash for headings H1, H2, H3."""
     hash_ = title.lower()
     hash_ = re.sub(r"[^a-z0-9_\- ]+", r"", hash_)
     hash_ = hash_.replace(" ", "-")

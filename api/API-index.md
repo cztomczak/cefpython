@@ -147,6 +147,7 @@
   * [GetCommandLineSwitch](cefpython.md#getcommandlineswitch)
   * [GetGlobalClientCallback](cefpython.md#getglobalclientcallback)
   * [GetModuleDirectory](cefpython.md#getmoduledirectory)
+  * [GetVersion](cefpython.md#getversion)
   * [Initialize](cefpython.md#initialize)
   * [IsThread](cefpython.md#isthread)
   * [MessageLoop](cefpython.md#messageloop)
