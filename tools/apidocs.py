@@ -46,18 +46,44 @@ def update_api_index_file(api_links):
 
 
 def update_readme_file(api_links):
-    """Update root/README.md with API reference links."""
+    """Update root/README.md with API categories and index links.
+    API categories are copied from API-categories.md which is
+    generated manually. """
     api_links = api_links.replace("](", "](api/")
     readme_file = os.path.join(ROOT_DIR, "README.md")
     with open(readme_file, "rb") as fo:
-        current_contents = fo.read().decode("utf-8")
-    contents = current_contents
-    contents = re.sub((r"### API reference\s+"
-                       r"(\s*\*[ ]\[[^\r\n\[\]]+\]\([^\r\n()]+\)\s+)*"),
-                      ("### API reference\r\n\r\n{api_links}"
+        readme_contents = fo.read().decode("utf-8")
+    contents = readme_contents
+
+    # Update API categories
+    categories_file = os.path.join(API_DIR, "API-categories.md")
+    with open(categories_file, "rb") as fo:
+        categories_contents = fo.read().decode("utf-8")
+        match = re.search(r"# API categories\s+(###[\s\S]+)",
+                          categories_contents)
+        assert match and match.group(1), "Failed to parse API categories"
+        categories_contents = match.group(1)
+        categories_contents = categories_contents.replace("###", "####")
+    re_find = r"### API categories[\s\S]+### API index"
+    assert re.search(re_find, readme_contents), ("API categories not found"
+                                                 " in README")
+    contents = re.sub(re_find,
+                      ("### API categories\r\n\r\n{categories_contents}"
+                       "\r\n### API index"
+                       .format(categories_contents=categories_contents)),
+                      contents)
+
+    # Update API index
+    re_find = (r"### API index\s+"
+               r"(\s*\*[ ]\[[^\r\n\[\]]+\]\([^\r\n()]+\)\s+)*")
+    assert re.search(re_find, readme_contents), ("API index not found"
+                                                 " in README")
+    contents = re.sub(re_find,
+                      ("### API index\r\n\r\n{api_links}"
                        .format(api_links=api_links)),
                       contents)
-    if contents == current_contents:
+
+    if contents == readme_contents:
         print("No changes: /%s" % (os.path.basename(readme_file)))
         return
     with open(readme_file, "wb") as fo:
