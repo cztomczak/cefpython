@@ -1,8 +1,8 @@
 diff --git http_cache_transaction.cc http_cache_transaction.cc
-index 45f3db6aed3c..373b1e3c5b45 100644
+index 717522eb6951..e92ba22a9ca9 100644
 --- http_cache_transaction.cc
 +++ http_cache_transaction.cc
-@@ -2552,7 +2552,8 @@ int HttpCache::Transaction::WriteResponseInfoToEntry(bool truncated) {
+@@ -2554,7 +2554,8 @@ int HttpCache::Transaction::WriteResponseInfoToEntry(bool truncated) {
    // blocking page is shown.  An alternative would be to reverse-map the cert
    // status to a net error and replay the net error.
    if ((response_.headers->HasHeaderValue("cache-control", "no-store")) ||

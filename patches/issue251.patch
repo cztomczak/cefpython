@@ -1,5 +1,5 @@
 diff --git include/capi/cef_drag_data_capi.h include/capi/cef_drag_data_capi.h
-index 5f86225..1684de2 100644
+index 2e84df8f..5b17e212 100644
 --- include/capi/cef_drag_data_capi.h
 +++ include/capi/cef_drag_data_capi.h
 @@ -39,6 +39,7 @@
@@ -34,7 +34,7 @@ index 5f86225..1684de2 100644
  
  
 diff --git include/cef_drag_data.h include/cef_drag_data.h
-index 8f8094b..8b4602b 100644
+index 8f8094b4..8b4602b1 100644
 --- include/cef_drag_data.h
 +++ include/cef_drag_data.h
 @@ -39,6 +39,7 @@
@@ -70,21 +70,21 @@ index 8f8094b..8b4602b 100644
  };
  
  #endif  // CEF_INCLUDE_CEF_DRAG_DATA_H_
-diff --git libcef/browser/osr/web_contents_view_osr.cc libcef/browser/osr/web_contents_view_osr.cc
-index c39a29c..8b3c30a 100644
---- libcef/browser/osr/web_contents_view_osr.cc
-+++ libcef/browser/osr/web_contents_view_osr.cc
-@@ -6,6 +6,7 @@
- #include "libcef/browser/osr/web_contents_view_osr.h"
+diff --git libcef/browser/osr/browser_platform_delegate_osr.cc libcef/browser/osr/browser_platform_delegate_osr.cc
+index 2cf44f6d..2e6b8c32 100644
+--- libcef/browser/osr/browser_platform_delegate_osr.cc
++++ libcef/browser/osr/browser_platform_delegate_osr.cc
+@@ -7,6 +7,7 @@
+ #include <utility>
  
  #include "libcef/browser/browser_host_impl.h"
 +#include "libcef/browser/image_impl.h"
  #include "libcef/browser/osr/render_widget_host_view_osr.h"
+ #include "libcef/browser/osr/web_contents_view_osr.h"
  #include "libcef/common/drag_data_impl.h"
- 
-@@ -230,7 +231,9 @@ void CefWebContentsViewOSR::StartDragging(
-   if (browser.get())
-     handler = browser->GetClient()->GetRenderHandler();
+@@ -393,7 +394,9 @@ void CefBrowserPlatformDelegateOsr::StartDragging(
+   CefRefPtr<CefRenderHandler> handler =
+       browser_->GetClient()->GetRenderHandler();
    if (handler.get()) {
 -    CefRefPtr<CefDragDataImpl> drag_data(new CefDragDataImpl(drop_data));
 +    CefRefPtr<CefImage> cef_image(new CefImageImpl(image));
@@ -94,7 +94,7 @@ index c39a29c..8b3c30a 100644
      base::MessageLoop::ScopedNestableTaskAllower allow(
          base::MessageLoop::current());
 diff --git libcef/common/drag_data_impl.cc libcef/common/drag_data_impl.cc
-index 6b632ab..2f12b92 100644
+index 6b632ab2..2f12b928 100644
 --- libcef/common/drag_data_impl.cc
 +++ libcef/common/drag_data_impl.cc
 @@ -20,6 +20,13 @@ CefDragDataImpl::CefDragDataImpl(const content::DropData& data)
@@ -142,7 +142,7 @@ index 6b632ab..2f12b92 100644
 +  else return false;
 +}
 diff --git libcef/common/drag_data_impl.h libcef/common/drag_data_impl.h
-index 64f29ed..9870726 100644
+index 64f29ed3..98707262 100644
 --- libcef/common/drag_data_impl.h
 +++ libcef/common/drag_data_impl.h
 @@ -7,6 +7,7 @@
@@ -181,7 +181,7 @@ index 64f29ed..9870726 100644
    // True if this object is read-only.
    bool read_only_;
 diff --git libcef_dll/cpptoc/drag_data_cpptoc.cc libcef_dll/cpptoc/drag_data_cpptoc.cc
-index c36069e..ddb5729 100644
+index ffad1755..70a6c5c2 100644
 --- libcef_dll/cpptoc/drag_data_cpptoc.cc
 +++ libcef_dll/cpptoc/drag_data_cpptoc.cc
 @@ -11,6 +11,7 @@
@@ -256,7 +256,7 @@ index c36069e..ddb5729 100644
  
  template<> CefRefPtr<CefDragData> CefCppToC<CefDragDataCppToC, CefDragData,
 diff --git libcef_dll/ctocpp/drag_data_ctocpp.cc libcef_dll/ctocpp/drag_data_ctocpp.cc
-index c6b0ee8..3873e9f 100644
+index ab27df2e..0b37224a 100644
 --- libcef_dll/ctocpp/drag_data_ctocpp.cc
 +++ libcef_dll/ctocpp/drag_data_ctocpp.cc
 @@ -11,6 +11,7 @@
@@ -320,7 +320,7 @@ index c6b0ee8..3873e9f 100644
  // CONSTRUCTOR - Do not edit by hand.
  
 diff --git libcef_dll/ctocpp/drag_data_ctocpp.h libcef_dll/ctocpp/drag_data_ctocpp.h
-index 225f57a..2f0b67d 100644
+index 85ea3e58..24283697 100644
 --- libcef_dll/ctocpp/drag_data_ctocpp.h
 +++ libcef_dll/ctocpp/drag_data_ctocpp.h
 @@ -53,6 +53,9 @@ class CefDragDataCToCpp
@@ -332,4 +332,4 @@ index 225f57a..2f0b67d 100644
 +  bool HasImage() OVERRIDE;
  };
  
- #endif  // USING_CEF_SHARED
+ #endif  // CEF_LIBCEF_DLL_CTOCPP_DRAG_DATA_CTOCPP_H_

@@ -813,25 +813,46 @@ def get_vcvars_for_python():
 
 
 def getenv():
-    """Env variables passed to shell when running commands."""
+    """Env variables passed to shell when running commands.
+    See cef/AutomatedBuildSetup.md for reference."""
     env = os.environ
+
+    # PATH
     if Options.build_cef:
         if os.path.exists(Options.depot_tools_dir):
             env["PATH"] = Options.depot_tools_dir + os.pathsep + env["PATH"]
+
+    # Generators: ninja, msvs
     env["GYP_GENERATORS"] = Options.gyp_generators
+
+    # VS version
     if platform.system() == "Windows":
         env["GYP_MSVS_VERSION"] = Options.gyp_msvs_version
-    # See cef/AutomatedBuildSetup.md for reference.
-    # Issue73 patch applied with "use_allocator=none"
-    # TODO: 32-bit gyp defines: host_arch=x86_64 target_arch=ia32
+
+    # GN configuration
+    env["CEF_USE_GN"] = "1"
+    # Issue #73 patch applied here with "use_allocator=none"
+    # TODO: 32-bit GN defines: host_arch=x86_64 target_arch=ia32
     env["GN_DEFINES"] = "use_sysroot=true use_allocator=none symbol_level=1"
+    # env["GN_DEFINES"] += " use_gtk3=false"
     # To perform an official build set GYP_DEFINES=buildtype=Official.
     # This will disable debugging code and enable additional link-time
     # optimizations in Release builds.
     if Options.release_build and not Options.fast_build:
         env["GN_DEFINES"] += " is_official_build=true"
-    # Modifications to automate-git.py
+
+    # GYP configuration is DEPRECATED, however it is still set in
+    # upstream Linux configuration on AutomatedBuildSetup wiki page,
+    # so setting it here as well.
+    env["GYP_DEFINES"] = "disable_nacl=1 use_sysroot=1 use_allocator=none"
+    # Note: 32-bit GYP defines: host_arch=x86_64 target_arch=ia32
+    if Options.release_build and not Options.fast_build:
+        env["GYP_DEFINES"] += " buildtype=Official"
+
+    # Modifications to upstream automate-git.py introduced
+    # CEFPYTHON_NINJA_JOBS env key.
     env["CEFPYTHON_NINJA_JOBS"] = str(Options.ninja_jobs)
+
     return env
 
 
@@ -839,7 +860,11 @@ def run_command(command, working_dir, env=None):
     """Run command in a given directory with env variables set.
     On Linux multiple commands on one line with the use of && are not allowed.
     """
-    print("[automate.py] Running '"+" ".join(command)+"' in '" +
+    if isinstance(command, list):
+        command_str = " ".join(command)
+    else:
+        command_str = command
+    print("[automate.py] Running '"+command_str+"' in '" +
           working_dir+"'...")
     if isinstance(command, str):
         args = shlex.split(command.replace("\\", "\\\\"))

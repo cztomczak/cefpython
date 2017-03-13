@@ -12,6 +12,7 @@ Table of contents:
 * [Build using prebuilt CEF binaries and libraries](#build-using-prebuilt-cef-binaries-and-libraries)
 * [Build using CEF binaries from Spotify Automated Builds](#build-using-cef-binaries-from-spotify-automated-builds)
 * [Build upstream CEF from sources](#build-upstream-cef-from-sources)
+  * [Possible errors](#possible-errors)
 * [Build CEF manually](#build-cef-manually)
 * [CEF Automated Builds (Spotify and Adobe)](#cef-automated-builds-spotify-and-adobe)
 * [Notes](#notes)
@@ -191,8 +192,9 @@ requirements common for all platforms.
     * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
     * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
       and copy it to /usr/bin and chmod 755.
-    * Install required packages using one of the three methods below:
-        1. Type command: `sudo apt-get install bison build-essential cdbs curl devscripts dpkg-dev elfutils fakeroot flex g++ git-core git-svn gperf libapache2-mod-php5 libasound2-dev libav-tools libbrlapi-dev libbz2-dev libcairo2-dev libcap-dev libcups2-dev libcurl4-gnutls-dev libdrm-dev libelf-dev libexif-dev libffi-dev libgconf2-dev libgl1-mesa-dev libglib2.0-dev libglu1-mesa-dev libgnome-keyring-dev libgtk2.0-dev libkrb5-dev libnspr4-dev libnss3-dev libpam0g-dev libpci-dev libpulse-dev libsctp-dev libspeechd-dev libsqlite3-dev libssl-dev libudev-dev libwww-perl libxslt1-dev libxss-dev libxt-dev libxtst-dev mesa-common-dev openbox patch perl php5-cgi pkg-config python python-cherrypy3 python-crypto python-dev python-psutil python-numpy python-opencv python-openssl python-yaml rpm ruby subversion ttf-dejavu-core ttf-indic-fonts ttf-kochi-gothic ttf-kochi-mincho fonts-thai-tlwg wdiff zip`
+    * Install/upgrade required packages using one of the three methods below
+      (these packages should be upgraded each time you update to newer CEF):
+        1. Type command: `sudo apt-get install bison build-essential cdbs curl devscripts dpkg-dev elfutils fakeroot flex g++ git-core git-svn gperf libapache2-mod-php5 libasound2-dev libav-tools libbrlapi-dev libbz2-dev libcairo2-dev libcap-dev libcups2-dev libcurl4-gnutls-dev libdrm-dev libelf-dev libexif-dev libffi-dev libgconf2-dev libgl1-mesa-dev libglib2.0-dev libglu1-mesa-dev libgnome-keyring-dev libgtk2.0-dev libkrb5-dev libnspr4-dev libnss3-dev libpam0g-dev libpci-dev libpulse-dev libsctp-dev libspeechd-dev libsqlite3-dev libssl-dev libudev-dev libwww-perl libxslt1-dev libxss-dev libxt-dev libxtst-dev mesa-common-dev openbox patch perl php5-cgi pkg-config python python-cherrypy3 python-crypto python-dev python-psutil python-numpy python-opencv python-openssl python-yaml rpm ruby subversion ttf-dejavu-core ttf-indic-fonts ttf-kochi-gothic ttf-kochi-mincho fonts-thai-tlwg wdiff wget zip`
         2. See the list of packages on the
            [cef/AutomatedBuildSetup.md](https://bitbucket.org/chromiumembedded/cef/wiki/AutomatedBuildSetup.md#markdown-header-linux-configuration)
             wiki page.
@@ -298,12 +300,15 @@ a custom CEF branch
 then use the --cef-branch flag, but note that this is only for advanced
 users as this will require updating cefpython's C++/Cython code.
 
-If building on Linux and there are errors, see the
-"MISSING PACKAGES (Linux)" note futher down.
-
 You should be fine by running automate.py with the default options,
 but if you need to customize the build then use the --help flag to
 see more options.
+
+Remember to always upgrade packages listed in Requirements section each
+time you update to newer CEF.
+
+On Linux if there are errors about missing packages or others,
+then see solutions in the [Possible errors](#possible-errors) section.
 
 The commands below will build CEF from sources with custom CEF Python
 patches applied and then build the CEF Python package (xx.x is version
@@ -323,6 +328,15 @@ module, make installer package, install the package and run unit tests
 and examples. See the notes for commands for creating package installer
 and/or wheel package for distribution.
 
+### Possible errors
+
+__Debug_GN_arm/ configuration error (Linux)__: Even though building
+on Linux for Linux, Chromium still runs ARM configuration files. If
+there is an error showing that pkg-config fails with GTK 3 library
+then see solution in the third post in this topic on CEF Forum:
+[Debug_GN_arm error when building on Linux, *not* arm]
+(https://magpcss.org/ceforum/viewtopic.php?f=6&t=14976).
+
 __MISSING PACKAGES (Linux)__: After the chromium sources are downloaded,
 it will try to build cef projects and if it fails due to missing packages
 make sure you've installed all the required packages listed in the
@@ -334,7 +348,7 @@ graphical installer pops up don't install it - deny EULA.
 ```
 cd build/chromium/src/build/
 chmod 755 install-build-deps.sh
-sudo ./install-build-deps.sh --no-lib32 --no-arm --no-chromeos-fonts --no-nacl
+sudo ./install-build-deps.sh --no-chromeos-fonts --no-nacl
 ```
 
 After dependencies are satisifed re-run automate.py.
@@ -442,7 +456,12 @@ cd chromium/src/cef/
 git diff --no-prefix --relative > issue251.patch
 ```
 
-Apply a patch in current directory:
+Apply a patch in current directory and ignore git index:
+```
+patch -p0 < issue251.patch
+```
+
+Apply a patch in current directory and do not ignore git index:
 ```
 cd chromium/src/cef/
 git apply -v -p0 issue251.patch
