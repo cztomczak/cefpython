@@ -348,7 +348,7 @@ graphical installer pops up don't install it - deny EULA.
 ```
 cd build/chromium/src/build/
 chmod 755 install-build-deps.sh
-sudo ./install-build-deps.sh --no-chromeos-fonts --no-nacl
+sudo ./install-build-deps.sh --no-chromeos-fonts --no-nacl --no-arm
 ```
 
 After dependencies are satisifed re-run automate.py.

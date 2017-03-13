@@ -23,11 +23,12 @@ Usage:
 Options:
     VERSION            Version number eg. 50.0
     --no-run-examples  Do not run examples after build, only unit tests
-    --rebuild-cpp      Force rebuild of .vcproj C++ projects (DISABLED)
     --fast             Fast mode
     --clean            Clean C++ projects build files on Linux/Mac
     --kivy             Run only Kivy example
 """
+
+# --rebuild-cpp      Force rebuild of .vcproj C++ projects (DISABLED)
 
 # How to debug on Linux:
 # 1. Install "python-dbg" package
@@ -236,7 +237,7 @@ def setup_environ():
         pass
 
     # Mac env variables for makefiles
-    if MAC:
+    if MAC or LINUX:
         os.environ["CEF_BIN"] = os.path.join(CEF_BINARIES_LIBRARIES, "bin")
         os.environ["CEF_LIB"] = os.path.join(CEF_BINARIES_LIBRARIES, "lib")
 
@@ -306,29 +307,33 @@ def fix_cefpython_api_header_file():
         print("[build.py] cefpython API header file was not yet generated")
         return
 
+    # Original contents
     with open(CEFPYTHON_API_HFILE, "rb") as fo:
         contents = fo.read().decode("utf-8")
 
-    already_fixed = False
-    pragma = "#pragma warning(disable:4190)"
-    if pragma in contents:
-        already_fixed = True
-        print("[build.py] cefpython API header file is already fixed")
-    else:
-        if not MAC:
+    # Pragma fix on Windows
+    if WINDOWS:
+        already_fixed = False
+        pragma = "#pragma warning(disable:4190)"
+        if pragma in contents:
+            already_fixed = True
+            print("[build.py] cefpython API header file is already fixed")
+        else:
             contents = ("%s\n\n" % pragma) + contents
+            with open(CEFPYTHON_API_HFILE, "wb") as fo:
+                fo.write(contents.encode("utf-8"))
+            print("[build.py] Save {filename}"
+                  .format(filename=CEFPYTHON_API_HFILE))
 
-    if not already_fixed:
-        with open(CEFPYTHON_API_HFILE, "wb") as fo:
-            fo.write(contents.encode("utf-8"))
-        print("[build.py] Save {filename}"
-              .format(filename=CEFPYTHON_API_HFILE))
-
+    # Make a copy with a "_fixed" postfix
     if os.path.exists(CEFPYTHON_API_HFILE_FIXED):
         with open(CEFPYTHON_API_HFILE_FIXED, "rb") as fo:
             contents_fixed = fo.read().decode("utf-8")
     else:
         contents_fixed = ""
+
+    # Resave fixed copy only if contents changed. Other scripts
+    # depend on "modified time" of the "_fixed" file.
     if contents != contents_fixed:
         print("[build.py] Save cefpython_fixed.h")
         with open(CEFPYTHON_API_HFILE_FIXED, "wb") as fo:

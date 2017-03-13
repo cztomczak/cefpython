@@ -27,13 +27,11 @@ INC = -I./../ -I./../common/ -I/usr/include/python2.7 \
 	-I/usr/lib/glib-2.0/include
 
 ifeq ($(UNAME_S), Linux)
-	LIB_DIRS = -L./../../build/cef_linux64/bin \
-			   -L./../../build/cef_linux32/bin \
-			   -L./../../build/cef_linux64/lib \
-			   -L./../../build/cef_linux32/lib
+	LIB_DIRS = -L$(CEF_BIN) \
+							-L$(CEF_LIB)
 else ifeq ($(UNAME_S), Darwin)
 	LIB_DIRS = -F$(CEF_BIN) \
-			   -L$(CEF_LIB)
+							-L$(CEF_LIB)
 endif
 
 ifeq ($(UNAME_S), Linux)
