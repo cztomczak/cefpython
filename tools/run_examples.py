@@ -96,8 +96,9 @@ def main():
     for example in examples:
         print("[run_examples.py] Running '{example}'..."
               .format(example=example))
-        ret = os.system("\"{python}\" {example}"
-                        .format(python=sys.executable, example=example))
+        command = "\"{python}\" {example}".format(python=sys.executable,
+                                                  example=example)
+        ret = os.system(command)
         if ret == 0:
             succeeded.append(example)
         else:

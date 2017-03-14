@@ -6,7 +6,10 @@
 Prepares CEF binaries and libraries for work with the build.py tool.
 
 Option 1 is to build CEF from sources with the CEF Python patches applied
-using the --build-cef flag.
+using the --build-cef flag. Building CEF from sources is supported only
+on 64-bit systems. 32-bit is also built on 64-bit using cross-compiling.
+Note that building CEF from sources was last tested with v56 on Linux
+and with v50 on Windows, so if there are issues report them on the Forum.
 
 Option 2 is to use CEF binaries from Spotify Automated Builds using
 the --prebuilt-cef flag. In such case check the cefpython/src/version/
@@ -22,6 +25,7 @@ cefpython/build/cef55_3.2883.1553.g80bd606_win32/ .
 
 Usage:
     automate.py (--prebuilt-cef | --build-cef)
+                [--x86 X86]
                 [--fast-build FAST_BUILD]
                 [--force-chromium-update FORCE_CHROMIUM_UPDATE]
                 [--no-cef-update NO_CEF_UPDATE]
@@ -37,6 +41,7 @@ Options:
                              binaries for Linux are built on Ubuntu.
     --build-cef              Whether to build CEF from sources with the
                              cefpython patches applied.
+    --x86                    Build 32-bit CEF on 64-bit system
     --fast-build             Fast build with is_official_build=False
     --force-chromium-update  Force Chromium update (gclient sync etc).
     --no-cef-update          Do not update CEF sources (by default both cef/
@@ -82,6 +87,7 @@ class Options(object):
     # From command-line
     prebuilt_cef = False
     build_cef = False
+    x86 = False
     fast_build = False
     force_chromium_update = False
     no_cef_update = False
@@ -223,17 +229,20 @@ def prebuilt_cef():
     #       eg. tag 'upstream-cef47'.
 
     # Find cef_binary directory in the build directory
+    postfix2 = CEF_POSTFIX2
+    if Options.x86:
+        postfix2 = get_cef_postfix2_for_arch("32bit")
     if Options.cef_version:
         cef_binary = os.path.join(Options.build_dir,
                                   "cef_binary_{cef_version}_{os}{sep}"
                                   .format(cef_version=Options.cef_version,
-                                          os=CEF_POSTFIX2,
+                                          os=postfix2,
                                           sep=os.sep))
     else:
         cef_binary = os.path.join(Options.build_dir,
                                   "cef_binary_3.{cef_branch}.*_{os}{sep}"
                                   .format(cef_branch=Options.cef_branch,
-                                          os=CEF_POSTFIX2,
+                                          os=postfix2,
                                           sep=os.sep))
     dirs = glob.glob(cef_binary)
     if len(dirs) == 1:
@@ -336,8 +345,11 @@ def build_cef_projects():
                 cef_binary = symbols.replace("_debug_symbols", "")
             assert "symbols" not in os.path.basename(cef_binary)
         else:
+            postfix2 = CEF_POSTFIX2
+            if Options.x86:
+                postfix2 = get_cef_postfix2_for_arch("32bit")
             files = glob.glob(os.path.join(Options.binary_distrib,
-                                           "cef_binary_*_"+OS_POSTFIX2))
+                                           "cef_binary_*_"+postfix2))
             assert len(files) == 1, "Error finding binary distrib"
             cef_binary = files[0]
         assert os.path.exists(cef_binary)
@@ -832,7 +844,6 @@ def getenv():
     # GN configuration
     env["CEF_USE_GN"] = "1"
     # Issue #73 patch applied here with "use_allocator=none"
-    # TODO: 32-bit GN defines: host_arch=x86_64 target_arch=ia32
     env["GN_DEFINES"] = "use_sysroot=true use_allocator=none symbol_level=1"
     # env["GN_DEFINES"] += " use_gtk3=false"
     # To perform an official build set GYP_DEFINES=buildtype=Official.
@@ -845,7 +856,8 @@ def getenv():
     # upstream Linux configuration on AutomatedBuildSetup wiki page,
     # so setting it here as well.
     env["GYP_DEFINES"] = "disable_nacl=1 use_sysroot=1 use_allocator=none"
-    # Note: 32-bit GYP defines: host_arch=x86_64 target_arch=ia32
+    if Options.x86:
+        env["GYP_DEFINES"] += " host_arch=x86_64 target_arch=ia32"
     if Options.release_build and not Options.fast_build:
         env["GYP_DEFINES"] += " buildtype=Official"
 
@@ -872,8 +884,7 @@ def run_command(command, working_dir, env=None):
         args = command
     if not env:
         env = getenv()
-    return subprocess.check_call(args, cwd=working_dir, env=env,
-                                 shell=(platform.system() == "Windows"))
+    return subprocess.check_call(args, cwd=working_dir, env=env, shell=True)
 
 
 def run_git(command_line, working_dir):
@@ -893,7 +904,7 @@ def run_automate_git():
         ninja -v -j2 -Cout\Release cefclient
     """
     args = []
-    if ARCH64:
+    if ARCH64 and not Options.x86:
         args.append("--x64-build")
     args.append("--download-dir=" + Options.cef_build_dir)
     args.append("--branch=" + Options.cef_branch)
@@ -972,10 +983,13 @@ def get_prebuilt_name(header_file=""):
         version = get_version_from_file(header_file)
     else:
         version = get_cefpython_version()
+    postfix2 = OS_POSTFIX2
+    if Options.x86:
+        postfix2 = get_os_postfix2_for_arch("32bit")
     name = "cef%s_%s_%s" % (
         version["CHROME_VERSION_MAJOR"],
         version["CEF_VERSION"],
-        OS_POSTFIX2,
+        postfix2
     )
     return name
 

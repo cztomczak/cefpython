@@ -6,7 +6,7 @@
 Build distribution packages for all architectures and all supported
 python versions.
 
-TODO: Linux/Mac support. Currently runs only on Windows.
+TODO: Mac support. Currently runs only on Windows/Linux.
 
 Usage:
     build_distrib.py VERSION [--no-run-examples] [--no-rebuild]
@@ -14,7 +14,8 @@ Usage:
 Options:
     VERSION            Version number eg. 50.0
     --no-run-examples  Do not run examples while building cefpython modules.
-                       Only unit tests will be run in such case.
+                       Examples require interaction, closing window before
+                       proceeding. Only unit tests will be run in such case.
     --no-rebuild       Do not rebuild cefpython modules. For internal use
                        so that changes to packaging can be quickly tested.
 
@@ -33,6 +34,8 @@ This script does the following:
    nor libcef_dll_wrapper libraries in these directories. If you
    would like to rebuild everything from scratch then delete subdirs
    manually (build_cefclient/, build_wrapper*/).
+   When building CEF from sources copy build/chromium/src/cef/binary_distrib
+   /cef_binary_*/ to the build/ directory.
 4. Install and/or upgrade tools/requirements.txt and uninstall
    cefpython3 packages for all python versions
 5. Run automate.py --prebuilt-cef using both Python 32-bit and Python 64-bit
@@ -45,7 +48,8 @@ This script does the following:
 9. Make setup installers and pack them to zip (Win/Mac) or .tar.gz (Linux)
 10. Make wheel packages
 11. Move setup and wheel packages to the build/distrib/ directory
-12. Test installation of wheel packages
+12. Test wheel packages installation and run unit tests using the
+    installed wheel package.
 13. Show summary
 """
 
@@ -56,6 +60,7 @@ import pprint
 import re
 import shutil
 import subprocess
+import tarfile
 import zipfile
 
 # Command line args
@@ -63,27 +68,45 @@ VERSION = ""
 NO_RUN_EXAMPLES = False
 NO_REBUILD = False
 
-# Pythons
+# Python versions
 SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6)]
-PYTHON_SEARCH_PATHS_WINDOWS = [
-    "C:\\Python*\\",
-    "%LocalAppData%\\Programs\\Python\\Python*\\",
-    "C:\\Program Files\\Python*\\",
-    "C:\\Program Files (x86)\\Python*\\",
-]
+
+# Python search paths. It will use first Python found for specific version.
+# Supports replacement of one environment variable in path eg.: %ENV_KEY%.
+PYTHON_SEARCH_PATHS = dict(
+    WINDOWS=[
+        "C:\\Python*\\",
+        "%LOCALAPPDATA%\\Programs\\Python\\Python*\\",
+        "C:\\Program Files\\Python*\\",
+        "C:\\Program Files (x86)\\Python*\\",
+    ],
+    LINUX=[
+        "%PYENV_ROOT%/versions/*/bin",
+    ],
+)
 
 
 def main():
     command_line_args()
-    print("[build_distrib.py] Supported python versions:")
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(SUPPORTED_PYTHON_VERSIONS)
+    supported = list()
+    for version in SUPPORTED_PYTHON_VERSIONS:
+        supported.append("{major}.{minor}".format(major=version[0],
+                                                  minor=version[1]))
+    print("[build_distrib.py] Supported python versions: {supported}"
+          .format(supported=" / ".join(supported)))
     clean_build_directories()
-    pythons_32bit = list()
-    pythons_64bit = list()
     if WINDOWS:
         pythons_32bit = search_for_pythons("32bit")
         pythons_64bit = search_for_pythons("64bit")
+    elif LINUX:
+        pythons_32bit = search_for_pythons("32bit") if ARCH32 else list()
+        pythons_64bit = search_for_pythons("64bit") if ARCH64 else list()
+    elif MAC:
+        pythons_32bit = list()
+        pythons_64bit = search_for_pythons("64bit")
+    else:
+        print("ERROR: Unsupported OS")
+        sys.exit(1)
     check_pythons(pythons_32bit, pythons_64bit)
     install_upgrade_requirements(pythons_32bit + pythons_64bit)
     uninstall_cefpython3_packages(pythons_32bit + pythons_64bit)
@@ -107,7 +130,7 @@ def main():
         make_packages(pythons_32bit[0], "32bit")
     if pythons_64bit:
         make_packages(pythons_64bit[0], "64bit")
-    test_wheel_package_installation(pythons_32bit + pythons_64bit)
+    test_wheel_packages(pythons_32bit + pythons_64bit)
     show_summary(pythons_32bit, pythons_64bit)
 
 
@@ -158,7 +181,7 @@ def clean_build_directories():
 
 def delete_cefpython_binary_dir(arch):
     cefpython_binary = get_cefpython_binary_basename(
-            postfix2=get_postfix2_for_arch(arch))
+            postfix2=get_os_postfix2_for_arch(arch))
     assert cefpython_binary, cefpython_binary
     cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary)
     if os.path.exists(cefpython_binary):
@@ -169,7 +192,7 @@ def delete_cefpython_binary_dir(arch):
 
 def delete_cef_binaries_libraries_dir(arch):
     cef_binlib = get_cef_binaries_libraries_basename(
-            postfix2=get_postfix2_for_arch(arch))
+            postfix2=get_os_postfix2_for_arch(arch))
     assert cef_binlib, cef_binlib
     cef_binlib = os.path.join(BUILD_DIR, cef_binlib)
     if os.path.exists(cef_binlib):
@@ -178,45 +201,31 @@ def delete_cef_binaries_libraries_dir(arch):
         shutil.rmtree(cef_binlib)
 
 
-def check_pythons(pythons_32bit, pythons_64bit):
-    pp = pprint.PrettyPrinter(indent=4)
-    if pythons_32bit:
-        print("[build_distrib.py] Pythons 32-bit found:")
-        pp.pprint(pythons_32bit)
-    if WINDOWS and len(pythons_32bit) != len(SUPPORTED_PYTHON_VERSIONS):
-        print("[build_distrib.py] ERROR: Couldn't find all supported"
-              " python 32-bit installations. Found: {found}."
-              .format(found=len(pythons_32bit)))
-        sys.exit(1)
-    if pythons_64bit:
-        print("[build_distrib.py] Pythons 64-bit found:")
-        pp.pprint(pythons_64bit)
-    if len(pythons_64bit) != len(SUPPORTED_PYTHON_VERSIONS):
-        print("[build_distrib.py] ERROR: Couldn't find all supported"
-              " python 64-bit installations. Found: {found}."
-              .format(found=len(pythons_64bit)))
-        sys.exit(1)
-
-
 def search_for_pythons(search_arch):
-    print("[build_distrib.py] Search for Pythons...")
-    if WINDOWS:
-        return search_for_pythons_windows(search_arch)
-    raise Exception("Only Windows platform supported currently")
-
-
-def search_for_pythons_windows(search_arch):
     """Returns pythons ordered by version from lowest to highest."""
     pythons_found = list()
-    for pattern in PYTHON_SEARCH_PATHS_WINDOWS:
-        pattern = pattern.replace("%LocalAppData%",
-                                  os.environ["LOCALAPPDATA"])
+    for pattern in PYTHON_SEARCH_PATHS[SYSTEM]:
+        # Replace env variable in path
+        match = re.search(r"%(\w+)%", pattern)
+        if match:
+            env_key = match.group(1)
+            if env_key in os.environ:
+                pattern = pattern.replace(match.group(0), os.environ[env_key])
+            else:
+                print("ERROR: Env variable not found: {env_key}"
+                      .format(env_key=env_key))
+                sys.exit(1)
         results = glob.glob(pattern)
         for path in results:
             if os.path.isdir(path):
-                python = os.path.join(path, "python.exe")
+                python = os.path.join(path,
+                                      "python{ext}".format(ext=EXECUTABLE_EXT))
                 version_code = ("import sys;"
                                 "print(str(sys.version_info[:3]));")
+                if not os.path.isfile(python):
+                    print("ERROR: Python executable not found: {executable}"
+                          .format(executable=python))
+                    sys.exit(1)
                 version_str = subprocess.check_output([python, "-c",
                                                        version_code])
                 version_str = version_str.strip()
@@ -247,14 +256,31 @@ def search_for_pythons_windows(search_arch):
         supported_python = None
         for python in pythons_found:
             if python["version2"] == version_tuple:
-                # Always go through the whole loop and save the last
-                # python executable for the given version (eg. 2.7),
-                # so that the latest version is used (eg. 2.7.12).
-                # This is assuming that glob.glob sorted directories.
                 supported_python = python
+                break
         if supported_python:
             ret_pythons.append(supported_python)
     return ret_pythons
+
+
+def check_pythons(pythons_32bit, pythons_64bit):
+    pp = pprint.PrettyPrinter(indent=4)
+    if pythons_32bit:
+        print("[build_distrib.py] Pythons 32-bit found:")
+        pp.pprint(pythons_32bit)
+    if WINDOWS and len(pythons_32bit) != len(SUPPORTED_PYTHON_VERSIONS):
+        print("[build_distrib.py] ERROR: Couldn't find all supported"
+              " python 32-bit installations. Found: {found}."
+              .format(found=len(pythons_32bit)))
+        sys.exit(1)
+    if pythons_64bit:
+        print("[build_distrib.py] Pythons 64-bit found:")
+        pp.pprint(pythons_64bit)
+    if len(pythons_64bit) != len(SUPPORTED_PYTHON_VERSIONS):
+        print("[build_distrib.py] ERROR: Couldn't find all supported"
+              " python 64-bit installations. Found: {found}."
+              .format(found=len(pythons_64bit)))
+        sys.exit(1)
 
 
 def install_upgrade_requirements(pythons):
@@ -263,10 +289,9 @@ def install_upgrade_requirements(pythons):
               " for: {name}".format(name=python["name"]))
 
         # Upgrade pip
-        command = "\"{python}\" -m pip install --upgrade pip"
-        command = command.format(python=python["executable"])
-        if python["executable"].startswith("/usr/"):
-            command = "sudo {command}".format(command=command)
+        command = ("\"{python}\" -m pip install --upgrade pip"
+                   .format(python=python["executable"]))
+        command = sudo_command(command, python=python["executable"])
         pcode = subprocess.call(command, shell=True)
         if pcode != 0:
             print("[build_distrib.py] ERROR while upgrading pip")
@@ -274,11 +299,10 @@ def install_upgrade_requirements(pythons):
 
         # Install/upgrade requirements.txt
         requirements = os.path.join(TOOLS_DIR, "requirements.txt")
-        command = "\"{python}\" -m pip install --upgrade -r {requirements}"
-        command = command.format(python=python["executable"],
-                                 requirements=requirements)
-        if python["executable"].startswith("/usr/"):
-            command = "sudo {command}".format(command=command)
+        command = ("\"{python}\" -m pip install --upgrade -r {requirements}"
+                   .format(python=python["executable"],
+                           requirements=requirements))
+        command = sudo_command(command, python=python["executable"])
         pcode = subprocess.call(command, shell=True)
         if pcode != 0:
             print("[build_distrib.py] ERROR while running pip install/upgrade")
@@ -287,14 +311,14 @@ def install_upgrade_requirements(pythons):
 
 def uninstall_cefpython3_packages(pythons):
     for python in pythons:
-        print("[build_distrib.py] pip uninstall cefpython3 package"
+        print("[build_distrib.py] Uninstall cefpython3 package"
               " for: {name}".format(name=python["name"]))
 
         # Check if package is installed
         command = ("\"{python}\" -m pip show cefpython3"
                    .format(python=python["executable"]))
         try:
-            output = subprocess.check_output(command)
+            output = subprocess.check_output(command, shell=True)
         except subprocess.CalledProcessError, exc:
             # pip show returns error code when package is not installed
             output = exc.output
@@ -307,8 +331,7 @@ def uninstall_cefpython3_packages(pythons):
         # otherwise error code is returned.
         command = ("\"{python}\" -m pip uninstall -y cefpython3"
                    .format(python=python["executable"]))
-        if python["executable"].startswith("/usr/"):
-            command = "sudo {command}".format(command=command)
+        command = sudo_command(command, python=python["executable"])
         pcode = subprocess.call(command, shell=True)
         if pcode != 0:
             print("[build_distrib.py] ERROR while uninstall cefpython3"
@@ -322,7 +345,7 @@ def run_automate_prebuilt_cef(python):
     automate = os.path.join(TOOLS_DIR, "automate.py")
     command = ("\"{python}\" {automate} --prebuilt-cef"
                .format(python=python["executable"], automate=automate))
-    code = subprocess.call(command)
+    code = subprocess.call(command, shell=True)
     if code != 0:
         print("[build_distrib.py] ERROR while running automate.py")
         sys.exit(1)
@@ -330,7 +353,7 @@ def run_automate_prebuilt_cef(python):
 
 def pack_prebuilt_cef(arch):
     prebuilt_basename = get_cef_binaries_libraries_basename(
-                get_postfix2_for_arch(arch))
+                get_os_postfix2_for_arch(arch))
     print("[build_distrib.py] Pack directory: {dir}/ ..."
           .format(dir=prebuilt_basename))
     prebuilt_dir = os.path.join(BUILD_DIR, prebuilt_basename)
@@ -351,8 +374,8 @@ def pack_directory(path, base_path):
     if WINDOWS or MAC:
         zip_directory(path, base_path=base_path, archive=archive)
     else:
-        # LINUX
-        raise Exception("pack_directory(): Linux not yet supported")  # TODO
+        with tarfile.open(archive, "w:gz") as tar:
+            tar.add(path, arcname=os.path.basename(path))
     assert os.path.isfile(archive), archive
     return archive
 
@@ -376,7 +399,7 @@ def reduce_package_size_issue_262(arch):
     print("[build_distrib.py] Reduce package size for {arch} (Issue #262)"
           .format(arch=arch))
     prebuilt_basename = get_cef_binaries_libraries_basename(
-                get_postfix2_for_arch(arch))
+                get_os_postfix2_for_arch(arch))
     bin_dir = os.path.join(prebuilt_basename, "bin")
 
     # Run `strip` command on `libcef.so`
@@ -384,10 +407,8 @@ def reduce_package_size_issue_262(arch):
     print("[build_distrib.py] Strip {libcef_so}"
           .format(libcef_so=os.path.basename(libcef_so)))
     command = "strip {libcef_so}".format(libcef_so=libcef_so)
-    pcode = subprocess.call(command)
-    if pcode != 0:
-        print("[build_distrib.py] ")
-        sys.exit(1)
+    pcode = subprocess.call(command, shell=True)
+    assert pcode, "strip command failed"
 
 
 def reduce_package_size_issue_321(arch):
@@ -395,13 +416,13 @@ def reduce_package_size_issue_321(arch):
     print("[build_distrib.py] Reduce package size for {arch} (Issue #321)"
           .format(arch=arch))
     prebuilt_basename = get_cef_binaries_libraries_basename(
-                get_postfix2_for_arch(arch))
+                get_os_postfix2_for_arch(arch))
     bin_dir = os.path.join(prebuilt_basename, "bin")
 
     # Delete sample applications to reduce package size
     sample_apps = ["cefclient", "cefsimple", "ceftests"]
-    for sample_app in sample_apps:
-        sample_app = os.path.join(bin_dir, sample_app + APP_EXT)
+    for sample_app_name in sample_apps:
+        sample_app = os.path.join(bin_dir, sample_app_name + APP_EXT)
         # Not on all platforms sample apps may be available
         if os.path.exists(sample_app):
             print("[build_distrib.py] Delete {sample_app}"
@@ -410,6 +431,20 @@ def reduce_package_size_issue_321(arch):
                 shutil.rmtree(sample_app)
             else:
                 os.remove(sample_app)
+            # Also delete subdirs eg. cefclient_files/, ceftests_files/
+            files_subdir = os.path.join(bin_dir, sample_app_name + "_files")
+            if os.path.isdir(files_subdir):
+                print("[build_distrib.py] Delete directory: {dir}/"
+                      .format(dir=os.path.basename(files_subdir)))
+                shutil.rmtree(files_subdir)
+
+    # Strip symbols from cefpython .so modules to reduce size
+    modules = glob.glob(os.path.join(CEFPYTHON_BINARY, "*.so"))
+    for module in modules:
+        print("[build_distrib.py] strip {module}"
+              .format(module=os.path.basename(module)))
+        command = "strip {module}".format(module=module)
+        assert os.system(command) == 0, "strip command failed"
 
 
 def build_cefpython_modules(pythons):
@@ -419,7 +454,8 @@ def build_cefpython_modules(pythons):
         flags = ""
         if NO_RUN_EXAMPLES:
             flags += " --no-run-examples"
-        command = ("\"{python}\" {build_py} {version} {flags}"
+        # On Linux/Mac Makefiles are used and must pass --clean flag
+        command = ("\"{python}\" {build_py} {version} --clean {flags}"
                    .format(python=python["executable"],
                            build_py=os.path.join(TOOLS_DIR, "build.py"),
                            version=VERSION,
@@ -446,7 +482,7 @@ def make_packages(python, arch):
                          .format(python=python["executable"],
                                  make_installer_py=make_installer_py,
                                  version=VERSION))
-    pcode = subprocess.call(installer_command, cwd=BUILD_DIR)
+    pcode = subprocess.call(installer_command, cwd=BUILD_DIR, shell=True)
     if pcode != 0:
         print("[build_distrib.py] ERROR: failed to make setup package for"
               " {arch}".format(arch=arch))
@@ -456,7 +492,7 @@ def make_packages(python, arch):
     print("[build_distrib.py] Pack setup package for {arch}..."
           .format(arch=arch))
     setup_basename = get_setup_installer_basename(
-            VERSION, get_postfix2_for_arch(arch))
+            VERSION, get_os_postfix2_for_arch(arch))
     setup_dir = os.path.join(BUILD_DIR, setup_basename)
     archive = pack_directory(setup_dir, BUILD_DIR)
     shutil.move(archive, DISTRIB_DIR)
@@ -468,7 +504,7 @@ def make_packages(python, arch):
     wheel_command = ("\"{python}\" setup.py {wheel_args}"
                      .format(python=python["executable"],
                              wheel_args=wheel_args))
-    pcode = subprocess.call(wheel_command, cwd=setup_dir)
+    pcode = subprocess.call(wheel_command, cwd=setup_dir, shell=True)
     if pcode != 0:
         print("[build_distrib.py] ERROR: failed to make wheel package for"
               " {arch}".format(arch=arch))
@@ -485,10 +521,11 @@ def make_packages(python, arch):
     shutil.rmtree(setup_dir)
 
 
-def test_wheel_package_installation(pythons):
+def test_wheel_packages(pythons):
+    """Test wheel packages installation and run unit tests."""
     uninstall_cefpython3_packages(pythons)
     for python in pythons:
-        print("[build_distrib.py] Test wheel package installation for"
+        print("[build_distrib.py] Test wheel package (install, unittests) for"
               " {python_name}".format(python_name=python["name"]))
         platform_tag = get_pypi_postfix2_for_arch(python["arch"])
         whl_pattern = (r"*-{platform_tag}.whl"
@@ -496,15 +533,26 @@ def test_wheel_package_installation(pythons):
         wheels = glob.glob(os.path.join(DISTRIB_DIR, whl_pattern))
         assert len(wheels) == 1, ("No wheels found in distrib dir for %s"
                                   % python["arch"])
+
         # Install wheel
         command = ("\"{python}\" -m pip install {wheel}"
                    .format(python=python["executable"],
                            wheel=os.path.basename(wheels[0])))
-        if python["executable"].startswith("/usr/"):
-            command = "sudo {command}".format(command=command)
-        pcode = subprocess.call(command, cwd=DISTRIB_DIR)
+        command = sudo_command(command, python=python["executable"])
+        pcode = subprocess.call(command, cwd=DISTRIB_DIR, shell=True)
         if pcode != 0:
             print("[build_distrib.py] Wheel package installation failed for"
+                  " {python_name}".format(python_name=python["name"]))
+            sys.exit(1)
+
+        # Run unittests using the installed wheel package
+        command = ("\"{python}\" {unittests}"
+                   .format(python=python["executable"],
+                           unittests=os.path.join(UNITTESTS_DIR,
+                                                  "main_test.py")))
+        pcode = subprocess.call(command, cwd=DISTRIB_DIR, shell=True)
+        if pcode != 0:
+            print("[build_distrib.py] ERROR: Unit tests failed for"
                   " {python_name}".format(python_name=python["name"]))
             sys.exit(1)
 

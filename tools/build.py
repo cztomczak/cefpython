@@ -313,10 +313,8 @@ def fix_cefpython_api_header_file():
 
     # Pragma fix on Windows
     if WINDOWS:
-        already_fixed = False
         pragma = "#pragma warning(disable:4190)"
         if pragma in contents:
-            already_fixed = True
             print("[build.py] cefpython API header file is already fixed")
         else:
             contents = ("%s\n\n" % pragma) + contents
@@ -701,18 +699,11 @@ def build_cefpython_module():
 
     os.chdir(BUILD_CEFPYTHON)
 
+    command = ("\"{python}\" {tools_dir}/cython_setup.py build_ext"
+               .format(python=sys.executable, tools_dir=TOOLS_DIR))
     if FAST_FLAG:
-        ret = subprocess.call("\"{python}\" {tools_dir}/cython_setup.py"
-                              " build_ext --fast"
-                              .format(python=sys.executable,
-                                      tools_dir=TOOLS_DIR),
-                              shell=True)
-    else:
-        ret = subprocess.call("\"{python}\" {tools_dir}/cython_setup.py"
-                              " build_ext"
-                              .format(python=sys.executable,
-                                      tools_dir=TOOLS_DIR),
-                              shell=True)
+        command += " --fast"
+    ret = subprocess.call(command, shell=True)
 
     # if DEBUG_FLAG:
     #     shutil.rmtree("./../binaries_%s/cython_debug/" % BITS,
@@ -741,7 +732,8 @@ def build_cefpython_module():
             args.append(os.path.join(TOOLS_DIR, os.path.basename(__file__)))
             assert __file__ in sys.argv[0]
             args.extend(sys.argv[1:])
-            ret = subprocess.call(" ".join(args), shell=True)
+            command = " ".join(args)
+            ret = subprocess.call(command, shell=True)
             sys.exit(ret)
         else:
             print("[build.py] ERROR: failed to build the cefpython module")
@@ -806,10 +798,11 @@ def install_and_run():
     # Make setup installer
     print("[build.py] Make setup installer")
     make_tool = os.path.join(TOOLS_DIR, "make_installer.py")
-    ret = os.system("\"{python}\" {make_tool} --version {version}"
-                    .format(python=sys.executable,
-                            make_tool=make_tool,
-                            version=VERSION))
+    command = ("\"{python}\" {make_tool} --version {version}"
+               .format(python=sys.executable,
+                       make_tool=make_tool,
+                       version=VERSION))
+    ret = os.system(command)
     if ret != 0:
         print("[build.py] ERROR while making installer package")
         sys.exit(ret)
@@ -817,8 +810,10 @@ def install_and_run():
     # Install
     print("[build.py] Install the cefpython package")
     os.chdir(setup_installer_dir)
-    ret = os.system("{sudo} \"{python}\" setup.py install"
-                    .format(sudo=get_sudo(), python=sys.executable))
+    command = ("\"{python}\" setup.py install"
+               .format(python=sys.executable))
+    command = sudo_command(command, python=sys.executable)
+    ret = os.system(command)
     if ret != 0:
         print("[build.py] ERROR while installing package")
         sys.exit(ret)
@@ -830,8 +825,10 @@ def install_and_run():
     # Run unittests
     print("[build.py] Run unittests")
     test_runner = os.path.join(UNITTESTS_DIR, "_test_runner.py")
-    ret = os.system("\"{python}\" {test_runner}"
-                    .format(python=sys.executable, test_runner=test_runner))
+    command = ("\"{python}\" {test_runner}"
+               .format(python=sys.executable,
+                       test_runner=test_runner))
+    ret = os.system(command)
     if ret != 0:
         print("[build.py] ERROR while running unit tests")
         sys.exit(ret)
@@ -842,24 +839,16 @@ def install_and_run():
         os.chdir(EXAMPLES_DIR)
         kivy_flag = "--kivy" if KIVY_FLAG else ""
         run_examples = os.path.join(TOOLS_DIR, "run_examples.py")
-        ret = os.system("\"{python}\" {run_examples} {kivy_flag}"
-                        .format(python=sys.executable,
-                                run_examples=run_examples,
-                                kivy_flag=kivy_flag))
+        command = ("\"{python}\" {run_examples} {kivy_flag}"
+                   .format(python=sys.executable,
+                           run_examples=run_examples,
+                           kivy_flag=kivy_flag))
+        ret = os.system(command)
         if ret != 0:
             print("[build.py] ERROR while running examples")
             sys.exit(1)
 
     print("[build.py] Everything OK")
-
-
-def get_sudo():
-    # System Python requires sudo when installing package
-    if sys.executable.startswith("/usr/"):
-        sudo = "sudo"
-    else:
-        sudo = ""
-    return sudo
 
 
 def delete_directory_reliably(adir):
@@ -873,8 +862,9 @@ def delete_directory_reliably(adir):
         # On Linux sudo might be required to delete directory, as this
         # might be a setup installer directory with package installed
         # using sudo and in such case files were created with sudo.
-        os.system("{sudo} rm -rf {dir}"
-                  .format(sudo=get_sudo(), dir=adir))
+        command = "rm -rf {dir}".format(dir=adir)
+        command = sudo_command(command, python=sys.executable)
+        os.system(command)
 
 
 if __name__ == "__main__":

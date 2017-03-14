@@ -21,6 +21,7 @@ if ARCH32:
 if ARCH64:
     assert platform.architecture()[0] == "64bit"
 ARCH_STR = platform.architecture()[0]
+
 # OS_POSTFIX is for directories/files names in cefpython sources
 # OS_POSTFIX2 is for platform name in cefpython binaries
 # CEF_POSTFIX2 is for platform name in upstream CEF binaries
@@ -29,6 +30,7 @@ OS_POSTFIX = ("win" if platform.system() == "Windows" else
               "mac" if platform.system() == "Darwin" else "unknown")
 OS_POSTFIX2 = "unknown"
 CEF_POSTFIX2 = "unknown"  # Upstream CEF binaries postfix
+
 if OS_POSTFIX == "win":
     OS_POSTFIX2 = "win32" if ARCH32 else "win64"
     CEF_POSTFIX2 = "windows32" if ARCH32 else "windows64"
@@ -40,20 +42,25 @@ elif OS_POSTFIX == "linux":
     CEF_POSTFIX2 = "linux32" if ARCH32 else "linux64"
 
 # Platforms
-SYSTEM = platform.system()
-WINDOWS = SYSTEM if SYSTEM == "Windows" else False
-LINUX = SYSTEM if SYSTEM == "Linux" else False
-MAC = SYSTEM if SYSTEM == "Darwin" else False
+SYSTEM = platform.system().upper()
+WINDOWS = SYSTEM if SYSTEM == "WINDOWS" else False
+LINUX = SYSTEM if SYSTEM == "LINUX" else False
+MAC = SYSTEM if SYSTEM == "DARWIN" else False
 
 OS_POSTFIX2_ARCH = dict(
-    Windows={"32bit": "win32", "64bit": "win64"},
-    Linux={"32bit": "linux32", "64bit": "linux64"},
-    Darwin={"32bit": "mac32", "64bit": "mac64"},
+    WINDOWS={"32bit": "win32", "64bit": "win64"},
+    LINUX={"32bit": "linux32", "64bit": "linux64"},
+    DARWIN={"32bit": "mac32", "64bit": "mac64"},
+)
+CEF_POSTFIX2_ARCH = dict(
+    WINDOWS={"32bit": "windows32", "64bit": "windows64"},
+    LINUX={"32bit": "linux32", "64bit": "linux64"},
+    DARWIN={"64bit": "macosx64"},
 )
 PYPI_POSTFIX2_ARCH = dict(
-    Windows={"32bit": "win32", "64bit": "win_amd64"},
-    Linux={"32bit": "i686", "64bit": "x86_64"},
-    Darwin={"64bit": "x86_64"},
+    WINDOWS={"32bit": "win32", "64bit": "win_amd64"},
+    LINUX={"32bit": "manylinux1_i686", "64bit": "manylinux1_x86_64"},
+    DARWIN={"64bit": "x86_64"},
 )
 
 # Python version eg. 27
@@ -192,12 +199,24 @@ if "LOCALAPPDATA" in os.environ:
                                         os.environ["LOCALAPPDATA"])
 
 
-def get_postfix2_for_arch(arch):
+def get_os_postfix2_for_arch(arch):
     return OS_POSTFIX2_ARCH[SYSTEM][arch]
+
+
+def get_cef_postfix2_for_arch(arch):
+    return CEF_POSTFIX2_ARCH[SYSTEM][arch]
 
 
 def get_pypi_postfix2_for_arch(arch):
     return PYPI_POSTFIX2_ARCH[SYSTEM][arch]
+
+
+def sudo_command(command, python):
+    """Prepends command with sudo when installing python packages
+    requires sudo."""
+    if python.startswith("/usr/"):
+        command = "sudo " + command
+    return command
 
 
 def _detect_cef_binaries_libraries_dir():
@@ -273,7 +292,17 @@ def _detect_distrib_dir():
         # Will only be set when called from scripts that had version
         # number arg passed on command line: build.py, build_distrib.py,
         # make_installer.py, etc.
-        dirname = "distrib_{version}".format(version=version)
+        if LINUX:
+            # On Linux buildig 32bit and 64bit separately, so don't
+            # delete eg. 64bit distrib when building 32bit distrib.
+            # Keep them in different directories.
+            dirname = ("distrib_{version}_{postfix2}"
+                       .format(version=version, postfix2=OS_POSTFIX2))
+        else:
+            # On Windows both 32bit and 64bit distribs are built at
+            # the same time.
+            # On Mac only 64bit is supported.
+            dirname = "distrib_{version}".format(version=version)
         DISTRIB_DIR = os.path.join(BUILD_DIR, dirname)
 
 

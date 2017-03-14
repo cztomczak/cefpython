@@ -204,6 +204,8 @@ requirements common for all platforms.
       [cef/BuildingOnDebian7.md](https://bitbucket.org/chromiumembedded/cef/wiki/BuildingOnDebian7.md) and
       [cef/#1575](https://bitbucket.org/chromiumembedded/cef/issues/1575),
       and [cef/#1697](https://bitbucket.org/chromiumembedded/cef/issues/1697)
+* If building CEF from sources, 32-bit on 64-bit machine:
+    * Follow the configuration [here](https://bitbucket.org/chromiumembedded/cef/wiki/AutomatedBuildSetup.md#markdown-header-linux-configuration)
     * To perform a 32-bit Linux build on a 64-bit Linux system see
       Linux configuration in upstream cef/AutomatedBuildSetup.md. See also
       [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804).
@@ -311,14 +313,15 @@ On Linux if there are errors about missing packages or others,
 then see solutions in the [Possible errors](#possible-errors) section.
 
 The commands below will build CEF from sources with custom CEF Python
-patches applied and then build the CEF Python package (xx.x is version
-number):
+patches applied and then build the CEF Python package. "xx.x" is version
+number and "ninja-jobs 4" means to run 4 parallel jobs for compiling,
+increase it if you have more CPU cores and want things to build faster:
 ```
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/
 mkdir build/
 cd build/
-python ../tools/automate.py --build-cef --ninja-jobs 6
+python ../tools/automate.py --build-cef --ninja-jobs 4
 python ../tools/build.py xx.x
 ```
 
