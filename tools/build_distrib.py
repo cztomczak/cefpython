@@ -6,16 +6,18 @@
 Build distribution packages for all architectures and all supported
 python versions.
 
-TODO: test_wheel_package_installation()
 TODO: Linux/Mac support. Currently runs only on Windows.
 
 Usage:
-    build_distrib.py VERSION [--no-run-examples]
+    build_distrib.py VERSION [--no-run-examples] [--no-rebuild]
 
 Options:
     VERSION            Version number eg. 50.0
     --no-run-examples  Do not run examples while building cefpython modules.
                        Only unit tests will be run in such case.
+    --no-rebuild       Do not rebuild cefpython modules. For internal use
+                       so that changes to packaging can be quickly tested.
+
 
 This script does the following:
 1. Expects that all supported python versions are installed
@@ -27,17 +29,24 @@ This script does the following:
 2. Expects that all python compilers for supported python versions
    are installed. See docs/Build-instructions.md > Requirements.
 3. Expects cef_binary*/ directories from Spotify Automated Builds
-   to be in the build/ directory
+   to be in the build/ directory. It does not rebuild cefclient
+   nor libcef_dll_wrapper libraries in these directories. If you
+   would like to rebuild everything from scratch then delete subdirs
+   manually (build_cefclient/, build_wrapper*/).
 4. Install and/or upgrade tools/requirements.txt and uninstall
    cefpython3 packages for all python versions
 5. Run automate.py --prebuilt-cef using both Python 32-bit and Python 64-bit
 6. Pack the prebuilt biaries using zip on Win/Mac and .tar.gz on Linux
    and move to build/distrib/
-7. Build cefpython modules for all supported Python versions on both
+7. Reduce packages size (Issue #321). After packing prebuilt binaries,
+   reduce its size so that packages will use the reduced prebuilt binaries.
+8. Build cefpython modules for all supported Python versions on both
    32-bit and 64-bit
-8. Make setup installers and pack them to zip (Win/Mac) or .tar.gz (Linux)
-9. Make wheel packages
-10. Move setup and wheel packages to the build/distrib/ directory
+9. Make setup installers and pack them to zip (Win/Mac) or .tar.gz (Linux)
+10. Make wheel packages
+11. Move setup and wheel packages to the build/distrib/ directory
+12. Test installation of wheel packages
+13. Show summary
 """
 
 from common import *
@@ -52,6 +61,7 @@ import zipfile
 # Command line args
 VERSION = ""
 NO_RUN_EXAMPLES = False
+NO_REBUILD = False
 
 # Pythons
 SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6)]
@@ -81,50 +91,67 @@ def main():
         os.makedirs(DISTRIB_DIR)
     if pythons_32bit:
         run_automate_prebuilt_cef(pythons_32bit[0])
-        pack_prebuilt_cef(pythons_32bit[0]["arch"])
+        pack_prebuilt_cef("32bit")
+        if LINUX:
+            reduce_package_size_issue_262("32bit")
+        reduce_package_size_issue_321("32bit")
     if pythons_64bit is not None:
         run_automate_prebuilt_cef(pythons_64bit[0])
-        pack_prebuilt_cef(pythons_64bit[0]["arch"])
-    build_cefpython_modules(pythons_32bit + pythons_64bit)
+        pack_prebuilt_cef("64bit")
+        if LINUX:
+            reduce_package_size_issue_262("64bit")
+        reduce_package_size_issue_321("64bit")
+    if not NO_REBUILD:
+        build_cefpython_modules(pythons_32bit + pythons_64bit)
     if pythons_32bit:
         make_packages(pythons_32bit[0], "32bit")
     if pythons_64bit:
         make_packages(pythons_64bit[0], "64bit")
-    test_wheel_package_installation()
+    test_wheel_package_installation(pythons_32bit + pythons_64bit)
     show_summary(pythons_32bit, pythons_64bit)
 
 
 def command_line_args():
-    global VERSION, NO_RUN_EXAMPLES
+    global VERSION, NO_RUN_EXAMPLES, NO_REBUILD
     version = get_version_from_command_line_args(__file__)
-    if not version:
+    if not version or "--help" in sys.argv:
         print(__doc__)
         sys.exit(1)
     VERSION = version
     if "--no-run-examples" in sys.argv:
         NO_RUN_EXAMPLES = True
+        sys.argv.remove("--no-run-examples")
+    if "--no-rebuild" in sys.argv:
+        NO_REBUILD = True
+        sys.argv.remove("--no-rebuild")
+    args = sys.argv[1:]
+    for arg in args:
+        if arg == version:
+            continue
+        print("[build_distrib.py] Invalid argument: {arg}".format(arg=arg))
+        sys.exit(1)
 
 
 def clean_build_directories():
     print("[build_distrib.py] Clean build directories")
 
-    # Distrib dir
+    # Delete distrib dir
     if os.path.exists(DISTRIB_DIR):
         print("[build_distrib.py] Delete directory: {distrib_dir}/"
               .format(distrib_dir=os.path.basename(DISTRIB_DIR)))
         shutil.rmtree(DISTRIB_DIR)
 
-    # build_cefpython/ dir
-    if os.path.exists(BUILD_CEFPYTHON):
-        print("[build_distirb.py] Delete directory: {dir}/"
-              .format(dir=os.path.basename(BUILD_CEFPYTHON)))
-        shutil.rmtree(BUILD_CEFPYTHON)
+    if not NO_REBUILD:
+        # Delete build_cefpython/ dir
+        if os.path.exists(BUILD_CEFPYTHON):
+            print("[build_distirb.py] Delete directory: {dir}/"
+                  .format(dir=os.path.basename(BUILD_CEFPYTHON)))
+            shutil.rmtree(BUILD_CEFPYTHON)
+        # Delete cefpython_binary_*/ dirs
+        delete_cefpython_binary_dir("32bit")
+        delete_cefpython_binary_dir("64bit")
 
-    # cefpython_binary_*/ dirs
-    delete_cefpython_binary_dir("32bit")
-    delete_cefpython_binary_dir("64bit")
-
-    # cef binaries and libraries dirs
+    # Delete cef binaries and libraries dirs
     delete_cef_binaries_libraries_dir("32bit")
     delete_cef_binaries_libraries_dir("64bit")
 
@@ -344,6 +371,47 @@ def zip_directory(path, base_path, archive):
     os.chdir(original_dir)
 
 
+def reduce_package_size_issue_262(arch):
+    """Linux only: libcef.so is huge (500 MB) in Chrome v54+. Issue #262."""
+    print("[build_distrib.py] Reduce package size for {arch} (Issue #262)"
+          .format(arch=arch))
+    prebuilt_basename = get_cef_binaries_libraries_basename(
+                get_postfix2_for_arch(arch))
+    bin_dir = os.path.join(prebuilt_basename, "bin")
+
+    # Run `strip` command on `libcef.so`
+    libcef_so = os.path.join(bin_dir, "libcef.so")
+    print("[build_distrib.py] Strip {libcef_so}"
+          .format(libcef_so=os.path.basename(libcef_so)))
+    command = "strip {libcef_so}".format(libcef_so=libcef_so)
+    pcode = subprocess.call(command)
+    if pcode != 0:
+        print("[build_distrib.py] ")
+        sys.exit(1)
+
+
+def reduce_package_size_issue_321(arch):
+    """PyPI has file size limit and must reduce package size. Issue #321."""
+    print("[build_distrib.py] Reduce package size for {arch} (Issue #321)"
+          .format(arch=arch))
+    prebuilt_basename = get_cef_binaries_libraries_basename(
+                get_postfix2_for_arch(arch))
+    bin_dir = os.path.join(prebuilt_basename, "bin")
+
+    # Delete sample applications to reduce package size
+    sample_apps = ["cefclient", "cefsimple", "ceftests"]
+    for sample_app in sample_apps:
+        sample_app = os.path.join(bin_dir, sample_app + APP_EXT)
+        # Not on all platforms sample apps may be available
+        if os.path.exists(sample_app):
+            print("[build_distrib.py] Delete {sample_app}"
+                  .format(sample_app=os.path.basename(sample_app)))
+            if os.path.isdir(sample_app):
+                shutil.rmtree(sample_app)
+            else:
+                os.remove(sample_app)
+
+
 def build_cefpython_modules(pythons):
     for python in pythons:
         print("[build_distrib.py] Build cefpython module for {python_name}"
@@ -417,9 +485,28 @@ def make_packages(python, arch):
     shutil.rmtree(setup_dir)
 
 
-def test_wheel_package_installation():
-    # PYPI_POSTFIX2_ARCH
-    pass  # TODO
+def test_wheel_package_installation(pythons):
+    uninstall_cefpython3_packages(pythons)
+    for python in pythons:
+        print("[build_distrib.py] Test wheel package installation for"
+              " {python_name}".format(python_name=python["name"]))
+        platform_tag = get_pypi_postfix2_for_arch(python["arch"])
+        whl_pattern = (r"*-{platform_tag}.whl"
+                       .format(platform_tag=platform_tag))
+        wheels = glob.glob(os.path.join(DISTRIB_DIR, whl_pattern))
+        assert len(wheels) == 1, ("No wheels found in distrib dir for %s"
+                                  % python["arch"])
+        # Install wheel
+        command = ("\"{python}\" -m pip install {wheel}"
+                   .format(python=python["executable"],
+                           wheel=os.path.basename(wheels[0])))
+        if python["executable"].startswith("/usr/"):
+            command = "sudo {command}".format(command=command)
+        pcode = subprocess.call(command, cwd=DISTRIB_DIR)
+        if pcode != 0:
+            print("[build_distrib.py] Wheel package installation failed for"
+                  " {python_name}".format(python_name=python["name"]))
+            sys.exit(1)
 
 
 def show_summary(pythons_32bit, pythons_64bit):
@@ -436,7 +523,7 @@ def show_summary(pythons_32bit, pythons_64bit):
                   count=len(files)))
     for file_ in files:
         print("    {filename}".format(filename=os.path.basename(file_)))
-    print("[build_distrib.py] Done. Distribution packages created.")
+    print("[build_distrib.py] Everything OK. Distribution packages created.")
 
 
 if __name__ == "__main__":

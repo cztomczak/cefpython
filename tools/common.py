@@ -51,7 +51,7 @@ OS_POSTFIX2_ARCH = dict(
     Darwin={"32bit": "mac32", "64bit": "mac64"},
 )
 PYPI_POSTFIX2_ARCH = dict(
-    Windows={"32bit": "win32", "64bit": "win-amd64"},
+    Windows={"32bit": "win32", "64bit": "win_amd64"},
     Linux={"32bit": "i686", "64bit": "x86_64"},
     Darwin={"64bit": "x86_64"},
 )
@@ -71,12 +71,15 @@ MODULE_NAME_TEMPLATE_NOEXT = "cefpython_py{pyversion}"
 MODULE_NAME = MODULE_NAME_TEMPLATE.format(pyversion=PYVERSION, ext=MODULE_EXT)
 MODULE_NAME_NOEXT = MODULE_NAME_TEMPLATE_NOEXT.format(pyversion=PYVERSION)
 
-# Executable extension
+# App and Executable extensions
 if WINDOWS:
+    APP_EXT = ".exe"
     EXECUTABLE_EXT = ".exe"
 elif MAC:
-    EXECUTABLE_EXT = ".app"
+    APP_EXT = ".app"  # cefclient, cefsimple, ceftests
+    EXECUTABLE_EXT = ""  # subprocess
 else:
+    APP_EXT = ""
     EXECUTABLE_EXT = ""
 
 # Library extension
@@ -191,6 +194,10 @@ if "LOCALAPPDATA" in os.environ:
 
 def get_postfix2_for_arch(arch):
     return OS_POSTFIX2_ARCH[SYSTEM][arch]
+
+
+def get_pypi_postfix2_for_arch(arch):
+    return PYPI_POSTFIX2_ARCH[SYSTEM][arch]
 
 
 def _detect_cef_binaries_libraries_dir():

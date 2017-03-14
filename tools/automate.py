@@ -348,7 +348,7 @@ def build_cef_projects():
                                        "build_cefclient")
     cefclient_exe = os.path.join(build_cefclient_dir, "tests", "cefclient",
                                  Options.build_type,
-                                 "cefclient" + EXECUTABLE_EXT)
+                                 "cefclient" + APP_EXT)
 
     # Check whether already built
     already_built = False
@@ -691,7 +691,7 @@ def create_prebuilt_binaries():
             src,
             "build_cefclient", "tests", "cefclient",
             Options.build_type,
-            "cefclient" + EXECUTABLE_EXT)
+            "cefclient" + APP_EXT)
     if LINUX and os.path.exists(cefclient):
         # On Windows resources/*.html files are embedded inside exe
         cefclient_files = os.path.join(
@@ -706,14 +706,14 @@ def create_prebuilt_binaries():
             src,
             "build_cefclient", "tests", "cefsimple",
             Options.build_type,
-            "cefsimple" + EXECUTABLE_EXT)
+            "cefsimple" + APP_EXT)
 
     # ceftests
     ceftests = os.path.join(
             src,
             "build_cefclient", "tests", "ceftests",
             Options.build_type,
-            "ceftests" + EXECUTABLE_EXT)
+            "ceftests" + APP_EXT)
     if LINUX and os.path.exists(ceftests):
         # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
