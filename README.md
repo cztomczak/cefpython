@@ -48,7 +48,7 @@ scraping or as a web crawler, or other kind of internet bots.
 - Documentation is in the [docs/](docs) directory
 - API reference is in the [api/](api) directory
 - Additional documentation is in issues labelled [Knowledge Base]
-  (../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+(../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
 - Wiki pages are deprecated and for v31 only
 
 
@@ -67,7 +67,7 @@ scraping or as a web crawler, or other kind of internet bots.
 - Documentation is in the [docs/](docs) directory
 - API reference is in the [api/](api) directory
 - Additional documentation is in issues labelled [Knowledge Base]
-  (../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+(../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
 
 ### v31 release
 
@@ -79,7 +79,7 @@ scraping or as a web crawler, or other kind of internet bots.
 - Mac support: 32-bit and 64-bit (requirements: MacOS 10.7+)
 - Documentation is on [wiki pages](../../wiki)
 - API reference is available in revision [169a1b2]
-  (../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
+(../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
 
 
 ## Support development
