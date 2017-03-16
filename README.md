@@ -60,7 +60,7 @@ scraping or as a web crawler, or other kind of internet bots.
 - Downloads are available on [GitHub Releases](../../releases) pages
 - Windows support: 32-bit and 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
   (requirements: Windows 7+)
-- Linux support: 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
+- Linux support: 32-bit and 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
   (requirements: Debian 7+ / Ubuntu 12.04+)
 - Mac support: 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
   (requirements: MacOS 10.9+)

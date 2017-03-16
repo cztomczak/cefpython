@@ -4,12 +4,16 @@
 
 # Common stuff for tools such as automate.py, build.py, etc.
 
-import struct
-import platform
-import sys
-import os
 import glob
+import os
+import platform
 import re
+import shutil
+import struct
+import sys
+
+# These sample apps will be deleted when creating setup/wheel packages
+CEF_SAMPLE_APPS = ["cefclient", "cefsimple", "ceftests", "chrome-sandbox"]
 
 # Architecture and OS postfixes
 ARCH32 = (8 * struct.calcsize('P') == 32)
@@ -198,6 +202,8 @@ if "LOCALAPPDATA" in os.environ:
     VS2008_BUILD = VS2008_BUILD.replace("%LocalAppData%",
                                         os.environ["LOCALAPPDATA"])
 
+# -----------------------------------------------------------------------------
+
 
 def get_os_postfix2_for_arch(arch):
     return OS_POSTFIX2_ARCH[SYSTEM][arch]
@@ -217,6 +223,57 @@ def sudo_command(command, python):
     if python.startswith("/usr/"):
         command = "sudo " + command
     return command
+
+
+def get_python_path():
+    """Get Python path."""
+    return os.path.dirname(sys.executable)
+
+
+def get_python_include_path():
+    # 1) C:\Python27\include
+    # 2) ~/.pyenv/versions/2.7.13/bin/python
+    #    ~/.pyenv/versions/2.7.13/include/python2.7
+    # 3) ~/.pyenv/versions/3.4.6/include/python2.7m
+    # 4) /usr/include/python2.7
+    base_dir = os.path.dirname(sys.executable)
+    try_dirs = ["{base_dir}/include",
+                "{base_dir}/../include/python{ver}",
+                "{base_dir}/../include/python{ver}*",
+                "/usr/include/python{ver}"]
+    ver_tuple = sys.version_info[:2]
+    ver = "{major}.{minor}".format(major=ver_tuple[0], minor=ver_tuple[1])
+    for pattern in try_dirs:
+        pattern = pattern.format(base_dir=base_dir, ver=ver)
+        if WINDOWS:
+            pattern = pattern.replace("/", "\\")
+        results = glob.glob(pattern)
+        if len(results) == 1:
+            python_h = os.path.join(results[0], "Python.h")
+            if os.path.isfile(python_h):
+                return results[0]
+    return ".\\" if WINDOWS else "./"
+
+
+def delete_cef_sample_apps(caller_script, bin_dir):
+    """Delete CEF sample apps to reduce package size."""
+    for sample_app_name in CEF_SAMPLE_APPS:
+        sample_app = os.path.join(bin_dir, sample_app_name + APP_EXT)
+        # Not on all platforms sample apps may be available
+        if os.path.exists(sample_app):
+            print("[{script}] Delete {sample_app}"
+                  .format(script=os.path.basename(caller_script),
+                          sample_app=os.path.basename(sample_app)))
+            if os.path.isdir(sample_app):
+                shutil.rmtree(sample_app)
+            else:
+                os.remove(sample_app)
+            # Also delete subdirs eg. cefclient_files/, ceftests_files/
+            files_subdir = os.path.join(bin_dir, sample_app_name + "_files")
+            if os.path.isdir(files_subdir):
+                print("[build_distrib.py] Delete directory: {dir}/"
+                      .format(dir=os.path.basename(files_subdir)))
+                shutil.rmtree(files_subdir)
 
 
 def _detect_cef_binaries_libraries_dir():

@@ -126,9 +126,6 @@ def main():
                   "       version of python.")
             sys.exit(1)
         build_cef()
-        # Build cefclient, cefsimple, ceftests, libcef_dll_wrapper
-        build_cef_projects()
-        create_prebuilt_binaries()
     elif Options.prebuilt_cef:
         prebuilt_cef()
 
@@ -209,6 +206,11 @@ def setup_options(docopt_args):
 def build_cef():
     """Build CEF from sources."""
 
+    if ARCH32:
+        print("[automate.py] INFO: building CEF 32-bit from sources is"
+              " supported only with cross-compiling on 64-bit OS.")
+        sys.exit(1)
+
     # cef/ repo
     create_cef_directories()
 
@@ -220,6 +222,18 @@ def build_cef():
     run_automate_git()
     print("[automate.py] Binary distrib created in %s"
           % Options.binary_distrib)
+
+    if Options.x86:
+        print("[automate.py] INFO: to build CEF projects and create prebuilt"
+              " binaries you have to use 32-bit chroot. Copy the binary"
+              " distrib's cef_binary_*/ directory (path displayed above) to"
+              " cefpython's build/ directory. Then run automate.py"
+              " --prebuilt-cef using 32-bit chroot.")
+        sys.exit(0)
+    else:
+        # Build cefclient, cefsimple, ceftests, libcef_dll_wrapper
+        build_cef_projects()
+        create_prebuilt_binaries()
 
 
 def prebuilt_cef():
@@ -884,7 +898,10 @@ def run_command(command, working_dir, env=None):
         args = command
     if not env:
         env = getenv()
-    return subprocess.check_call(args, cwd=working_dir, env=env, shell=True)
+    # When passing list of args shell cannot be True on eg. Linux, read
+    # notes in build.py
+    shell=(platform.system() == "Windows")
+    return subprocess.check_call(args, cwd=working_dir, env=env, shell=shell)
 
 
 def run_git(command_line, working_dir):

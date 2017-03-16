@@ -76,14 +76,16 @@ def main():
         (EXAMPLES_DIR, "*"), (SETUP_DIR, "examples/"),
     ]
     perform_copy_operations(copy_operations)
+    delete_cef_sample_apps(caller_script=__file__, bin_dir=PKG_DIR)
 
     # Linux only operations
     if LINUX:
+        os.makedirs(os.path.join(SETUP_DIR, "examples", "kivy-select-boxes"))
         copy_operations_linux = [
             (LINUX_DIR, "binaries_64bit/kivy_.py"),
-            (PKG_DIR, "examples/"),
+            (SETUP_DIR, "examples/"),
             (LINUX_DIR, "binaries_64bit/kivy-select-boxes/*"),
-            (PKG_DIR, "examples/")
+            (SETUP_DIR, "examples/kivy-select-boxes/")
         ]
         perform_copy_operations(copy_operations_linux)
 
@@ -129,6 +131,9 @@ def command_line_args():
             continue
         if WHEEL:
             WHEEL_ARGS.append(arg)
+    if WHEEL and not len(WHEEL_ARGS):
+        print("ERROR: wheel requires additional args eg. --universal")
+        sys.exit(1)
 
 
 def copy_tools_installer_files(setup_dir, pkg_dir):

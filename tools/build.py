@@ -30,19 +30,22 @@ Options:
 
 # --rebuild-cpp      Force rebuild of .vcproj C++ projects (DISABLED)
 
-# How to debug on Linux:
+# NOTE: When passing string command to subprocess functions you must
+#       always use shell=True, otherwise on Linux error is thrown:
+#       "No such file or directory". Always pass string commands to
+#       subprocess functions with shell=True. If you pass a list of
+#       arguments instead, then on Linux a "Segmentation fault" error
+#       message is not shown. When passing a list of args to subprocess
+#       function then you can't pass shell=True on Linux. If you pass
+#       then it will execute args[0] and ignore others args.
+
+# How to debug on Linux (OLD unsupported).
 # 1. Install "python-dbg" package
 # 2. Install "python-wxgtk2.8-dbg" package
 # 3. Run "python compile.py debug"
 # 4. In cygdb type "cy run"
 # 5. To display debug backtrace type "cy bt"
 # 6. More commands: http://docs.cython.org/src/userguide/debugging.html
-
-# This will not show "Segmentation fault" error message:
-# > subprocess.call(["python", "./wxpython.py"])
-# You need to call it with command as string and shell=True
-# for this kind of error message to be shown:
-# > subprocess.call("python wxpython.py", shell=True)
 
 from common import *
 import sys
@@ -210,8 +213,7 @@ def setup_environ():
     if WINDOWS:
         if "INCLUDE" not in os.environ:
             os.environ["INCLUDE"] = ""
-        os.environ["INCLUDE"] += os.pathsep + os.path.join(get_python_path(),
-                                                           "include")
+        os.environ["INCLUDE"] += os.pathsep + get_python_include_path()
         print("[build.py] environ INCLUDE: {include}"
               .format(include=os.environ["INCLUDE"]))
 
@@ -223,7 +225,11 @@ def setup_environ():
               .format(lib=os.environ["AdditionalLibraryDirectories"]))
 
     if LINUX or MAC:
-        # Used in makefiles
+        # Env variables for makefiles
+        os.environ["PYTHON_INCLUDE"] = get_python_include_path()
+        print("[build.py] PYTHON_INCLUDE: {python_include}"
+              .format(python_include=os.environ["PYTHON_INCLUDE"]))
+
         os.environ["CEF_CCFLAGS"] = "-std=gnu++11 -DNDEBUG -Wall -Werror"
         if FAST_FLAG:
             os.environ["CEF_CCFLAGS"] += " -O0"
@@ -231,15 +237,13 @@ def setup_environ():
             os.environ["CEF_CCFLAGS"] += " -O3"
         os.environ["CEF_LINK_FLAGS"] = ""
 
+        os.environ["CEF_BIN"] = os.path.join(CEF_BINARIES_LIBRARIES, "bin")
+        os.environ["CEF_LIB"] = os.path.join(CEF_BINARIES_LIBRARIES, "lib")
+
     if LINUX:
         # TODO: Set CEF_CCFLAGS and CEF_LINK_FLAGS according to what is
         #       in upstream cefclient, see cef/cmake/cef_variables.cmake.
         pass
-
-    # Mac env variables for makefiles
-    if MAC or LINUX:
-        os.environ["CEF_BIN"] = os.path.join(CEF_BINARIES_LIBRARIES, "bin")
-        os.environ["CEF_LIB"] = os.path.join(CEF_BINARIES_LIBRARIES, "lib")
 
     # Mac compiler options
     if MAC:
@@ -280,11 +284,6 @@ def setup_environ():
                 " -Wl,-pie"
                 " -Wl,-dead_strip"
         )
-
-
-def get_python_path():
-    """Get Python path."""
-    return os.path.dirname(sys.executable)
 
 
 def fix_cefpython_api_header_file():
@@ -449,6 +448,7 @@ def clean_cpp_projects_unix():
     delete_files_by_pattern("{0}/*.o".format(SUBPROCESS_DIR))
     delete_files_by_pattern("{0}/*.a".format(SUBPROCESS_DIR))
     delete_files_by_pattern("{0}/subprocess".format(SUBPROCESS_DIR))
+    delete_files_by_pattern("{0}/main_message_loop/*.o".format(SUBPROCESS_DIR))
 
     delete_files_by_pattern("{0}/*.o".format(CPP_UTILS_DIR))
     delete_files_by_pattern("{0}/*.a".format(CPP_UTILS_DIR))

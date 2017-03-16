@@ -60,7 +60,7 @@ import pprint
 import re
 import shutil
 import subprocess
-import tarfile
+# import tarfile  # Currently using zip on all platforms
 import zipfile
 
 # Command line args
@@ -117,13 +117,13 @@ def main():
         pack_prebuilt_cef("32bit")
         if LINUX:
             reduce_package_size_issue_262("32bit")
-        reduce_package_size_issue_321("32bit")
-    if pythons_64bit is not None:
+        remove_unnecessary_package_files("32bit")
+    if pythons_64bit:
         run_automate_prebuilt_cef(pythons_64bit[0])
         pack_prebuilt_cef("64bit")
         if LINUX:
             reduce_package_size_issue_262("64bit")
-        reduce_package_size_issue_321("64bit")
+        remove_unnecessary_package_files("64bit")
     if not NO_REBUILD:
         build_cefpython_modules(pythons_32bit + pythons_64bit)
     if pythons_32bit:
@@ -264,11 +264,21 @@ def search_for_pythons(search_arch):
 
 
 def check_pythons(pythons_32bit, pythons_64bit):
+    check_32bit = True
+    check_64bit = True
+    if MAC:
+        check_32bit = False
+    elif LINUX:
+        if pythons_64bit:
+            check_32bit = False
+        elif pythons_32bit:
+            check_64bit = False
+
     pp = pprint.PrettyPrinter(indent=4)
     if pythons_32bit:
         print("[build_distrib.py] Pythons 32-bit found:")
         pp.pprint(pythons_32bit)
-    if WINDOWS and len(pythons_32bit) != len(SUPPORTED_PYTHON_VERSIONS):
+    if check_32bit and len(pythons_32bit) != len(SUPPORTED_PYTHON_VERSIONS):
         print("[build_distrib.py] ERROR: Couldn't find all supported"
               " python 32-bit installations. Found: {found}."
               .format(found=len(pythons_32bit)))
@@ -276,7 +286,7 @@ def check_pythons(pythons_32bit, pythons_64bit):
     if pythons_64bit:
         print("[build_distrib.py] Pythons 64-bit found:")
         pp.pprint(pythons_64bit)
-    if len(pythons_64bit) != len(SUPPORTED_PYTHON_VERSIONS):
+    if check_64bit and len(pythons_64bit) != len(SUPPORTED_PYTHON_VERSIONS):
         print("[build_distrib.py] ERROR: Couldn't find all supported"
               " python 64-bit installations. Found: {found}."
               .format(found=len(pythons_64bit)))
@@ -367,15 +377,17 @@ def pack_prebuilt_cef(arch):
 def pack_directory(path, base_path):
     if path.endswith(os.path.sep):
         path = path[:-1]
-    ext = ".zip" if WINDOWS or MAC else ".tar.gz"
+    # ext = ".zip" if WINDOWS or MAC else ".tar.gz"
+    ext = ".zip"
     archive = path + ext
     if os.path.exists(archive):
         os.remove(archive)
     if WINDOWS or MAC:
         zip_directory(path, base_path=base_path, archive=archive)
     else:
-        with tarfile.open(archive, "w:gz") as tar:
-            tar.add(path, arcname=os.path.basename(path))
+        zip_directory(path, base_path=base_path, archive=archive)
+        # with tarfile.open(archive, "w:gz") as tar:
+        #     tar.add(path, arcname=os.path.basename(path))
     assert os.path.isfile(archive), archive
     return archive
 
@@ -408,43 +420,19 @@ def reduce_package_size_issue_262(arch):
           .format(libcef_so=os.path.basename(libcef_so)))
     command = "strip {libcef_so}".format(libcef_so=libcef_so)
     pcode = subprocess.call(command, shell=True)
-    assert pcode, "strip command failed"
+    assert pcode == 0, "strip command failed"
 
 
-def reduce_package_size_issue_321(arch):
-    """PyPI has file size limit and must reduce package size. Issue #321."""
+def remove_unnecessary_package_files(arch):
+    """Do not ship sample applications (cefclient etc) with the package.
+    They increase size and also are an additional unnecessary factor
+    when dealing with false-positives in Anti-Virus software."""
     print("[build_distrib.py] Reduce package size for {arch} (Issue #321)"
           .format(arch=arch))
     prebuilt_basename = get_cef_binaries_libraries_basename(
                 get_os_postfix2_for_arch(arch))
     bin_dir = os.path.join(prebuilt_basename, "bin")
-
-    # Delete sample applications to reduce package size
-    sample_apps = ["cefclient", "cefsimple", "ceftests"]
-    for sample_app_name in sample_apps:
-        sample_app = os.path.join(bin_dir, sample_app_name + APP_EXT)
-        # Not on all platforms sample apps may be available
-        if os.path.exists(sample_app):
-            print("[build_distrib.py] Delete {sample_app}"
-                  .format(sample_app=os.path.basename(sample_app)))
-            if os.path.isdir(sample_app):
-                shutil.rmtree(sample_app)
-            else:
-                os.remove(sample_app)
-            # Also delete subdirs eg. cefclient_files/, ceftests_files/
-            files_subdir = os.path.join(bin_dir, sample_app_name + "_files")
-            if os.path.isdir(files_subdir):
-                print("[build_distrib.py] Delete directory: {dir}/"
-                      .format(dir=os.path.basename(files_subdir)))
-                shutil.rmtree(files_subdir)
-
-    # Strip symbols from cefpython .so modules to reduce size
-    modules = glob.glob(os.path.join(CEFPYTHON_BINARY, "*.so"))
-    for module in modules:
-        print("[build_distrib.py] strip {module}"
-              .format(module=os.path.basename(module)))
-        command = "strip {module}".format(module=module)
-        assert os.system(command) == 0, "strip command failed"
+    delete_cef_sample_apps(caller_script=__file__, bin_dir=bin_dir)
 
 
 def build_cefpython_modules(pythons):

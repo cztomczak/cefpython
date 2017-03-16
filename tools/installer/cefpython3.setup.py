@@ -152,8 +152,6 @@ def main():
             "Topic :: Internet :: WWW/HTTP",
             "Topic :: Internet :: WWW/HTTP :: Browsers",
             "Topic :: Multimedia",
-            ("Topic :: Software Development :: Libraries"
-             ":: Application Frameworks"),
             "Topic :: Software Development :: User Interfaces",
         ],
     )
@@ -236,6 +234,8 @@ def post_install_hook():
     print("[setup.py] Set execute permissions on executables")
     for executable in get_executables():
         executable = os.path.join(installed_package_dir, executable)
+        if not os.path.exists(executable):
+            continue
         command = "chmod +x {executable}".format(executable=executable)
         print("[setup.py] {command}".format(command=command))
         subprocess.call(command, shell=True)

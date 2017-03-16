@@ -21,7 +21,7 @@ maintained:
   and [PySide](https://wiki.qt.io/PySide) libraries (Qt 4)
 - [tkinter_.py](tkinter_.py): example for [Tkinter]
   (https://wiki.python.org/moin/TkInter). Currently broken on Mac.
-- [wxpython.py](wxpython.py): example for wxPython
+- [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)
 
 If there are any issues in examples read top comments in sources
 to see whether this is a known issue with available workarounds.

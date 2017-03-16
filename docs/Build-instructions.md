@@ -184,10 +184,7 @@ requirements common for all platforms.
 
 ### Linux
 
-* Install packages: `sudo apt-get install python-dev cmake g++ libgtk2.0-dev`
-* If using prebuilt binaries from Spotify automated builds and want to
-  build cefclient/cefsimple you need to install these packages:
-  `sudo apt-get install libgtkglext1-dev`
+* Install packages: `sudo apt-get install python-dev cmake g++ libgtk2.0-dev libgtkglext1-dev`
 * If building CEF from sources:
     * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
     * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
@@ -209,6 +206,8 @@ requirements common for all platforms.
     * To perform a 32-bit Linux build on a 64-bit Linux system see
       Linux configuration in upstream cef/AutomatedBuildSetup.md. See also
       [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804).
+* Sometimes it is also required to install these packages (eg. chroot):
+  `sudo apt-get install libnss3 libnspr4 libxss1 libgconf-2-4`
 
 
 ### Mac

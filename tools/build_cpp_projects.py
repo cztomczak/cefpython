@@ -247,8 +247,6 @@ def smart_compile(compiler, macros, extra_args, sources, output_dir):
         # all put in the same output_directory. Otherwise distutils
         # will create lots of subdirs in output_directory.
         macros = macros_as_tuples(macros)
-        python_include = os.path.join(os.path.dirname(sys.executable),
-                                      "include")
         common_dir = os.path.join(SRC_DIR, "common")
         original_dir = os.getcwd()
         for source_file in sources:
@@ -261,7 +259,7 @@ def smart_compile(compiler, macros, extra_args, sources, output_dir):
                                       # TODO include dirs for Linux/Mac
                                       include_dirs=[SRC_DIR,
                                                     common_dir,
-                                                    python_include],
+                                                    get_python_include_path()],
                                       # TODO compiler flags for Linux/Mac
                                       extra_preargs=None,
                                       extra_postargs=extra_args)
