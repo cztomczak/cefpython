@@ -19,11 +19,9 @@ Table of contents:
 
 ## Notifications on new releases
 
-To be notified of new releases subscribe to this [RSS/Atom feed]
-(../../../releases.atom).
+To be notified of new releases subscribe to this [RSS/Atom feed](../../../releases.atom).
 
-Announcements are also made on the [Forum]
-(https://groups.google.com/d/forum/cefpython).
+Announcements are also made on the [Forum](https://groups.google.com/d/forum/cefpython).
 To be notified of these via email set your Membership and Email settings
 and change delivery preference to Daily summaries.
 
@@ -33,8 +31,8 @@ and change delivery preference to Daily summaries.
 CEF Python depends on CEF and API breaks are inevitable when updating
 to latest CEF. The [Migration Guide](Migration-guide.md) document which
 is still under works, will list most notable breaking changes since
-v31 release. Until it's done go to go to the [GitHub Releases]
-(../../../releases) page and check release notes for all the releases
+v31 release. Until it's done go to go to the [GitHub Releases](../../../releases)
+page and check release notes for all the releases
 that appeared between your old version and the new version. Look for
 lists named "Changes in API that break backward compatibility" or
 similar.
@@ -61,9 +59,8 @@ on Mac.
 By default CEF expects that CEF framework is located at
 `Contents/Frameworks/Chromium Embedded Framework.framework`
 in the top-level app bundle. If that is not the case then you have
-to set ApplicationSettings.[framework_dir_path]
-(../api/ApplicationSettings.md#framework_dir_path) before calling
-cef.Initialize().
+to set ApplicationSettings.[framework_dir_path](../api/ApplicationSettings.md#framework_dir_path)
+before calling cef.Initialize().
 
 You may also need to change the structure and embedded paths in
 CEF framework and in the cefpython module. Here are the default
@@ -113,8 +110,7 @@ as of now.
 To see if some feature is working or a bug is fixed in newer CEF
 release perform the following steps:
 
-1. Go to [Spotify Automated Builds]
-   (http://opensource.spotify.com/cefbuilds/index.html)
+1. Go to [Spotify Automated Builds](http://opensource.spotify.com/cefbuilds/index.html)
    to download latest CEF for your platform. Choose "Sample
    Application" binaries.
 2. Extract the archive and run sample application from the
@@ -188,8 +184,7 @@ Now you should see debug information displayed in console like this:
 
 Install gdb:
 - On Linux type: `sudo apt-get install gdb`
-- On Mac type: `brew install gdb` and then [sign gdb]
-  (https://sourceware.org/gdb/wiki/BuildingOnDarwin#Giving_gdb_permission_to_control_other_processes)
+- On Mac type: `brew install gdb` and then [sign gdb](https://sourceware.org/gdb/wiki/BuildingOnDarwin#Giving_gdb_permission_to_control_other_processes)
 - Additionally on Mac to get a meaningful stack trace with gdb do these steps:
     - Install [macports](https://www.macports.org/install.php)
       and restart terminal
@@ -224,8 +219,7 @@ supported XP was v49.
 
 On XP you should disable GPU acceleration by using the --disable-gpu
 and --disable-gpu-compositing switches. These switches must be passed
-programmatically to cef.Initialize(), see [api/Command Line Switches]
-(../api/CommandLineSwitches.md).
+programmatically to cef.Initialize(), see [api/Command Line Switches](../api/CommandLineSwitches.md).
 
 
 ## Mac 32-bit support
@@ -266,7 +260,6 @@ A quote by Marshall Greenblatt:
 >   decision that may have security consequences should be evaluated
 >   by people who are knowledgeable about security considerations.
 
-Reference: [Question on browser security]
-(http://magpcss.org/ceforum/viewtopic.php?f=10&t=10222)
+Reference: [Question on browser security](http://magpcss.org/ceforum/viewtopic.php?f=10&t=10222)
 on the CEF Forum.
 

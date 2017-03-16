@@ -163,8 +163,7 @@ requirements common for all platforms.
       if does not exist
     * For Python 3.4 follow the instructions for installing Windows SDK 7.1.
       If you encounter issue with .NET Framework 4 then make registry edits
-      as suggested here: [Windows SDK setup failure]
-      (http://stackoverflow.com/a/33260090/623622).
+      as suggested here: [Windows SDK setup failure](http://stackoverflow.com/a/33260090/623622).
     * For Python 3.4, if getting error:
       `Cannot open include file 'ammintrin.h': No such file or directory`
       then Copy that `ammitrin.h` file from for example VS 2015 installation
@@ -336,8 +335,7 @@ __Debug_GN_arm/ configuration error (Linux)__: Even though building
 on Linux for Linux, Chromium still runs ARM configuration files. If
 there is an error showing that pkg-config fails with GTK 3 library
 then see solution in the third post in this topic on CEF Forum:
-[Debug_GN_arm error when building on Linux, *not* arm]
-(https://magpcss.org/ceforum/viewtopic.php?f=6&t=14976).
+[Debug_GN_arm error when building on Linux, *not* arm](https://magpcss.org/ceforum/viewtopic.php?f=6&t=14976).
 
 __MISSING PACKAGES (Linux)__: After the chromium sources are downloaded,
 it will try to build cef projects and if it fails due to missing packages

@@ -16,15 +16,12 @@ Table of contents:
 
 ## Introduction
 
-CEF Python is a BSD-licensed open source project founded by [Czarek Tomczak]
-(http://www.linkedin.com/in/czarektomczak) in 2012 and is based on
-Google Chromium and the [CEF Framework]
-(https://bitbucket.org/chromiumembedded/cef) projects. The Chromium
-project focuses mainly on Google Chrome application development, while
-CEF focuses on facilitating embedded browser use cases in third-party
-applications. Lots of applications use CEF control, there are more than
-[100 million CEF instances]
-(http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
+CEF Python is a BSD-licensed open source project founded by [Czarek Tomczak](http://www.linkedin.com/in/czarektomczak)
+in 2012 and is based on Google Chromium and the [CEF Framework](https://bitbucket.org/chromiumembedded/cef)
+projects. The Chromium project focuses mainly on Google Chrome application
+development, while CEF focuses on facilitating embedded browser use cases
+in third-party applications. Lots of applications use CEF control, there are
+more than [100 million CEF instances](http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
 installed around the world. [Examples of embedding](examples/Examples-README.md)
 Chrome browser are available for many popular GUI toolkits including:
 wxPython, PyGTK, PyQt, PySide, Kivy, Panda3D and PyGame/PyOpenGL.
@@ -33,22 +30,20 @@ There are many use cases for CEF. You can embed a web browser control
 based on Chromium with great HTML 5 support. You can use it to create
 a HTML 5 based GUI in an application, this can act as a replacement for
 standard GUI toolkits such as wxWidgets, Qt or GTK. In such case to
-communicate between Python<>Javascript use [javascript bindings]
-(api/JavascriptBindings.md) or embed an internal web server and talk
-using http requests. You can render web content off-screen in
-applications that use custom drawing frameworks. You can use it for
-automated testing of existing applications. You can use it for web
-scraping or as a web crawler, or other kind of internet bots.
+communicate between Python<>Javascript use [javascript bindings](api/JavascriptBindings.md)
+or embed an internal web server and talk using http requests. You
+can render web content off-screen in applications that use custom
+drawing frameworks. You can use it for automated testing of existing
+applications. You can use it for web scraping or as a web crawler,
+or other kind of internet bots.
 
 
 ## Support
 
-- Ask questions, report problems and issues on the [Forum]
-  (https://groups.google.com/group/cefpython)
+- Ask questions, report problems and issues on the [Forum](https://groups.google.com/group/cefpython)
 - Documentation is in the [docs/](docs) directory
 - API reference is in the [api/](api) directory
-- Additional documentation is in issues labelled [Knowledge Base]
-(../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+- Additional documentation is in issues labelled [Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
 - Wiki pages are deprecated and for v31 only
 
 
@@ -66,8 +61,7 @@ scraping or as a web crawler, or other kind of internet bots.
   (requirements: MacOS 10.9+)
 - Documentation is in the [docs/](docs) directory
 - API reference is in the [api/](api) directory
-- Additional documentation is in issues labelled [Knowledge Base]
-(../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+- Additional documentation is in issues labelled [Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
 
 ### v31 release
 
@@ -78,8 +72,7 @@ scraping or as a web crawler, or other kind of internet bots.
 - Linux support: 32-bit and 64-bit (requirements: Debian 7+ / Ubuntu 12.04+)
 - Mac support: 32-bit and 64-bit (requirements: MacOS 10.7+)
 - Documentation is on [wiki pages](../../wiki)
-- API reference is available in revision [169a1b2]
-(../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
+- API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
 
 
 ## Support development
@@ -105,9 +98,8 @@ directly.
   the v55/v56 releases for all platforms
 * Thanks to JetBrains for providing an Open Source license for
   [PyCharm](https://www.jetbrains.com/pycharm/)
-* Thanks to those who have made a Paypal donation: [Rentouch GmbH]
-  (http://www.rentouch.ch/), Walter Purvis, Rokas Stupuras, Alex Rattray,
-  Greg Kacy, Paul Korzhyk
+* Thanks to those who have made a Paypal donation: [Rentouch GmbH](http://www.rentouch.ch/),
+  Walter Purvis, Rokas Stupuras, Alex Rattray, Greg Kacy, Paul Korzhyk
 * Lots of thanks goes to [Cyan Inc.](http://www.blueplanet.com/) for
   sponsoring this project for a long time, making CEF Python 3 mature
 * Thanks to those who have donated their time through code contributions,
