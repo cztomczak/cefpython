@@ -3,6 +3,8 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "../cefpython.pyx"
+include "../browser.pyx"
+
 cimport cef_types
 from cef_types cimport TID_UI
 
@@ -17,7 +19,7 @@ cdef public void FocusHandler_OnTakeFocus(
     cdef PyBrowser browser
     try:
         assert IsThread(TID_UI), "Must be called on the UI thread"
-        browser = GetPyBrowser(cef_browser)
+        browser = GetPyBrowser(cef_browser, "OnTakeFocus")
         callback = browser.GetClientCallback("OnTakeFocus")
         if callback:
             callback(browser=browser, next=next_)
@@ -34,7 +36,7 @@ cdef public cpp_bool FocusHandler_OnSetFocus(
     cdef py_bool ret
     try:
         assert IsThread(TID_UI), "Must be called on the UI thread"
-        browser = GetPyBrowser(cef_browser)
+        browser = GetPyBrowser(cef_browser, "OnSetFocus")
         callback = browser.GetClientCallback("OnSetFocus")
         if callback:
             ret = callback(browser=browser, source=source)
@@ -52,7 +54,7 @@ cdef public void FocusHandler_OnGotFocus(
     cdef PyBrowser browser
     try:
         assert IsThread(TID_UI), "Must be called on the UI thread"
-        browser = GetPyBrowser(cef_browser)
+        browser = GetPyBrowser(cef_browser, "OnGotFocus")
         callback = browser.GetClientCallback("OnGotFocus")
         if callback:
             callback(browser=browser)

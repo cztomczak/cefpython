@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "../cefpython.pyx"
+include "../browser.pyx"
 
 cdef public void DisplayHandler_OnAddressChange(
         CefRefPtr[CefBrowser] cefBrowser,
@@ -14,7 +15,7 @@ cdef public void DisplayHandler_OnAddressChange(
     cdef py_string pyUrl
     cdef object callback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnAddressChange")
         pyFrame = GetPyFrame(cefFrame)
         pyUrl = CefToPyString(cefUrl)
         callback = pyBrowser.GetClientCallback("OnAddressChange")
@@ -32,7 +33,7 @@ cdef public void DisplayHandler_OnTitleChange(
     cdef py_string pyTitle
     cdef object callback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnTitleChange")
         pyTitle = CefToPyString(cefTitle)
         callback = pyBrowser.GetClientCallback("OnTitleChange")
         if callback:
@@ -51,7 +52,7 @@ cdef public cpp_bool DisplayHandler_OnTooltip(
     cdef object callback
     cdef py_bool returnValue
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnTooltip")
         pyText = CefToPyString(cefText)
         pyTextOut = [pyText]
         callback = pyBrowser.GetClientCallback("OnTooltip")
@@ -73,7 +74,7 @@ cdef public void DisplayHandler_OnStatusMessage(
     cdef py_string pyValue
     cdef object callback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnStatusMessage")
         pyValue = CefToPyString(cefValue)
         callback = pyBrowser.GetClientCallback("OnStatusMessage")
         if callback:
@@ -94,7 +95,7 @@ cdef public cpp_bool DisplayHandler_OnConsoleMessage(
     cdef py_bool returnValue
     cdef object callback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnConsoleMessage")
         pyMessage = CefToPyString(cefMessage)
         pySource = CefToPyString(cefSource)
         callback = pyBrowser.GetClientCallback("OnConsoleMessage")

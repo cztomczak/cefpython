@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "../cefpython.pyx"
+include "../browser.pyx"
 
 # enum cef_jsdialog_type_t
 cimport cef_types
@@ -48,7 +49,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
     cdef object clientCallback
     cdef py_bool returnValue
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnJavascriptDialog")
         pyOriginUrl = CefToPyString(origin_url)
         pyMessageText = CefToPyString(message_text)
         pyDefaultPromptText = CefToPyString(default_prompt_text)
@@ -86,7 +87,8 @@ cdef public cpp_bool JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(
     cdef object clientCallback
     cdef py_bool returnValue
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser,
+                                         "OnBeforeUnloadJavascriptDialog")
         pyMessageText = CefToPyString(message_text)
         pyIsReload = bool(is_reload)
         pyCallback = CreatePyJavascriptDialogCallback(callback)
@@ -110,7 +112,8 @@ cdef public void JavascriptDialogHandler_OnResetJavascriptDialogState(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser,
+                                         "OnResetJavascriptDialogState")
         callback = pyBrowser.GetClientCallback(
                 "OnResetJavascriptDialogState")
         if callback:
@@ -124,7 +127,8 @@ cdef public void JavascriptDialogHandler_OnJavascriptDialogClosed(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser,
+                                         "OnJavascriptDialogClosed")
         callback = pyBrowser.GetClientCallback("OnJavascriptDialogClosed")
         if callback:
             callback(browser=pyBrowser)

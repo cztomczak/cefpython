@@ -838,7 +838,8 @@ def CreateBrowserSync(windowInfo=None,
             requestContextHandler.get().SetBrowser(cefBrowser)
 
     cdef PyBrowser pyBrowser = GetPyBrowser(cefBrowser)
-    pyBrowser.SetUserData("__outerWindowHandle", int(windowInfo.parentWindowHandle))
+    pyBrowser.SetUserData("__outerWindowHandle",
+                          int(windowInfo.parentWindowHandle))
 
     return pyBrowser
 
@@ -888,6 +889,10 @@ def Shutdown():
 
     # Run some message loop work, force closing browsers and then run
     # some message loop work again for the browsers to close cleanly.
+    #
+    # UPDATE: This code needs to be rechecked. There were enhancements
+    #         to unrferencing globally stored Browser objects in
+    #         g_pyBrowsers. See Issue #330 and its commits.
     #
     # CASE 1:
     # There might be a case when python error occured after creating

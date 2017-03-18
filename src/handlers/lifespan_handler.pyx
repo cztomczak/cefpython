@@ -47,7 +47,7 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
     cdef object callback
     cdef py_bool returnValue
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnBeforePopup")
         pyFrame = GetPyFrame(cefFrame)
         pyTargetUrl = CefToPyString(targetUrl)
         pyTargetFrameName = CefToPyString(targetFrameName)
@@ -84,7 +84,7 @@ cdef public void LifespanHandler_OnAfterCreated(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnAfterCreated")
         callback = GetGlobalClientCallback("OnAfterCreated")
         if callback:
             callback(browser=pyBrowser)
@@ -97,7 +97,7 @@ cdef public cpp_bool LifespanHandler_DoClose(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "DoClose")
         callback = pyBrowser.GetClientCallback("DoClose")
         if callback:
             return bool(callback(browser=pyBrowser))
@@ -112,7 +112,8 @@ cdef public void LifespanHandler_OnBeforeClose(
     cdef PyBrowser pyBrowser
     cdef object callback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        Debug("LifespanHandler_OnBeforeClose")
+        pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeClose")
         callback = pyBrowser.GetClientCallback("OnBeforeClose")
         if callback:
             callback(browser=pyBrowser)
@@ -120,6 +121,8 @@ cdef public void LifespanHandler_OnBeforeClose(
         RemovePyFramesForBrowser(pyBrowser.GetIdentifier())
         RemovePyBrowser(pyBrowser.GetIdentifier())
         if g_MessageLoop_called and not len(g_pyBrowsers):
+            # Automatically quit message loop when last browser was closed.
+            # This is required for hello_world.py example to work.
             QuitMessageLoop()
 
     except:

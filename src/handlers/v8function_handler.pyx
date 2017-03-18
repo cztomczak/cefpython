@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "../cefpython.pyx"
+include "../browser.pyx"
 
 cdef public void V8FunctionHandler_Execute(
         CefRefPtr[CefBrowser] cefBrowser,
@@ -18,7 +19,7 @@ cdef public void V8FunctionHandler_Execute(
     cdef object returnValue
     cdef py_string jsErrorMessage
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "V8FunctionHandler_Execute")
         pyFrame = GetPyFrame(cefFrame)
         functionName = CefToPyString(cefFunctionName)
         Debug("V8FunctionHandler_Execute(): functionName=%s" % functionName)

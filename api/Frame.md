@@ -3,6 +3,19 @@
 
 # Frame (object)
 
+Remember to free all frame references for the browser to shut down cleanly.
+Otherwise data such as cookies or other storage might not be flushed to disk
+when closing app, and other issues might occur as well. If you store
+a reference to Frame somewhere in your code then to free it just assign
+a None value to the variable.
+
+To compare frame objects always use [GetIdentifier()](#getidentifier)
+method. Do not compare two Frame objects variables directly. There
+are some edge cases when after the OnBeforeClose event frame objects
+are no more globally referenced thus a new instance is created that
+wraps upstream CefFrame object. Frame objects that were globally
+unreferenced do not have properties of the original Frame object.
+
 
 Table of contents:
 * [Methods](#methods)

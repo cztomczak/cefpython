@@ -15,7 +15,9 @@ See also [Issue #11](../issues/11) (Throw JS / Python exceptions according to ex
 Table of contents:
 * [Methods](#methods)
   * [Call](#call)
-  * [GetName](#getname)
+  * [GetFrame](#getframe)
+  * [GetId](#getid)
+  * [GetFunctionName](#getfunctionname)
 
 
 ## Methods
@@ -30,10 +32,29 @@ Table of contents:
 
 Call the javascript callback function.
 
-For a list of allowed types for `mixed` see [JavascriptBindings](JavascriptBindings.md).IsValueAllowed().
+For a list of allowed types for `mixed` see JavascriptBindings.[IsValueAllowed()](JavascriptBindings.md#isvalueallowed).
 
 
-### GetName
+### GetFrame
+
+| | |
+| --- | --- |
+| __Return__ | [Frame](Frame.md) |
+
+Get Frame object associated with this callback. If Browser was destroyed
+then Frame may be None.
+
+
+### GetId
+
+| | |
+| --- | --- |
+| __Return__ | int |
+
+Get this callback's identifier.
+
+
+### GetFunctionName
 
 | | |
 | --- | --- |

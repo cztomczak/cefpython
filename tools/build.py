@@ -184,6 +184,17 @@ def check_directories():
     if not os.path.exists(BUILD_CEFPYTHON):
         os.makedirs(BUILD_CEFPYTHON)
 
+    # Info if directory missing
+    if not os.path.exists(CEF_BINARIES_LIBRARIES):
+        prebuilt_name = get_cef_binaries_libraries_basename(OS_POSTFIX2)
+        print("[build.py] ERROR: Couldn't find CEF prebuilt binaries and"
+              " libraries: 'build/{prebuilt_dir}/'. Download it"
+              " from GitHub released tagged eg. 'v50-upstream` or download"
+              " CEF binaries from Spotify Automated Builds and then run"
+              "`automate.py --prebuilt-cef`."
+              .format(prebuilt_dir=prebuilt_name))
+        sys.exit(1)
+
     # Check directories exist
     assert os.path.exists(BUILD_DIR)
     assert os.path.exists(BUILD_CEFPYTHON)

@@ -3,9 +3,11 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "cefpython.pyx"
+include "browser.pyx"
 
 cdef JavascriptCallback CreateJavascriptCallback(int callbackId,
-        CefRefPtr[CefBrowser] cefBrowser, object frameId, py_string functionName):
+        CefRefPtr[CefBrowser] cefBrowser, object frameId,
+        py_string functionName):
     # frameId is int64
     cdef JavascriptCallback jsCallback = JavascriptCallback()
     jsCallback.callbackId = callbackId
@@ -17,6 +19,8 @@ cdef JavascriptCallback CreateJavascriptCallback(int callbackId,
     return jsCallback
 
 cdef class JavascriptCallback:
+    """A javascript callback object may still live while browser/frame
+    are destroyed. Always check frame/browser for None value."""
     cdef int callbackId
     cdef PyFrame frame
     cdef py_string functionName
@@ -32,18 +36,24 @@ cdef class JavascriptCallback:
                         "ExecuteJavascriptCallback",
                         [self.callbackId] + list(args))
             else:
-                Debug("JavascriptCallback.Call() FAILED: browser not found, " \
-                        "callbackId = %s" % self.callbackId)
+                # This code probably ain't needed
+                raise Exception("JavascriptCallback.Call() FAILED: browser"
+                                " not found, callbackId = %s"
+                                % self.callbackId)
         else:
-            Debug("JavascriptCallback.Call() FAILED: frame not found, " \
-                    "callbackId = %s" % self.callbackId)
+            # This code probably ain't needed
+            raise Exception("JavascriptCallback.Call() FAILED: frame not found"
+                            ", callbackId = %s" % self.callbackId)
 
     def GetFunctionName(self):
         return self.functionName
 
     def GetName(self):
-        # DEPRECATED name.
+        """@deprecated."""
         return self.GetFunctionName()
+
+    def GetId(self):
+        return self.callbackId
 
     def GetFrame(self):
         return self.frame

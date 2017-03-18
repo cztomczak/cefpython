@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "cefpython.pyx"
+include "browser.pyx"
 
 cdef dict g_pyFrames = {}
 
@@ -17,25 +18,51 @@ cdef PyFrame GetPyFrameById(int browserId, object frameId):
 
 cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     global g_pyFrames
+
+    # This code probably ain't needed, but just to be sure.
     if <void*>cefFrame == NULL or not cefFrame.get():
-        Debug("GetPyFrame(): returning None")
-        return
+        raise Exception("GetPyFrame(): CefFrame reference is NULL")
+
     cdef PyFrame pyFrame
     cdef object frameId = cefFrame.get().GetIdentifier()  # int64
     cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
     assert (frameId and browserId), "frameId or browserId empty"
     cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
+
     if uniqueFrameId in g_pyFrames:
         return g_pyFrames[uniqueFrameId]
+
+    # This code probably ain't needed.
+    # ----
+    cdef list toRemove = []
     for uFid, pyFrame in g_pyFrames.items():
         if not pyFrame.cefFrame.get():
-            Debug("GetPyFrame(): removing an empty CefFrame reference, " \
-                    "uniqueFrameId = %s" % uniqueFrameId)
-            del g_pyFrames[uFid]
-    # Debug("GetPyFrame(): creating new PyFrame, frameId=%s" % frameId)
+            toRemove.append(uFid)
+    for uFid in toRemove:
+        Debug("GetPyFrame(): removing an empty CefFrame reference, "
+              "uniqueFrameId = %s" % uniqueFrameId)
+        del g_pyFrames[uFid]
+    # ----
+
     pyFrame = PyFrame(browserId, frameId)
     pyFrame.cefFrame = cefFrame
-    g_pyFrames[uniqueFrameId] = pyFrame
+
+    if browserId in g_unreferenced_browsers:
+        # Browser was already globally unreferenced in OnBeforeClose,
+        # thus all frames are globally unreferenced too. Create a new
+        # incomplete instance of PyFrame object. Read comments in
+        # browser.pyx > GetPyBrowser and in Browser.md for what
+        # "incomplete" means.
+        pass
+    else:
+        # Keep a global reference to this frame only if the browser
+        # wasn't destroyed in OnBeforeClose. Otherwise we would leave
+        # dead frames references living forever.
+        # SIDE EFFECT: two calls to GetPyFrame for the same frame object
+        #              may return two different PyFrame objects. Compare
+        #              frame objects always using GetIdentifier().
+        # Debug("GetPyFrame(): create new PyFrame, frameId=%s" % frameId)
+        g_pyFrames[uniqueFrameId] = pyFrame
     return pyFrame
 
 cdef void RemovePyFrame(int browserId, object frameId) except *:

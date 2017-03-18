@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "../cefpython.pyx"
+include "../browser.pyx"
 
 # cef_termination_status_t
 cimport cef_types
@@ -67,7 +68,7 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
     cdef object clientCallback
     cdef py_bool returnValue
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeBrowse")
         pyFrame = GetPyFrame(cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
         pyIsRedirect = bool(cefIsRedirect)
@@ -97,7 +98,7 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
     cdef object clientCallback
     cdef py_bool returnValue
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeResourceLoad")
         pyFrame = GetPyFrame(cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
         clientCallback = pyBrowser.GetClientCallback("OnBeforeResourceLoad")
@@ -125,7 +126,7 @@ cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
     cdef object clientCallback
     cdef object returnValue
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "GetResourceHandler")
         pyFrame = GetPyFrame(cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
         clientCallback = pyBrowser.GetClientCallback("GetResourceHandler")
@@ -161,7 +162,7 @@ cdef public void RequestHandler_OnResourceRedirect(
     cdef PyResponse pyResponse
     cdef object clientCallback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnResourceRedirect")
         pyFrame = GetPyFrame(cefFrame)
         pyOldUrl = CefToPyString(cefOldUrl)
         pyNewUrlOut = [CefToPyString(cefNewUrl)]
@@ -206,7 +207,7 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
     cdef list pyPasswordOut
     cdef object clientCallback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "GetAuthCredentials")
         pyFrame = GetPyFrame(cefFrame)
         pyIsProxy = bool(cefIsProxy)
         pyHost = CefToPyString(cefHost)
@@ -260,7 +261,7 @@ cdef public cpp_bool RequestHandler_OnQuotaRequest(
     cdef py_bool returnValue
     cdef object clientCallback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnQuotaRequest")
         pyOriginUrl = CefToPyString(cefOriginUrl)
         clientCallback = pyBrowser.GetClientCallback("OnQuotaRequest")
         if clientCallback:
@@ -290,7 +291,7 @@ cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
     cdef object clientCallback
     cdef PyCookieManager returnValue
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "GetCookieManager")
         pyMainUrl = CefToPyString(cefMainUrl)
         if pyBrowser:
             # Browser may be empty.
@@ -322,7 +323,7 @@ cdef public void RequestHandler_OnProtocolExecution(
     cdef list pyAllowOSExecutionOut
     cdef object clientCallback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnProtocolExecution")
         pyUrl = CefToPyString(cefUrl)
         pyAllowOSExecutionOut = [bool(cefAllowOSExecution)]
         clientCallback = pyBrowser.GetClientCallback("OnProtocolExecution")
@@ -357,7 +358,7 @@ cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
     cdef py_bool returnValue
     cdef object clientCallback
     try:
-        py_browser = GetPyBrowser(browser)
+        py_browser = GetPyBrowser(browser, "OnBeforePluginLoad")
         py_plugin_info = CreatePyWebPluginInfo(plugin_info)
         clientCallback = GetGlobalClientCallback("OnBeforePluginLoad")
         if clientCallback:
@@ -412,7 +413,7 @@ cdef public void RequestHandler_OnRendererProcessTerminated(
     cdef PyBrowser pyBrowser
     cdef object clientCallback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnRendererProcessTerminated")
         clientCallback = pyBrowser.GetClientCallback(
                 "OnRendererProcessTerminated")
         if clientCallback:
@@ -434,7 +435,7 @@ cdef public void RequestHandler_OnPluginCrashed(
     cdef PyBrowser pyBrowser
     cdef object clientCallback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnPluginCrashed")
         clientCallback = pyBrowser.GetClientCallback("OnPluginCrashed")
         if clientCallback:
             clientCallback(

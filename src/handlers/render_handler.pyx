@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "../cefpython.pyx"
+include "../browser.pyx"
 
 cimport cef_types
 
@@ -29,7 +30,7 @@ cdef public cpp_bool RenderHandler_GetRootScreenRect(
     cdef list pyRect = []
     cdef py_bool ret
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "GetRootScreenRect")
         callback = pyBrowser.GetClientCallback("GetRootScreenRect")
         if callback:
             ret = callback(browser=pyBrowser, rect_out=pyRect)
@@ -56,7 +57,7 @@ cdef public cpp_bool RenderHandler_GetViewRect(
     cdef list pyRect = []
     cdef py_bool ret
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "GetViewRect")
         callback = pyBrowser.GetClientCallback("GetViewRect")
         if callback:
             ret = callback(browser=pyBrowser, rect_out=pyRect)
@@ -83,7 +84,7 @@ cdef public cpp_bool RenderHandler_GetScreenRect(
     cdef list pyRect = []
     cdef py_bool ret
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "GetScreenRect")
         callback = pyBrowser.GetClientCallback("GetScreenRect")
         if callback:
             ret = callback(browser=pyBrowser, rect_out=pyRect)
@@ -112,7 +113,7 @@ cdef public cpp_bool RenderHandler_GetScreenPoint(
     cdef list screenCoordinates = []
     cdef py_bool ret
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "GetScreenPoint")
         callback = pyBrowser.GetClientCallback("GetScreenPoint")
         if callback:
             ret = callback(browser=pyBrowser,
@@ -146,7 +147,7 @@ cdef public void RenderHandler_OnPopupShow(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnPopupShow")
         callback = pyBrowser.GetClientCallback("OnPopupShow")
         if callback:
             callback(browser=pyBrowser, show=show)
@@ -161,7 +162,7 @@ cdef public void RenderHandler_OnPopupSize(
     cdef PyBrowser pyBrowser
     cdef list pyRect
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnPopupSize")
         callback = pyBrowser.GetClientCallback("OnPopupSize")
         if callback:
             pyRect = [cefRect.x, cefRect.y, cefRect.width, cefRect.height]
@@ -187,8 +188,7 @@ cdef public void RenderHandler_OnPaint(
     cdef CefRect cefRect
     cdef PaintBuffer paintBuffer
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
-
+        pyBrowser = GetPyBrowser(cefBrowser, "OnPaint")
         iterator = cefDirtyRects.begin()
         while iterator != cefDirtyRects.end():
             cefRect = deref(iterator)
@@ -223,7 +223,7 @@ cdef public void RenderHandler_OnCursorChange(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnCursorChange")
         callback = pyBrowser.GetClientCallback("OnCursorChange")
         if callback:
             callback(browser=pyBrowser, cursor=<uintptr_t>cursor)
@@ -236,7 +236,7 @@ cdef public void RenderHandler_OnScrollOffsetChanged(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnScrollOffsetChanged")
         callback = pyBrowser.GetClientCallback("OnScrollOffsetChanged")
         if callback:
             callback(browser=pyBrowser)
@@ -254,7 +254,7 @@ cdef public cpp_bool RenderHandler_StartDragging(
     cdef DragData drag_data
     cdef py_bool ret
     try:
-        browser = GetPyBrowser(cef_browser)
+        browser = GetPyBrowser(cef_browser, "StartDragging")
         drag_data = DragData_Init(cef_drag_data)
         callback = browser.GetClientCallback("StartDragging")
         if callback:
@@ -280,7 +280,7 @@ cdef public void RenderHandler_UpdateDragCursor(
         ) except * with gil:
     cdef PyBrowser browser
     try:
-        browser = GetPyBrowser(cef_browser)
+        browser = GetPyBrowser(cef_browser, "UpdateDragCursor")
         callback = browser.GetClientCallback("UpdateDragCursor")
         if callback:
             callback(browser=browser, operation=operation)

@@ -17,75 +17,109 @@ MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
 # get segmentation faults, as they will be garbage collected.
 
 cdef dict g_pyBrowsers = {}
+
+# Unreferenced browsers are added to this list in OnBeforeClose().
+# Must keep a list of unreferenced browsers so that a new reference
+# is not created in GetPyBrowser() when browser was closed.
+cdef list g_unreferenced_browsers = []  # [int identifier, ..]
+
+# Browsers that are about to be closed are added to this list in
+# CloseBrowser().
 cdef list g_closed_browsers = []  # [int identifier, ..]
 
 cdef PyBrowser GetPyBrowserById(int browserId):
+    """May return None value so always check returned value."""
     if browserId in g_pyBrowsers:
         return g_pyBrowsers[browserId]
     return None
 
-cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser):
+cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser,
+                                    callerIdStr="GetPyBrowser"):
+    """The second argument 'callerIdStr' is so that a debug
+    message can be displayed informing which CEF handler callback
+    is being called to which an incomplete PyBrowser instance is
+    provided."""
+
     global g_pyBrowsers
+
+    # This probably ain't needed, but just to be sure.
     if <void*>cefBrowser == NULL or not cefBrowser.get():
-        # noinspection PyUnresolvedReferences
-        Debug("GetPyBrowser(): returning None")
-        return None
+        raise Exception("{caller}: CefBrowser reference is NULL"
+                        .format(caller=callerIdStr))
 
     cdef PyBrowser pyBrowser
     cdef int browserId
-    cdef int identifier
-
     browserId = cefBrowser.get().GetIdentifier()
+
     if browserId in g_pyBrowsers:
         return g_pyBrowsers[browserId]
 
+    # This code probably ain't needed.
+    # ----
+    cdef list toRemove = []
+    cdef int identifier
     for identifier, pyBrowser in g_pyBrowsers.items():
         if not pyBrowser.cefBrowser.get():
-            # noinspection PyUnresolvedReferences
-            Debug("GetPyBrowser(): removing an empty CefBrowser reference, "
-                  "browserId=%s" % identifier)
-            del g_pyBrowsers[identifier]
+            toRemove.append(identifier)
+    for identifier in toRemove:
+        Debug("GetPyBrowser(): removing an empty CefBrowser reference,"
+              " browserId=%s" % identifier)
+        RemovePyBrowser(identifier)
+    # ----
 
-    # noinspection PyUnresolvedReferences
-    Debug("GetPyBrowser(): creating new PyBrowser, browserId=%s" % browserId)
     pyBrowser = PyBrowser()
     pyBrowser.cefBrowser = cefBrowser
-    g_pyBrowsers[browserId] = pyBrowser
-
-    # Inherit client callbacks and javascript bindings
-    # from parent browser.
-
-    # Checking __outerWindowHandle as we should not inherit
-    # client callbacks and javascript bindings if the browser
-    # was created explicitily by calling CreateBrowserSync().
-
-    # Popups inherit client callbacks by default.
-
-    # Popups inherit javascript bindings only when "bindToPopups"
-    # constructor param was set to True.
 
     cdef WindowHandle openerHandle
     cdef dict clientCallbacks
     cdef JavascriptBindings javascriptBindings
     cdef PyBrowser tempPyBrowser
 
-    if pyBrowser.IsPopup() and \
-            not pyBrowser.GetUserData("__outerWindowHandle"):
-        openerHandle = pyBrowser.GetOpenerWindowHandle()
-        for identifier, tempPyBrowser in g_pyBrowsers.items():
-            if tempPyBrowser.GetWindowHandle() == openerHandle:
-                clientCallbacks = tempPyBrowser.GetClientCallbacksDict()
-                if clientCallbacks:
-                    pyBrowser.SetClientCallbacksDict(clientCallbacks)
-                javascriptBindings = tempPyBrowser.GetJavascriptBindings()
-                if javascriptBindings:
-                    if javascriptBindings.GetBindToPopups():
-                        pyBrowser.SetJavascriptBindings(javascriptBindings)
+    if browserId in g_unreferenced_browsers:
+        # This browser was already unreferenced due to OnBeforeClose
+        # was already called. An incomplete new instance of Browser
+        # object is created. This instance doesn't have the client
+        # callbacks, javascript bindings or user data that was already
+        # available in the original Browser object.
+        Debug("{caller}: Browser was already globally unreferenced"
+              ", a new incomplete instance is created, browser id={id}"
+              .format(caller=callerIdStr, id=str(browserId)))
+    else:
+        # This is first creation of browser. Store a reference globally
+        # and inherit client callbacks and javascript bindings from
+        # parent browsers.
+        Debug("GetPyBrowser(): create new PyBrowser, browserId=%s"
+              % browserId)
+
+        g_pyBrowsers[browserId] = pyBrowser
+
+        # Inherit client callbacks and javascript bindings
+        # from parent browser.
+        # - Checking __outerWindowHandle as we should not inherit
+        #   client callbacks and javascript bindings if the browser
+        #   was created explicitily by calling CreateBrowserSync().
+        # - Popups inherit client callbacks by default.
+        # - Popups inherit javascript bindings only when "bindToPopups"
+        #   constructor param was set to True.
+
+        if pyBrowser.IsPopup() and \
+                not pyBrowser.GetUserData("__outerWindowHandle"):
+            openerHandle = pyBrowser.GetOpenerWindowHandle()
+            for identifier, tempPyBrowser in g_pyBrowsers.items():
+                if tempPyBrowser.GetWindowHandle() == openerHandle:
+                    clientCallbacks = tempPyBrowser.GetClientCallbacksDict()
+                    if clientCallbacks:
+                        pyBrowser.SetClientCallbacksDict(clientCallbacks)
+                    javascriptBindings = tempPyBrowser.GetJavascriptBindings()
+                    if javascriptBindings:
+                        if javascriptBindings.GetBindToPopups():
+                            pyBrowser.SetJavascriptBindings(javascriptBindings)
+
     return pyBrowser
 
 cdef void RemovePyBrowser(int browserId) except *:
     # Called from LifespanHandler_OnBeforeClose().
-    global g_pyBrowsers
+    global g_pyBrowsers, g_unreferenced_browsers
     if browserId in g_pyBrowsers:
         if len(g_pyBrowsers) == 1:
             # This is the last browser remaining.
@@ -97,6 +131,7 @@ cdef void RemovePyBrowser(int browserId) except *:
         # noinspection PyUnresolvedReferences
         Debug("del g_pyBrowsers[%s]" % browserId)
         del g_pyBrowsers[browserId]
+        g_unreferenced_browsers.append(browserId)
     else:
         # noinspection PyUnresolvedReferences
         Debug("RemovePyBrowser() FAILED: browser not found, id = %s" \
@@ -116,7 +151,7 @@ cdef public void PyBrowser_ShowDevTools(CefRefPtr[CefBrowser] cefBrowser
     # Called from ClientHandler::OnContextMenuCommand
     cdef PyBrowser pyBrowser
     try:
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "ShowDevTools")
         pyBrowser.ShowDevTools()
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()

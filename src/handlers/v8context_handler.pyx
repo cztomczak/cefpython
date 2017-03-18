@@ -9,6 +9,7 @@
 # a bit delayed due to asynchronous way this is being done.
 
 include "../cefpython.pyx"
+include "../browser.pyx"
 
 cdef public void V8ContextHandler_OnContextCreated(
         CefRefPtr[CefBrowser] cefBrowser,
@@ -19,7 +20,7 @@ cdef public void V8ContextHandler_OnContextCreated(
     cdef object clientCallback
     try:
         Debug("V8ContextHandler_OnContextCreated()")
-        pyBrowser = GetPyBrowser(cefBrowser)
+        pyBrowser = GetPyBrowser(cefBrowser, "OnContextCreated")
         pyBrowser.SetUserData("__v8ContextCreated", True)
         pyFrame = GetPyFrame(cefFrame)
         # User defined callback.
@@ -48,6 +49,10 @@ cdef public void V8ContextHandler_OnContextReleased(
         # were released.
         Debug("V8ContextHandler_OnContextReleased()")
         pyBrowser = GetPyBrowserById(browserId)
+        if not pyBrowser:
+            Debug("OnContextReleased: Browser doesn't exist anymore, id={id}"
+                  .format(id=str(browserId)))
+            return
         pyFrame = GetPyFrameById(browserId, frameId)
         if pyBrowser and pyFrame:
             clientCallback = pyBrowser.GetClientCallback("OnContextReleased")
@@ -56,10 +61,10 @@ cdef public void V8ContextHandler_OnContextReleased(
         else:
             if not pyBrowser:
                 Debug("V8ContextHandler_OnContextReleased() WARNING: "
-                        "pyBrowser not found")
+                        "PyBrowser not found")
             if not pyFrame:
                 Debug("V8ContextHandler_OnContextReleased() WARNING: "
-                        "pyFrame not found")
+                        "PyFrame not found")
         RemovePyFrame(browserId, frameId)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
