@@ -40,6 +40,11 @@ maintained.
   see [gist by AnishN](https://gist.github.com/AnishN/aa3bb27fc9d69319955ed9a8973cd40f)
 - Screenshot example:
   see [gist by stefanbacon](https://gist.github.com/stefanbacon/7b1571d57aee54aa9f8e9021b4848d06)
+- Example of implementing [ResourceHandler](../api/ResourceHandler.md)
+  with the use of [WebRequest](../api/WebRequest.md) object and
+  [WebRequestClient](../api/WebRequestClient.md) interface to allow
+  for reading/modifying web requests: see the [wxpython-response.py](https://github.com/cztomczak/cefpython/blob/cefpython31/cefpython/cef3/linux/binaries_64bit/wxpython-response.py)
+  example in the cefpython31 branch.
 - Old PyWin32 example:
   see [pywin32.py](https://github.com/cztomczak/cefpython/blob/cefpython31/cefpython/cef3/windows/binaries_32bit/pywin32.py)
   in the cefpython31 branch
