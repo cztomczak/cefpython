@@ -198,8 +198,8 @@ END OF: CHANGES in CEF since v31..v47.
 #   | cdef cppclass _Object "Object":
 #
 # - Supporting operators that are not yet supported:
-#   | CefRefPtr[T]& Assign "operator="(T* p)
-#   | cefBrowser.Assign(CefBrowser*)
+#   | RetValue& Assign "operator="(T* p)
+#   | object.Assign(T*)
 #   In the same way you can import function with a different name, this one
 #   imports a static method Create() while adding a prefix "CefSome_":
 #   | cdef extern from "..":
@@ -390,9 +390,14 @@ from cef_types cimport (
     int32, uint32, int64, uint64,
 )
 
+# noinspection PyUnresolvedReferences
+from cef_ptr cimport CefRefPtr
+
+# noinspection PyUnresolvedReferences
+from cef_scoped_ptr cimport scoped_ptr
+
 from cef_task cimport *
 from cef_platform cimport *
-from cef_ptr cimport *
 from cef_app cimport *
 from cef_browser cimport *
 # noinspection PyUnresolvedReferences
@@ -428,9 +433,6 @@ from cef_path_util cimport *
 from cef_drag_data cimport *
 from cef_image cimport *
 from main_message_loop cimport *
-# noinspection PyUnresolvedReferences
-from cef_scoped_ptr cimport scoped_ptr
-
 
 # -----------------------------------------------------------------------------
 # GLOBAL VARIABLES
@@ -445,18 +447,18 @@ g_debugFile = "debug.log"
 g_applicationSettings = {"string_encoding": "utf-8"}
 g_commandLineSwitches = {}
 
+# If ApplicationSettings.unique_request_context_per_browser is False
+# then a shared request context is used for all browsers. Otherwise
+# a unique one is created for each call to CreateBrowserSync.
+# noinspection PyUnresolvedReferences
+cdef CefRefPtr[CefRequestContext] g_shared_request_context
+
 cdef scoped_ptr[MainMessageLoopExternalPump] g_external_message_pump
 
 cdef py_bool g_MessageLoop_called = False
 cdef py_bool g_MessageLoopWork_called = False
 
 cdef dict g_globalClientCallbacks = {}
-
-# If ApplicationSettings.unique_request_context_per_browser is False
-# then a shared request context is used for all browsers. Otherwise
-# a unique one is created for each call to CreateBrowserSync.
-# noinspection PyUnresolvedReferences
-cdef CefRefPtr[CefRequestContext] g_sharedRequestContext
 
 # -----------------------------------------------------------------------------
 
@@ -735,7 +737,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # External message pump
     if GetAppSetting("external_message_pump")\
             and not g_external_message_pump.get():
-        g_external_message_pump.Assign(MainMessageLoopExternalPump.Create())
+        g_external_message_pump.reset(
+                MainMessageLoopExternalPump.Create().get())
 
     Debug("CefInitialize()")
     cdef cpp_bool ret
@@ -786,7 +789,6 @@ def CreateBrowserSync(windowInfo=None,
     cdef CefWindowInfo cefWindowInfo
     SetCefWindowInfo(cefWindowInfo, windowInfo)
 
-
     navigateUrl = GetNavigateUrl(navigateUrl)
     Debug("navigateUrl: %s" % navigateUrl)
     cdef CefString cefNavigateUrl
@@ -798,7 +800,7 @@ def CreateBrowserSync(windowInfo=None,
     cdef CefRefPtr[CefBrowser] cefBrowser
 
     # Request context - part 1/2.
-    createSharedRequestContext = bool(not g_sharedRequestContext.get())
+    createSharedRequestContext = bool(not g_shared_request_context.get())
     cdef CefRefPtr[CefRequestContext] cefRequestContext
     cdef CefRefPtr[RequestContextHandler] requestContextHandler =\
             <CefRefPtr[RequestContextHandler]?>new RequestContextHandler(
@@ -807,15 +809,13 @@ def CreateBrowserSync(windowInfo=None,
         cefRequestContext = CefRequestContext.CreateContext(
                 CefRequestContext.GetGlobalContext(),
                 <CefRefPtr[CefRequestContextHandler]?>requestContextHandler)
+    elif createSharedRequestContext:
+        cefRequestContext = CefRequestContext.CreateContext(
+                CefRequestContext.GetGlobalContext(),
+                <CefRefPtr[CefRequestContextHandler]?>requestContextHandler)
+        g_shared_request_context.Assign(cefRequestContext.get())
     else:
-        if createSharedRequestContext:
-            cefRequestContext = CefRequestContext.CreateContext(
-                    CefRequestContext.GetGlobalContext(),
-                    <CefRefPtr[CefRequestContextHandler]?>\
-                            requestContextHandler)
-            g_sharedRequestContext.Assign(cefRequestContext.get())
-        else:
-            cefRequestContext.Assign(g_sharedRequestContext.get())
+        cefRequestContext.Assign(g_shared_request_context.get())
 
     # CEF browser creation.
     with nogil:
@@ -881,11 +881,12 @@ def QuitMessageLoop():
         CefQuitMessageLoop()
 
 def Shutdown():
-    if g_sharedRequestContext.get():
-        # A similar release is done in RemovePyBrowser and CloseBrowser.
-        # This one is probably redundant. Additional testing should be done.
-        Debug("Shutdown: releasing shared request context")
-        g_sharedRequestContext.Assign(NULL)
+    Debug("Shutdown()")
+
+    # Release shared request context. This is sometimes causing
+    # segmentation fault, so disabling it for now. See Issue #333:
+    # https://github.com/cztomczak/cefpython/issues/333
+    # OFF: g_shared_request_context.Assign(NULL)
 
     # Run some message loop work, force closing browsers and then run
     # some message loop work again for the browsers to close cleanly.
@@ -968,7 +969,7 @@ def Shutdown():
         NonCriticalError("Shutdown called, but there are still browser"
                          " references alive")
 
-    Debug("Shutdown()")
+    Debug("CefShutdown()")
     with nogil:
         CefShutdown()
 

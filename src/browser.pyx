@@ -121,13 +121,6 @@ cdef void RemovePyBrowser(int browserId) except *:
     # Called from LifespanHandler_OnBeforeClose().
     global g_pyBrowsers, g_unreferenced_browsers
     if browserId in g_pyBrowsers:
-        if len(g_pyBrowsers) == 1:
-            # This is the last browser remaining.
-            if g_sharedRequestContext.get():
-                # A similar release is done in Shutdown and CloseBrowser.
-                # noinspection PyUnresolvedReferences
-                Debug("RemovePyBrowser: releasing shared request context")
-                g_sharedRequestContext.Assign(NULL)
         # noinspection PyUnresolvedReferences
         Debug("del g_pyBrowsers[%s]" % browserId)
         del g_pyBrowsers[browserId]
@@ -302,13 +295,6 @@ cdef class PyBrowser:
         pass
 
     cpdef py_void CloseBrowser(self, py_bool forceClose=False):
-        if len(g_pyBrowsers) == 1:
-            # This is the last browser remaining.
-            if g_sharedRequestContext.get():
-                # A similar release is done in Shutdown
-                # and RemovePyBrowser.
-                Debug("CloseBrowser: releasing shared request context")
-                g_sharedRequestContext.Assign(NULL)
         Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
         cdef int browserId = self.GetCefBrowser().get().GetIdentifier()
         self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))

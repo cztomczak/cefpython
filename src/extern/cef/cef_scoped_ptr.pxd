@@ -10,6 +10,6 @@ cdef extern from "include/base/cef_scoped_ptr.h":
         # noinspection PyUnresolvedReferences
         void reset()
         # noinspection PyUnresolvedReferences
-        T* get()
+        void reset(T* p)
         # noinspection PyUnresolvedReferences
-        scoped_ptr[T]& Assign "operator="(scoped_ptr[T]& p)
+        T* get()
