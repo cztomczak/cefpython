@@ -64,6 +64,12 @@ class MainFrame(wx.Frame):
                           title='wxPython example', size=(WIDTH, HEIGHT))
         self.browser = None
 
+        # Must ignore X11 errors like 'BadWindow' and others by
+        # installing X11 error handlers. This must be done after
+        # wx was intialized.
+        if LINUX:
+            WindowUtils.InstallX11ErrorHandlers()
+
         global g_count_windows
         g_count_windows += 1
 
