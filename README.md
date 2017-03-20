@@ -2,9 +2,11 @@
 
 Table of contents:
 * [Introduction](#introduction)
+* [Install](#install)
+* [Examples](#examples)
 * [Support](#support)
 * [Releases](#releases)
-  * [v50+ releases](#v50-releases)
+  * [v56+ releases](#v56-releases)
   * [v31 release](#v31-release)
 * [Support development](#support-development)
   * [Thanks](#thanks)
@@ -38,6 +40,21 @@ applications. You can use it for web scraping or as a web crawler,
 or other kind of internet bots.
 
 
+## Install
+
+You can install with pip. On Linux pip 8.1+ is required. You can
+also download packages for offline installation available on the
+[GitHub Releases](../../releases) pages.
+
+```
+pip install cefpython3==56.1
+```
+
+## Examples
+
+See the [Examples-README.md](examples/Examples-README.md) file.
+
+
 ## Support
 
 - Ask questions, report problems and issues on the [Forum](https://groups.google.com/group/cefpython)
@@ -49,28 +66,30 @@ or other kind of internet bots.
 
 ## Releases
 
-### v50+ releases
+Information on supported platforms, python versions, architectures
+and requirements. If you want to support old operating systems then
+choose the v31 release.
 
-- Can be installed on all platforms using `pip install cefpython3` command
-- Downloads are available on [GitHub Releases](../../releases) pages
-- Windows support: 32-bit and 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
-  (requirements: Windows 7+)
-- Linux support: 32-bit and 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
-  (requirements: Debian 7+ / Ubuntu 12.04+)
-- Mac support: 64-bit, Python 2.7 / 3.4 / 3.5 / 3.6
-  (requirements: MacOS 10.9+)
-- Documentation is in the [docs/](docs) directory
-- API reference is in the [api/](api) directory
-- Additional documentation is in issues labelled [Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+### v56+ releases
+
+OS | Py2 | Py3 | 32bit | 64bit | Requirements
+--- | --- | --- | --- | --- | ---
+Windows | 2.7 | 3.4 / 3.5 / 3.6 | Yes | Yes | Windows 7+
+Linux | 2.7 | 3.4 / 3.5 / 3.6 | Yes | Yes | Debian 7+ / Ubuntu 12.04+
+Mac | 2.7 | 3.4 / 3.5 / 3.6 | No | Yes | MacOS 10.9+
 
 ### v31 release
 
+OS | Py2 | Py3 | 32bit | 64bit | Requirements
+--- | --- | --- | --- | --- | ---
+Windows | 2.7 | No | Yes | Yes | Windows XP+
+Linux | 2.7 | No | Yes | Yes | Debian 7+ / Ubuntu 12.04+
+Mac | 2.7 | No | Yes | Yes | MacOS 10.7+
+
+Additional information for v31.2 release:
+- On Windows/Mac you can install with command: `pip install cefpython3==31.2`
 - Downloads are available on [wiki pages](../../wiki#downloads)
-  and on GH Releases tagged [v31.2](../../releases/tag/v31.2)
-- Supports only Python 2.7
-- Windows support: 32-bit and 64-bit (requirements: Windows XP+)
-- Linux support: 32-bit and 64-bit (requirements: Debian 7+ / Ubuntu 12.04+)
-- Mac support: 32-bit and 64-bit (requirements: MacOS 10.7+)
+  and on GitHub Releases tagged [v31.2](../../releases/tag/v31.2).
 - Documentation is on [wiki pages](../../wiki)
 - API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
 
