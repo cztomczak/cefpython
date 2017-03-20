@@ -27,12 +27,14 @@ bool JSDialogHandler::OnJSDialog(CefRefPtr<CefBrowser> browser,
                                             dialog_type, message_text,
                                             default_prompt_text,
                                             callback, suppress_message);
+#if defined(OS_LINUX)
     if (!ret) {
         // Default implementation
         return dialog_handler_->OnJSDialog(browser, origin_url, dialog_type,
                                            message_text, default_prompt_text,
                                            callback, suppress_message);
     }
+#endif
     return ret;
 }
 
@@ -47,11 +49,13 @@ bool JSDialogHandler::OnBeforeUnloadDialog(
     bool ret = JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(
                                                 browser, message_text,
                                                 is_reload, callback);
+#if defined(OS_LINUX)
     if (!ret) {
         // Default implementation
         return dialog_handler_->OnBeforeUnloadDialog(browser, message_text,
                                                      is_reload, callback);
     }
+#endif
     return ret;
 }
 
@@ -59,8 +63,10 @@ bool JSDialogHandler::OnBeforeUnloadDialog(
 void JSDialogHandler::OnResetDialogState(CefRefPtr<CefBrowser> browser)
 {
     REQUIRE_UI_THREAD();
+#if defined(OS_LINUX)
     // Default implementation
     dialog_handler_->OnResetDialogState(browser);
+#endif
     // User implementation
     JavascriptDialogHandler_OnResetJavascriptDialogState(browser);
 }

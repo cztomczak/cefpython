@@ -598,7 +598,7 @@ def build_wrapper_library_mac():
     # from cefclient.
     cmake_wrapper = prepare_build_command(build_lib=True)
     cmake_wrapper.extend(["cmake", "-G", "Ninja",
-                          "-DPROJECT_ARCH=x86_64"
+                          "-DPROJECT_ARCH=x86_64",
                           "-DCMAKE_CXX_FLAGS=-stdlib=libc++",
                           "-DCMAKE_BUILD_TYPE=" + Options.build_type,
                           ".."])

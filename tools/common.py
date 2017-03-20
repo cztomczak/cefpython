@@ -47,24 +47,26 @@ elif OS_POSTFIX == "linux":
 
 # Platforms
 SYSTEM = platform.system().upper()
+if SYSTEM == "DARWIN":
+    SYSTEM = "MAC"
 WINDOWS = SYSTEM if SYSTEM == "WINDOWS" else False
 LINUX = SYSTEM if SYSTEM == "LINUX" else False
-MAC = SYSTEM if SYSTEM == "DARWIN" else False
+MAC = SYSTEM if SYSTEM == "MAC" else False
 
 OS_POSTFIX2_ARCH = dict(
     WINDOWS={"32bit": "win32", "64bit": "win64"},
     LINUX={"32bit": "linux32", "64bit": "linux64"},
-    DARWIN={"32bit": "mac32", "64bit": "mac64"},
+    MAC={"32bit": "mac32", "64bit": "mac64"},
 )
 CEF_POSTFIX2_ARCH = dict(
     WINDOWS={"32bit": "windows32", "64bit": "windows64"},
     LINUX={"32bit": "linux32", "64bit": "linux64"},
-    DARWIN={"64bit": "macosx64"},
+    MAC={"64bit": "macosx64"},
 )
 PYPI_POSTFIX2_ARCH = dict(
     WINDOWS={"32bit": "win32", "64bit": "win_amd64"},
     LINUX={"32bit": "manylinux1_i686", "64bit": "manylinux1_x86_64"},
-    DARWIN={"64bit": "x86_64"},
+    MAC={"64bit": "x86_64"},
 )
 
 # Python version eg. 27

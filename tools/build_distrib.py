@@ -6,8 +6,6 @@
 Build distribution packages for all architectures and all supported
 python versions.
 
-TODO: Mac support. Currently runs only on Windows/Linux.
-
 Usage:
     build_distrib.py VERSION [--no-run-examples] [--no-rebuild]
 
@@ -24,9 +22,11 @@ This script does the following:
 1. Expects that all supported python versions are installed
    a) On Windows search for Pythons in the multiple default install
       locations
-   b) On Mac use system Python 2.7 and Python 3 from ~/.pyenv/versions/
+   b) On Linux use only Pythons from ~/.pyenv/versions/
       directory
-   c) On Linux use only Pythons from ~/.pyenv/versions/ directory
+   c) On Mac use Pythons from ~/.pyenv/versions/ and /usr/local/bin/python
+      For example will use Python 2.7.13 from /usr/local/bin/ only
+      when 2.7 was not found in ~/.pyenv/versions/.
 2. Expects that all python compilers for supported python versions
    are installed. See docs/Build-instructions.md > Requirements.
 3. Expects cef_binary*/ directories from Spotify Automated Builds
@@ -82,6 +82,10 @@ PYTHON_SEARCH_PATHS = dict(
     ],
     LINUX=[
         "%PYENV_ROOT%/versions/*/bin",
+    ],
+    MAC=[
+        "%PYENV_ROOT%/versions/*/bin",
+        "/usr/local/bin",
     ],
 )
 
@@ -516,7 +520,7 @@ def test_wheel_packages(pythons):
         print("[build_distrib.py] Test wheel package (install, unittests) for"
               " {python_name}".format(python_name=python["name"]))
         platform_tag = get_pypi_postfix2_for_arch(python["arch"])
-        whl_pattern = (r"*-{platform_tag}.whl"
+        whl_pattern = (r"*{platform_tag}.whl"
                        .format(platform_tag=platform_tag))
         wheels = glob.glob(os.path.join(DISTRIB_DIR, whl_pattern))
         assert len(wheels) == 1, ("No wheels found in distrib dir for %s"
