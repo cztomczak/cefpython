@@ -6,7 +6,7 @@ Table of contents:
 * [Examples](#examples)
 * [Support](#support)
 * [Releases](#releases)
-  * [v56+ releases](#v56-releases)
+  * [Latest release](#latest-release)
   * [v31 release](#v31-release)
 * [Support development](#support-development)
   * [Thanks](#thanks)
@@ -70,13 +70,20 @@ Information on supported platforms, python versions, architectures
 and requirements. If you want to support old operating systems then
 choose the v31 release.
 
-### v56+ releases
+### Latest release
 
 OS | Py2 | Py3 | 32bit | 64bit | Requirements
 --- | --- | --- | --- | --- | ---
 Windows | 2.7 | 3.4 / 3.5 / 3.6 | Yes | Yes | Windows 7+
 Linux | 2.7 | 3.4 / 3.5 / 3.6 | Yes | Yes | Debian 7+ / Ubuntu 12.04+
 Mac | 2.7 | 3.4 / 3.5 / 3.6 | No | Yes | MacOS 10.9+
+
+These platforms are not yet supported:
+
+OS | More info
+--- | ---
+ARM | [Issue #267](../../issues/267)
+Android | [Issue #303](../../issues/303)
 
 ### v31 release
 
