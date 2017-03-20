@@ -78,12 +78,12 @@ Windows | 2.7 | 3.4 / 3.5 / 3.6 | Yes | Yes | Windows 7+
 Linux | 2.7 | 3.4 / 3.5 / 3.6 | Yes | Yes | Debian 7+ / Ubuntu 12.04+
 Mac | 2.7 | 3.4 / 3.5 / 3.6 | No | Yes | MacOS 10.9+
 
-These platforms are not yet supported:
+These platforms are not supported yet:
 
 OS | More info
 --- | ---
 ARM | [Issue #267](../../issues/267)
-Android | [Issue #303](../../issues/303)
+Android | [Issue #307](../../issues/307)
 
 ### v31 release
 
