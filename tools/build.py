@@ -806,9 +806,8 @@ def install_and_run():
     os.chdir(BUILD_DIR)
 
     # Setup installer directory
-    setup_installer_dir = ("./cefpython3-{version}-{os}-setup/"
-                           .format(version=VERSION, os=OS_POSTFIX2))
-    setup_installer_dir = os.path.join(BUILD_DIR, setup_installer_dir)
+    setup_basename = get_setup_installer_basename(VERSION, OS_POSTFIX2)
+    setup_installer_dir = os.path.join(BUILD_DIR, setup_basename)
 
     # Delete setup installer directory if exists
     if os.path.exists(setup_installer_dir):
