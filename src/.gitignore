@@ -1,46 +1,4 @@
-/cef1/windows/setup/build/
-*.pyc
-
 # If you want to ignore an already commited directory run:
 # git rm --cached -r .idea
 
-/.idea/
-debug.log
-error.log
-console.log
-
-# WingIDE project files
-/wingide.wpr
-/wingide.wpu
-
-*.ncb
-*.suo
-*.user
-*.aps
-*.sdf
-*.sln
-Debug*/
-Release*/
-*.pdb
-
-ctags
-
-/windows/installer/Output/
-
-# Inno setup files generated from a template
-*.generated
-
-cython_debug/
-
-cefpython_py27.pyd
-cefpython_py32.pyd
-cefpython_py27.so
-cefpython_py32.so
-
 compile_time_constants.pxi
-
-debug_32bit/
-debug_64bit/
-
-libcef_debug/
-libcef_release/

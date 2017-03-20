@@ -404,15 +404,15 @@ cd cefpython/build/
 python ../tools/make_installer.py xx.x
 ```
 
-To create a wheel package from that installer package type:
+To create a wheel package type:
 ```
-cd *-setup/
-python setup.py bdist_wheel
-cd dist/
-ls *.whl
+cd cefpython/build/
+python ../tools/make_installer.py xx.xx --wheel --universal
+cd cefpython3_*/dist/
+ls
 ```
 
-Optional flags for the setup.py script above:
+Additional flags when using --wheel flag:
 * `--python-tag cp27` to generate Python 2.7 only package
 * `--universal` to build package for multiple Python versions
   (in such case you must first build multiple cefpython modules

@@ -1,7 +1,0 @@
-build/
-cefpython.cpp
-cython_debug/
-*.pyx
-*.cpp
-lib_64bit/
-lib_32bit/

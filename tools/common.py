@@ -320,7 +320,7 @@ def get_cefpython_binary_basename(postfix2, ignore_error=False):
 
 
 def get_setup_installer_basename(version, postfix2):
-    setup_basename = ("cefpython3-{version}-{os}-setup"
+    setup_basename = ("cefpython3_{version}_{os}"
                       .format(version=version, os=postfix2))
     return setup_basename
 
