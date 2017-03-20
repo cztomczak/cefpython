@@ -5,11 +5,15 @@
 #include "common/cefpython_public_api.h"
 #include "include/cef_jsdialog_handler.h"
 
+#if defined(OS_LINUX)
+#include "dialog_handler_gtk.h"
+#endif
+
 
 class JSDialogHandler : public CefJSDialogHandler
 {
 public:
-    JSDialogHandler(){}
+    JSDialogHandler();
     virtual ~JSDialogHandler(){}
 
     typedef cef_jsdialog_type_t JSDialogType;
@@ -30,6 +34,12 @@ public:
 
     void OnResetDialogState(CefRefPtr<CefBrowser> browser) override;
     void OnDialogClosed(CefRefPtr<CefBrowser> browser) override;
+
+public:
+#if defined(OS_LINUX)
+    // Default dialog handler impl for GTK.
+    CefRefPtr<ClientDialogHandlerGtk> dialog_handler_;
+#endif
 
 private:
     IMPLEMENT_REFCOUNTING(JSDialogHandler);

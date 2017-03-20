@@ -19,6 +19,7 @@ from sources or use ready binaries from Spotify Automated Builds.
 
 Usage:
     build.py VERSION [--rebuild-cpp] [--fast] [--clean] [--kivy]
+                     [--hello-world]
 
 Options:
     VERSION            Version number eg. 50.0
@@ -26,6 +27,7 @@ Options:
     --fast             Fast mode
     --clean            Clean C++ projects build files on Linux/Mac
     --kivy             Run only Kivy example
+    --hello-world      Run only Hello World example
 """
 
 # --rebuild-cpp      Force rebuild of .vcproj C++ projects (DISABLED)
@@ -70,6 +72,7 @@ DEBUG_FLAG = False
 FAST_FLAG = False
 CLEAN_FLAG = False
 KIVY_FLAG = False
+HELLO_WORLD_FLAG = False
 REBUILD_CPP = False
 
 # First run
@@ -107,7 +110,7 @@ def main():
 
 
 def command_line_args():
-    global DEBUG_FLAG, FAST_FLAG, CLEAN_FLAG, KIVY_FLAG,\
+    global DEBUG_FLAG, FAST_FLAG, CLEAN_FLAG, KIVY_FLAG, HELLO_WORLD_FLAG, \
            REBUILD_CPP, VERSION, NO_RUN_EXAMPLES
 
     VERSION = get_version_from_command_line_args(__file__)
@@ -141,7 +144,12 @@ def command_line_args():
     # --kivy
     if "--kivy" in sys.argv:
         KIVY_FLAG = True
-        print("[build.py] KIVY mode enabled")
+        print("[build.py] KIVY example")
+
+    # --kivy
+    if "--hello-world" in sys.argv:
+        HELLO_WORLD_FLAG = True
+        print("[build.py] HELLO WORLD example")
 
     # --rebuild-cpp
     # Rebuild c++ projects
@@ -848,12 +856,16 @@ def install_and_run():
     if not NO_RUN_EXAMPLES:
         print("[build.py] Run examples")
         os.chdir(EXAMPLES_DIR)
-        kivy_flag = "--kivy" if KIVY_FLAG else ""
+        flags = ""
+        if KIVY_FLAG:
+            flags += " --kivy"
+        if HELLO_WORLD_FLAG:
+            flags += " --hello-world"
         run_examples = os.path.join(TOOLS_DIR, "run_examples.py")
-        command = ("\"{python}\" {run_examples} {kivy_flag}"
+        command = ("\"{python}\" {run_examples} {flags}"
                    .format(python=sys.executable,
                            run_examples=run_examples,
-                           kivy_flag=kivy_flag))
+                           flags=flags))
         ret = os.system(command)
         if ret != 0:
             print("[build.py] ERROR while running examples")

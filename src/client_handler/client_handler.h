@@ -13,6 +13,7 @@
 #include "common/cefpython_public_api.h"
 
 #include "context_menu_handler.h"
+#include "dialog_handler.h"
 #include "display_handler.h"
 #include "download_handler.h"
 #include "focus_handler.h"
@@ -26,6 +27,7 @@
 
 class ClientHandler : public CefClient,
                       public ContextMenuHandler,
+                      public DialogHandler,
                       public DisplayHandler,
                       public DownloadHandler,
                       public FocusHandler,
@@ -43,6 +45,12 @@ public:
     CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override {
         return this;
     }
+
+#if defined(OS_LINUX)
+    CefRefPtr<CefDialogHandler> GetDialogHandler() override {
+        return this;
+    }
+#endif
 
     CefRefPtr<CefDisplayHandler> GetDisplayHandler() override {
         return this;

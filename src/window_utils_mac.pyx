@@ -37,3 +37,7 @@ class WindowUtils:
     def IsWindowHandle(WindowHandle windowHandle):
         Debug("WindowUtils::IsWindowHandle() not implemented (always True)")
         return True
+
+    @staticmethod
+    def InstallX11ErrorHandlers():
+        pass

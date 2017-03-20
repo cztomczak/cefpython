@@ -113,6 +113,15 @@ cdef public void LifespanHandler_OnBeforeClose(
     cdef object callback
     try:
         Debug("LifespanHandler_OnBeforeClose")
+        # NOTE: browser_id may not necessarily be in g_pyBrowsers currently.
+        #       I haven't yet debugged it but the logic in Shutdown that
+        #       tries to force close browsers and removes references might
+        #       have something to do with it. Such scenario is reproducible
+        #       with the following steps:
+        #       1. Run wxpython.py example
+        #       2. Google "js alert" and open w3schools
+        #       3. Open demo popup
+        #       4. Close main window (not popup)
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeClose")
         callback = pyBrowser.GetClientCallback("OnBeforeClose")
         if callback:

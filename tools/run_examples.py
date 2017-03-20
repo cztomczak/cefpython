@@ -20,6 +20,19 @@ import sys
 def main():
     os.chdir(EXAMPLES_DIR)
 
+    # When importing Kivy package there can't be any flags unknown to Kivy,
+    # use sys.argv.remove to remove them.
+
+    kivy_flag = False
+    if "--kivy" in sys.argv:
+        sys.argv.remove("--kivy")
+        kivy_flag = True
+
+    hello_world_flag = False
+    if "--hello-world" in sys.argv:
+        sys.argv.remove("--hello-world")
+        hello_world_flag = True
+
     packages = check_installed_packages()
     examples = list()
     examples.append("hello_world.py")
@@ -83,14 +96,19 @@ def main():
         print(["run_examples.py] PASS: tkinter_.py (tkinter not installed)"])
         passed.append("tkinter_.py")
 
-    # kivy
     if LINUX and packages["kivy"] and packages["gtk"]:
-        if "--kivy" in sys.argv:
-            # When --kivy flag passed run only Kivy example
+        # When --kivy flag passed run only Kivy example
+        if kivy_flag:
             examples = list()
             passed = list()
         examples.append("{linux_dir}/binaries_64bit/kivy_.py"
                         .format(linux_dir=LINUX_DIR))
+
+    # When --hello-world flag is passed run only hello_world.py example
+    if hello_world_flag:
+        examples = list()
+        passed = list()
+        examples.append("hello_world.py")
 
     # Run all
     for example in examples:

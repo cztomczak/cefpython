@@ -145,3 +145,7 @@ class WindowUtils(object):
             return bool(IsWindow(<HWND>windowHandle))
         ELSE:
             return False
+
+    @staticmethod
+    def InstallX11ErrorHandlers():
+        pass

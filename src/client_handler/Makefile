@@ -12,7 +12,7 @@ UNAME_S = $(shell uname -s)
 CCFLAGS = -fPIC $(CEF_CCFLAGS)
 
 ifeq ($(UNAME_S), Linux)
-	SRC_MORE = x11.cpp
+	SRC_MORE = x11.cpp dialog_handler_gtk.cpp
 else ifeq ($(UNAME_S), Darwin)
 	SRC_MORE = util_mac.mm
 endif
@@ -22,7 +22,7 @@ SRC = client_handler.cpp cookie_visitor.cpp resource_handler.cpp \
 	task.cpp context_menu_handler.cpp display_handler.cpp \
 	download_handler.cpp focus_handler.cpp js_dialog_handler.cpp \
 	keyboard_handler.cpp lifespan_handler.cpp load_handler.cpp \
-	render_handler.cpp request_handler.cpp \
+	render_handler.cpp request_handler.cpp dialog_handler.cpp \
 	$(SRC_MORE)
 
 OBJ = $(filter %.o, $(SRC:.cpp=.o) $(SRC:.mm=.o))
