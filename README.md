@@ -61,6 +61,9 @@ See the [Examples-README.md](examples/Examples-README.md) file.
 - Documentation is in the [docs/](docs) directory
 - API reference is in the [api/](api) directory
 - Additional documentation is in issues labelled [Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+- To search documentation use GitHub "This repository" search
+  at the top. To narrow results to documentation only select
+  "Markdown" in the left pane.
 - Wiki pages are deprecated and for v31 only
 
 

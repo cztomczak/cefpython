@@ -1,8 +1,21 @@
 # Examples README
 
 Table of contents:
+* [Hello World!](#hello-world)
 * [Supported examples](#supported-examples)
 * [More examples](#more-examples)
+
+## Hello World!
+
+Instructions to install the cefpython3 package, clone the repository
+and run the hello_world.py example:
+
+```
+pip install cefpython3==56.1
+git clone https://github.com/cztomczak/cefpython.git
+cd cefpython/
+python hello_world.py
+```
 
 
 ## Supported examples
@@ -10,17 +23,18 @@ Table of contents:
 Examples provided in the examples/ root directory are actively
 maintained:
 
+- [hello_world.py](hello_world.py): basic example, doesn't require any
+  third party GUI framework to run
 - [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
   library (GTK 2)
 - [gtk3.py](gtk3.py): example for [PyGObject/PyGI](https://wiki.gnome.org/Projects/PyGObject)
   library (GTK 3). Currently broken on Linux/Mac, see top comments in sources.
-- [hello_world.py](hello_world.py): doesn't require any third party
-  GUI framework
 - [qt4.py](qt4.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4)
   and [PySide](https://wiki.qt.io/PySide) libraries (Qt 4)
 - [tkinter_.py](tkinter_.py): example for [Tkinter](https://wiki.python.org/moin/TkInter).
   Currently broken on Mac.
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)
+  toolkit
 
 If there are any issues in examples read top comments in sources
 to see whether this is a known issue with available workarounds.
