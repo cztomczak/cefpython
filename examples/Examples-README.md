@@ -13,7 +13,7 @@ and run the hello_world.py example:
 ```
 pip install cefpython3==56.1
 git clone https://github.com/cztomczak/cefpython.git
-cd cefpython/
+cd cefpython/examples/
 python hello_world.py
 ```
 
