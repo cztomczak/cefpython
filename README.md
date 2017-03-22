@@ -82,11 +82,8 @@ Linux | 2.7 | 3.4 / 3.5 / 3.6 | Yes | Yes | Debian 7+ / Ubuntu 12.04+
 Mac | 2.7 | 3.4 / 3.5 / 3.6 | No | Yes | MacOS 10.9+
 
 These platforms are not supported yet:
-
-OS | More info
---- | ---
-ARM | [Issue #267](../../issues/267)
-Android | [Issue #307](../../issues/307)
+- ARM - see [Issue #267](../../issues/267)
+- Android - see [Issue #307](../../issues/307)
 
 ### v31 release
 
@@ -111,12 +108,11 @@ by making a donation please click the Paypal Donate button:
 
 <a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=V7LU7PD4N4GGG'>
 <img src='https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/donate.gif' />
-</a>
+</a><br><br>
 
-At this time CEF Python is unable to accept donations that sponsor the
-development of specific features. However you can make a donation with
-a comment that you would like to see some feature implemented and it will
-give it a higher priority.
+If you would like to see some feature implemented you can make
+a comment about that when making a donation. It will give it
+a higher priority.
 
 If you are interested in sponsorship opportunities please contact Czarek
 directly.
