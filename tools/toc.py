@@ -113,6 +113,11 @@ def create_toc(contents, file_):
                     contents += os.linesep + toc + os.linesep + os.linesep
                     toc_inserted = True
             contents += line + os.linesep
+    # Special case for README.md - remove Quick Links toc for subheadings
+    re_find = (r"  \* \[Docs\]\(#docs\)[\r\n]+"
+               r"  \* \[API categories\]\(#api-categories\)[\r\n]+"
+               r"  \* \[API index\]\(#api-index\)\r?\n?")
+    contents = re.sub(re_find, "", contents)
     return tocsize, contents, warnings
 
 

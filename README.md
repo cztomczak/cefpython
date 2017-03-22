@@ -6,14 +6,9 @@ Table of contents:
 * [Examples](#examples)
 * [Support](#support)
 * [Releases](#releases)
-  * [Latest release](#latest-release)
-  * [v31 release](#v31-release)
 * [Support development](#support-development)
   * [Thanks](#thanks)
 * [Quick links](#quick-links)
-  * [Docs](#docs)
-  * [API categories](#api-categories)
-  * [API index](#api-index)
 
 
 ## Introduction
@@ -73,7 +68,7 @@ Information on supported platforms, python versions, architectures
 and requirements. If you want to support old operating systems then
 choose the v31 release.
 
-### Latest release
+**Latest release**
 
 OS | Py2 | Py3 | 32bit | 64bit | Requirements
 --- | --- | --- | --- | --- | ---
@@ -85,7 +80,7 @@ These platforms are not supported yet:
 - ARM - see [Issue #267](../../issues/267)
 - Android - see [Issue #307](../../issues/307)
 
-### v31 release
+**v31 release**
 
 OS | Py2 | Py3 | 32bit | 64bit | Requirements
 --- | --- | --- | --- | --- | ---
