@@ -612,6 +612,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     global g_debugFile
     if "--debug" in sys.argv:
         application_settings["debug"] = True
+        application_settings["log_file"] = "debug.log"
         application_settings["log_severity"] = LOGSEVERITY_WARNING
         sys.argv.remove("--debug")
     if "debug" in application_settings:
