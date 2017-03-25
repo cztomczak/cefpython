@@ -76,8 +76,10 @@ cdef class WindowInfo:
     cdef public py_string windowName
     cdef public py_bool transparentPainting
 
-    def __init__(self):
+    def __init__(self, title=""):
         self.transparentPainting = False
+        if title:
+            self.windowName = title
 
     cpdef py_void SetAsChild(self, WindowHandle parentWindowHandle,
                              list windowRect=None):
@@ -117,7 +119,8 @@ cdef class WindowInfo:
                         % parentWindowHandle)
             self.parentWindowHandle = parentWindowHandle
             self.windowType = "popup"
-            self.windowName = str(windowName)
+            if windowName:
+                self.windowName = str(windowName)
 
     cpdef py_void SetAsOffscreen(self,
             WindowHandle parentWindowHandle):

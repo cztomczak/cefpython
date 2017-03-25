@@ -187,9 +187,9 @@ class CefBrowser(Widget):
         # Start idle - CEF message loop work.
         Clock.schedule_once(self._message_loop_work, 0)
 
-        # CEF needs a valid window handle passed to SetAsOffscreen()
-        # for Printing to work. There is no API to get Kivy's window
-        # handle so creating a dummy hidden Window using GTK.
+        # TODO: For printing to work in off-screen-rendering mode
+        #       it is enough to call gtk_init(). It is not required
+        #       to provide window handle when calling SetAsOffscreen().
         gtkwin = gtk.Window()
         gtkwin.realize()
 

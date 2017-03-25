@@ -27,7 +27,7 @@ Table of contents:
 * [v50+ Build instructions and build tools](#v50-build-instructions-and-build-tools)
 * [v51+ Off-screen-rendering: new option "windowless_rendering_enabled"](#v51-off-screen-rendering-new-option-windowless_rendering_enabled)
 * [v51+ Remove LifespanHandler.RunModal](#v51-remove-lifespanhandlerrunmodal)
-* [v51+: BrowserSettings options removed](#v51-browsersettings-options-removed)
+* [v51+ BrowserSettings options removed](#v51-browsersettings-options-removed)
 * [v51+ cef.Request.Flags changed](#v51-cefrequestflags-changed)
 * [v51+ Request.GetHeaderMap and SetHeaderMap change](#v51-requestgetheadermap-and-setheadermap-change)
 * [v54+ GTK 3 example doesn't work anymore on Linux](#v54-gtk-3-example-doesnt-work-anymore-on-linux)
@@ -157,7 +157,7 @@ http://opensource.spotify.com/cefbuilds/index.html
 
 ## v50+ Build instructions and build tools
 
-Many changes in regards to building CEF and CEF Python has changed.
+There were many changes in regards to building CEF and CEF Python.
 There are now new tools in the tools/ root directory that fully
 automate building CEF and CEF Python. CEF Python now provides
 upstream CEF prebuilt binaries and libraries on GitHub Releases
@@ -180,7 +180,7 @@ API ref: ApplicationSettings.[windowless_rendering_enabled](../api/ApplicationSe
 LifespanHandler.RunModal callback is no more available.
 
 
-## v51+: BrowserSettings options removed
+## v51+ BrowserSettings options removed
 
 The following options were removed from BrowserSettings:
 - user_style_sheet_location

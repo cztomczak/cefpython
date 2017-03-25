@@ -49,10 +49,10 @@ def main():
 
 
 def check_versions():
-    print("[gkt2.py] CEF Python {ver}".format(ver=cef.__version__))
-    print("[gkt2.py] Python {ver} {arch}".format(
+    print("[gtk2.py] CEF Python {ver}".format(ver=cef.__version__))
+    print("[gtk2.py] Python {ver} {arch}".format(
             ver=platform.python_version(), arch=platform.architecture()[0]))
-    print("[gkt2.py] GTK {ver}".format(ver='.'.join(
+    print("[gtk2.py] GTK {ver}".format(ver='.'.join(
                                            map(str, list(gtk.gtk_version)))))
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
     pygtk.require('2.0')
@@ -64,11 +64,11 @@ def configure_message_loop():
         print("[gtk2.py] Force --message-loop-cef flag on Mac")
         sys.argv.append("--message-loop-cef")
     if "--message-loop-cef" in sys.argv:
-        print("[gkt2.py] Message loop mode: CEF (best performance)")
+        print("[gtk2.py] Message loop mode: CEF (best performance)")
         g_message_loop = MESSAGE_LOOP_CEF
         sys.argv.remove("--message-loop-cef")
     else:
-        print("[gkt2.py] Message loop mode: TIMER")
+        print("[gtk2.py] Message loop mode: TIMER")
         g_message_loop = MESSAGE_LOOP_TIMER
 
 

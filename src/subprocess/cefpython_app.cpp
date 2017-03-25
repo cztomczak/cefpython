@@ -9,6 +9,12 @@
 #include "common/cefpython_public_api.h"
 #endif
 
+#if defined(OS_LINUX)
+#include <gtk/gtk.h>
+#include <gdk/gdkx.h>
+#include "print_handler_gtk.h"
+#endif
+
 #include "cefpython_app.h"
 #include "util.h"
 #include "include/wrapper/cef_closure_task.h"
@@ -95,6 +101,13 @@ void CefPythonApp::OnContextInitialized() {
 #ifdef BROWSER_PROCESS
     REQUIRE_UI_THREAD();
 #if defined(OS_LINUX)
+    // For print handler to work GTK must be initialized. This is
+    // required for hello_world.py example to work.
+    GdkDisplay* gdk_display = gdk_display_get_default();
+    if (!gdk_display) {
+        LOG_DEBUG << "Initialize GTK";
+        gtk_init(0, NULL);
+    }
     print_handler_ = new ClientPrintHandlerGtk();
 #endif // OS_LINUX
 #endif // BROWSER_PROCESS

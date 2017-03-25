@@ -15,9 +15,13 @@ from libc.limits cimport UINT_MAX
 
 cdef extern from "include/internal/cef_types.h":
 
+    # noinspection PyUnresolvedReferences
     ctypedef int32_t int32
+    # noinspection PyUnresolvedReferences
     ctypedef uint32_t uint32
+    # noinspection PyUnresolvedReferences
     ctypedef int64_t int64
+    # noinspection PyUnresolvedReferences
     ctypedef uint64_t uint64
 
     IF UNAME_SYSNAME == "Windows":
@@ -96,6 +100,11 @@ cdef extern from "include/internal/cef_types.h":
         int x, y, width, height
         CefRect()
         CefRect(int x, int y, int width, int height)
+
+    cdef cppclass CefSize:
+        int width, height
+        CefSize()
+        CefSize(int width, int height)
 
     cdef cppclass CefPoint:
         pass

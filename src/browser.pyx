@@ -42,7 +42,6 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser,
 
     global g_pyBrowsers
 
-    # This probably ain't needed, but just to be sure.
     if <void*>cefBrowser == NULL or not cefBrowser.get():
         raise Exception("{caller}: CefBrowser reference is NULL"
                         .format(caller=callerIdStr))

@@ -9,6 +9,12 @@
 #ifndef CEFPYTHON_PUBLIC_API_H
 #define CEFPYTHON_PUBLIC_API_H
 
+// Includes required by "cefpython_fixed.h".
+#include "include/cef_client.h"
+#include "include/cef_urlrequest.h"
+#include "include/cef_command_line.h"
+#include "util.h"
+
 #if defined(OS_WIN)
 #pragma warning(disable:4190)  // cefpython API extern C-linkage warnings
 #endif
@@ -23,12 +29,6 @@
 #ifndef DL_EXPORT
 #define DL_EXPORT(RTYPE) RTYPE
 #endif
-
-// Includes required by "cefpython_fixed.h".
-#include "include/cef_client.h"
-#include "include/cef_urlrequest.h"
-#include "include/cef_command_line.h"
-#include "util.h"
 
 #if PY_MAJOR_VERSION == 2
 #if PY_MINOR_VERSION == 7

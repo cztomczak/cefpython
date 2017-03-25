@@ -384,7 +384,7 @@ cdef extern from *:
 # cannot cimport *, that would cause name conflicts with constants
 # noinspection PyUnresolvedReferences
 from cef_types cimport (
-    CefSettings, CefBrowserSettings, CefRect, CefPoint,
+    CefSettings, CefBrowserSettings, CefRect, CefSize, CefPoint,
     CefKeyEvent, CefMouseEvent, CefScreenInfo,
     PathKey, PK_DIR_EXE, PK_DIR_MODULE,
     int32, uint32, int64, uint64,
@@ -433,6 +433,8 @@ from cef_path_util cimport *
 from cef_drag_data cimport *
 from cef_image cimport *
 from main_message_loop cimport *
+# noinspection PyUnresolvedReferences
+from cef_views cimport *
 
 # -----------------------------------------------------------------------------
 # GLOBAL VARIABLES
@@ -775,6 +777,46 @@ def CreateBrowserSync(windowInfo=None,
     assert IsThread(TID_UI), (
             "cefpython.CreateBrowserSync() may only be called on the UI thread")
 
+    """
+    # CEF views
+    # noinspection PyUnresolvedReferences
+    cdef CefRefPtr[CefWindow] cef_window
+    # noinspection PyUnresolvedReferences
+    cdef CefRefPtr[CefBoxLayout] cef_box_layout
+    cdef CefBoxLayoutSettings cef_box_layout_settings
+    cdef CefRefPtr[CefPanel] cef_panel
+    if not windowInfo and browserSettings \
+            and "window_title" in browserSettings:
+        # noinspection PyUnresolvedReferences
+        cef_window = CefWindow.CreateTopLevelWindow(
+                <CefRefPtr[CefWindowDelegate]?>NULL)
+        Debug("CefWindow.GetChildViewCount = "
+              +str(cef_window.get().GetChildViewCount()))
+
+        cef_window.get().CenterWindow(CefSize(800, 600))
+        cef_window.get().SetBounds(CefRect(0, 0, 800, 600))
+        # noinspection PyUnresolvedReferences
+        #cef_box_layout = cef_window.get().SetToBoxLayout(
+        #        cef_box_layout_settings)
+        #cef_box_layout.get().SetFlexForView(cef_window, 1)
+        cef_window.get().SetToFillLayout()
+        # noinspection PyUnresolvedReferences
+        cef_panel = CefPanel.CreatePanel(<CefRefPtr[CefPanelDelegate]?>NULL)
+        cef_window.get().AddChildView(cef_panel)
+        cef_window.get().Layout()
+        cef_window.get().SetVisible(True)
+        cef_window.get().Show()
+        cef_window.get().RequestFocus()
+        windowInfo = WindowInfo()
+        windowInfo.SetAsChild(cef_window.get().GetWindowHandle())
+        Debug("CefWindow handle = "+str(cef_window.get().GetWindowHandle()))
+    """
+
+    # Only title was set in hello_world.py example
+    if windowInfo and not windowInfo.windowType:
+        windowInfo.SetAsChild(0)
+
+    # No window info provided
     if not windowInfo:
         windowInfo = WindowInfo()
         windowInfo.SetAsChild(0)
@@ -831,6 +873,9 @@ def CreateBrowserSync(windowInfo=None,
     else:
         Debug("CefBrowser::CreateBrowserSync() succeeded")
 
+    Debug("CefBrowser window handle = "
+          +str(cefBrowser.get().GetHost().get().GetWindowHandle()))
+
     # Request context - part 2/2.
     if g_applicationSettings["unique_request_context_per_browser"]:
         requestContextHandler.get().SetBrowser(cefBrowser)
@@ -841,6 +886,21 @@ def CreateBrowserSync(windowInfo=None,
     cdef PyBrowser pyBrowser = GetPyBrowser(cefBrowser)
     pyBrowser.SetUserData("__outerWindowHandle",
                           int(windowInfo.parentWindowHandle))
+
+    """
+    if cef_window.get():
+        cef_window.get().ReorderChildView(cef_panel, -1)
+        cef_window.get().Layout()
+        cef_window.get().Show()
+        cef_window.get().RequestFocus()
+    """
+
+    if windowInfo.parentWindowHandle == 0 and windowInfo.windowType == "child":
+        # Set window title in hello_world.py example
+        IF UNAME_SYSNAME == "Linux":
+            pass
+        ELIF UNAME_SYSNAME == "Darwin":
+            pass
 
     return pyBrowser
 

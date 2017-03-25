@@ -19,7 +19,6 @@ cdef PyFrame GetPyFrameById(int browserId, object frameId):
 cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     global g_pyFrames
 
-    # This code probably ain't needed, but just to be sure.
     if <void*>cefFrame == NULL or not cefFrame.get():
         raise Exception("GetPyFrame(): CefFrame reference is NULL")
 

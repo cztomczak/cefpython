@@ -358,6 +358,15 @@ cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
     cdef py_bool returnValue
     cdef object clientCallback
     try:
+        # OnBeforePluginLoad is called from RequestContexthandler.
+        # The Browser object might not be available, because it is
+        # being set synchronously during CreateBrowserSync, after
+        # Browser is created. From testing it always works, however
+        # better be safe.
+        if not browser.get():
+            Debug("WARNING: RequestHandler_OnBeforePluginLoad() failed,"
+                  " Browser object is not available")
+            return False
         py_browser = GetPyBrowser(browser, "OnBeforePluginLoad")
         py_plugin_info = CreatePyWebPluginInfo(plugin_info)
         clientCallback = GetGlobalClientCallback("OnBeforePluginLoad")

@@ -6,10 +6,6 @@
 #include "include/cef_app.h"
 #include "include/cef_print_handler.h"
 
-#if defined(OS_LINUX)
-#include "print_handler_gtk.h"
-#endif
-
 #include <map>
 
 // CefPythonApp class is instantiated in subprocess and in
