@@ -813,7 +813,8 @@ def CreateBrowserSync(windowInfo=None,
         cef_window.get().RequestFocus()
         windowInfo = WindowInfo()
         windowInfo.SetAsChild(cef_window.get().GetWindowHandle())
-        Debug("CefWindow handle = "+str(cef_window.get().GetWindowHandle()))
+        Debug("CefWindow handle = "
+              +str(<uintptr_t>cef_window.get().GetWindowHandle()))
     """
 
     # Only title was set in hello_world.py example
@@ -881,7 +882,7 @@ def CreateBrowserSync(windowInfo=None,
         Debug("CefBrowser::CreateBrowserSync() succeeded")
 
     Debug("CefBrowser window handle = "
-          +str(cefBrowser.get().GetHost().get().GetWindowHandle()))
+          +str(<uintptr_t>cefBrowser.get().GetHost().get().GetWindowHandle()))
 
     # Request context - part 2/2.
     if g_applicationSettings["unique_request_context_per_browser"]:
@@ -910,7 +911,8 @@ def CreateBrowserSync(windowInfo=None,
             x11.SetX11WindowTitle(cefBrowser,
                                   PyStringToChar(windowInfo.windowName))
         ELIF UNAME_SYSNAME == "Darwin":
-            pass
+            MacSetWindowTitle(cefBrowser,
+                              PyStringToChar(windowInfo.windowName))
 
     return pyBrowser
 

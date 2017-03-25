@@ -8,7 +8,9 @@
 #include <string>
 #include "include/cef_base.h"
 #include "include/cef_app.h"
+#include "include/cef_browser.h"
 
 void MacInitialize();
+void MacSetWindowTitle(CefRefPtr<CefBrowser> browser, char* title);
 
 #endif  // CEFPYTHON_UTIL_MAC_H_

@@ -66,7 +66,8 @@ void MacInitialize() {
     [NSApplication sharedApplication];
 }
 
-void MacSetTitle(CefRefPtr<CefBrowser> browser, char* title) {
+void MacSetWindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
     NSView* view = browser->GetHost()->GetWindowHandle();
-    view.window!.title = title;
+    NSString* nstitle = [NSString stringWithFormat:@"%s" , title];
+    view.window.title = nstitle;
 }
