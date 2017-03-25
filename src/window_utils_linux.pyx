@@ -4,9 +4,6 @@
 
 include "cefpython.pyx"
 
-IF UNAME_SYSNAME == "Linux":
-    cimport x11
-
 class WindowUtils:
     # You have to overwrite this class and provide implementations
     # for these methods.

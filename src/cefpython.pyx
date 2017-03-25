@@ -376,6 +376,9 @@ ELIF UNAME_SYSNAME == "Darwin":
 from cpp_utils cimport *
 from task cimport *
 
+IF UNAME_SYSNAME == "Linux":
+    cimport x11
+
 from cef_string cimport *
 cdef extern from *:
     # noinspection PyUnresolvedReferences
@@ -764,6 +767,7 @@ def CreateBrowser(**kwargs):
 def CreateBrowserSync(windowInfo=None,
                       browserSettings=None,
                       navigateUrl="",
+                      window_title="",
                       **kwargs):
     # Alternative names for existing parameters
     if "window_info" in kwargs:
@@ -822,6 +826,9 @@ def CreateBrowserSync(windowInfo=None,
         windowInfo.SetAsChild(0)
     elif not isinstance(windowInfo, WindowInfo):
         raise Exception("CreateBrowserSync() failed: windowInfo: invalid object")
+
+    if window_title and windowInfo.parentWindowHandle == 0:
+        windowInfo.windowName = window_title
 
     if not browserSettings:
         browserSettings = {}
@@ -895,10 +902,13 @@ def CreateBrowserSync(windowInfo=None,
         cef_window.get().RequestFocus()
     """
 
-    if windowInfo.parentWindowHandle == 0 and windowInfo.windowType == "child":
+    if windowInfo.parentWindowHandle == 0\
+            and windowInfo.windowType == "child"\
+            and windowInfo.windowName:
         # Set window title in hello_world.py example
         IF UNAME_SYSNAME == "Linux":
-            pass
+            x11.SetX11WindowTitle(cefBrowser,
+                                  PyStringToChar(windowInfo.windowName))
         ELIF UNAME_SYSNAME == "Darwin":
             pass
 

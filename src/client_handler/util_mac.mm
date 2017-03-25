@@ -7,6 +7,7 @@
 #include <objc/runtime.h>
 #include "include/cef_app.h"
 #include "include/cef_application_mac.h"
+#include "include/cef_browser.h"
 
 namespace {
 
@@ -63,4 +64,9 @@ BOOL g_handling_send_event = false;
 
 void MacInitialize() {
     [NSApplication sharedApplication];
+}
+
+void MacSetTitle(CefRefPtr<CefBrowser> browser, char* title) {
+    NSView* view = browser->GetHost()->GetWindowHandle();
+    view.window!.title = title;
 }

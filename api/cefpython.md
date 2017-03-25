@@ -48,22 +48,20 @@ synchronously. The async call to CefCreateBrowser is yet TODO.
 | window_info | [WindowInfo](WindowInfo.md) |
 | [settings](BrowserSettings.md) | [BrowserSettings](BrowserSettings.md) |
 | url | string |
-| request_context | void |
+| window_title | string |
 | __Return__ | [Browser](Browser.md) |
 
-This function should only be called on the UI thread. The 'request_context' parameter is not yet implemented. You must first create a window and initialize 'window_info' by calling WindowInfo.SetAsChild().
+All parameters are optional.
 
-After the call to CreateBrowserSync() the page is not yet loaded, if you want your next lines of code to do some stuff on the webpage you will have to implement [LoadHandler](LoadHandler.md).OnLoadEnd() callback, see example below:
+This function can only be called on the UI thread.
 
-```python
-def OnLoadEnd(browser, frame, httpCode):
-    if frame == browser.GetMainFrame():
-        print("Finished loading main frame: %s (http code = %d)"
-              % (frame.GetUrl(), httpCode))
+The "window_title" parameter will be used only
+when parent window provided in window_info was set to 0.
 
-browser = cefpython.CreateBrowserSync(windowInfo, settings, url)
-browser.SetClientCallback("OnLoadEnd", OnLoadEnd)
-```
+After the call to CreateBrowserSync() the page is not yet loaded,
+if you want your next lines of code to do some stuff on the webpage
+you will have to implement LoadHandler.[OnLoadEnd]((LoadHandler.md#onloadend))
+callback.
 
 
 ### ExceptHook
