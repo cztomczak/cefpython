@@ -115,7 +115,7 @@ On Linux and Mac this method always returns True. @TODO.
 | long GdkNativeWindow | long |
 | __Return__ | void |
 
-Linux-only. This method is utilized in the PyQt example.
+Linux-only.
 
 
 ### gtk_widget_show (Linux)
@@ -125,7 +125,7 @@ Linux-only. This method is utilized in the PyQt example.
 | long GtkWidget* | long |
 | __Return__ | void |
 
-Linux-only. This method is utilized in the PyQt example.
+Linux-only.
 
 
 ### InstallX11ErrorHandlers (Linux)
@@ -139,4 +139,5 @@ won't be terminated on non-fatal errors. Must be done after
 initializing GTK.
 
 CEF Python calls this function automatically during a call to
-Initialize, so there is no need to call it manually anymore.
+Initialize, so there is no more need to call it manually in
+most cases.

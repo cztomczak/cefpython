@@ -133,10 +133,7 @@ cdef void SetBrowserSettings(
     cdef CefString* cefString
 
     for key in browserSettings:
-        if key == "window_title":
-            # CEF Python only options. These are not to be found in CEF.
-            continue
-        elif key == "accept_language_list":
+        if key == "accept_language_list":
             cefString = new CefString(&cefBrowserSettings.accept_language_list)
             PyToCefStringPointer(browserSettings[key], cefString)
             del cefString
