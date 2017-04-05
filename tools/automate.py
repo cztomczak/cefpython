@@ -30,7 +30,7 @@ Usage:
                 [--force-chromium-update FORCE_CHROMIUM_UPDATE]
                 [--no-cef-update NO_CEF_UPDATE]
                 [--cef-branch BRANCH] [--cef-commit COMMIT]
-                [--build-dir BUILD_DIR] [--cef-build-dir CEF_BUIL_DDIR]
+                [--build-dir BUILD_DIR] [--cef-build-dir CEF_BUILD_DIR]
                 [--ninja-jobs JOBS] [--gyp-generators GENERATORS]
                 [--gyp-msvs-version MSVS]
     automate.py (-h | --help) [type -h to show full description for options]
@@ -900,7 +900,7 @@ def run_command(command, working_dir, env=None):
         env = getenv()
     # When passing list of args shell cannot be True on eg. Linux, read
     # notes in build.py
-    shell=(platform.system() == "Windows")
+    shell = (platform.system() == "Windows")
     return subprocess.check_call(args, cwd=working_dir, env=env, shell=shell)
 
 

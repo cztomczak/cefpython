@@ -9,10 +9,13 @@
 #include "common/cefpython_public_api.h"
 #endif
 
-#if defined(OS_LINUX)
+#ifdef BROWSER_PROCESS
+#ifdef OS_LINUX
 #include <gtk/gtk.h>
+#include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 #include "print_handler_gtk.h"
+#endif
 #endif
 
 #include "cefpython_app.h"
@@ -133,6 +136,7 @@ void CefPythonApp::OnRenderProcessThreadCreated(
 }
 
 CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
+#ifdef BROWSER_PROCESS
 #if defined(OS_LINUX)
     // For print handler to work GTK must be initialized. This is
     // required for some of the examples.
@@ -141,6 +145,7 @@ CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
         LOG_DEBUG << "Initialize GTK";
         gtk_init(0, NULL);
     }
+#endif
 #endif
     return print_handler_;
 }

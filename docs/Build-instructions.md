@@ -183,7 +183,7 @@ requirements common for all platforms.
 
 ### Linux
 
-* Install packages: `sudo apt-get install python-dev cmake g++ libgtk2.0-dev libgtkglext1-dev`
+* Install packages: `sudo apt-get install cmake g++ libgtk2.0-dev libgtkglext1-dev`
 * If building CEF from sources:
     * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
     * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
@@ -200,11 +200,8 @@ requirements common for all platforms.
       [cef/BuildingOnDebian7.md](https://bitbucket.org/chromiumembedded/cef/wiki/BuildingOnDebian7.md) and
       [cef/#1575](https://bitbucket.org/chromiumembedded/cef/issues/1575),
       and [cef/#1697](https://bitbucket.org/chromiumembedded/cef/issues/1697)
-* If building CEF from sources, 32-bit on 64-bit machine:
-    * Follow the configuration [here](https://bitbucket.org/chromiumembedded/cef/wiki/AutomatedBuildSetup.md#markdown-header-linux-configuration)
-    * To perform a 32-bit Linux build on a 64-bit Linux system see
-      Linux configuration in upstream cef/AutomatedBuildSetup.md. See also
-      [cef/#1804](https://bitbucket.org/chromiumembedded/cef/issues/1804).
+* Building CEF 32-bit is only possible using cross-compiling on
+  64-bit machine. See [Issue #328](https://github.com/cztomczak/cefpython/issues/328).
 * Sometimes it is also required to install these packages (eg. chroot):
   `sudo apt-get install libnss3 libnspr4 libxss1 libgconf-2-4`
 
