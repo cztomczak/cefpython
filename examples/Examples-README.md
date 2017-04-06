@@ -39,6 +39,11 @@ maintained:
 If there are any issues in examples read top comments in sources
 to see whether this is a known issue with available workarounds.
 
+**Unit tests**
+
+There are also available unit tests and its usage of the API can
+be of some use. See [main_test.py](../unittests/main_test.py).
+
 
 ## More examples
 

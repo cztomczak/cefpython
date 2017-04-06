@@ -32,7 +32,7 @@ cpdef str GetModuleDirectory():
 
 g_GetAppPath_dir = None
 
-cpdef str GetAppPath(file=None):
+cpdef str GetAppPath(file_=None):
     """Get application path."""
     # On Windows after downloading file and calling Browser.GoForward(),
     # current working directory is set to %UserProfile%.
@@ -47,49 +47,46 @@ cpdef str GetAppPath(file=None):
         global g_GetAppPath_dir
         g_GetAppPath_dir = adir
     # If file is None return current directory without trailing slash.
-    if file is None:
-        file = ""
+    if file_ is None:
+        file_ = ""
     # Only when relative path.
-    if not file.startswith("/") and not file.startswith("\\") and (
-            not re.search(r"^[\w-]+:", file)):
-        path = g_GetAppPath_dir + os.sep + file
+    if not file_.startswith("/") and not file_.startswith("\\") and (
+            not re.search(r"^[\w-]+:", file_)):
+        path = g_GetAppPath_dir + os.sep + file_
         if platform.system() == "Windows":
             path = re.sub(r"[/\\]+", re.escape(os.sep), path)
         path = re.sub(r"[/\\]+$", "", path)
         return path
-    return str(file)
+    return str(file_)
 
 
-cpdef py_void ExceptHook(excType, excValue, traceObject):
-    """Global except hook to exit app cleanly on error."""
-    # This hook does the following: in case of exception write it to
-    # the "error.log" file, display it to the console, shutdown CEF
-    # and exit application immediately by ignoring "finally" (_exit()).
-    print("[CEF Python] ExceptHook: catched exception, will shutdown CEF now")
+def ExceptHook(exc_type, exc_value, exc_trace):
+    """Global except hook to exit app cleanly on error.
+    This hook does the following: in case of exception write it to
+    the "error.log" file, display it to the console, shutdown CEF
+    and exit application immediately by ignoring "finally" (_exit()).
+    """
+    print("[CEF Python] ExceptHook: catched exception, will shutdown CEF")
     QuitMessageLoop()
     Shutdown()
-    print("[CEF Python] ExceptHook: see the catched exception below:")
-    errorMsg = "".join(traceback.format_exception(excType, excValue,
-            traceObject))
-    errorFile = GetAppPath("error.log")
+    msg = "".join(traceback.format_exception(exc_type, exc_value,
+                                             exc_trace))
+    error_file = GetAppPath("error.log")
+    encoding = GetAppSetting("string_encoding") or "utf-8"
+    if type(msg) == bytes:
+        msg = msg.decode(encoding=encoding, errors="replace")
     try:
-        appEncoding = g_applicationSettings["string_encoding"]
-    except:
-        appEncoding = "utf-8"
-    if type(errorMsg) == bytes:
-        errorMsg = errorMsg.decode(encoding=appEncoding, errors="replace")
-    try:
-        with codecs.open(errorFile, mode="a", encoding=appEncoding) as fp:
+        with codecs.open(error_file, mode="a", encoding=encoding) as fp:
             fp.write("\n[%s] %s\n" % (
-                    time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
+                    time.strftime("%Y-%m-%d %H:%M:%S"), msg))
     except:
         print("[CEF Python] WARNING: failed writing to error file: %s" % (
-                errorFile))
+                error_file))
     # Convert error message to ascii before printing, otherwise
     # you may get error like this:
     # | UnicodeEncodeError: 'charmap' codec can't encode characters
-    errorMsg = errorMsg.encode("ascii", errors="replace")
-    errorMsg = errorMsg.decode("ascii", errors="replace")
-    print("\n"+errorMsg)
+    msg = msg.encode("ascii", errors="replace")
+    msg = msg.decode("ascii", errors="replace")
+    print("\n"+msg)
     # noinspection PyProtectedMember
     os._exit(1)

@@ -29,12 +29,6 @@ In CEF 3 communication between javascript and python can only be asynchronous. I
 There are plans to support binding data by reference (a list, dict or object's properties). This would be possible with the use of CefRegisterExtension().
 
 
-## Example usage
-
-See the [wxpython.py](../src/windows/binaries_32bit/wxpython.py) example for an example usage of javascript bindings, javascript callbacks and python callbacks.
-
-
-
 ## Methods
 
 

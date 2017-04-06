@@ -45,6 +45,11 @@ also download packages for offline installation available on the
 pip install cefpython3==56.1
 ```
 
+## Tutorial
+
+See the [Tutorial.md](docs/Tutorial.md) file.
+
+
 ## Examples
 
 See the [Examples-README.md](examples/Examples-README.md) file.
@@ -53,8 +58,15 @@ See the [Examples-README.md](examples/Examples-README.md) file.
 ## Support
 
 - Ask questions, report problems and issues on the [Forum](https://groups.google.com/group/cefpython)
-- Documentation is in the [docs/](docs) directory
-- API reference is in the [api/](api) directory
+- Supported examples are listed in the [Examples-README.md](examples/Examples-README.md) file
+- Documentation is in the [docs/](docs) directory:
+  - [Build instructions](docs/Build-instructions.md)
+  - [Knowledge base](docs/Knowledge-Base.md)
+  - [Migration guide](docs/Migration-guide.md)
+  - [Tutorial](docs/Tutorial.md)
+- API reference is in the [api/](api) directory:
+  - [API categories](api/API-categories.md#api-categories)
+  - [API index](api/API-index.md#api-index)
 - Additional documentation is in issues labelled [Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
 - To search documentation use GitHub "This repository" search
   at the top. To narrow results to documentation only select

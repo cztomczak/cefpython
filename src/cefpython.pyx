@@ -593,9 +593,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if "settings" in kwargs:
         assert not applicationSettings, "Bad arguments"
         application_settings = kwargs["settings"]
+        del kwargs["settings"]
     if "switches" in kwargs:
         assert not command_line_switches, "Bad arguments"
         command_line_switches = kwargs["switches"]
+        del kwargs["switches"]
+    for kwarg in kwargs:
+        raise Exception("Invalid argument: "+kwarg)
 
     IF UNAME_SYSNAME == "Linux":
         # Fix Issue #231 - Discovery of the "icudtl.dat" file fails on Linux.
@@ -772,10 +776,15 @@ def CreateBrowserSync(windowInfo=None,
     # Alternative names for existing parameters
     if "window_info" in kwargs:
         windowInfo = kwargs["window_info"]
+        del kwargs["window_info"]
     if "settings" in kwargs:
         browserSettings = kwargs["settings"]
+        del kwargs["settings"]
     if "url" in kwargs:
         navigateUrl = kwargs["url"]
+        del kwargs["url"]
+    for kwarg in kwargs:
+        raise Exception("Invalid argument: "+kwarg)
 
     Debug("CreateBrowserSync() called")
     assert IsThread(TID_UI), (

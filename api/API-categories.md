@@ -36,7 +36,7 @@
  * [WindowUtils](WindowUtils.md#windowutils-class) class
 
 
-### Handlers (interfaces)
+### Client handlers (interfaces)
 
  * [DisplayHandler](DisplayHandler.md#displayhandler-interface)
  * [DownloadHandler](DownloadHandler.md#downloadhandler)

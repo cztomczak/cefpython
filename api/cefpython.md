@@ -55,12 +55,14 @@ All parameters are optional.
 
 This function can only be called on the UI thread.
 
-The "window_title" parameter will be used only
-when parent window provided in window_info was set to 0.
+The "window_title" parameter will be used only when parent
+window provided in window_info was set to 0. This is for use
+with hello_world.py and tutorial.py examples which don't use
+any third party GUI framework for creation of top-level window.
 
 After the call to CreateBrowserSync() the page is not yet loaded,
-if you want your next lines of code to do some stuff on the webpage
-you will have to implement LoadHandler.[OnLoadEnd]((LoadHandler.md#onloadend))
+if you want your next lines of code to do some stuff on the
+webpage you will have to implement LoadHandler.[OnLoadingStateChange]((LoadHandler.md#onloadingstatechange))
 callback.
 
 
@@ -68,10 +70,10 @@ callback.
 
 | Parameter | Type |
 | --- | --- |
-| excType | - |
-| excValue | - |
-| traceObject | - |
-| __Return__ | string |
+| exc_type | - |
+| exc_value | - |
+| exc_trace | - |
+| __Return__ | void |
 
 Global except hook to exit app cleanly on error. CEF has a multiprocess
 architecture and when exiting you need to close all processes (main Browser
@@ -99,6 +101,7 @@ to Initialize(). Returns None if key is not found.
 
 | | |
 | --- | --- |
+| file_ (optional) | string |
 | __Return__ | string |
 
 Get path to where application resides.
@@ -181,18 +184,7 @@ Returns true if called on the specified thread.
 
 CEF maintains multiple internal threads that are used for handling different types of tasks. The UI thread creates the browser window and is used for all interaction with the webkit rendering engine and V8 Javascript engine. The UI thread will be the same as the main application thread if CefInitialize() is called with an [ApplicationSettings](ApplicationSettings.md) 'multi_threaded_message_loop' option set to false. The IO thread is used for handling schema and network requests. The FILE thread is used for the application cache and other miscellaneous activities.
 
-List of threads in the Browser process. These are constants defined in the cefpython module:
-
-* TID_UI: The main thread in the browser. This will be the same as the main application thread if cefpython.Initialize() is called with a ApplicationSettings.multi_threaded_message_loop value of false.
-* TID_DB: Used to interact with the database.
-* TID_FILE: Used to interact with the file system.
-* TID_FILE_USER_BLOCKING: Used for file system operations that block user interactions. Responsiveness of this thread affects users.
-* TID_PROCESS_LAUNCHER: Used to launch and terminate browser processes.
-* TID_CACHE: Used to handle slow HTTP cache operations.
-* TID_IO: Used to process IPC and network messages.
-
-List of threads in the Renderer process:
-* TID_RENDERER: The main thread in the renderer. Used for all webkit and V8 interaction.
+See PostTask() for a list of threads.
 
 
 ### MessageLoop
@@ -244,9 +236,22 @@ Description from upstream CEF:
 | ... | *args |
 | __Return__ | void |
 
-Post a task for execution on the thread associated with this task runner. Execution will occur asynchronously. Only Browser process threads are allowed, see IsThread() for a list of available threads and their descriptions.
+Post a task for execution on the thread associated with this task runner. Execution will occur asynchronously. Only Browser process threads are allowed.
 
 An example usage is in the wxpython.py example on Windows, in implementation of LifespanHandler.OnBeforePopup().
+
+List of threads in the Browser process:
+* cef.TID_UI: The main thread in the browser. This will be the same as the main application thread if cefpython.Initialize() is called with a ApplicationSettings.multi_threaded_message_loop value of false.
+* cef.TID_DB: Used to interact with the database.
+* cef.TID_FILE: Used to interact with the file system.
+* cef.TID_FILE_USER_BLOCKING: Used for file system operations that block user interactions. Responsiveness of this thread affects users.
+* cef.TID_PROCESS_LAUNCHER: Used to launch and terminate browser processes.
+* cef.TID_CACHE: Used to handle slow HTTP cache operations.
+* cef.TID_IO: Used to process IPC and network messages.
+
+List of threads in the Renderer process:
+* cef.TID_RENDERER: The main thread in the renderer. Used for all webkit and V8 interaction.
+
 
 
 ### QuitMessageLoop
