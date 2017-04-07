@@ -157,7 +157,7 @@ The cef.ExceptHook helper function does the following:
    which exits the process with status 1, without calling
    cleanup handlers, flushing stdio buffers, etc.
 
-See CEF Python's ExceptHook source code [here](../../../search?utf8=%E2%9C%93&q=%22def+excepthook%28exc_type%22&type=).
+See CEF Python's ExceptHook source code in src/[helpers.pyx](../src/helpers.pyx).
 
 
 ## Message loop
@@ -322,10 +322,17 @@ def set_client_handlers(browser):
 ...
 class LoadHandler(object):
     def OnLoadingStateChange(self, browser, is_loading, **_):
+        # Issue #344 will fix this in next release, so that client
+        # handlers are not called for Developer Tools windows.
+        if browser.GetUrl().startswith("chrome-devtools://"):
+            return
+        # This callback is called twice, once when loading starts
+        # (is_loading=True) and second time when loading ends
+        # (is_loading=False).
         if not is_loading:
-            # Loading is complete
-            js_print(browser, "Python: LoadHandler.OnLoadingStateChange:"
-                              "loading is complete")
+            # Loading is complete. DOM is ready.
+            js_print(browser, "Python", "OnLoadingStateChange",
+                     "Loading is complete")
 ```
 
 
@@ -372,12 +379,43 @@ messaging:
    however pass Python functions when executing javascript
    callbacks mentioned earlier.
 
-In tutorial.py example you will find example code that uses
-javascript bindings and other APIs mentioned above.
+In [tutorial.py](../examples/tutorial.py) example you will find
+example usage of javascript bindings, javascript callbacks
+and python callbacks. Here is some source code:
 
+```
+set_javascript_bindings(browser)
 ...
+def set_javascript_bindings(browser):
+    bindings = cef.JavascriptBindings(
+            bindToFrames=False, bindToPopups=False)
+    bindings.SetFunction("html_to_data_uri", html_to_data_uri)
+    browser.SetJavascriptBindings(bindings)
 ...
-
+def html_to_data_uri(html, js_callback=None):
+    # This function is called in two ways:
+    # 1. From Python: in this case value is returned
+    # 2. From Javascript: in this case value cannot be returned because
+    #    inter-process messaging is asynchronous, so must return value
+    #    by calling js_callback.
+    html = html.encode("utf-8", "replace")
+    b64 = base64.b64encode(html).decode("utf-8", "replace")
+    ret = "data:text/html;base64,{data}".format(data=b64)
+    if js_callback:
+        js_print(js_callback.GetFrame().GetBrowser(),
+                 "Python", "html_to_data_uri",
+                 "Called from Javascript. Will call Javascript callback now.")
+        js_callback.Call(ret)
+    else:
+        return ret
+...
+<script>
+function js_callback_1(ret) {
+    js_print("Javascript", "html_to_data_uri", ret);
+}
+html_to_data_uri("test", js_callback_1);
+</script>
+```
 
 **Communication using http requests**
 

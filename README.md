@@ -3,6 +3,7 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Install](#install)
+* [Tutorial](#tutorial)
 * [Examples](#examples)
 * [Support](#support)
 * [Releases](#releases)

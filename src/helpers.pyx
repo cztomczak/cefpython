@@ -12,6 +12,38 @@ import time
 import codecs
 
 
+def ExceptHook(exc_type, exc_value, exc_trace):
+    """Global except hook to exit app cleanly on error.
+    This hook does the following: in case of exception write it to
+    the "error.log" file, display it to the console, shutdown CEF
+    and exit application immediately by ignoring "finally" (_exit()).
+    """
+    print("[CEF Python] ExceptHook: catched exception, will shutdown CEF")
+    QuitMessageLoop()
+    Shutdown()
+    msg = "".join(traceback.format_exception(exc_type, exc_value,
+                                             exc_trace))
+    error_file = GetAppPath("error.log")
+    encoding = GetAppSetting("string_encoding") or "utf-8"
+    if type(msg) == bytes:
+        msg = msg.decode(encoding=encoding, errors="replace")
+    try:
+        with codecs.open(error_file, mode="a", encoding=encoding) as fp:
+            fp.write("\n[%s] %s\n" % (
+                    time.strftime("%Y-%m-%d %H:%M:%S"), msg))
+    except:
+        print("[CEF Python] WARNING: failed writing to error file: %s" % (
+                error_file))
+    # Convert error message to ascii before printing, otherwise
+    # you may get error like this:
+    # | UnicodeEncodeError: 'charmap' codec can't encode characters
+    msg = msg.encode("ascii", errors="replace")
+    msg = msg.decode("ascii", errors="replace")
+    print("\n"+msg)
+    # noinspection PyProtectedMember
+    os._exit(1)
+
+
 cpdef str GetModuleDirectory():
     """Get path to the cefpython module (so/pyd)."""
     if platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):
@@ -58,35 +90,3 @@ cpdef str GetAppPath(file_=None):
         path = re.sub(r"[/\\]+$", "", path)
         return path
     return str(file_)
-
-
-def ExceptHook(exc_type, exc_value, exc_trace):
-    """Global except hook to exit app cleanly on error.
-    This hook does the following: in case of exception write it to
-    the "error.log" file, display it to the console, shutdown CEF
-    and exit application immediately by ignoring "finally" (_exit()).
-    """
-    print("[CEF Python] ExceptHook: catched exception, will shutdown CEF")
-    QuitMessageLoop()
-    Shutdown()
-    msg = "".join(traceback.format_exception(exc_type, exc_value,
-                                             exc_trace))
-    error_file = GetAppPath("error.log")
-    encoding = GetAppSetting("string_encoding") or "utf-8"
-    if type(msg) == bytes:
-        msg = msg.decode(encoding=encoding, errors="replace")
-    try:
-        with codecs.open(error_file, mode="a", encoding=encoding) as fp:
-            fp.write("\n[%s] %s\n" % (
-                    time.strftime("%Y-%m-%d %H:%M:%S"), msg))
-    except:
-        print("[CEF Python] WARNING: failed writing to error file: %s" % (
-                error_file))
-    # Convert error message to ascii before printing, otherwise
-    # you may get error like this:
-    # | UnicodeEncodeError: 'charmap' codec can't encode characters
-    msg = msg.encode("ascii", errors="replace")
-    msg = msg.decode("ascii", errors="replace")
-    print("\n"+msg)
-    # noinspection PyProtectedMember
-    os._exit(1)

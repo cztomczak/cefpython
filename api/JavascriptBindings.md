@@ -6,7 +6,6 @@
 
 Table of contents:
 * [Introduction](#introduction)
-* [Example usage](#example-usage)
 * [Methods](#methods)
   * [\_\_init\_\_()](#__init__)
   * [IsValueAllowed](#isvalueallowed)

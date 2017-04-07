@@ -101,8 +101,8 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser,
         # - Popups inherit javascript bindings only when "bindToPopups"
         #   constructor param was set to True.
 
-        if pyBrowser.IsPopup() and \
-                not pyBrowser.GetUserData("__outerWindowHandle"):
+        if pyBrowser.IsPopup()\
+                and not pyBrowser.GetUserData("__outerWindowHandle"):
             openerHandle = pyBrowser.GetOpenerWindowHandle()
             for identifier, tempPyBrowser in g_pyBrowsers.items():
                 if tempPyBrowser.GetWindowHandle() == openerHandle:
@@ -457,12 +457,10 @@ cdef class PyBrowser:
             window_info.SetAsPopup(
                     <CefWindowHandle>self.GetOpenerWindowHandle(),
                     PyToCefStringValue("DevTools"))
-        cdef CefRefPtr[ClientHandler] client_handler =\
-                <CefRefPtr[ClientHandler]?>new ClientHandler()
         cdef CefBrowserSettings settings
         cdef CefPoint inspect_element_at
         self.GetCefBrowserHost().get().ShowDevTools(
-                window_info, <CefRefPtr[CefClient]?>client_handler, settings,
+                window_info, <CefRefPtr[CefClient]?>NULL, settings,
                 inspect_element_at)
 
     cpdef py_void StopLoad(self):
