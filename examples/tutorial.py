@@ -1,4 +1,4 @@
-# Tutorial example.
+# Tutorial example. Doesn't depend on any third party GUI framework.
 # Tested with CEF Python v56.1+
 
 from cefpython3 import cefpython as cef

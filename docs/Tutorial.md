@@ -36,7 +36,7 @@ Run the commands below to install the cefpython3 package, clone
 the github repository, enter the examples/ directory and run the
 Hello World example:
 
-```
+```commandline
 pip install cefpython3==56.1
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/examples/
@@ -142,7 +142,7 @@ must be called and if running CEF message loop then it must be
 stopped first. In all CEF Python examples you can find such
 a line that overwrites the default exception handler in Python:
 
-```
+```python
 sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
 ```
 
@@ -187,7 +187,7 @@ an external message pump for best performance.
 
 On Windows for best performance a multi-threaded message loop should
 be used instead of cef.MessageLoopWork() or external message pump. To do
-so, set ApplicationSettings.[multi_threaded_message_loop](../ApplicationSettings.md#multi_threaded_message_loop)
+so, set ApplicationSettings.[multi_threaded_message_loop](../api/ApplicationSettings.md#multi_threaded_message_loop)
 to True and run a native message loop in your app. Don't call CEF's
 message loop. Create browser using `cef.PostTask(cef.TID_UI, cef.CreateBrowserSync, ...)`.
 Note that when using multi-threaded message loop, CEF's UI thread
@@ -242,7 +242,7 @@ Here are some settings worth noting:
   for localized resources
 
 To enable debugging set these settings:
-```
+```python
 settings = {
     "debug": True,
     "log_severity": cef.LOGSEVERITY_WARNING,
@@ -270,7 +270,7 @@ Examples switches:
 
 Example code:
 
-```
+```python
 switches = {
     "enable-media-stream": "",
     "proxy-server": "socks5://127.0.0.1:8888",
@@ -310,9 +310,10 @@ underscore in its name.
 The [tutorial.py](../examples/tutorial.py) example shows how to
 implement client handlers like [DisplayHandler](../api/DisplayHandler.md)
 and [LoadHandler](../api/LoadHandler.md). It also shows how to
-implement a global client callback LifespanHandler.[_OnAfterCreated](../api/LifespanHandler.md#_onaftercreated). Here is some source code:
+implement a global client callback LifespanHandler.[_OnAfterCreated](../api/LifespanHandler.md#_onaftercreated). Here is part of its
+source code:
 
-```
+```python
 set_client_handlers(browser)
 ...
 def set_client_handlers(browser):
@@ -350,7 +351,7 @@ Python and Javascript can communicate using inter-process
 messaging:
  - Use the [JavascriptBindings](../api/JavascriptBindings.md)
    class methods to to expose Python functions, objects and properties
-   to Javascript: [SetFunction](../api/JavascriptBindings.md#setfunctions),
+   to Javascript: [SetFunction](../api/JavascriptBindings.md#setfunction),
    [SetObject](../api/JavascriptBindings.md#setobject)
    and [SetProperty](../api/JavascriptBindings.md#setproperty)
  - To initiate communication from the Python side call
@@ -381,9 +382,9 @@ messaging:
 
 In [tutorial.py](../examples/tutorial.py) example you will find
 example usage of javascript bindings, javascript callbacks
-and python callbacks. Here is some source code:
+and python callbacks. Here is part of its source code:
 
-```
+```python
 set_javascript_bindings(browser)
 ...
 def set_javascript_bindings(browser):

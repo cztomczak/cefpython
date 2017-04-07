@@ -25,6 +25,7 @@ maintained:
 
 - [hello_world.py](hello_world.py): basic example, doesn't require any
   third party GUI framework to run
+- [tutorial.py](tutorial.py): example from [Tutorial](../docs/Tutorial.md)
 - [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
   library (GTK 2)
 - [gtk3.py](gtk3.py): example for [PyGObject/PyGI](https://wiki.gnome.org/Projects/PyGObject)
