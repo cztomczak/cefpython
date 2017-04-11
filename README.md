@@ -28,7 +28,7 @@ There are many use cases for CEF. You can embed a web browser control
 based on Chromium with great HTML 5 support. You can use it to create
 a HTML 5 based GUI in an application, this can act as a replacement for
 standard GUI toolkits such as wxWidgets, Qt or GTK. In such case to
-communicate between Python<>Javascript use [javascript bindings](api/JavascriptBindings.md)
+communicate between Python<>Javascript use [javascript bindings](docs/Tutorial.md#javascript-integration)
 or embed an internal web server and talk using http requests. You
 can render web content off-screen in applications that use custom
 drawing frameworks. You can use it for automated testing of existing

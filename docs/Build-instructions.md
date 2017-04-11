@@ -22,8 +22,7 @@ Table of contents:
 ## Preface
 
 These instructions are for the new releases of CEF Python v50+.
-For the old v31 release that is supported on all platforms, see
-the build instructions on the wiki pages.
+For the old v31 release see the build instructions on Wiki pages.
 
 If you would like to quickly build cefpython then see the
 [Quick build instructions for Windows](#quick-build-instructions-for-windows)

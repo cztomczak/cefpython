@@ -27,10 +27,10 @@ Table of contents:
 
 | Parameter | Type |
 | --- | --- |
-| [params..] | mixed |
-| __Return__ | mixed |
+| [params..] (optional) | mixed |
+| __Return__ | void |
 
-Call the javascript callback function.
+Call the javascript callback function. Pass arguments optionally.
 
 For a list of allowed types for `mixed` see JavascriptBindings.[IsValueAllowed()](JavascriptBindings.md#isvalueallowed).
 

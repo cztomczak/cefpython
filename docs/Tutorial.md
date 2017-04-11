@@ -268,7 +268,8 @@ Examples switches:
 - "proxy-server" - to set proxy server
 - "disable-gpu" - use only CPU software rendering
 
-Example code:
+Note that when setting switch that doesn't accept value then
+must pass an empty string as value. Example code:
 
 ```python
 switches = {
@@ -278,9 +279,6 @@ switches = {
 }
 cef.Initialize(switches=switches)
 ```
-
-Note that when setting switch that doesn't accept value then
-must pass an empty string as value.
 
 
 **Chromium preferences**
