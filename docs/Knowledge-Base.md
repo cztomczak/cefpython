@@ -25,7 +25,7 @@ Announcements are also made on the [Forum](https://groups.google.com/d/forum/cef
 To be notified of these via email set your Membership and Email settings
 and change delivery preference to Daily summaries.
 
-To be notified on new commits subscribe to this [RSS/Atom feed](../../commits/master.atom).
+To be notified on new commits subscribe to this [RSS/Atom feed](../../../commits/master.atom).
 
 
 ## Changes in API after CEF updates
