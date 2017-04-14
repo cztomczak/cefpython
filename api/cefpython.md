@@ -34,11 +34,10 @@ Table of contents:
 
 ### CreateBrowser
 
-Create browser asynchronously (does not return Browser object).
-See `CreateBrowserSync()` for params list.
-
-NOTE: currently this is just an alias and actually creates browser
-synchronously. The async call to CefCreateBrowser is yet TODO.
+Not yet implemented - currently this method just calls [CreateBrowserSync](#createbrowsersync).
+In upstream CEF this method creates browser asynchronously. Currently
+CEF Python depends on browser being created synchronously in a few parts
+of code.
 
 
 ### CreateBrowserSync
@@ -82,8 +81,7 @@ This hook does the following: in case of exception write it to
 the "error.log" file, display it to the console, shutdown CEF
 and exit application immediately by ignoring "finally" (_exit()).
 
-If you would like to implement a custom hook take a look at the
-source code of ExceptHook in the cefpython/src/helpers.pyx file.
+See also Tutorial: [Handling Python exceptions](../docs/Tutorial.md#handling-python-exceptions).
 
 
 ### GetAppSetting
@@ -233,7 +231,7 @@ Description from upstream CEF:
 | --- | --- |
 | threadId | int |
 | func | object |
-| ... | *args |
+| [args..] | mixed |
 | __Return__ | void |
 
 Post a task for execution on the thread associated with this task runner. Execution will occur asynchronously. Only Browser process threads are allowed.

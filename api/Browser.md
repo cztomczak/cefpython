@@ -169,7 +169,7 @@ Explicitly close the associated DevTools browser, if any.
 
 ### DragTargetDragEnter
 
-| | |
+| Parameter | Type |
 | --- | --- |
 | drag_data | [DragData](DragData.md) |
 | x | int |
@@ -189,7 +189,7 @@ Description from upstream CEF:
 
 ### DragTargetDragOver
 
-| | |
+| Parameter | Type |
 | --- | --- |
 | x | int |
 | y | int |
@@ -217,7 +217,7 @@ Description from upstream CEF:
 
 ### DragTargetDrop
 
-| | |
+| Parameter | Type |
 | --- | --- |
 | x | int |
 | y | int |
@@ -233,7 +233,7 @@ Description from upstream CEF:
 
 ### DragSourceEndedAt
 
-| | |
+| Parameter | Type |
 | --- | --- |
 | x | int |
 | y | int |

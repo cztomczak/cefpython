@@ -68,7 +68,7 @@ See the [Examples-README.md](examples/Examples-README.md) file.
 - API reference is in the [api/](api) directory:
   - [API categories](api/API-categories.md#api-categories)
   - [API index](api/API-index.md#api-index)
-- Additional documentation is in issues labelled [Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+- Additional documentation is available in [Issues labelled Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
 - To search documentation use GitHub "This repository" search
   at the top. To narrow results to documentation only select
   "Markdown" in the right pane.
@@ -190,7 +190,7 @@ directly.
  * [WindowUtils](api/WindowUtils.md#windowutils-class) class
 
 
-#### Handlers (interfaces)
+#### Client handlers (interfaces)
 
  * [DisplayHandler](api/DisplayHandler.md#displayhandler-interface)
  * [DownloadHandler](api/DownloadHandler.md#downloadhandler)
@@ -475,7 +475,9 @@ directly.
   * [SetProperty](api/JavascriptBindings.md#setproperty)
 * [JavascriptCallback (object)](api/JavascriptCallback.md#javascriptcallback-object)
   * [Call](api/JavascriptCallback.md#call)
-  * [GetName](api/JavascriptCallback.md#getname)
+  * [GetFrame](api/JavascriptCallback.md#getframe)
+  * [GetId](api/JavascriptCallback.md#getid)
+  * [GetFunctionName](api/JavascriptCallback.md#getfunctionname)
 * [JavascriptDialogHandler (interface)](api/JavascriptDialogHandler.md#javascriptdialoghandler-interface)
   * [Continue](api/JavascriptDialogHandler.md#continue)
   * [OnJavascriptDialog](api/JavascriptDialogHandler.md#onjavascriptdialog)

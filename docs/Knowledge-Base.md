@@ -1,7 +1,7 @@
 # Knowledge Base
 
 Table of contents:
-* [Notifications on new releases](#notifications-on-new-releases)
+* [Notifications about new releases / commits](#notifications-about-new-releases-commits)
 * [Changes in API after CEF updates](#changes-in-api-after-cef-updates)
 * [Differences between Python 2 and Python 3](#differences-between-python-2-and-python-3)
 * [Location of CEF framework in Mac apps](#location-of-cef-framework-in-mac-apps)
@@ -17,13 +17,15 @@ Table of contents:
 * [Security](#security)
 
 
-## Notifications on new releases
+## Notifications about new releases / commits
 
 To be notified of new releases subscribe to this [RSS/Atom feed](../../../releases.atom).
 
 Announcements are also made on the [Forum](https://groups.google.com/d/forum/cefpython).
 To be notified of these via email set your Membership and Email settings
 and change delivery preference to Daily summaries.
+
+To be notified on new commits subscribe to this [RSS/Atom feed](../../commits/master.atom).
 
 
 ## Changes in API after CEF updates
