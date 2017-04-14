@@ -1,7 +1,7 @@
 # Knowledge Base
 
 Table of contents:
-* [Notifications about new releases / commits](#notifications-about-new-releases-commits)
+* [Notifications about new releases / commits](#notifications-about-new-releases--commits)
 * [Changes in API after CEF updates](#changes-in-api-after-cef-updates)
 * [Differences between Python 2 and Python 3](#differences-between-python-2-and-python-3)
 * [Location of CEF framework in Mac apps](#location-of-cef-framework-in-mac-apps)

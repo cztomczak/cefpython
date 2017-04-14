@@ -168,11 +168,13 @@ def headinghash(title):
     """Get a link hash for a heading H1,H2,H3."""
     hash_ = title.lower()
     hash_ = hash_.replace(" - ", "specialcase1")
+    hash_ = hash_.replace(" / ", "specialcase2")
     hash_ = re.sub(r"[^a-z0-9_\- ]+", r"", hash_)
     hash_ = hash_.replace(" ", "-")
     hash_ = re.sub(r"[-]+", r"-", hash_)
     hash_ = re.sub(r"-$", r"", hash_)
     hash_ = hash_.replace("specialcase1", "---")
+    hash_ = hash_.replace("specialcase2", "--")
     return hash_
 
 
