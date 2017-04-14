@@ -62,7 +62,7 @@ See the [Examples-README.md](examples/Examples-README.md) file.
 - Supported examples are listed in the [Examples-README.md](examples/Examples-README.md) file
 - Documentation is in the [docs/](docs) directory:
   - [Build instructions](docs/Build-instructions.md)
-  - [Knowledge base](docs/Knowledge-Base.md)
+  - [Knowledge Base](docs/Knowledge-Base.md)
   - [Migration guide](docs/Migration-guide.md)
   - [Tutorial](docs/Tutorial.md)
 - API reference is in the [api/](api) directory:

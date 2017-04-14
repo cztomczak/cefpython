@@ -879,7 +879,12 @@ def delete_directory_reliably(adir):
     print("[build.py] Delete directory: {dir}"
           .format(dir=adir.replace(ROOT_DIR, "")))
     if WINDOWS:
-        shutil.rmtree(adir)
+        # rmtree is vulnerable to race conditions. Sometimes
+        # deleting directory fails with error:
+        # >> OSError: [WinError 145] The directory is not empty:
+        # >> 'C:\\github\\cefpython\\build\\cefpython3_56.2_win64\\build\\
+        # >> lib\\cefpython3'
+        shutil.rmtree(adir, ignore_errors=True)
     else:
         # On Linux sudo might be required to delete directory, as this
         # might be a setup installer directory with package installed

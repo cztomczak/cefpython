@@ -44,7 +44,8 @@ This script does the following:
 7. Reduce packages size (Issue #321). After packing prebuilt binaries,
    reduce its size so that packages will use the reduced prebuilt binaries.
 8. Build cefpython modules for all supported Python versions on both
-   32-bit and 64-bit
+   32-bit and 64-bit. Backup and restore subprocess executable on Windows
+   built with Python 2.7 (Issue #342).
 9. Make setup installers and pack them to zip (Win/Mac) or .tar.gz (Linux)
 10. Make wheel packages
 11. Move setup and wheel packages to the build/distrib/ directory
@@ -129,7 +130,8 @@ def main():
             reduce_package_size_issue_262("64bit")
         remove_unnecessary_package_files("64bit")
     if not NO_REBUILD:
-        build_cefpython_modules(pythons_32bit + pythons_64bit)
+        build_cefpython_modules(pythons_32bit, "32bit")
+        build_cefpython_modules(pythons_64bit, "64bit")
     if pythons_32bit:
         make_packages(pythons_32bit[0], "32bit")
     if pythons_64bit:
@@ -439,7 +441,7 @@ def remove_unnecessary_package_files(arch):
     delete_cef_sample_apps(caller_script=__file__, bin_dir=bin_dir)
 
 
-def build_cefpython_modules(pythons):
+def build_cefpython_modules(pythons, arch):
     for python in pythons:
         print("[build_distrib.py] Build cefpython module for {python_name}"
               .format(python_name=python["name"]))
@@ -461,14 +463,62 @@ def build_cefpython_modules(pythons):
             sys.exit(1)
         print("[build_distrib.py] Built successfully cefpython module for"
               " {python_name}".format(python_name=python["name"]))
-    print("[build_distrib.py] Successfully built cefpython modules for"
-          " all Python versions")
+        # Issue #342
+        backup_subprocess_executable_issue342(python)
+
+    # Issue #342
+    restore_subprocess_executable_issue342(arch)
+
+    print("[build_distrib.py] Successfully built cefpython modules for {arch}"
+          .format(arch=arch))
+
+
+def backup_subprocess_executable_issue342(python):
+    """Use subprocess executable build by Python 2.7 to avoid
+    false-positives by AVs when building subprocess with Python 3.
+    Windows-only issue."""
+    if not WINDOWS:
+        return
+    if python["version2"] == (2, 7):
+        print("[build_distrib.py] Backup subprocess executable built"
+              " with Python 2.7 (Issue #342)")
+        cefpython_binary_basename = get_cefpython_binary_basename(
+                get_os_postfix2_for_arch(python["arch"]))
+        cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary_basename)
+        assert os.path.isdir(cefpython_binary)
+        src = os.path.join(cefpython_binary, "subprocess.exe")
+        dst = os.path.join(BUILD_CEFPYTHON,
+                           "subprocess_py27_{arch}_issue342.exe"
+                           .format(arch=python["arch"]))
+        shutil.copy(src, dst)
+
+
+def restore_subprocess_executable_issue342(arch):
+    """Use subprocess executable build by Python 2.7 to avoid
+    false-positives by AVs when building subprocess with Python 3.
+    Windows-only issue."""
+    if not WINDOWS:
+        return
+    print("[build_distrib.py] Restore subprocess executable built"
+          " with Python 2.7 (Issue #342)")
+    cefpython_binary_basename = get_cefpython_binary_basename(
+            get_os_postfix2_for_arch(arch))
+    cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary_basename)
+    assert os.path.isdir(cefpython_binary)
+    src = os.path.join(BUILD_CEFPYTHON,
+                       "subprocess_py27_{arch}_issue342.exe"
+                       .format(arch=arch))
+    assert os.path.isfile(src)
+    dst = os.path.join(cefpython_binary, "subprocess.exe")
+    shutil.copy(src, dst)
 
 
 def make_packages(python, arch):
-    # Make setup package
+    """Make setup and wheel packages."""
     print("[build_distrib.py] Make setup package for {arch}..."
           .format(arch=arch))
+
+    # Call make_installer.py
     make_installer_py = os.path.join(TOOLS_DIR, "make_installer.py")
     installer_command = ("\"{python}\" {make_installer_py} {version}"
                          .format(python=python["executable"],
