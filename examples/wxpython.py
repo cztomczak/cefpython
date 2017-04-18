@@ -87,7 +87,14 @@ class MainFrame(wx.Frame):
         # is available (Issue #347).
         if LINUX:
             self.Show()
-            self.embed_browser()
+            # In wxPython 3.0 and wxPython 4.0 handle is still
+            # not yet available, must delay embedding browser
+            # (Issue #349).
+            if wx.version().startswith("3.") or wx.version().startswith("4."):
+                wx.CallLater(20, self.embed_browser)
+            else:
+                # This works fine in wxPython 2.8
+                self.embed_browser()
         else:
             self.embed_browser()
             self.Show()
@@ -95,7 +102,8 @@ class MainFrame(wx.Frame):
     def setup_icon(self):
         icon_file = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                  "resources", "wxpython.png")
-        if os.path.exists(icon_file):
+        # wx.IconFromBitmap is not available on Linux in wxPython 3.0/4.0
+        if os.path.exists(icon_file) and hasattr(wx, "IconFromBitmap"):
             icon = wx.IconFromBitmap(wx.Bitmap(icon_file, wx.BITMAP_TYPE_PNG))
             self.SetIcon(icon)
 
@@ -132,7 +140,7 @@ class MainFrame(wx.Frame):
                                0, 0, 0)
         elif LINUX:
             (x, y) = (0, 0)
-            (width, height) = self.browser_panel.GetSizeTuple()
+            (width, height) = self.browser_panel.GetSize().Get()
             self.browser.SetBounds(x, y, width, height)
         self.browser.NotifyMoveOrResizeStarted()
 
