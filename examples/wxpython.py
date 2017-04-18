@@ -4,6 +4,7 @@
 # To install wxPython on Linux type "sudo apt-get install python-wxtools".
 
 # Tested configurations:
+# - wxPython 4.0 on Windows/Mac/Linux
 # - wxPython 3.0 on Windows/Mac
 # - wxPython 2.8 on Linux
 # - CEF Python v55.4+
