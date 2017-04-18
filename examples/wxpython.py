@@ -84,7 +84,7 @@ class MainFrame(wx.Frame):
         self.browser_panel.Bind(wx.EVT_SIZE, self.OnSize)
 
         # On Linux must show before embedding browser, so that handle
-        # is available.
+        # is available (Issue #347).
         if LINUX:
             self.Show()
             self.embed_browser()

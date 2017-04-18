@@ -96,10 +96,12 @@ class Gtk2Example:
         self.vbox.pack_start(self.menubar, False, False, 0)
         self.main_window.add(self.vbox)
 
-        self.embed_browser()
-
+        # On Linux must show window first before embedding browser
+        # (Issue #347).
         self.vbox.show()
         self.main_window.show()
+        self.embed_browser()
+
         self.vbox.get_window().focus()
         self.main_window.get_window().focus()
         if g_message_loop == MESSAGE_LOOP_TIMER:
