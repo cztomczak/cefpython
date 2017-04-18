@@ -78,6 +78,7 @@ cdef class WindowInfo:
 
     def __init__(self, title=""):
         self.transparentPainting = False
+        self.windowName = ""
         if title:
             self.windowName = title
 

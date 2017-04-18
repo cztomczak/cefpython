@@ -36,6 +36,7 @@ def main():
     packages = check_installed_packages()
     examples = list()
     examples.append("hello_world.py")
+    examples.append("tutorial.py")
     succeeded = list()
     failed = list()
     passed = list()

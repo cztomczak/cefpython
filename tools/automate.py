@@ -492,8 +492,9 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
             # When Using WinSDK 7.1 vcvarsall.bat doesn't work. Use
             # setuptools.msvc.msvc9_query_vcvarsall to query env vars.
             env.update(msvc9_query_vcvarsall(10.0, arch=VS_PLATFORM_ARG))
-            # On Python 2.7 64-bit env values returned by setuptools
-            # are unicode. On 32-bit they are strings.
+            # On Python 2.7 env values returned by both distutils
+            # and setuptools are unicode, but Python expects env
+            # dict values as strings.
             for env_key in env:
                 env_value = env[env_key]
                 if type(env_value) != str:
