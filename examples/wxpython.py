@@ -109,7 +109,7 @@ class MainFrame(wx.Frame):
 
     def embed_browser(self):
         window_info = cef.WindowInfo()
-        (width, height) = self.browser_panel.GetClientSizeTuple()
+        (width, height) = self.browser_panel.GetClientSize().Get()
         window_info.SetAsChild(self.browser_panel.GetHandle(),
                                [0, 0, width, height])
         self.browser = cef.CreateBrowserSync(window_info,
@@ -197,14 +197,15 @@ class CefApp(wx.App):
         # http://wiki.wxwidgets.org/Making_a_render_loop
         # Another way would be to use EVT_IDLE in MainFrame.
         self.timer = wx.Timer(self, self.timer_id)
+        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
         self.timer.Start(10)  # 10ms timer
-        wx.EVT_TIMER(self, self.timer_id, self.on_timer)
 
     def on_timer(self, _):
         cef.MessageLoopWork()
 
     def OnExit(self):
         self.timer.Stop()
+        return 0
 
 
 if __name__ == '__main__':

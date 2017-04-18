@@ -7,8 +7,8 @@ a replacement for standard GUI toolkits such as wxWidgets,
 Qt or GTK. With this tutorial you will learn CEF Python
 basics. This tutorial will discuss the two basic examples:
 [hello_world.py](../examples/hello_world.py)
-and [tutorial.py](../examples/tutorial.py). There are more
-many more examples that you can find in the [Examples-README.md](../examples/Examples-README.md)
+and [tutorial.py](../examples/tutorial.py). There are many
+more examples that you can find in the [Examples-README.md](../examples/Examples-README.md)
 file, but these examples are out of scope for this tutorial.
 
 
@@ -33,8 +33,7 @@ You can install with pip. On Linux pip 8.1+ is required. Alternatively
 you can download packages for offline installation from [GitHub Releases](../../../releases).
 
 Run the commands below to install the cefpython3 package, clone
-the github repository, enter the examples/ directory and run the
-Hello World example:
+the repository and run the Hello World example:
 
 ```commandline
 pip install cefpython3==56.1
