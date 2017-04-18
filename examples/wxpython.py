@@ -191,14 +191,31 @@ class CefApp(wx.App):
     def __init__(self, redirect):
         self.timer = None
         self.timer_id = 1
+        self.is_initialized = False
         super(CefApp, self).__init__(redirect=redirect)
 
+    def OnPreInit(self):
+        super(CefApp, self).OnPreInit()
+        # On Mac with wxPython 4.0 the OnInit() event never gets
+        # called. Doing wx window creation in OnPreInit() seems to
+        # resolve the problem (Issue #350).
+        if MAC and wx.version().startswith("4."):
+            print("[wxpython.py] OnPreInit: initialize here"
+                  " (wxPython 4.0 fix)")
+            self.initialize()
+
     def OnInit(self):
+        self.initialize()
+        return True
+
+    def initialize(self):
+        if self.is_initialized:
+            return
         self.create_timer()
         frame = MainFrame()
         self.SetTopWindow(frame)
         frame.Show()
-        return True
+        self.initialized = True
 
     def create_timer(self):
         # See also "Making a render loop":

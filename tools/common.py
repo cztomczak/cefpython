@@ -242,6 +242,8 @@ def get_python_include_path():
     try_dirs = ["{base_dir}/include",
                 "{base_dir}/../include/python{ver}",
                 "{base_dir}/../include/python{ver}*",
+                ("{base_dir}/../Frameworks/Python.framework/Versions/{ver}"
+                 "/include/python{ver}*"),
                 "/usr/include/python{ver}"]
     ver_tuple = sys.version_info[:2]
     ver = "{major}.{minor}".format(major=ver_tuple[0], minor=ver_tuple[1])
