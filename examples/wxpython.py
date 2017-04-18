@@ -212,11 +212,11 @@ class CefApp(wx.App):
     def initialize(self):
         if self.is_initialized:
             return
+        self.is_initialized = True
         self.create_timer()
         frame = MainFrame()
         self.SetTopWindow(frame)
         frame.Show()
-        self.initialized = True
 
     def create_timer(self):
         # See also "Making a render loop":
