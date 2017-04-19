@@ -53,7 +53,7 @@ cpdef object Debug(py_string msg):
     # Otherwise the default is LOGSEVERITY_INFO and log_file is
     # none.
     if g_cef_initialized or g_debug:
-        cef_log_info(msg)
+        cef_log_info(PyStringToChar(msg))
 
 cdef void NonCriticalError(py_string msg) except *:
     """Notify about error gently. Does not terminate application."""

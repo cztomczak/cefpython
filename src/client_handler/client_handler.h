@@ -10,8 +10,6 @@
 #include <stdint.h>
 #endif
 
-#include "common/cefpython_public_api.h"
-
 #include "context_menu_handler.h"
 #include "dialog_handler.h"
 #include "display_handler.h"

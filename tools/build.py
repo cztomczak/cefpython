@@ -41,6 +41,14 @@ Options:
 #       function then you can't pass shell=True on Linux. If you pass
 #       then it will execute args[0] and ignore others args.
 
+# NOTE 2: When calling os.system() returned value may be 256 when eg.
+#         when running unit tests fail. If you pass 256 to sys.exit
+#         an undefined result will occur. In my case on Linux it caused
+#         that other script that called it sys.exit(256) was interpreted
+#         for the script execute successfully. So never pass to sys.exit
+#         a value returned from os.system. Check the value and call
+#         sys.exit(1).
+
 # How to debug on Linux (OLD unsupported).
 # 1. Install "python-dbg" package
 # 2. Install "python-wxgtk2.8-dbg" package
@@ -753,7 +761,10 @@ def build_cefpython_module():
             args.extend(sys.argv[1:])
             command = " ".join(args)
             ret = subprocess.call(command, shell=True)
-            sys.exit(ret)
+            # Always pass fixed value to sys.exit, read note at
+            # the top of the script about os.system and sys.exit
+            # issue.
+            sys.exit(0 if ret == 0 else 1)
         else:
             print("[build.py] ERROR: failed to build the cefpython module")
         sys.exit(1)
@@ -823,7 +834,7 @@ def install_and_run():
     ret = os.system(command)
     if ret != 0:
         print("[build.py] ERROR while making installer package")
-        sys.exit(ret)
+        sys.exit(1)
 
     # Install
     print("[build.py] Install the cefpython package")
@@ -834,7 +845,7 @@ def install_and_run():
     ret = os.system(command)
     if ret != 0:
         print("[build.py] ERROR while installing package")
-        sys.exit(ret)
+        sys.exit(1)
     os.chdir(BUILD_DIR)
 
     # Delete setup installer directory after the package was installed
@@ -849,7 +860,7 @@ def install_and_run():
     ret = os.system(command)
     if ret != 0:
         print("[build.py] ERROR while running unit tests")
-        sys.exit(ret)
+        sys.exit(1)
 
     # Run examples
     if not NO_RUN_EXAMPLES:
