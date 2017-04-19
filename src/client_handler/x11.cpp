@@ -3,10 +3,10 @@
 // Project website: https://github.com/cztomczak/cefpython
 
 #include "x11.h"
-#include "LOG_DEBUG.h"
+#include "include/base/cef_logging.h"
 
 int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
-    LOG_DEBUG
+    LOG(INFO) << "[Browser process] "
         << "X error received: "
         << "type " << event->type << ", "
         << "serial " << event->serial << ", "

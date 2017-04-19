@@ -8,7 +8,7 @@
 
 #include "client_handler.h"
 #include "common/cefpython_public_api.h"
-#include "common/DebugLog.h"
+#include "include/base/cef_logging.h"
 
 #if defined(OS_WIN)
 #include <Shellapi.h>
@@ -34,9 +34,9 @@ bool ClientHandler::OnProcessMessageReceived(
         return false;
     }
     std::string messageName = message->GetName().ToString();
-    std::string logMessage = "Browser: OnProcessMessageReceived(): ";
+    std::string logMessage = "[Browser process] OnProcessMessageReceived(): ";
     logMessage.append(messageName.c_str());
-    DebugLog(logMessage.c_str());
+    LOG(INFO) << logMessage.c_str();
     if (messageName == "OnContextCreated") {
         CefRefPtr<CefListValue> arguments = message->GetArgumentList();
         if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_INT) {
@@ -45,8 +45,8 @@ bool ClientHandler::OnProcessMessageReceived(
             V8ContextHandler_OnContextCreated(browser, frame);
             return true;
         } else {
-            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
-                     ", messageName = OnContextCreated");
+            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
+                          " invalid arguments, messageName=OnContextCreated";
             return false;
         }
     } else if (messageName == "OnContextReleased") {
@@ -59,8 +59,8 @@ bool ClientHandler::OnProcessMessageReceived(
             V8ContextHandler_OnContextReleased(browserId, frameId);
             return true;
         } else {
-            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
-                     ", messageName = OnContextReleased");
+            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
+                          " invalid arguments, messageName=OnContextReleased";
             return false;
         }
     } else if (messageName == "V8FunctionHandler::Execute") {
@@ -80,8 +80,9 @@ bool ClientHandler::OnProcessMessageReceived(
                                       functionArguments);
             return true;
         } else {
-            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
-                     ", messageName = V8FunctionHandler::Execute");
+            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
+                          " invalid arguments,"
+                          " messageName=V8FunctionHandler::Execute";
             return false;
         }
     } else if (messageName == "ExecutePythonCallback") {
@@ -94,8 +95,9 @@ bool ClientHandler::OnProcessMessageReceived(
             ExecutePythonCallback(browser, callbackId, functionArguments);
             return true;
         } else {
-            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
-                     ", messageName = ExecutePythonCallback");
+            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
+                          " invalid arguments,"
+                          " messageName=ExecutePythonCallback";
             return false;
         }
     } else if (messageName == "RemovePythonCallbacksForFrame") {
@@ -105,8 +107,9 @@ bool ClientHandler::OnProcessMessageReceived(
             RemovePythonCallbacksForFrame(frameId);
             return true;
         } else {
-            DebugLog("Browser: OnProcessMessageReceived(): invalid arguments" \
-                     ", messageName = ExecutePythonCallback");
+            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
+                          " invalid arguments,"
+                          " messageName=ExecutePythonCallback";
             return false;
         }
     }

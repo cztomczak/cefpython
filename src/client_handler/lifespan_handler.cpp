@@ -6,7 +6,7 @@
 #if defined(OS_WIN)
 #include "dpi_aware.h"
 #endif
-#include "LOG_DEBUG.h"
+#include "include/base/cef_logging.h"
 
 
 bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
@@ -38,8 +38,8 @@ void LifespanHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
     // High DPI support.
     CefString auto_zooming = ApplicationSettings_GetString("auto_zooming");
     if (!auto_zooming.empty()) {
-        LOG_DEBUG << "Browser: OnAfterCreated(): auto_zooming = "
-                << auto_zooming.ToString();
+        LOG(INFO) << "[Browser process] OnAfterCreated(): auto_zooming = "
+                  << auto_zooming.ToString();
         SetBrowserDpiSettings(browser, auto_zooming);
     }
     #endif // OS_WIN

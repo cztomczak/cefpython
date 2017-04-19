@@ -9,7 +9,7 @@
 
 #include "v8utils.h"
 #include "javascript_callback.h"
-#include "DebugLog.h"
+#include "include/base/cef_logging.h"
 #include "cefpython_app.h"
 #include <sstream>
 
@@ -33,12 +33,13 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
                                  CefRefPtr<CefListValue> listValue,
                                  int nestingLevel) {
     if (!v8Value->IsValid()) {
-        DebugLog("V8ValueAppendToCefListValue(): IsValid() FAILED");
+        LOG(ERROR) << "[Renderer process] V8ValueAppendToCefListValue():"
+                      " IsValid() failed";
         return;
     }
     if (nestingLevel > 8) {
-        DebugLog("V8ValueAppendToCefListValue(): WARNING: max nesting level (8) " \
-                "exceeded");
+        LOG(ERROR) << "[Renderer process] V8ValueAppendToCefListValue():"
+                      " max nesting level (8) exceeded";
         return;
     }
     if (v8Value->IsUndefined() || v8Value->IsNull()) {
@@ -53,7 +54,8 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
             &uint32_value, sizeof(uint32_value));
         listValue->SetBinary((int)listValue->GetSize(), binaryValue);
     } else if (v8Value->IsDouble()) {
-        listValue->SetDouble((int)listValue->GetSize(), v8Value->GetDoubleValue());
+        listValue->SetDouble((int)listValue->GetSize(),
+                             v8Value->GetDoubleValue());
     } else if (v8Value->IsDate()) {
         // TODO: in time_utils.pyx there are already functions for
         // converting cef_time_t to python DateTime, we could easily
@@ -86,8 +88,9 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
             listValue->SetString((int)listValue->GetSize(), strCallbackId);
         } else {
             listValue->SetNull((int)listValue->GetSize());
-            DebugLog("V8ValueAppendToCefListValue() FAILED: not in V8 context"
-                    " , FATAL ERROR!");
+            LOG(ERROR) << "[Renderer process] V8ValueAppendToCefListValue():"
+                          " not in V8 context";
+            return;
         }
     } else if (v8Value->IsObject()) {
         // Check for IsObject() must happen after the IsArray()
@@ -96,7 +99,8 @@ void V8ValueAppendToCefListValue(CefRefPtr<CefV8Value> v8Value,
                 V8ObjectToCefDictionaryValue(v8Value, nestingLevel + 1));
     } else {
         listValue->SetNull((int)listValue->GetSize());
-        DebugLog("V8ValueAppendToCefListValue() FAILED: unknown V8 type");
+        LOG(ERROR) << "[Renderer process] V8ValueAppendToCefListValue():"
+                      " unknown V8 type";
     }
 }
 
@@ -104,22 +108,25 @@ CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
                                     CefRefPtr<CefV8Value> v8Object,
                                     int nestingLevel) {
     if (!v8Object->IsValid()) {
-        DebugLog("V8ObjectToCefDictionaryValue(): IsValid() FAILED");
+        LOG(ERROR) << "[Renderer process] V8ObjectToCefDictionaryValue():"
+                      " IsValid() failed";
         return CefDictionaryValue::Create();
     }
     if (nestingLevel > 8) {
-        DebugLog("V8ObjectToCefDictionaryValue(): WARNING: " \
-            "max nesting level (8) exceeded");
+        LOG(ERROR) << "[Renderer process] V8ObjectToCefDictionaryValue():"
+                      " max nesting level (8) exceeded";
         return CefDictionaryValue::Create();
     }
     if (!v8Object->IsObject()) {
-        DebugLog("V8ObjectToCefDictionaryValue(): IsObject() FAILED");
+        LOG(ERROR) << "[Renderer process] V8ObjectToCefDictionaryValue():"
+                      " IsObject() failed";
         return CefDictionaryValue::Create();
     }
     CefRefPtr<CefDictionaryValue> ret = CefDictionaryValue::Create();
     std::vector<CefString> keys;
     if (!v8Object->GetKeys(keys)) {
-        DebugLog("V8ObjectToCefDictionaryValue(): GetKeys() FAILED");
+        LOG(ERROR) << "[Renderer process] V8ObjectToCefDictionaryValue():"
+                      " GetKeys() failed";
         return ret;
     }
     for (std::vector<CefString>::iterator it = keys.begin(); \
@@ -172,8 +179,9 @@ CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
                 ret->SetString(key, strCallbackId);
             } else {
                 ret->SetNull(key);
-                DebugLog("V8ObjectToCefDictionaryValue() FAILED: " \
-                        "not in V8 context FATAL ERROR!");
+                LOG(ERROR) << "[Renderer process]"
+                              " V8ObjectToCefDictionaryValue():"
+                              " not in V8 context";
             }
         } else if (v8Value->IsObject()) {
             // Check for IsObject() must happen after the IsArray()
@@ -182,7 +190,8 @@ CefRefPtr<CefDictionaryValue> V8ObjectToCefDictionaryValue(
                     V8ObjectToCefDictionaryValue(v8Value, nestingLevel + 1));
         } else {
             ret->SetNull(key);
-            DebugLog("V8ObjectToCefDictionaryValue() FAILED: unknown V8 type");
+            LOG(ERROR) << "[Renderer process] V8ObjectToCefDictionaryValue():"
+                          " unknown V8 type";
         }
     }
     return ret;
@@ -223,13 +232,13 @@ CefRefPtr<CefV8Value> CefListValueToV8Value(
         CefRefPtr<CefListValue> listValue,
         int nestingLevel) {
     if (!listValue->IsValid()) {
-        DebugLog("CefListValueToV8Value() FAILED: " \
-                "CefDictionaryValue is invalid");
+        LOG(ERROR) << "[Renderer process] CefListValueToV8Value():"
+                      " CefDictionaryValue is invalid";
         return CefV8Value::CreateNull();
     }
     if (nestingLevel > 8) {
-        DebugLog("CefListValueToV8Value(): WARNING: " \
-            "max nesting level (8) exceeded");
+        LOG(ERROR) << "[Renderer process] CefListValueToV8Value():"
+                      " max nesting level (8) exceeded";
         return CefV8Value::CreateNull();
     }
     int listSize = (int)listValue->GetSize();
@@ -269,8 +278,8 @@ CefRefPtr<CefV8Value> CefListValueToV8Value(
                                 CefV8Value::CreateFunction(
                                         callbackName, v8FunctionHandler));
             } else {
-                DebugLog("CefListValueToV8Value(): WARNING: " \
-                        "unknown binary value, setting value to null");
+                LOG(ERROR) << "[Renderer process] CefListValueToV8Value():"
+                              " unknown binary value, setting value to null";
                 success = ret->SetValue(key, CefV8Value::CreateNull());
             }
         } else if (valueType == VTYPE_DICTIONARY) {
@@ -284,14 +293,14 @@ CefRefPtr<CefV8Value> CefListValueToV8Value(
                             listValue->GetList(key),
                             nestingLevel + 1));
         } else {
-            DebugLog("CefListValueToV8Value(): WARNING: " \
-                    "unknown type, setting value to null");
+            LOG(ERROR) << "[Renderer process] CefListValueToV8Value():"
+                          " unknown type, setting value to null";
             success = ret->SetValue(key,
                     CefV8Value::CreateNull());
         }
         if (!success) {
-            DebugLog("CefListValueToV8Value(): WARNING: " \
-                    "ret->SetValue() failed");
+            LOG(ERROR) << "[Renderer process] CefListValueToV8Value():"
+                          " ret->SetValue() failed";
         }
     }
     return ret;
@@ -301,19 +310,19 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
         CefRefPtr<CefDictionaryValue> dictValue,
         int nestingLevel) {
     if (!dictValue->IsValid()) {
-        DebugLog("CefDictionaryValueToV8Value() FAILED: " \
-                "CefDictionaryValue is invalid");
+        LOG(ERROR) << "[Renderer process] CefDictionaryValueToV8Value():"
+                      " CefDictionaryValue is invalid";
         return CefV8Value::CreateNull();
     }
     if (nestingLevel > 8) {
-        DebugLog("CefDictionaryValueToV8Value(): WARNING: " \
-            "max nesting level (8) exceeded");
+        LOG(ERROR) << "[Renderer process] CefDictionaryValueToV8Value():"
+                      " max nesting level (8) exceeded";
         return CefV8Value::CreateNull();
     }
     std::vector<CefString> keys;
     if (!dictValue->GetKeys(keys)) {
-        DebugLog("CefDictionaryValueToV8Value() FAILED: " \
-            "dictValue->GetKeys() failed");
+        LOG(ERROR) << "[Renderer process] CefDictionaryValueToV8Value():"
+                      " dictValue->GetKeys() failed";
         return CefV8Value::CreateNull();
     }
     CefRefPtr<CefV8Value> ret = CefV8Value::CreateObject(NULL, NULL);
@@ -360,8 +369,8 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
                                         callbackName, v8FunctionHandler),
                                 V8_PROPERTY_ATTRIBUTE_NONE);
             } else {
-                DebugLog("CefListValueToV8Value(): WARNING: " \
-                        "unknown binary value, setting value to null");
+                LOG(ERROR) << "[Renderer process] CefListValueToV8Value():"
+                              " unknown binary value, setting value to null";
                 success = ret->SetValue(key,
                         CefV8Value::CreateNull(),
                         V8_PROPERTY_ATTRIBUTE_NONE);
@@ -379,15 +388,15 @@ CefRefPtr<CefV8Value> CefDictionaryValueToV8Value(
                             nestingLevel + 1),
                     V8_PROPERTY_ATTRIBUTE_NONE);
         } else {
-            DebugLog("CefDictionaryValueToV8Value(): WARNING: " \
-                    "unknown type, setting value to null");
+            LOG(ERROR) << "[Renderer process] CefDictionaryValueToV8Value():"
+                          " unknown type, setting value to null";
             success = ret->SetValue(key,
                     CefV8Value::CreateNull(),
                     V8_PROPERTY_ATTRIBUTE_NONE);
         }
         if (!success) {
-            DebugLog("CefDictionaryValueToV8Value(): WARNING: " \
-                    "ret->SetValue() failed");
+            LOG(ERROR) << "[Renderer process] CefDictionaryValueToV8Value():"
+                          " ret->SetValue() failed";
         }
     }
     return ret;

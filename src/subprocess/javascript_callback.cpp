@@ -5,9 +5,9 @@
 #include "javascript_callback.h"
 #include <map>
 #include <sstream>
-#include "DebugLog.h"
 #include "v8utils.h"
 #include "cefpython_app.h"
+#include "include/base/cef_logging.h"
 
 template<typename T>
 inline std::string AnyToString(const T& value)
@@ -49,17 +49,18 @@ CefString PutJavascriptCallback(
 
 bool ExecuteJavascriptCallback(int callbackId, CefRefPtr<CefListValue> args) {
     if (g_jsCallbackMap.empty()) {
-        DebugLog("Renderer: ExecuteJavascriptCallback() FAILED: " \
-                 "callback map is empty");
+        LOG(ERROR) << "[Renderer process] ExecuteJavascriptCallback():"
+                      " callback map is empty";
         return false;
     }
     JavascriptCallbackMap::const_iterator it = g_jsCallbackMap.find(
             callbackId);
     if (it == g_jsCallbackMap.end()) {
-        std::string logMessage = "Renderer: ExecuteJavascriptCallback() "
-                "FAILED: callback not found, id=";
+        std::string logMessage = "[Renderer process]"
+                                 " ExecuteJavascriptCallback():"
+                                 " callback not found, id=";
         logMessage.append(AnyToString(callbackId));
-        DebugLog(logMessage.c_str());
+        LOG(ERROR) << logMessage.c_str();
         return false;
     }
     CefRefPtr<CefFrame> frame = it->second.first;
@@ -74,8 +75,8 @@ bool ExecuteJavascriptCallback(int callbackId, CefRefPtr<CefListValue> args) {
         return true;
     } else {
         context->Exit();
-        DebugLog("Renderer: ExecuteJavascriptCallback() FAILED: " \
-                "callback->ExecuteFunction() FAILED");
+        LOG(ERROR) << "[Renderer process] ExecuteJavascriptCallback():"
+                      " callback->ExecuteFunction() failed";
         return false;
     }
 }
@@ -95,8 +96,9 @@ void RemoveJavascriptCallbacksForFrame(CefRefPtr<CefFrame> frame) {
             // | ++it;
             // This would cause an infinite loop.
             g_jsCallbackMap.erase(it++);
-            DebugLog("Renderer: RemoveJavascriptCallbacksForFrame(): " \
-                    "removed js callback from the map");
+            LOG(INFO) << "[Renderer process]"
+                         " RemoveJavascriptCallbacksForFrame():"
+                         " removed js callback from the map";
         } else {
             ++it;
         }

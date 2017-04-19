@@ -438,12 +438,12 @@ from cef_image cimport *
 from main_message_loop cimport *
 # noinspection PyUnresolvedReferences
 from cef_views cimport *
+from cef_log cimport *
 
 # -----------------------------------------------------------------------------
 # GLOBAL VARIABLES
 
 g_debug = False
-g_debugFile = "debug.log"
 
 # When put None here and assigned a local dictionary in Initialize(), later
 # while running app this global variable was garbage collected, see topic:
@@ -462,6 +462,7 @@ cdef scoped_ptr[MainMessageLoopExternalPump] g_external_message_pump
 
 cdef py_bool g_MessageLoop_called = False
 cdef py_bool g_MessageLoopWork_called = False
+cdef py_bool g_cef_initialized = False
 
 cdef dict g_globalClientCallbacks = {}
 
@@ -530,14 +531,11 @@ include "handlers/v8function_handler.pyx"
 # Utility functions to provide settings to the C++ browser process code.
 
 cdef public void cefpython_GetDebugOptions(
-        cpp_bool* debug,
-        cpp_string* debugFile
+        cpp_bool* debug
         ) except * with gil:
     # Called from subprocess/cefpython_app.cpp -> CefPythonApp constructor.
-    cdef cpp_string cppString = PyStringToChar(g_debugFile)
     try:
         debug[0] = <cpp_bool>bool(g_debug)
-        debugFile.assign(cppString)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -618,16 +616,17 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # Debug settings need to be set before Debug() is called
     # and before the CefPythonApp class is instantiated.
     global g_debug
-    global g_debugFile
     if "--debug" in sys.argv:
         application_settings["debug"] = True
-        application_settings["log_file"] = "debug.log"
-        application_settings["log_severity"] = LOGSEVERITY_WARNING
+        application_settings["log_file"] = os.path.join(os.getcwd(),
+                                                        "debug.log")
+        application_settings["log_severity"] = LOGSEVERITY_INFO
         sys.argv.remove("--debug")
     if "debug" in application_settings:
         g_debug = bool(application_settings["debug"])
-    if "log_file" in application_settings:
-        g_debugFile = application_settings["log_file"]
+    if "log_severity" in application_settings:
+        if application_settings["log_severity"] <= LOGSEVERITY_INFO:
+            g_debug = True
 
     Debug("Initialize() called")
 
@@ -719,11 +718,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         # TODO: use the CefMainArgs(int argc, char** argv) constructor.
         cdef CefMainArgs cefMainArgs
     cdef int exitCode = 1
-    with nogil:
-        exitCode = CefExecuteProcess(cefMainArgs, cefApp, NULL)
-    Debug("CefExecuteProcess(): exitCode = %s" % exitCode)
-    if exitCode >= 0:
-        sys.exit(exitCode)
+
+    # NOTE: CefExecuteProcess shall not be called here. It should
+    #       be called only in the subprocess main.cpp.
 
     # Make a copy as applicationSettings is a reference only
     # that might get destroyed later.
@@ -754,6 +751,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     cdef cpp_bool ret
     with nogil:
         ret = CefInitialize(cefMainArgs, cefApplicationSettings, cefApp, NULL)
+
+    global g_cef_initialized
+    g_cef_initialized = True
 
     if not ret:
         Debug("CefInitialize() failed")

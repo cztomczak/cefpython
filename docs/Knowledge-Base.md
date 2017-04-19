@@ -167,8 +167,12 @@ You can pass "--debug" command line flag to any of CEF Python
 examples and unit tests. It will also work with your app, as
 this feature is enabled in CEF Python's core. When this flag is
 passed the following settings will be set:
-```
-settings = {"debug": True, "log_severity": cef.LOGSEVERITY_WARNING}
+```python
+settings = {
+    "debug": True,
+    "log_severity": cef.LOGSEVERITY_INFO,
+    "log_file": "debug.log",
+}
 cef.Initialize(settings=settings)
 ```
 

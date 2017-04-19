@@ -10,7 +10,7 @@
 #include "dpi_aware.h"
 #include "include/wrapper/cef_closure_task.h"
 #include "include/base/cef_bind.h"
-#include "LOG_DEBUG.h"
+#include "include/base/cef_logging.h"
 
 const int DEFAULT_DPIX = 96;
 
@@ -56,7 +56,8 @@ PROCESS_DPI_AWARENESS GetProcessDpiAwareness() {
             return result;
         }
         // Possible failures include E_INVALIDARG or E_ACCESSDENIED.
-        LOG_DEBUG << "Browser: GetProcessDpiAwareness failed with HR=" << hr;
+        LOG(INFO) << "[Browser process] GetProcessDpiAwareness():"
+                     " hr=" << hr;
     }
     return PROCESS_DPI_UNAWARE;
 }
@@ -88,23 +89,23 @@ void SetProcessDpiAware() {
                 GetProcAddress(GetModuleHandleA("user32.dll"),
                     "SetProcessDpiAwarenessInternal"));
     if (set_process_dpi_awareness_func) {
-        LOG_DEBUG << "Browser: SetProcessDpiAware: "
-                << "calling user32.dll SetProcessDpiAwareness";
+        LOG(INFO) << "[Browser process] SetProcessDpiAware():"
+                     " calling user32.dll SetProcessDpiAwareness";
         HRESULT hr = set_process_dpi_awareness_func(PROCESS_SYSTEM_DPI_AWARE);
         if (SUCCEEDED(hr)) {
-            LOG_DEBUG << "Browser: SetBrowserDpiAware: "
-                    "SetProcessDpiAwareness succeeded";
+            LOG(INFO) << "[Browser process]: SetBrowserDpiAware():"
+                         " SetProcessDpiAwareness succeeded";
             return;
         } else if (hr == E_ACCESSDENIED) {
-            LOG_DEBUG << "Browser: SetBrowserDpiAware: "
-                    "SetProcessDpiAwareness FAILED: "
-                    "The DPI awareness is already set, either by calling "
-                    "this API previously or through the application (.exe) "
-                    "manifest.";
+            LOG(ERROR) << "[Browser process] SetBrowserDpiAware():"
+                          " SetProcessDpiAwareness failed:"
+                          " The DPI awareness is already set, either by calling"
+                          " this API previously or through the application"
+                          " (.exe) manifest.";
             // Do not return here, let's try to call SetProcessDPIAware.
         } else {
-            LOG_DEBUG << "Browser: SetBrowserDpiAware: "
-                    "SetProcessDpiAwareness FAILED";
+            LOG(ERROR) << "[Browser process] SetBrowserDpiAware():"
+                          " SetProcessDpiAwareness failed";
             // Do not return here, let's try to call SetProcessDPIAware.
         }
     }
@@ -119,8 +120,8 @@ void SetProcessDpiAware() {
         // If cefpython.Initialize() wasn't yet called, then
         // this log message won't be written, as g_debug is
         // is set during CEF initialization.
-        LOG_DEBUG << "Browser: SetProcessDpiAware: "
-                << "calling user32.dll SetProcessDPIAware";
+        LOG(INFO) << "[Browser process] SetProcessDpiAware():"
+                     " calling user32.dll SetProcessDPIAware";
         set_process_dpi_aware_func();
     }
 }
@@ -153,9 +154,9 @@ void GetDpiAwareWindowSize(int* width, int* height) {
     if (newZoomLevel > 0.0) {
         *width = *width + (int)ceil(newZoomLevel * 0.25 * (*width));
         *height = *height + (int)ceil(newZoomLevel * 0.25 * (*height));
-        LOG_DEBUG << "Browser: GetDpiAwareWindowSize: "
-                << "enlarged by " << ceil(newZoomLevel * 0.25 * 100) << "% "
-                << "new size = " << *width << "/" << *height;
+        LOG(INFO) << "[Browser process] GetDpiAwareWindowSize():"
+                     " enlarged by " << ceil(newZoomLevel * 0.25 * 100) << "%"
+                     " new size = " << *width << "/" << *height;
     }
 }
 
@@ -191,9 +192,9 @@ void SetBrowserDpiSettings(CefRefPtr<CefBrowser> cefBrowser,
         cefBrowser->GetHost()->SetZoomLevel(newZoomLevel);
         if (cefBrowser->GetHost()->GetZoomLevel() != oldZoomLevel) {
             // OK succes.
-            LOG_DEBUG << "Browser: SetBrowserDpiSettings: "
-                    << "DPI=" << dpix << " "
-                    << "zoom=" << cefBrowser->GetHost()->GetZoomLevel();
+            LOG(INFO) << "[Browser process] SetBrowserDpiSettings():"
+                         " DPI=" << dpix << ""
+                         " zoom=" << cefBrowser->GetHost()->GetZoomLevel();
         }
     } else {
         // This code block running can also be a result of executing
@@ -206,9 +207,9 @@ void SetBrowserDpiSettings(CefRefPtr<CefBrowser> cefBrowser,
         if (!already_logged) {
             already_logged = true;
             // OK success.
-            LOG_DEBUG << "Browser: SetBrowserDpiSettings: "
-                    << "DPI=" << dpix << " "
-                    << "zoom=" << cefBrowser->GetHost()->GetZoomLevel();
+            LOG(INFO) << "[Browser process] SetBrowserDpiSettings():"
+                         " DPI=" << dpix << ""
+                         " zoom=" << cefBrowser->GetHost()->GetZoomLevel();
         }
     }
     // We need to check zooming constantly, during loading of pages.

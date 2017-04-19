@@ -171,21 +171,21 @@ def set_compiler_options(options):
     if LINUX:
         os.environ["CC"] = "g++"
         os.environ["CXX"] = "g++"
+        extra_compile_args.extend(["-std=gnu++11"])
+
+        # Fix "ImportError ... undefined symbol ..." caused by CEF's
+        # include/base/ headers by adding the -flto flag (Issue #230).
+        # Unfortunately -flto prolongs compilation time significantly.
+        # More on the other flags: https://stackoverflow.com/questions/
+        # 6687630/ .
 
         if FAST_FLAG:
-            extra_compile_args.extend(["-flto",
-                                       "-std=gnu++11"])
+            extra_compile_args.extend(["-flto"])
             extra_link_args.extend(["-flto"])
         else:
-            # Fix "ImportError ... undefined symbol ..." caused by CEF's
-            # include/base/ headers by adding the -flto flag (Issue #230).
-            # Unfortunately -flto prolongs compilation time significantly.
-            # More on the other flags: https://stackoverflow.com/questions/
-            # 6687630/ .
             extra_compile_args.extend(["-flto",
                                        "-fdata-sections",
-                                       "-ffunction-sections",
-                                       "-std=gnu++11"])
+                                       "-ffunction-sections"])
             extra_link_args.extend(["-flto",
                                     "-Wl,--gc-sections"])
 

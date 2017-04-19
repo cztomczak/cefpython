@@ -148,9 +148,6 @@ class CefBrowser(Widget):
 
         # Configure CEF
         settings = {
-            "debug": True,  # debug messages in console and in log_file
-            "log_severity": cef.LOGSEVERITY_INFO,
-            "log_file": "debug.log",
             # This directories must be set on Linux
             "locales_dir_path": cef.GetModuleDirectory()+"/locales",
             "resources_dir_path": cef.GetModuleDirectory(),

@@ -23,6 +23,7 @@ SRC = client_handler.cpp cookie_visitor.cpp resource_handler.cpp \
 	download_handler.cpp focus_handler.cpp js_dialog_handler.cpp \
 	keyboard_handler.cpp lifespan_handler.cpp load_handler.cpp \
 	render_handler.cpp request_handler.cpp dialog_handler.cpp \
+	cef_log.cpp \
 	$(SRC_MORE)
 
 OBJ = $(filter %.o, $(SRC:.cpp=.o) $(SRC:.mm=.o))

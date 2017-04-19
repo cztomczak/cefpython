@@ -4,7 +4,6 @@
 
 #include "request_context_handler.h"
 #include "common/cefpython_public_api.h"
-#include "DebugLog.h"
 
 // --------------------------------------------------------------------------
 // CefRequestContextHandler

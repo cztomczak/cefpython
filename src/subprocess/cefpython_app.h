@@ -10,9 +10,9 @@
 
 // CefPythonApp class is instantiated in subprocess and in
 // cefpython.pyx for the browser process, so the code is shared.
-// Using printf() in CefRenderProcessHandler won't work, use
-// the DebugLog() function instead, it will write the message
-// to the "debug.log" file.
+// Using printf() in CefRenderProcessHandler won't work on some
+// operating systems, use LOG(INFO) macro instead, it will write
+// the message to the "debug.log" file.
 
 class CefPythonApp :
         public CefApp,
@@ -20,7 +20,6 @@ class CefPythonApp :
         public CefRenderProcessHandler {
  protected:
   std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;
-  std::string commandLineString_;
   CefRefPtr<CefPrintHandler> print_handler_;
 
  public:

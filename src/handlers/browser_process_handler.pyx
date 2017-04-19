@@ -8,7 +8,6 @@ cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
         CefRefPtr[CefListValue] extra_info
         ) except * with gil:
     try:
-        # Keys 0 and 1 are already set in C++ code - to pass debug options.
         pass
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
@@ -19,7 +18,6 @@ cdef public void BrowserProcessHandler_OnBeforeChildProcessLaunch(
         ) except * with gil:
     try:
         AppendSwitchesToCommandLine(cefCommandLine, g_commandLineSwitches)
-        Debug("BrowserProcessHandler_OnBeforeChildProcessLaunch()")
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

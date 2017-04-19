@@ -1,9 +1,8 @@
 # Example of embedding CEF Python browser using wxPython library.
 # This example has a top menu and a browser widget without navigation bar.
 
-# To install wxPython on Linux type "sudo apt-get install python-wxtools".
-
 # Tested configurations:
+# - wxPython 4.0 on Windows/Linux
 # - wxPython 3.0 on Windows/Mac
 # - wxPython 2.8 on Linux
 # - CEF Python v55.4+
@@ -35,8 +34,7 @@ def main():
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     settings = {}
     if WINDOWS:
-        # High DPI support
-        settings["auto_zooming"] = "system_dpi"
+        settings["auto_zooming"] = "system_dpi"  # High DPI support
         # noinspection PyUnresolvedReferences, PyArgumentList
         cef.DpiAware.SetProcessDpiAware()  # Alternative is to embed manifest
     cef.Initialize(settings=settings)

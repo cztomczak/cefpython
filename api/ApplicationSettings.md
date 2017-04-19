@@ -287,9 +287,9 @@ a value of "verbose", "info", "warning", "error", "error-report" or
 
 Accepted values - constants available in the cefpython module:
 * LOGSEVERITY_VERBOSE
-* LOGSEVERITY_INFO (default)
+* LOGSEVERITY_INFO
 * LOGSEVERITY_WARNING
-* LOGSEVERITY_ERROR
+* LOGSEVERITY_ERROR (default)
 * LOGSEVERITY_ERROR_REPORT
 * LOGSEVERITY_DISABLE
 

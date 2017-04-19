@@ -18,7 +18,7 @@
 #include "include/cef_parser.h"
 #include "include/wrapper/cef_helpers.h"
 
-#include "LOG_DEBUG.h"
+#include "include/base/cef_logging.h"
 
 #include "dialog_handler_gtk.h"
 #include "x11.h"
@@ -159,7 +159,7 @@ GtkWindow* GetWindow(CefRefPtr<CefBrowser> browser) {
     // internally, so GTK wasn't yet initialized and must do it
     // now, so that display is available. Also must install X11
     // error handlers to avoid 'BadWindow' errors.
-    LOG_DEBUG << "Initialize GTK";
+    LOG(INFO) << "[Browser process] Initialize GTK";
     gtk_init(0, NULL);
     InstallX11ErrorHandlers();
     // Now the display is available

@@ -43,22 +43,17 @@ cpdef py_bool IsThread(int threadID):
 
 cpdef object Debug(py_string msg):
     """Print debug message. Will be shown only when settings.debug=True."""
-    if not g_debug:
-        return
     # In Python 3 str or bytes may be passed
     if type(msg) != str and type(msg) == bytes:
         msg = msg.decode("utf-8", "replace")
     # Convert to str in case other kind of object was passed
     msg = str(msg)
-    msg = "[CEF Python] "+msg
-    print(msg)
-    if g_debugFile:
-        try:
-            with open(g_debugFile, "a") as file_:
-                file_.write(msg+"\n")
-        except:
-            print("[CEF Python] WARNING: failed writing to debug file: %s" % (
-                    g_debugFile))
+    msg = "[Browser process] " + msg
+    # CEF logging is initialized only after CEF was initialized.
+    # Otherwise the default is LOGSEVERITY_INFO and log_file is
+    # none.
+    if g_cef_initialized or g_debug:
+        cef_log_info(msg)
 
 cdef void NonCriticalError(py_string msg) except *:
     """Notify about error gently. Does not terminate application."""
@@ -67,15 +62,8 @@ cdef void NonCriticalError(py_string msg) except *:
         msg = msg.decode("utf-8", "replace")
     # Convert to str in case other kind of object was passed
     msg = str(msg)
-    msg = "[CEF Python] ERROR: "+msg
-    print(msg)
-    if g_debugFile:
-        try:
-            with open(g_debugFile, "a") as file_:
-                file_.write(msg+"\n")
-        except:
-            print("[CEF Python] WARNING: failed writing to debug file: %s" % (
-                    g_debugFile))
+    msg = "[Browser process] " + msg
+    cef_log_error(PyStringToChar(msg))
 
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":

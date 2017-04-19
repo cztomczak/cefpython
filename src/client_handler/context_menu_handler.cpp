@@ -3,7 +3,7 @@
 // Project website: https://github.com/cztomczak/cefpython
 
 #include "context_menu_handler.h"
-#include "common/DebugLog.h"
+#include "include/base/cef_logging.h"
 
 #define _MENU_ID_DEVTOOLS                         MENU_ID_USER_FIRST + 1
 #define _MENU_ID_RELOAD_PAGE                      MENU_ID_USER_FIRST + 2
@@ -127,12 +127,13 @@ void OpenInExternalBrowser(const std::string& url)
     // Linux equivalent of ShellExecute
 
     if (url.empty()) {
-        DebugLog("Browser: OpenInExternalBrowser() FAILED: url is empty");
+        LOG(ERROR) << "[Browser process] OpenInExternalBrowser():"
+                      " url is empty";
         return;
     }
-    std::string msg = "Browser: OpenInExternalBrowser(): url=";
+    std::string msg = "[Browser process] OpenInExternalBrowser(): url=";
     msg.append(url.c_str());
-    DebugLog(msg.c_str());
+    LOG(INFO) << msg.c_str();
 
     // xdg-open is a desktop-independent tool for running
     // default applications. Installed by default on Ubuntu.

@@ -244,7 +244,7 @@ To enable debugging set these settings:
 ```python
 settings = {
     "debug": True,
-    "log_severity": cef.LOGSEVERITY_WARNING,
+    "log_severity": cef.LOGSEVERITY_INFO,
     "log_file": "debug.log",
 }
 cef.Initialize(settings=settings)

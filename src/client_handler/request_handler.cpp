@@ -3,7 +3,7 @@
 // Project website: https://github.com/cztomczak/cefpython
 
 #include "request_handler.h"
-#include "common/DebugLog.h"
+#include "include/base/cef_logging.h"
 
 
 bool RequestHandler::OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
@@ -104,7 +104,7 @@ void RequestHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                                cef_termination_status_t status)
 {
     REQUIRE_UI_THREAD();
-    DebugLog("Browser: OnRenderProcessTerminated()");
+    LOG(ERROR) << "[Browser process] OnRenderProcessTerminated()";
     RequestHandler_OnRendererProcessTerminated(browser, status);
 }
 
