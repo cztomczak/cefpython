@@ -40,12 +40,11 @@ Table of contents:
 
 ## v50+ Distribution packages
 
-In latest CEF Python there are only two distribution packages
-available. The first one is a wheel package distributed through
-PyPI, which you can install using the pip tool (8.1+ required
-on Linux). The second one is a setup package available for
-download on the GitHub Releases pages, instructions on how to
-install it are provided in README.txt.
+In latest CEF Python there is only one distribution package
+available: a wheel package. Wheel packages are distributed on
+[PyPI](https://pypi.python.org/pypi/cefpython3) and you can
+install it using the pip tool (8.1+ required on Linux). You
+can also download wheel packages from [GitHub Releases](../../../releases).
 
 **Windows**
 

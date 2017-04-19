@@ -36,7 +36,7 @@ Run the commands below to install the cefpython3 package, clone
 the repository and run the Hello World example:
 
 ```commandline
-pip install cefpython3==56.1
+pip install cefpython3==56.2
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/examples/
 python hello_world.py
@@ -320,10 +320,6 @@ def set_client_handlers(browser):
 ...
 class LoadHandler(object):
     def OnLoadingStateChange(self, browser, is_loading, **_):
-        # Issue #344 will fix this in next release, so that client
-        # handlers are not called for Developer Tools windows.
-        if browser.GetUrl().startswith("chrome-devtools://"):
-            return
         # This callback is called twice, once when loading starts
         # (is_loading=True) and second time when loading ends
         # (is_loading=False).

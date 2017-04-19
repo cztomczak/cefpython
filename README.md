@@ -43,7 +43,7 @@ also download packages for offline installation available on the
 [GitHub Releases](../../releases) pages.
 
 ```
-pip install cefpython3==56.1
+pip install cefpython3==56.2
 ```
 
 ## Tutorial

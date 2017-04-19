@@ -1,5 +1,5 @@
 # Tutorial example. Doesn't depend on any third party GUI framework.
-# Tested with CEF Python v56.1+
+# Tested with CEF Python v56.2+
 
 from cefpython3 import cefpython as cef
 import base64
@@ -61,7 +61,7 @@ def main():
     cef.Initialize()
     set_global_handler()
     browser = cef.CreateBrowserSync(url=html_to_data_uri(HTML_code),
-                                    window_title="Hello World!")
+                                    window_title="Tutorial")
     set_client_handlers(browser)
     set_javascript_bindings(browser)
     cef.MessageLoop()
@@ -72,7 +72,7 @@ def check_versions():
     print("[tutorial.py] CEF Python {ver}".format(ver=cef.__version__))
     print("[tutorial.py] Python {ver} {arch}".format(
           ver=platform.python_version(), arch=platform.architecture()[0]))
-    assert cef.__version__ >= "56.1", "CEF Python v56.1+ required to run this"
+    assert cef.__version__ >= "56.2", "CEF Python v56.2+ required to run this"
 
 
 def html_to_data_uri(html, js_callback=None):
@@ -125,10 +125,6 @@ def js_print(browser, lang, event, msg):
 
 class GlobalHandler(object):
     def OnAfterCreated(self, browser, **_):
-        # Issue #344 will fix this in next release, so that client
-        # handlers are not called for Developer Tools windows.
-        if browser.GetUrl().startswith("chrome-devtools://"):
-            return
         # DOM is not yet loaded. Using js_print at this moment will
         # throw an error: "Uncaught ReferenceError: js_print is not defined".
         # We make this error on purpose. This error will be intercepted
@@ -143,10 +139,6 @@ class GlobalHandler(object):
 
 class LoadHandler(object):
     def OnLoadingStateChange(self, browser, is_loading, **_):
-        # Issue #344 will fix this in next release, so that client
-        # handlers are not called for Developer Tools windows.
-        if browser.GetUrl().startswith("chrome-devtools://"):
-            return
         # This callback is called twice, once when loading starts
         # (is_loading=True) and second time when loading ends
         # (is_loading=False).
@@ -158,10 +150,6 @@ class LoadHandler(object):
 
 class DisplayHandler(object):
     def OnConsoleMessage(self, browser, message, **_):
-        # Issue #344 will fix this in next release, so that client
-        # handlers are not called for Developer Tools windows.
-        if browser.GetUrl().startswith("chrome-devtools://"):
-            return
         # This will intercept js errors, see comments in OnAfterCreated
         if "error" in message.lower() or "uncaught" in message.lower():
             # Prevent infinite recurrence in case something went wrong

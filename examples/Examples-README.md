@@ -11,7 +11,7 @@ Instructions to install the cefpython3 package, clone the repository
 and run the hello_world.py example:
 
 ```
-pip install cefpython3==56.1
+pip install cefpython3==56.2
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/examples/
 python hello_world.py
