@@ -2,7 +2,7 @@
 # This example has a top menu and a browser widget without navigation bar.
 
 # Tested configurations:
-# - wxPython 4.0 on Windows/Linux
+# - wxPython 4.0 on Windows/Mac/Linux
 # - wxPython 3.0 on Windows/Mac
 # - wxPython 2.8 on Linux
 # - CEF Python v55.4+
@@ -189,14 +189,31 @@ class CefApp(wx.App):
     def __init__(self, redirect):
         self.timer = None
         self.timer_id = 1
+        self.is_initialized = False
         super(CefApp, self).__init__(redirect=redirect)
 
+    def OnPreInit(self):
+        super(CefApp, self).OnPreInit()
+        # On Mac with wxPython 4.0 the OnInit() event never gets
+        # called. Doing wx window creation in OnPreInit() seems to
+        # resolve the problem (Issue #350).
+        if MAC and wx.version().startswith("4."):
+            print("[wxpython.py] OnPreInit: initialize here"
+                  " (wxPython 4.0 fix)")
+            self.initialize()
+
     def OnInit(self):
+        self.initialize()
+        return True
+
+    def initialize(self):
+        if self.is_initialized:
+            return
+        self.is_initialized = True
         self.create_timer()
         frame = MainFrame()
         self.SetTopWindow(frame)
         frame.Show()
-        return True
 
     def create_timer(self):
         # See also "Making a render loop":
