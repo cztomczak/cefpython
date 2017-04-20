@@ -1,12 +1,14 @@
-# Example of embedding CEF browser using PyQt/PySide libraries.
-# This example has two widgets: a navigation bar and a browser.
+# Example of embedding CEF browser using PyQt4, PyQt5 and
+# PySide libraries. This example has two widgets: a navigation
+# bar and a browser.
 #
 # Tested configurations:
+# - PyQt 5.8.2 on Linux
 # - PyQt 4.11 (qt 4.8) on Windows/Linux
 # - PySide 1.2 (qt 4.8) on Windows/Linux/Mac
 # - CEF Python v55.4+
 #
-# Issues on Mac (tested with PySide):
+# Issues with PySide 1.2 on Mac:
 # - Keyboard focus issues when switching between controls (Issue #284)
 # - Mouse cursor never changes when hovering over links (Issue #311)
 # - Sometimes process hangs when quitting app
@@ -17,25 +19,32 @@ import os
 import platform
 import sys
 
+# GLOBALS
+PYQT4 = False
+PYQT5 = False
+PYSIDE = False
+
 # PyQt imports
-if "pyqt" in sys.argv:
-    # noinspection PyUnresolvedReferences
+if "pyqt4" in sys.argv:
+    PYQT4 = True
     from PyQt4.QtGui import *
-    # noinspection PyUnresolvedReferences
     from PyQt4.QtCore import *
+elif "pyqt5" in sys.argv:
+    PYQT5 = True
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
 # PySide imports
 elif "pyside" in sys.argv:
-    # noinspection PyUnresolvedReferences
+    PYSIDE = True
     import PySide
-    # noinspection PyUnresolvedReferences
     from PySide import QtCore
-    # noinspection PyUnresolvedReferences
     from PySide.QtGui import *
-    # noinspection PyUnresolvedReferences
     from PySide.QtCore import *
 else:
     print("USAGE:")
-    print("  qt4.py pyqt")
+    print("  qt4.py pyqt4")
+    print("  qt4.py pyqt5")
     print("  qt4.py pyside")
     sys.exit(1)
 
@@ -53,8 +62,7 @@ HEIGHT = 600
 
 # OS differences
 CefWidgetParent = QWidget
-if LINUX:
-    # noinspection PyUnresolvedReferences
+if LINUX and (PYQT4 or PYSIDE):
     CefWidgetParent = QX11EmbedContainer
 
 
@@ -78,17 +86,14 @@ def check_versions():
     print("[qt4.py] CEF Python {ver}".format(ver=cef.__version__))
     print("[qt4.py] Python {ver} {arch}".format(
             ver=platform.python_version(), arch=platform.architecture()[0]))
-    # PyQt version
-    if "pyqt" in sys.argv:
-        # noinspection PyUnresolvedReferences
+    if PYQT4 or PYQT5:
         print("[qt4.py] PyQt {v1} (qt {v2})".format(
               v1=PYQT_VERSION_STR, v2=qVersion()))
-    # PySide version
-    elif "pyside" in sys.argv:
+    elif PYSIDE:
         print("[qt4.py] PySide {v1} (qt {v2})".format(
               v1=PySide.__version__, v2=QtCore.__version__))
     # CEF Python version requirement
-    assert cef.__version__ >= "55.4", "CEF Python v55.+ required to run this"
+    assert cef.__version__ >= "55.4", "CEF Python v55.4+ required to run this"
 
 
 class MainWindow(QMainWindow):
@@ -96,9 +101,11 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(None)
         self.cef_widget = None
         self.navigation_bar = None
-        if "pyqt" in sys.argv:
-            self.setWindowTitle("PyQt example")
-        elif "pyside" in sys.argv:
+        if PYQT4:
+            self.setWindowTitle("PyQt4 example")
+        elif PYQT5:
+            self.setWindowTitle("PyQt5 example")
+        elif PYSIDE:
             self.setWindowTitle("PySide example")
         self.setFocusPolicy(Qt.StrongFocus)
         self.setupLayout()
@@ -119,6 +126,10 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(frame)
         # Browser can be embedded only after layout was set up
         self.cef_widget.embedBrowser()
+        if LINUX and PYQT5:
+            self.container = QWidget.createWindowContainer(
+                    self.cef_widget.hidden_window, parent=self)
+            layout.addWidget(self.container, 1, 0)
 
     def closeEvent(self, event):
         # Close browser (force=True) and free CEF reference
@@ -137,6 +148,7 @@ class CefWidget(CefWidgetParent):
         super(CefWidget, self).__init__(parent)
         self.parent = parent
         self.browser = None
+        self.hidden_window = None  # Required for PyQt5 on Linux
         self.show()
 
     def focusInEvent(self, event):
@@ -154,6 +166,8 @@ class CefWidget(CefWidgetParent):
             self.browser.SetFocus(False)
 
     def embedBrowser(self):
+        if LINUX and PYQT5:
+            self.hidden_window = QWindow()
         window_info = cef.WindowInfo()
         rect = [0, 0, self.width(), self.height()]
         window_info.SetAsChild(self.getHandle(), rect)
@@ -163,11 +177,16 @@ class CefWidget(CefWidgetParent):
         self.browser.SetClientHandler(FocusHandler(self))
 
     def getHandle(self):
-        # PySide bug: QWidget.winId() returns <PyCObject object at 0x02FD8788>
-        # There is no easy way to convert it to int.
+        # PyQt5 on Linux
+        if self.hidden_window:
+            return int(self.hidden_window.winId())
         try:
+            # PyQt4 and PyQt5
             return int(self.winId())
         except:
+            # PySide:
+            # | QWidget.winId() returns <PyCObject object at 0x02FD8788>
+            # | Converting it to int using ctypes.
             if sys.version_info[0] == 2:
                 # Python 2
                 ctypes.pythonapi.PyCObject_AsVoidPtr.restype = (
@@ -214,7 +233,6 @@ class CefApplication(QApplication):
 
     def createTimer(self):
         timer = QTimer()
-        # noinspection PyUnresolvedReferences
         timer.timeout.connect(self.onTimer)
         timer.start(10)
         return timer
@@ -280,25 +298,21 @@ class NavigationBar(QFrame):
 
         # Back button
         self.back = self.createButton("back")
-        # noinspection PyUnresolvedReferences
         self.back.clicked.connect(self.onBack)
         layout.addWidget(self.back, 0, 0)
 
         # Forward button
         self.forward = self.createButton("forward")
-        # noinspection PyUnresolvedReferences
         self.forward.clicked.connect(self.onForward)
         layout.addWidget(self.forward, 0, 1)
 
         # Reload button
         self.reload = self.createButton("reload")
-        # noinspection PyUnresolvedReferences
         self.reload.clicked.connect(self.onReload)
         layout.addWidget(self.reload, 0, 2)
 
         # Url input
         self.url = QLineEdit("")
-        # noinspection PyUnresolvedReferences
         self.url.returnPressed.connect(self.onGoUrl)
         layout.addWidget(self.url, 0, 3)
 
