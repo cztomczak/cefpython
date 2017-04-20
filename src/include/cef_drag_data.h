@@ -48,7 +48,7 @@
 // on any thread.
 ///
 /*--cef(source=library)--*/
-class CefDragData : public virtual CefBase {
+class CefDragData : public virtual CefBaseRefCounted {
  public:
   ///
   // Create a new CefDragData object.

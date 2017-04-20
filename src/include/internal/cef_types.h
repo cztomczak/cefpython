@@ -2397,6 +2397,13 @@ typedef struct _cef_pdf_print_settings_t {
   int page_height;
 
   ///
+  // The percentage to scale the PDF by before printing (e.g. 50 is 50%).
+  // If this value is less than or equal to zero the default value of 100
+  // will be used.
+  ///
+  int scale_factor;
+
+  ///
   // Margins in millimeters. Only used if |margin_type| is set to
   // PDF_PRINT_MARGIN_CUSTOM.
   ///
@@ -2731,6 +2738,19 @@ typedef enum {
   CEF_MENU_ANCHOR_TOPRIGHT,
   CEF_MENU_ANCHOR_BOTTOMCENTER,
 } cef_menu_anchor_position_t;
+
+///
+// Supported color types for menu items.
+///
+typedef enum {
+  CEF_MENU_COLOR_TEXT,
+  CEF_MENU_COLOR_TEXT_HOVERED,
+  CEF_MENU_COLOR_TEXT_ACCELERATOR,
+  CEF_MENU_COLOR_TEXT_ACCELERATOR_HOVERED,
+  CEF_MENU_COLOR_BACKGROUND,
+  CEF_MENU_COLOR_BACKGROUND_HOVERED,
+  CEF_MENU_COLOR_COUNT,
+} cef_menu_color_type_t;
 
 // Supported SSL version values. See net/ssl/ssl_connection_status_flags.h
 // for more information.

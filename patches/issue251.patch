@@ -1,5 +1,5 @@
 diff --git include/capi/cef_drag_data_capi.h include/capi/cef_drag_data_capi.h
-index 2e84df8f..5b17e212 100644
+index e1fcfd8c..fc388247 100644
 --- include/capi/cef_drag_data_capi.h
 +++ include/capi/cef_drag_data_capi.h
 @@ -39,6 +39,7 @@
@@ -34,7 +34,7 @@ index 2e84df8f..5b17e212 100644
  
  
 diff --git include/cef_drag_data.h include/cef_drag_data.h
-index 8f8094b4..8b4602b1 100644
+index 29b85e84..e3c9c2df 100644
 --- include/cef_drag_data.h
 +++ include/cef_drag_data.h
 @@ -39,6 +39,7 @@
@@ -45,7 +45,7 @@ index 8f8094b4..8b4602b1 100644
  #include "include/cef_stream.h"
  #include <vector>
  
-@@ -193,6 +194,24 @@ class CefDragData : public virtual CefBase {
+@@ -193,6 +194,24 @@ class CefDragData : public virtual CefBaseRefCounted {
    ///
    /*--cef(optional_param=display_name)--*/
    virtual void AddFile(const CefString& path, const CefString& display_name) =0;
@@ -181,7 +181,7 @@ index 64f29ed3..98707262 100644
    // True if this object is read-only.
    bool read_only_;
 diff --git libcef_dll/cpptoc/drag_data_cpptoc.cc libcef_dll/cpptoc/drag_data_cpptoc.cc
-index ffad1755..70a6c5c2 100644
+index 381b88b9..6f4925a0 100644
 --- libcef_dll/cpptoc/drag_data_cpptoc.cc
 +++ libcef_dll/cpptoc/drag_data_cpptoc.cc
 @@ -11,6 +11,7 @@
@@ -254,9 +254,9 @@ index ffad1755..70a6c5c2 100644
 +  GetStruct()->has_image = drag_data_has_image;
  }
  
- template<> CefRefPtr<CefDragData> CefCppToC<CefDragDataCppToC, CefDragData,
+ template<> CefRefPtr<CefDragData> CefCppToCRefCounted<CefDragDataCppToC,
 diff --git libcef_dll/ctocpp/drag_data_ctocpp.cc libcef_dll/ctocpp/drag_data_ctocpp.cc
-index ab27df2e..0b37224a 100644
+index db1a2f71..5e94aff8 100644
 --- libcef_dll/ctocpp/drag_data_ctocpp.cc
 +++ libcef_dll/ctocpp/drag_data_ctocpp.cc
 @@ -11,6 +11,7 @@
@@ -320,10 +320,10 @@ index ab27df2e..0b37224a 100644
  // CONSTRUCTOR - Do not edit by hand.
  
 diff --git libcef_dll/ctocpp/drag_data_ctocpp.h libcef_dll/ctocpp/drag_data_ctocpp.h
-index 85ea3e58..24283697 100644
+index 5b202710..a2e3774f 100644
 --- libcef_dll/ctocpp/drag_data_ctocpp.h
 +++ libcef_dll/ctocpp/drag_data_ctocpp.h
-@@ -53,6 +53,9 @@ class CefDragDataCToCpp
+@@ -54,6 +54,9 @@ class CefDragDataCToCpp
    void SetFragmentBaseURL(const CefString& base_url) OVERRIDE;
    void ResetFileContents() OVERRIDE;
    void AddFile(const CefString& path, const CefString& display_name) OVERRIDE;
