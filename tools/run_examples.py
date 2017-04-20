@@ -72,19 +72,26 @@ def main():
         print("[run_examples.py] PASS: gtk3.py (Gtk 3 not installed)")
         passed.append("gtk3.py")
 
-    # pyqt
+    # pyqt4
     if packages["PyQt4"]:
-        examples.append("qt4.py pyqt")
+        examples.append("qt.py pyqt4")
     else:
-        print("[run_examples.py] PASS: qt4.py pyqt (PyQt4 not installed)")
-        passed.append("qt4.py pyqt")
+        print("[run_examples.py] PASS: qt.py pyqt4 (PyQt4 not installed)")
+        passed.append("qt.py pyqt4")
+
+    # pyqt5
+    if packages["PyQt5"]:
+        examples.append("qt.py pyqt5")
+    else:
+        print("[run_examples.py] PASS: qt.py pyqt5 (PyQt5 not installed)")
+        passed.append("qt.py pyqt5")
 
     # pyside
     if packages["PySide"]:
-        examples.append("qt4.py pyside")
+        examples.append("qt.py pyside")
     else:
-        print("[run_examples.py] PASS: qt4.py pyside (PySide not installed)")
-        passed.append("qt4.py pyside")
+        print("[run_examples.py] PASS: qt.py pyside (PySide not installed)")
+        passed.append("qt.py pyside")
 
     # tkinter
     if MAC:
@@ -160,6 +167,7 @@ def check_installed_packages():
         "gi": False,
         "kivy": False,
         "PyQt4": False,
+        "PyQt5": False,
         "PySide": False,
         "tkinter": False,
         "Tkinter": False,

@@ -30,8 +30,9 @@ maintained:
   library (GTK 2)
 - [gtk3.py](gtk3.py): example for [PyGObject/PyGI](https://wiki.gnome.org/Projects/PyGObject)
   library (GTK 3). Currently broken on Linux/Mac, see top comments in sources.
-- [qt4.py](qt4.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4)
-  and [PySide](https://wiki.qt.io/PySide) libraries (Qt 4)
+- [qt.py](qt.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4),
+  [PyQt5](https://pypi.python.org/pypi/PyQt5)
+  and [PySide](https://wiki.qt.io/PySide) libraries
 - [tkinter_.py](tkinter_.py): example for [Tkinter](https://wiki.python.org/moin/TkInter).
   Currently broken on Mac.
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)

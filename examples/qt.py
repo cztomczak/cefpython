@@ -43,9 +43,9 @@ elif "pyside" in sys.argv:
     from PySide.QtCore import *
 else:
     print("USAGE:")
-    print("  qt4.py pyqt4")
-    print("  qt4.py pyqt5")
-    print("  qt4.py pyside")
+    print("  qt.py pyqt4")
+    print("  qt.py pyqt5")
+    print("  qt.py pyside")
     sys.exit(1)
 
 # Fix for PyCharm hints warnings when using static methods
@@ -83,14 +83,14 @@ def main():
 
 
 def check_versions():
-    print("[qt4.py] CEF Python {ver}".format(ver=cef.__version__))
-    print("[qt4.py] Python {ver} {arch}".format(
+    print("[qt.py] CEF Python {ver}".format(ver=cef.__version__))
+    print("[qt.py] Python {ver} {arch}".format(
             ver=platform.python_version(), arch=platform.architecture()[0]))
     if PYQT4 or PYQT5:
-        print("[qt4.py] PyQt {v1} (qt {v2})".format(
+        print("[qt.py] PyQt {v1} (qt {v2})".format(
               v1=PYQT_VERSION_STR, v2=qVersion()))
     elif PYSIDE:
-        print("[qt4.py] PySide {v1} (qt {v2})".format(
+        print("[qt.py] PySide {v1} (qt {v2})".format(
               v1=PySide.__version__, v2=QtCore.__version__))
     # CEF Python version requirement
     assert cef.__version__ >= "55.4", "CEF Python v55.4+ required to run this"
@@ -265,7 +265,7 @@ class LoadHandler(object):
             self.navigation_bar.cef_widget.setFocus()
             # Temporary fix no. 2 for focus issue on Linux (Issue #284)
             if LINUX:
-                print("[qt4.py] LoadHandler.OnLoadStart:"
+                print("[qt.py] LoadHandler.OnLoadStart:"
                       " keyboard focus fix no. 2 (Issue #284)")
                 browser.SetFocus(True)
             self.initial_app_loading = False
@@ -281,7 +281,7 @@ class FocusHandler(object):
     def OnGotFocus(self, browser, **_):
         # Temporary fix no. 1 for focus issues on Linux (Issue #284)
         if LINUX:
-            print("[qt4.py] FocusHandler.OnGotFocus:"
+            print("[qt.py] FocusHandler.OnGotFocus:"
                   " keyboard focus fix no. 1 (Issue #284)")
             browser.SetFocus(True)
 
