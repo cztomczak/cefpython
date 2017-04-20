@@ -85,7 +85,7 @@ void CefPythonApp::OnBeforeCommandLineProcessing(
 }
 
 void CefPythonApp::OnRegisterCustomSchemes(
-  CefRefPtr<CefSchemeRegistrar> registrar) {
+        CefRawPtr<CefSchemeRegistrar> registrar) {
 }
 
 CefRefPtr<CefResourceBundleHandler> CefPythonApp::GetResourceBundleHandler() {

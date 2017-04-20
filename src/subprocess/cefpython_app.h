@@ -30,7 +30,7 @@ class CefPythonApp :
       CefRefPtr<CefCommandLine> command_line) override;
 
   void OnRegisterCustomSchemes(
-      CefRefPtr<CefSchemeRegistrar> registrar) override;
+      CefRawPtr<CefSchemeRegistrar> registrar) override;
 
   CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler()
         override;
