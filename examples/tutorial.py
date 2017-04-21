@@ -42,6 +42,8 @@ HTML_code = """
     window.onload = function(){
         js_print("Javascript", "window.onload", "Called");
         js_print("Javascript", "python_property", python_property);
+        js_print("Javascript", "navigator.userAgent", navigator.userAgent);
+        js_print("Javascript", "cefpython_version", cefpython_version.version);
         html_to_data_uri("test", js_callback_1);
         external.test_multiple_callbacks(js_callback_2);
     };
@@ -113,6 +115,7 @@ def set_javascript_bindings(browser):
     bindings = cef.JavascriptBindings(
             bindToFrames=False, bindToPopups=False)
     bindings.SetProperty("python_property", "This property was set in Python")
+    bindings.SetProperty("cefpython_version", cef.GetVersion())
     bindings.SetFunction("html_to_data_uri", html_to_data_uri)
     bindings.SetObject("external", external)
     browser.SetJavascriptBindings(bindings)
