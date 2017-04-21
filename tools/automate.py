@@ -224,11 +224,11 @@ def build_cef():
           % Options.binary_distrib)
 
     if Options.x86:
-        print("[automate.py] INFO: to build CEF projects and create prebuilt"
-              " binaries you have to use 32-bit chroot. Copy the binary"
+        print("[automate.py] INFO: Build CEF projects and create prebuilt"
+              " binaries on Linux 32-bit using eg. VirtualBox. Copy the binary"
               " distrib's cef_binary_*/ directory (path displayed above) to"
               " cefpython's build/ directory. Then run automate.py"
-              " --prebuilt-cef using 32-bit chroot.")
+              " --prebuilt-cef on Linux 32-bit.")
         sys.exit(0)
     else:
         # Build cefclient, cefsimple, ceftests, libcef_dll_wrapper

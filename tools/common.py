@@ -27,8 +27,14 @@ if ARCH64:
 ARCH_STR = platform.architecture()[0]
 
 # OS_POSTFIX is for directories/files names in cefpython sources
+#            and doesn't include architecture type, just OS name.
+
 # OS_POSTFIX2 is for platform name in cefpython binaries
+#             and includes architecture type (32bit/64bit).
+
 # CEF_POSTFIX2 is for platform name in upstream CEF binaries
+#              and includes architecture type (32bit/64bit).
+
 OS_POSTFIX = ("win" if platform.system() == "Windows" else
               "linux" if platform.system() == "Linux" else
               "mac" if platform.system() == "Darwin" else "unknown")
@@ -353,17 +359,23 @@ def _detect_distrib_dir():
         # Will only be set when called from scripts that had version
         # number arg passed on command line: build.py, build_distrib.py,
         # make_installer.py, etc.
-        if LINUX:
-            # On Linux buildig 32bit and 64bit separately, so don't
+        if LINUX or MAC:
+            # - On Linux buildig 32bit and 64bit separately, so don't
             # delete eg. 64bit distrib when building 32bit distrib.
             # Keep them in different directories.
+            # - On Mac only 64bit is supported.
             dirname = ("distrib_{version}_{postfix2}"
                        .format(version=version, postfix2=OS_POSTFIX2))
-        else:
+        elif WINDOWS:
             # On Windows both 32bit and 64bit distribs are built at
             # the same time.
-            # On Mac only 64bit is supported.
-            dirname = "distrib_{version}".format(version=version)
+            dirname = ("distrib_{version}_{win32}_{win64}"
+                       .format(version=version,
+                               win32=OS_POSTFIX2_ARCH[WINDOWS]["32bit"],
+                               win64=OS_POSTFIX2_ARCH[WINDOWS]["64bit"]))
+        else:
+            dirname = ("distrib_{version}_{postfix}"
+                       .format(version=version, postfix=OS_POSTFIX))
         DISTRIB_DIR = os.path.join(BUILD_DIR, dirname)
 
 
