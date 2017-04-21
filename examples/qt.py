@@ -3,7 +3,7 @@
 # bar and a browser.
 #
 # Tested configurations:
-# - PyQt 5.8.2 on Linux
+# - PyQt 5.8.2 on Windows/Linux/Mac
 # - PyQt 4.11 (qt 4.8) on Windows/Linux
 # - PySide 1.2 (qt 4.8) on Windows/Linux/Mac
 # - CEF Python v55.4+
@@ -124,9 +124,22 @@ class MainWindow(QMainWindow):
         frame = QFrame()
         frame.setLayout(layout)
         self.setCentralWidget(frame)
+
+        if PYQT5 and WINDOWS:
+            # On Windows with PyQt5 main window must be shown first
+            # before CEF browser is embedded, otherwise window is
+            # not resized and application hangs during resize.
+            self.show()
+
         # Browser can be embedded only after layout was set up
         self.cef_widget.embedBrowser()
-        if LINUX and PYQT5:
+
+        if PYQT5 and LINUX:
+            # On Linux with PyQt5 the QX11EmbedContainer widget is
+            # no more available. An equivalent in Qt5 is to create
+            # a hidden window, embed CEF browser in it and then
+            # create a container for that hidden window and replace
+            # cef widget in the layout with the container.
             self.container = QWidget.createWindowContainer(
                     self.cef_widget.hidden_window, parent=self)
             layout.addWidget(self.container, 1, 0)
@@ -166,7 +179,7 @@ class CefWidget(CefWidgetParent):
             self.browser.SetFocus(False)
 
     def embedBrowser(self):
-        if LINUX and PYQT5:
+        if PYQT5 and LINUX:
             self.hidden_window = QWindow()
         window_info = cef.WindowInfo()
         rect = [0, 0, self.width(), self.height()]
@@ -177,8 +190,8 @@ class CefWidget(CefWidgetParent):
         self.browser.SetClientHandler(FocusHandler(self))
 
     def getHandle(self):
-        # PyQt5 on Linux
         if self.hidden_window:
+            # PyQt5 on Linux
             return int(self.hidden_window.winId())
         try:
             # PyQt4 and PyQt5

@@ -201,6 +201,7 @@ def setup_options(docopt_args):
         Options.ninja_jobs = int(multiprocessing.cpu_count() / 2)
         if Options.ninja_jobs < 1:
             Options.ninja_jobs = 1
+    Options.ninja_jobs = str(Options.ninja_jobs)
 
 
 def build_cef():
@@ -410,9 +411,11 @@ def build_cef_projects():
         # > cefclient_mac.mm:22:29: error: property 'mainMenu' not found
         if MAC:
             # Build only cefsimple
-            command.extend(["ninja", "cefsimple"])
+            command.extend(["ninja", "-j", Options.ninja_jobs,
+                            "cefsimple"])
         else:
-            command.extend(["ninja", "cefclient", "cefsimple", "ceftests"])
+            command.extend(["ninja", "-j", Options.ninja_jobs,
+                            "cefclient", "cefsimple", "ceftests"])
         run_command(command, build_cefclient_dir)
         print("[automate.py] OK")
         assert os.path.exists(cefclient_exe)
@@ -507,7 +510,8 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
 
         # Run ninja
         ninja_wrapper = prepare_build_command(build_lib=True, vcvars=vcvars)
-        ninja_wrapper.extend(["ninja", "libcef_dll_wrapper"])
+        ninja_wrapper.extend(["ninja", "-j", Options.ninja_jobs,
+                              "libcef_dll_wrapper"])
         run_command(ninja_wrapper, working_dir=build_wrapper_dir)
         print("[automate.py] ninja OK")
         assert os.path.exists(wrapper_lib)
@@ -630,7 +634,8 @@ def build_wrapper_library_mac():
         print("[automate.py] cmake OK")
         # Ninja
         ninja_wrapper = prepare_build_command(build_lib=True)
-        ninja_wrapper.extend(["ninja", "libcef_dll_wrapper"])
+        ninja_wrapper.extend(["ninja", "-j", Options.ninja_jobs,
+                              "libcef_dll_wrapper"])
         run_command(ninja_wrapper, build_wrapper_dir)
         print("[automate.py] ninja OK")
         assert os.path.exists(wrapper_lib)

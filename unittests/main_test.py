@@ -14,7 +14,7 @@ import base64
 import sys
 
 # To show the window for an extended period of time increase this number.
-MESSAGE_LOOP_RANGE = 100  # each iteration is 0.01 sec
+MESSAGE_LOOP_RANGE = 200  # each iteration is 0.01 sec
 
 g_datauri_data = """
 <!DOCTYPE html>
@@ -35,6 +35,11 @@ g_datauri_data = """
     }
     window.onload = function(){
         print("window.onload() ok");
+
+        version = cefpython_version
+        print("CEF Python: <b>"+version.version+"</b>");
+        print("Chrome: <b>"+version.chrome_version+"</b>");
+        print("CEF: <b>"+version.cef_version+"</b>");
 
         // Test binding property: test_property1
         if (test_property1 == "Test binding property to the 'window' object") {
@@ -140,6 +145,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         bindings.SetFunction("test_function", external.test_function)
         bindings.SetProperty("test_property1", external.test_property1)
         bindings.SetProperty("test_property2", external.test_property2)
+        bindings.SetProperty("cefpython_version", cef.GetVersion())
         bindings.SetObject("external", external)
         browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
