@@ -1,16 +1,13 @@
 # Example of embedding CEF Python browser using PyGObject/PyGI (GTK 3).
 #
-# Mac note: This example crashes on Mac with error message:
-#           > _createMenuRef called with existing principal MenuRef..
-#           Reported as Issue #310.
-#
-# Linux note: This example is currently broken in v54+ on Linux (Issue #261).
-#             It works fine with cefpython v53.
-#
 # Tested configurations:
-# - GTK 3.18 on Windows
-# - GTK 3.10 on Linux
-# - CEF Python v53.1+
+# - GTK 3.18 on Windows (cefpython v53.1+)
+# - GTK 3.10 on Linux (works with cefpython v53.1 and v57.0+)
+#
+# Mac crash: This example crashes on Mac with error message:
+#            > _createMenuRef called with existing principal MenuRef..
+#            Reported as Issue #310.
+
 
 from cefpython3 import cefpython as cef
 import ctypes

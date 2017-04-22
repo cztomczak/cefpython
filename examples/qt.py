@@ -24,22 +24,29 @@ PYQT4 = False
 PYQT5 = False
 PYSIDE = False
 
-# PyQt imports
 if "pyqt4" in sys.argv:
     PYQT4 = True
+    # noinspection PyUnresolvedReferences
     from PyQt4.QtGui import *
+    # noinspection PyUnresolvedReferences
     from PyQt4.QtCore import *
 elif "pyqt5" in sys.argv:
     PYQT5 = True
+    # noinspection PyUnresolvedReferences
     from PyQt5.QtGui import *
+    # noinspection PyUnresolvedReferences
     from PyQt5.QtCore import *
+    # noinspection PyUnresolvedReferences
     from PyQt5.QtWidgets import *
-# PySide imports
 elif "pyside" in sys.argv:
     PYSIDE = True
+    # noinspection PyUnresolvedReferences
     import PySide
+    # noinspection PyUnresolvedReferences
     from PySide import QtCore
+    # noinspection PyUnresolvedReferences
     from PySide.QtGui import *
+    # noinspection PyUnresolvedReferences
     from PySide.QtCore import *
 else:
     print("USAGE:")
@@ -63,6 +70,7 @@ HEIGHT = 600
 # OS differences
 CefWidgetParent = QWidget
 if LINUX and (PYQT4 or PYSIDE):
+    # noinspection PyUnresolvedReferences
     CefWidgetParent = QX11EmbedContainer
 
 
@@ -98,6 +106,7 @@ def check_versions():
 
 class MainWindow(QMainWindow):
     def __init__(self):
+        # noinspection PyArgumentList
         super(MainWindow, self).__init__(None)
         self.cef_widget = None
         self.navigation_bar = None
@@ -115,12 +124,15 @@ class MainWindow(QMainWindow):
         self.cef_widget = CefWidget(self)
         self.navigation_bar = NavigationBar(self.cef_widget)
         layout = QGridLayout()
+        # noinspection PyArgumentList
         layout.addWidget(self.navigation_bar, 0, 0)
+        # noinspection PyArgumentList
         layout.addWidget(self.cef_widget, 1, 0)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.setRowStretch(0, 0)
         layout.setRowStretch(1, 1)
+        # noinspection PyArgumentList
         frame = QFrame()
         frame.setLayout(layout)
         self.setCentralWidget(frame)
@@ -140,8 +152,10 @@ class MainWindow(QMainWindow):
             # a hidden window, embed CEF browser in it and then
             # create a container for that hidden window and replace
             # cef widget in the layout with the container.
+            # noinspection PyUnresolvedReferences, PyArgumentList
             self.container = QWidget.createWindowContainer(
                     self.cef_widget.hidden_window, parent=self)
+            # noinspection PyArgumentList
             layout.addWidget(self.container, 1, 0)
 
     def closeEvent(self, event):
@@ -158,6 +172,7 @@ class MainWindow(QMainWindow):
 
 class CefWidget(CefWidgetParent):
     def __init__(self, parent=None):
+        # noinspection PyArgumentList
         super(CefWidget, self).__init__(parent)
         self.parent = parent
         self.browser = None
@@ -180,6 +195,7 @@ class CefWidget(CefWidgetParent):
 
     def embedBrowser(self):
         if PYQT5 and LINUX:
+            # noinspection PyUnresolvedReferences
             self.hidden_window = QWindow()
         window_info = cef.WindowInfo()
         rect = [0, 0, self.width(), self.height()]
@@ -246,6 +262,7 @@ class CefApplication(QApplication):
 
     def createTimer(self):
         timer = QTimer()
+        # noinspection PyUnresolvedReferences
         timer.timeout.connect(self.onTimer)
         timer.start(10)
         return timer
@@ -301,6 +318,7 @@ class FocusHandler(object):
 
 class NavigationBar(QFrame):
     def __init__(self, cef_widget):
+        # noinspection PyArgumentList
         super(NavigationBar, self).__init__()
         self.cef_widget = cef_widget
 
@@ -311,22 +329,30 @@ class NavigationBar(QFrame):
 
         # Back button
         self.back = self.createButton("back")
+        # noinspection PyUnresolvedReferences
         self.back.clicked.connect(self.onBack)
+        # noinspection PyArgumentList
         layout.addWidget(self.back, 0, 0)
 
         # Forward button
         self.forward = self.createButton("forward")
+        # noinspection PyUnresolvedReferences
         self.forward.clicked.connect(self.onForward)
+        # noinspection PyArgumentList
         layout.addWidget(self.forward, 0, 1)
 
         # Reload button
         self.reload = self.createButton("reload")
+        # noinspection PyUnresolvedReferences
         self.reload.clicked.connect(self.onReload)
+        # noinspection PyArgumentList
         layout.addWidget(self.reload, 0, 2)
 
         # Url input
         self.url = QLineEdit("")
+        # noinspection PyUnresolvedReferences
         self.url.returnPressed.connect(self.onGoUrl)
+        # noinspection PyArgumentList
         layout.addWidget(self.url, 0, 3)
 
         # Layout

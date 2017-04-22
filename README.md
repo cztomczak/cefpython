@@ -38,9 +38,10 @@ or other kind of internet bots.
 
 ## Install
 
-You can install with pip. On Linux pip 8.1+ is required. You can
+You can install [pypi/cefpython3](https://pypi.python.org/pypi/cefpython3)
+package using pip tool. On Linux pip 8.1+ is required. You can
 also download packages for offline installation available on the
-[GitHub Releases](../../releases) pages.
+[GitHub Releases](../../releases) pages. Command to install with pip:
 
 ```
 pip install cefpython3==57.0
