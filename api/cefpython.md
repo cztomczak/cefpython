@@ -23,6 +23,7 @@ Table of contents:
   * [MessageLoop](#messageloop)
   * [MessageLoopWork](#messageloopwork)
   * [PostTask](#posttask)
+  * [PostDelayedTask](#postdelayedtask)
   * [QuitMessageLoop](#quitmessageloop)
   * [SetGlobalClientCallback](#setglobalclientcallback)
   * [SetOsModalLoop](#setosmodalloop)
@@ -229,7 +230,7 @@ Description from upstream CEF:
 
 | Parameter | Type |
 | --- | --- |
-| threadId | int |
+| thread | int |
 | func | object |
 | [args..] | mixed |
 | __Return__ | void |
@@ -250,6 +251,20 @@ List of threads in the Browser process:
 List of threads in the Renderer process:
 * cef.TID_RENDERER: The main thread in the renderer. Used for all webkit and V8 interaction.
 
+
+### PostDelayedTask
+
+| Parameter | Type |
+| --- | --- |
+| thread | int |
+| delay_ms | int |
+| func | object |
+| [args..] | mixed |
+| __Return__ | void |
+
+Post a task for delayed execution on the specified thread. This
+function behaves similarly to PostTask above, but with an additional
+|delay_ms| argument.
 
 
 ### QuitMessageLoop

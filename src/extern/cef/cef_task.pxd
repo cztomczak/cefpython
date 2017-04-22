@@ -5,6 +5,7 @@
 from libcpp cimport bool as cpp_bool
 # noinspection PyUnresolvedReferences
 cimport cef_types
+from cef_types cimport int64
 from cef_ptr cimport CefRefPtr
 
 cdef extern from "include/cef_task.h":
@@ -12,7 +13,11 @@ cdef extern from "include/cef_task.h":
     ctypedef cef_types.cef_thread_id_t CefThreadId
     
     cdef cpp_bool CefCurrentlyOn(CefThreadId)
-    cdef cpp_bool CefPostTask(CefThreadId threadId, CefRefPtr[CefTask] task)
+    cdef cpp_bool CefPostTask(CefThreadId threadId,
+                              CefRefPtr[CefTask] task)
+    cdef cpp_bool CefPostDelayedTask(CefThreadId threadId,
+                                     CefRefPtr[CefTask] task,
+                                     int64 delay_ms)
     
     cdef cppclass CefTask:
         pass

@@ -7,17 +7,23 @@
 #include "include/base/cef_bind.h"
 
 void PostTaskWrapper(int threadId, int taskId) {
-    // Calling CefPostDelayedTask with 0ms delay seems to give 
-    // better responsiveness than CefPostTask. In wxpython.py 
-    // on Windows the freeze when creating popup window feels 
-    // shorter, when compared to a call to CefPostTask.
+    CefPostTask(
+            static_cast<CefThreadId>(threadId),
+            CefCreateClosureTask(base::Bind(
+                    &PyTaskRunnable,
+                    taskId
+            ))
+    );
+}
+
+void PostDelayedTaskWrapper(int threadId, int64 delay_ms, int taskId) {
     CefPostDelayedTask(
             static_cast<CefThreadId>(threadId),
             CefCreateClosureTask(base::Bind(
                     &PyTaskRunnable,
                     taskId
             )),
-            0
+            delay_ms
     );
 }
 

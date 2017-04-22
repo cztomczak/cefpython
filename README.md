@@ -366,6 +366,7 @@ directly.
   * [MessageLoop](api/cefpython.md#messageloop)
   * [MessageLoopWork](api/cefpython.md#messageloopwork)
   * [PostTask](api/cefpython.md#posttask)
+  * [PostDelayedTask](api/cefpython.md#postdelayedtask)
   * [QuitMessageLoop](api/cefpython.md#quitmessageloop)
   * [SetGlobalClientCallback](api/cefpython.md#setglobalclientcallback)
   * [SetOsModalLoop](api/cefpython.md#setosmodalloop)

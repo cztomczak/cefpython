@@ -7,11 +7,11 @@ include "cefpython.pyx"
 g_taskMaxId = 0
 g_tasks = {}
 
-def PostTask(int threadId, object func, *args):
+def PostTask(int thread, object func, *args):
     global g_tasks, g_taskMaxId
 
     # Validate threadId.
-    if threadId not in g_browserProcessThreads:
+    if thread not in g_browserProcessThreads:
         raise Exception("PoastTask failed: requires a browser process thread")
 
     # Validate func.
@@ -31,7 +31,35 @@ def PostTask(int threadId, object func, *args):
     # Call C++ wrapper.
     cdef int cTaskId = int(g_taskMaxId)
     with nogil:
-        PostTaskWrapper(threadId, cTaskId)
+        PostTaskWrapper(thread, cTaskId)
+
+
+def PostDelayedTask(int thread, int delay_ms, object func, *args):
+    global g_tasks, g_taskMaxId
+
+    # Validate threadId.
+    if thread not in g_browserProcessThreads:
+        raise Exception("PoastTask failed: requires a browser process thread")
+
+    # Validate func.
+    if not IsFunctionOrMethod(type(func)):
+        raise Exception("PostTask failed: not a function nor method")
+
+    # Params.
+    cdef list params = list(args)
+
+    # Keep func and params until PyTaskRunnable is called.
+    g_taskMaxId += 1
+    g_tasks[str(g_taskMaxId)] = {
+        "func": func,
+        "params": params
+    }
+
+    # Call C++ wrapper.
+    cdef int cTaskId = int(g_taskMaxId)
+    with nogil:
+        PostDelayedTaskWrapper(thread, delay_ms, cTaskId)
+
 
 cdef public void PyTaskRunnable(int taskId) except * with gil:
     cdef object func

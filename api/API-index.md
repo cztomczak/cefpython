@@ -153,6 +153,7 @@
   * [MessageLoop](cefpython.md#messageloop)
   * [MessageLoopWork](cefpython.md#messageloopwork)
   * [PostTask](cefpython.md#posttask)
+  * [PostDelayedTask](cefpython.md#postdelayedtask)
   * [QuitMessageLoop](cefpython.md#quitmessageloop)
   * [SetGlobalClientCallback](cefpython.md#setglobalclientcallback)
   * [SetOsModalLoop](cefpython.md#setosmodalloop)
