@@ -21,11 +21,22 @@ python hello_world.py
 ## Supported examples
 
 Examples provided in the examples/ root directory are actively
-maintained:
+maintained. If there are any issues in examples read top comments
+in sources to see whether this is a known issue with available
+workarounds.
 
-- [hello_world.py](hello_world.py): basic example, doesn't require any
+**Featured**
+
+- [hello_world.py](hello_world.py) - Basic example, doesn't require any
   third party GUI framework to run
-- [tutorial.py](tutorial.py): example from [Tutorial](../docs/Tutorial.md)
+- [tutorial.py](tutorial.py) - Example from [Tutorial](../docs/Tutorial.md)
+- [screenshot.py](screenshot.py) - Example of off-screen rendering mode
+  to create a screenshot of a web page. Also referenced in Tutorial
+  in the [Off-screen rendering](../docs/Tutorial.md#off-screen-rendering)
+  section.
+
+**Embedding using various GUI frameworks**
+
 - [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
   library (GTK 2)
 - [gtk3.py](gtk3.py): example for [PyGObject/PyGI](https://wiki.gnome.org/Projects/PyGObject)
@@ -37,9 +48,6 @@ maintained:
   Currently broken on Mac.
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)
   toolkit
-
-If there are any issues in examples read top comments in sources
-to see whether this is a known issue with available workarounds.
 
 **Unit tests**
 

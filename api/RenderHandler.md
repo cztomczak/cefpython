@@ -129,7 +129,7 @@ Called when the browser wants to move or resize the popup widget.
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
-| element_type | int |
+| element_type | PaintElementType |
 | dirty_rects | list[[x,y,width,height],[..]] |
 | paint_buffer | [PaintBuffer](PaintBuffer.md) |
 | width | int |
@@ -145,9 +145,12 @@ of rectangles in pixel coordinates that need to be repainted. |buffer| will
 be |width|*|height|*4 bytes in size and represents a BGRA image with an
 upper-left origin.
 
-`paintElementType` constants in the cefpython module:
-* PET_VIEW
-* PET_POPUP
+**Important:** Do not keep reference to |paint_buffer| after this
+method returns.
+
+`PaintElementType` enum:
+* cef.PET_VIEW
+* cef.PET_POPUP
 
 
 ### OnCursorChange

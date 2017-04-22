@@ -128,6 +128,7 @@ def js_print(browser, lang, event, msg):
 
 class GlobalHandler(object):
     def OnAfterCreated(self, browser, **_):
+        """Called after a new browser is created."""
         # DOM is not yet loaded. Using js_print at this moment will
         # throw an error: "Uncaught ReferenceError: js_print is not defined".
         # We make this error on purpose. This error will be intercepted
@@ -142,9 +143,7 @@ class GlobalHandler(object):
 
 class LoadHandler(object):
     def OnLoadingStateChange(self, browser, is_loading, **_):
-        # This callback is called twice, once when loading starts
-        # (is_loading=True) and second time when loading ends
-        # (is_loading=False).
+        """Called when the loading state has changed."""
         if not is_loading:
             # Loading is complete. DOM is ready.
             js_print(browser, "Python", "OnLoadingStateChange",
@@ -153,6 +152,7 @@ class LoadHandler(object):
 
 class DisplayHandler(object):
     def OnConsoleMessage(self, browser, message, **_):
+        """Called to display a console message."""
         # This will intercept js errors, see comments in OnAfterCreated
         if "error" in message.lower() or "uncaught" in message.lower():
             # Prevent infinite recurrence in case something went wrong

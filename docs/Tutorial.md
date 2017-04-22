@@ -5,9 +5,10 @@ on Chromium in a Python application. You can also use it to
 create a HTML 5 based GUI in an application that can act as
 a replacement for standard GUI toolkits such as wxWidgets,
 Qt or GTK. With this tutorial you will learn CEF Python
-basics. This tutorial will discuss the two basic examples:
-[hello_world.py](../examples/hello_world.py)
-and [tutorial.py](../examples/tutorial.py). There are many
+basics. This tutorial will discuss the three featured examples:
+[hello_world.py](../examples/hello_world.py),
+[tutorial.py](../examples/tutorial.py)
+and [screenshot.py](../examples/screenshot.py). There are many
 more examples that you can find in the [Examples-README.md](../examples/Examples-README.md)
 file, but these examples are out of scope for this tutorial.
 
@@ -23,6 +24,7 @@ Table of contents:
 * [Javascript integration](#javascript-integration)
 * [Javascript exceptions and Python exceptions](#javascript-exceptions-and-python-exceptions)
 * [Plugins and Flash support](#plugins-and-flash-support)
+* [Off-screen rendering](#off-screen-rendering)
 * [Build executable](#build-executable)
 * [Support and documentation](#support-and-documentation)
 
@@ -46,9 +48,9 @@ The hello_world.py example's source code will be analyzed line
 by line in the next section of this Tutorial.
 
 This tutorial in its further sections will also reference the
-tutorial.py example which will show how to use more advanced
-CEF Python features. The tutorial.py example is also available
-in the examples/ directory.
+tutorial.py and screenshot.py examples which will show how to
+use more advanced CEF Python features. All these examples are
+available in the examples/ root directory.
 
 
 ## Hello world
@@ -469,6 +471,151 @@ Instructions for enabling Flash support are available in [Issue #235](../../../i
 For the old CEF Python v31 release instructions for enabling Flash
 support are available on Wiki pages.
 
+
+## Off-screen rendering
+
+Off-screen rendering, in short OSR, also known as windowless
+rendering, is a method of rendering pages into a memory buffer
+without creating an actual visible window. This method of
+rendering has its uses, some pluses and some minuses. Its main
+use is so that web page rendering can be integrated into apps
+that have its own rendering systems and they can draw web browser
+contents only if they are provided a pixel buffer to draw. CEF Python
+provides a few examples of integrating CEF off-screen rendering
+with frameworks such as Kivy, Panda3D and Pygame/PyOpenGl.
+
+In this tutorial it will be discussed [screenshot.py](../examples/screenshot.py)
+example which is a very basic example of off-screen rendering.
+This example creates a screenshot of a web page with viewport
+size set to 800px width and 5000px height which is an equivalent
+of scrolling down page multiple times, but you get all this in
+one single screenshot.
+
+Before running this script you must install PIL image library:
+
+```text
+pip install PIL
+```
+
+This example accepts optional arguments so that you can change
+url and viewport size. Example usage:
+
+```text
+python screenshot.py
+python screenshot.py https://github.com/cztomczak/cefpython 1024 5000
+python screenshot.py https://www.google.com/ 800 600
+```
+
+Let's discuss code in this example.
+
+To be able to use off-screen rendering mode in CEF you have to set
+[windowless_rendering_enabled](../api/ApplicationSettings.md#windowless_rendering_enabled)
+option to True, eg.:
+
+```Python
+cef.Initialize(settings={"windowless_rendering_enabled": True})
+```
+
+Do not enable this value if the application does not use off-screen
+rendering as it may reduce rendering performance on some systems.
+
+Another thing that distincts windowed rendering from off-screen
+rendering is that when creating browser you have to call SetAsOffscreen
+method on the WindowInfo object. Code from the example:
+
+```Python
+parent_window_handle = 0
+window_info = cef.WindowInfo()
+window_info.SetAsOffscreen(parent_window_handle)
+browser = cef.CreateBrowserSync(window_info=window_info,
+                                url=URL)
+```
+
+Also after creating browser it is required to let CEF know that
+viewport size is available and that OnPaint callback may be called
+(this callback will be explained in a moment) by calling
+WasResized method:
+
+```Python
+browser.WasResized()
+```
+
+Off-screen rendering requires implementing [RenderHandler](../api/RenderHandler.md#renderhandler-interface)
+which is one of client handlers and how to use them was
+explained earlier in the tutorial in the [Client handlers](#client-handlers)
+section. For basic off-screen rendering it is enough to
+implement only two methods: [GetViewRect](../api/RenderHandler.md#getviewrect)
+and [OnPaint](../api/RenderHandler.md#onpaint). In the GetViewRect
+callback information on viewport size will be provided to CEF:
+
+```Python
+def GetViewRect(self, rect_out, **_):
+    rect_out.extend([0, 0, VIEWPORT_SIZE[0], VIEWPORT_SIZE[1]])
+    return True
+```
+
+In this callback viewport size is returned via |rect_out| which
+is of type "list" and thus is passed by reference. Additionally
+a True value is returned by function to notify CEF that rectangle
+was provided.
+
+In the OnPaint callback CEF provides a [PaintBufer](../api/PaintBuffer.md#paintbuffer-object) object, which is a pixel buffer of the
+browser view. This object has [GetIntPointer](../api/PaintBuffer.md#getintpointer)
+and [GetString](../api/PaintBuffer.md#getstring) methods. In the
+example the latter method is used which returns bytes. The method
+name is a bit confusing for Python 3 users, but in Python 2 bytes
+were strings and thus the name. Here is the code:
+
+```Python
+def OnPaint(self, browser, element_type, paint_buffer, **_):
+    if element_type == cef.PET_VIEW:
+        buffer_string = paint_buffer.GetString(mode="rgba",
+                                               origin="top-left")
+        browser.SetUserData("OnPaint.buffer_string", buffer_string)
+```
+
+The |element_type| argument can be either of cef.PET_VIEW
+(main view) or cef.PET_POPUP (for drawing popup widgets like
+`<select>` element). You can see a call to [SetUserData](../api/Browser.md#setuserdata)
+which is a helper method for storing custom data associated with
+browser. This data is stored for later use when page completes
+loading. During loading of a page there are many calls to OnPaint
+callback and it is not yet known which call is the last when
+loading completes and thus image buffer is stored for later use.
+
+The screenshot example also implements another handler named
+[LoadHanadler](../api/LoadHandler.md#loadhandler-interface)
+and two of its callbacks: [OnLoadingStateChange](../api/LoadHandler.md#onloadingstatechange)
+and [OnLoadError](../api/LoadHandler.md#onloaderror). The
+OnLoadingStateChange callbacks notifies when web page loading
+completes and OnLoadError callback notifies if loading of
+page failed. When loading succeeds a function save_screenshot()
+is called which retrieves image buffer that was earlier stored
+in the browser object and then uses PIL image library to save
+it as a PNG image.
+
+At the end, it is worth noting that there is yet an another
+option for off-screen rendering named [windowless_frame_rate](../api/BrowserSettings.md#windowless_frame_rate)
+(can be passed to [CreateBrowserSync](../api/cefpython.md#createbrowsersync)),
+but is not used by this example. It sets the maximum rate
+in frames per second (fps) that OnPaint callback will be called
+
+Currently CEF requires a window manager on Linux even in off-screen
+rendering mode. On systems without screen or any input you can use
+something like [Xvfb](https://en.wikipedia.org/wiki/Xvfb) which
+performs all graphical operations in memory without showing any
+screen output. Pure headless mode is currently not supported in
+CEF, but that may change in the future. CEF currently depends on
+X11 window manager, but there are plans to support alternative
+window managers by adding Ozone support - [upstream issue #1989](https://bitbucket.org/chromiumembedded/cef/issues/1989/linux-add-ozone-support-as-an-alternative).
+
+The screenshot.py example is just a basic showcase of off-screen
+rendering features. That screenshot feature should also be possible
+to implement using windowed rendering using a normal GUI window,
+but a hidden one with height set to some very big value that it
+wouldn't fit on screen. You could then render contents of this
+window to an image. For example in Qt you can do this by using
+QImage/QPainter classes along with a call to QWidget.render().
 
 ## Build executable
 
