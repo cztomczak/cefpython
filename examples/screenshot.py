@@ -5,22 +5,25 @@ example doesn't depend on any third party GUI framework.
 This example is discussed in Tutorial in the Off-screen
 rendering section.
 
-You have to install PIL image library before running script:
+Before running this script you have to install Pillow image
+library (PIL module):
 
-    pip install PIL
+    pip install Pillow
 
-With optionl arguments to this script you can resize viewport so
-that screenshot includes whole page with height like 5000 px which
-would be an equivalent of scrolling down multiple pages. By default
-when no arguments are provided will load cefpython project page
-on Github with 5000 px height.
+With optionl arguments to this script you can resize viewport
+so that screenshot includes whole page with height like 5000px
+which would be an equivalent of scrolling down multiple pages.
+By default when no arguments are provided will load cefpython
+project page on Github with 5000 px height.
 
 Usage:
     python screenshot.py
     python screenshot.py https://github.com/cztomczak/cefpython 1024 5000
-    python screenshot.py https://www.google.com/ 800 600
+    python screenshot.py https://www.google.com/ncr 1024 768
 
-Tested with CEF Python v57.0+
+Tested configurations:
+- CEF Python v57.0+
+- Pillow 2.3.0 / 4.1.0
 """
 
 from cefpython3 import cefpython as cef
@@ -30,10 +33,10 @@ import subprocess
 import sys
 
 try:
-    from PIL import Image
+    from PIL import Image, PILLOW_VERSION
 except:
     print("[screenshot.py] Error: PIL module not available. To install"
-          " type: pip install PIL")
+          " type: pip install Pillow")
     sys.exit(1)
 
 
@@ -48,6 +51,7 @@ def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     if os.path.exists(SCREENSHOT_PATH):
+        print("[screenshot.py] Remove old screenshot")
         os.remove(SCREENSHOT_PATH)
     command_line_arguments()
     # Off-screen-rendering requires setting "windowless_rendering_enabled"
@@ -56,14 +60,15 @@ def main():
     create_browser()
     cef.MessageLoop()
     cef.Shutdown()
-    print("[screenshot.py] Opening screenshot using default application")
-    open_in_default_application(SCREENSHOT_PATH)
+    print("[screenshot.py] Opening screenshot with default application")
+    open_with_default_application(SCREENSHOT_PATH)
 
 
 def check_versions():
     print("[screenshot.py] CEF Python {ver}".format(ver=cef.__version__))
     print("[screenshot.py] Python {ver} {arch}".format(
           ver=platform.python_version(), arch=platform.architecture()[0]))
+    print("[screenshot.py] Pillow {ver}".format(ver=PILLOW_VERSION))
     assert cef.__version__ >= "57.0", "CEF Python v57.0+ required to run this"
 
 
@@ -124,7 +129,7 @@ def save_screenshot(browser):
     print("[screenshot.py] Saved image: {path}".format(path=SCREENSHOT_PATH))
 
 
-def open_in_default_application(path):
+def open_with_default_application(path):
     if sys.platform.startswith("darwin"):
         subprocess.call(("open", path))
     elif os.name == "nt":

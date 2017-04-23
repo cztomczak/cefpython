@@ -491,10 +491,11 @@ size set to 800px width and 5000px height which is an equivalent
 of scrolling down page multiple times, but you get all this in
 one single screenshot.
 
-Before running this script you must install PIL image library:
+Before running this script you have to install Pillow image
+library (PIL module):
 
 ```text
-pip install PIL
+pip install Pillow
 ```
 
 This example accepts optional arguments so that you can change
@@ -503,7 +504,7 @@ url and viewport size. Example usage:
 ```text
 python screenshot.py
 python screenshot.py https://github.com/cztomczak/cefpython 1024 5000
-python screenshot.py https://www.google.com/ 800 600
+python screenshot.py https://www.google.com/ncr 1024 768
 ```
 
 Let's discuss code in this example.
@@ -591,7 +592,7 @@ OnLoadingStateChange callbacks notifies when web page loading
 completes and OnLoadError callback notifies if loading of
 page failed. When loading succeeds a function save_screenshot()
 is called which retrieves image buffer that was earlier stored
-in the browser object and then uses PIL image library to save
+in the browser object and then uses Pillow image library to save
 it as a PNG image.
 
 At the end, it is worth noting that there is yet an another

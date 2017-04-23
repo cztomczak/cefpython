@@ -5,3 +5,4 @@ __pycache__/
 *.pyc
 cefclient
 webcache/
+examples/screenshot.png
