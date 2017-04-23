@@ -18,10 +18,16 @@ cdef class PaintBuffer:
     cdef int height
     cdef Py_ssize_t length
 
-    cpdef uintptr_t GetIntPointer(self) except *:
+    def __init__(self):
+        # TODO: Remove deprecated methods below from API reference
+        #       and update examples during next release
+        self.GetIntPointer = self.GetPointer
+        self.GetString = self.GetBytes
+
+    cpdef uintptr_t GetPointer(self) except *:
         return <uintptr_t>self.buffer
 
-    cpdef object GetString(self, str mode="bgra", str origin="top-left"):
+    cpdef object GetBytes(self, str mode="bgra", str origin="top-left"):
         cdef void* dest
         cdef py_bool dest_alloced = False
         cdef object ret

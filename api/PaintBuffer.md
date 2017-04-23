@@ -3,7 +3,7 @@
 
 # PaintBuffer (object)
 
-This object is related to: [Browser](Browser.md).GetImage() and [RenderHandler](RenderHandler.md).OnPaint().
+This object used in: [RenderHandler](RenderHandler.md).OnPaint().
 
 
 Table of contents:
