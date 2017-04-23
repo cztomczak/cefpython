@@ -14,7 +14,7 @@ With optionl arguments to this script you can resize viewport
 so that screenshot includes whole page with height like 5000px
 which would be an equivalent of scrolling down multiple pages.
 By default when no arguments are provided will load cefpython
-project page on Github with 5000 px height.
+project page on Github with 5000px height.
 
 Usage:
     python screenshot.py

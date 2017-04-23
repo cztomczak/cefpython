@@ -37,6 +37,7 @@ def main():
     examples = list()
     examples.append("hello_world.py")
     examples.append("tutorial.py")
+    examples.append("screenshot.py")
     succeeded = list()
     failed = list()
     passed = list()
