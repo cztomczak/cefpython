@@ -24,7 +24,7 @@ job you should see a new subdirectory in the build/ directory, for example:
 cefpython/build/cef55_3.2883.1553.g80bd606_win32/ .
 
 Usage:
-    automate.py (--prebuilt-cef | --build-cef)
+    automate.py (--prebuilt-cef | --build-cef | --make-distrib)
                 [--x86 X86]
                 [--fast-build FAST_BUILD]
                 [--force-chromium-update FORCE_CHROMIUM_UPDATE]
@@ -41,7 +41,10 @@ Options:
                              binaries for Linux are built on Ubuntu.
     --build-cef              Whether to build CEF from sources with the
                              cefpython patches applied.
-    --x86                    Build 32-bit CEF on 64-bit system
+    --make-distrib           Re-make CEF distribution (cef/binary_distrib/)
+                             after CEF was already built.
+    --x86                    Build (or make distrib) for 32-bit CEF on
+                             64-bit system.
     --fast-build             Fast build with is_official_build=False
     --force-chromium-update  Force Chromium update (gclient sync etc).
     --no-cef-update          Do not update CEF sources (by default both cef/
@@ -87,6 +90,7 @@ class Options(object):
     # From command-line
     prebuilt_cef = False
     build_cef = False
+    make_distrib = False
     x86 = False
     fast_build = False
     force_chromium_update = False
@@ -121,13 +125,15 @@ def main():
 
     if Options.build_cef:
         if not sys.version_info[:2] == (2, 7):
-            print("ERROR: To build CEF from sources you need Python 2.7,"
-                  "       as upstream automate-git.py only works with that"
-                  "       version of python.")
+            print("ERROR: To build CEF from sources you need Python 2.7.")
+            print("       Upstream automate-git.py works only with that")
+            print("       version of python.")
             sys.exit(1)
         build_cef()
     elif Options.prebuilt_cef:
         prebuilt_cef()
+    elif Options.make_distrib:
+        run_make_distrib()
 
 
 def setup_options(docopt_args):
@@ -958,6 +964,31 @@ def run_automate_git():
     command = script + " " + args
     working_dir = Options.cef_build_dir
     return run_command("%s %s" % (python, command), working_dir)
+
+
+def run_make_distrib():
+    """Run CEF make_distrib script."""
+    print("[automate.py] Make CEF binary distribution")
+    script_ext = "bat" if WINDOWS else "sh"
+    base_script = "make_distrib.{ext}".format(ext=script_ext)
+    tools_dir = os.path.join(Options.cef_build_dir, "chromium", "src", "cef",
+                             "tools")
+    script = os.path.join(tools_dir, base_script)
+    args = list()
+    args.append("--allow-partial")
+    args.append("--ninja-build")
+    if ARCH64 and not Options.x86:
+        args.append("--x64-build")
+    args.append("--no-archive")
+    args = " ".join(args)
+    command = "{script} {args}".format(script=script, args=args)
+    status = run_command(command, tools_dir)
+    if status == 0:
+        print("[automate.py] Done. CEF binary distribution created in: {dir}"
+              .format(dir=Options.binary_distrib))
+    else:
+        print("[automate.py] Error while making CEF binary distribution")
+        sys.exit(1)
 
 
 def rmdir(path):

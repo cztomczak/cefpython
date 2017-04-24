@@ -174,6 +174,9 @@ class CefBrowser(Widget):
 
         # Initialize CEF
 
+        # To shutdown all CEF processes on error
+        sys.excepthook = cef.ExceptHook
+
         # noinspection PyArgumentList
         cef.WindowUtils.InstallX11ErrorHandlers()
 

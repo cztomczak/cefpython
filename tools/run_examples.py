@@ -59,11 +59,14 @@ def main():
         passed.append("gtk2.py")
 
     # gtk3
+    """
     if LINUX:
         # Broken on Linux (Issue #261)
         print("[run_examples.py] PASS: gtk3.py (Issue #261)")
         passed.append("gtk3.py (Issue #261)")
-    elif MAC:
+    """
+
+    if MAC:
         # Crashes on Mac (Issue #310)
         print("[run_examples.py] PASS: gtk3.py (Issue #310)")
         passed.append("gtk3.py (Issue #310)")
@@ -165,7 +168,6 @@ def main():
 def check_installed_packages():
     packages = {
         "gtk": False,
-        "gi": False,
         "kivy": False,
         "PyQt4": False,
         "PyQt5": False,
@@ -180,7 +182,17 @@ def check_installed_packages():
             packages[package] = True
         except ImportError:
             packages[package] = False
+    packages["gi"] = check_gi_installed()
     return packages
+
+
+def check_gi_installed():
+    # Cannot import both gtk and gi in the same script, thus
+    # need another way of checking if gi package is installed.
+    command = ("\"{python}\" -c \"import gi\""
+               .format(python=sys.executable))
+    code = os.system(command)
+    return True if code == 0 else False
 
 
 if __name__ == "__main__":

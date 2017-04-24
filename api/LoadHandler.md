@@ -45,22 +45,23 @@ calls to OnLoadError and/or OnLoadEnd.
 | frame | [Frame](Frame.md) |
 | __Return__ | void |
 
+Description from upstream CEF:
+> Called after a navigation has been committed and before the browser begins
+> loading contents in the frame. The |frame| value will never be empty --
+> call the IsMain() method to check if this frame is the main frame.
+> |transition_type| provides information about the source of the navigation
+> and an accurate value is only available in the browser process. Multiple
+> frames may be loading at the same time. Sub-frames may start or continue
+> loading after the main frame load has ended. This method will not be called
+> for same page navigations (fragments, history state, etc.) or for
+> navigations that fail or are canceled before commit. For notification of
+> overall browser load status use OnLoadingStateChange instead.
+
 This callback is called for a number of different reasons, including when
 history.pushState or history.replaceState changes the reference fragment
 for the currently loaded page. In most cases you want to use
 OnLoadingStateChange. In newer CEF there is |transition_type| arg that
 provides information about the source of the navigation.
-
-Description from upstream CEF:
-> Called when the browser begins loading a frame. The |frame| value will
-> never be empty -- call the IsMain() method to check if this frame is the
-> main frame. |transition_type| provides information about the source of the
-> navigation and an accurate value is only available in the browser process.
-> Multiple frames may be loading at the same time. Sub-frames may
-> start or continue loading after the main frame load has ended. This method
-> will always be called for all frames irrespective of whether the request
-> completes successfully. For notification of overall browser load status use
-> [DisplayHandler](DisplayHandler.md).`OnLoadingStateChange` instead.
 
 
 ### OnDomReady
@@ -81,13 +82,15 @@ Not yet implemented. See [Issue #32](../issues/32).
 | http_code | int |
 | __Return__ | void |
 
-Called when the browser is done loading a frame. The |frame| value will
-never be empty -- call the IsMain() method to check if this frame is the
-main frame. Multiple frames may be loading at the same time. Sub-frames may
-start or continue loading after the main frame load has ended. This method
-will always be called for all frames irrespective of whether the request
-completes successfully. For notification of overall browser load status use
-OnLoadingStateChange instead.
+Description from upstream CEF:
+> Called when the browser is done loading a frame. The |frame| value will
+> never be empty -- call the IsMain() method to check if this frame is the
+> main frame. Multiple frames may be loading at the same time. Sub-frames may
+> start or continue loading after the main frame load has ended. This method
+> will not be called for same page navigations (fragments, history state,
+> etc.) or for navigations that fail or are canceled before commit. For
+> notification of overall browser load status use OnLoadingStateChange
+> instead.
 
 This event behaves like window.onload, it waits for all the content
 to load (e.g. images), there is currently no callback for
@@ -108,10 +111,12 @@ topic: http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10906
 | failed_url | string |
 | __Return__ | void |
 
-Called when the resource load for a navigation fails or is canceled.
-|errorCode| is the error code number, |error_text_out[0]| is the error
-text and |failed_url| is the URL that failed to load. See
-net\base\net_error_list.h for complete descriptions of the error codes.
+Description from upstream CEF:
+> Called when a navigation fails or is canceled. This method may be called
+> by itself if before commit or in combination with OnLoadStart/OnLoadEnd if
+> after commit. |errorCode| is the error code number, |errorText| is the
+> error text and |failedUrl| is the URL that failed to load.
+> See net\base\net_error_list.h for complete descriptions of the error codes.
 
 This callback may get called when [Browser](Browser.md).`StopLoad`
 is called, or when file download is aborted (see DownloadHandler).

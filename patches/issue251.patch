@@ -71,7 +71,7 @@ index 29b85e84..e3c9c2df 100644
  
  #endif  // CEF_INCLUDE_CEF_DRAG_DATA_H_
 diff --git libcef/browser/osr/browser_platform_delegate_osr.cc libcef/browser/osr/browser_platform_delegate_osr.cc
-index 2cf44f6d..2e6b8c32 100644
+index 148ef49c..59cfae97 100644
 --- libcef/browser/osr/browser_platform_delegate_osr.cc
 +++ libcef/browser/osr/browser_platform_delegate_osr.cc
 @@ -7,6 +7,7 @@
@@ -82,7 +82,7 @@ index 2cf44f6d..2e6b8c32 100644
  #include "libcef/browser/osr/render_widget_host_view_osr.h"
  #include "libcef/browser/osr/web_contents_view_osr.h"
  #include "libcef/common/drag_data_impl.h"
-@@ -393,7 +394,9 @@ void CefBrowserPlatformDelegateOsr::StartDragging(
+@@ -432,7 +433,9 @@ void CefBrowserPlatformDelegateOsr::StartDragging(
    CefRefPtr<CefRenderHandler> handler =
        browser_->GetClient()->GetRenderHandler();
    if (handler.get()) {
@@ -94,10 +94,10 @@ index 2cf44f6d..2e6b8c32 100644
      base::MessageLoop::ScopedNestableTaskAllower allow(
          base::MessageLoop::current());
 diff --git libcef/common/drag_data_impl.cc libcef/common/drag_data_impl.cc
-index 6b632ab2..2f12b928 100644
+index a8e2c8e1..b0c47e8e 100644
 --- libcef/common/drag_data_impl.cc
 +++ libcef/common/drag_data_impl.cc
-@@ -20,6 +20,13 @@ CefDragDataImpl::CefDragDataImpl(const content::DropData& data)
+@@ -19,6 +19,13 @@ CefDragDataImpl::CefDragDataImpl(const content::DropData& data)
        read_only_(false) {
  }
  
@@ -111,7 +111,7 @@ index 6b632ab2..2f12b928 100644
  CefDragDataImpl::CefDragDataImpl()
      : read_only_(false) {
  }
-@@ -32,7 +39,7 @@ CefRefPtr<CefDragData> CefDragDataImpl::Clone() {
+@@ -31,7 +38,7 @@ CefRefPtr<CefDragData> CefDragDataImpl::Clone() {
    CefDragDataImpl* drag_data = NULL;
    {
      base::AutoLock lock_scope(lock_);
@@ -120,7 +120,7 @@ index 6b632ab2..2f12b928 100644
    }
    return drag_data;
  }
-@@ -191,3 +198,20 @@ void CefDragDataImpl::SetReadOnly(bool read_only) {
+@@ -187,3 +194,20 @@ void CefDragDataImpl::SetReadOnly(bool read_only) {
  
    read_only_ = read_only;
  }
