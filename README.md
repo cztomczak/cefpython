@@ -78,9 +78,21 @@ See the [Examples-README.md](examples/Examples-README.md) file.
 
 ## Releases
 
-Information on supported platforms, python versions, architectures
-and requirements. If you want to support old operating systems then
-choose the v31 release.
+Information on planned new and current releases, supported platforms,
+python versions, architectures and requirements. If you want to
+support old operating systems then choose the v31 release.
+
+**Next release**
+
+- New v58 release will be ready very soon
+- To see planned new features or bugs to be fixed in the
+  next release, see the
+  [next release](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release%22)
+  label in the tracker
+- To see planned new features or bugs to be fixed in the
+  in one of next releases, see the
+  [next release 2](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release+2%22)
+  label in the tracker
 
 **Latest release**
 
