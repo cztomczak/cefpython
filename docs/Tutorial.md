@@ -20,6 +20,7 @@ Table of contents:
 * [Handling Python exceptions](#handling-python-exceptions)
 * [Message loop](#message-loop)
 * [Settings](#settings)
+* [Change user agent string](#change-user-agent-string)
 * [Client handlers](#client-handlers)
 * [Javascript integration](#javascript-integration)
 * [Javascript exceptions and Python exceptions](#javascript-exceptions-and-python-exceptions)
