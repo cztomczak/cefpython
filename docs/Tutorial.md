@@ -300,7 +300,7 @@ for details.
 
 ## Change user agent string
 
-There are two options in [application settings](../api/ApplicationSettings.md)
+There are two options in [application settings](../api/ApplicationSettings.md#application-settings)
 for changing User-Agent string: [product_version](../api/ApplicationSettings.md#product_version)
 and [user_agent](../api/ApplicationSettings.md#user_agent).
 
@@ -334,6 +334,7 @@ settings = {
     # "product_version": "MyProduct/10.00",
     # "user_agent": "MyAgent/20.00 MyProduct/10.00",
 }
+cef.Initialize(settings=settings)
 ```
 
 
