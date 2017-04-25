@@ -241,6 +241,13 @@ Here are some settings worth noting:
   customize context menu
 - [locale](../api/ApplicationSettings.md#locale) - set language
   for localized resources
+- [product_version](../api/ApplicationSettings.md#product_version) -
+  set the product portion of the default User-Agent string.
+  If user_agent option (below) is used then product_version will
+  be ignored.
+- [user_agent](../api/ApplicationSettings.md#user_agent) - set
+  value that will be returned as the User-Agent HTTP header
+  and js navigator.userAgent
 
 To enable debugging set these settings:
 ```python
@@ -288,6 +295,45 @@ There are lots of more settings that can be set using Chromium
 preferences (and even changed during runtime), however this API
 wasn't yet exposed to CEF Python, see [Issue #244](../../../issues/244)
 for details.
+
+
+## Change user agent string
+
+There are two options in [application settings](../api/ApplicationSettings.md)
+for changing User-Agent string: [product_version](../api/ApplicationSettings.md#product_version)
+and [user_agent](../api/ApplicationSettings.md#user_agent).
+
+The "product_version" sets the product portion of the default
+User-Agent string. If "user_agent" option is used then
+"product_version" will be ignored. For example if you set
+"product_version" to "MyProduct/10.00" then User-Agent will
+be:
+
+```text
+Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)
+MyProduct/10.00 Safari/537.36
+```
+
+To change the whole user agent string use the "user_agent"
+option. For example set it to "MyApp/40.00 MyProduct/10.00"
+and both User-Agent HTTP header and js navigator.userAgent will be:
+
+```text
+MyAgent/20.00 MyProduct/10.00
+```
+
+Uncomment appropriate lines in [tutorial.py](../examples/tutorial.py)
+example to see the effect:
+
+```Python
+# To change user agent use either "product_version"
+# or "user_agent" options. Explained in Tutorial in
+# "Change user agent string" section.
+settings = {
+    # "product_version": "MyProduct/10.00",
+    # "user_agent": "MyAgent/20.00 MyProduct/10.00",
+}
+```
 
 
 ## Client handlers
