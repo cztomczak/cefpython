@@ -95,7 +95,7 @@ index 148ef49c..bfec55b7 100644
      base::MessageLoop::ScopedNestableTaskAllower allow(
          base::MessageLoop::current());
 diff --git libcef/common/drag_data_impl.cc libcef/common/drag_data_impl.cc
-index a8e2c8e1..a5c8940c 100644
+index a8e2c8e1..6db3da39 100644
 --- libcef/common/drag_data_impl.cc
 +++ libcef/common/drag_data_impl.cc
 @@ -19,6 +19,15 @@ CefDragDataImpl::CefDragDataImpl(const content::DropData& data)
@@ -123,22 +123,10 @@ index a8e2c8e1..a5c8940c 100644
    }
    return drag_data;
  }
-@@ -187,3 +196,31 @@ void CefDragDataImpl::SetReadOnly(bool read_only) {
+@@ -187,3 +196,18 @@ void CefDragDataImpl::SetReadOnly(bool read_only) {
  
    read_only_ = read_only;
  }
-+
-+void CefDragDataImpl::SetImage(CefRefPtr<CefImage> image) {
-+  base::AutoLock lock_scope(lock_);
-+  CHECK_READONLY_RETURN_VOID();
-+  image_ = image;
-+}
-+
-+void CefDragDataImpl::SetImageHotspot(const CefPoint& point) {
-+  base::AutoLock lock_scope(lock_);
-+  CHECK_READONLY_RETURN_VOID();
-+  image_hotspot_.Set(point.x, point.y);
-+}
 +
 +CefRefPtr<CefImage> CefDragDataImpl::GetImage() {
 +  base::AutoLock lock_scope(lock_);
@@ -152,11 +140,10 @@ index a8e2c8e1..a5c8940c 100644
 +
 +bool CefDragDataImpl::HasImage() {
 +  base::AutoLock lock_scope(lock_);
-+  if (image_) return true;
-+  else return false;
++  return image_ ? true : false;
 +}
 diff --git libcef/common/drag_data_impl.h libcef/common/drag_data_impl.h
-index 64f29ed3..68cb3875 100644
+index 64f29ed3..37c398d2 100644
 --- libcef/common/drag_data_impl.h
 +++ libcef/common/drag_data_impl.h
 @@ -7,6 +7,7 @@
@@ -171,9 +158,9 @@ index 64f29ed3..68cb3875 100644
   public:
    CefDragDataImpl();
    explicit CefDragDataImpl(const content::DropData& data);
-+  explicit CefDragDataImpl(const content::DropData& data,
-+                           CefRefPtr<CefImage> image,
-+                           const CefPoint& image_hotspot);
++  CefDragDataImpl(const content::DropData& data,
++                  CefRefPtr<CefImage> image,
++                  const CefPoint& image_hotspot);
  
    CefRefPtr<CefDragData> Clone() override;
    bool IsReadOnly() override;
@@ -187,14 +174,7 @@ index 64f29ed3..68cb3875 100644
  
    // This method is not safe. Use Lock/Unlock to get mutually exclusive access.
    content::DropData* drop_data() {
-@@ -49,10 +56,15 @@ class CefDragDataImpl : public CefDragData {
- 
-   void SetReadOnly(bool read_only);
- 
-+  void SetImage(CefRefPtr<CefImage> image);
-+  void SetImageHotspot(const CefPoint& point);
-+
-   base::Lock& lock() { return lock_; }
+@@ -53,6 +60,8 @@ class CefDragDataImpl : public CefDragData {
  
   private:
    content::DropData data_;
@@ -351,3 +331,36 @@ index 5b202710..20262388 100644
  };
  
  #endif  // CEF_LIBCEF_DLL_CTOCPP_DRAG_DATA_CTOCPP_H_
+diff --git tests/ceftests/os_rendering_unittest.cc tests/ceftests/os_rendering_unittest.cc
+index 8fa110fa..c8f49d9c 100644
+--- tests/ceftests/os_rendering_unittest.cc
++++ tests/ceftests/os_rendering_unittest.cc
+@@ -1007,6 +1007,28 @@ class OSRTestHandler : public RoutingTestHandler,
+                      CefRenderHandler::DragOperationsMask allowed_ops,
+                      int x, int y) override {
+     if (test_type_ == OSR_TEST_DRAG_DROP_START_DRAGGING && started()) {
++      // Drag image representation
++      EXPECT_TRUE(drag_data->HasImage());
++      CefRefPtr<CefImage> image = drag_data->GetImage();
++      EXPECT_TRUE(image.get() != NULL);
++      if (image.get()) {
++        // Drag image height seem to be always + 1px greater than
++        // the drag rect on Linux. But whether this is true on all
++        // platforms not sure, so to be safe lets allow it to be
++        // +/- 1px.
++        EXPECT_GE(image->GetWidth(), GetScaledInt(kDragDivRect.width));
++        EXPECT_LE(image->GetWidth(), GetScaledInt(kDragDivRect.width) + 1);
++        EXPECT_GE(image->GetHeight(), GetScaledInt(kDragDivRect.height));
++        EXPECT_LE(image->GetHeight(), GetScaledInt(kDragDivRect.height) + 1);
++      }
++      // During testing hotspot was (15, 23) and with scale_factor 2x
++      // it was (15, 18). I don't know how the algorithm works, so
++      // testing only rect boundaries.
++      CefPoint hotspot = drag_data->GetImageHotspot();
++      EXPECT_GT(hotspot.x, 0);
++      EXPECT_LT(hotspot.x, GetScaledInt(kDragDivRect.width));
++      EXPECT_GT(hotspot.y, 0);
++      EXPECT_LT(hotspot.y, GetScaledInt(kDragDivRect.height));
+       DestroySucceededTestSoon();
+       return false;
+     } else if ((test_type_ == OSR_TEST_DRAG_DROP_UPDATE_CURSOR ||

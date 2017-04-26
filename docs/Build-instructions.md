@@ -452,6 +452,11 @@ cd chromium/src/cef/
 git diff --no-prefix --relative > issue251.patch
 ```
 
+To create a patch from last two commits:
+```
+git diff --no-prefix --relative HEAD~2..HEAD > issue251.patch
+```
+
 Apply a patch in current directory and ignore git index:
 ```
 patch -p0 < issue251.patch
@@ -461,10 +466,4 @@ Apply a patch in current directory and do not ignore git index:
 ```
 cd chromium/src/cef/
 git apply -v -p0 issue251.patch
-```
-
-To create a patch from last two commits (no --relative flag available
-in this case, so must be in root CEF dir):
-```
-git format-patch --no-prefix -2 HEAD --stdout > issue251.patch
 ```
