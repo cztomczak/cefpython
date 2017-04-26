@@ -13,6 +13,7 @@ Table of contents:
   * [GetFragmentText](#getfragmenttext)
   * [GetFragmentHtml](#getfragmenthtml)
   * [GetImage](#getimage)
+  * [GetImageHotspot](#getimagehotspot)
   * [HasImage](#hasimage)
 
 
@@ -84,6 +85,17 @@ Linux-only currently (#251).
 
 Get image representation of drag data. Check with HasImage() first,
 otherwise if there is no image an exception is thrown.
+
+
+### GetImageHotspot
+
+| | |
+| --- | --- |
+| __Return__ | [Image](Image.md) |
+
+Linux-only currently (#251).
+
+Get image hotspot (drag start location relative to image dimensions).
 
 
 ### HasImage

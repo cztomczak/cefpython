@@ -443,6 +443,7 @@ directly.
   * [GetFragmentText](api/DragData.md#getfragmenttext)
   * [GetFragmentHtml](api/DragData.md#getfragmenthtml)
   * [GetImage](api/DragData.md#getimage)
+  * [GetImageHotspot](api/DragData.md#getimagehotspot)
   * [HasImage](api/DragData.md#hasimage)
 * [FocusHandler (interface)](api/FocusHandler.md#focushandler-interface)
   * [OnTakeFocus](api/FocusHandler.md#ontakefocus)

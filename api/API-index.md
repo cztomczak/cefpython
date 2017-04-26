@@ -218,6 +218,7 @@
   * [GetFragmentText](DragData.md#getfragmenttext)
   * [GetFragmentHtml](DragData.md#getfragmenthtml)
   * [GetImage](DragData.md#getimage)
+  * [GetImageHotspot](DragData.md#getimagehotspot)
   * [HasImage](DragData.md#hasimage)
 * [FocusHandler (interface)](FocusHandler.md#focushandler-interface)
   * [OnTakeFocus](FocusHandler.md#ontakefocus)
