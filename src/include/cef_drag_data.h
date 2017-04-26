@@ -196,16 +196,16 @@ class CefDragData : public virtual CefBaseRefCounted {
   virtual void AddFile(const CefString& path, const CefString& display_name) =0;
 
   ///
-  // Set image representation of drag data.
-  ///
-  /*--cef()--*/
-  virtual void SetImage(CefRefPtr<CefImage> image) =0;
-
-  ///
   // Get image representation of drag data (may be NULL).
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefImage> GetImage() =0;
+
+  ///
+  // Get image hotspot (drag start location relative to image dimensions).
+  ///
+  /*--cef()--*/
+  virtual CefPoint GetImageHotspot() =0;
 
   ///
   // Whether image representation of drag data is available.

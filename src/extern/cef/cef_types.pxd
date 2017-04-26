@@ -107,7 +107,8 @@ cdef extern from "include/internal/cef_types.h":
         CefSize(int width, int height)
 
     cdef cppclass CefPoint:
-        pass
+        int x
+        int y
 
     ctypedef struct CefRequestContextSettings:
         pass
