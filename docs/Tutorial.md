@@ -643,6 +643,13 @@ is called which retrieves image buffer that was earlier stored
 in the browser object and then uses Pillow image library to save
 it as a PNG image.
 
+The screenshot example could be further extended, so that it
+makes a screenshot of the whole page no matter how long it is.
+Detecting page length could be done in Javascript and then
+communicated back with Python using [Javascript bindings](#javscript-integration).
+After whole page length is known a call to browser.WasResized()
+should be done so that GetViewRect and OnPaint are called again.
+
 At the end, it is worth noting that there is yet an another
 option for off-screen rendering named [windowless_frame_rate](../api/BrowserSettings.md#windowless_frame_rate)
 (can be passed to [CreateBrowserSync](../api/cefpython.md#createbrowsersync)),

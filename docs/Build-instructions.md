@@ -455,6 +455,8 @@ git diff --no-prefix --relative > issue251.patch
 To create a patch from last two commits:
 ```
 git diff --no-prefix --relative HEAD~2..HEAD > issue251.patch
+# or
+git format-patch --no-prefix -2 HEAD --stdout > issue251.patch
 ```
 
 Apply a patch in current directory and ignore git index:

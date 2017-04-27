@@ -85,13 +85,13 @@ class MainFrame(wx.Frame):
         # is available (Issue #347).
         if LINUX:
             self.Show()
-            # In wxPython 3.0 and wxPython 4.0 handle is still
-            # not yet available, must delay embedding browser
+            # In wxPython 3.0 and wxPython 4.0 on Linux handle is
+            # still not yet available, so must delay embedding browser
             # (Issue #349).
             if wx.version().startswith("3.") or wx.version().startswith("4."):
                 wx.CallLater(20, self.embed_browser)
             else:
-                # This works fine in wxPython 2.8
+                # This works fine in wxPython 2.8 on Linux
                 self.embed_browser()
         else:
             self.embed_browser()

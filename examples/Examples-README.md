@@ -39,7 +39,7 @@ workarounds.
 
 - [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
   library (GTK 2)
-- [gtk3.py](gtk3.py): example for [PyGObject/PyGI](https://wiki.gnome.org/Projects/PyGObject)
+- [gtk3.py](gtk3.py): example for [PyGObject / PyGI](https://wiki.gnome.org/Projects/PyGObject)
   library (GTK 3). Currently broken on Mac ([#310](../../../issues/310)).
 - [qt.py](qt.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4),
   [PyQt5](https://pypi.python.org/pypi/PyQt5)
