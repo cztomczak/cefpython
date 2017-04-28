@@ -190,6 +190,9 @@ class CefBrowser(Widget):
         # TODO: For printing to work in off-screen-rendering mode
         #       it is enough to call gtk_init(). It is not required
         #       to provide window handle when calling SetAsOffscreen().
+        #       However it still needs to be tested whether providing
+        #       window handle is required for mouse context menu and
+        #       popup widgets to work.
         gtkwin = gtk.Window()
         gtkwin.realize()
 
