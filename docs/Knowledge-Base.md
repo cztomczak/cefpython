@@ -55,7 +55,7 @@ freezing application into exe then these tools should
 automatically detect the msvcp140.dll dependency and ship it
 with your application.
 
-Created [Issue #359](../../issues/359) to track this problem.
+Created [Issue #359](../../../issues/359) to track this problem.
 
 
 ## Notifications about new releases / commits
