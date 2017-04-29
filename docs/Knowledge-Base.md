@@ -1,6 +1,7 @@
 # Knowledge Base
 
 Table of contents:
+* [ImportError: DLL load failed (Windows)](#importerror-dll-load-failed-windows)
 * [Notifications about new releases / commits](#notifications-about-new-releases--commits)
 * [Changes in API after CEF updates](#changes-in-api-after-cef-updates)
 * [Differences between Python 2 and Python 3](#differences-between-python-2-and-python-3)
@@ -15,6 +16,46 @@ Table of contents:
 * [Windows XP support](#windows-xp-support)
 * [Mac 32-bit support](#mac-32-bit-support)
 * [Security](#security)
+
+
+## ImportError: DLL load failed (Windows)
+
+If you get such an error on Windows:
+```Text
+import cefpython3
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Python3\lib\site-packages\cefpython3\__init__.py", line 59, in <module>
+    from . import cefpython_py36 as cefpython
+ImportError: DLL load failed: The specified module could not be found.
+```
+
+Then most probably this is caused, because you are missing
+"msvcp140.dll" dependency (for Python 3 for example). This
+is a dependency for Python C++ extensions (eg. cefpython_py36.pyd
+depends on it). For Python 3 to fix this download
+[Visual C++ Redistributable for VS2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145)
+(13 MB) - this is just a VC++ redistributable, not a Visual Studio
+package. For 32-bit download "vc_redist.x86.exe" file and for
+64-bit download "vc_redist.x64.exe" file.
+
+Explanation: msvcp140.dll is the DLL for the C++ runtime library.
+This dependency is added by Cython when building CEF Python
+module. It seems that Python 3.6 only ships "vcruntime140.dll"
+which is the DLL for the C runtime library.
+
+Rant: It would be nice if Guido van Rossum would stop his
+academic approach to Python development and would not have
+created Python 3 incompatibility hell. It would also be nice
+if he shipped msvcp140.dll along with vcruntime140.dll, so
+that Python 3 supports C++ extensions as well.
+
+On a side note, when using pyinstaller/py2exe tools for
+freezing application into exe then these tools should
+automatically detect the msvcp140.dll dependency and ship it
+with your application.
+
+Created [Issue #359](../../issues/359) to track this problem.
 
 
 ## Notifications about new releases / commits
