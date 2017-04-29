@@ -31,9 +31,9 @@ ImportError: DLL load failed: The specified module could not be found.
 ```
 
 Then most probably this is caused, because you are missing
-"msvcp140.dll" dependency (for Python 3 for example). This
+"msvcp140.dll" dependency (for Python 3.5/3.6 for example). This
 is a dependency for Python C++ extensions (eg. cefpython_py36.pyd
-depends on it). For Python 3 to fix this download
+depends on it). For Python 3.5/3.6 to fix this download
 [Visual C++ Redistributable for VS2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145)
 (13 MB) - this is just a VC++ redistributable, not a Visual Studio
 package. For 32-bit download "vc_redist.x86.exe" file and for
