@@ -12,6 +12,7 @@ import pygtk
 import gtk
 import sys
 import os
+import time
 
 from kivy.app import App
 from kivy.uix.button import Button
@@ -80,6 +81,7 @@ class CefBrowser(Widget):
         # This has to be done like this because I wasn't able to change
         # the texture size
         # until runtime without core-dump.
+        # noinspection PyArgumentList
         self.bind(size=self.size_changed)
 
         self.browser = None
@@ -158,6 +160,7 @@ class CefBrowser(Widget):
                 # Disable context menu, popup widgets not supported
                 "enabled": False,
             },
+            "external_message_pump": False,  # See Issue #246
         }
         switches = {
             # Tweaking OSR performance by setting the same Chromium flags
@@ -276,7 +279,7 @@ class CefBrowser(Widget):
     _keyboard = None
 
     def request_keyboard(self):
-        print("request_keyboard()")
+        print("[kivy_.py] request_keyboard()")
         self._keyboard = EventLoop.window.request_keyboard(
                 self.release_keyboard, self)
         self._keyboard.bind(on_key_down=self.on_key_down)
@@ -303,7 +306,7 @@ class CefBrowser(Widget):
         self.is_alt2 = False
         if not self._keyboard:
             return
-        print("release_keyboard()")
+        print("[kivy_.py] release_keyboard()")
         self._keyboard.unbind(on_key_down=self.on_key_down)
         self._keyboard.unbind(on_key_up=self.on_key_up)
         self._keyboard.release()
@@ -615,16 +618,16 @@ class CefBrowser(Widget):
                     y = -1
                 if y == self.height-1:
                     y = self.height
-                print("~~ DragSourceEndedAt")
-                print("~~ current_drag_operation=%s"
+                print("[kivy_.py] ~~ DragSourceEndedAt")
+                print("[kivy_.py] ~~ current_drag_operation=%s"
                       % self.current_drag_operation)
                 self.browser.DragSourceEndedAt(x, y,
                                                self.current_drag_operation)
                 self.drag_ended()
             else:
-                print("~~ DragTargetDrop")
-                print("~~ DragSourceEndedAt")
-                print("~~ current_drag_operation=%s"
+                print("[kivy_.py] ~~ DragTargetDrop")
+                print("[kivy_.py] ~~ DragSourceEndedAt")
+                print("[kivy_.py] ~~ current_drag_operation=%s"
                       % self.current_drag_operation)
                 self.browser.DragTargetDrop(touch.x, y)
                 self.browser.DragSourceEndedAt(touch.x, y,
@@ -667,19 +670,19 @@ class CefBrowser(Widget):
             # print("on_touch_move=%s/%s" % (touch.x, y))
             if self.is_inside_web_view(touch.x, y):
                 if self.is_drag_leave:
-                    print("~~ DragTargetDragEnter")
+                    print("[kivy_.py] ~~ DragTargetDragEnter")
                     self.browser.DragTargetDragEnter(
                             self.drag_data, touch.x, y,
                             cef.DRAG_OPERATION_EVERY)
                     self.is_drag_leave = False
-                print("~~ DragTargetDragOver")
+                print("[kivy_.py] ~~ DragTargetDragOver")
                 self.browser.DragTargetDragOver(
                         touch.x, y, cef.DRAG_OPERATION_EVERY)
                 self.update_drag_icon(touch.x, y)
             else:
                 if not self.is_drag_leave:
                     self.is_drag_leave = True
-                    print("~~ DragTargetDragLeave")
+                    print("[kivy_.py] ~~ DragTargetDragLeave")
                     self.browser.DragTargetDragLeave()
 
     def is_inside_web_view(self, x, y):
@@ -696,7 +699,7 @@ class CefBrowser(Widget):
         del self.drag_data
         self.current_drag_operation = cef.DRAG_OPERATION_NONE
         self.update_drag_icon(None, None)
-        print("~~ DragSourceSystemDragEnded")
+        print("[kivy_.py] ~~ DragSourceSystemDragEnded")
         self.browser.DragSourceSystemDragEnded()
 
     drag_icon = None
@@ -765,12 +768,12 @@ class ClientHandler:
         # --
         # Cannot use "file://" urls to load local resources, error:
         # | Not allowed to load local resource
-        print("_fix_select_boxes()")
+        print("[kivy_.py] _fix_select_boxes()")
         resources_dir = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
                 "kivy-select-boxes")
         if not os.path.exists(resources_dir):
-            print("The kivy-select-boxes directory does not exist, "
+            print("[kivy_.py] The kivy-select-boxes directory does not exist, "
                   "select boxes fix won't be applied.")
             return
         js_file = os.path.join(resources_dir, "kivy-selectBox.js")
@@ -796,10 +799,12 @@ class ClientHandler:
             "kivy_.py > ClientHandler > OnLoadStart > _fix_select_boxes()")
 
     def OnLoadStart(self, browser, frame, **_):
+        self.load_start_time = time.time()
         self._fix_select_boxes(frame)
         browserWidget = browser.GetUserData("browserWidget")
         if browserWidget and browserWidget.keyboard_mode == "local":
-            print("OnLoadStart(): injecting focus listeners for text controls")
+            print("[kivy_.py] OnLoadStart(): injecting focus listeners for"
+                  " text controls")
             # The logic is similar to the one found in kivy-berkelium:
             # https://github.com/kivy/kivy-berkelium/blob/master/berkelium/__init__.py
             jsCode = """
@@ -849,14 +854,30 @@ class ClientHandler:
             browser.SendFocusEvent(True)
 
     def OnLoadingStateChange(self, is_loading, **_):
-        print("OnLoadingStateChange(): isLoading = %s" % is_loading)
+        print("[kivy_.py] OnLoadingStateChange: isLoading = %s" % is_loading)
         # browserWidget = browser.GetUserData("browserWidget")
+        if self.load_start_time:
+            print("[kivy_.py] OnLoadingStateChange: load time = {time}"
+                  .format(time=time.time()-self.load_start_time))
+            self.load_start_time = None
 
     def OnPaint(self, element_type, paint_buffer, **_):
         # print "OnPaint()"
         if element_type != cef.PET_VIEW:
             print "Popups aren't implemented yet"
             return
+
+        # FPS meter ("fps" arg)
+        if "fps" in sys.argv:
+            if not hasattr(self, "last_paints"):
+                self.last_paints = []
+            self.last_paints.append(time.time())
+            while len(self.last_paints) > 30:
+                self.last_paints.pop(0)
+            if len(self.last_paints) > 1:
+                fps = len(self.last_paints) /\
+                        (self.last_paints[-1] - self.last_paints[0])
+                print("[kivy_.py] FPS={fps}".format(fps=fps))
 
         # update buffer
         paint_buffer = paint_buffer.GetString(mode="bgra", origin="top-left")
@@ -915,7 +936,7 @@ class ClientHandler:
         return True
 
     def StartDragging(self, drag_data, x, y, **_):
-        print("~~ StartDragging")
+        print("[kivy_.py] ~~ StartDragging")
         # Succession of d&d calls:
         #   DragTargetDragEnter
         #   DragTargetDragOver - in touch move event
@@ -924,7 +945,7 @@ class ClientHandler:
         #   DragTargetDrop - on mouse up
         #   DragSourceEndedAt - on mouse up
         #   DragSourceSystemDragEnded - on mouse up
-        print("~~ DragTargetDragEnter")
+        print("[kivy_.py] ~~ DragTargetDragEnter")
         self.browserWidget.browser.DragTargetDragEnter(
                 drag_data, x, y, cef.DRAG_OPERATION_EVERY)
         self.browserWidget.is_drag = True
