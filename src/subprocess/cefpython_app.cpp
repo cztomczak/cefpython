@@ -490,6 +490,29 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
     }
 }
 
+static CefRefPtr<CefV8Value> GetBaseObject(CefString &bindingName,
+                                           CefRefPtr<CefV8Value> v8Window) {
+        CefRefPtr<CefV8Value> v8Base = v8Window;
+
+        std::string::size_type prev_pos = 0, pos = 0;
+        std::string sfunctionName = bindingName.ToString();
+        while((pos = sfunctionName.find(".", pos)) != std::string::npos)
+        {
+            CefString basename(sfunctionName.substr(prev_pos, pos-prev_pos));
+            if (v8Base->HasValue(basename)) {
+                v8Base = v8Base->GetValue(basename);
+            } else {
+                CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(NULL, NULL);
+                v8Base->SetValue(basename, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
+                v8Base = v8Object;
+            }
+            pos += 1;
+            prev_pos = pos;
+        }
+        bindingName = sfunctionName.substr(prev_pos, std::string::npos);
+        return v8Base;
+}
+
 void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                         CefRefPtr<CefFrame> frame,
                         CefRefPtr<CefV8Context> context) {
@@ -567,9 +590,12 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     for (std::vector<CefString>::iterator it = functionsVector.begin(); \
             it != functionsVector.end(); ++it) {
         CefString functionName = *it;
+
+        CefRefPtr<CefV8Value> v8Base = GetBaseObject(functionName, v8Window);
+
         v8Function = CefV8Value::CreateFunction(functionName,
                 v8FunctionHandler);
-        v8Window->SetValue(functionName, v8Function,
+        v8Base->SetValue(functionName, v8Function,
                 V8_PROPERTY_ATTRIBUTE_NONE);
     }
     // PROPERTIES.
@@ -586,8 +612,9 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     for (std::vector<CefString>::iterator it = v8Keys.begin(); \
             it != v8Keys.end(); ++it) {
         CefString v8Key = *it;
+        CefRefPtr<CefV8Value> v8Base = GetBaseObject(v8Key, v8Window);
         CefRefPtr<CefV8Value> v8Value = v8Properties->GetValue(v8Key);
-        v8Window->SetValue(v8Key, v8Value, V8_PROPERTY_ATTRIBUTE_NONE);
+        v8Base->SetValue(v8Key, v8Value, V8_PROPERTY_ATTRIBUTE_NONE);
     }
     // OBJECTS AND ITS METHODS.
     std::vector<CefString> objectsVector;
@@ -601,8 +628,9 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     for (std::vector<CefString>::iterator it = objectsVector.begin(); \
             it != objectsVector.end(); ++it) {
         CefString objectName = *it;
+        CefRefPtr<CefV8Value> v8Base = GetBaseObject(objectName, v8Window);
         CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(NULL, NULL);
-        v8Window->SetValue(objectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
+        v8Base->SetValue(objectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
         // METHODS.
         if (!(objects->GetType(objectName) == VTYPE_DICTIONARY)) {
             LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
