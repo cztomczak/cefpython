@@ -598,24 +598,6 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         v8Base->SetValue(functionName, v8Function,
                 V8_PROPERTY_ATTRIBUTE_NONE);
     }
-    // PROPERTIES.
-    CefRefPtr<CefV8Value> v8Properties = CefDictionaryValueToV8Value(
-            properties);
-    std::vector<CefString> v8Keys;
-    if (!v8Properties->GetKeys(v8Keys)) {
-        LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
-                      " v8Properties->GetKeys() failed";
-        if (didEnterContext)
-            context->Exit();
-        return;
-    }
-    for (std::vector<CefString>::iterator it = v8Keys.begin(); \
-            it != v8Keys.end(); ++it) {
-        CefString v8Key = *it;
-        CefRefPtr<CefV8Value> v8Base = GetBaseObject(v8Key, v8Window);
-        CefRefPtr<CefV8Value> v8Value = v8Properties->GetValue(v8Key);
-        v8Base->SetValue(v8Key, v8Value, V8_PROPERTY_ATTRIBUTE_NONE);
-    }
     // OBJECTS AND ITS METHODS.
     std::vector<CefString> objectsVector;
     if (!objects->GetKeys(objectsVector)) {
@@ -660,6 +642,24 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
             v8Object->SetValue(methodName, v8Function,
                     V8_PROPERTY_ATTRIBUTE_NONE);
         }
+    }
+    // PROPERTIES.
+    CefRefPtr<CefV8Value> v8Properties = CefDictionaryValueToV8Value(
+            properties);
+    std::vector<CefString> v8Keys;
+    if (!v8Properties->GetKeys(v8Keys)) {
+        LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
+                      " v8Properties->GetKeys() failed";
+        if (didEnterContext)
+            context->Exit();
+        return;
+    }
+    for (std::vector<CefString>::iterator it = v8Keys.begin(); \
+            it != v8Keys.end(); ++it) {
+        CefString v8Key = *it;
+        CefRefPtr<CefV8Value> v8Value = v8Properties->GetValue(v8Key);
+        CefRefPtr<CefV8Value> v8Base = GetBaseObject(v8Key, v8Window);
+        v8Base->SetValue(v8Key, v8Value, V8_PROPERTY_ATTRIBUTE_NONE);
     }
     // END.
     if (didEnterContext)
