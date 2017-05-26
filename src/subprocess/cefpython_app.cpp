@@ -611,8 +611,8 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
             it != objectsVector.end(); ++it) {
         CefString objectName = *it;
         CefRefPtr<CefV8Value> v8Base = GetBaseObject(objectName, v8Window);
-        CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(NULL, NULL);
-        v8Base->SetValue(objectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
+        CefRefPtr<CefV8Value> v8Object;
+
         // METHODS.
         if (!(objects->GetType(objectName) == VTYPE_DICTIONARY)) {
             LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
@@ -623,6 +623,20 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         }
         CefRefPtr<CefDictionaryValue> methods = \
                 objects->GetDictionary(objectName);
+
+        // If __call__ method exists make top level object a callable function
+        CefString callable = "__call__";
+        if (methods->HasKey(callable)) {
+            std::string fullMethodName = objectName.ToString().append(".") \
+                .append(callable.ToString());
+            v8Object = CefV8Value::CreateFunction(fullMethodName,
+                v8FunctionHandler);
+        } else {
+            v8Object = CefV8Value::CreateObject(NULL, NULL);
+        }
+
+        v8Base->SetValue(objectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
+
         std::vector<CefString> methodsVector;
         if (!(methods->IsValid() && methods->GetKeys(methodsVector))) {
             LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
