@@ -29,14 +29,15 @@ cdef class JavascriptBindings:
     cpdef py_void SetFunction(self, py_string name, object func):
         self.SetProperty(name, func)
 
-    cpdef py_void SetObject(self, py_string name, object obj):
+    cpdef py_void SetObject(self, py_string name, object obj,
+                            object allow_properties=False):
         if not hasattr(obj, "__class__"):
             raise Exception("JavascriptBindings.SetObject() failed: name=%s, "
                             "__class__ attribute missing, this is not an object" % name)
         cdef dict methods = {}
         cdef py_string key
         cdef object method
-        cdef object predicate = inspect.ismethod
+        cdef object predicate = None if allow_properties else inspect.ismethod
         if isinstance(obj, (PyBrowser, PyFrame)):
             predicate = inspect.isbuiltin
         for value in inspect.getmembers(obj, predicate=predicate):
@@ -75,7 +76,6 @@ cdef class JavascriptBindings:
             raise Exception("JavascriptBindings.SetProperty() failed: name=%s, "
                             "not allowed type: %s (this may be a type of a nested value)"
                             % (name, allowed))
-
         cdef object valueType = type(value)
         if IsFunctionOrMethod(valueType):
             self.functions[name] = value
@@ -88,7 +88,7 @@ cdef class JavascriptBindings:
         cdef dict functions
         cdef dict properties
         cdef dict objects
-        cdef dict methods
+        cdef dict attrs
         for browserId, pyBrowser in g_pyBrowsers.iteritems():
             if pyBrowser.GetJavascriptBindings() != self:
                 continue
@@ -100,10 +100,11 @@ cdef class JavascriptBindings:
             properties = self.properties
             objects = {}
             for objectName in self.objects:
-                methods = {}
-                for methodName in self.objects[objectName]:
-                    methods[methodName] = None
-                objects[objectName] = methods
+                attrs = {}
+                for name, value in self.objects[objectName].items():
+                    if self.IsValueAllowedRecursively(value):
+                        attrs[name] = value
+                objects[objectName] = attrs
             pyBrowser.SendProcessMessage(cef_types.PID_RENDERER,
                     0, "DoJavascriptBindings", [{
                             "functions": functions,
@@ -131,7 +132,7 @@ cdef class JavascriptBindings:
         if valueType == list:
             for val in value:
                 valueType2 = JavascriptBindings.IsValueAllowedRecursively(val, True)
-                if valueType2 is not True:
+                if not valueType2:
                     return valueType2.__name__
             return True
         elif valueType == bool:
@@ -150,7 +151,7 @@ cdef class JavascriptBindings:
         elif valueType == dict:
             for key in value:
                 valueType2 = JavascriptBindings.IsValueAllowedRecursively(value[key], True)
-                if valueType2 is not True:
+                if not valueType2:
                     return valueType2.__name__
             return True
         elif valueType == str or valueType == bytes:

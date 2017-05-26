@@ -598,7 +598,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         v8Base->SetValue(functionName, v8Function,
                 V8_PROPERTY_ATTRIBUTE_NONE);
     }
-    // OBJECTS AND ITS METHODS.
+    // OBJECTS AND ITS ATTRIBUTES.
     std::vector<CefString> objectsVector;
     if (!objects->GetKeys(objectsVector)) {
         LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
@@ -613,7 +613,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         CefRefPtr<CefV8Value> v8Base = GetBaseObject(objectName, v8Window);
         CefRefPtr<CefV8Value> v8Object;
 
-        // METHODS.
+        // OBJECT METHODS.
         if (!(objects->GetType(objectName) == VTYPE_DICTIONARY)) {
             LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
                           " objects->GetType() != VTYPE_DICTIONARY";
@@ -621,12 +621,12 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                 context->Exit();
             return;
         }
-        CefRefPtr<CefDictionaryValue> methods = \
+        CefRefPtr<CefDictionaryValue> attributes = \
                 objects->GetDictionary(objectName);
 
         // If __call__ method exists make top level object a callable function
         CefString callable = "__call__";
-        if (methods->HasKey(callable)) {
+        if (attributes->HasKey(callable)) {
             std::string fullMethodName = objectName.ToString().append(".") \
                 .append(callable.ToString());
             v8Object = CefV8Value::CreateFunction(fullMethodName,
@@ -637,24 +637,44 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
 
         v8Base->SetValue(objectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
 
-        std::vector<CefString> methodsVector;
-        if (!(methods->IsValid() && methods->GetKeys(methodsVector))) {
+        CefRefPtr<CefV8Value> v8Attributes = CefDictionaryValueToV8Value(
+            attributes);
+
+        std::vector<CefString> v8Keys;
+        if (!v8Attributes->GetKeys(v8Keys)) {
             LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
-                          " methods->GetKeys() failed";
+                " attributes->GetKeys() failed";
             if (didEnterContext)
                 context->Exit();
             return;
         }
-        for (std::vector<CefString>::iterator it = methodsVector.begin(); \
-                it != methodsVector.end(); ++it) {
-            CefString methodName = *it;
-            // fullMethodName = "object.method"
-            std::string fullMethodName = objectName.ToString().append(".") \
-                    .append(methodName.ToString());
-            v8Function = CefV8Value::CreateFunction(fullMethodName,
-                    v8FunctionHandler);
-            v8Object->SetValue(methodName, v8Function,
-                    V8_PROPERTY_ATTRIBUTE_NONE);
+        for (std::vector<CefString>::iterator it = v8Keys.begin(); \
+            it != v8Keys.end(); ++it) {
+            CefString attributeName = *it;
+
+            // Exclude dunder attributes
+            if (it->ToString().compare(0, 2, "__") != 0) {
+                CefRefPtr<CefValue> value =
+                    attributes->GetValue(attributeName);
+
+                // Check if attribute is a function
+                if (value->GetType() == VTYPE_BINARY) {
+                    std::string fullMethodName =
+                        objectName.ToString().append(".") \
+                            .append(attributeName.ToString());
+                    v8Function = CefV8Value::CreateFunction(fullMethodName,
+                        v8FunctionHandler);
+                    v8Object->SetValue(attributeName, v8Function,
+                        V8_PROPERTY_ATTRIBUTE_NONE);
+                }
+                else {
+                    // Else handle it as a property
+                    CefRefPtr<CefV8Value> v8Value =
+                        v8Attributes->GetValue(attributeName);
+                    v8Object->SetValue(attributeName, v8Value,
+                        V8_PROPERTY_ATTRIBUTE_NONE);
+                }
+            }
         }
     }
     // PROPERTIES.
