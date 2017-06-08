@@ -2,20 +2,22 @@
 
 Table of contents:
 * [Introduction](#introduction)
+* [Major sponsors](#major-sponsors)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
 * [Support](#support)
-* [Releases](#releases)
 * [Support development](#support-development)
   * [Thanks](#thanks)
+* [Releases](#releases)
 * [Quick links](#quick-links)
 
 
 ## Introduction
 
 CEF Python is a BSD-licensed open source project founded by [Czarek Tomczak](http://www.linkedin.com/in/czarektomczak)
-in 2012 and is based on Google Chromium and the [CEF Framework](https://bitbucket.org/chromiumembedded/cef)
+(hire me!) in 2012 and is based on Google Chromium and the
+[CEF Framework](https://bitbucket.org/chromiumembedded/cef)
 projects. The Chromium project focuses mainly on Google Chrome application
 development, while CEF focuses on facilitating embedded browser use cases
 in third-party applications. Lots of applications use CEF control, there are
@@ -34,6 +36,27 @@ can render web content off-screen in applications that use custom
 drawing frameworks. You can use it for automated testing of existing
 applications. You can use it for web scraping or as a web crawler,
 or other kind of internet bots.
+
+
+## Major sponsors
+
+<a href="http://www.blueplanet.com/">
+<img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
+</a>
+<br>
+
+<a href="https://clearchat.com/">
+<img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
+</a>
+<br>
+
+<a href="http://www.rentouch.ch/">
+<img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
+</a>
+<br><br>
+
+See the [Support development](#support-development) section for a list of
+all the individuals and companies supporting CEF Python.
 
 
 ## Install
@@ -80,6 +103,43 @@ See the [Examples-README.md](examples/Examples-README.md) file.
 - Wiki pages are deprecated and for v31 only
 
 
+## Support development
+
+If you would like to support general CEF Python development efforts
+by making a donation please click the Paypal Donate button:
+
+<a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=V7LU7PD4N4GGG'>
+<img src='https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/donate.gif' />
+</a><br><br>
+
+If you would like to see some feature implemented you can make
+a comment about that when making a donation. It will give it
+a higher priority.
+
+If you are interested in sponsorship opportunities please contact Czarek
+directly (linkedin profile or email).
+
+### Thanks
+
+* [2017] Many thanks to [ClearChat Inc.](https://clearchat.com/) for sponsoring
+  the v55/v56 releases for all platforms
+* [2016-2017] Thanks to JetBrains for providing an Open Source license for
+  [PyCharm](https://www.jetbrains.com/pycharm/)
+* [2012-2016] Thanks to those who have made a Paypal donation:
+  [Rentouch GmbH](http://www.rentouch.ch/), Walter Purvis, Rokas Stupuras,
+  Alex Rattray, Greg Kacy, Paul Korzhyk
+* [2012-2016] Thanks to those who have donated their time through code contributions,
+  they are listed in the [Authors](Authors) file
+* [2013-2015] Lots of thanks goes to [Cyan Inc.](http://www.blueplanet.com/)
+  for sponsoring this project for a long time, making CEF Python 3 mature
+* [2014] Thanks to Adam Duston for donating a Macbook to aid the development
+  of Mac port
+* [2013] Thanks to [Rentouch GmbH](http://www.rentouch.ch/) for sponsoring the
+  development of the off-screen rendering support
+* [2013] Thanks to Thomas Wusatiuk for sponsoring the development of the web
+  response reading features
+
+
 ## Releases
 
 Information on planned new and current releases, supported platforms,
@@ -123,42 +183,6 @@ Additional information for v31.2 release:
   and on GitHub Releases tagged [v31.2](../../releases/tag/v31.2).
 - Documentation is on [wiki pages](../../wiki)
 - API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
-
-
-## Support development
-
-If you would like to support general CEF Python development efforts
-by making a donation please click the Paypal Donate button:
-
-<a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=V7LU7PD4N4GGG'>
-<img src='https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/donate.gif' />
-</a><br><br>
-
-If you would like to see some feature implemented you can make
-a comment about that when making a donation. It will give it
-a higher priority.
-
-If you are interested in sponsorship opportunities please contact Czarek
-directly.
-
-### Thanks
-
-* Many thanks to [ClearChat Inc.](https://clearchat.com) for sponsoring
-  the v55/v56 releases for all platforms
-* Thanks to JetBrains for providing an Open Source license for
-  [PyCharm](https://www.jetbrains.com/pycharm/)
-* Thanks to those who have made a Paypal donation: [Rentouch GmbH](http://www.rentouch.ch/),
-  Walter Purvis, Rokas Stupuras, Alex Rattray, Greg Kacy, Paul Korzhyk
-* Lots of thanks goes to [Cyan Inc.](http://www.blueplanet.com/) for
-  sponsoring this project for a long time, making CEF Python 3 mature
-* Thanks to those who have donated their time through code contributions,
-  they are listed in the [Authors](Authors) file
-* Thanks to Adam Duston for donating a Macbook to aid the development
-  of Mac port
-* Thanks to [Rentouch GmbH](http://www.rentouch.ch/) for sponsoring the
-  development of the off-screen rendering support
-* Thanks to Thomas Wusatiuk for sponsoring the development of the web
-  response reading features
 
 
 ## Quick links
