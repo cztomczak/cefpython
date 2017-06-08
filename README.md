@@ -88,7 +88,6 @@ support old operating systems then choose the v31 release.
 
 **Next release**
 
-- New v58 release will be ready very soon
 - To see planned new features or bugs to be fixed in the
   next release, see the
   [next release](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release%22)
