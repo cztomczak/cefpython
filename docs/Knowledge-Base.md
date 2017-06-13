@@ -34,7 +34,7 @@ Then most probably this is caused, because you are missing
 "msvcp140.dll" dependency (for Python 3.5/3.6 for example). This
 is a dependency for Python C++ extensions (eg. cefpython_py36.pyd
 depends on it). For Python 3.5/3.6 to fix this download
-[Visual C++ Redistributable for VS2015](https://www.microsoft.com/en-us/download/details.aspx?id=48145)
+[Visual C++ Redistributable for VS2015](https://www.microsoft.com/en-us/download/details.aspx?id=52685)
 (13 MB) - this is just a VC++ redistributable, not a Visual Studio
 package. For 32-bit download "vc_redist.x86.exe" file and for
 64-bit download "vc_redist.x64.exe" file.
@@ -43,12 +43,6 @@ Explanation: msvcp140.dll is the DLL for the C++ runtime library.
 This dependency is added by Cython when building CEF Python
 module. It seems that Python 3.6 only ships "vcruntime140.dll"
 which is the DLL for the C runtime library.
-
-Rant: It would be nice if Guido van Rossum would stop his
-academic approach to Python development and would not have
-created Python 3 incompatibility hell. It would also be nice
-if he shipped msvcp140.dll along with vcruntime140.dll, so
-that Python 3 supports C++ extensions as well.
 
 On a side note, when using pyinstaller/py2exe tools for
 freezing application into exe then these tools should
