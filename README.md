@@ -3,6 +3,7 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Major sponsors](#major-sponsors)
+* [Funding request - v59.0 release [$600]](#funding-request---v590-release-600)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
@@ -57,6 +58,11 @@ or other kind of internet bots.
 
 See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
+
+
+## Funding request - v59.0 release [$600]
+
+For those interested in sponsoring a v59.0 release please see [Issue #370](../../issues/370).
 
 
 ## Install
