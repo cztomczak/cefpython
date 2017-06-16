@@ -19,8 +19,6 @@ def ExceptHook(exc_type, exc_value, exc_trace):
     and exit application immediately by ignoring "finally" (_exit()).
     """
     print("[CEF Python] ExceptHook: catched exception, will shutdown CEF")
-    QuitMessageLoop()
-    Shutdown()
     msg = "".join(traceback.format_exception(exc_type, exc_value,
                                              exc_trace))
     error_file = GetAppPath("error.log")
@@ -40,6 +38,11 @@ def ExceptHook(exc_type, exc_value, exc_trace):
     msg = msg.encode("ascii", errors="replace")
     msg = msg.decode("ascii", errors="replace")
     print("\n"+msg)
+    # There is a strange bug on Mac. Sometimes except message is not
+    # printed if QuitMessageLoop and Shutdown were called before the print
+    # message above.
+    QuitMessageLoop()
+    Shutdown()
     # noinspection PyProtectedMember
     os._exit(1)
 
