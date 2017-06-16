@@ -81,9 +81,25 @@ class MainFrame(wx.Frame):
         self.browser_panel.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         self.browser_panel.Bind(wx.EVT_SIZE, self.OnSize)
 
-        # On Linux must show before embedding browser, so that handle
-        # is available (Issue #347).
+        if MAC:
+            try:
+                # noinspection PyUnresolvedReferences
+                from AppKit import NSApp
+                # Make the content view for the window have a layer.
+                # This will make all sub-views have layers. This is
+                # necessary to ensure correct layer ordering of all
+                # child views and their layers. This fixes Window
+                # glitchiness during initial loading on Mac (Issue #371).
+                NSApp.windows()[0].contentView().setWantsLayer_(True)
+            except ImportError:
+                print("[wxpython.py] Warning: PyObjC package is missing, "
+                      "cannot fix Issue #371")
+                print("[wxpython.py] To install PyObjC type: "
+                      "pip install -U pyobjc")
+
         if LINUX:
+            # On Linux must show before embedding browser, so that handle
+            # is available (Issue #347).
             self.Show()
             # In wxPython 3.0 and wxPython 4.0 on Linux handle is
             # still not yet available, so must delay embedding browser
