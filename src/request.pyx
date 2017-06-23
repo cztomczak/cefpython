@@ -136,12 +136,14 @@ cdef class PyRequest:
                     raise Exception("Invalid element in postData: %s" % (
                             pyElement))
                 postData.get().AddElement(postDataElement)
+            self.GetCefRequest().get().SetPostData(postData)
         elif type(pyPostData) == dict:
             pyElement = urllib.urlencode(pyPostData)
             pyElement = str(pyElement)
             postDataElement = CefPostDataElement_Create()
             postDataElement.get().SetToBytes(len(pyElement), <char*>pyElement)
             postData.get().AddElement(postDataElement)
+            self.GetCefRequest().get().SetPostData(postData)
         else:
             raise Exception("Invalid type of postData, only dict|list allowed")
 
