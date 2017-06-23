@@ -159,6 +159,14 @@ The `AuthCallback` object methods:
 * void Continue(string username, string password)
 * void Cancel()
 
+Example implementations:
+- Using Kivy framework: see [this commit](https://github.com/allestuetsmerweh/garden.cefpython/commit/d0d77283230adccdb838e6053ceed29845acd2eb)
+  in the garden.cefpython project.
+- For Windows using WinAPI and C++. This is deprecated code from
+  CEF Python 1: [[1]](https://github.com/cztomczak/cefpython/tree/cefpython31/cefpython/cef1/http_authentication),
+  [[2]](https://github.com/cztomczak/cefpython/blob/cefpython31/cefpython/request_handler_cef1.pyx#L231),
+  [[3]](https://github.com/cztomczak/cefpython/blob/cefpython31/cefpython/http_authentication_win.pyx).
+
 
 ### OnQuotaRequest
 
