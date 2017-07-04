@@ -4,6 +4,7 @@
 from cefpython3 import cefpython as cef
 
 import distutils.sysconfig
+import math
 import os
 import platform
 import sys
@@ -23,12 +24,6 @@ def main():
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     cef.Initialize()
     pyWin32Example()
-    """
-    if g_message_loop == MESSAGE_LOOP_CEF:
-        cef.MessageLoop()
-    else:
-        gtk.main()
-    """
     cef.Shutdown()
 
 
@@ -40,60 +35,67 @@ def check_versions():
 
 
 def pyWin32Example():
-    pass
-
-
-def CefAdvanced():
-    sys.excepthook = ExceptHook
-
-    appSettings = dict()
-    # appSettings["cache_path"] = "webcache/" # Disk cache
-    if DEBUG:
-        # cefpython debug messages in console and in log_file
-        appSettings["debug"] = True
-        cefwindow.g_debug = True
-    appSettings["log_file"] = GetApplicationPath("debug.log")
-    appSettings["log_severity"] = cefpython.LOGSEVERITY_INFO
-    appSettings["release_dcheck_enabled"] = True # Enable only when debugging
-    appSettings["browser_subprocess_path"] = "%s/%s" % (
-            cefpython.GetModuleDirectory(), "subprocess")
-    cefpython.Initialize(appSettings)
+    
+    cef.Initialize()
 
     wndproc = {
         win32con.WM_CLOSE: CloseWindow,
         win32con.WM_DESTROY: QuitApplication,
-        win32con.WM_SIZE: cefpython.WindowUtils.OnSize,
-        win32con.WM_SETFOCUS: cefpython.WindowUtils.OnSetFocus,
-        win32con.WM_ERASEBKGND: cefpython.WindowUtils.OnEraseBackground
+        win32con.WM_SIZE: WindowUtils.OnSize,
+        win32con.WM_SETFOCUS: WindowUtils.OnSetFocus,
+        win32con.WM_ERASEBKGND: WindowUtils.OnEraseBackground
     }
-
-    browserSettings = dict()
-    browserSettings["universal_access_from_file_urls_allowed"] = True
-    browserSettings["file_access_from_file_urls_allowed"] = True
-
-    if os.path.exists("icon.ico"):
-        icon = os.path.abspath("icon.ico")
-    else:
-        icon = ""
-
-    windowHandle = cefwindow.CreateWindow(title="pywin32 example",
-            className="cefpython3_example", width=1024, height=768,
-            icon=icon, windowProc=wndproc)
-    windowInfo = cefpython.WindowInfo()
+    
+    windowHandle = CreateWindow(title="pywin32 example", className="cefpython3_example", width=1024, height=768, windowProc=wndproc)
+    
+    windowInfo = cef.WindowInfo()
     windowInfo.SetAsChild(windowHandle)
-    browser = cefpython.CreateBrowserSync(windowInfo, browserSettings,
-            navigateUrl=GetApplicationPath("example.html"))
-    cefpython.MessageLoop()
-    cefpython.Shutdown()
+    browser = cef.CreateBrowserSync(windowInfo, settings={},
+                                    url="https://www.google.com/")
+    cef.MessageLoop()
+    cef.Shutdown()
+
 
 def CloseWindow(windowHandle, message, wparam, lparam):
-    browser = cefpython.GetBrowserByWindowHandle(windowHandle)
+    browser = cef.GetBrowserByWindowHandle(windowHandle)
     browser.CloseBrowser()
     return win32gui.DefWindowProc(windowHandle, message, wparam, lparam)
+
 
 def QuitApplication(windowHandle, message, wparam, lparam):
     win32gui.PostQuitMessage(0)
     return 0
+
+
+def CreateWindow(title, className, width, height, windowProc):
+    
+    wndclass = win32gui.WNDCLASS()
+    wndclass.hInstance = win32api.GetModuleHandle(None)
+    wndclass.lpszClassName = className
+    wndclass.style = win32con.CS_VREDRAW | win32con.CS_HREDRAW
+    # win32con.CS_GLOBALCLASS
+    wndclass.hbrBackground = win32con.COLOR_WINDOW
+    wndclass.hCursor = win32gui.LoadCursor(0, win32con.IDC_ARROW)
+    wndclass.lpfnWndProc = windowProc
+    atomClass = win32gui.RegisterClass(wndclass)
+    assert(atomClass != 0)
+    
+    # Center window on the screen.
+    screenx = win32api.GetSystemMetrics(win32con.SM_CXSCREEN)
+    screeny = win32api.GetSystemMetrics(win32con.SM_CYSCREEN)
+    xpos = int(math.floor((screenx - width) / 2))
+    ypos = int(math.floor((screeny - height) / 2))
+    if xpos < 0: xpos = 0
+    if ypos < 0: ypos = 0
+    
+    windowHandle = win32gui.CreateWindow(className, title, 
+                                         win32con.WS_OVERLAPPEDWINDOW | win32con.WS_CLIPCHILDREN | win32con.WS_VISIBLE,
+                                         xpos, ypos, width, height, # xpos, ypos, width, height
+                                         0, 0, wndclass.hInstance, None)
+    
+    assert(windowHandle != 0)
+    return windowHandle
+
 
 def GetPywin32Version():
     pth = distutils.sysconfig.get_python_lib(plat_specific=1)
