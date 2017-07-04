@@ -9,6 +9,7 @@ import os
 import platform
 import sys
 import time
+import traceback
 
 import win32api
 import win32con
@@ -19,11 +20,35 @@ WindowUtils = cef.WindowUtils()
 # Platforms (Windows only)
 assert(platform.system() == "Windows")
 
-def main():
+def main(multi_threaded_message_loop):
+    
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-    cef.Initialize()
-    pyWin32Example()
+    
+    settings = {"multi_threaded_message_loop": 1 if multi_threaded_message_loop else 0}
+    cef.Initialize(settings)
+    
+    wndproc = {
+        win32con.WM_CLOSE: CloseWindow,
+        win32con.WM_DESTROY: QuitApplication,
+        win32con.WM_SIZE: WindowUtils.OnSize,
+        win32con.WM_SETFOCUS: WindowUtils.OnSetFocus,
+        win32con.WM_ERASEBKGND: WindowUtils.OnEraseBackground
+    }
+    windowHandle = CreateWindow(title="pywin32 example", className="cefpython3_example", width=1024, height=768, windowProc=wndproc)
+    
+    windowInfo = cef.WindowInfo()
+    windowInfo.SetAsChild(windowHandle)
+    
+    if(multi_threaded_message_loop):
+        # when using multi-threaded message loop, CEF's UI thread is no more application's main thread
+        cef.PostTask(cef.TID_UI, _createBrowserInUiThread, windowInfo, {}, "https://www.google.com/")
+        win32gui.PumpMessages()
+        
+    else:
+        browser = _createBrowserInUiThread(windowInfo, {}, "https://www.google.com/")
+        cef.MessageLoop()
+    
     cef.Shutdown()
 
 
@@ -34,26 +59,11 @@ def check_versions():
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
 
 
-def pyWin32Example():
+def _createBrowserInUiThread(windowInfo, settings, url):
     
-    cef.Initialize()
-
-    wndproc = {
-        win32con.WM_CLOSE: CloseWindow,
-        win32con.WM_DESTROY: QuitApplication,
-        win32con.WM_SIZE: WindowUtils.OnSize,
-        win32con.WM_SETFOCUS: WindowUtils.OnSetFocus,
-        win32con.WM_ERASEBKGND: WindowUtils.OnEraseBackground
-    }
-    
-    windowHandle = CreateWindow(title="pywin32 example", className="cefpython3_example", width=1024, height=768, windowProc=wndproc)
-    
-    windowInfo = cef.WindowInfo()
-    windowInfo.SetAsChild(windowHandle)
+    assert(cef.IsThread(cef.TID_UI))
     browser = cef.CreateBrowserSync(windowInfo, settings={},
                                     url="https://www.google.com/")
-    cef.MessageLoop()
-    cef.Shutdown()
 
 
 def CloseWindow(windowHandle, message, wparam, lparam):
@@ -104,4 +114,12 @@ def GetPywin32Version():
 
 
 if __name__ == '__main__':
-    main()
+    
+    if "--multi_threaded_message_loop" in sys.argv:
+        print("[pywin32.py] Message loop mode: CEF multi-threaded (best performance)")
+        multi_threaded_message_loop = True
+    else:
+        print("[pywin32.py] Message loop mode: CEF single-threaded")
+        multi_threaded_message_loop = False
+    
+    main(multi_threaded_message_loop)
