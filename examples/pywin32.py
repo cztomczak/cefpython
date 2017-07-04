@@ -1,95 +1,47 @@
 # Example of embedding CEF browser using the PyWin32 extension.
-# Tested with pywin32 version 218.
+# Tested with pywin32 version 219.
 
-import os, sys
-libcef_dll = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-        'libcef.dll')
-if os.path.exists(libcef_dll):
-    # Import a local module
-    if (2,7) <= sys.version_info < (2,8):
-        import cefpython_py27 as cefpython
-    elif (3,4) <= sys.version_info < (3,4):
-        import cefpython_py34 as cefpython
-    else:
-        raise Exception("Unsupported python version: %s" % sys.version)
-else:
-    # Import an installed package
-    from cefpython3 import cefpython
+from cefpython3 import cefpython as cef
 
-import cefwindow
-import win32con
-import win32gui
-import win32api
+import distutils.sysconfig
+import os
+import platform
+import sys
 import time
 
-DEBUG = True
+import win32api
+import win32con
+import win32gui
 
-# -----------------------------------------------------------------------------
-# Helper functions.
+WindowUtils = cef.WindowUtils()
 
-def Log(msg):
-    print("[pywin32.py] %s" % str(msg))
+# Platforms (Windows only)
+assert(platform.system() == "Windows")
 
-def GetApplicationPath(file=None):
-    import re, os, platform
-    # On Windows after downloading file and calling Browser.GoForward(),
-    # current working directory is set to %UserProfile%.
-    # Calling os.path.dirname(os.path.realpath(__file__))
-    # returns for eg. "C:\Users\user\Downloads". A solution
-    # is to cache path on first call.
-    if not hasattr(GetApplicationPath, "dir"):
-        if hasattr(sys, "frozen"):
-            dir = os.path.dirname(sys.executable)
-        elif "__file__" in globals():
-            dir = os.path.dirname(os.path.realpath(__file__))
-        else:
-            dir = os.getcwd()
-        GetApplicationPath.dir = dir
-    # If file is None return current directory without trailing slash.
-    if file is None:
-        file = ""
-    # Only when relative path.
-    if not file.startswith("/") and not file.startswith("\\") and (
-            not re.search(r"^[\w-]+:", file)):
-        path = GetApplicationPath.dir + os.sep + file
-        if platform.system() == "Windows":
-            path = re.sub(r"[/\\]+", re.escape(os.sep), path)
-        path = re.sub(r"[/\\]+$", "", path)
-        return path
-    return str(file)
+def main():
+    check_versions()
+    sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
+    cef.Initialize()
+    pyWin32Example()
+    """
+    if g_message_loop == MESSAGE_LOOP_CEF:
+        cef.MessageLoop()
+    else:
+        gtk.main()
+    """
+    cef.Shutdown()
 
-def ExceptHook(excType, excValue, traceObject):
-    import traceback, os, time, codecs
-    # This hook does the following: in case of exception write it to
-    # the "error.log" file, display it to the console, shutdown CEF
-    # and exit application immediately by ignoring "finally" (os._exit()).
-    errorMsg = "\n".join(traceback.format_exception(excType, excValue,
-            traceObject))
-    errorFile = GetApplicationPath("error.log")
-    try:
-        appEncoding = cefpython.g_applicationSettings["string_encoding"]
-    except:
-        appEncoding = "utf-8"
-    if type(errorMsg) == bytes:
-        errorMsg = errorMsg.decode(encoding=appEncoding, errors="replace")
-    try:
-        with codecs.open(errorFile, mode="a", encoding=appEncoding) as fp:
-            fp.write("\n[%s] %s\n" % (
-                    time.strftime("%Y-%m-%d %H:%M:%S"), errorMsg))
-    except:
-        print("[pywin32.py] WARNING: failed writing to error file: %s" % (
-                errorFile))
-    # Convert error message to ascii before printing, otherwise
-    # you may get error like this:
-    # | UnicodeEncodeError: 'charmap' codec can't encode characters
-    errorMsg = errorMsg.encode("ascii", errors="replace")
-    errorMsg = errorMsg.decode("ascii", errors="replace")
-    print("\n"+errorMsg+"\n")
-    cefpython.QuitMessageLoop()
-    cefpython.Shutdown()
-    os._exit(1)
 
-# -----------------------------------------------------------------------------
+def check_versions():
+    print("[pywin32.py] CEF Python {ver}".format(ver=cef.__version__))
+    print("[pywin32.py] Python {ver} {arch}".format(ver=platform.python_version(), arch=platform.architecture()[0]))
+    print("[pywin32.py] pywin32 {ver}".format(ver=GetPywin32Version()))
+    assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
+
+
+def pyWin32Example():
+    pass
+
 
 def CefAdvanced():
     sys.excepthook = ExceptHook
@@ -144,9 +96,10 @@ def QuitApplication(windowHandle, message, wparam, lparam):
     return 0
 
 def GetPywin32Version():
-    fixed_file_info = win32api.GetFileVersionInfo(win32api.__file__, '\\')
-    return fixed_file_info['FileVersionLS'] >> 16
+    pth = distutils.sysconfig.get_python_lib(plat_specific=1)
+    ver = open(os.path.join(pth, "pywin32.version.txt")).read().strip()
+    return ver
 
-if __name__ == "__main__":
-    Log("pywin32 version = %s" % GetPywin32Version())
-    CefAdvanced()
+
+if __name__ == '__main__':
+    main()
