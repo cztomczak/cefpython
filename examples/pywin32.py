@@ -8,8 +8,6 @@ import math
 import os
 import platform
 import sys
-import time
-import traceback
 
 import win32api
 import win32con
@@ -62,8 +60,7 @@ def check_versions():
 def _createBrowserInUiThread(windowInfo, settings, url):
     
     assert(cef.IsThread(cef.TID_UI))
-    browser = cef.CreateBrowserSync(windowInfo, settings={},
-                                    url="https://www.google.com/")
+    browser = cef.CreateBrowserSync(windowInfo, settings, url)
 
 
 def CloseWindow(windowHandle, message, wparam, lparam):
