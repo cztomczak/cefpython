@@ -23,7 +23,8 @@ def main(multi_threaded_message_loop):
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     
-    settings = {"multi_threaded_message_loop": 1 if multi_threaded_message_loop else 0}
+    settings = {"multi_threaded_message_loop": 1 if multi_threaded_message_loop else 0,
+                "remote_debugging_port": 2020}
     cef.Initialize(settings)
     
     wndproc = {
