@@ -15,15 +15,6 @@ include "cefpython.pyx"
 # CEF values to Python values
 # -----------------------------------------------------------------------------
 
-cdef struct FunctionPlaceholder:
-    int id
-
-cdef CefRefPtr[CefBinaryValue] fnPlaceholder() except *:
-    cdef FunctionPlaceholder functionPlaceholder = {"id":-1}
-    return CefBinaryValue_Create(
-            &functionPlaceholder, sizeof(functionPlaceholder))
-
-
 cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
         py_string pyString):
     # A javascript callback from the Renderer process is sent as a string.
@@ -37,12 +28,13 @@ cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
     if pyString.startswith(cefPythonMessageHash):
         jsonData = pyString[len(cefPythonMessageHash):]
         message = json.loads(jsonData)
-        if message and type(message) == dict and ("what" in message) \
-                and message["what"] == "javascript-callback":
-            jsCallback = CreateJavascriptCallback(
-                    message["callbackId"], cefBrowser,
-                    message["frameId"], message["functionName"])
-            return jsCallback
+        if message and type(message) == dict and ("what" in message):
+            if message["what"] == "javascript-callback":
+                jsCallback = CreateJavascriptCallback(
+                        message["callbackId"], cefBrowser,
+                        message["frameId"], message["functionName"])
+                return jsCallback
+
     return pyString
 
 cdef list CefListValueToPyList(
@@ -220,8 +212,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
                     browserId, frameId, value, nestingLevel + 1))
         elif IsFunctionOrMethod(valueType):
             ret.get().SetBinary(index, PutPythonCallback(
-                    browserId, frameId, value) if frameId
-                        else fnPlaceholder())
+                    browserId, frameId, value))
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
@@ -283,8 +274,7 @@ cdef void PyListToExistingCefListValue(
             cefListValue.get().SetList(index, newCefListValue)
         elif IsFunctionOrMethod(valueType):
             cefListValue.get().SetBinary(index, PutPythonCallback(
-                        browserId, frameId, value) if frameId
-                            else fnPlaceholder())
+                        browserId, frameId, value))
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,
@@ -341,8 +331,7 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
                     browserId, frameId, value, nestingLevel + 1))
         elif IsFunctionOrMethod(valueType):
             ret.get().SetBinary(cefKey, PutPythonCallback(
-                    browserId, frameId, value) if frameId
-                        else fnPlaceholder())
+                    browserId, frameId, value))
         else:
             # Raising an exception probably not a good idea, why
             # terminate application when we can cast it to string,

@@ -103,6 +103,8 @@ cdef class JavascriptBindings:
                 attrs = {}
                 for name, value in self.objects[objectName].items():
                     if self.IsValueAllowedRecursively(value):
+                        if inspect.ismethod(value):
+                            value = '####cefpython####{"what": "bound-function"}'
                         attrs[name] = value
                 objects[objectName] = attrs
             pyBrowser.SendProcessMessage(cef_types.PID_RENDERER,
