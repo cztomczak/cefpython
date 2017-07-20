@@ -21,6 +21,7 @@
 #include "load_handler.h"
 #include "render_handler.h"
 #include "request_handler.h"
+#include "drag_handler.h"
 
 
 class ClientHandler : public CefClient,
@@ -34,7 +35,8 @@ class ClientHandler : public CefClient,
                       public LifespanHandler,
                       public LoadHandler,
                       public RenderHandler,
-                      public RequestHandler
+                      public RequestHandler,
+                      public DragHandler
 {
 public:
     ClientHandler(){}
@@ -44,11 +46,11 @@ public:
         return this;
     }
 
-#if defined(OS_LINUX)
+//#if defined(OS_LINUX)
     CefRefPtr<CefDialogHandler> GetDialogHandler() override {
         return this;
     }
-#endif
+//#endif
 
     CefRefPtr<CefDisplayHandler> GetDisplayHandler() override {
         return this;
@@ -83,6 +85,10 @@ public:
     }
 
     CefRefPtr<CefRequestHandler> GetRequestHandler() override {
+        return this;
+    }
+
+    CefRefPtr<CefDragHandler> GetDragHandler() override {
         return this;
     }
 

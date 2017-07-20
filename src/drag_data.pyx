@@ -18,6 +18,28 @@ cdef class DragData:
         self.cef_drag_data.get().SetFragmentHtml(PyToCefStringValue("none"))
         self.cef_drag_data.get().SetFragmentBaseURL(PyToCefStringValue(""))
 
+
+    cpdef py_bool IsFile(self):
+        return self.cef_drag_data.get().IsFile()
+
+    cpdef py_string GetFileName(self):
+        return CefToPyString(self.cef_drag_data.get().GetFileName())
+
+    cpdef list GetFileNames(self):
+        cdef cpp_vector[CefString] cefNames
+        self.cef_drag_data.get().GetFileNames(cefNames)
+        cdef list names = []
+        cdef cpp_vector[CefString].iterator iterator = cefNames.begin()
+        cdef CefString cefString
+        while iterator != cefNames.end():
+            cefString = deref(iterator)
+            names.append(CefToPyString(cefString))
+            preinc(iterator)
+
+        return names
+        # return []
+
+
     cpdef py_bool IsLink(self):
         return self.cef_drag_data.get().IsLink()
 
@@ -44,10 +66,6 @@ cdef class DragData:
             if not cef_image.get():
                 raise Exception("Image is not available")
             return PyImage_Init(cef_image)
-
-        cpdef tuple GetImageHotspot(self):
-            cdef CefPoint point = self.cef_drag_data.get().GetImageHotspot()
-            return (point.x, point.y)
 
         cpdef py_bool HasImage(self):
             return self.cef_drag_data.get().HasImage()

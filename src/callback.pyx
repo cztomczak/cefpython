@@ -18,3 +18,26 @@ cdef class PyCallback:
     
     cpdef py_void Cancel(self):
         self.cefCallback.get().Cancel()
+
+
+
+cdef PyFileDialogCallback CreatePyFileDialogCallback(
+        CefRefPtr[CefFileDialogCallback] cefCallback):
+    cdef PyFileDialogCallback pyCallback = PyFileDialogCallback()
+    pyCallback.cefCallback = cefCallback
+    return pyCallback
+
+cdef class PyFileDialogCallback:
+    cdef CefRefPtr[CefFileDialogCallback] cefCallback
+
+    cpdef py_void Continue(self,int selected_accept_filter,list file_paths):
+
+        cdef cpp_vector[CefString] filePaths
+
+        for f in file_paths:
+            filePaths.push_back(PyToCefStringValue(f))
+
+        self.cefCallback.get().Continue(selected_accept_filter,filePaths)
+
+    cpdef py_void Cancel(self):
+        self.cefCallback.get().Cancel()

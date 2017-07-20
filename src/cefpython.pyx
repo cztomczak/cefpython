@@ -517,6 +517,7 @@ IF UNAME_SYSNAME == "Linux":
 include "handlers/browser_process_handler.pyx"
 include "handlers/display_handler.pyx"
 include "handlers/focus_handler.pyx"
+include "handlers/drag_handler.pyx"
 include "handlers/javascript_dialog_handler.pyx"
 include "handlers/keyboard_handler.pyx"
 include "handlers/lifespan_handler.pyx"
@@ -526,6 +527,7 @@ include "handlers/resource_handler.pyx"
 include "handlers/request_handler.pyx"
 include "handlers/v8context_handler.pyx"
 include "handlers/v8function_handler.pyx"
+
 
 # -----------------------------------------------------------------------------
 # Utility functions to provide settings to the C++ browser process code.

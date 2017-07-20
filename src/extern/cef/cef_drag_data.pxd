@@ -6,10 +6,15 @@ from libcpp cimport bool as cpp_bool
 from cef_string cimport CefString
 from cef_ptr cimport CefRefPtr
 from cef_image cimport CefImage
-from cef_types cimport CefPoint
+
+from libcpp.vector cimport vector as cpp_vector
 
 cdef extern from "include/cef_drag_data.h":
     cdef cppclass CefDragData:
+
+        cpp_bool IsFile()
+        CefString GetFileName()
+        cpp_bool GetFileNames(cpp_vector[CefString]& names)
         cpp_bool IsLink()
         cpp_bool IsFragment()
         CefString GetLinkURL()
@@ -21,7 +26,6 @@ cdef extern from "include/cef_drag_data.h":
         void SetFragmentBaseURL(const CefString& base_url)
         cpp_bool HasImage()
         CefRefPtr[CefImage] GetImage()
-        CefPoint GetImageHotspot()
 
 
     cdef CefRefPtr[CefDragData] CefDragData_Create "CefDragData::Create"()

@@ -4,7 +4,6 @@
 
 #include "dialog_handler.h"
 
-
 DialogHandler::DialogHandler()
 {
 #if defined(OS_LINUX)
@@ -22,16 +21,29 @@ bool DialogHandler::OnFileDialog(CefRefPtr<CefBrowser> browser,
                                  int selected_accept_filter,
                                  CefRefPtr<CefFileDialogCallback> callback)
 {
-#if defined(OS_LINUX)
-    return dialog_handler_->OnFileDialog(browser,
+    bool result;
+    result = DialogHandlerr_OnFileDialog(browser,
                                          mode,
                                          title,
                                          default_file_path,
                                          accept_filters,
                                          selected_accept_filter,
                                          callback);
-#else
-    return false;
-#endif
+    if(result){
+        return result;
+    }else{
+
+        #if defined(OS_LINUX)
+            return dialog_handler_->OnFileDialog(browser,
+                                                 mode,
+                                                 title,
+                                                 default_file_path,
+                                                 accept_filters,
+                                                 selected_accept_filter,
+                                                 callback);
+        #else
+            return false;
+        #endif
+    }
 
 }
