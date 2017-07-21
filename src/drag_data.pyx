@@ -37,8 +37,6 @@ cdef class DragData:
             preinc(iterator)
 
         return names
-        # return []
-
 
     cpdef py_bool IsLink(self):
         return self.cef_drag_data.get().IsLink()
@@ -66,6 +64,10 @@ cdef class DragData:
             if not cef_image.get():
                 raise Exception("Image is not available")
             return PyImage_Init(cef_image)
+
+        cpdef tuple GetImageHotspot(self):
+            cdef CefPoint point = self.cef_drag_data.get().GetImageHotspot()
+            return (point.x, point.y)
 
         cpdef py_bool HasImage(self):
             return self.cef_drag_data.get().HasImage()

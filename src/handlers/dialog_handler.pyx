@@ -1,4 +1,4 @@
-# Copyright (c) 2012 CEF Python, see the Authors file.
+# Copyright (c) 2017 CEF Python, see the Authors file.
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
@@ -6,40 +6,41 @@ include "../cefpython.pyx"
 include "../browser.pyx"
 
 
-cdef public cpp_bool DialogHandlerr_OnFileDialog(CefRefPtr[CefBrowser] cef_browser,
-                                        uint32 mode,
-                                        const CefString& cefTitle,
-                                        const CefString& cefDefaultFilePath,
-                                        const cpp_vector[CefString]& cefAcceptFilters,
-                                        int selected_accept_filter,
-                                       CefRefPtr[CefFileDialogCallback] cefFileDialogCallback
-                                    ) except * with gil:
+cdef public cpp_bool DialogHandler_OnFileDialog(
+        CefRefPtr[CefBrowser] cef_browser,
+        uint32 mode,
+        const CefString& cefTitle,
+        const CefString& cefDefaultFilePath,
+        const cpp_vector[CefString]& cefAcceptFilters,
+        int selected_accept_filter,
+        CefRefPtr[CefFileDialogCallback] cefFileDialogCallback
+        ) except * with gil:
 
 
     cdef PyBrowser pyBrowser
     cdef py_bool returnValue
-    cdef py_string title
-    cdef py_string default_file_path
-    cdef list accept_filters = []
-    cdef cpp_vector[CefString].iterator it
+    cdef py_string pyTitle
+    cdef py_string pyDefaultFilePath
+    cdef list pyAcceptFilters = []
 
     try:
         pyBrowser = GetPyBrowser(cef_browser, "OnFileDialog")
 
-        title = CefToPyString(cefTitle)
-        default_file_path = CefToPyString(cefDefaultFilePath)
+        pyTitle = CefToPyString(cefTitle)
+        pyDefaultFilePath = CefToPyString(cefDefaultFilePath)
 
         for i in range(cefAcceptFilters.size()):
-            accept_filters.append(CefToPyString(cefAcceptFilters[i]))
+            pyAcceptFilters.append(CefToPyString(cefAcceptFilters[i]))
 
 
         callback = pyBrowser.GetClientCallback("OnFileDialog")
         if callback:
-            returnValue = callback(browser=pyBrowser,
+            returnValue = callback(
+                     browser=pyBrowser,
                      mode=mode,
-                     title=title,
-                     default_file_path=default_file_path,
-                     accept_filters=accept_filters,
+                     title=pyTitle,
+                     default_file_path=pyDefaultFilePath,
+                     accept_filters=pyAcceptFilters,
                      selected_accept_filter=selected_accept_filter,
                      file_dialog_callback = CreatePyFileDialogCallback(cefFileDialogCallback)
                    )

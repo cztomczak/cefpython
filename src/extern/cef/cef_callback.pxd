@@ -3,7 +3,6 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 from cef_string cimport CefString
-# from libcpp cimport bool as cpp_bool
 from libcpp.vector cimport vector as cpp_vector
 
 cdef extern from "include/cef_callback.h":

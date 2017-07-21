@@ -243,8 +243,6 @@ cdef class PyBrowser:
             # DialogHanlder
             self.allowedClientCallbacks += ["OnFileDialog"]
 
-
-
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
                             "callback: %s" % name)
