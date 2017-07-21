@@ -6,8 +6,11 @@
 
 Table of contents:
 * [Methods](#methods)
+  * [IsFile](#isfile)
   * [IsLink](#islink)
   * [IsFragment](#isfragment)
+  * [GetFileName](#getfilename)
+  * [GetFileNames](#getfilenames)
   * [GetLinkUrl](#getlinkurl)
   * [GetLinkTitle](#getlinktitle)
   * [GetFragmentText](#getfragmenttext)
@@ -19,6 +22,13 @@ Table of contents:
 
 ## Methods
 
+### IsFile
+
+| | |
+| --- | --- |
+| __Return__ | bool |
+
+Returns true if the drag data is a file.
 
 ### IsLink
 
@@ -37,6 +47,25 @@ Returns true if the drag data is a link.
 
 Returns true if the drag data is a text or html fragment.
 
+
+### GetFileName
+
+| | |
+| --- | --- |
+| __Return__ | string |
+
+
+Return the name of the file being dragged out of the browser window.
+
+
+### GetFileNames
+
+| | |
+| --- | --- |
+| __Return__ | list |
+
+
+Return the list of file names that are being dragged into the browser window.
 
 ### GetLinkUrl
 
