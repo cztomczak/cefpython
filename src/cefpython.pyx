@@ -431,6 +431,7 @@ from cef_command_line cimport *
 from cef_request_context cimport *
 from cef_request_context_handler cimport *
 from request_context_handler cimport *
+from cef_dialog_handler cimport *
 from cef_jsdialog_handler cimport *
 from cef_path_util cimport *
 from cef_drag_data cimport *
@@ -518,6 +519,7 @@ include "handlers/browser_process_handler.pyx"
 include "handlers/display_handler.pyx"
 include "handlers/focus_handler.pyx"
 include "handlers/drag_handler.pyx"
+include "handlers/dialog_handler.pyx"
 include "handlers/javascript_dialog_handler.pyx"
 include "handlers/keyboard_handler.pyx"
 include "handlers/lifespan_handler.pyx"

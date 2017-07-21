@@ -4,8 +4,27 @@
 
 include "../cefpython.pyx"
 include "../browser.pyx"
-#
-cimport cef_types
+
+cdef PyFileDialogCallback CreatePyFileDialogCallback(
+        CefRefPtr[CefFileDialogCallback] cefCallback):
+    cdef PyFileDialogCallback pyCallback = PyFileDialogCallback()
+    pyCallback.cefCallback = cefCallback
+    return pyCallback
+
+cdef class PyFileDialogCallback:
+    cdef CefRefPtr[CefFileDialogCallback] cefCallback
+
+    cpdef py_void Continue(self,int selected_accept_filter,list file_paths):
+
+        cdef cpp_vector[CefString] filePaths
+
+        for f in file_paths:
+            filePaths.push_back(PyToCefStringValue(f))
+
+        self.cefCallback.get().Continue(selected_accept_filter,filePaths)
+
+    cpdef py_void Cancel(self):
+        self.cefCallback.get().Cancel()
 
 cdef public cpp_bool DragHandler_OnDragEnter(CefRefPtr[CefBrowser] cef_browser,
                                         CefRefPtr[CefDragData] cef_drag_data,
@@ -36,53 +55,6 @@ cdef public cpp_bool DragHandler_OnDragEnter(CefRefPtr[CefBrowser] cef_browser,
 
     return False
 
-
-cdef public cpp_bool DialogHandlerr_OnFileDialog(CefRefPtr[CefBrowser] cef_browser,
-                                        uint32 mode,
-                                        const CefString& cefTitle,
-                                        const CefString& cefDefaultFilePath,
-                                        const cpp_vector[CefString]& cefAcceptFilters,
-                                        int selected_accept_filter,
-                                       CefRefPtr[CefFileDialogCallback] cefFileDialogCallback
-                                    ) except * with gil:
-
-
-    cdef PyBrowser pyBrowser
-    cdef py_bool returnValue
-    cdef py_string title
-    cdef py_string default_file_path
-    cdef list accept_filters = []
-    cdef cpp_vector[CefString].iterator it
-
-    try:
-        pyBrowser = GetPyBrowser(cef_browser, "OnFileDialog")
-
-        title = CefToPyString(cefTitle)
-        default_file_path = CefToPyString(cefDefaultFilePath)
-
-        for i in range(cefAcceptFilters.size()):
-            accept_filters.append(CefToPyString(cefAcceptFilters[i]))
-
-
-        callback = pyBrowser.GetClientCallback("OnFileDialog")
-        if callback:
-            returnValue = callback(browser=pyBrowser,
-                     mode=mode,
-                     title=title,
-                     default_file_path=default_file_path,
-                     accept_filters=accept_filters,
-                     selected_accept_filter=selected_accept_filter,
-                     file_dialog_callback = CreatePyFileDialogCallback(cefFileDialogCallback)
-                   )
-
-
-            return bool(returnValue)
-
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-    return False
 
 
 
