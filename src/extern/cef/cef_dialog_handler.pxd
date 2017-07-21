@@ -5,7 +5,6 @@
 from cef_string cimport CefString
 from libcpp.vector cimport vector as cpp_vector
 
-
 cdef extern from "include/cef_dialog_handler.h":
 
     cdef cppclass CefFileDialogCallback:

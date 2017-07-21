@@ -18,7 +18,6 @@ cdef class DragData:
         self.cef_drag_data.get().SetFragmentHtml(PyToCefStringValue("none"))
         self.cef_drag_data.get().SetFragmentBaseURL(PyToCefStringValue(""))
 
-
     cpdef py_bool IsFile(self):
         return self.cef_drag_data.get().IsFile()
 
@@ -35,7 +34,6 @@ cdef class DragData:
             cefString = deref(iterator)
             names.append(CefToPyString(cefString))
             preinc(iterator)
-
         return names
 
     cpdef py_bool IsLink(self):

@@ -2,9 +2,6 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
-from cef_string cimport CefString
-from libcpp.vector cimport vector as cpp_vector
-
 cdef extern from "include/cef_callback.h":
 
     cdef cppclass CefCallback:
@@ -13,4 +10,3 @@ cdef extern from "include/cef_callback.h":
 
     cdef cppclass CefCompletionCallback:
         void OnComplete()
-

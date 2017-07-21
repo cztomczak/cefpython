@@ -12,7 +12,6 @@ from libcpp.vector cimport vector as cpp_vector
 
 cdef extern from "include/cef_drag_data.h":
     cdef cppclass CefDragData:
-
         cpp_bool IsFile()
         CefString GetFileName()
         cpp_bool GetFileNames(cpp_vector[CefString]& names)

@@ -16,7 +16,6 @@ cdef public cpp_bool DialogHandler_OnFileDialog(
         CefRefPtr[CefFileDialogCallback] cefFileDialogCallback
         ) except * with gil:
 
-
     cdef PyBrowser pyBrowser
     cdef py_bool returnValue
     cdef py_string pyTitle
@@ -32,7 +31,6 @@ cdef public cpp_bool DialogHandler_OnFileDialog(
         for i in range(cefAcceptFilters.size()):
             pyAcceptFilters.append(CefToPyString(cefAcceptFilters[i]))
 
-
         callback = pyBrowser.GetClientCallback("OnFileDialog")
         if callback:
             returnValue = callback(
@@ -44,7 +42,6 @@ cdef public cpp_bool DialogHandler_OnFileDialog(
                      selected_accept_filter=selected_accept_filter,
                      file_dialog_callback = CreatePyFileDialogCallback(cefFileDialogCallback)
                    )
-
 
             return bool(returnValue)
 
