@@ -44,11 +44,9 @@ cdef public cpp_bool DialogHandler_OnFileDialog(
                    )
 
             return bool(returnValue)
-
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
-
     return False
 
 

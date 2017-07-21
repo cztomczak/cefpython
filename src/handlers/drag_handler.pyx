@@ -30,7 +30,6 @@ cdef public cpp_bool DragHandler_OnDragEnter(
 
     cdef PyBrowser pyBrowser
     cdef DragData drag_data
-
     cdef py_bool returnValue
     try:
         pyBrowser = GetPyBrowser(cef_browser, "OnDragEnter")
@@ -41,11 +40,8 @@ cdef public cpp_bool DragHandler_OnDragEnter(
             returnValue = callback(browser=pyBrowser,
                                    dragData=drag_data,
                                    mask=mask)
-
             return bool(returnValue)
-
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
-
     return False
