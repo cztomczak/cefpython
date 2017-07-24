@@ -102,7 +102,8 @@ cdef class JavascriptBindings:
             for objectName in self.objects:
                 attrs = {}
                 for name, value in self.objects[objectName].items():
-                    if self.IsValueAllowedRecursively(value):
+                    if self.IsValueAllowedRecursively(value) and \
+                            name == '__call__' or not name.startswith('_'):
                         if inspect.ismethod(value):
                             value = '####cefpython####{"what": "bound-function"}'
                         attrs[name] = value
