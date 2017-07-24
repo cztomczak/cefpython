@@ -16,6 +16,7 @@ import sys
 # To show the window for an extended period of time increase this number.
 MESSAGE_LOOP_RANGE = 200  # each iteration is 0.01 sec
 
+# language=HTML
 g_datauri_data = """
 <!DOCTYPE html>
 <html>
@@ -36,7 +37,7 @@ g_datauri_data = """
     window.onload = function(){
         print("window.onload() ok");
 
-        version = cefpython_version
+        version = cefpython_version;
         print("CEF Python: <b>"+version.version+"</b>");
         print("Chrome: <b>"+version.chrome_version+"</b>");
         print("CEF: <b>"+version.cef_version+"</b>");
@@ -76,6 +77,31 @@ g_datauri_data = """
             py_callback("String sent from Javascript");
             print("py_callback() ok");
         });
+        
+        // Test binding callable object
+        callable();
+        callable.test_function();
+        print("window.callable() ok");
+        
+        // Test binding object with properties
+        if (obj_with_props.property_is_true !== true) {
+            throw new Error("obj_with_props.property_is_true was not true");
+        }        
+        if (obj_with_props.property_is_string !== "string") {
+            throw new Error("obj_with_props.property_is_string was not 'string'"); 
+        }        
+        if (obj_with_props._not_exposed !== undefined) {
+            throw new Error("obj_with_props._not_exposed was not available to js"); 
+        }
+        var counter = obj_with_props.property_evaluated_at_binding;
+        if (!Number.isInteger(counter)) {
+            throw new Error("obj_with_props.property_evaluated_at_binding was not expected integer"); 
+        }
+        if (obj_with_props.property_evaluated_at_binding != counter) {
+            throw new Error("obj_with_props.property_evaluated_at_binding changed on second read"); 
+        }
+        print("window.obj_with_props ok");
+
     };
     </script>
 </head>
@@ -140,6 +166,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
 
         # Test javascript bindings
         external = External(self)
+        callable_obj = Callable()
+        obj_with_props = ObjWithProps()
         bindings = cef.JavascriptBindings(
                 bindToFrames=False, bindToPopups=False)
         bindings.SetFunction("test_function", external.test_function)
@@ -147,6 +175,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
         bindings.SetProperty("test_property2", external.test_property2)
         bindings.SetProperty("cefpython_version", cef.GetVersion())
         bindings.SetObject("external", external)
+        bindings.SetObject("callable", callable_obj)
+        bindings.SetObject("obj_with_props", obj_with_props, allow_properties=True)
         browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
 
@@ -169,7 +199,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
             time.sleep(0.01)
 
         # Automatic check of asserts in handlers and in external
-        for obj in [] + client_handlers + [global_handler, external]:
+        for obj in [] + client_handlers + \
+                [global_handler, external, callable_obj, obj_with_props]:
             test_for_True = False  # Test whether asserts are working correctly
             for key, value in obj.__dict__.items():
                 if key == "test_for_True":
@@ -325,6 +356,41 @@ class External(object):
                                        "String sent from Javascript")
         self.test_callbacks_True = True
         js_callback.Call("String sent from Python", py_callback)
+
+
+class Callable(object):
+    """Javascript 'window.callable' object."""
+
+    def __init__(self):
+        self.test_for_True = True  # Test whether asserts are working correctly
+        self.test_callable_True = False
+        self.test_function_True = False
+
+    def __call__(self):
+        self.test_callable_True = True
+
+    def test_function(self):
+        """Test function on the 'callable' object."""
+        self.test_function_True = True
+
+
+class ObjWithProps(object):
+    """Javascript 'window.obj_with_props' object."""
+
+    def __init__(self):
+        self.test_for_True = True  # Test whether asserts are working correctly
+
+        self.property_is_true = True
+        self.property_is_string = "string"
+
+        self._not_exposed = True
+        self._counter = 0
+
+    @property
+    def property_evaluated_at_binding(self):
+        val = self._counter
+        self._counter += 1
+        return val
 
 
 if __name__ == "__main__":
