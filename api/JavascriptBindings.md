@@ -118,9 +118,11 @@ This function is dummy, it really calls SetProperty(), you might use it as well 
 | --- | --- |
 | name | string |
 | object | instance |
+| allow_properties | bool=False |
 | __Return__ | void |
 
-Currently this function binds only methods of an object. Example:
+Normally this function binds only methods of an object. If `allow_properties` is set properties will be copied during binding also.
+Example:
 
 ```
 # In python:
@@ -131,23 +133,53 @@ Currently this function binds only methods of an object. Example:
 	myobject.someMethod();
 ```
 
-Currently when binding object only methods are binded, I decided not to bind properties of the object, as they would be binded by copying value and this might be confusing, as accessing object's property from javascript might give a different value during runtime then the real value when getting the property from python runtime. Only object's methods and functions can be binded by reference. Still you can bind object's properties if you like, you can find useful method IsValueAllowed() to check which properties can be binded, of course doing it this way will not allow you to access properties through "window.myobject.property", you can only bind to the "window" object so you should imitate some kind of namespace, so that accessing property would be through "window.myobject_property" or "myobject_property" as window prefix is always optional. Use dir() function to list object's properties. Example code:
+By default when binding object only methods are bound unless `allow_properties` is explicitely set. This was done as properties can currently ounly be bound by copying value during the binding process. It is expected this could be confusing as accessing object's property from javascript might give a different value during runtime then the real value when getting the property from python runtime if either end has been changed in the mean time. Only object's methods and functions can be bound by reference currently.  
+If so desired the properties can be bound just be aware that the javascript object will only be able to access the values as they existed at the time binding was performed. Changes to the javascript or python copies of the properties will not be reflected on the other.
 
 ```
-import types
+# In python:
+	class MyObject(object):
+        def __init__(self):
+            self.definition = "a property"
 
-	for name in dir(myobject):
-		if name[0] == '_': # ignore private attributes
-			continue
-		attr = getattr(myobject, name)
-		# Do not bind: functions, methods - this check is necessary as IsValueAllowed is true for these.
-		if type(attr) not in (types.FunctionType, types.MethodType):
-			if bindings.IsValueAllowed(attr):
-				bindings.SetProperty("myobject_"+name, attr)
+        @property
+        def py_prop(self):
+            return True
+
+        def someMethod(self):
+            print("someMethod() called")
+
+	myobject = MyObject()
+	bindings.SetObject("myobject", myobject, allow_properties=True)
+	browser.SetJavascriptBindings(bindings)
+	myobject.definition = "changed property"  # js will not see this
+    
+	// In javasript:
+	window.myobject.definition == "a property";
+	// or:
+	myobject.py_prop == true;
+	myobject.someMethod();
 ```
 
 There is a plan for the future to support binding object's properties by reference, it would be possible with the use of CefRegisterExtension().
 
+If the python object has the special function `__call__` the javascript object will also be callable, running this python function. This allows some more complex javascript objects to be crafted.
+
+```
+# In python:
+	class myobject(object):
+        def __call__(self, arg):
+            print("myobject(%s) called" % arg) 
+
+        def someMethod(self):
+            print("someMethod() called")
+
+	bindings.SetObject("myobject", myobject())
+    
+	// In javasript:
+	myobject("run object");
+	myobject.someMethod();
+```
 
 ### SetProperty
 
