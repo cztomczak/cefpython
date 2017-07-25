@@ -30,14 +30,14 @@ cdef class JavascriptBindings:
         self.SetProperty(name, func)
 
     cpdef py_void SetObject(self, py_string name, object obj,
-                            object allow_properties=False):
+                            py_bool allow_properties=False):
         if not hasattr(obj, "__class__"):
             raise Exception("JavascriptBindings.SetObject() failed: name=%s, "
                             "__class__ attribute missing, this is not an object" % name)
         cdef dict methods = {}
         cdef py_string key
         cdef object method
-        cdef object predicate = None if allow_properties else inspect.ismethod
+        cdef object predicate = False if allow_properties else inspect.ismethod
         if isinstance(obj, (PyBrowser, PyFrame)):
             predicate = inspect.isbuiltin
         for value in inspect.getmembers(obj, predicate=predicate):
