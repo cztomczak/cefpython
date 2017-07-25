@@ -81,7 +81,7 @@ Call this to rebind javascript bindings. This is useful when using reload() on p
 
 There is an another way of doing rebinding, you can call [Frame](Frame.md).SetProperty(), but this is not best performant way as it creates a C++ class V8FunctionHandler for each function, when doing Rebind() there is only one such class created. [Frame](Frame.md).SetProperty() is also more limited, you cannot bind objects using it, though it could be supported, I'm wondering whether there is a need for that, it would allow to pass objects as arguments to javascript callbacks so maybe it will be implemented in the future. Also Rebind() does bindings to frames and popups automatically according to bindToFrames and bindToPopups constructor options, while using [Frame](Frame.md).SetProperty() you would need to take care of that by yourself.
 
-Rebind does not solve all scenarios, take for example: what happens if you pass a python callback to javascript and then do rebindings? You still get old function referenced in javascript.
+Rebind does not solve all scenarios, take for example: what happens if you pass a python callback to javascript and then do call rebind? You still get old function referenced in javascript.
 
 
 ### SetFunction
@@ -92,7 +92,7 @@ Rebind does not solve all scenarios, take for example: what happens if you pass 
 | func | function|method |
 | __Return__ | void |
 
-This function will be binded to window object in html, you can call it in two ways:
+This function will be bound to window object in html, you can call it in two ways:
 
 ```
 window.myfunc()
@@ -118,7 +118,7 @@ This function is dummy, it really calls SetProperty(), you might use it as well 
 | --- | --- |
 | name | string |
 | object | instance |
-| allow_properties | bool=False |
+| allow_properties | bool (default False) |
 | __Return__ | void |
 
 Normally this function binds only methods of an object. If `allow_properties` is set properties will be copied during binding also.
@@ -133,12 +133,12 @@ Example:
 	myobject.someMethod();
 ```
 
-By default when binding object only methods are bound unless `allow_properties` is explicitely set. This was done as properties can currently ounly be bound by copying value during the binding process. It is expected this could be confusing as accessing object's property from javascript might give a different value during runtime then the real value when getting the property from python runtime if either end has been changed in the mean time. Only object's methods and functions can be bound by reference currently.  
+By default when binding object only methods are bound unless `allow_properties` is explicitly set. This was done as properties can currently only be bound by copying value during the binding process. It is expected this could be confusing as accessing object's property from javascript might give a different value during runtime than the real value when getting the property from python runtime if either end has been changed in the mean time. Only object's methods and functions can be bound by reference currently.  
 If so desired the properties can be bound just be aware that the javascript object will only be able to access the values as they existed at the time binding was performed. Changes to the javascript or python copies of the properties will not be reflected on the other.
 
 ```
 # In python:
-	class MyObject(object):
+    class MyObject(object):
         def __init__(self):
             self.definition = "a property"
 
@@ -152,7 +152,9 @@ If so desired the properties can be bound just be aware that the javascript obje
 	myobject = MyObject()
 	bindings.SetObject("myobject", myobject, allow_properties=True)
 	browser.SetJavascriptBindings(bindings)
-	myobject.definition = "changed property"  # js will not see this
+	
+	# js will not see this change unless you call browser.Rebind()
+	myobject.definition = "changed property" 
     
 	// In javasript:
 	window.myobject.definition == "a property";
@@ -189,7 +191,7 @@ If the python object has the special function `__call__` the javascript object w
 | value | mixed |
 | __Return__ | void |
 
-Set some value to property of the window object in html. This propertiy  for example can hold configuration options or some other data required at startup of your application.
+Set some value to property of the window object in html. This property  for example can hold configuration options or some other data required at startup of your application.
 
 Mixed type is one that can be converted to javascript types, see IsValueAllowed() for a full list.
 
