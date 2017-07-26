@@ -53,9 +53,9 @@ hello_world.py, tutorial.py and screenshot.py examples is an absolute
 minimum that you must do. Please try also testing examples for
 various GUI frameworks.
 
-Pure Python code should be tested using multiple Python versions. See
-[Issue #249](../../../issue/249) ("How to use pyenv to manage multiple
-Python versions on Ubuntu/Mac").
+Pure Python code should be tested using multiple Python versions
+(Python 2 and Python 3 at least). See [Issue #249](../../../issue/249)
+("How to use pyenv to manage multiple Python versions on Ubuntu/Mac").
 
 
 ## API docs
