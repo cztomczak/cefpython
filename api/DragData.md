@@ -18,7 +18,9 @@ Table of contents:
   * [GetImage](#getimage)
   * [GetImageHotspot](#getimagehotspot)
   * [HasImage](#hasimage)
-
+  * [AddFile](#addfile)
+  * [SetFragmentText](#setfragmenttext)
+  * [SetFragmentHtml](#setfragmenthtml)
 
 ## Methods
 
@@ -137,3 +139,30 @@ Linux-only currently (#251).
 
 Whether image representation of drag data is available.
 
+### AddFile
+
+| | |
+| --- | --- |
+| path | string |
+| display_name  | string |
+| __Return__ | void |
+
+Add a file that is being dragged into the webview.
+
+### SetFragmentText
+
+| | |
+| --- | --- |
+| text | string |
+| __Return__ | void |
+
+Set the plain text fragment that is being dragged.
+
+### SetFragmentHtml
+
+| | |
+| --- | --- |
+| html | string |
+| __Return__ | void |
+
+Set the text/html fragment that is being dragged.
