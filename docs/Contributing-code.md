@@ -21,6 +21,10 @@ Table of contents:
   on the [Forum](https://groups.google.com/group/cefpython).
 - When adding or exposing new API you should update API docs as well
   (the api/ directory)
+  - Update or create new documents if necessary
+  - To update table of contents (TOC) in the document run the
+    tools/toc.py script
+  - To update API index run the tools/apidocs.py tool
 - When adding or exposing new API you should create unit tests
   for the new functionality (the unittests/ directory). If creating
   unit tests is not feasible or extremely difficult then you should
