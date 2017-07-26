@@ -48,7 +48,10 @@ Before you can build CEF Python or CEF you must satisfy
 ## Quick build instructions for Windows
 
 Complete steps for building CEF Python v50+ with Python 2.7 using
-prebuilt binaries and libraries from GitHub Releases:
+prebuilt binaries and libraries from GitHub Releases.
+
+When cloning repository you should checkout a stable branch which
+are named "cefpythonXX" where XX is Chromium version number.
 
 1) Tested and works fine on Windows 7 64-bit
 
@@ -65,10 +68,12 @@ prebuilt binaries and libraries from GitHub Releases:
    you have to install "Visual C++ 2008 Redistributable Package (x64)"
    from [here](https://www.microsoft.com/en-us/download/details.aspx?id=15336)
 
-6) Clone cefpython and create a build/ directory and enter it:
+6) Clone cefpython, checkout for example "cefpython57" branch
+   that includes Chromium v57, then create a build/ directory and enter it:
 ```
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/
+git checkout cefpython57
 mkdir build/
 cd build/
 ```
@@ -80,7 +85,7 @@ pip install --upgrade -r ../tools/requirements.txt
 
 8) Download Windows binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/tags)
-   tagged e.g. 'v55-upstream' when building v55. The version
+   tagged e.g. 'v57-upstream' when building v57. The version
    of the binaries must match exactly the CEF version from
    the "cefpython/src/version/cef_version_win.h" file
    (the CEF_VERSION constant).
@@ -96,7 +101,10 @@ python ../tools/build.py xx.x
 ## Quick build instructions for Linux
 
 Complete steps for building CEF Python v50+ using prebuilt
-binaries and libraries from GitHub Releases:
+binaries and libraries from GitHub Releases.
+
+When cloning repository you should checkout a stable branch which
+are named "cefpythonXX" where XX is Chromium version number.
 
 1) Tested and works fine on Ubuntu 14.04 64-bit
 
@@ -109,10 +117,12 @@ binaries and libraries from GitHub Releases:
 sudo apt-get install python-dev cmake g++ libgtk2.0-dev
 ```
 
-4) Clone cefpython and create build/ directory and enter it:
+4) Clone cefpython, checkout for example "cefpython57" branch
+   that includes Chromium v57, then create build/ directory and enter it:
 ```
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/
+git checkout cefpython57
 mkdir build/
 cd build/
 ```
@@ -124,7 +134,7 @@ sudo pip install --upgrade -r ../tools/requirements.txt
 
 6) Download Linux binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/tags)
-   tagged e.g. 'v55-upstream' when building v55. The version
+   tagged e.g. 'v57-upstream' when building v57. The version
    of the binaries must match exactly the CEF version from
    the "cefpython/src/version/cef_version_linux.h" file
    (the CEF_VERSION constant).
@@ -225,17 +235,22 @@ requirements common for all platforms.
 
 ## Build using prebuilt CEF binaries and libraries
 
-1) Clone cefpython and create a build/ directory and enter it:
+When cloning repository you should checkout a stable branch which
+are named "cefpythonXX" where XX is Chromium version number.
+
+1) Clone cefpython, checkout for example "cefpython57" branch
+   that includes Chromium v57, then create a build/ directory and enter it:
 ```
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/
+git checkout cefpython57
 mkdir build/
 cd build/
 ```
 
 2) Download binaries and libraries from
    [GH releases](https://github.com/cztomczak/cefpython/tags)
-   tagged eg. 'v55-upstream' when building v55. The version
+   tagged eg. 'v57-upstream' when building v57. The version
    of the binaries must match exactly the CEF version from
    the "cefpython/src/version/" directory (look for CEF_VERSION
    constant in .h file).
@@ -251,10 +266,15 @@ python ../tools/build.py xx.x
 
 ## Build using CEF binaries from Spotify Automated Builds
 
-1) Clone cefpython and create a build/ directory and enter it:
+When cloning repository you should checkout a stable branch which
+are named "cefpythonXX" where XX is Chromium version number.
+
+1) Clone cefpython, checkout for example "cefpython57" branch
+   that includes Chromium v57, then create a build/ directory and enter it:
 ```
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/
+git checkout cefpython57
 mkdir build/
 cd build/
 ```
@@ -306,13 +326,21 @@ time you update to newer CEF.
 On Linux if there are errors about missing packages or others,
 then see solutions in the [Possible errors](#possible-errors) section.
 
+
 The commands below will build CEF from sources with custom CEF Python
 patches applied and then build the CEF Python package. "xx.x" is version
 number and "ninja-jobs 4" means to run 4 parallel jobs for compiling,
-increase it if you have more CPU cores and want things to build faster:
+increase it if you have more CPU cores and want things to build faster.
+
+The commands below checkout for example "cefpython57" branch that
+includes Chromium v57. When cloning repository you should checkout
+a stable branch which are named "cefpythonXX" where XX is Chromium
+version number.
+
 ```
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/
+git checkout cefpython57
 mkdir build/
 cd build/
 python ../tools/automate.py --build-cef --ninja-jobs 4
