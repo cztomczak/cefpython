@@ -5,6 +5,7 @@ Table of contents:
 * [Notifications about new releases / commits](#notifications-about-new-releases--commits)
 * [Changes in API after CEF updates](#changes-in-api-after-cef-updates)
 * [Differences between Python 2 and Python 3](#differences-between-python-2-and-python-3)
+* [A blank window on Mac/Linux](#a-blank-window-on-maclinux)
 * [Location of CEF framework in Mac apps](#location-of-cef-framework-in-mac-apps)
 * [Flash support](#flash-support)
 * [Feature X works in Google Chrome, but doesn't work in CEF Python](#feature-x-works-in-google-chrome-but-doesnt-work-in-cef-python)
@@ -86,6 +87,23 @@ following format: `cefpython3 == 31.2`.
 In Python 2 all cefpython strings are byte strings, but in Python 3
 they are all unicode strings. Be aware of this when porting cefpython
 based apps to Python 3, as it may cause issues.
+
+
+## A blank window on Mac/Linux
+
+A blank window might appear when your Python does not support
+GUI applications and this seems to be the case when you're using
+a custom Python installation. On system Python everything should
+work just fine.
+
+- On Mac it is required for Python to be build as a framework. See here:
+  https://github.com/pyenv/pyenv/wiki#how-to-build-cpython-with-framework-support-on-os-x
+- On Linux it is required for Python to be build as a shared library. See here:
+  https://github.com/pyenv/pyenv/wiki#how-to-build-cpython-with---enable-shared
+
+For a more detailed explanation see this comment by Robin Dunn from the
+wxPython project:
+https://github.com/wxWidgets/Phoenix/issues/288#issuecomment-294896145
 
 
 ## Location of CEF framework in Mac apps
