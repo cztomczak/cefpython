@@ -56,24 +56,23 @@ cdef class DragData:
 
     cpdef py_void SetFragmentText(self, text):
         cdef CefString cefText
-        PyToCefString(text,cefText)
+        PyToCefString(text, cefText)
         self.cef_drag_data.get().SetFragmentText(cefText)
 
-    cpdef py_void SetFragmentHtml(self, html ):
+    cpdef py_void SetFragmentHtml(self, html):
         cdef CefString cefHtml
-        PyToCefString(html,cefHtml)
+        PyToCefString(html, cefHtml)
         self.cef_drag_data.get().SetFragmentHtml(cefHtml)
 
     cpdef py_void AddFile(self, path, display_name):
         cdef CefString cefPath
         cdef CefString cefDisplayName
-        PyToCefString(path,cefPath)
-        PyToCefString(display_name,cefDisplayName)
-        self.cef_drag_data.get().AddFile(cefPath,cefDisplayName)
+        PyToCefString(path, cefPath)
+        PyToCefString(display_name, cefDisplayName)
+        self.cef_drag_data.get().AddFile(cefPath, cefDisplayName)
 
     cpdef py_void ResetFileContents(self):
         self.cef_drag_data.get().ResetFileContents()
-
 
     IF UNAME_SYSNAME == "Linux":
 

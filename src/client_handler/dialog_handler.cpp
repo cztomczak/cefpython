@@ -31,17 +31,16 @@ bool DialogHandler::OnFileDialog(CefRefPtr<CefBrowser> browser,
                                          callback);
     if(result){
         return result;
-    }else{
-#if defined(OS_LINUX)
-        return dialog_handler_->OnFileDialog(browser,
-                                             mode,
-                                             title,
-                                             default_file_path,
-                                             accept_filters,
-                                             selected_accept_filter,
-                                             callback);
-#else
-        return false;
-#endif
     }
+#if defined(OS_LINUX)
+    return dialog_handler_->OnFileDialog(browser,
+                                         mode,
+                                         title,
+                                         default_file_path,
+                                         accept_filters,
+                                         selected_accept_filter,
+                                         callback);
+#else
+    return false;
+#endif
 }

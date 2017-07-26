@@ -12,23 +12,22 @@ from libcpp.vector cimport vector as cpp_vector
 
 cdef extern from "include/cef_drag_data.h":
     cdef cppclass CefDragData:
-        cpp_bool IsFile()
-        CefString GetFileName()
-        cpp_bool GetFileNames(cpp_vector[CefString]& names)
+        void AddFile(const CefString& path, const CefString& display_name)
         cpp_bool IsLink()
+        cpp_bool IsFile()
         cpp_bool IsFragment()
         CefString GetLinkURL()
         CefString GetLinkTitle()
+        CefString GetFileName()
+        cpp_bool GetFileNames(cpp_vector[CefString]& names)
         CefString GetFragmentText()
         CefString GetFragmentHtml()
+        void ResetFileContents()
         void SetFragmentText(const CefString& text)
         void SetFragmentHtml(const CefString& html)
         void SetFragmentBaseURL(const CefString& base_url)
         cpp_bool HasImage()
         CefRefPtr[CefImage] GetImage()
         CefPoint GetImageHotspot()
-        void ResetFileContents()
-        void AddFile(const CefString& path, const CefString& display_name)
-
 
     cdef CefRefPtr[CefDragData] CefDragData_Create "CefDragData::Create"()

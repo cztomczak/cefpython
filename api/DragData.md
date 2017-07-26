@@ -6,31 +6,34 @@
 
 Table of contents:
 * [Methods](#methods)
-  * [IsFile](#isfile)
+  * [AddFile](#addfile)
   * [IsLink](#islink)
+  * [IsFile](#isfile)
   * [IsFragment](#isfragment)
-  * [GetFileName](#getfilename)
-  * [GetFileNames](#getfilenames)
   * [GetLinkUrl](#getlinkurl)
   * [GetLinkTitle](#getlinktitle)
+  * [GetFileName](#getfilename)
+  * [GetFileNames](#getfilenames)
   * [GetFragmentText](#getfragmenttext)
   * [GetFragmentHtml](#getfragmenthtml)
   * [GetImage](#getimage)
   * [GetImageHotspot](#getimagehotspot)
   * [HasImage](#hasimage)
-  * [AddFile](#addfile)
   * [SetFragmentText](#setfragmenttext)
   * [SetFragmentHtml](#setfragmenthtml)
 
 ## Methods
 
-### IsFile
+### AddFile
 
 | | |
 | --- | --- |
-| __Return__ | bool |
+| path | string |
+| display_name  | string |
+| __Return__ | void |
 
-Returns true if the drag data is a file.
+Add a file that is being dragged into the webview.
+
 
 ### IsLink
 
@@ -41,6 +44,15 @@ Returns true if the drag data is a file.
 Returns true if the drag data is a link.
 
 
+### IsFile
+
+| | |
+| --- | --- |
+| __Return__ | bool |
+
+Returns true if the drag data is a file.
+
+
 ### IsFragment
 
 | | |
@@ -48,6 +60,25 @@ Returns true if the drag data is a link.
 | __Return__ | bool |
 
 Returns true if the drag data is a text or html fragment.
+
+
+### GetLinkUrl
+
+| | |
+| --- | --- |
+| __Return__ | string |
+
+
+Return the link URL that is being dragged.
+
+
+### GetLinkTitle
+
+| | |
+| --- | --- |
+| __Return__ | string |
+
+Return the title associated with the link being dragged.
 
 
 ### GetFileName
@@ -68,24 +99,6 @@ Return the name of the file being dragged out of the browser window.
 
 
 Return the list of file names that are being dragged into the browser window.
-
-### GetLinkUrl
-
-| | |
-| --- | --- |
-| __Return__ | string |
-
-
-Return the link URL that is being dragged.
-
-
-### GetLinkTitle
-
-| | |
-| --- | --- |
-| __Return__ | string |
-
-Return the title associated with the link being dragged.
 
 
 ### GetFragmentText
@@ -138,16 +151,6 @@ Get image hotspot (drag start location relative to image dimensions).
 Linux-only currently (#251).
 
 Whether image representation of drag data is available.
-
-### AddFile
-
-| | |
-| --- | --- |
-| path | string |
-| display_name  | string |
-| __Return__ | void |
-
-Add a file that is being dragged into the webview.
 
 ### SetFragmentText
 

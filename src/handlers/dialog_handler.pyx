@@ -40,16 +40,9 @@ cdef public cpp_bool DialogHandler_OnFileDialog(
                      default_file_path=pyDefaultFilePath,
                      accept_filters=pyAcceptFilters,
                      selected_accept_filter=selected_accept_filter,
-                     file_dialog_callback = CreatePyFileDialogCallback(cefFileDialogCallback)
-                   )
-
+                     file_dialog_callback = CreatePyFileDialogCallback(cefFileDialogCallback))
             return bool(returnValue)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
     return False
-
-
-
-
-
