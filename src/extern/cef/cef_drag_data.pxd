@@ -27,6 +27,8 @@ cdef extern from "include/cef_drag_data.h":
         cpp_bool HasImage()
         CefRefPtr[CefImage] GetImage()
         CefPoint GetImageHotspot()
+        void ResetFileContents()
+        void AddFile(const CefString& path, const CefString& display_name)
 
 
     cdef CefRefPtr[CefDragData] CefDragData_Create "CefDragData::Create"()
