@@ -84,14 +84,14 @@ python unittest module works doesn't allow to define for example
 test methods named "test_1_initialize", "test_2_some", "test_3_shutdown",
 after doing so some strange things happen (maybe unittest is
 running these methods in separate threads). So with these
-restrictions the way it works currently is that there is ongle
-single method named "test_main" in which muliple sub-tests are
-run. A function named "subtest_message" was defined to be able
+restrictions the way it works currently is that there is a
+single method named test_main() in which muliple sub-tests are
+run. A function named subtest_message() was defined to be able
 to output results of the multiple subtests that are running inside
-the "test_main" method.
+the test_main() method.
 
-In main_test.py there were implemented automated checks in handlers
-and in the external object. When class (handler or external)
+In main_test.py there were implemented automated assert checks
+in handlers and in the external object. When class (handler or external)
 defines a property that ends with "_True" or "_False" then it will
 be automatically checked  whether it asserts to these values just
 before CEF shutdown. There is one limitation for these type
