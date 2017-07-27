@@ -4,6 +4,36 @@
 
 include "cefpython.pyx"
 
+
+cdef class ObjectWrapper:
+    # Holds reference to bound object providing access to allowed attributes
+    cdef public object obj
+    cdef public object predicate
+
+    def __init__(self, obj, predicate=False):
+        self.obj = obj
+        self.predicate = predicate
+
+    def __contains__(self, item):
+        if not hasattr(self.obj, item):
+            return False
+        val = getattr(self.obj, item)
+        return not self.predicate or self.predicate(val)
+
+    def __getitem__(self, item):
+        if item in self:
+            return getattr(self.obj, item)
+        raise AttributeError("Not available")
+
+    def get(self, item, default=None):
+        if item in self:
+            return self[item]
+        return default
+
+    cpdef object items(self):
+        return inspect.getmembers(self.obj, predicate=self.predicate)
+
+
 cdef class JavascriptBindings:
     # By default binding only to top frame.
     cdef public py_bool bindToFrames
@@ -34,17 +64,10 @@ cdef class JavascriptBindings:
         if not hasattr(obj, "__class__"):
             raise Exception("JavascriptBindings.SetObject() failed: name=%s, "
                             "__class__ attribute missing, this is not an object" % name)
-        cdef dict methods = {}
-        cdef py_string key
-        cdef object method
         cdef object predicate = False if allow_properties else inspect.ismethod
         if isinstance(obj, (PyBrowser, PyFrame)):
             predicate = inspect.isbuiltin
-        for value in inspect.getmembers(obj, predicate=predicate):
-            key = value[0]
-            method = value[1]
-            methods[key] = method
-        self.objects[name] = methods
+        self.objects[name] = ObjectWrapper(obj, predicate)
 
     cpdef object GetFunction(self, py_string name):
         if name in self.functions:
@@ -57,9 +80,10 @@ cdef class JavascriptBindings:
         return self.objects
 
     cpdef object GetObjectMethod(self, py_string objectName, py_string methodName):
+        cdef object method
         if objectName in self.objects:
-            if methodName in self.objects[objectName]:
-                return self.objects[objectName][methodName]
+            method = self.objects[objectName].get(methodName)
+            return method if callable(method) else None
 
     cpdef object GetFunctionOrMethod(self, py_string name):
         # Name can be "someFunc" or "object.someMethod".
@@ -101,10 +125,10 @@ cdef class JavascriptBindings:
             objects = {}
             for objectName in self.objects:
                 attrs = {}
+                # print(self.objects[objectName].items())
                 for name, value in self.objects[objectName].items():
-                    if self.IsValueAllowedRecursively(value) and \
-                            name == '__call__' or not name.startswith('_'):
-                        if inspect.ismethod(value):
+                    if self.IsValueAllowedRecursively(value):
+                        if inspect.ismethod(value) or inspect.isbuiltin(value):
                             value = '####cefpython####{"what": "bound-function"}'
                         attrs[name] = value
                 objects[objectName] = attrs

@@ -14,7 +14,7 @@ import base64
 import sys
 
 # To show the window for an extended period of time increase this number.
-MESSAGE_LOOP_RANGE = 200  # each iteration is 0.01 sec
+MESSAGE_LOOP_RANGE = 300  # each iteration is 0.01 sec
 
 # language=HTML
 g_datauri_data = """
@@ -90,15 +90,15 @@ g_datauri_data = """
         if (obj_with_props.property_is_string !== "string") {
             throw new Error("obj_with_props.property_is_string was not 'string'"); 
         }        
-        if (obj_with_props._not_exposed !== undefined) {
-            throw new Error("obj_with_props._not_exposed was not available to js"); 
-        }
         var counter = obj_with_props.property_evaluated_at_binding;
         if (!Number.isInteger(counter)) {
             throw new Error("obj_with_props.property_evaluated_at_binding was not expected integer"); 
         }
         if (obj_with_props.property_evaluated_at_binding != counter) {
             throw new Error("obj_with_props.property_evaluated_at_binding changed on second read"); 
+        }
+        if (obj_with_props.changed != true) {
+            throw new Error("obj_with_props.changed is still false"); 
         }
         print("window.obj_with_props ok");
 
@@ -179,6 +179,11 @@ class MainTest_IsolatedTest(unittest.TestCase):
         bindings.SetObject("obj_with_props", obj_with_props, allow_properties=True)
         browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
+
+        # Test changed object value
+        obj_with_props.changed = True
+        browser.javascriptBindings.Rebind()
+        subtest_message("browser.javascriptBindings.Rebind() ok")
 
         # Run message loop for some time.
         # noinspection PyTypeChecker
@@ -383,7 +388,8 @@ class ObjWithProps(object):
         self.property_is_true = True
         self.property_is_string = "string"
 
-        self._not_exposed = True
+        self.changed = False
+
         self._counter = 0
 
     @property
