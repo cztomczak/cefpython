@@ -22,5 +22,5 @@ Table of contents:
 | mask | int |
 | __Return__ | bool |
 
- Called when an external drag event enters the browser window.
-
+Description from upstream CEF:
+> Called when an external drag event enters the browser window.
