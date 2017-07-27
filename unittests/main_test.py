@@ -7,10 +7,10 @@
 import unittest
 # noinspection PyUnresolvedReferences
 import _test_runner
+from _common import subtest_message, display_number_of_unittest, html_to_data_uri, cef_waiting
+from _common import automatic_check_handlers
 from os.path import basename
 from cefpython3 import cefpython as cef
-import time
-import base64
 import sys
 
 # To show the window for an extended period of time increase this number.
@@ -76,28 +76,23 @@ g_datauri_data = """
             py_callback("String sent from Javascript");
             print("py_callback() ok");
         });
+
+        // Test receiving a file from OnFileDialog.
+        document.getElementById('selectFile').addEventListener('change', function(e){
+            print('Received file "'+this.files[0].name + '" OK')
+        }, true);
     };
     </script>
 </head>
 <body>
     <!-- FrameSourceVisitor hash = 747ef3e6011b6a61e6b3c6e54bdd2dee -->
+    <input id="selectFile" type="file">
     <h1>Main test</h1>
     <div id="console"></div>
 </body>
 </html>
 """
-g_datauri = "data:text/html;base64,"+base64.b64encode(g_datauri_data.encode(
-        "utf-8", "replace")).decode("utf-8", "replace")
-
-g_subtests_ran = 0
-
-
-def subtest_message(message):
-    global g_subtests_ran
-    g_subtests_ran += 1
-    print(str(g_subtests_ran) + ". " + message)
-    sys.stdout.flush()
-
+g_datauri = html_to_data_uri(g_datauri_data)
 
 class MainTest_IsolatedTest(unittest.TestCase):
 
@@ -132,8 +127,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
         self.assertIsNotNone(browser, "Browser object")
         subtest_message("cef.CreateBrowserSync() ok")
 
-        # Test other handlers: LoadHandler, DisplayHandler etc.
-        client_handlers = [LoadHandler(self), DisplayHandler(self)]
+        # Test other handlers: LoadHandler, DisplayHandler, DialogHandler etc.
+        client_handlers = [LoadHandler(self), DisplayHandler(self), DialogHandler(self)]
         for handler in client_handlers:
             browser.SetClientHandler(handler)
         subtest_message("browser.SetClientHandler() ok")
@@ -152,10 +147,15 @@ class MainTest_IsolatedTest(unittest.TestCase):
 
         # Run message loop for some time.
         # noinspection PyTypeChecker
-        for i in range(MESSAGE_LOOP_RANGE):
-            cef.MessageLoopWork()
-            time.sleep(0.01)
+        cef_waiting(MESSAGE_LOOP_RANGE)
         subtest_message("cef.MessageLoopWork() ok")
+
+        #Simulating file dialog click event for testing OnFileDialog handler
+        browser.SendMouseClickEvent(67, 20, cef.MOUSEBUTTON_LEFT, False, 1)
+        browser.SendMouseClickEvent(67, 20, cef.MOUSEBUTTON_LEFT, True, 1)
+
+        # Run message loop for some time.
+        cef_waiting(MESSAGE_LOOP_RANGE)
 
         # Test browser closing. Remember to clean reference.
         browser.CloseBrowser(True)
@@ -164,37 +164,17 @@ class MainTest_IsolatedTest(unittest.TestCase):
 
         # Give it some time to close before calling shutdown.
         # noinspection PyTypeChecker
-        for i in range(25):
-            cef.MessageLoopWork()
-            time.sleep(0.01)
+        cef_waiting(25)
 
         # Automatic check of asserts in handlers and in external
-        for obj in [] + client_handlers + [global_handler, external]:
-            test_for_True = False  # Test whether asserts are working correctly
-            for key, value in obj.__dict__.items():
-                if key == "test_for_True":
-                    test_for_True = True
-                    continue
-                if "_True" in key:
-                    self.assertTrue(value, "Check assert: " +
-                                    obj.__class__.__name__ + "." + key)
-                    subtest_message(obj.__class__.__name__ + "." +
-                                    key.replace("_True", "") +
-                                    " ok")
-                elif "_False" in key:
-                    self.assertFalse(value, "Check assert: " +
-                                     obj.__class__.__name__ + "." + key)
-                    subtest_message(obj.__class__.__name__ + "." +
-                                    key.replace("_False", "") +
-                                    " ok")
-            self.assertTrue(test_for_True)
+        automatic_check_handlers(self, [] + client_handlers + [global_handler, external])
 
         # Test shutdown of CEF
         cef.Shutdown()
         subtest_message("cef.Shutdown() ok")
 
         # Display real number of tests there were run
-        print("\nRan " + str(g_subtests_ran) + " sub-tests in test_main")
+        display_number_of_unittest("sub-tests in test_main")
         sys.stdout.flush()
 
 
@@ -280,6 +260,21 @@ class DisplayHandler(object):
             # Check whether messages from javascript are coming
             self.OnConsoleMessage_True = True
             subtest_message(message)
+
+
+class DialogHandler(object):
+    def __init__(self, test_case):
+        self.test_case = test_case
+
+        # Asserts for True/False will be checked just before shutdown
+        self.test_for_True = True  # Test whether asserts are working correctly
+        self.OnFileDialog_True = False
+
+    def OnFileDialog(self, browser, mode, title, default_file_path ,accept_filters ,selected_accept_filter ,file_dialog_callback):
+        self.test_case.assertFalse(self.OnFileDialog_True)
+        self.OnFileDialog_True = True
+        file_dialog_callback.Continue(selected_accept_filter, [__file__])
+        return True
 
 
 class FrameSourceVisitor(object):
