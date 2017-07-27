@@ -18,13 +18,13 @@ Table of contents:
 * [Hello world](#hello-world)
 * [Architecture](#architecture)
 * [Handling Python exceptions](#handling-python-exceptions)
-* [Message loop](#message-loop)
 * [Settings](#settings)
 * [Change user agent string](#change-user-agent-string)
 * [Client handlers](#client-handlers)
 * [Javascript integration](#javascript-integration)
 * [Javascript exceptions and Python exceptions](#javascript-exceptions-and-python-exceptions)
 * [Plugins and Flash support](#plugins-and-flash-support)
+* [Message loop](#message-loop)
 * [Off-screen rendering](#off-screen-rendering)
 * [Build executable](#build-executable)
 * [Support and documentation](#support-and-documentation)
@@ -151,71 +151,15 @@ sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
 See Python docs for [sys.excepthook](https://docs.python.org/2/library/sys.html#sys.excepthook).
 
 The cef.ExceptHook helper function does the following:
-1. Calls cef.[QuitMessageLoop](../api/cefpython.md#quitmessageloop)
-2. Calls cef.[Shutdown](../api/cefpython.md#shutdown)
-3. Writes exception to "error.log" file
-4. Prints exception
+1. Writes exception to "error.log" file
+2. Prints exception
+3. Calls cef.[QuitMessageLoop](../api/cefpython.md#quitmessageloop)
+4. Calls cef.[Shutdown](../api/cefpython.md#shutdown)
 5. Calls [os._exit(1)](https://docs.python.org/2/library/os.html#os._exit) -
    which exits the process with status 1, without calling
    cleanup handlers, flushing stdio buffers, etc.
 
 See CEF Python's ExceptHook source code in src/[helpers.pyx](../src/helpers.pyx).
-
-
-## Message loop
-
-Message loop is a programming construct that waits for and
-dispatches events or messages in a program. All desktop GUI
-programs must run some kind of message loop. The hello_world.py
-example doesn't depend on any third party GUI framework and thus
-can run CEF message loop directly by calling cef.MessageLoop().
-However in other examples that embed CEF browser with GUI frameworks
-such as Qt/wxPython/Tkinter you can't call cef.MessageLoop(), because
-these frameworks run a message loop of its own. For such cases CEF
-provides cef.MessageLoopWork() which is for integrating CEF message
-loop into existing application message loop. Usually
-cef.MessageLoopWork() is called in a 10ms timer.
-
-**Performance**
-
-Calling cef.MessageLoopWork() in a timer is not the best performant
-way to run CEF message loop, also there are known bugs on some
-platforms when calling message loop work in a timer. There are two
-options to increase performance depending on platform. On Windows
-use a multi-threaded message loop for best performance. On Mac use
-an external message pump for best performance.
-
-**Windows: multi-threaded message loop**
-
-On Windows for best performance a multi-threaded message loop should
-be used instead of cef.MessageLoopWork() or external message pump. To do
-so, set ApplicationSettings.[multi_threaded_message_loop](../api/ApplicationSettings.md#multi_threaded_message_loop)
-to True and run a native message loop in your app. Don't call CEF's
-message loop. Create browser using `cef.PostTask(cef.TID_UI, cef.CreateBrowserSync, ...)`.
-Note that when using multi-threaded message loop, CEF's UI thread
-is no more application's main thread, and that makes it a bit harder
-to correctly use CEF API. API docs explain on which threads a function
-may be called and in case of handlers' callbacks (and other interfaces)
-it is stated on which thread a callback will be called. See also
-[Issue #133](../../../issues/133).
-
-**Mac: external message pump**
-
-CEF provides ApplicationSettings.[external_message_pump](../api/ApplicationSettings.md#external_message_pump)
-option for running an external message pump that you should use for
-best performance and to get rid of some bugs that appear when using
-cef.MessageLoopWork() in a timer.
-
-This option is currently marked experimental as it wasn't yet fully
-tested. This option should work good on Mac - in upstream CEF it was
-tested mainly on Mac. If you've successfully used this option on Mac
-please let us know on the Forum.
-
-**Linux**
-
-External message pump option is not recommended to use on Linux,
-as during testing it actually made app x2 slower - it's a bug in
-upstream CEF. See [Issue #246](../../../issues/246) for more details.
 
 
 ## Settings
@@ -518,6 +462,62 @@ Instructions for enabling Flash support are available in [Issue #235](../../../i
 
 For the old CEF Python v31 release instructions for enabling Flash
 support are available on Wiki pages.
+
+
+## Message loop
+
+Message loop is a programming construct that waits for and
+dispatches events or messages in a program. All desktop GUI
+programs must run some kind of message loop. The hello_world.py
+example doesn't depend on any third party GUI framework and thus
+can run CEF message loop directly by calling cef.MessageLoop().
+However in other examples that embed CEF browser with GUI frameworks
+such as Qt/wxPython/Tkinter you can't call cef.MessageLoop(), because
+these frameworks run a message loop of its own. For such cases CEF
+provides cef.MessageLoopWork() which is for integrating CEF message
+loop into existing application message loop. Usually
+cef.MessageLoopWork() is called in a 10ms timer.
+
+**Performance**
+
+Calling cef.MessageLoopWork() in a timer is not the best performant
+way to run CEF message loop, also there are known bugs on some
+platforms when calling message loop work in a timer. There are two
+options to increase performance depending on platform. On Windows
+use a multi-threaded message loop for best performance. On Mac use
+an external message pump for best performance.
+
+**Windows: multi-threaded message loop**
+
+On Windows for best performance a multi-threaded message loop should
+be used instead of cef.MessageLoopWork() or external message pump. To do
+so, set ApplicationSettings.[multi_threaded_message_loop](../api/ApplicationSettings.md#multi_threaded_message_loop)
+to True and run a native message loop in your app. Don't call CEF's
+message loop. Create browser using `cef.PostTask(cef.TID_UI, cef.CreateBrowserSync, ...)`.
+Note that when using multi-threaded message loop, CEF's UI thread
+is no more application's main thread, and that makes it a bit harder
+to correctly use CEF API. API docs explain on which threads a function
+may be called and in case of handlers' callbacks (and other interfaces)
+it is stated on which thread a callback will be called. See also
+[Issue #133](../../../issues/133).
+
+**Mac: external message pump**
+
+CEF provides ApplicationSettings.[external_message_pump](../api/ApplicationSettings.md#external_message_pump)
+option for running an external message pump that you should use for
+best performance and to get rid of some bugs that appear when using
+cef.MessageLoopWork() in a timer.
+
+This option is currently marked experimental as it wasn't yet fully
+tested. This option should work good on Mac - in upstream CEF it was
+tested mainly on Mac. If you've successfully used this option on Mac
+please let us know on the Forum.
+
+**Linux**
+
+External message pump option is not recommended to use on Linux,
+as during testing it actually made app x2 slower - it's a bug in
+upstream CEF. See [Issue #246](../../../issues/246) for more details.
 
 
 ## Off-screen rendering
