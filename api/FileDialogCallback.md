@@ -35,4 +35,8 @@ Description from upstream CEF:
 | __Return__ | void |
 
 Description from upstream CEF:
-> Continue the file selection. |selected_accept_filter| should be the 0-based index of the value selected from the accept filters array passed to CefDialogHandler::OnFileDialog. |file_paths| should be a single value or a list of values depending on the dialog mode. An empty |file_paths| value is treated the same as calling Cancel().
+> Continue the file selection.
+> |selected_accept_filter| should be the 0-based index of the value selected from the accept filters array passed to
+>                          CefDialogHandler::OnFileDialog. |file_paths| should be a single value or a list of values
+>                          depending on the dialog mode. An empty
+> |file_paths| value is treated the same as calling Cancel().
