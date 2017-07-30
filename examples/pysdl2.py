@@ -16,12 +16,6 @@ import os
 import sys
 import sdl2
 import sdl2.ext
-import sdl2.sdlimage
-import sdl2.joystick
-import sdl2.video
-import sdl2.render
-import sdl2.sdlgfx
-import sdl2.sdlttf
 
 from cefpython3 import cefpython as cef
 from PIL import Image
