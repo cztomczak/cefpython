@@ -28,6 +28,7 @@ Table of contents:
 ## Code style
 
 * Try to comply with the [PEP 8 style guide](http://www.python.org/dev/peps/pep-0008/)
+* Follow docstring conventions described in [PEP 257](https://www.python.org/dev/peps/pep-0257/)
 * Limit all lines to a maximum of 79 characters (comments should
   be shorter, max 60-65 chars)
 * Do your best for the new code to be consistent with existing code base
