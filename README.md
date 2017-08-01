@@ -3,7 +3,7 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Major sponsors](#major-sponsors)
-* [Funding request - v59.0 release](#funding-request---v590-release)
+* [Funding request - v60.0 release](#funding-request---v600-release)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
