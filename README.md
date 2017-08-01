@@ -60,9 +60,10 @@ See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
 
 
-## Funding request - v59.0 release
+## Funding request - v60.0 release
 
-For those interested in sponsoring a v59.0 release please see [Issue #370](../../issues/370).
+For those interested in sponsoring a v60.0 release please see
+[Issue #370](../../issues/370).
 
 
 ## Install
