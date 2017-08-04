@@ -24,6 +24,19 @@
  Tested configurations:
  - SDL2 2.0.5 with PySDL2 0.9.3 on Fedora 25 (x86_64)
  - SDL2 with PySDL2 0.9.5 on Ubuntu 14.04
+ 
+ Event handling:
+ 
+ Where possible SDL2 events are mapped to CEF ones. Not all keyboard
+ modifiers are handled in this example but these could be
+ add by the reader (if desired).
+ 
+ Due to SDL2's lack of GUI widgets there are no GUI controls
+ for the user. However, as an exercise this example could
+ be extended by create some simple SDL2 widgets. An example of
+ widgets made using PySDL2 can be found as part of the Pi
+ Entertainment System at:
+ https://github.com/neilmunday/pes/blob/master/lib/pes/ui.py
 """
 
 import os
@@ -55,6 +68,8 @@ def main():
     headerHeight = 0
     browserHeight = height - headerHeight
     browserWidth = width
+    # Mouse wheel fudge to enhance scrolling
+    scrollEnhance = 20
     # Initialise CEF for offscreen rendering
     WindowUtils = cef.WindowUtils()
     sys.excepthook = cef.ExceptHook
@@ -121,9 +136,22 @@ def main():
                             1
                         )
             elif event.type == sdl2.SDL_MOUSEMOTION:
-                if event.button.y > headerHeight:
-                    # Mouse click triggered in browser region
-                    browser.SendMouseMoveEvent(event.button.x, event.button.y - headerHeight, True)
+                if event.motion.y > headerHeight:
+                    # Mouse move triggered in browser region
+                    browser.SendMouseMoveEvent(event.motion.x, event.motion.y - headerHeight, False)
+            elif event.type == sdl2.SDL_MOUSEWHEEL:
+                # Mouse wheel event
+                x = event.wheel.x
+                if x < 0:
+                    x -= scrollEnhance
+                else:
+                    x += scrollEnhance
+                y = event.wheel.y
+                if y < 0:
+                    y -= scrollEnhance
+                else:
+                    y += scrollEnhance
+                browser.SendMouseWheelEvent(0, 0, x, y)
             elif event.type == sdl2.SDL_TEXTINPUT:
                 # Handle text events to get actual characters typed rather than the key pressed
                 keycode = ord(event.text.text)
@@ -166,14 +194,15 @@ def main():
                         sdl2.SDLK_END
                 ]:
                     keycode = getKeyCode(event.key.keysym.sym)
-                    key_event = {
-                        "type": cef.KEYEVENT_RAWKEYDOWN,
-                        "windows_key_code": keycode,
-                        "character": keycode,
-                        "unmodified_character": keycode,
-                        "modifiers": cef.EVENTFLAG_NONE
-                    }
-                    browser.SendKeyEvent(key_event)
+                    if keycode != None:
+                        key_event = {
+                            "type": cef.KEYEVENT_RAWKEYDOWN,
+                            "windows_key_code": keycode,
+                            "character": keycode,
+                            "unmodified_character": keycode,
+                            "modifiers": cef.EVENTFLAG_NONE
+                        }
+                        browser.SendKeyEvent(key_event)
             elif event.type == sdl2.SDL_KEYUP:
                 # Handle key up events for non-text keys
                 if event.key.keysym.sym in [
@@ -188,14 +217,15 @@ def main():
                         sdl2.SDLK_END
                 ]:
                     keycode = getKeyCode(event.key.keysym.sym)
-                    key_event = {
-                        "type": cef.KEYEVENT_KEYUP,
-                        "windows_key_code": keycode,
-                        "character": keycode,
-                        "unmodified_character": keycode,
-                        "modifiers": cef.EVENTFLAG_NONE
-                    }
-                    browser.SendKeyEvent(key_event)
+                    if keycode != None:
+                        key_event = {
+                            "type": cef.KEYEVENT_KEYUP,
+                            "windows_key_code": keycode,
+                            "character": keycode,
+                            "unmodified_character": keycode,
+                            "modifiers": cef.EVENTFLAG_NONE
+                        }
+                        browser.SendKeyEvent(key_event)
         # Clear the renderer
         sdl2.SDL_SetRenderDrawColor(
             renderer,
@@ -221,25 +251,22 @@ def main():
     
 def getKeyCode(key):
     """Helper function to convert SDL2 key codes to cef ones"""
-    if key == sdl2.SDLK_RETURN:
-        return 13
-    if key == sdl2.SDLK_DELETE:
-        return 46
-    if key == sdl2.SDLK_BACKSPACE:
-        return 8
-    if key == sdl2.SDLK_LEFT:
-        return 37
-    if key == sdl2.SDLK_RIGHT:
-        return 39
-    if key == sdl2.SDLK_UP:
-        return 38
-    if key == sdl2.SDLK_DOWN:
-        return 40
-    if key == sdl2.SDLK_HOME:
-        return 36
-    if key == sdl2.SDLK_END:
-        return 35
-    raise Exception("Invalid key")
+    keyMap = {
+        sdl2.SDLK_RETURN: 13,
+        sdl2.SDLK_DELETE: 46,
+        sdl2.SDLK_BACKSPACE: 8,
+        sdl2.SDLK_LEFT: 37,
+        sdl2.SDLK_RIGHT: 39,
+        sdl2.SDLK_UP: 38,
+        sdl2.SDLK_DOWN: 40,
+        sdl2.SDLK_HOME: 36,
+        sdl2.SDLK_END: 35,
+    }
+    if key in keyMap:
+        return keyMap[key]
+    # Key not mapped, raise exception
+    print("Keyboard mapping incomplete: unsupported SDL key %d. See https://wiki.libsdl.org/SDLKeycodeLookup for mapping." % key)
+    return None
 
 class LoadHandler(object):
     """Simple handler for loading URLs."""
@@ -252,7 +279,6 @@ class LoadHandler(object):
         if not frame.IsMain():
             return
         print("Failed to load %s" % failed_url)
-        cef.PostTask(cef.TID_UI, exit_app, browser)
 
 class RenderHandler(object):
     """
