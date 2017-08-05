@@ -1,8 +1,6 @@
 """
  Simple SDL2 / cefpython3 example.
 
- Only handles mouse events but could be extended to handle others.
-
  Requires pysdl2 (and SDL2 library).
  
  Tested configurations:
