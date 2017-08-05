@@ -4,6 +4,10 @@
  Only handles mouse events but could be extended to handle others.
 
  Requires pysdl2 (and SDL2 library).
+ 
+ Tested configurations:
+ - SDL2 2.0.5 with PySDL2 0.9.3 on Fedora 25 (x86_64)
+ - SDL2 with PySDL2 0.9.5 on Ubuntu 14.04
 
  Install instructions.
  
@@ -20,16 +24,17 @@
  2. Install PySDL via PIP:
 
     sudo pip2 install PySDL2
-
- Tested configurations:
- - SDL2 2.0.5 with PySDL2 0.9.3 on Fedora 25 (x86_64)
- - SDL2 with PySDL2 0.9.5 on Ubuntu 14.04
  
  Event handling:
  
  Where possible SDL2 events are mapped to CEF ones. Not all keyboard
  modifiers are handled in this example but these could be
- add by the reader (if desired).
+ added by the reader (if desired). Modifiers that do not work
+ for example:
+ 
+ - Ctrl
+ - Mouse dragging
+ - Marking text inputs with the shift key
  
  Due to SDL2's lack of GUI widgets there are no GUI controls
  for the user. However, as an exercise this example could
@@ -265,7 +270,10 @@ def getKeyCode(key):
     if key in keyMap:
         return keyMap[key]
     # Key not mapped, raise exception
-    print("Keyboard mapping incomplete: unsupported SDL key %d. See https://wiki.libsdl.org/SDLKeycodeLookup for mapping." % key)
+    print("Keyboard mapping incomplete: \
+unsupported SDL key %d. \
+See https://wiki.libsdl.org/SDLKeycodeLookup for mapping."
+    % key)
     return None
 
 class LoadHandler(object):
