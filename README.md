@@ -344,6 +344,7 @@ Additional information for v31.2 release:
   * [NotifyMoveOrResizeStarted](api/Browser.md#notifymoveorresizestarted)
   * [NotifyScreenInfoChanged](api/Browser.md#notifyscreeninfochanged)
   * [ParentWindowWillClose](api/Browser.md#parentwindowwillclose)
+  * [Print](api/Browser.md#print)
   * [Reload](api/Browser.md#reload)
   * [ReloadIgnoreCache](api/Browser.md#reloadignorecache)
   * [ReplaceMisspelling](api/Browser.md#replacemisspelling)

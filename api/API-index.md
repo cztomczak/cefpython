@@ -84,6 +84,7 @@
   * [NotifyMoveOrResizeStarted](Browser.md#notifymoveorresizestarted)
   * [NotifyScreenInfoChanged](Browser.md#notifyscreeninfochanged)
   * [ParentWindowWillClose](Browser.md#parentwindowwillclose)
+  * [Print](Browser.md#print)
   * [Reload](Browser.md#reload)
   * [ReloadIgnoreCache](Browser.md#reloadignorecache)
   * [ReplaceMisspelling](Browser.md#replacemisspelling)

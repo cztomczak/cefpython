@@ -64,6 +64,7 @@ Table of contents:
   * [NotifyMoveOrResizeStarted](#notifymoveorresizestarted)
   * [NotifyScreenInfoChanged](#notifyscreeninfochanged)
   * [ParentWindowWillClose](#parentwindowwillclose)
+  * [Print](#print)
   * [Reload](#reload)
   * [ReloadIgnoreCache](#reloadignorecache)
   * [ReplaceMisspelling](#replacemisspelling)
@@ -660,6 +661,15 @@ disabled.
 | __Return__ | void |
 
 This method does nothing. Kept for BC.
+
+
+### Print
+
+| | |
+| --- | --- |
+| __Return__ | void |
+
+Print the current browser contents.
 
 
 ### Reload
