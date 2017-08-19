@@ -30,7 +30,6 @@ Table of contents:
   * [GetBrowserIdentifier](#getbrowseridentifier)
   * [GetName](#getname)
   * [GetParent](#getparent)
-  * [GetProperty](#getproperty)
   * [GetSource](#getsource)
   * [GetText](#gettext)
   * [GetUrl](#geturl)
@@ -42,7 +41,6 @@ Table of contents:
   * [Paste](#paste)
   * [Redo](#redo)
   * [SelectAll](#selectall)
-  * [SetProperty](#setproperty)
   * [Undo](#undo)
   * [ViewSource](#viewsource)
 
@@ -157,16 +155,6 @@ Returns the name for this frame. If the frame has an assigned name (for example,
 Returns the parent of this frame or None if this is the main (top-level) frame. This method should only be called on the UI thread.
 
 
-### GetProperty
-
-| Parameter | Type |
-| --- | --- |
-| name | string |
-| __Return__ | void |
-
-Get property of the window object in javascript. For a list of allowed returned values see [JavascriptBindings](JavascriptBindings.md).IsValueAllowed()  - except function, method and instance. If you try to get some javascript native property that its value cannot be converted to the python types above, you will get an error.
-
-
 ### GetSource
 
 | Parameter | Type |
@@ -279,17 +267,6 @@ Execute redo in this frame.
 | __Return__ | void |
 
 Execute select all in this frame.
-
-
-### SetProperty
-
-| Parameter | Type |
-| --- | --- |
-| name | string |
-| value | mixed |
-| __Return__ | void |
-
-Set property of the window object in javascript. You can also set properties before browser is created by using [JavascriptBindings](JavascriptBindings.md).SetProperty(). For a list of allowed types for 'mixed' see [JavascriptBindings](JavascriptBindings.md).IsValueAllowed() (except instance).
 
 
 ### Undo
