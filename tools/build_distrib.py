@@ -16,6 +16,10 @@ Options:
                        proceeding. Only unit tests will be run in such case.
     --no-rebuild       Do not rebuild cefpython modules. For internal use
                        so that changes to packaging can be quickly tested.
+    --no-automate      Do not run automate.py --prebuilt-cef. This flag
+                       allows to use CEF prebuilt binaries and libraries
+                       downloaded from CEF Python's Github releases to
+                       build distribution pacakges.
 
 
 This script does the following:
@@ -68,6 +72,7 @@ import zipfile
 VERSION = ""
 NO_RUN_EXAMPLES = False
 NO_REBUILD = False
+NO_AUTOMATE = False
 
 # Python versions
 SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6)]
@@ -118,13 +123,15 @@ def main():
     if not os.path.exists(DISTRIB_DIR):
         os.makedirs(DISTRIB_DIR)
     if pythons_32bit:
-        run_automate_prebuilt_cef(pythons_32bit[0])
+        if not NO_AUTOMATE:
+            run_automate_prebuilt_cef(pythons_32bit[0])
         pack_prebuilt_cef("32bit")
         if LINUX:
             reduce_package_size_issue_262("32bit")
         remove_unnecessary_package_files("32bit")
     if pythons_64bit:
-        run_automate_prebuilt_cef(pythons_64bit[0])
+        if not NO_AUTOMATE:
+            run_automate_prebuilt_cef(pythons_64bit[0])
         pack_prebuilt_cef("64bit")
         if LINUX:
             reduce_package_size_issue_262("64bit")
@@ -141,7 +148,7 @@ def main():
 
 
 def command_line_args():
-    global VERSION, NO_RUN_EXAMPLES, NO_REBUILD
+    global VERSION, NO_RUN_EXAMPLES, NO_REBUILD, NO_AUTOMATE
     version = get_version_from_command_line_args(__file__)
     if not version or "--help" in sys.argv:
         print(__doc__)
@@ -153,6 +160,9 @@ def command_line_args():
     if "--no-rebuild" in sys.argv:
         NO_REBUILD = True
         sys.argv.remove("--no-rebuild")
+    if "--no-automate" in sys.argv:
+        NO_AUTOMATE = True
+        sys.argv.remove("--no-automate")
     args = sys.argv[1:]
     for arg in args:
         if arg == version:
@@ -181,8 +191,9 @@ def clean_build_directories():
         delete_cefpython_binary_dir("64bit")
 
     # Delete cef binaries and libraries dirs
-    delete_cef_binaries_libraries_dir("32bit")
-    delete_cef_binaries_libraries_dir("64bit")
+    if not NO_AUTOMATE:
+        delete_cef_binaries_libraries_dir("32bit")
+        delete_cef_binaries_libraries_dir("64bit")
 
 
 def delete_cefpython_binary_dir(arch):
