@@ -9,14 +9,19 @@
 #include "common/cefpython_public_api.h"
 #endif
 
+#if defined(OS_WIN)
+#include <Shobjidl.h>
+#pragma comment(lib, "Shell32.lib")
+#endif  // OS_WIN
+
 #ifdef BROWSER_PROCESS
 #ifdef OS_LINUX
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 #include "print_handler_gtk.h"
-#endif
-#endif
+#endif  // OS_LINUX
+#endif  // BROWSER_PROCESS
 
 #include "cefpython_app.h"
 #include "util.h"
@@ -49,6 +54,19 @@ CefPythonApp::CefPythonApp() {
 void CefPythonApp::OnBeforeCommandLineProcessing(
       const CefString& process_type,
       CefRefPtr<CefCommandLine> command_line) {
+    // IMPORTANT NOTES
+    // ---------------
+    // NOTE 1: Currently CEF logging is limited and you cannot log
+    //         info messages during execution of this function. The
+    //         default log severity in Chromium is LOG_ERROR, thus
+    //         you can will only see log messages when using LOG(ERROR)
+    //         here. You won't see LOG(WARNING) nor LOG(INFO) messages
+    //         here.
+    // NOTE 2: The "g_debug" variable is never set at this moment
+    //         due to IPC messaging delay. There is some code here
+    //         that depends on this variable, but it is currently
+    //         never executed.
+
 #ifdef BROWSER_PROCESS
     // This is included only in the Browser process, when building
     // the libcefpythonapp library.
@@ -56,32 +74,71 @@ void CefPythonApp::OnBeforeCommandLineProcessing(
         // Empty proc type, so this must be the main browser process.
         App_OnBeforeCommandLineProcessing_BrowserProcess(command_line);
     }
-#endif
+#endif  // BROWSER_PROCESS
+
+    // IMPORTANT: This code is currently dead due to g_debug and
+    //            LOG(INFO) issues described at the top of this
+    //            function. Command line string for subprocesses are
+    //            are currently logged in OnBeforeChildProcess().
+    //            Command line string for the main browser process
+    //            is currently never logged.
     std::string process_name = process_type.ToString();
     if (process_name.empty()) {
         process_name = "browser";
     }
 #ifdef BROWSER_PROCESS
     std::string logMessage = "[Browser process] ";
-#else
+#else  // BROWSER_PROCESS
     std::string logMessage = "[Non-browser process] ";
-#endif
+#endif  // BROWSER_PROCESS
     logMessage.append("Command line string for the ");
     logMessage.append(process_name);
     logMessage.append(" process: ");
     std::string clString = command_line->GetCommandLineString().ToString();
     logMessage.append(clString.c_str());
-    // There is a bug in upstream CEF, log settings are initialized
-    // after OnBeforeCommandLineProcessing. So if g_debug is not
-    // checked it would always log msg even though logging info is
-    // disabled. However this issue does not matter, because command
-    // line is also logged in OnBeforeChildProcessLaunch().
-    // In OnBeforeCommandLineProcessing() command line for browser
-    // process is logged and in OnBeforeChildProcessLaunch() command
-    // line for other processes is logged.
     if (g_debug) {
+        // This code is currently never executed, see the "IMPORTANT"
+        // comment above and comments at the top of this function.
         LOG(INFO) << logMessage.c_str();
     }
+
+#ifdef OS_WIN
+    // Set AppUserModelID (AppID) when "--app-user-model-id" switch
+    // is provided. This fixes pinning to taskbar issues on Windows 10.
+    // See Issue #395 for details.
+    //
+    // AppID here is set in all processes (Browser, Renderer, GPU, etc.).
+    //
+    // When compiling under Python 2.7 (VS2008) using Visual C++ for
+    // Python, it seems you can't use WINSDK 7 header files even though
+    // WINVER was specified in build_cpp_projects.py macros. Thus calling
+    // using proc address. Specifying full path to Shell32.dll is not
+    // required, in Chromium's source code full paths are not used.
+    //
+    // Note:
+    //   subprocess.exe is built with UNICODE defined, however the
+    //   cefpython_app library that is shared between subprocess and
+    //   python process does not define UNICODE macro. Thus it is required
+    //   to call LoadLibraryW explicitilly here.
+    HINSTANCE shell32 = LoadLibraryW(L"shell32.dll");
+    CefString app_id = command_line->GetSwitchValue("app-user-model-id");
+    if (app_id.length()) {
+        typedef HRESULT (WINAPI *SetAppUserModelID_Type)(PCWSTR);
+        static SetAppUserModelID_Type SetAppUserModelID;
+        SetAppUserModelID = (SetAppUserModelID_Type)GetProcAddress(
+                shell32, "SetCurrentProcessExplicitAppUserModelID");
+        HRESULT hr = (*SetAppUserModelID)(app_id.ToWString().c_str());
+        if (hr == S_OK) {
+            if (g_debug) {
+                // This code is currently never executed, see comments
+                // at the top of this function.
+                LOG(INFO) << "SetCurrentProcessExplicitAppUserModelID ok";
+            }
+        } else {
+            LOG(ERROR) << "SetCurrentProcessExplicitAppUserModelID failed";
+        }
+    }
+#endif  // OS_WIN
 }
 
 void CefPythonApp::OnRegisterCustomSchemes(

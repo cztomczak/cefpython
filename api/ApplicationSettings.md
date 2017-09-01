@@ -8,6 +8,7 @@ Table of contents:
 * [Introduction](#introduction)
 * [Settings](#settings)
   * [accept_language_list](#accept_language_list)
+  * [app_user_model_id](#app_user_model_id)
   * [auto_zooming](#auto_zooming)
   * [background_color](#background_color)
   * [browser_subprocess_path](#browser_subprocess_path)
@@ -66,6 +67,19 @@ per-browser basis using the CefBrowserSettings.accept_language_list value.
 If both values are empty then "en-US,en" will be used. Can be overridden
 for individual CefRequestContext instances via the
 CefRequestContextSettings.accept_language_list value.
+
+
+### app_user_model_id
+
+This is setting is applied only on Windows.
+It sets [AppUserModelID](https://msdn.microsoft.com/en-us/library/windows/desktop/dd378459(v=vs.85).aspx)
+(also known as AppID) for all processes (Browser, Renderer, GPU, etc.).
+Setting this is required on Windows 10 to workaround issues related to
+pinning app to Taskbar. More details can be found in [Issue #395](https://github.com/cztomczak/cefpython/issues/395).
+
+Internally this setting will append "--app-user-model-id" switch to
+all processes.
+
 
 ### auto_zooming
 
