@@ -599,6 +599,18 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     for kwarg in kwargs:
         raise Exception("Invalid argument: "+kwarg)
 
+    if command_line_switches:
+        # Make a copy as commandLineSwitches is a reference only
+        # that might get destroyed later.
+        global g_commandLineSwitches
+        for key in command_line_switches:
+            g_commandLineSwitches[key] = copy.deepcopy(
+                    command_line_switches[key])
+    # Use g_commandLineSwitches if you need to modify or access
+    # command line switches inside this function.
+    del command_line_switches
+    del commandLineSwitches
+
     IF UNAME_SYSNAME == "Linux":
         # Fix Issue #231 - Discovery of the "icudtl.dat" file fails on Linux.
         cdef str py_module_dir = GetModuleDirectory()
@@ -636,8 +648,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     IF UNAME_SYSNAME == "Darwin":
         MacInitialize()
 
-    # -------------------------------------------------------------------------
-    # CEF Python only options - default values
+    # ------------------------------------------------------------------------
+    # CEF Python only options
+    # ------------------------------------------------------------------------
 
     if "debug" not in application_settings:
         application_settings["debug"] = False
@@ -657,8 +670,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         IF UNAME_SYSNAME == "Windows":
             if DpiAware.IsProcessDpiAware():
                 application_settings["auto_zooming"] = "system_dpi"
+    if "app_user_model_id" in application_settings:
+        g_commandLineSwitches["app-user-model-id"] =\
+                application_settings["app_user_model_id"]
 
+    # ------------------------------------------------------------------------
     # Paths
+    # ------------------------------------------------------------------------
     cdef str module_dir = GetModuleDirectory()
     if platform.system() == "Darwin":
         if  "framework_dir_path" not in application_settings:
@@ -679,7 +697,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         application_settings["browser_subprocess_path"] = os.path.join(
                 module_dir, "subprocess")
 
+    # ------------------------------------------------------------------------
     # Mouse context menu
+    # ------------------------------------------------------------------------
     if "context_menu" not in application_settings:
         application_settings["context_menu"] = {}
     menuItems = ["enabled", "navigation", "print", "view_source",
@@ -688,8 +708,11 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         if item not in application_settings["context_menu"]:
             application_settings["context_menu"][item] = True
 
-    # Remote debugging port. If value is 0 we will generate a random
-    # port. To disable remote debugging set value to -1.
+    # ------------------------------------------------------------------------
+    # Remote debugging port.
+    # ------------------------------------------------------------------------
+    # If value is 0 we will generate a random port. To disable
+    # remote debugging set value to -1.
     if application_settings["remote_debugging_port"] == 0:
         # Generate a random port.
         application_settings["remote_debugging_port"] =\
@@ -698,13 +721,14 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         # Disable remote debugging
         application_settings["remote_debugging_port"] = 0
 
-    # -------------------------------------------------------------------------
-
-    # CEF options - default values.
+    # ------------------------------------------------------------------------
+    # CEF options - default values
+    # ------------------------------------------------------------------------
     if not "multi_threaded_message_loop" in application_settings:
         application_settings["multi_threaded_message_loop"] = False
     if not "single_process" in application_settings:
         application_settings["single_process"] = False
+    # ------------------------------------------------------------------------
 
     cdef CefRefPtr[CefApp] cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
 
@@ -732,14 +756,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # No sandboxing for the subprocesses
     cefApplicationSettings.no_sandbox = 1
     SetApplicationSettings(application_settings, &cefApplicationSettings)
-
-    if command_line_switches:
-        # Make a copy as commandLineSwitches is a reference only
-        # that might get destroyed later.
-        global g_commandLineSwitches
-        for key in command_line_switches:
-            g_commandLineSwitches[key] = copy.deepcopy(
-                    command_line_switches[key])
 
     # External message pump
     if GetAppSetting("external_message_pump")\

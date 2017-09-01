@@ -21,11 +21,15 @@ import setuptools
 from distutils.ccompiler import new_compiler
 from common import *
 import shutil
+from pprint import pprint
 
 # Macros
 MACROS = [
     "WIN32", "_WIN32", "_WINDOWS",
-    ("WINVER", "0x0601"),  ("_WIN32_WINNT", "0x0601"),  # Windows 7+
+    # Windows 7+ minimum supported
+    ("NTDDI_VERSION", "0x06010000"),
+    ("WINVER", "0x0601"),
+    ("_WIN32_WINNT", "0x0601"),
     "NDEBUG", "_NDEBUG",
     "_CRT_SECURE_NO_WARNINGS",
 ]
@@ -61,6 +65,7 @@ FORCE_FLAG = False
 def main():
     command_line_args()
     clean_build_directories_if_forced()
+    print_compiler_options()
     build_cefpython_app_library()
     build_library(lib_name="client_handler",
                   macros=MACROS,
@@ -88,6 +93,18 @@ def clean_build_directories_if_forced():
         for bdir in build_dirs:
             if os.path.isdir(bdir):
                 shutil.rmtree(bdir)
+
+
+def print_compiler_options():
+    compiler = get_compiler()
+    print("[build_cpp.projects] Shared macros:")
+    pprint(MACROS, indent=3, width=160)
+    print("[build_cpp.projects] cefpython_app library macros:")
+    pprint(cefpython_app_MACROS, indent=3, width=160)
+    print("[build_cpp.projects] subprocess executable macros:")
+    pprint(subprocess_MACROS, indent=3, width=160)
+    print("[build_cpp.projects] Compiler options:")
+    pprint(vars(compiler), indent=3, width=160)
 
 
 def get_compiler(static=False):
