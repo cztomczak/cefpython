@@ -3,7 +3,7 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Major sponsors](#major-sponsors)
-* [Funding request - v60.0 release](#funding-request---v600-release)
+* [Funding for v60.0 release](#funding-for-v600-release)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
@@ -11,6 +11,7 @@ Table of contents:
 * [Support development](#support-development)
   * [Thanks](#thanks)
 * [Releases](#releases)
+* [Other READMEs](#other-readmes)
 * [Quick links](#quick-links)
 
 
@@ -23,7 +24,7 @@ projects. The Chromium project focuses mainly on Google Chrome application
 development, while CEF focuses on facilitating embedded browser use cases
 in third-party applications. Lots of applications use CEF control, there are
 more than [100 million CEF instances](http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
-installed around the world. [Examples of embedding](examples/Examples-README.md)
+installed around the world. [Examples of embedding](examples/README-examples.md)
 Chrome browser are available for many popular GUI toolkits including:
 wxPython, PyGTK, PyQt, PySide, Kivy, Panda3D and PyGame/PyOpenGL.
 
@@ -60,7 +61,7 @@ See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
 
 
-## Funding request - v60.0 release
+## Funding for v60.0 release
 
 For those interested in sponsoring a v60.0 release please see
 [Issue #370](../../issues/370).
@@ -88,13 +89,13 @@ See the [Tutorial.md](docs/Tutorial.md) file.
 
 ## Examples
 
-See the [Examples-README.md](examples/Examples-README.md) file.
+See the [README-examples.md](examples/README-examples.md) file.
 
 
 ## Support
 
 - Ask questions, report problems and issues on the [Forum](https://groups.google.com/group/cefpython)
-- Supported examples are listed in the [Examples-README.md](examples/Examples-README.md) file
+- Supported examples are listed in the [README.md](examples/README-examples.md) file
 - Documentation is in the [docs/](docs) directory:
   - [Build instructions](docs/Build-instructions.md)
   - [Contributing code](docs/Contributing-code.md)
@@ -193,6 +194,12 @@ Additional information for v31.2 release:
 - API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
 
 
+## Other READMEs
+
+- [PyInstaller packager](examples/pyinstaller/README-pyinstaller.md)
+
+
+
 ## Quick links
 
 ### Docs
@@ -264,6 +271,7 @@ Additional information for v31.2 release:
 
 * [Application settings](api/ApplicationSettings.md#application-settings)
   * [accept_language_list](api/ApplicationSettings.md#accept_language_list)
+  * [app_user_model_id](api/ApplicationSettings.md#app_user_model_id)
   * [auto_zooming](api/ApplicationSettings.md#auto_zooming)
   * [background_color](api/ApplicationSettings.md#background_color)
   * [browser_subprocess_path](api/ApplicationSettings.md#browser_subprocess_path)

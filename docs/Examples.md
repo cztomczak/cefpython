@@ -1,4 +1,4 @@
 # Examples
 
 Examples are available in the examples/ root directory. See
-the [Examples-README.md](../examples/Examples-README.md) file.
+the [README-examples.md](../examples/README-examples.md) file.

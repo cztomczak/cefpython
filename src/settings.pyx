@@ -36,7 +36,8 @@ cdef void SetApplicationSettings(
                 or key == "unique_request_context_per_browser"\
                 or key == "downloads_enabled"\
                 or key == "context_menu" \
-                or key == "auto_zooming":
+                or key == "auto_zooming"\
+                or key == "app_user_model_id":
             # CEF Python only options. These are not to be found in CEF.
             continue
         elif key == "accept_language_list":

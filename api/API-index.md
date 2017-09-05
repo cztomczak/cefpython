@@ -4,6 +4,7 @@
 
 * [Application settings](ApplicationSettings.md#application-settings)
   * [accept_language_list](ApplicationSettings.md#accept_language_list)
+  * [app_user_model_id](ApplicationSettings.md#app_user_model_id)
   * [auto_zooming](ApplicationSettings.md#auto_zooming)
   * [background_color](ApplicationSettings.md#background_color)
   * [browser_subprocess_path](ApplicationSettings.md#browser_subprocess_path)
