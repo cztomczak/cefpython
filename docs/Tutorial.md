@@ -675,14 +675,18 @@ QImage/QPainter classes along with a call to QWidget.render().
 
 ## Build executable
 
-There are no official examples for building executable using
-python packaging tools, however some resources and tips are
-available, see these issues in the tracker:
+Currently there is available [PyInstaller example](../examples/pyinstaller/README-pyinstaller.md)
+for building executable, by default it packages the wxpython.py example.
 
-* Pyinstaller - see [Issue #135](../../../issues/135)
+There are many more Python packagers available, however no
+official examples are provided for these. See the following
+issues in the tracker for all available packagers:
+
+* cx_Freeze - see [Issue #338](../../../issues/338)
 * py2exe - see [Issue #35](../../../issues/35)
 * py2app - see [Issue #337](../../../issues/337)
-* cx_Freeze - see [Issue #338](../../../issues/338)
+* Pyinstaller - see [Issue #135](../../../issues/135)
+
 
 If you have any problems building executable ask on the [Forum](https://groups.google.com/group/cefpython).
 
