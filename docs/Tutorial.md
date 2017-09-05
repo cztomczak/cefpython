@@ -9,7 +9,7 @@ basics. This tutorial will discuss the three featured examples:
 [hello_world.py](../examples/hello_world.py),
 [tutorial.py](../examples/tutorial.py)
 and [screenshot.py](../examples/screenshot.py). There are many
-more examples that you can find in the [Examples-README.md](../examples/Examples-README.md)
+more examples that you can find in the [README-examples.md](../examples/README-examples.md)
 file, but these examples are out of scope for this tutorial.
 
 
@@ -423,7 +423,7 @@ Frame object also has the same methods.
 You can also serve requests directly in CEF using for example
 [ResourceHandler](../api/ResourceHandler.md) object. You can find
 an example usage of this object in one of examples listed in
-the [Examples-README.md](../examples/Examples-README.md) file.
+the [README-examples.md](../examples/README-examples.md) file.
 
 On a side note, upstream CEF also supports custom scheme handlers,
 however these APIs were not yet exposed to CEF Python.

@@ -25,6 +25,7 @@ maintained. If there are any issues in examples read top comments
 in sources to see whether this is a known issue with available
 workarounds.
 
+
 **Featured**
 
 - [hello_world.py](hello_world.py) - Basic example, doesn't require any
@@ -34,6 +35,7 @@ workarounds.
   to create a screenshot of a web page. The code from this example is
   discussed in great details in Tutorial in the [Off-screen rendering](../docs/Tutorial.md#off-screen-rendering)
   section.
+
 
 **Embedding using various GUI frameworks**
 
@@ -49,6 +51,14 @@ workarounds.
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)
   toolkit
 
+
+**Build executable using Python packagers**
+
+- [PyInstaller example](pyinstaller/README-pyinstaller.md):
+  example of packaging app using [PyInstaller](http://www.pyinstaller.org/)
+  packager
+
+
 **Unit tests**
 
 There are also available unit tests and its usage of the API can
@@ -58,7 +68,7 @@ be of some use. See [main_test.py](../unittests/main_test.py).
 ## More examples
 
 There are even more examples available, some of them are externally
-maintained. 
+maintained.
 
 - Kivy framework:
   see [Kivy](https://github.com/cztomczak/cefpython/wiki/Kivy) wiki page.
