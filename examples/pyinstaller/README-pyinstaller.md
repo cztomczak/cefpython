@@ -19,7 +19,8 @@ To install required packages type:
 pip install --upgrade pyinstaller pycrypto
 ```
 
-To package example type:
+To package the example go to the [examples/pyinstaller/](./) directory
+and type:
 ```
 python pyinstaller.py
 ```
