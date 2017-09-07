@@ -685,6 +685,7 @@ issues in the tracker for all available packagers:
 * cx_Freeze - see [Issue #338](../../../issues/338)
 * py2exe - see [Issue #35](../../../issues/35)
 * py2app - see [Issue #337](../../../issues/337)
+* Nuitka - see [Issue #396](../../../issues/396)
 * Pyinstaller - see [Issue #135](../../../issues/135)
 
 
