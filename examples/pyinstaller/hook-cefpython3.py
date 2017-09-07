@@ -10,7 +10,9 @@ https://pyinstaller.readthedocs.io/en/stable/hooks.html
 import glob
 import os
 import platform
+import re
 import sys
+import PyInstaller
 from PyInstaller.utils.hooks import is_module_satisfies
 from PyInstaller import log as logging
 
@@ -19,6 +21,9 @@ CEFPYTHON_MIN_VERSION = "57.0"
 PYINSTALLER_MIN_VERSION = "3.2.1"
 
 # Makes assumption that using "python.exe" and not "pyinstaller.exe"
+# TODO: use this code to work cross-platform:
+# > from PyInstaller.utils.hooks import get_package_paths
+# > get_package_paths("cefpython3")
 CEFPYTHON3_DIR = os.path.join(
     os.path.dirname(sys.executable),
     'Lib', 'site-packages', 'cefpython3')
@@ -31,18 +36,31 @@ else:
 # Globals
 logger = logging.getLogger(__name__)
 
-# Checks: platforms and versions
-if platform.system() != "Windows":
-    raise SystemExit("Error: Currently only Windows platform is "
-                     " supported, see Issue #135.")
 
-if not is_module_satisfies("cefpython3 >= %s" % CEFPYTHON_MIN_VERSION):
-    raise SystemExit("Error: cefpython3 %s or higher is required"
-                     % CEFPYTHON_MIN_VERSION)
+# Functions
+def check_platforms():
+    if platform.system() != "Windows":
+        raise SystemExit("Error: Currently only Windows platform is "
+                         " supported, see Issue #135.")
 
-if not is_module_satisfies("pyinstaller >= %s" % PYINSTALLER_MIN_VERSION):
-    raise SystemExit("Error: pyinstaller %s or higher is required"
-                     % PYINSTALLER_MIN_VERSION)
+
+def check_pyinstaller_version():
+    """Using is_module_satisfies() for pyinstaller fails when
+    installed using 'pip install develop.zip' command
+    (PyInstaller Issue #2802)."""
+    # Example version string for dev version of pyinstaller:
+    # > 3.3.dev0+g5dc9557c
+    version = PyInstaller.__version__
+    match = re.search(r"^\d+\.\d+", version)
+    if not (match.group(0) >= PYINSTALLER_MIN_VERSION):
+        raise SystemExit("Error: pyinstaller %s or higher is required"
+                         % PYINSTALLER_MIN_VERSION)
+
+
+def check_cefpython3_version():
+    if not is_module_satisfies("cefpython3 >= %s" % CEFPYTHON_MIN_VERSION):
+        raise SystemExit("Error: cefpython3 %s or higher is required"
+                         % CEFPYTHON_MIN_VERSION)
 
 
 def get_cefpython_modules():
@@ -128,6 +146,11 @@ def get_cefpython3_datas():
 # ----------------------------------------------------------------------------
 # Main
 # ----------------------------------------------------------------------------
+
+# Checks
+check_platforms()
+check_pyinstaller_version()
+check_cefpython3_version()
 
 # Info
 logger.info("CEF Python package directory: %s" % CEFPYTHON3_DIR)

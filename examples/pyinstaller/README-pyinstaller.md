@@ -19,6 +19,13 @@ To install required packages type:
 pip install --upgrade pyinstaller pycrypto
 ```
 
+Note that pyinstaller version on PyPI is almost one year old (as of Sep 2017)
+and has several bugs, so if you encounter any issues try installing dev
+version using this command:
+```
+pip install https://github.com/pyinstaller/pyinstaller/archive/develop.zip
+```
+
 To package the example go to the [examples/pyinstaller/](./) directory
 and type:
 ```
