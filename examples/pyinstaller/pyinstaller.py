@@ -64,7 +64,7 @@ def main():
     cefapp_dir = os.path.join(curdir, "dist", "cefapp")
     executable = os.path.join(cefapp_dir, "cefapp"+EXE_EXT)
     if not os.path.exists(executable):
-        print("PyInstaller failed, main executable is missing: %s"
+        print("Error: PyInstaller failed, main executable is missing: %s"
               % executable)
         sys.exit(1)
 
@@ -76,7 +76,6 @@ def main():
     # console window doesn't close.
     if platform.system() == "Windows":
         if "--debug" in sys.argv:
-            # COMSPEC = C:/Windows/System32/cmd.exe
             os.system("start cmd /k \"%s\"" % executable)
         else:
             # SYSTEMROOT = C:/Windows

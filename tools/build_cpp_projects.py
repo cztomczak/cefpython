@@ -97,13 +97,13 @@ def clean_build_directories_if_forced():
 
 def print_compiler_options():
     compiler = get_compiler()
-    print("[build_cpp.projects] Shared macros:")
+    print("build_cpp_projects.py] Shared macros:")
     pprint(MACROS, indent=3, width=160)
-    print("[build_cpp.projects] cefpython_app library macros:")
+    print("[build_cpp_projects.py] cefpython_app library macros:")
     pprint(cefpython_app_MACROS, indent=3, width=160)
-    print("[build_cpp.projects] subprocess executable macros:")
+    print("[build_cpp_projects.py] subprocess executable macros:")
     pprint(subprocess_MACROS, indent=3, width=160)
-    print("[build_cpp.projects] Compiler options:")
+    print("[build_cpp_projects.py] Compiler options:")
     pprint(vars(compiler), indent=3, width=160)
 
 
