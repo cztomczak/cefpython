@@ -11,8 +11,7 @@ You must keep a strong reference to the `ResourceHandler` object while resource 
 
 Make requests using [WebRequest](WebRequest.md) and [WebRequestClient](WebRequestClient.md).
 
-The `ResourceHandler` example can be found in the [wxpython-response.py]
-(../src/linux/binaries_64bit/wxpython-response.py) script.
+The `ResourceHandler` example can be found in the [wxpython-response.py](https://github.com/cztomczak/cefpython/blob/cefpython31/cefpython/cef3/linux/binaries_64bit/wxpython-response.py) script.
 
 
 Table of contents:
