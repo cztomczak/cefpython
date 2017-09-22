@@ -14,6 +14,17 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
+
+	// lpCmdLine does not include program name argument, must
+	// use GetCommandLineW(). Cannot use CefCommandLine::GetGlobalCommandLine,
+	// as CEF was not yet initialized.
+	CefRefPtr<CefCommandLine> command_line = \
+	        CefCommandLine::CreateCommandLine();
+    command_line->InitFromString(GetCommandLineW());
+    if (command_line->HasSwitch("enable-high-dpi-support")) {
+	    CefEnableHighDPISupport();
+	}
+
 	CefMainArgs mainArgs(hInstance);
 
 #else // defined(OS_WIN)

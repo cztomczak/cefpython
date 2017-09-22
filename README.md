@@ -217,6 +217,7 @@ directly.
 
 * [Application settings](api/ApplicationSettings.md#application-settings)
   * [accept_language_list](api/ApplicationSettings.md#accept_language_list)
+  * [app_user_model_id](api/ApplicationSettings.md#app_user_model_id)
   * [auto_zooming](api/ApplicationSettings.md#auto_zooming)
   * [background_color](api/ApplicationSettings.md#background_color)
   * [browser_subprocess_path](api/ApplicationSettings.md#browser_subprocess_path)
@@ -420,6 +421,7 @@ directly.
 * [DownloadHandler](api/DownloadHandler.md#downloadhandler)
 * [DpiAware (class)](api/DpiAware.md#dpiaware-class)
   * [CalculateWindowSize](api/DpiAware.md#calculatewindowsize)
+  * [EnableHighDpiSupport](api/DpiAware.md#enablehighdpisupport)
   * [GetSystemDpi](api/DpiAware.md#getsystemdpi)
   * [IsProcessDpiAware](api/DpiAware.md#isprocessdpiaware)
   * [SetProcessDpiAware](api/DpiAware.md#setprocessdpiaware)

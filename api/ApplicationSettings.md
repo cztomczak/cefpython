@@ -84,14 +84,17 @@ all processes.
 ### auto_zooming
 
 (string)
-Windows only. Perform automatic zooming of browser contents. Example values for auto_zooming (numeric value means a zoom level):
+Windows only. Perform automatic zooming of browser contents. Example
+values for auto_zooming (numeric value means a zoom level):
 
-  * "system_dpi" - use system DPI settings, see the [DpiAware](DpiAware.md) wiki page for more details.
+  * "" - default is empty string
   * "0.0" (96 DPI)
   * "1.0" (120 DPI)
   * "2.0" (144 DPI)
   * "-1.0" (72 DPI)
-  * "" - if cefpython detects that application is DPI aware it will automatically set `auto_zooming` to "system_dpi". If you do not wish such behavior set `auto_zooming` to an empty string. See the [DpiAware](DpiAware.md) wiki page for more details on that.
+  * "system_dpi" - Deprecated. Use system DPI settings. This value is
+    deprecated, as it is no more required to set auto_zooming to this
+    value after High DPI support was enabled.
 
 Example values that can be set in Win7 DPI settings (Control Panel Appearance and Personalization Display):
 

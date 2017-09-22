@@ -34,9 +34,8 @@ def main():
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     settings = {}
     if WINDOWS:
-        settings["auto_zooming"] = "system_dpi"  # High DPI support
         # noinspection PyUnresolvedReferences, PyArgumentList
-        cef.DpiAware.SetProcessDpiAware()  # Alternative is to embed manifest
+        cef.DpiAware.EnableHighDpiSupport()
     cef.Initialize(settings=settings)
     app = CefApp(False)
     app.MainLoop()
