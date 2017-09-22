@@ -666,10 +666,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         application_settings["downloads_enabled"] = True
     if "remote_debugging_port" not in application_settings:
         application_settings["remote_debugging_port"] = 0
-    if "auto_zooming" not in application_settings:
-        IF UNAME_SYSNAME == "Windows":
-            if DpiAware.IsProcessDpiAware():
-                application_settings["auto_zooming"] = "system_dpi"
     if "app_user_model_id" in application_settings:
         g_commandLineSwitches["app-user-model-id"] =\
                 application_settings["app_user_model_id"]

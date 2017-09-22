@@ -7,3 +7,5 @@ __pycache__/
 cefclient
 webcache/
 examples/screenshot.png
+examples/pyinstaller/build/
+examples/pyinstaller/dist/

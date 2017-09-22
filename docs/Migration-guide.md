@@ -35,6 +35,7 @@ Table of contents:
 * [v55+ HTTPS cache problems on pages with certificate errors](#v55-https-cache-problems-on-pages-with-certificate-errors)
 * [v55.3+ Handlers' callbacks and other interfaces](#v553-handlers-callbacks-and-other-interfaces)
 * [v56+ MacOS 10.9+ required to run](#v56-macos-109-required-to-run)
+* [v57.1+ High DPI support on Windows](#v571-high-dpi-support-on-windows)
 
 
 
@@ -281,3 +282,16 @@ your code will definitely break, unless you've also used
 ## v56+ MacOS 10.9+ required to run
 
 CEF v55 was the last version to support MacOS 10.7.
+
+
+## v57.1+ High DPI support on Windows
+
+The `cef.DpiAware.SetProcessDpiAware` function is now deprecated.
+Use cef.DpiAware.[EnableHighDpiSupport](../api/DpiAware.md#enablehighdpisupport)
+function instead.
+
+The ApplicationSettings.[auto_zooming](../api/ApplicationSettings.md#auto_zooming)
+option should have its value set to an empty string (a default now)
+for High DPI support. In previous versions the default value was
+"system_dpi" and if you have set it explicitilly in your application,
+then you should change it to an empty string now.

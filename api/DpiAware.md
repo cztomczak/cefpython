@@ -12,23 +12,19 @@ Table of contents:
 * [Introduction](#introduction)
 * [Static methods](#static-methods)
   * [CalculateWindowSize](#calculatewindowsize)
+  * [EnableHighDpiSupport](#enablehighdpisupport)
   * [GetSystemDpi](#getsystemdpi)
   * [IsProcessDpiAware](#isprocessdpiaware)
   * [SetProcessDpiAware](#setprocessdpiaware)
 
 
+
 ## Introduction
 
-By default if DPI awareness is not enabled in application, then OS performs display scaling. That causes text to look fuzzy on high DPI displays. The solution is to enable DPI awareness and use the ApplicationSettings.`auto_zooming` option. High DPI support is available only on Windows.
+By default if DPI awareness is not enabled in application, then OS performs display scaling. That causes text to look blurry on high DPI displays. To resolve this you have to
+ call `cef.DpiAware.EnableHighDpiSupport` method. High DPI support is available only on Windows.
 
-Enabling High DPI support in app can be done by embedding a DPI awareness xml manifest in executable (see [Issue #112](../issues/112) comment #2), or by calling the `DpiAware.SetProcessDpiAware` method. Embedding xml manifest is the most reliable method. There is also an another way by writing registry key, but we won't discuss this method here.
-
-The downside of calling `SetProcessDpiAware` is that scrollbar in CEF browser is very small. This is because DPI awareness was set too late, after executable and the CEF dll was loaded. To fix that embed DPI awareness xml manifest in the .exe file.
-
-Additionally you have to set the ApplicationSettings.`auto_zomming` option to "system_dpi". This will cause browser content to be zoomed automatically using system DPI settings. On Win7 these can be set in: Control Panel > Appearance and Personalization > Display.
-
-When cefpyhon detects that application is DPI aware, it will automatically set ApplicationSettings."auto_zooming" to "system_dpi". User can manually enable DPI awareness in application by going to .exe properties > Compatibility tab > and checking the box labeled "Disable display scaling on high DPI settings". If you wish to not enable auto zooming in such case then set "auto_zooming" to an empty string.
-
+Enabling High DPI support in app can be done by embedding a DPI awareness xml manifest in both main executable and subprocess executable (see [Issue #112](../issues/112) comment #2), or by calling the `cef.DpiAware.EnableHighDpiSupport` method.
 
 ## Static methods
 
@@ -47,6 +43,21 @@ being set to "Larger 150%" will return 1200/900.
 
 Calculation for DPI < 96 is not yet supported. Use
 the `GetSystemDpi` method for that.
+
+
+### EnableHighDpiSupport
+
+| | |
+| --- | --- |
+| __Return__ | void |
+
+Calling this function will set current process and subprocesses
+to be DPI aware.
+
+Description from upstream CEF:
+> Call during process startup to enable High-DPI support on Windows 7 or newer.
+> Older versions of Windows should be left DPI-unaware because they do not
+> support DirectWrite and GDI fonts are kerned very badly.
 
 
 ### GetSystemDpi
@@ -89,5 +100,9 @@ On Win8 this will return True if DPI awareness is set to either "System DPI awar
 | | |
 | --- | --- |
 | __Return__ | void |
+
+Calling this method is deprecated, call instead `EnableHighDpiSupport()`.
+See [Issue #358](../../../issues/358) for how the behavior changed in
+latest CEF. This method now internally calls `EnableHighDpiSupport()`.
 
 Enables DPI awareness for the running process. Embedding a DPI manifest in .exe is the prefered way, as it gives more reliable results, otherwise some display bugs may appear (discussed in the "Introduction" section on this page).
