@@ -43,6 +43,14 @@ IGNORE_DIRS = ["__pycache__"]
 def main():
     command_line_args()
 
+    # Make sure pyinstaller build/dist directories do not exist,
+    # otherwise they would be packed along with examples and thus
+    # increase package size significantly.
+    assert not os.path.exists(os.path.join(EXAMPLES_DIR,
+                                           "pyinstaller", "build"))
+    assert not os.path.exists(os.path.join(EXAMPLES_DIR,
+                                           "pyinstaller", "dist"))
+
     # Setup and package directories
     global SETUP_DIR, PKG_DIR
     setup_dir_name = get_setup_installer_basename(VERSION, OS_POSTFIX2)
