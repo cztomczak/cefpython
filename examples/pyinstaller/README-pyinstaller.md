@@ -34,7 +34,7 @@ python pyinstaller.py
 
 **Note on PyInstaller's bootloader being flagged by Anti-virus software**
 
-PyInstaller's bootloader for Windows (runw.exe) has [12/67 false-positives](https://www.virustotal.com/#/file/798b3c1cd233c4c025af7445718176bdb46014e3ceb25ef12df41a6a25af2fc5/detection)
+PyInstaller's bootloader for Windows (runw.exe as of version 3.3) has [12/67 false-positives](https://www.virustotal.com/#/file/798b3c1cd233c4c025af7445718176bdb46014e3ceb25ef12df41a6a25af2fc5/detection)
 reported by Anti-virus software when scanning with virustotal.com and the maintainers of
 PyInstaller have no plans to fix that, see https://github.com/pyinstaller/pyinstaller/issues/2501
 for details. If this is a problem for you then you might consider using py2exe or cx_Freeze
