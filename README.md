@@ -3,7 +3,7 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Major sponsors](#major-sponsors)
-* [Funding for v62.0 release](#funding-for-v620-release)
+* [Funding for v63.0 release](#funding-for-v630-release)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
@@ -61,9 +61,9 @@ See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
 
 
-## Funding for v62.0 release
+## Funding for v63.0 release
 
-For those interested in sponsoring a v62.0 release please see
+For those interested in sponsoring a v63.0 release please see
 [Issue #370](../../issues/370).
 
 
