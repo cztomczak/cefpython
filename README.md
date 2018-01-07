@@ -95,7 +95,7 @@ See the [README-examples.md](examples/README-examples.md) file.
 ## Support
 
 - Ask questions, report problems and issues on the [Forum](https://groups.google.com/group/cefpython)
-- Supported examples are listed in the [README.md](examples/README-examples.md) file
+- Supported examples are listed in the [README-examples.md](examples/README-examples.md) file
 - Documentation is in the [docs/](docs) directory:
   - [Build instructions](docs/Build-instructions.md)
   - [Contributing code](docs/Contributing-code.md)
