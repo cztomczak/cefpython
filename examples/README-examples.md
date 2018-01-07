@@ -43,6 +43,8 @@ workarounds.
   library (GTK 2)
 - [gtk3.py](gtk3.py): example for [PyGObject / PyGI](https://wiki.gnome.org/Projects/PyGObject)
   library (GTK 3). Currently broken on Mac ([#310](../../../issues/310)).
+- [pywin32.py](pywin32.py): example for [pywin32](https://github.com/mhammond/pywin32)
+  library
 - [qt.py](qt.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4),
   [PyQt5](https://pypi.python.org/pypi/PyQt5)
   and [PySide](https://wiki.qt.io/PySide) libraries
@@ -83,9 +85,6 @@ maintained.
   example in the cefpython31 branch.
 - Example of using Python network library (urllib3/openssl) instead of Chromium's
   network library - see [gist by Massimiliano Dal Cero](https://gist.github.com/yattamax/0252a3c5dc54a2f81650d5c0eafabf99)
-- Old PyWin32 example:
-  see [pywin32.py](https://github.com/cztomczak/cefpython/blob/cefpython31/cefpython/cef3/windows/binaries_32bit/pywin32.py)
-  in the cefpython31 branch
 
 There are ongoing efforts to add these examples to the official examples/
 directory, see issues in the tracker.
