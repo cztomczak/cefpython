@@ -43,6 +43,9 @@ workarounds.
   library (GTK 2)
 - [gtk3.py](gtk3.py): example for [PyGObject / PyGI](https://wiki.gnome.org/Projects/PyGObject)
   library (GTK 3). Currently broken on Mac ([#310](../../../issues/310)).
+- [pysdl2.py](pysdl2.py): off-screen rendering example for
+  [PySDL2](https://github.com/marcusva/py-sdl2) library. Currently tested
+  only on Linux.
 - [pywin32.py](pywin32.py): example for [pywin32](https://github.com/mhammond/pywin32)
   library
 - [qt.py](qt.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4),
