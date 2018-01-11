@@ -139,13 +139,11 @@ sudo pip install --upgrade -r ../tools/requirements.txt
    the "cefpython/src/version/cef_version_linux.h" file
    (the CEF_VERSION constant).
 
-7) Extract the archive in the build/ directory and rename
-   the extracted directory to "cef_linux64/".
+7) Extract the archive in the "build/" directory.
 
 8) Build cefpython and run examples (xx.x is version number):
 ```
-cd ../src/linux/
-python compile.py xx.x
+python ../tools/build.py xx.x
 ```
 
 
