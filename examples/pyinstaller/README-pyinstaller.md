@@ -12,7 +12,10 @@ Table of contents:
 
 This is an example of using [PyInstaller](http://www.pyinstaller.org/)
 packager to build executable from one of CEF Python's examples
-(wxpython.py). Only Windows platform is currently supported.
+(wxpython.py). Although this pyinstaller example supports only packaging
+on Windows, CEF can be packaged on all platforms without problems, but
+this specific packaging example just wasn't tested on other platforms.
+Pull requests are welcome.
 
 To install required packages type:
 ```
