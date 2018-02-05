@@ -54,7 +54,13 @@ or other kind of internet bots.
 <a href="http://www.rentouch.ch/">
 <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
 </a>
-<br><br>
+<br>
+
+<a href="https://www.jetbrains.com/pycharm/">
+<img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
+</a>
+<br>
+<br>
 
 See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
@@ -129,10 +135,10 @@ directly (linkedin profile or email).
 
 ### Thanks
 
+* [2016-2018] Thanks to JetBrains for providing an Open Source license for
+  [PyCharm](https://www.jetbrains.com/pycharm/)
 * [2017] Many thanks to [ClearChat Inc.](https://clearchat.com/) for sponsoring
   the v55/v56 releases for all platforms
-* [2016-2017] Thanks to JetBrains for providing an Open Source license for
-  [PyCharm](https://www.jetbrains.com/pycharm/)
 * [2012-2016] Thanks to those who have made a Paypal donation:
   [Rentouch GmbH](http://www.rentouch.ch/), Walter Purvis, Rokas Stupuras,
   Alex Rattray, Greg Kacy, Paul Korzhyk
