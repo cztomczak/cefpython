@@ -114,6 +114,10 @@ See the [README-examples.md](examples/README-examples.md) file.
 - To search documentation use GitHub "This repository" search
   at the top. To narrow results to documentation only select
   "Markdown" in the right pane.
+- You can vote on issues in the tracker to let us know which issues are important to you.
+  To do that add a +1 thumb up reaction to the first post in the issue. See
+  [Most popular issues](../../issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
+  sorted by reactions.
 - Wiki pages are deprecated and for v31 only
 
 
