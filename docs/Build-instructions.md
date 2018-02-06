@@ -12,6 +12,7 @@ Table of contents:
 * [Build using prebuilt CEF binaries and libraries](#build-using-prebuilt-cef-binaries-and-libraries)
 * [Build using CEF binaries from Spotify Automated Builds](#build-using-cef-binaries-from-spotify-automated-builds)
 * [Build upstream CEF from sources](#build-upstream-cef-from-sources)
+  * [Building old unsupported version of Chromium](#building-old-unsupported-version-of-chromium)
   * [Possible errors](#possible-errors)
 * [Build CEF manually](#build-cef-manually)
 * [CEF Automated Builds (Spotify and Adobe)](#cef-automated-builds-spotify-and-adobe)
@@ -300,6 +301,7 @@ python ../tools/build.py xx.x
 
 ## Build upstream CEF from sources
 
+
 Building CEF from sources is a very long process that can take several
 hours depending on your CPU speed and the platform you're building on.
 To speed up the process you can pass the --fast-build flag, however
@@ -350,6 +352,26 @@ directory when it's done. Then the build.py tool will build the cefpython
 module, make installer package, install the package and run unit tests
 and examples. See the notes for commands for creating package installer
 and/or wheel package for distribution.
+
+### Building old unsupported version of Chromium 
+
+When building an old version of Chromium you may get into issues.
+For example as of this writing the latest CEF Python version is
+v57, but current support Chromium version is v64. Now when building
+v57 you may encounter issues since Chromium build tools had
+many updates since v57. You have to checkout depot_tools from the
+revision when Chromium v57 was released. When running automate.py
+tool the depot_tools repository resides in `build_dir/depot_tools/`
+directory. If you didn't run automate.py then you can find repository
+url in automate-git.py script. For example for v57 release to checkout
+an old revision of depot_tools you can use this command:
+
+```
+git checkout master@{2017-04-20}
+```
+
+After that set `DEPOT_TOOLS_UPDATE=0` environment variable and then
+run automate.py tool.
 
 ### Possible errors
 
