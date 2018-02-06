@@ -139,23 +139,23 @@ directly (linkedin profile or email).
 
 ### Thanks
 
-* [2016-2018] Thanks to JetBrains for providing an Open Source license for
-  [PyCharm](https://www.jetbrains.com/pycharm/)
 * [2017] Many thanks to [ClearChat Inc.](https://clearchat.com/) for sponsoring
   the v55/v56 releases for all platforms
-* [2012-2016] Thanks to those who have made a Paypal donation:
-  [Rentouch GmbH](http://www.rentouch.ch/), Walter Purvis, Rokas Stupuras,
-  Alex Rattray, Greg Kacy, Paul Korzhyk
-* [2012-2016] Thanks to those who have donated their time through code contributions,
-  they are listed in the [Authors](Authors) file
-* [2013-2015] Lots of thanks goes to [Cyan Inc.](http://www.blueplanet.com/)
-  for sponsoring this project for a long time, making CEF Python 3 mature
+* [2016-2018] Thanks to JetBrains for providing an Open Source license for
+  [PyCharm](https://www.jetbrains.com/pycharm/)
 * [2014] Thanks to Adam Duston for donating a Macbook to aid the development
   of Mac port
+* [2013-2015] Lots of thanks goes to [Cyan Inc.](http://www.blueplanet.com/)
+  for sponsoring this project for a long time, making CEF Python 3 mature
 * [2013] Thanks to [Rentouch GmbH](http://www.rentouch.ch/) for sponsoring the
   development of the off-screen rendering support
 * [2013] Thanks to Thomas Wusatiuk for sponsoring the development of the web
   response reading features
+* [2012-2018] Thanks to those who have made a Paypal donation:
+  [Rentouch GmbH](http://www.rentouch.ch/), Walter Purvis, Rokas Stupuras,
+  Alex Rattray, Greg Kacy, Paul Korzhyk, Tomasz Tomanek.
+* [2012-2017] Thanks to those who have donated their time through code contributions,
+  they are listed in the [Authors](Authors) file
 
 
 ## Releases
