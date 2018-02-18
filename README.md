@@ -135,7 +135,7 @@ a comment about that when making a donation. It will give it
 a higher priority.
 
 If you are interested in sponsorship opportunities please contact Czarek
-directly (linkedin profile or email).
+directly - contact details are available in his [Resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
 
 ### Thanks
 
