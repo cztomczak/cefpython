@@ -5,6 +5,8 @@ Table of contents:
 * [Notifications about new releases / commits](#notifications-about-new-releases--commits)
 * [Changes in API after CEF updates](#changes-in-api-after-cef-updates)
 * [Differences between Python 2 and Python 3](#differences-between-python-2-and-python-3)
+* [How to enable debug information in examples?](#how-to-enable-debug-information-in-examples)
+* [Debugging using various chrome:// protocol uris](#debugging-using-various-chrome-protocol-uris)
 * [A blank window on Mac/Linux](#a-blank-window-on-maclinux)
 * [Location of CEF framework in Mac apps](#location-of-cef-framework-in-mac-apps)
 * [Flash support](#flash-support)
@@ -12,7 +14,6 @@ Table of contents:
 * [How to capture Audio and Video in HTML5?](#how-to-capture-audio-and-video-in-html5)
 * [Touch and multi-touch support](#touch-and-multi-touch-support)
 * [Black or white browser screen](#black-or-white-browser-screen)
-* [How to enable debug information in examples?](#how-to-enable-debug-information-in-examples)
 * [Python crashes with "Segmentation fault" - how to debug?](#python-crashes-with-segmentation-fault---how-to-debug)
 * [Windows XP support](#windows-xp-support)
 * [Mac 32-bit support](#mac-32-bit-support)
@@ -87,6 +88,61 @@ following format: `cefpython3 == 31.2`.
 In Python 2 all cefpython strings are byte strings, but in Python 3
 they are all unicode strings. Be aware of this when porting cefpython
 based apps to Python 3, as it may cause issues.
+
+
+## How to enable debug information in examples?
+
+You can pass "--debug" command line flag to any of CEF Python
+examples and unit tests. It will also work with your app, as
+this feature is enabled in CEF Python's core. When this flag is
+passed the following settings will be set:
+```python
+settings = {
+    "debug": True,
+    "log_severity": cef.LOGSEVERITY_INFO,
+    "log_file": "debug.log",
+}
+cef.Initialize(settings=settings)
+```
+
+Now you should see debug information displayed in console like this:
+```
+[CEF Python] Initialize() called
+[CEF Python] CefExecuteProcess(): exitCode = -1
+[CEF Python] CefInitialize()
+[CEF Python] App_OnBeforeCommandLineProcessing_BrowserProcess()
+[CEF Python] Command line string for the browser process:  ...
+```
+
+
+## Debugging using various chrome:// protocol uris
+
+The `chrome://` protocol uris give you access to various debugging
+tools. For example if you encounter GPU issues then after the issue
+occured load the `chrome://gpu` to see a list of errors.
+
+Here is a list of supported `chrome://` protocol uris as of v55.2:
+- chrome://accessibility
+- chrome://appcache-internals
+- chrome://blob-internals
+- chrome://credits
+- chrome://gpu
+- chrome://histograms
+- chrome://indexeddb-internals
+- chrome://license
+- chrome://media-internals
+- chrome://net-export
+- chrome://net-internals
+- chrome://network-error
+- chrome://network-errors
+- chrome://resources
+- chrome://serviceworker-internals
+- chrome://system
+- chrome://tracing
+- chrome://version
+- chrome://view-http-cache
+- chrome://webrtc-internals
+- chrome://webui-hosts
 
 
 ## A blank window on Mac/Linux
@@ -212,31 +268,6 @@ It will affect 2D accelerated content as well.
 Note that when web page uses WebGL then the black screen may still
 appear even after disabling GPU hardware acceleration. This is normal
 because GPU was disabled so WebGL cannot work.
-
-
-## How to enable debug information in examples?
-
-You can pass "--debug" command line flag to any of CEF Python
-examples and unit tests. It will also work with your app, as
-this feature is enabled in CEF Python's core. When this flag is
-passed the following settings will be set:
-```python
-settings = {
-    "debug": True,
-    "log_severity": cef.LOGSEVERITY_INFO,
-    "log_file": "debug.log",
-}
-cef.Initialize(settings=settings)
-```
-
-Now you should see debug information displayed in console like this:
-```
-[CEF Python] Initialize() called
-[CEF Python] CefExecuteProcess(): exitCode = -1
-[CEF Python] CefInitialize()
-[CEF Python] App_OnBeforeCommandLineProcessing_BrowserProcess()
-[CEF Python] Command line string for the browser process:  ...
-```
 
 
 ## Python crashes with "Segmentation fault" - how to debug?
