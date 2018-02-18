@@ -109,7 +109,8 @@ class MainWindow(QMainWindow):
         # noinspection PyArgumentList
         super(MainWindow, self).__init__(None)
         # Avoids crash when shutting down CEF (issue #360)
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
+        if PYSIDE:
+            self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.cef_widget = None
         self.navigation_bar = None
         if PYQT4:
