@@ -65,9 +65,13 @@ def main():
 
 
 def check_versions():
-    print("[screenshot.py] CEF Python {ver}".format(ver=cef.__version__))
+    ver = cef.GetVersion()
+    print("[screenshot.py] CEF Python {ver}".format(ver=ver["version"]))
+    print("[screenshot.py] Chromium {ver}".format(ver=ver["chrome_version"]))
+    print("[screenshot.py] CEF {ver}".format(ver=ver["cef_version"]))
     print("[screenshot.py] Python {ver} {arch}".format(
-          ver=platform.python_version(), arch=platform.architecture()[0]))
+           ver=platform.python_version(),
+           arch=platform.architecture()[0]))
     print("[screenshot.py] Pillow {ver}".format(ver=PILLOW_VERSION))
     assert cef.__version__ >= "57.0", "CEF Python v57.0+ required to run this"
 
