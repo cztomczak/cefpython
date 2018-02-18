@@ -41,6 +41,10 @@ g_datauri_data = """
         print("Chrome: <b>"+version.chrome_version+"</b>");
         print("CEF: <b>"+version.cef_version+"</b>");
 
+        // Test binding function: test_function
+        test_function();
+        print("test_function() ok");
+
         // Test binding property: test_property1
         if (test_property1 == "Test binding property to the 'window' object") {
             print("test_property_1 ok");
@@ -56,9 +60,9 @@ g_datauri_data = """
             throw new Error("test_property2 contains invalid value");
         }
 
-        // Test binding function: test_function
-        test_function();
-        print("test_function() ok");
+        // Test binding function: test_property3_function
+        test_property3_function();
+        print("test_property3_function() ok");
 
         // Test binding external object and use of javascript<>python callbacks
         var start_time = new Date().getTime();
@@ -145,6 +149,11 @@ class MainTest_IsolatedTest(unittest.TestCase):
         bindings.SetFunction("test_function", external.test_function)
         bindings.SetProperty("test_property1", external.test_property1)
         bindings.SetProperty("test_property2", external.test_property2)
+        # Property with a function value can also be bound. CEF Python
+        # supports passing functions as callbacks when called from
+        # javascript, and as a side effect any value and in this case
+        # a property can also be a function.
+        bindings.SetProperty("test_property3_function", external.test_property3_function)
         bindings.SetProperty("cefpython_version", cef.GetVersion())
         bindings.SetObject("external", external)
         browser.SetJavascriptBindings(bindings)
@@ -310,12 +319,17 @@ class External(object):
         # Asserts for True/False will be checked just before shutdown
         self.test_for_True = True  # Test whether asserts are working correctly
         self.test_function_True = False
+        self.test_property3_function_True = False
         self.test_callbacks_True = False
         self.py_callback_True = False
 
     def test_function(self):
         """Test binding function to the 'window' object."""
         self.test_function_True = True
+
+    def test_property3_function(self):
+        """Test binding function to the 'window' object."""
+        self.test_property3_function_True = True
 
     def test_callbacks(self, js_callback):
         """Test both javascript and python callbacks."""
