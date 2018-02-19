@@ -319,6 +319,13 @@ thread. If false (0) than the [cefpython](cefpython.md).MessageLoopWork()
 function must be called from your application message loop. This option is
 only supported on Windows.
 
+When this option is set to true, you don't call CEF message loop explicitilly
+anymore. Also app's main thread is no more CEF's UI thread, thus many of API
+calls will require using cef.[cefpython.md#posttask](PostTask) function to run
+code on UI thread. You should also pay attention when reading API docs, as many
+handlers/callbacks execute on specific threads, so when this option is On then
+your app's code can start executing on different threads.
+
 This option is not and cannot be supported on OS-X for architectural reasons.
 
 
