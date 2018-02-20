@@ -7,17 +7,21 @@ further down. Pull requests for the missing functionality are welcome.
 Requires PySDL2 and SDL2 libraries.
  
 Tested configurations:
+- Windows 7: SDL 2.0.7 and PySDL2 0.9.6
 - Fedora 25: SDL2 2.0.5 with PySDL2 0.9.3
 - Ubuntu 14.04: SDL2 with PySDL2 0.9.6
 
 Install instructions:
 1. Install SDL libraries for your OS, e.g:
+   - Windows: Download SDL2.dll from http://www.libsdl.org/download-2.0.php
+              and put SDL2.dll in C:\Python27\ (where you've installed Python)
    - Fedora: sudo dnf install SDL2 SDL2_ttf SDL2_image SDL2_gfx SDL2_mixer
    - Ubuntu: sudo apt-get install libsdl2-dev
 2. Install PySDL2 using pip package manager:
    pip install PySDL2
  
 Missing functionality:
+- Performance is still not perfect, see Issue #379 for further details
 - Keyboard modifiers that are not yet handled in this example:
   ctrl, marking text inputs with the shift key.
 - Mouse dragging
@@ -69,10 +73,23 @@ def main():
     browserHeight = height - headerHeight
     browserWidth = width
     # Mouse wheel fudge to enhance scrolling
-    scrollEnhance = 20
+    scrollEnhance = 40
     # Initialise CEF for offscreen rendering
     sys.excepthook = cef.ExceptHook
-    cef.Initialize(settings={"windowless_rendering_enabled": True})
+    switches = {
+        # Tweaking OSR performance by setting the same Chromium flags
+        # as in upstream cefclient (Issue #240).
+        "disable-surfaces": "",
+        "disable-gpu": "",
+        "disable-gpu-compositing": "",
+        "enable-begin-frame-scheduling": "",
+    }
+    browser_settings = {
+        # Tweaking OSR performance (Issue #240)
+        "windowless_frame_rate": 100
+    }
+    cef.Initialize(settings={"windowless_rendering_enabled": True},
+                   switches=switches)
     window_info = cef.WindowInfo()
     window_info.SetAsOffscreen(0)
     # Initialise SDL2 for video (add other init constants if you
@@ -96,7 +113,9 @@ def main():
     # Set-up the RenderHandler, passing in the SDL2 renderer
     renderHandler = RenderHandler(renderer, width, height - headerHeight)
     # Create the browser instance
-    browser = cef.CreateBrowserSync(window_info, url="https://www.google.com/")
+    browser = cef.CreateBrowserSync(window_info,
+                                    url="https://www.google.com/",
+                                    settings=browser_settings)
     browser.SetClientHandler(LoadHandler())
     browser.SetClientHandler(renderHandler)
     # Must call WasResized at least once to let know CEF that
