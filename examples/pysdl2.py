@@ -21,7 +21,7 @@ Install instructions:
    pip install PySDL2
  
 Missing functionality:
-- Performance is still not perfect, see Issue #379 for further details
+- Performance is still not perfect, see Issue #324 for further details
 - Keyboard modifiers that are not yet handled in this example:
   ctrl, marking text inputs with the shift key.
 - Mouse dragging
