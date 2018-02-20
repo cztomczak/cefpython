@@ -6,6 +6,13 @@ further down. Pull requests for the missing functionality are welcome.
 
 Requires PySDL2 and SDL2 libraries.
 
+Usage:
+
+    python pysdl2.py [-v] [-h]
+
+    -v  turn on debug messages
+    -h  display help info
+
 Tested configurations:
 - Windows 7: SDL 2.0.7 and PySDL2 0.9.6
 - Fedora 26: SDL2 2.0.7 with PySDL2 0.9.6
