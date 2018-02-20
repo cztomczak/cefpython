@@ -36,33 +36,43 @@ GUI controls:
   https://github.com/neilmunday/pes/blob/master/lib/pes/ui.py
 """
 
+import argparse
+import logging
 import sys
+
+def die(msg):
+    """
+    Helper function to exit application on failed imports etc.
+    """
+    sys.stderr.write("%s\n" % msg)
+    sys.exit(1)
+
 try:
     # noinspection PyUnresolvedReferences
     from cefpython3 import cefpython as cef
 except ImportError:
-    print("ERROR: cefpython3 package not found")
-    print("To install type: `pip install cefpython3`")
-    sys.exit(1)
+    die("ERROR: cefpython3 package not found\nTo install type: `pip install cefpython3`")
 try:
     # noinspection PyUnresolvedReferences
     import sdl2
     # noinspection PyUnresolvedReferences
     import sdl2.ext
 except ImportError:
-    print("ERROR: SDL2 package not found")
-    print("To install type: `pip install PySDL2`")
-    sys.exit(1)
+    die("ERROR: SDL2 package not found\nTo install type: `pip install PySDL2`")
 try:
     # noinspection PyUnresolvedReferences
     from PIL import Image
 except ImportError:
-    print("ERROR: PIL package not found")
-    print("To install type: pip install Pillow")
-    sys.exit(1)
-
+    die("ERROR: PIL package not found\nTo install type: pip install Pillow")
 
 def main():
+    parser = argparse.ArgumentParser(description='PySDL2 / cefpython example', add_help=True)
+    parser.add_argument('-v', '--verbose', help='Turn on debug info', dest='verbose', action='store_true')
+    args = parser.parse_args()
+    logLevel = logging.INFO
+    if args.verbose:
+        logLevel = logging.DEBUG
+    logging.basicConfig(format='[%(filename)s %(levelname)s]: %(message)s', level=logLevel)
     # The following variables control the dimensions of the window
     # and browser display area
     width = 800
@@ -75,7 +85,7 @@ def main():
     # Mouse wheel fudge to enhance scrolling
     scrollEnhance = 40
     # desired frame rate
-    frameRate = 60
+    frameRate = 100
     # Initialise CEF for offscreen rendering
     sys.excepthook = cef.ExceptHook
     switches = {
@@ -88,16 +98,18 @@ def main():
     }
     browser_settings = {
         # Tweaking OSR performance (Issue #240)
-        "windowless_frame_rate": 100
+        "windowless_frame_rate": frameRate
     }
     cef.Initialize(settings={"windowless_rendering_enabled": True},
                    switches=switches)
+    logging.debug("cef initialised")
     window_info = cef.WindowInfo()
     window_info.SetAsOffscreen(0)
     # Initialise SDL2 for video (add other init constants if you
     # require other SDL2 functionality e.g. mixer,
     # TTF, joystick etc.
     sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO)
+    logging.debug("SDL2 initialised")
     # Create the window
     window = sdl2.video.SDL_CreateWindow(
         'cefpython3 SDL2 Demo',
@@ -127,8 +139,10 @@ def main():
     # Begin the main rendering loop
     running = True
     # FPS debug variables
-    #frames = 0
-    #lastFrameTick = sdl2.timer.SDL_GetTicks()
+    if logLevel == logging.DEBUG:
+        frames = 0
+        lastFrameTick = sdl2.timer.SDL_GetTicks()
+    logging.debug("beginning rendering loop")
     while running:
         # record when we started drawing this frame
         startTime = sdl2.timer.SDL_GetTicks()
@@ -277,12 +291,13 @@ def main():
         )
         sdl2.SDL_RenderPresent(renderer)
 
-        # FPS debug code - left here for reference
-        #frames += 1
-        #currentTick = sdl2.timer.SDL_GetTicks()
-        #if currentTick - lastFrameTick > 1000:
-        #    lastFrameTick = sdl2.timer.SDL_GetTicks()
-        #    print("FPS %d" % (frames / (currentTick / 1000.0)))
+        # FPS debug code
+        if logLevel == logging.DEBUG:
+            frames += 1
+            currentTick = sdl2.timer.SDL_GetTicks()
+            if currentTick - lastFrameTick > 1000:
+                lastFrameTick = sdl2.timer.SDL_GetTicks()
+                logging.debug("FPS %d" % (frames / (currentTick / 1000.0)))
 
         # regulate frame rate
         if sdl2.timer.SDL_GetTicks() - startTime < 1000.0 / frameRate:
@@ -307,7 +322,7 @@ def get_key_code(key):
     if key in key_map:
         return key_map[key]
     # Key not mapped, raise exception
-    print("[pysdl2.py] Keyboard mapping incomplete:"
+    logging.error("Keyboard mapping incomplete:"
           " unsupported SDL key %d."
           " See https://wiki.libsdl.org/SDLKeycodeLookup for mapping."
           % key)
@@ -319,12 +334,12 @@ class LoadHandler(object):
 
     def OnLoadingStateChange(self, is_loading, **_):
         if not is_loading:
-            print("[pysdl2.py] Page loading complete")
+            logging.info("Page loading complete")
 
     def OnLoadError(self, frame, failed_url, **_):
         if not frame.IsMain():
             return
-        print("[pysdl2.py] Failed to load %s" % failed_url)
+        logging.error("Failed to load %s" % failed_url)
 
 
 class RenderHandler(object):
@@ -396,7 +411,7 @@ class RenderHandler(object):
                 depth = 32
                 pitch = self.__width * 4
             else:
-                print("[pysdl2.py] ERROR: Unsupported mode: %s" % mode)
+                logging.error("ERROR: Unsupported mode: %s" % mode)
                 exit_app()
 
             pxbuf = image.tobytes()
@@ -421,14 +436,14 @@ class RenderHandler(object):
             # Free the surface
             sdl2.SDL_FreeSurface(surface)
         else:
-            print("[pysdl2.py] WARNING: Unsupport element_type in OnPaint")
+            logging.warning("Unsupport element_type in OnPaint")
 
 
 def exit_app():
     """Tidy up SDL2 and CEF before exiting."""
     sdl2.SDL_Quit()
     cef.Shutdown()
-    print("[pysdl2.py] Exited gracefully")
+    logging.info("Exited gracefully")
 
 
 if __name__ == "__main__":
