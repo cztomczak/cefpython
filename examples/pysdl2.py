@@ -5,10 +5,10 @@ This example is incomplete, see "Missing functionality" section
 further down. Pull requests for the missing functionality are welcome.
 
 Requires PySDL2 and SDL2 libraries.
- 
+
 Tested configurations:
 - Windows 7: SDL 2.0.7 and PySDL2 0.9.6
-- Fedora 25: SDL2 2.0.5 with PySDL2 0.9.3
+- Fedora 26: SDL2 2.0.7 with PySDL2 0.9.6
 - Ubuntu 14.04: SDL2 with PySDL2 0.9.6
 
 Install instructions:
@@ -19,7 +19,7 @@ Install instructions:
    - Ubuntu: sudo apt-get install libsdl2-dev
 2. Install PySDL2 using pip package manager:
    pip install PySDL2
- 
+
 Missing functionality:
 - Performance is still not perfect, see Issue #324 for further details
 - Keyboard modifiers that are not yet handled in this example:
@@ -74,6 +74,8 @@ def main():
     browserWidth = width
     # Mouse wheel fudge to enhance scrolling
     scrollEnhance = 40
+    # desired frame rate
+    frameRate = 60
     # Initialise CEF for offscreen rendering
     sys.excepthook = cef.ExceptHook
     switches = {
@@ -124,7 +126,12 @@ def main():
     browser.WasResized()
     # Begin the main rendering loop
     running = True
+    # FPS debug variables
+    #frames = 0
+    #lastFrameTick = sdl2.timer.SDL_GetTicks()
     while running:
+        # record when we started drawing this frame
+        startTime = sdl2.timer.SDL_GetTicks()
         # Convert SDL2 events into CEF events (where appropriate)
         events = sdl2.ext.get_events()
         for event in events:
@@ -269,6 +276,17 @@ def main():
             sdl2.SDL_Rect(0, headerHeight, browserWidth, browserHeight)
         )
         sdl2.SDL_RenderPresent(renderer)
+
+        # FPS debug code - left here for reference
+        #frames += 1
+        #currentTick = sdl2.timer.SDL_GetTicks()
+        #if currentTick - lastFrameTick > 1000:
+        #    lastFrameTick = sdl2.timer.SDL_GetTicks()
+        #    print("FPS %d" % (frames / (currentTick / 1000.0)))
+
+        # regulate frame rate
+        if sdl2.timer.SDL_GetTicks() - startTime < 1000.0 / frameRate:
+            sdl2.timer.SDL_Delay((1000 / frameRate) - (sdl2.timer.SDL_GetTicks() - startTime))
     # User exited
     exit_app()
 
@@ -298,11 +316,11 @@ def get_key_code(key):
 
 class LoadHandler(object):
     """Simple handler for loading URLs."""
-    
+
     def OnLoadingStateChange(self, is_loading, **_):
         if not is_loading:
             print("[pysdl2.py] Page loading complete")
-            
+
     def OnLoadError(self, frame, failed_url, **_):
         if not frame.IsMain():
             return
@@ -313,7 +331,7 @@ class RenderHandler(object):
     """
     Handler for rendering web pages to the
     screen via SDL2.
-    
+
     The object's texture property is exposed
     to allow the main rendering loop to access
     the SDL2 texture.
@@ -324,11 +342,11 @@ class RenderHandler(object):
         self.__height = height
         self.__renderer = renderer
         self.texture = None
-            
+
     def GetViewRect(self, rect_out, **_):
         rect_out.extend([0, 0, self.__width, self.__height])
         return True
-    
+
     def OnPaint(self, element_type, paint_buffer, **_):
         """
         Using the pixel data from CEF's offscreen rendering
@@ -380,7 +398,7 @@ class RenderHandler(object):
             else:
                 print("[pysdl2.py] ERROR: Unsupported mode: %s" % mode)
                 exit_app()
-            
+
             pxbuf = image.tobytes()
             # Create surface
             surface = sdl2.SDL_CreateRGBSurfaceFrom(
