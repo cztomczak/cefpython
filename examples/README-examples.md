@@ -45,7 +45,7 @@ workarounds.
   library (GTK 3). Currently broken on Mac ([#310](../../../issues/310)).
 - [pysdl2.py](pysdl2.py): off-screen rendering example for
   [PySDL2](https://github.com/marcusva/py-sdl2) library. Currently tested
-  only on Linux.
+  only on Linux ([#324](../../../issues/324)).
 - [pywin32.py](pywin32.py): example for [pywin32](https://github.com/mhammond/pywin32)
   library
 - [qt.py](qt.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4),
