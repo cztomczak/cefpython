@@ -11,7 +11,6 @@
 # Issues with PySide 1.2:
 # - Mac: Keyboard focus issues when switching between controls (Issue #284)
 # - Mac: Mouse cursor never changes when hovering over links (Issue #311)
-# - Windows/Mac: Sometimes process hangs when quitting app (Issue #360)
 
 from cefpython3 import cefpython as cef
 import ctypes
