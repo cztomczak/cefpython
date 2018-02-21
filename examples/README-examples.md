@@ -94,7 +94,7 @@ yet ported to latest CEF. Some of them are externally maintained.
 
 ## More examples to come
 
-Here is a list of issues in the tracker to implement new examples:
+Here is a list of issues in the tracker to create or upgrade examples:
 
 - [Issue #323](../../../issues/323) - "Create cocos2d example"
 - [Issue #322](../../../issues/322) - "Create pyglet example"
