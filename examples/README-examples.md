@@ -3,7 +3,8 @@
 Table of contents:
 * [Hello World!](#hello-world)
 * [Supported examples](#supported-examples)
-* [More examples](#more-examples)
+* [Other examples](#other-examples)
+* [More examples to come](#more-examples-to-come)
 
 ## Hello World!
 
@@ -71,10 +72,11 @@ There are also available unit tests and its usage of the API can
 be of some use. See [main_test.py](../unittests/main_test.py).
 
 
-## More examples
+## Other examples
 
-There are even more examples available, some of them are externally
-maintained.
+There are even more examples available, they do not reside in the examples/
+directory. Some of them were created for old verions of CEF and were not
+yet ported to latest CEF. Some of them are externally maintained.
 
 - Kivy framework:
   see [Kivy](https://github.com/cztomczak/cefpython/wiki/Kivy) wiki page.
@@ -90,5 +92,36 @@ maintained.
 - Example of using Python network library (urllib3/openssl) instead of Chromium's
   network library - see [gist by Massimiliano Dal Cero](https://gist.github.com/yattamax/0252a3c5dc54a2f81650d5c0eafabf99)
 
-There are ongoing efforts to add these examples to the official examples/
-directory, see issues in the tracker.
+## More examples to come
+
+Here is a list of issues in the tracker to implement new examples:
+
+- [Issue #323](../../../issues/323) - "Create cocos2d example"
+- [Issue #322](../../../issues/322) - "Create pyglet example"
+- [Issue #312](../../../issues/312) - "Easy to use CefBrowser widgets
+                                       for many popular GUI toolkits"
+- [Issue #301](../../../issues/301) - "Fix cefpython3.wx package to work
+                                       with latest v55+"
+- [Issue #289](../../../issues/289) - "Pygame / PyOpenGL example"
+- [Issue #288](../../../issues/288) - "Create panda3d_.py example"
+- [Issue #285](../../../issues/285) - "[kivy_.py] Refactor example, make
+                                       it work cross-platform and move it
+                                       to examples/"
+- [Issue #252](../../../issues/252) - "Use CEF views in Hello World, Tutorial
+                                       and Offscreen examples, and in Unit
+                                       tests"
+- [Issue #224](../../../issues/224) - "Port CEF 1 examples to CEF 3"
+- [Issue #109](../../../issues/109) - "The ResourceHandler example"
+
+Packaging examples:
+
+- [Issue #407](../../../issues/407) - "Example of packaging app using
+                                       Cython compiler"
+- [Issue #396](../../../issues/396) - "Example of packaging app using
+                                       Nuitka compiler"
+- [Issue #338](../../../issues/338) - "Example of packaging app using
+                                       cx_Freeze"
+- [Issue #337](../../../issues/337) - "Example of packaging app using
+                                       py2app"
+- [Issue #135](../../../issues/135) - "Example of packaging app using
+                                       pyinstaller"
