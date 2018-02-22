@@ -1017,11 +1017,12 @@ def Shutdown():
     # and closes browser automatically if you give it some time.
     # If the time was not enough, then there is an emergency plan,
     # the code block further down that checks len(g_pyBrowsers).
-    for _ in range(20):
-        for __ in range(10):
-            with nogil:
-                CefDoMessageLoopWork()
-        time.sleep(0.01)
+    if not g_applicationSettings["multi_threaded_message_loop"]:
+        for _ in range(20):
+            for __ in range(10):
+                with nogil:
+                    CefDoMessageLoopWork()
+            time.sleep(0.01)
 
     # Emergency plan in case the code above didn't close browsers,
     # and neither browsers were closed in client app. This code
@@ -1045,7 +1046,7 @@ def Shutdown():
                 browser_close_forced = True
             browser = None  # free reference
             RemovePyBrowser(browserId)
-        if browser_close_forced:
+        if browser_close_forced and not g_applicationSettings["multi_threaded_message_loop"]:
             for _ in range(20):
                 for __ in range(10):
                     with nogil:
