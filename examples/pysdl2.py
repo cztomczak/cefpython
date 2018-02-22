@@ -47,6 +47,7 @@ import argparse
 import logging
 import sys
 
+
 def die(msg):
     """
     Helper function to exit application on failed imports etc.
@@ -54,11 +55,13 @@ def die(msg):
     sys.stderr.write("%s\n" % msg)
     sys.exit(1)
 
+
 try:
     # noinspection PyUnresolvedReferences
     from cefpython3 import cefpython as cef
 except ImportError:
-    die("ERROR: cefpython3 package not found\nTo install type: `pip install cefpython3`")
+    die("""ERROR: cefpython3 package not found\n
+    To install type: `pip install cefpython3`""")
 try:
     # noinspection PyUnresolvedReferences
     import sdl2
@@ -72,14 +75,33 @@ try:
 except ImportError:
     die("ERROR: PIL package not found\nTo install type: pip install Pillow")
 
+
 def main():
-    parser = argparse.ArgumentParser(description='PySDL2 / cefpython example', add_help=True)
-    parser.add_argument('-v', '--verbose', help='Turn on debug info', dest='verbose', action='store_true')
+    parser = argparse.ArgumentParser(
+        description='PySDL2 / cefpython example',
+        add_help=True
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        help='Turn on debug info',
+        dest='verbose',
+        action='store_true'
+    )
     args = parser.parse_args()
     logLevel = logging.INFO
     if args.verbose:
         logLevel = logging.DEBUG
-    logging.basicConfig(format='[%(filename)s %(levelname)s]: %(message)s', level=logLevel)
+    logging.basicConfig(
+        format='[%(filename)s %(levelname)s]: %(message)s',
+        level=logLevel
+    )
+    logging.info("Using PySDL2 %s" % sdl2.__version__)
+    version = sdl2.SDL_version()
+    sdl2.SDL_GetVersion(version)
+    logging.info(
+        "Using SDL2 %s.%s.%s" % (version.major, version.minor, version.patch)
+    )
     # The following variables control the dimensions of the window
     # and browser display area
     width = 800
@@ -146,13 +168,16 @@ def main():
     # Begin the main rendering loop
     running = True
     # FPS debug variables
-    if logLevel == logging.DEBUG:
-        frames = 0
-        lastFrameTick = sdl2.timer.SDL_GetTicks()
+    frames = 0
     logging.debug("beginning rendering loop")
+    resetFpsTime = True
+    fpsTime = 0
     while running:
         # record when we started drawing this frame
         startTime = sdl2.timer.SDL_GetTicks()
+        if resetFpsTime:
+            fpsTime = sdl2.timer.SDL_GetTicks()
+            resetFpsTime = False
         # Convert SDL2 events into CEF events (where appropriate)
         events = sdl2.ext.get_events()
         for event in events:
@@ -297,18 +322,17 @@ def main():
             sdl2.SDL_Rect(0, headerHeight, browserWidth, browserHeight)
         )
         sdl2.SDL_RenderPresent(renderer)
-
         # FPS debug code
-        if logLevel == logging.DEBUG:
-            frames += 1
-            currentTick = sdl2.timer.SDL_GetTicks()
-            if currentTick - lastFrameTick > 1000:
-                lastFrameTick = sdl2.timer.SDL_GetTicks()
-                logging.debug("FPS %d" % (frames / (currentTick / 1000.0)))
-
+        frames += 1
+        if sdl2.timer.SDL_GetTicks() - fpsTime > 1000:
+            logging.debug("FPS: %d" % frames)
+            frames = 0
+            resetFpsTime = True
         # regulate frame rate
         if sdl2.timer.SDL_GetTicks() - startTime < 1000.0 / frameRate:
-            sdl2.timer.SDL_Delay((1000 / frameRate) - (sdl2.timer.SDL_GetTicks() - startTime))
+            sdl2.timer.SDL_Delay(
+                (1000 / frameRate) - (sdl2.timer.SDL_GetTicks() - startTime)
+            )
     # User exited
     exit_app()
 
@@ -329,10 +353,12 @@ def get_key_code(key):
     if key in key_map:
         return key_map[key]
     # Key not mapped, raise exception
-    logging.error("Keyboard mapping incomplete:"
-          " unsupported SDL key %d."
-          " See https://wiki.libsdl.org/SDLKeycodeLookup for mapping."
-          % key)
+    logging.error(
+        """
+        Keyboard mapping incomplete: unsupported SDL key %d.
+        See https://wiki.libsdl.org/SDLKeycodeLookup for mapping.
+        """ % key
+    )
     return None
 
 
