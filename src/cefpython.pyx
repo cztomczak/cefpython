@@ -1017,7 +1017,7 @@ def Shutdown():
     # and closes browser automatically if you give it some time.
     # If the time was not enough, then there is an emergency plan,
     # the code block further down that checks len(g_pyBrowsers).
-    if not g_applicationSettings["multi_threaded_message_loop"]:
+    if not GetAppSetting("multi_threaded_message_loop"):
         for _ in range(20):
             for __ in range(10):
                 with nogil:
@@ -1046,7 +1046,7 @@ def Shutdown():
                 browser_close_forced = True
             browser = None  # free reference
             RemovePyBrowser(browserId)
-        if browser_close_forced and not g_applicationSettings["multi_threaded_message_loop"]:
+        if browser_close_forced and not GetAppSetting("multi_threaded_message_loop"):
             for _ in range(20):
                 for __ in range(10):
                     with nogil:
