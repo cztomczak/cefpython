@@ -1,10 +1,11 @@
 """
 Example of embedding CEF browser using PySDL2 library.
 
-This example is incomplete, see "Missing functionality" section
-further down. Pull requests for the missing functionality are welcome.
+Requires PySDL2 and SDL2 libraries, see install instructions further
+down.
 
-Requires PySDL2 and SDL2 libraries.
+This example is incomplete and has some issues, see the "Known issues"
+section further down. Pull requests with fixes are welcome.
 
 Usage:
 
@@ -30,11 +31,14 @@ Install instructions:
 2. Install PySDL2 using pip package manager:
    pip install PySDL2
 
-Missing functionality:
+Known issues (pull requests are welcome):
+- There are issues when running on slow machine - key events are being
+  lost (noticed on Mac only), see Issue #324 for more details
 - Performance is still not perfect, see Issue #324 for further details
 - Keyboard modifiers that are not yet handled in this example:
   ctrl, marking text inputs with the shift key.
-- Mouse dragging
+- Backspace key doesn't work on Mac
+- Dragging with mouse not implemented
 - Window size is fixed, cannot be resized
 
 GUI controls:
