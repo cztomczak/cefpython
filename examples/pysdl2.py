@@ -15,6 +15,7 @@ Usage:
 
 Tested configurations:
 - Windows 7: SDL 2.0.7 and PySDL2 0.9.6
+- Mac 10.9: SDL 2.0.7 and PySDL2 0.9.6
 - Fedora 26: SDL2 2.0.7 with PySDL2 0.9.6
 - Ubuntu 14.04: SDL2 with PySDL2 0.9.6
 
@@ -22,6 +23,8 @@ Install instructions:
 1. Install SDL libraries for your OS, e.g:
    - Windows: Download SDL2.dll from http://www.libsdl.org/download-2.0.php
               and put SDL2.dll in C:\Python27\ (where you've installed Python)
+   - Mac: Install Homebrew from https://brew.sh/
+          and then type "brew install sdl2"
    - Fedora: sudo dnf install SDL2 SDL2_ttf SDL2_image SDL2_gfx SDL2_mixer
    - Ubuntu: sudo apt-get install libsdl2-dev
 2. Install PySDL2 using pip package manager:
@@ -60,20 +63,32 @@ try:
     # noinspection PyUnresolvedReferences
     from cefpython3 import cefpython as cef
 except ImportError:
-    die("""ERROR: cefpython3 package not found\n
-    To install type: `pip install cefpython3`""")
+    die("ERROR: cefpython3 package not found\n"
+        "       To install type: pip install cefpython3")
+
 try:
     # noinspection PyUnresolvedReferences
     import sdl2
     # noinspection PyUnresolvedReferences
     import sdl2.ext
-except ImportError:
-    die("ERROR: SDL2 package not found\nTo install type: `pip install PySDL2`")
+except ImportError as exc:
+    excstr = repr(exc)
+    if "No module named sdl2" in excstr:
+        die("ERROR: PySDL2 package not found\n"
+            "       To install type: pip install PySDL2")
+    elif ("could not find any library for SDL2"
+          " (PYSDL2_DLL_PATH: unset)" in excstr):
+        die("ERROR: SDL2 package not found.\n"
+            "       See install instructions in top comment in sources.")
+    else:
+        die(excstr)
+
 try:
     # noinspection PyUnresolvedReferences
     from PIL import Image
 except ImportError:
-    die("ERROR: PIL package not found\nTo install type: pip install Pillow")
+    die("ERROR: PIL package not found\n"
+        "       To install type: pip install Pillow")
 
 
 def main():
