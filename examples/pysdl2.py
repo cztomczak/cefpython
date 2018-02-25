@@ -204,10 +204,14 @@ def main():
                 or (event.type == sdl2.SDL_KEYDOWN
                     and event.key.keysym.sym == sdl2.SDLK_ESCAPE)):
                 running = False
+                logging.debug("SDL2 QUIT event")
                 break
             if event.type == sdl2.SDL_MOUSEBUTTONDOWN:
                 if event.button.button == sdl2.SDL_BUTTON_LEFT:
                     if event.button.y > headerHeight:
+                        logging.debug(
+                            "SDL2 MOUSEBUTTONDOWN event (left button)"
+                        )
                         # Mouse click triggered in browser region
                         browser.SendMouseClickEvent(
                             event.button.x,
@@ -219,6 +223,7 @@ def main():
             elif event.type == sdl2.SDL_MOUSEBUTTONUP:
                 if event.button.button == sdl2.SDL_BUTTON_LEFT:
                     if event.button.y > headerHeight:
+                        logging.debug("SDL2 MOUSEBUTTONUP event (left button)")
                         # Mouse click triggered in browser region
                         browser.SendMouseClickEvent(
                             event.button.x,
@@ -234,6 +239,7 @@ def main():
                                                event.motion.y - headerHeight,
                                                False)
             elif event.type == sdl2.SDL_MOUSEWHEEL:
+                logging.debug("SDL2 MOUSEWHEEL event")
                 # Mouse wheel event
                 x = event.wheel.x
                 if x < 0:
@@ -249,6 +255,7 @@ def main():
             elif event.type == sdl2.SDL_TEXTINPUT:
                 # Handle text events to get actual characters typed rather
                 # than the key pressed.
+                logging.debug("SDL2 TEXTINPUT event: %s" % event.text.text)
                 keycode = ord(event.text.text)
                 key_event = {
                     "type": cef.KEYEVENT_CHAR,
@@ -257,7 +264,6 @@ def main():
                     "unmodified_character": keycode,
                     "modifiers": cef.EVENTFLAG_NONE
                 }
-                logging.debug("sending browser keyevent \"char\": %s" % event.text.text)
                 browser.SendKeyEvent(key_event)
                 key_event = {
                     "type": cef.KEYEVENT_KEYUP,
@@ -266,10 +272,10 @@ def main():
                     "unmodified_character": keycode,
                     "modifiers": cef.EVENTFLAG_NONE
                 }
-                logging.debug("sending browser key event \"up\": %s" % event.text.text)
                 browser.SendKeyEvent(key_event)
             elif event.type == sdl2.SDL_KEYDOWN:
                 # Handle key down events for non-text keys
+                logging.debug("SDL2 KEYDOWN event")
                 if event.key.keysym.sym == sdl2.SDLK_RETURN:
                     keycode = event.key.keysym.sym
                     key_event = {
@@ -302,6 +308,7 @@ def main():
                         browser.SendKeyEvent(key_event)
             elif event.type == sdl2.SDL_KEYUP:
                 # Handle key up events for non-text keys
+                logging.debug("SDL2 KEYUP event")
                 if event.key.keysym.sym in [
                         sdl2.SDLK_RETURN,
                         sdl2.SDLK_BACKSPACE,
