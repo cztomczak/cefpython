@@ -257,6 +257,7 @@ def main():
                     "unmodified_character": keycode,
                     "modifiers": cef.EVENTFLAG_NONE
                 }
+                logging.debug("sending browser keyevent \"char\": %s" % event.text.text)
                 browser.SendKeyEvent(key_event)
                 key_event = {
                     "type": cef.KEYEVENT_KEYUP,
@@ -265,6 +266,7 @@ def main():
                     "unmodified_character": keycode,
                     "modifiers": cef.EVENTFLAG_NONE
                 }
+                logging.debug("sending browser key event \"up\": %s" % event.text.text)
                 browser.SendKeyEvent(key_event)
             elif event.type == sdl2.SDL_KEYDOWN:
                 # Handle key down events for non-text keys
