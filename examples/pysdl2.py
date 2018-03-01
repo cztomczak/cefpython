@@ -9,9 +9,10 @@ section further down. Pull requests with fixes are welcome.
 
 Usage:
 
-    python pysdl2.py [-v] [-h]
+    python pysdl2.py [-v] [-h] [-r {software|hardware}]
 
     -v  turn on debug messages
+    -r  specify hardware or software (default) rendering
     -h  display help info
 
 Tested configurations:
@@ -107,6 +108,14 @@ def main():
         dest='verbose',
         action='store_true'
     )
+    parser.add_argument(
+        '-r',
+        '--renderer',
+        help='Specify hardware or software rendering',
+        default='software',
+        dest='renderer',
+        choices=['software', 'hardware']
+    )
     args = parser.parse_args()
     logLevel = logging.INFO
     if args.verbose:
@@ -169,9 +178,23 @@ def main():
     )
     # Define default background colour (black in this case)
     backgroundColour = sdl2.SDL_Color(0, 0, 0)
-    # Create the renderer using hardware acceleration
-    renderer = sdl2.SDL_CreateRenderer(window, -1,
-                                       sdl2.render.SDL_RENDERER_ACCELERATED)
+    renderer = None
+    if args.renderer == 'hardware':
+        # Create the renderer using hardware acceleration
+        logging.info("Using hardware rendering")
+        renderer = sdl2.SDL_CreateRenderer(
+            window,
+            -1,
+            sdl2.render.SDL_RENDERER_ACCELERATED
+        )
+    else:
+        # Create the renderer using software acceleration
+        logging.info("Using software rendering")
+        renderer = sdl2.SDL_CreateRenderer(
+            window,
+            -1,
+            sdl2.render.SDL_RENDERER_SOFTWARE
+        )
     # Set-up the RenderHandler, passing in the SDL2 renderer
     renderHandler = RenderHandler(renderer, width, height - headerHeight)
     # Create the browser instance
