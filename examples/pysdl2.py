@@ -12,7 +12,7 @@ Usage:
     python pysdl2.py [-v] [-h] [-r {software|hardware}]
 
     -v  turn on debug messages
-    -r  specify hardware or software (default) rendering
+    -r  specify hardware (default) or software rendering
     -h  display help info
 
 Tested configurations:
@@ -112,7 +112,7 @@ def main():
         '-r',
         '--renderer',
         help='Specify hardware or software rendering',
-        default='software',
+        default='hardware',
         dest='renderer',
         choices=['software', 'hardware']
     )
