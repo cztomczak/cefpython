@@ -2,7 +2,7 @@
 
 Table of contents:
 * [Introduction](#introduction)
-* [Major sponsors](#major-sponsors)
+* [Sponsors](#Sponsors)
 * [Funding for v64.0 release](#funding-for-v640-release)
 * [Install](#install)
 * [Tutorial](#tutorial)
@@ -39,31 +39,47 @@ applications. You can use it for web scraping or as a web crawler,
 or other kind of internet bots.
 
 
-## Major sponsors
+## Sponsors
 
-<a href="http://www.blueplanet.com/">
-<img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
-</a>
-<br>
-
-<a href="https://clearchat.com/">
-<img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
-</a>
-<br>
-
-<a href="http://www.rentouch.ch/">
-<img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
-</a>
-<br>
-
-<a href="https://www.jetbrains.com/pycharm/">
-<img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
-</a>
-<br>
-<br>
+<table>
+ <tr>
+  <td>
+   <a href="http://www.blueplanet.com/">
+    <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
+   </a><br>
+   <a href="http://www.blueplanet.com/">www.blueplanet.com</a>
+  </td>
+  <td>
+   <a href="https://clearchat.com/">
+    <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
+   </a><br>
+   <a href="https://clearchat.com/">clearchat.com</a>
+  </td>
+  <td>
+   <a href="http://www.rentouch.ch/">
+    <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
+   </a><br>
+   <a href="http://www.rentouch.ch/">www.rentouch.ch</a>
+  </td>
+  <td>
+   <a href="https://www.jetbrains.com/pycharm/">
+    <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
+   </a><br>
+   <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com/pycharm/</a>
+  </td>
+ <tr>
+</table>
 
 See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
+
+If you would like to sponsor CEF Python development efforts and see your company
+logo with a link here, please contact Czarek (contact details are available in his
+[Resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)).
+This README page alone has 1,070 visitors and 2,402 views every two weeks,
+so your company logo and a website link will be visible to many Python developers.
+The statistics are from Mar 9, 2018. Complete statistics are available in this topic
+on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpython/CjkZF2P4rMk/discussion).
 
 
 ## Funding for v64.0 release
