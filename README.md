@@ -2,7 +2,7 @@
 
 Table of contents:
 * [Introduction](#introduction)
-* [Sponsors](#Sponsors)
+* [Sponsors](#sponsors)
 * [Funding for v64.0 release](#funding-for-v640-release)
 * [Install](#install)
 * [Tutorial](#tutorial)
