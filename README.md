@@ -44,28 +44,36 @@ or other kind of internet bots.
 <table>
  <tr>
   <td>
-   <a href="http://www.blueplanet.com/">
-    <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
-   </a><br>
-   <a href="http://www.blueplanet.com/">www.blueplanet.com</a>
+   <div align="center">
+    <a href="http://www.blueplanet.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
+    </a><br>
+    <a href="http://www.blueplanet.com/">www.blueplanet.com</a>
+   </div>
   </td>
   <td>
-   <a href="https://clearchat.com/">
-    <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
-   </a><br>
-   <a href="https://clearchat.com/">clearchat.com</a>
+   <div align="center">
+    <a href="https://clearchat.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
+    </a><br>
+    <a href="https://clearchat.com/">clearchat.com</a>
+   <div align="center">
   </td>
   <td>
-   <a href="http://www.rentouch.ch/">
-    <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
-   </a><br>
-   <a href="http://www.rentouch.ch/">www.rentouch.ch</a>
+   <div align="center">
+    <a href="http://www.rentouch.ch/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
+    </a><br>
+    <a href="http://www.rentouch.ch/">www.rentouch.ch</a>
+   </div>
   </td>
   <td>
-   <a href="https://www.jetbrains.com/pycharm/">
-    <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
-   </a><br>
-   <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com/pycharm/</a>
+   <div align="center">
+    <a href="https://www.jetbrains.com/pycharm/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
+    </a><br>
+    <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com/pycharm/</a>
+   </div>
   </td>
  <tr>
 </table>
