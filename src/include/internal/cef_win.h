@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #ifndef CEF_INCLUDE_INTERNAL_CEF_WIN_H_
 #define CEF_INCLUDE_INTERNAL_CEF_WIN_H_
 #pragma once
@@ -48,8 +47,9 @@ struct CefMainArgsTraits {
   static inline void init(struct_type* s) {}
   static inline void clear(struct_type* s) {}
 
-  static inline void set(const struct_type* src, struct_type* target,
-      bool copy) {
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
     target->instance = src->instance;
   }
 };
@@ -62,9 +62,7 @@ class CefMainArgs : public CefStructBase<CefMainArgsTraits> {
   CefMainArgs() : parent() {}
   explicit CefMainArgs(const cef_main_args_t& r) : parent(r) {}
   explicit CefMainArgs(const CefMainArgs& r) : parent(r) {}
-  explicit CefMainArgs(HINSTANCE hInstance) : parent() {
-    instance = hInstance;
-  }
+  explicit CefMainArgs(HINSTANCE hInstance) : parent() { instance = hInstance; }
 };
 
 struct CefWindowInfoTraits {
@@ -76,11 +74,12 @@ struct CefWindowInfoTraits {
     cef_string_clear(&s->window_name);
   }
 
-  static inline void set(const struct_type* src, struct_type* target,
-      bool copy) {
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
     target->ex_style = src->ex_style;
     cef_string_set(src->window_name.str, src->window_name.length,
-        &target->window_name, copy);
+                   &target->window_name, copy);
     target->style = src->style;
     target->x = src->x;
     target->y = src->y;
@@ -88,7 +87,6 @@ struct CefWindowInfoTraits {
     target->height = src->height;
     target->parent_window = src->parent_window;
     target->menu = src->menu;
-    target->transparent_painting_enabled = src->transparent_painting_enabled;
     target->windowless_rendering_enabled = src->windowless_rendering_enabled;
     target->window = src->window;
   }
@@ -109,8 +107,8 @@ class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
   // Create the browser as a child window.
   ///
   void SetAsChild(CefWindowHandle parent, RECT windowRect) {
-    style = WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP |
-            WS_VISIBLE;
+    style =
+        WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE;
     parent_window = parent;
     x = windowRect.left;
     y = windowRect.top;
@@ -122,8 +120,8 @@ class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
   // Create the browser as a popup window.
   ///
   void SetAsPopup(CefWindowHandle parent, const CefString& windowName) {
-    style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS |
-            WS_VISIBLE;
+    style =
+        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE;
     parent_window = parent;
     x = CW_USEDEFAULT;
     y = CW_USEDEFAULT;
@@ -140,15 +138,14 @@ class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
   // monitor info and to act as the parent window for dialogs, context menus,
   // etc. If |parent| is not provided then the main screen monitor will be used
   // and some functionality that requires a parent window may not function
-  // correctly. If |transparent| is true a transparent background color will be
-  // used (RGBA=0x00000000). If |transparent| is false the background will be
-  // white and opaque. In order to create windowless browsers the
+  // correctly. In order to create windowless browsers the
   // CefSettings.windowless_rendering_enabled value must be set to true.
+  // Transparent painting is enabled by default but can be disabled by setting
+  // CefBrowserSettings.background_color to an opaque value.
   ///
-  void SetAsWindowless(CefWindowHandle parent, bool transparent) {
+  void SetAsWindowless(CefWindowHandle parent) {
     windowless_rendering_enabled = TRUE;
     parent_window = parent;
-    transparent_painting_enabled = transparent;
   }
 };
 

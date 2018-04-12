@@ -21,15 +21,18 @@ class ClientPrintHandlerGtk : public CefPrintHandler {
 
   // CefPrintHandler methods.
   void OnPrintStart(CefRefPtr<CefBrowser> browser) OVERRIDE;
-  void OnPrintSettings(CefRefPtr<CefPrintSettings> settings,
+  void OnPrintSettings(CefRefPtr<CefBrowser> browser,
+                       CefRefPtr<CefPrintSettings> settings,
                        bool get_defaults) OVERRIDE;
   bool OnPrintDialog(
+      CefRefPtr<CefBrowser> browser,
       bool has_selection,
       CefRefPtr<CefPrintDialogCallback> callback) OVERRIDE;
-  bool OnPrintJob(const CefString& document_name,
+  bool OnPrintJob(CefRefPtr<CefBrowser> browser,
+                  const CefString& document_name,
                   const CefString& pdf_file_path,
                   CefRefPtr<CefPrintJobCallback> callback) OVERRIDE;
-  void OnPrintReset() OVERRIDE;
+  void OnPrintReset(CefRefPtr<CefBrowser> browser) OVERRIDE;
   CefSize GetPdfPaperSize(int device_units_per_inch) OVERRIDE;
 
  private:

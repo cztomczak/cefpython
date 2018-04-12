@@ -66,8 +66,7 @@ cdef void SetCefWindowInfo(
     cdef cpp_bool transparent = bool(windowInfo.transparentPainting)
     if windowInfo.windowType == "offscreen":
         cefWindowInfo.SetAsWindowless(
-                <CefWindowHandle>windowInfo.parentWindowHandle,
-                transparent)
+                <CefWindowHandle>windowInfo.parentWindowHandle)
 
 cdef class WindowInfo:
     cdef public str windowType

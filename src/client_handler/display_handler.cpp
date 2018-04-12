@@ -39,10 +39,11 @@ void DisplayHandler::OnStatusMessage(CefRefPtr<CefBrowser> browser,
 
 
 bool DisplayHandler::OnConsoleMessage(CefRefPtr<CefBrowser> browser,
+                                     cef_log_severity_t level,
                                      const CefString& message,
                                      const CefString& source,
                                      int line)
 {
     REQUIRE_UI_THREAD();
-    return DisplayHandler_OnConsoleMessage(browser, message, source, line);
+    return DisplayHandler_OnConsoleMessage(browser, level, message, source, line);
 }

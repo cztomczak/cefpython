@@ -21,8 +21,7 @@ cdef extern from "include/internal/cef_win.h":
                         RECT windowRect)
         void SetAsPopup(CefWindowHandle parent,
                         const CefString& windowName)
-        void SetAsWindowless(CefWindowHandle parent,
-                        cpp_bool transparent)
+        void SetAsWindowless(CefWindowHandle parent)
 
     cdef cppclass CefMainArgs:
         CefMainArgs()

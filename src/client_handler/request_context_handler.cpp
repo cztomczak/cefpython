@@ -17,7 +17,7 @@ CefRefPtr<CefCookieManager> RequestContextHandler::GetCookieManager() {
     } else {
         CefString mainUrl;
         return RequestHandler_GetCookieManager(browser_, mainUrl);
-    }    
+    }
     // Default: return NULL.
 }
 
