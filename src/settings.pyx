@@ -12,6 +12,7 @@ cimport cef_types
 
 LOGSEVERITY_DEFAULT = cef_types.LOGSEVERITY_DEFAULT
 LOGSEVERITY_VERBOSE = cef_types.LOGSEVERITY_VERBOSE
+LOGSEVERITY_DEBUG= cef_types.LOGSEVERITY_DEBUG
 LOGSEVERITY_INFO = cef_types.LOGSEVERITY_INFO
 LOGSEVERITY_WARNING = cef_types.LOGSEVERITY_WARNING
 LOGSEVERITY_ERROR = cef_types.LOGSEVERITY_ERROR
@@ -190,13 +191,6 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.javascript = cef_types.STATE_DISABLED
             else:
                 cefBrowserSettings.javascript = cef_types.STATE_ENABLED
-        elif key == "javascript_open_windows_disallowed":
-            if browserSettings[key]:
-                cefBrowserSettings.javascript_open_windows = (
-                        cef_types.STATE_DISABLED)
-            else:
-                cefBrowserSettings.javascript_open_windows = (
-                        cef_types.STATE_ENABLED)
         elif key == "javascript_close_windows_disallowed":
             if browserSettings[key]:
                 cefBrowserSettings.javascript_close_windows = (

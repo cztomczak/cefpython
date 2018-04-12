@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2017 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,62 +34,33 @@
 // tools directory for more information.
 //
 
-#ifndef CEF_INCLUDE_CEF_GEOLOCATION_HANDLER_H_
-#define CEF_INCLUDE_CEF_GEOLOCATION_HANDLER_H_
+#ifndef CEF_INCLUDE_CEF_ACCESSIBILITY_HANDLER_H_
+#define CEF_INCLUDE_CEF_ACCESSIBILITY_HANDLER_H_
 #pragma once
 
-#include "include/cef_base.h"
-#include "include/cef_browser.h"
+#include "include/cef_values.h"
 
 ///
-// Callback interface used for asynchronous continuation of geolocation
-// permission requests.
-///
-/*--cef(source=library)--*/
-class CefGeolocationCallback : public virtual CefBaseRefCounted {
- public:
-  ///
-  // Call to allow or deny geolocation access.
-  ///
-  /*--cef(capi_name=cont)--*/
-  virtual void Continue(bool allow) =0;
-};
-
-
-///
-// Implement this interface to handle events related to geolocation permission
-// requests. The methods of this class will be called on the browser process UI
-// thread.
+// Implement this interface to receive accessibility notification when
+// accessibility events have been registered. The methods of this class will
+// be called on the UI thread.
 ///
 /*--cef(source=client)--*/
-class CefGeolocationHandler : public virtual CefBaseRefCounted {
+class CefAccessibilityHandler : public virtual CefBaseRefCounted {
  public:
   ///
-  // Called when a page requests permission to access geolocation information.
-  // |requesting_url| is the URL requesting permission and |request_id| is the
-  // unique ID for the permission request. Return true and call
-  // CefGeolocationCallback::Continue() either in this method or at a later
-  // time to continue or cancel the request. Return false to cancel the request
-  // immediately.
+  // Called after renderer process sends accessibility tree changes to the
+  // browser process.
   ///
   /*--cef()--*/
-  virtual bool OnRequestGeolocationPermission(
-      CefRefPtr<CefBrowser> browser,
-      const CefString& requesting_url,
-      int request_id,
-      CefRefPtr<CefGeolocationCallback> callback) {
-    return false;
-  }
+  virtual void OnAccessibilityTreeChange(CefRefPtr<CefValue> value) = 0;
 
   ///
-  // Called when a geolocation access request is canceled. |request_id| is the
-  // unique ID for the permission request.
+  // Called after renderer process sends accessibility location changes to the
+  // browser process.
   ///
   /*--cef()--*/
-  virtual void OnCancelGeolocationPermission(
-      CefRefPtr<CefBrowser> browser,
-      int request_id) {
-  }
+  virtual void OnAccessibilityLocationChange(CefRefPtr<CefValue> value) = 0;
 };
 
-#endif  // CEF_INCLUDE_CEF_GEOLOCATION_HANDLER_H_
+#endif  // CEF_INCLUDE_CEF_ACCESSIBILITY_HANDLER_H_

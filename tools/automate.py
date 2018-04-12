@@ -565,11 +565,8 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
     # This replacements must be unique for the undo operation
     # to be reliable.
 
-    mt_find = r"/MT "
-    mt_replace = r"/MD /wd4275 "
-
-    mtd_find = r"/MTd "
-    mtd_replace = r"/MDd /wd4275 "
+    mt_find = r'"/MT"'
+    mt_replace = r'"/MD"'
 
     cmake_variables = os.path.join(Options.cef_binary, "cmake",
                                    "cef_variables.cmake")
@@ -577,9 +574,8 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
         contents = fp.read().decode("utf-8")
 
     if try_undo:
-        matches1 = re.findall(re.escape(mt_replace), contents)
-        matches2 = re.findall(re.escape(mtd_replace), contents)
-        if len(matches1) or len(matches2):
+        matches = re.findall(re.escape(mt_replace), contents)
+        if len(matches):
             undo = True
         else:
             return
@@ -587,15 +583,9 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
     if undo:
         (contents, count) = re.subn(re.escape(mt_replace), mt_find,
                                     contents)
-        assert count == 2
-        (contents, count) = re.subn(re.escape(mtd_replace), mtd_find,
-                                    contents)
         assert count == 1
     else:
         (contents, count) = re.subn(re.escape(mt_find), mt_replace,
-                                    contents)
-        assert count == 2
-        (contents, count) = re.subn(re.escape(mtd_find), mtd_replace,
                                     contents)
         assert count == 1
 

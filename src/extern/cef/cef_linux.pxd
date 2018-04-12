@@ -15,8 +15,7 @@ cdef extern from "include/internal/cef_linux.h":
     cdef cppclass CefWindowInfo:
         void SetAsChild(CefWindowHandle parent,
                         const CefRect& windowRect)
-        void SetAsWindowless(CefWindowHandle parent,
-                             cpp_bool transparent)
+        void SetAsWindowless(CefWindowHandle parent)
 
     cdef cppclass CefMainArgs:
         CefMainArgs()

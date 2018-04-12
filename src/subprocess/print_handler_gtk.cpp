@@ -287,6 +287,7 @@ void ClientPrintHandlerGtk::OnPrintStart(CefRefPtr<CefBrowser> browser) {
 }
 
 void ClientPrintHandlerGtk::OnPrintSettings(
+    CefRefPtr<CefBrowser> browser,
     CefRefPtr<CefPrintSettings> settings,
     bool get_defaults) {
   if (get_defaults) {
@@ -358,6 +359,7 @@ void ClientPrintHandlerGtk::OnPrintSettings(
 }
 
 bool ClientPrintHandlerGtk::OnPrintDialog(
+    CefRefPtr<CefBrowser> browser,
     bool has_selection,
     CefRefPtr<CefPrintDialogCallback> callback) {
   dialog_callback_ = callback;
@@ -399,6 +401,7 @@ bool ClientPrintHandlerGtk::OnPrintDialog(
 }
 
 bool ClientPrintHandlerGtk::OnPrintJob(
+    CefRefPtr<CefBrowser> browser,
     const CefString& document_name,
     const CefString& pdf_file_path,
     CefRefPtr<CefPrintJobCallback> callback) {
@@ -425,7 +428,8 @@ bool ClientPrintHandlerGtk::OnPrintJob(
   return true;
 }
 
-void ClientPrintHandlerGtk::OnPrintReset() {
+void ClientPrintHandlerGtk::OnPrintReset(
+    CefRefPtr<CefBrowser> browser) {
   if (dialog_) {
     gtk_widget_destroy(dialog_);
     dialog_ = NULL;

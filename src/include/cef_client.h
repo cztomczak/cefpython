@@ -46,7 +46,6 @@
 #include "include/cef_drag_handler.h"
 #include "include/cef_find_handler.h"
 #include "include/cef_focus_handler.h"
-#include "include/cef_geolocation_handler.h"
 #include "include/cef_jsdialog_handler.h"
 #include "include/cef_keyboard_handler.h"
 #include "include/cef_life_span_handler.h"
@@ -75,108 +74,75 @@ class CefClient : public virtual CefBaseRefCounted {
   // implementation will be used.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefDialogHandler> GetDialogHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefDialogHandler> GetDialogHandler() { return NULL; }
 
   ///
   // Return the handler for browser display state events.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() { return NULL; }
 
   ///
   // Return the handler for download events. If no handler is returned downloads
   // will not be allowed.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefDownloadHandler> GetDownloadHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefDownloadHandler> GetDownloadHandler() { return NULL; }
 
   ///
   // Return the handler for drag events.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefDragHandler> GetDragHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefDragHandler> GetDragHandler() { return NULL; }
 
   ///
   // Return the handler for find result events.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefFindHandler> GetFindHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefFindHandler> GetFindHandler() { return NULL; }
 
   ///
   // Return the handler for focus events.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefFocusHandler> GetFocusHandler() {
-    return NULL;
-  }
-
-  ///
-  // Return the handler for geolocation permissions requests. If no handler is
-  // provided geolocation access will be denied by default.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefGeolocationHandler> GetGeolocationHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefFocusHandler> GetFocusHandler() { return NULL; }
 
   ///
   // Return the handler for JavaScript dialogs. If no handler is provided the
   // default implementation will be used.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefJSDialogHandler> GetJSDialogHandler() { return NULL; }
 
   ///
   // Return the handler for keyboard events.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() { return NULL; }
 
   ///
   // Return the handler for browser life span events.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() { return NULL; }
 
   ///
   // Return the handler for browser load status events.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefLoadHandler> GetLoadHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefLoadHandler> GetLoadHandler() { return NULL; }
 
   ///
   // Return the handler for off-screen rendering events.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefRenderHandler> GetRenderHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefRenderHandler> GetRenderHandler() { return NULL; }
 
   ///
   // Return the handler for browser request events.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefRequestHandler> GetRequestHandler() {
-    return NULL;
-  }
+  virtual CefRefPtr<CefRequestHandler> GetRequestHandler() { return NULL; }
 
   ///
   // Called when a new message is received from a different process. Return true

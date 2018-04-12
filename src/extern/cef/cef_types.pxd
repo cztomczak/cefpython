@@ -52,7 +52,6 @@ cdef extern from "include/internal/cef_types.h":
         int pack_loading_disabled
         int remote_debugging_port
         int uncaught_exception_stack_size
-        int context_safety_implementation # Not exposed.
         int ignore_certificate_errors
         cef_color_t background_color
         int persist_user_preferences
@@ -116,6 +115,7 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef enum cef_log_severity_t:
         LOGSEVERITY_DEFAULT,
         LOGSEVERITY_VERBOSE,
+        LOGSEVERITY_DEBUG = LOGSEVERITY_VERBOSE,
         LOGSEVERITY_INFO,
         LOGSEVERITY_WARNING,
         LOGSEVERITY_ERROR,
@@ -164,10 +164,11 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef enum cef_urlrequest_flags_t:
         UR_FLAG_NONE                      = 0,
         UR_FLAG_SKIP_CACHE                = 1 << 0,
-        UR_FLAG_ALLOW_CACHED_CREDENTIALS  = 1 << 1,
+        UR_FLAG_ONLY_FROM_CACHE           = 1 << 1,
+        UR_FLAG_ALLOW_STORED_CREDENTIALS  = 1 << 2,
         UR_FLAG_REPORT_UPLOAD_PROGRESS    = 1 << 3,
-        UR_FLAG_NO_DOWNLOAD_DATA          = 1 << 6,
-        UR_FLAG_NO_RETRY_ON_5XX           = 1 << 7,
+        UR_FLAG_NO_DOWNLOAD_DATA          = 1 << 4,
+        UR_FLAG_NO_RETRY_ON_5XX           = 1 << 5,
 
     # CefListValue, CefDictionaryValue - types.
     ctypedef enum cef_value_type_t:
@@ -343,6 +344,7 @@ cdef extern from "include/internal/cef_types.h":
         PK_FILE_MODULE,
         PK_LOCAL_APP_DATA,
         PK_USER_DATA,
+        PK_DIR_RESOURCES,
     ctypedef cef_path_key_t PathKey
 
     ctypedef enum cef_plugin_policy_t:

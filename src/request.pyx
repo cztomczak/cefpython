@@ -8,7 +8,7 @@ class Request:
     Flags = {
         "None": cef_types.UR_FLAG_NONE,
         "SkipCache": cef_types.UR_FLAG_SKIP_CACHE,
-        "AllowCachedCredentials": cef_types.UR_FLAG_ALLOW_CACHED_CREDENTIALS,
+        "AllowCachedCredentials": cef_types.UR_FLAG_ALLOW_STORED_CREDENTIALS,
         "AllowCookies": 0, # keep for BC
         "ReportUploadProgress": cef_types.UR_FLAG_REPORT_UPLOAD_PROGRESS,
         "ReportLoadTiming": 0, # keep for BC
