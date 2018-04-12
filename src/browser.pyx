@@ -236,6 +236,8 @@ cdef class PyBrowser:
             # FocusHandler
             self.allowedClientCallbacks += ["OnTakeFocus", "OnSetFocus",
                                             "OnGotFocus"]
+            # DialogHanlder
+            self.allowedClientCallbacks += ["OnFileDialog"]
 
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
