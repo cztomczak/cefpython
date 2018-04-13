@@ -124,9 +124,25 @@ class MainFrame(wx.Frame):
         filemenu = wx.Menu()
         filemenu.Append(1, "Some option")
         filemenu.Append(2, "Another option")
+        filemenu.Append(3, "PrintToPDF test1")
+        filemenu.Append(4, "PrintToPDF test2")
         menubar = wx.MenuBar()
         menubar.Append(filemenu, "&File")
         self.SetMenuBar(menubar)
+        self.Bind(wx.EVT_MENU, self.menu_handler)
+
+    def menu_handler(self, event): 
+      id = event.GetId()
+      if id == 3:
+        self.browser.PrintToPdf('test1.pdf', {'backgrounds_enabled': 1})
+      if id == 4:
+        self.browser.PrintToPdf('test2.pdf', {'backgrounds_enabled': 1}, func=self.OnPdfFinished)
+
+    def OnPdfFinished(self, path, ok):
+        if ok:
+            print("self.OnPdfPrintFinished: ok %s" % path)
+        else:
+            print("self.OnPdfPrintFinished: error")
 
     def embed_browser(self):
         window_info = cef.WindowInfo()
@@ -135,8 +151,10 @@ class MainFrame(wx.Frame):
         window_info.SetAsChild(self.browser_panel.GetHandle(),
                                [0, 0, width, height])
         self.browser = cef.CreateBrowserSync(window_info,
-                                             url="https://www.google.com/")
+                                             url="https://github.com/cztomczak/cefpython")
         self.browser.SetClientHandler(FocusHandler())
+        self.browser.SetClientHandler(DialogHandler())
+        self.browser.SetClientHandler(PdfPrintCallback())
 
     def OnSetFocus(self, _):
         if not self.browser:
@@ -200,6 +218,24 @@ class FocusHandler(object):
             browser.SetFocus(True)
 
 
+class DialogHandler(object):
+    def OnFileDialog(self, browser, mode, title, default_file_path, accept_filters, selected_accept_filter, file_dialog_callback):
+      file_real_path = os.path.realpath('test1.pdf')
+      if os.path.exists(file_real_path):
+        file_dialog_callback.Continue(0, [file_real_path])
+        return True
+      else:
+        return False
+
+
+class PdfPrintCallback(object):
+    def OnPdfPrintFinished(self, path, ok):
+        if ok:
+            print("PdfPrintCallback.OnPdfPrintFinished: ok %s" % path)
+        else:
+            print("PdfPrintCallback.OnPdfPrintFinished: error")
+
+
 class CefApp(wx.App):
 
     def __init__(self, redirect):
@@ -240,7 +276,10 @@ class CefApp(wx.App):
         self.timer.Start(10)  # 10ms timer
 
     def on_timer(self, _):
-        cef.MessageLoopWork()
+        if MAC:
+            cef.MessageLoop()
+        else:
+            cef.MessageLoopWork()
 
     def OnExit(self):
         self.timer.Stop()
