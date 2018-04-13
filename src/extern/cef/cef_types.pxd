@@ -61,6 +61,28 @@ cdef extern from "include/internal/cef_types.h":
         int external_message_pump
         cef_string_t framework_dir_path
 
+    ctypedef enum cef_pdf_print_margin_type_t:
+        PDF_PRINT_MARGIN_DEFAULT,
+        PDF_PRINT_MARGIN_NONE,
+        PDF_PRINT_MARGIN_MINIMUM,
+        PDF_PRINT_MARGIN_CUSTOM,
+
+    ctypedef struct CefPdfPrintSettings:
+        cef_string_t header_footer_title
+        cef_string_t header_footer_url
+        int page_width
+        int page_height
+        int scale_factor
+        double margin_top
+        double margin_right
+        double margin_bottom
+        double margin_left
+        cef_pdf_print_margin_type_t margin_type
+        int header_footer_enabled
+        int selection_only
+        int landscape
+        int backgrounds_enabled
+
     ctypedef struct CefBrowserSettings:
         cef_string_t accept_language_list
         cef_color_t background_color
