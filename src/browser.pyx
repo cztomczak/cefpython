@@ -463,6 +463,37 @@ cdef class PyBrowser:
                 window_info, <CefRefPtr[CefClient]?>NULL, settings,
                 inspect_element_at)
 
+    cpdef py_void PrintToPdf(self, py_string filepath, dict settings, object func = None):
+        self.SetClientCallback('OnMyPdfPrintFinished', func)
+        cdef CefPdfPrintSettings pdf_print_settings
+        pdf_print_settings.margin_type = settings.get('margin_type') or PDF_PRINT_MARGIN_DEFAULT
+        pdf_print_settings.header_footer_enabled = settings.get('header_footer_enabled') or 0
+        pdf_print_settings.selection_only = settings.get('selection_only') or 0
+        pdf_print_settings.landscape = settings.get('landscape') or 0
+        pdf_print_settings.backgrounds_enabled = settings.get('backgrounds_enabled') or 0
+        pdf_print_settings.page_width = settings.get('page_width') or 0
+        pdf_print_settings.page_height = settings.get('page_height') or 0
+        if pdf_print_settings.margin_type == cef_types.PDF_PRINT_MARGIN_CUSTOM:
+            pdf_print_settings.margin_top = settings.get('margin_top')
+            pdf_print_settings.margin_right = settings.get('margin_right')
+            pdf_print_settings.margin_left = settings.get('margin_left')
+            pdf_print_settings.margin_bottom = settings.get('margin_bottom')
+        pdf_print_settings.scale_factor = settings.get('scale_factor') or 0
+        if settings.get('header_footer_enabled') == 1:
+            if settings.get('header_footer_title'):
+                header_footer_title = new CefString(&pdf_print_settings.header_footer_title)
+                PyToCefStringPointer(settings.get('header_footer_title'), header_footer_title)
+                del header_footer_title
+            if settings.get('header_footer_url'):
+                header_footer_url = new CefString(&pdf_print_settings.header_footer_url)
+                PyToCefStringPointer(settings.get('header_footer_url'), header_footer_url)
+                del header_footer_url
+        cdef CefString cef_file_path
+        PyToCefString(filepath, cef_file_path)
+
+        cdef CefRefPtr[CefPdfPrintCallback] pdf_callback = <CefRefPtr[CefPdfPrintCallback]?>new CefFastPdfPrintCallback(self.cefBrowser)
+        self.GetCefBrowserHost().get().PrintToPDF(cef_file_path, pdf_print_settings, pdf_callback)
+
     cpdef py_void StopLoad(self):
         self.GetCefBrowser().get().StopLoad()
 

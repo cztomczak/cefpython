@@ -419,6 +419,7 @@ from cef_cookie cimport *
 from cef_string_visitor cimport *
 # noinspection PyUnresolvedReferences
 cimport cef_cookie_manager_namespace
+from fast_pdf_print_callback cimport *
 from cookie_visitor cimport *
 from string_visitor cimport *
 from cef_callback cimport *
@@ -507,6 +508,7 @@ include "command_line.pyx"
 include "app.pyx"
 include "drag_data.pyx"
 include "helpers.pyx"
+include "fast_pdf_print_callback.pyx"
 
 # Currently used only on Linux via DragData. Do not include on other
 # platforms otherwise warning about unused function appears.
