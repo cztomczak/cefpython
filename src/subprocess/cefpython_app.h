@@ -74,13 +74,6 @@ class CefPythonApp :
   void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
         override;
 
-  bool OnBeforeNavigation(CefRefPtr<CefBrowser> browser,
-                                  CefRefPtr<CefFrame> frame,
-                                  CefRefPtr<CefRequest> request,
-                                  cef_navigation_type_t navigation_type,
-                                  bool is_redirect)
-        override;
-
   void OnContextCreated(CefRefPtr<CefBrowser> browser,
                                 CefRefPtr<CefFrame> frame,
                                 CefRefPtr<CefV8Context> context)

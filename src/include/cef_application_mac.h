@@ -31,7 +31,9 @@
 #define CEF_INCLUDE_CEF_APPLICATION_MAC_H_
 #pragma once
 
+#ifdef __cplusplus
 #include "include/cef_base.h"
+#endif  // __cplusplus
 
 #if defined(OS_MACOSX) && defined(__OBJC__)
 
@@ -82,24 +84,26 @@
 @protocol CefAppProtocol<CrAppControlProtocol>
 @end
 
+#ifdef __cplusplus
+
 // Controls the state of |isHandlingSendEvent| in the event loop so that it is
 // reset properly.
 class CefScopedSendingEvent {
  public:
   CefScopedSendingEvent()
-    : app_(static_cast<NSApplication<CefAppProtocol>*>(
-              [NSApplication sharedApplication])),
-      handling_([app_ isHandlingSendEvent]) {
+      : app_(static_cast<NSApplication<CefAppProtocol>*>(
+            [NSApplication sharedApplication])),
+        handling_([app_ isHandlingSendEvent]) {
     [app_ setHandlingSendEvent:YES];
   }
-  ~CefScopedSendingEvent() {
-    [app_ setHandlingSendEvent:handling_];
-  }
+  ~CefScopedSendingEvent() { [app_ setHandlingSendEvent:handling_]; }
 
  private:
   NSApplication<CefAppProtocol>* app_;
   BOOL handling_;
 };
+
+#endif  // __cplusplus
 
 #endif  // defined(OS_MACOSX) && defined(__OBJC__)
 

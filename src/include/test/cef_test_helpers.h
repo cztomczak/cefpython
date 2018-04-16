@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2017 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,34 +33,29 @@
 // support the CEF translator tool. See the translator.README.txt file in the
 // tools directory for more information.
 //
+// THIS FILE IS FOR TESTING PURPOSES ONLY.
+//
+// The APIs defined in this file are for testing purposes only. They should only
+// be included from unit test targets.
+//
 
-#ifndef CEF_INCLUDE_CEF_GEOLOCATION_H_
-#define CEF_INCLUDE_CEF_GEOLOCATION_H_
+#ifndef CEF_INCLUDE_TEST_CEF_TEST_HELPERS_H_
+#define CEF_INCLUDE_TEST_CEF_TEST_HELPERS_H_
 #pragma once
 
-#include "include/cef_base.h"
+#if !defined(BUILDING_CEF_SHARED) && !defined(WRAPPING_CEF_SHARED) && \
+    !defined(UNIT_TEST)
+#error This file can be included for unit tests only
+#endif
+
+#include "include/cef_frame.h"
 
 ///
-// Implement this interface to receive geolocation updates. The methods of this
-// class will be called on the browser process UI thread.
+// Execute JavaScript with a user gesture to trigger functionality like
+// onbeforeunload handlers that will otherwise be blocked.
 ///
-/*--cef(source=client)--*/
-class CefGetGeolocationCallback : public virtual CefBaseRefCounted {
- public:
-  ///
-  // Called with the 'best available' location information or, if the location
-  // update failed, with error information.
-  ///
-  /*--cef()--*/
-  virtual void OnLocationUpdate(const CefGeoposition& position) =0;
-};
+/*--cef(optional_param=javascript)--*/
+void CefExecuteJavaScriptWithUserGestureForTests(CefRefPtr<CefFrame> frame,
+                                                 const CefString& javascript);
 
-///
-// Request a one-time geolocation update. This function bypasses any user
-// permission checks so should only be used by code that is allowed to access
-// location information.
-///
-/*--cef()--*/
-bool CefGetGeolocation(CefRefPtr<CefGetGeolocationCallback> callback);
-
-#endif  // CEF_INCLUDE_CEF_GEOLOCATION_H_
+#endif  // CEF_INCLUDE_TEST_CEF_TEST_HELPERS_H_

@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #ifndef CEF_INCLUDE_INTERNAL_CEF_MAC_H_
 #define CEF_INCLUDE_INTERNAL_CEF_MAC_H_
 #pragma once
@@ -46,8 +45,9 @@ struct CefMainArgsTraits {
   static inline void init(struct_type* s) {}
   static inline void clear(struct_type* s) {}
 
-  static inline void set(const struct_type* src, struct_type* target,
-      bool copy) {
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
     target->argc = src->argc;
     target->argv = src->argv;
   }
@@ -76,10 +76,11 @@ struct CefWindowInfoTraits {
     cef_string_clear(&s->window_name);
   }
 
-  static inline void set(const struct_type* src, struct_type* target,
-      bool copy) {
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
     cef_string_set(src->window_name.str, src->window_name.length,
-        &target->window_name, copy);
+                   &target->window_name, copy);
     target->x = src->x;
     target->y = src->y;
     target->width = src->width;
@@ -87,7 +88,6 @@ struct CefWindowInfoTraits {
     target->hidden = src->hidden;
     target->parent_view = src->parent_view;
     target->windowless_rendering_enabled = src->windowless_rendering_enabled;
-    target->transparent_painting_enabled = src->transparent_painting_enabled;
     target->view = src->view;
   }
 };
@@ -104,8 +104,7 @@ class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
   ///
   // Create the browser as a child view.
   ///
-  void SetAsChild(CefWindowHandle parent, int x, int y, int width,
-                  int height) {
+  void SetAsChild(CefWindowHandle parent, int x, int y, int width, int height) {
     parent_view = parent;
     this->x = x;
     this->y = y;
@@ -121,15 +120,14 @@ class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
   // monitor info and to act as the parent view for dialogs, context menus,
   // etc. If |parent| is not provided then the main screen monitor will be used
   // and some functionality that requires a parent view may not function
-  // correctly. If |transparent| is true a transparent background color will be
-  // used (RGBA=0x00000000). If |transparent| is false the background will be
-  // white and opaque. In order to create windowless browsers the
+  // correctly. In order to create windowless browsers the
   // CefSettings.windowless_rendering_enabled value must be set to true.
+  // Transparent painting is enabled by default but can be disabled by setting
+  // CefBrowserSettings.background_color to an opaque value.
   ///
-  void SetAsWindowless(CefWindowHandle parent, bool transparent) {
+  void SetAsWindowless(CefWindowHandle parent) {
     windowless_rendering_enabled = true;
     parent_view = parent;
-    transparent_painting_enabled = transparent;
   }
 };
 

@@ -12,6 +12,7 @@ from libcpp.vector cimport vector as cpp_vector
 from cef_frame cimport CefFrame
 cimport cef_types
 from cef_types cimport int64
+from cef_types cimport CefPdfPrintSettings
 from cef_types cimport CefBrowserSettings, CefPoint
 from cef_drag_data cimport CefDragData
 from cef_types cimport CefMouseEvent
@@ -26,6 +27,10 @@ ELIF UNAME_SYSNAME == "Darwin":
     from cef_mac cimport CefWindowHandle, CefWindowInfo
 
 cdef extern from "include/cef_browser.h":
+
+    cdef cppclass CefPdfPrintCallback:
+
+        void OnPdfPrintFinished(const CefString& path, cpp_bool ok)
 
     cdef cppclass CefBrowserHost:
 
@@ -66,6 +71,9 @@ cdef extern from "include/cef_browser.h":
                 cpp_bool matchCase, cpp_bool findNext)
         void StopFinding(cpp_bool clearSelection)
         void Print()
+        void PrintToPDF(const CefString& path,
+                        const CefPdfPrintSettings& settings,
+                        CefRefPtr[CefPdfPrintCallback] callback)
         cpp_bool TryCloseBrowser()
 
         # Drag & drop OSR

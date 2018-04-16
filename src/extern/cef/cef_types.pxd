@@ -52,7 +52,6 @@ cdef extern from "include/internal/cef_types.h":
         int pack_loading_disabled
         int remote_debugging_port
         int uncaught_exception_stack_size
-        int context_safety_implementation # Not exposed.
         int ignore_certificate_errors
         cef_color_t background_color
         int persist_user_preferences
@@ -61,6 +60,28 @@ cdef extern from "include/internal/cef_types.h":
         int no_sandbox
         int external_message_pump
         cef_string_t framework_dir_path
+
+    ctypedef enum cef_pdf_print_margin_type_t:
+        PDF_PRINT_MARGIN_DEFAULT,
+        PDF_PRINT_MARGIN_NONE,
+        PDF_PRINT_MARGIN_MINIMUM,
+        PDF_PRINT_MARGIN_CUSTOM,
+
+    ctypedef struct CefPdfPrintSettings:
+        cef_string_t header_footer_title
+        cef_string_t header_footer_url
+        int page_width
+        int page_height
+        int scale_factor
+        double margin_top
+        double margin_right
+        double margin_bottom
+        double margin_left
+        cef_pdf_print_margin_type_t margin_type
+        int header_footer_enabled
+        int selection_only
+        int landscape
+        int backgrounds_enabled
 
     ctypedef struct CefBrowserSettings:
         cef_string_t accept_language_list
@@ -116,6 +137,7 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef enum cef_log_severity_t:
         LOGSEVERITY_DEFAULT,
         LOGSEVERITY_VERBOSE,
+        LOGSEVERITY_DEBUG = LOGSEVERITY_VERBOSE,
         LOGSEVERITY_INFO,
         LOGSEVERITY_WARNING,
         LOGSEVERITY_ERROR,
@@ -164,10 +186,11 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef enum cef_urlrequest_flags_t:
         UR_FLAG_NONE                      = 0,
         UR_FLAG_SKIP_CACHE                = 1 << 0,
-        UR_FLAG_ALLOW_CACHED_CREDENTIALS  = 1 << 1,
+        UR_FLAG_ONLY_FROM_CACHE           = 1 << 1,
+        UR_FLAG_ALLOW_STORED_CREDENTIALS  = 1 << 2,
         UR_FLAG_REPORT_UPLOAD_PROGRESS    = 1 << 3,
-        UR_FLAG_NO_DOWNLOAD_DATA          = 1 << 6,
-        UR_FLAG_NO_RETRY_ON_5XX           = 1 << 7,
+        UR_FLAG_NO_DOWNLOAD_DATA          = 1 << 4,
+        UR_FLAG_NO_RETRY_ON_5XX           = 1 << 5,
 
     # CefListValue, CefDictionaryValue - types.
     ctypedef enum cef_value_type_t:
@@ -343,6 +366,7 @@ cdef extern from "include/internal/cef_types.h":
         PK_FILE_MODULE,
         PK_LOCAL_APP_DATA,
         PK_USER_DATA,
+        PK_DIR_RESOURCES,
     ctypedef cef_path_key_t PathKey
 
     ctypedef enum cef_plugin_policy_t:

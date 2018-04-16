@@ -44,11 +44,9 @@ public:
         return this;
     }
 
-#if defined(OS_LINUX)
     CefRefPtr<CefDialogHandler> GetDialogHandler() override {
         return this;
     }
-#endif
 
     CefRefPtr<CefDisplayHandler> GetDisplayHandler() override {
         return this;

@@ -50,15 +50,15 @@ class CefAuthCallback : public virtual CefBaseRefCounted {
   ///
   // Continue the authentication request.
   ///
-  /*--cef(capi_name=cont)--*/
+  /*--cef(capi_name=cont,optional_param=username,optional_param=password)--*/
   virtual void Continue(const CefString& username,
-                        const CefString& password) =0;
+                        const CefString& password) = 0;
 
   ///
   // Cancel the authentication request.
   ///
   /*--cef()--*/
-  virtual void Cancel() =0;
+  virtual void Cancel() = 0;
 };
 
 #endif  // CEF_INCLUDE_CEF_AUTH_CALLBACK_H_

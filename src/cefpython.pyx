@@ -419,6 +419,7 @@ from cef_cookie cimport *
 from cef_string_visitor cimport *
 # noinspection PyUnresolvedReferences
 cimport cef_cookie_manager_namespace
+from fast_pdf_print_callback cimport *
 from cookie_visitor cimport *
 from string_visitor cimport *
 from cef_callback cimport *
@@ -431,6 +432,7 @@ from cef_command_line cimport *
 from cef_request_context cimport *
 from cef_request_context_handler cimport *
 from request_context_handler cimport *
+from cef_dialog_handler cimport *
 from cef_jsdialog_handler cimport *
 from cef_path_util cimport *
 from cef_drag_data cimport *
@@ -507,6 +509,7 @@ include "command_line.pyx"
 include "app.pyx"
 include "drag_data.pyx"
 include "helpers.pyx"
+include "fast_pdf_print_callback.pyx"
 
 # Currently used only on Linux via DragData. Do not include on other
 # platforms otherwise warning about unused function appears.
@@ -517,6 +520,7 @@ IF UNAME_SYSNAME == "Linux":
 include "handlers/browser_process_handler.pyx"
 include "handlers/display_handler.pyx"
 include "handlers/focus_handler.pyx"
+include "handlers/dialog_handler.pyx"
 include "handlers/javascript_dialog_handler.pyx"
 include "handlers/keyboard_handler.pyx"
 include "handlers/lifespan_handler.pyx"
