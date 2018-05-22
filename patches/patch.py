@@ -13,9 +13,9 @@ OS_POSTFIX = ("win" if platform.system() == "Windows" else
 # noinspection PyUnresolvedReferences
 patches.extend([
     {
-        # Fixes HTTPS cache problems with private certificates
-        'name': 'issue125',
-        'path': '../net/http/'
+        # (Disabled) Fixes HTTPS cache problems with private certificates
+        # 'name': 'issue125',
+        # 'path': '../net/http/'
     },
 ])
 
@@ -26,11 +26,6 @@ if OS_POSTFIX == "linux":
         {
             # Discovery of the "icudtl.dat" file fails on Linux.
             'name': 'issue231',
-            'path': './'
-        },
-        {
-            # Adds drag-image representation during drag & drop in OSR mode.
-            'name': 'issue251',
             'path': './'
         },
     ])
