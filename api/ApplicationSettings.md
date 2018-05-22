@@ -233,12 +233,14 @@ RequestHandler.[_OnCertificateError()](#_oncertificateerror)
 callback. Note that disk caching is enabled only when the "cache_path"
 option is set.
 
-__NOTE ON CACHING__: the official CEF Python binary releases incorporate a patch
-that changes the caching behavior on sites with SSL certificate errors
-when used with this setting. Chromium by default disallows caching of
-content when there is certificate error. CEF Python applies a patch to
-Chromium sources to allow for caching even when there is certificate error,
-but only when the "ignore_certificate_errors" option is set to True.
+__NOTE ON CACHING__: Chromium by default disallows caching of
+content when there is certificate error. There is a issue125.patch
+in the patches/ directory that can be enabled when doing a custom
+CEF build. This patch changes the caching behavior on sites with SSL
+certificate errors when used with this setting. This patch can be
+applied Chromium sources to allow for caching even when there is
+certificate error, but only when the "ignore_certificate_errors"
+option is set to True.
 When it's set to False then the Chromium's caching behavior does not
 change. Enabling caching with certificate errors is useful on local
 private networks that use self-signed SSL certificates. See the

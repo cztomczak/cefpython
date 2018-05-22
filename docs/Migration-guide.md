@@ -36,6 +36,7 @@ Table of contents:
 * [v55.3+ Handlers' callbacks and other interfaces](#v553-handlers-callbacks-and-other-interfaces)
 * [v56+ MacOS 10.9+ required to run](#v56-macos-109-required-to-run)
 * [v57.1+ High DPI support on Windows](#v571-high-dpi-support-on-windows)
+* [v66.0+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled](#v660-linux-patch-that-fixed-https-cache-problems-on-pages-with-certificate-errors-was-disabled)
 
 
 
@@ -295,3 +296,9 @@ option should have its value set to an empty string (a default now)
 for High DPI support. In previous versions the default value was
 "system_dpi" and if you have set it explicitilly in your application,
 then you should change it to an empty string now.
+
+## v66.0+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled
+
+See Issue [#125](../../../issues/125) for more details.
+
+
