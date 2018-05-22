@@ -34,6 +34,7 @@ Usage:
                 [--ninja-jobs JOBS] [--gyp-generators GENERATORS]
                 [--gyp-msvs-version MSVS]
                 [--use-system-freetype USE_SYSTEM_FREETYPE]
+                [--no-depot-tools-update NO_DEPOT_TOOLS_UPDATE]
     automate.py (-h | --help) [type -h to show full description for options]
 
 Options:
@@ -63,6 +64,10 @@ Options:
     --gyp-generators=<gen>   Set GYP_GENERATORS [default: ninja].
     --gyp-msvs-version=<v>   Set GYP_MSVS_VERSION.
     --use-system-freetype    Use system Freetype library on Linux (Issue #402)
+    --no-depot-tools-update  Do not update depot_tools/ directory. When building
+                             old unsupported versions of Chromium you want to
+                             manually checkout an old version of depot tools
+                             from the time of the release.
 
 """
 
@@ -106,6 +111,7 @@ class Options(object):
     gyp_generators = "ninja"  # Even though CEF uses now GN, still some GYP
     gyp_msvs_version = ""     # env variables are being used.
     use_system_freetype = False
+    no_depot_tools_update = False
 
     # Internal options
     depot_tools_dir = ""
@@ -944,6 +950,8 @@ def run_automate_git():
         args.append("--x64-build")
     args.append("--download-dir=" + Options.cef_build_dir)
     args.append("--branch=" + Options.cef_branch)
+    if Options.no_depot_tools_update:
+        args.append("--no-depot-tools-update")
     if Options.release_build:
         args.append("--no-debug-build")
     args.append("--verbose-build")
