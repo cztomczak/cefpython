@@ -244,7 +244,7 @@ option is set to True.
 When it's set to False then the Chromium's caching behavior does not
 change. Enabling caching with certificate errors is useful on local
 private networks that use self-signed SSL certificates. See the
-referenced CEF topic in [Issue #125](../issues/125) for more details.
+referenced CEF topic in [Issue #125](../../../issues/125) for more details.
 
 
 ### javascript_flags
