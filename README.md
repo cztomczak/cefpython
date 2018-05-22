@@ -3,7 +3,7 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Sponsors](#sponsors)
-* [Funding for v64.0 release](#funding-for-v640-release)
+* [Funding for v66.0 release](#funding-for-v660-release)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
@@ -45,6 +45,14 @@ or other kind of internet bots.
  <tr>
   <td>
    <div align="center">
+    <a href="https://lampix.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix200.png">
+    </a><br>
+    <a href="https://lampix.com/">www.lampix.com</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
     <a href="http://www.blueplanet.com/">
      <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
     </a><br>
@@ -56,9 +64,11 @@ or other kind of internet bots.
     <a href="https://clearchat.com/">
      <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
     </a><br>
-    <a href="https://clearchat.com/">clearchat.com</a>
+    <a href="https://clearchat.com/">www.clearchat.com</a>
    <div align="center">
   </td>
+ </tr>
+ <tr>
   <td>
    <div align="center">
     <a href="http://www.rentouch.ch/">
@@ -72,7 +82,7 @@ or other kind of internet bots.
     <a href="https://www.jetbrains.com/pycharm/">
      <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
     </a><br>
-    <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com/pycharm/</a>
+    <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com</a>
    </div>
   </td>
  <tr>
@@ -90,11 +100,14 @@ The statistics are from Mar 9, 2018. Complete statistics are available in this t
 on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpython/CjkZF2P4rMk/discussion).
 
 
-## Funding for v64.0 release
+## Funding for v66.0 release
 
-For those interested in sponsoring a v64.0 release please see
-[Issue #370](../../issues/370).
+I am happy to announce that Lampix is sponsoring the v66 release of cefpython.
+Lampix is the first hardware and software solution that turns any surface
+into a smart, augmented reality or interactive surface. Please visit its
+website here: https://lampix.com/
 
+[![lampix600](https://user-images.githubusercontent.com/1187415/40367671-40fecd4e-5dda-11e8-8ef9-1e3d91298c8a.jpg)](https://lampix.com/)
 
 ## Install
 
