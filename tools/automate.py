@@ -33,6 +33,7 @@ Usage:
                 [--build-dir BUILD_DIR] [--cef-build-dir CEF_BUILD_DIR]
                 [--ninja-jobs JOBS] [--gyp-generators GENERATORS]
                 [--gyp-msvs-version MSVS]
+                [--use-system-freetype USE_SYSTEM_FREETYPE]
     automate.py (-h | --help) [type -h to show full description for options]
 
 Options:
@@ -61,6 +62,7 @@ Options:
                              By default set to cpu_count / 2.
     --gyp-generators=<gen>   Set GYP_GENERATORS [default: ninja].
     --gyp-msvs-version=<v>   Set GYP_MSVS_VERSION.
+    --use-system-freetype    Use system Freetype library on Linux (Issue #402)
 
 """
 
@@ -103,6 +105,7 @@ class Options(object):
     ninja_jobs = None
     gyp_generators = "ninja"  # Even though CEF uses now GN, still some GYP
     gyp_msvs_version = ""     # env variables are being used.
+    use_system_freetype = False
 
     # Internal options
     depot_tools_dir = ""
@@ -877,6 +880,10 @@ def getenv():
     # optimizations in Release builds.
     if Options.release_build and not Options.fast_build:
         env["GN_DEFINES"] += " is_official_build=true"
+
+    # Isssue #402 - Blurry font rendering on Linux
+    if Options.use_system_freetype:
+        env["GN_DEFINES"] += " use_system_freetype=true"
 
     # GYP configuration is DEPRECATED, however it is still set in
     # upstream Linux configuration on AutomatedBuildSetup wiki page,
