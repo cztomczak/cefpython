@@ -1,8 +1,8 @@
 diff --git automate-git.py automate-git.py
-index d5e75ae..9b3db23 100644
+index 4f24793..b819c7b 100644
 --- automate-git.py
 +++ automate-git.py
-@@ -1,3 +1,92 @@
+@@ -1,3 +1,128 @@
 +""" See automate.py. This script is for internal usage only, don't
 +call it directly. This is a modified copy of automate-git.py from
 +upstream CEF.
@@ -41,6 +41,14 @@ index d5e75ae..9b3db23 100644
 +                        Version of Chromium to checkout (Git branch/hash/tag).
 +                        This overrides the value specified by CEF in
 +                        CHROMIUM_BUILD_COMPATIBILITY.txt.
++  --chromium-channel=CHROMIUMCHANNEL
++                        Chromium channel to check out (canary, dev, beta or
++                        stable). This overrides the value specified by CEF in
++                        CHROMIUM_BUILD_COMPATIBILITY.txt.
++  --chromium-channel-distance=CHROMIUMCHANNELDISTANCE
++                        The target number of commits to step in the channel,
++                        or 0 to use the newest channel version. Used in
++                        combination with --chromium-channel.
 +  --force-config        Force creation of a new gclient config file.
 +  --force-clean         Force a clean checkout of Chromium and CEF. This will
 +                        trigger a new update, build and distribution.
@@ -58,24 +66,48 @@ index d5e75ae..9b3db23 100644
 +                        distribution.
 +  --no-cef-update       Do not update CEF. Pass --force-build or --force-
 +                        distrib if you desire a new build or distribution.
++  --force-cef-update    Force a CEF update. This will cause local changes in
++                        the CEF checkout to be discarded and patch files to be
++                        reapplied.
 +  --no-chromium-update  Do not update Chromium.
 +  --no-depot-tools-update
 +                        Do not update depot_tools.
++  --fast-update         Update existing Chromium/CEF checkouts for fast
++                        incremental builds by attempting to minimize the
++                        number of modified files. The update will fail if
++                        there are unstaged CEF changes or if Chromium changes
++                        are not included in a patch file.
++  --force-patch-update  Force update of patch files.
++  --resave              Resave patch files.
++  --log-chromium-changes
++                        Create a log of the Chromium changes.
 +  --force-build         Force CEF debug and release builds. This builds
 +                        [build-target] on all platforms and chrome_sandbox on
 +                        Linux.
 +  --no-build            Do not build CEF.
 +  --build-target=BUILDTARGET
 +                        Target name(s) to build (defaults to "cefclient").
-+  --build-tests         Also build the cef_unittests target.
++  --build-tests         Also build the test target specified via --test-
++                        target.
 +  --no-debug-build      Don't perform the CEF debug build.
 +  --no-release-build    Don't perform the CEF release build.
 +  --verbose-build       Show all command lines while building.
++  --build-failure-limit=BUILDFAILURELIMIT
++                        Keep going until N jobs fail.
 +  --build-log-file      Write build logs to file. The file will be named
 +                        "build-[branch]-[debug|release].log" in the download
 +                        directory.
 +  --x64-build           Create a 64-bit build.
 +  --arm-build           Create an ARM build.
++  --run-tests           Run the ceftests target.
++  --no-debug-tests      Don't run debug build tests.
++  --no-release-tests    Don't run release build tests.
++  --test-target=TESTTARGET
++                        Test target name to build (defaults to "ceftests").
++  --test-prefix=TESTPREFIX
++                        Prefix for running the test executable (e.g. `xvfb-
++                        run` on Linux).
++  --test-args=TESTARGS  Arguments that will be passed to the test executable.
 +  --force-distrib       Force creation of a CEF binary distribution.
 +  --no-distrib          Don't create a CEF binary distribution.
 +  --minimal-distrib     Create a minimal CEF binary distribution.
@@ -84,21 +116,25 @@ index d5e75ae..9b3db23 100644
 +  --client-distrib      Create a client CEF binary distribution.
 +  --client-distrib-only
 +                        Create a client CEF binary distribution only.
++  --sandbox-distrib     Create a cef_sandbox static library distribution.
++  --sandbox-distrib-only
++                        Create a cef_sandbox static library distribution only.
 +  --no-distrib-docs     Don't create CEF documentation.
 +  --no-distrib-archive  Don't create archives for output directories.
 +  --clean-artifacts     Clean the artifacts output directory.
 +  --distrib-subdir=DISTRIBSUBDIR
 +                        CEF distrib dir name, child of
 +                        chromium/src/cef/binary_distrib
++
 +"""
 +
  # Copyright (c) 2014 The Chromium Embedded Framework Authors. All rights
  # reserved. Use of this source code is governed by a BSD-style license that
  # can be found in the LICENSE file.
-@@ -457,9 +546,14 @@ if (options.nochromiumupdate and options.forceupdate) or \
-    (options.nocefupdate and options.forceupdate) or \
-    (options.nobuild and options.forcebuild) or \
-    (options.nodistrib and options.forcedistrib):
+@@ -945,9 +1070,14 @@ if (options.nochromiumupdate and options.forceupdate) or \
+    (options.nodistrib and options.forcedistrib) or \
+    ((options.forceclean or options.forcecleandeps) and options.fastupdate) or \
+    (options.chromiumcheckout and options.chromiumchannel):
 -  print "Invalid combination of options."
 -  parser.print_help(sys.stderr)
 -  sys.exit()
@@ -113,16 +149,153 @@ index d5e75ae..9b3db23 100644
  
  if (options.noreleasebuild and \
       (options.minimaldistrib or options.minimaldistribonly or \
-@@ -945,6 +1039,12 @@ if not options.nobuild and (chromium_checkout_changed or \
-   command = 'ninja -C '
+@@ -1494,9 +1624,16 @@ if not options.nobuild and (chromium_checkout_changed or \
+   command = 'ninja '
    if options.verbosebuild:
-     command = 'ninja -v -C'
+     command += '-v '
 +
 +  # -- CEF Python modification below
 +  assert os.environ['CEFPYTHON_NINJA_JOBS']
-+  command = 'ninja -v -j' + os.environ['CEFPYTHON_NINJA_JOBS'] + ' -C'
++  command += '-j' + os.environ['CEFPYTHON_NINJA_JOBS'] + ' '
 +  # --
++
+   if options.buildfailurelimit != 1:
+     command += '-k %d ' % options.buildfailurelimit
+   command += '-C '
 +
    target = ' ' + options.buildtarget
    if options.buildtests:
-     target = target + ' cef_unittests'
+     target += ' ' + options.testtarget
+diff --git automate-git.py.patch automate-git.py.patch
+index c999df7..4dcd59f 100644
+--- automate-git.py.patch
++++ automate-git.py.patch
+@@ -1,128 +0,0 @@
+-diff --git automate-git.py automate-git.py
+-index d5e75ae..9b3db23 100644
+---- automate-git.py
+-+++ automate-git.py
+-@@ -1,3 +1,92 @@
+-+""" See automate.py. This script is for internal usage only, don't
+-+call it directly. This is a modified copy of automate-git.py from
+-+upstream CEF.
+-+
+-+Some modifications were applied for CEF Python specific use case.
+-+There is a patch file with the same name as this script that contains
+-+differences from the original file.
+-+
+-+-------------------------------------------------------------------------------
+-+
+-+Usage: automate-git.py [options]
+-+
+-+ This utility implements automation for the download, update, build and
+-+distribution of CEF.
+-+
+-+Options:
+-+  -h, --help            show this help message and exit
+-+  --download-dir=DIR    Download directory with no spaces [required].
+-+  --depot-tools-dir=DIR
+-+                        Download directory for depot_tools.
+-+  --depot-tools-archive=DEPOTTOOLSARCHIVE
+-+                        Zip archive file that contains a single top-level
+-+                        depot_tools directory.
+-+  --branch=BRANCH       Branch of CEF to build (trunk, 1916, ...). This will
+-+                        be used to name the CEF download directory and to
+-+                        identify the correct URL if --url is not specified.
+-+                        The default value is trunk.
+-+  --url=URL             CEF download URL. If not specified the default URL
+-+                        will be used.
+-+  --chromium-url=CHROMIUMURL
+-+                        Chromium download URL. If not specified the default
+-+                        URL will be used.
+-+  --checkout=CHECKOUT   Version of CEF to checkout. If not specified the most
+-+                        recent remote version of the branch will be used.
+-+  --chromium-checkout=CHROMIUMCHECKOUT
+-+                        Version of Chromium to checkout (Git branch/hash/tag).
+-+                        This overrides the value specified by CEF in
+-+                        CHROMIUM_BUILD_COMPATIBILITY.txt.
+-+  --force-config        Force creation of a new gclient config file.
+-+  --force-clean         Force a clean checkout of Chromium and CEF. This will
+-+                        trigger a new update, build and distribution.
+-+  --force-clean-deps    Force a clean checkout of Chromium dependencies. Used
+-+                        in combination with --force-clean.
+-+  --dry-run             Output commands without executing them.
+-+  --dry-run-platform=DRYRUNPLATFORM
+-+                        Simulate a dry run on the specified platform (windows,
+-+                        macosx, linux). Must be used in combination with the
+-+                        --dry-run flag.
+-+  --force-update        Force a Chromium and CEF update. This will trigger a
+-+                        new build and distribution.
+-+  --no-update           Do not update Chromium or CEF. Pass --force-build or
+-+                        --force-distrib if you desire a new build or
+-+                        distribution.
+-+  --no-cef-update       Do not update CEF. Pass --force-build or --force-
+-+                        distrib if you desire a new build or distribution.
+-+  --no-chromium-update  Do not update Chromium.
+-+  --no-depot-tools-update
+-+                        Do not update depot_tools.
+-+  --force-build         Force CEF debug and release builds. This builds
+-+                        [build-target] on all platforms and chrome_sandbox on
+-+                        Linux.
+-+  --no-build            Do not build CEF.
+-+  --build-target=BUILDTARGET
+-+                        Target name(s) to build (defaults to "cefclient").
+-+  --build-tests         Also build the cef_unittests target.
+-+  --no-debug-build      Don't perform the CEF debug build.
+-+  --no-release-build    Don't perform the CEF release build.
+-+  --verbose-build       Show all command lines while building.
+-+  --build-log-file      Write build logs to file. The file will be named
+-+                        "build-[branch]-[debug|release].log" in the download
+-+                        directory.
+-+  --x64-build           Create a 64-bit build.
+-+  --arm-build           Create an ARM build.
+-+  --force-distrib       Force creation of a CEF binary distribution.
+-+  --no-distrib          Don't create a CEF binary distribution.
+-+  --minimal-distrib     Create a minimal CEF binary distribution.
+-+  --minimal-distrib-only
+-+                        Create a minimal CEF binary distribution only.
+-+  --client-distrib      Create a client CEF binary distribution.
+-+  --client-distrib-only
+-+                        Create a client CEF binary distribution only.
+-+  --no-distrib-docs     Don't create CEF documentation.
+-+  --no-distrib-archive  Don't create archives for output directories.
+-+  --clean-artifacts     Clean the artifacts output directory.
+-+  --distrib-subdir=DISTRIBSUBDIR
+-+                        CEF distrib dir name, child of
+-+                        chromium/src/cef/binary_distrib
+-+"""
+-+
+- # Copyright (c) 2014 The Chromium Embedded Framework Authors. All rights
+- # reserved. Use of this source code is governed by a BSD-style license that
+- # can be found in the LICENSE file.
+-@@ -457,9 +546,14 @@ if (options.nochromiumupdate and options.forceupdate) or \
+-    (options.nocefupdate and options.forceupdate) or \
+-    (options.nobuild and options.forcebuild) or \
+-    (options.nodistrib and options.forcedistrib):
+--  print "Invalid combination of options."
+--  parser.print_help(sys.stderr)
+--  sys.exit()
+-+  # -- CEF Python modification below
+-+  if (options.nocefupdate and options.forceupdate):
+-+    pass
+-+  else:
+-+    print "Invalid combination of options."
+-+    parser.print_help(sys.stderr)
+-+    sys.exit()
+-+  # --
+- 
+- if (options.noreleasebuild and \
+-      (options.minimaldistrib or options.minimaldistribonly or \
+-@@ -945,6 +1039,12 @@ if not options.nobuild and (chromium_checkout_changed or \
+-   command = 'ninja -C '
+-   if options.verbosebuild:
+-     command = 'ninja -v -C'
+-+
+-+  # -- CEF Python modification below
+-+  assert os.environ['CEFPYTHON_NINJA_JOBS']
+-+  command = 'ninja -v -j' + os.environ['CEFPYTHON_NINJA_JOBS'] + ' -C'
+-+  # --
+-+
+-   target = ' ' + options.buildtarget
+-   if options.buildtests:
+-     target = target + ' cef_unittests'
