@@ -91,14 +91,6 @@ or other kind of internet bots.
 See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
 
-If you would like to sponsor CEF Python development efforts and see your company
-logo with a link here, please contact Czarek (contact details are available in his
-[Resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)).
-This README page alone has 1,070 visitors and 2,402 views every two weeks,
-so your company logo and a website link will be visible to many Python developers.
-The statistics are from Mar 9, 2018. Complete statistics are available in this topic
-on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpython/CjkZF2P4rMk/discussion).
-
 
 ## Funding for v66.0 release
 
@@ -173,6 +165,13 @@ a higher priority.
 
 If you are interested in sponsorship opportunities please contact Czarek
 directly - contact details are available in his [Resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
+
+If you would like to sponsor CEF Python development efforts and see your company
+logo with a link in README, please contact Czarek.
+This README page alone has 1,070 visitors and 2,402 views every two weeks,
+so your company logo and a website link will be visible to many Python developers.
+The statistics are from Mar 9, 2018. Complete statistics are available in this topic
+on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpython/CjkZF2P4rMk/discussion).
 
 ### Thanks
 
