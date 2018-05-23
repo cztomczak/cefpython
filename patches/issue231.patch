@@ -115,7 +115,7 @@ index 15026ab5..a3d21052 100644
 --- libcef_dll/wrapper/libcef_dll_wrapper.cc
 +++ libcef_dll/wrapper/libcef_dll_wrapper.cc
 @@ -880,6 +880,23 @@ CEF_GLOBAL bool CefGetPath(PathKey key, CefString& path) {
-   return _retval?true:false;
+   return _retval ? true : false;
  }
  
 +CEF_GLOBAL bool CefOverridePath(PathKey key, const CefString& path) {

@@ -194,7 +194,7 @@ requirements common for all platforms.
 * Install packages: `sudo apt-get install cmake g++ libgtk2.0-dev libgtkglext1-dev`
 * If building CEF from sources:
     * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
-    * Download [ninja](http://martine.github.io/ninja/) 1.7.1 or later
+    * Download [ninja](https://github.com/ninja-build/ninja/releases) 1.7.1 or later
       and copy it to /usr/bin and chmod 755.
     * Install/upgrade required packages using one of the three methods below
       (these packages should be upgraded each time you update to newer CEF):
@@ -221,7 +221,6 @@ requirements common for all platforms.
 * Download [ninja](https://github.com/ninja-build/ninja) 1.7.2 or later
   and add it to PATH.
 * Download [cmake](https://cmake.org/download/) and add it to PATH.
-
 
 
 ### All platforms
