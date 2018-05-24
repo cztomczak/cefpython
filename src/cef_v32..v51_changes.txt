@@ -1,0 +1,139 @@
+Changes in v31..v51.
+Not all changes are listed here.
+
+CefEnableHighDPISupport()
+
+CefRequestContext
+    NEW BROWSER SETTINGS that can be get/set using request context:
+        * GetAllPreferences - all preferences for browser's request context
+        * SetPreference
+        * many more methods has/get/canset...
+    _cef_request_context_settings_t:
+        cache_path
+        persist_session_cookies
+        persist_user_preferences
+        ignore_certificate_errors
+    PurgePluginListCache
+    GetDefaultCookieManager
+    GetCachePath
+    IsSharingWith - possible to create new context that shares
+                    storage with another context
+    more methods...
+
+CefRequestContextHandler
+    OnBeforePluginLoad
+
+CefBrowserSettings
+    windowless_frame_rate - **OSR**
+
+CefBrowserHost
+    GetNavigationEntries
+    PrintToPDF
+    ParentWindowWillClose() - REMOVED, update .py examples
+    SetWindowVisibility()
+    ShowDevTools(WindowInfo, CefClient, BrowserSettings, inspect_element_at)
+    CloseDevTools [DONE]
+    ReplaceMisspelling
+    AddWordToDictionary
+    Invalidate
+    NotifyMoveOrResizeStarted() - call in WM_MOVE, WM_MOVING, WM_SIZING on Win
+    GetWindowlessFrameRate - **OSR**
+    SetWindowlessFrameRate - **OSR**
+    DragTargetDragEnter
+    DragTargetDragOver
+    DragTargetDragLeave
+    DragTargetDrop
+    DragSourceEndedAt
+    DragSourceSystemDragEnded
+    HasDevTools
+    DownloadImage
+    HasView
+
+CefRequestHandler
+    OnOpenURLFromTab
+    OnBeforeResourceLoad - new arg CefRequestCallback
+    OnResourceResponse
+    GetResourceResponseFilter - easy way to alter response, no need for the
+                         complicated wxpython-response.py example (Issue #229)
+    OnResourceLoadComplete
+    OnCertificateError - new args: browser and ssl_info.
+                         No more need to set it using
+                         cefpython.SetGlobalClientCallback()
+    OnRenderViewReady
+
+Support for handling onbeforeunload in LifespanHandler::DoClose with
+the use of Browser.TryCloseBrowser() or Browser.CloseBrowser.
+
+CefRequest
+    SetReferrer
+    GetReferrerURL
+    GetReferrerPolicy
+    GetIdentifier
+
+CefResponse
+    GetError
+    SetError
+
+CEF exposes Views/Aura framework as an alternative API
+for client applications. This can be a replacement for
+WinAPI/GTK/X11/Cocoa UI frameworks. See for more info:
+https://bitbucket.org/chromiumembedded/cef/issues/1749
+
+CefPrintHandler - Linux only
+CefPrintSettings
+
+CefDisplayHandler
+    OnFaviconURLChange
+    OnFullscreenModeChange
+
+CefRenderHandler
+    OnCursorChange - new args: type and custom_cursor_info
+    StartDragging
+    UpdateDragCursor
+    OnScrollOffsetChanged - new args: x,y
+
+
+In upstream cefclient:
+1. g_signal_connect(G_OBJECT(window_), "configure-event",
+                    G_CALLBACK(&RootWindowGtk::WindowConfigure), this);
+   browser->GetHost()->NotifyMoveOrResizeStarted();
+2. g_signal_connect(G_OBJECT(window_), "focus-in-event",
+                    G_CALLBACK(&RootWindowGtk::WindowFocusIn), this);
+   self->browser_window_->SetFocus(true);
+
+When window is minimized set browser size to 0x0 to reduce resource usage.
+See cefclient:
+- on Windows see https://github.com/cztomczak/phpdesktop/issues/179
+- on Linux see root_window_gtk.cc > WindowState
+
+CefContextMenuHandler
+    RunContextMenu
+CefContextMenuParams
+    GetMisspelledWord
+    GetDictionarySuggestions
+    IsSpellCheckEnabled
+    IsCustomMenu
+    IsPepperMenu
+
+CefCompletionCallback - added to many cookie functions to run asynchronously
+                        on the IO thread
+
+include/cef_parser.h - url/css/json/etc parsers
+
+CefResourceBundle
+CefResponseFilter
+
+CefValue
+
+cef_get_current_platform_thread_id()
+cef_get_current_platform_thread_handle()
+
+cef_get_xdisplay();
+
+include/cef_ssl_info.h
+include/wrapper/cef_helpers.h - CefDeleteOnThread() free object on
+                                the specified thread
+include/wrapper/cef_resource_manager.h
+
+CefPostData
+    HasExcludedElements

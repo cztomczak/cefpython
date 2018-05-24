@@ -107,10 +107,15 @@ Example values that can be set in Win7 DPI settings (Control Panel Appearance an
 ### background_color
 
 (int)
-Opaque background color used for accelerated content. By default the
-background color will be white. Only the RGB compontents of the specified
-value will be used. The alpha component must greater than 0 to enable use
-of the background color but will be otherwise ignored.
+Description from upstream CEF:
+> Background color used for the browser before a document is loaded and when
+> no document color is specified. The alpha component must be either fully
+> opaque (0xFF) or fully transparent (0x00). If the alpha component is fully
+> opaque then the RGB components will be used as the background color. If the
+> alpha component is fully transparent for a windowed browser then the
+> default value of opaque white be used. If the alpha component is fully
+> transparent for a windowless (off-screen) browser then transparent painting
+> will be enabled.
 
 32-bit ARGB color value, not premultiplied. The color components are always
 in a known order. Equivalent to the `SkColor` type.

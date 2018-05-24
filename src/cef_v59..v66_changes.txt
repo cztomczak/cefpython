@@ -1,0 +1,141 @@
+Changes in v59..v66
+
+BREAKAGE (needs updating Migration Guide doc)
+--------
+
+cef_display_handler.h
+- OnConsoleMessage: new param 'level'
+- update migration guide
+
+cef_life_span_handler.h
+- OnBeforePopup: created on UI thread instead of IO thread
+  - update checks for thread
+  - update migration guide
+
+cef_print_handler.h
+- Modify subprocess/print_handler_gtk.h and .cpp files
+- OnPrintSettings new param
+- OnPrintDialog new param
+- OnPrintJob new param
+- OnPrintReset new param
+
+cef_render_process_handler.h
+- Remove OnBeforeNavigation in subprocess/cefpython_app.h and .cpp files
+
+cef_request_handler.h
+- OnBeforeBrowse: new param 'user_gesture'
+
+internal/cef_linux.h
+internal/cef_types_linux.h
+internal/cef_mac.h
+internal/cef_types_mac.h
+internal/cef_win.h
+internal/cef_types_win.h
+- OSR windows are transparent by default. To change it set
+  CefBrowserSettings.background_color .
+- CefWindowInfo (cef_window_info_t): transparent_painting_enabled option removed
+- CefWindowInfo.SetAsWindowless: 'transparent' param removed
+- Deprecate WindowInfo.SetTransparentPainting method. When set
+  to True do nothing. If set to False then raise Exception
+  and provide info on CefBrowserSettings.background_color.
+  - Update Migration Guide doc
+
+internal/cef_types.h
+- cef_settings_t:
+  - javascript_open_windows option removed (keep a dummy for BC)
+- cef_thread_id_t:
+  - TID_DB removed (update Migration Guide)
+  - TID_PROCESS_LAUNCHER removed
+  - TID_CACHE removed
+
+
+NEW FEATURES
+------------
+
+internal/cef_types.h
+- cef_log_severity_t: new key LOGSEVERITY_DEBUG
+- cef_settings_t:
+  - background_color: OSR windows can set an ARGB background color
+- cef_path_key_t (informational only):
+  - PK_DIR_RESOURCES new key
+- cef_urlrequest_flags_t (expose in cefpython.Request.Flags):
+  - UR_FLAG_ONLY_FROM_CACHE new flag
+  - UR_FLAG_STOP_ON_REDIRECT new flag
+  - enum values have changed due to new key
+- cef_thread_id_t:
+  - TID_FILE_BACKGROUND (deprecated TID_FILE)
+  - TID_FILE_USER_VISIBLE
+- cef_popup_features_t: some keys removed (not exposed, informational only)
+- cef_referrer_policy_t changes (not exposed)
+
+cef_accessibility_handler.h
+- CefAccessibilityHandler
+- CefRenderHandler::GetAccessibilityHandler
+
+cef_render_handler.h
+- OnTextSelectionChanged
+
+cef_browser.h
+- SetAccessibilityState
+- SetAutoResizeEnabled
+- GetExtension
+- IsBackgroundHost
+
+cef_cookie.h
+- GetBlockingManager
+
+cef_display_handler.h
+- OnAutoResize
+- OnLoadingProgressChange
+
+cef_drag_data.h
+- GetImage (cross-platform)
+- GetImageHotspot (cross-platform)
+- HasImage (cross-platform)
+
+cef_extension.h
+- CefExtension
+- Will require exposing CefRequestContext object and its methods
+  LoadExtension, DidLoadExtension, etc.
+
+cef_request_context.h
+- LoadExtension
+- DidLoadExtension
+- HasExtension
+- GetExtensions
+- GetExtension
+
+cef_request_context_handler.h
+- OnRequestContextInitialized
+
+cef_extension_handler.h
+- CefGetExtensionResourceCallback
+- CefExtensionHandler
+
+cef_file_util.h
+- CefLoadCRLSetsFile
+
+cef_request_handler.h
+- CanGetCookies
+- CanSetCookie
+
+cef_response.h
+- GetURL
+- SetURL
+
+cef_server.h
+- You can easily start a web server in Python, so exposing this API
+  doesn't seem to be of great value?
+- CefServer: a web server that supports HTTP and WebSocket requests
+- CefServerHandler
+
+cef_urlrequest.h
+- ResponseWasCached
+
+cef_v8.h
+- CefV8ArrayBufferReleaseCallback
+- CefV8Value new methods:
+  - CreateArrayBuffer (does not own the buffer)
+  - IsArrayBuffer
+  - GetArrayBufferReleaseCallback
+  - NeuterArrayBuffer

@@ -81,10 +81,12 @@ Return the text/html fragment that is being dragged.
 | --- | --- |
 | __Return__ | [Image](Image.md) |
 
-Linux-only currently (#251).
+Description from upstream CEF:
+> Get the image representation of drag data. May return NULL if no image
+> representation is available.
 
-Get image representation of drag data. Check with HasImage() first,
-otherwise if there is no image an exception is thrown.
+Check with HasImage() first, otherwise if there is no image an exception
+is thrown.
 
 
 ### GetImageHotspot
@@ -93,9 +95,7 @@ otherwise if there is no image an exception is thrown.
 | --- | --- |
 | __Return__ | [Image](Image.md) |
 
-Linux-only currently (#251).
-
-Get image hotspot (drag start location relative to image dimensions).
+Get the image hotspot (drag start location relative to image dimensions).
 
 
 ### HasImage
@@ -104,7 +104,5 @@ Get image hotspot (drag start location relative to image dimensions).
 | --- | --- |
 | __Return__ | bool |
 
-Linux-only currently (#251).
-
-Whether image representation of drag data is available.
+Returns true if an image representation of drag data is available.
 

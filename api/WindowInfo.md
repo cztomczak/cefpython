@@ -58,13 +58,14 @@ CefRenderHandler interface. The |parent| value will be used to identify
 monitor info and to act as the parent window for dialogs, context menus,
 etc. If |parent| is not provided then the main screen monitor will be used
 and some functionality that requires a parent window may not function
-correctly. If |transparent| is true a transparent background color will be
-used (RGBA=0x00000000). If |transparent| is false the background will be
-white and opaque. In order to create windowless browsers the
+correctly. In order to create windowless browsers the
 CefSettings.windowless_rendering_enabled value must be set to true.
+Transparent painting is enabled by default but can be disabled by setting
+CefBrowserSettings.background_color to an opaque value.
 
 Call this method to disable windowed rendering and to use
-[RenderHandler](RenderHandler.md). See the Panda3D and Kivy examples.
+[RenderHandler](RenderHandler.md). See the pysdl2, screenshot, panda3d
+and kivy examples.
 
 In order to create windowless browsers the
 ApplicationSettings.[windowless_rendering_enabled](ApplicationSettings.md#windowless_rendering_enabled)
@@ -73,12 +74,3 @@ value must be set to true.
 You can pass 0 as `parentWindowHandle`, but then some things like
 context menus and plugins may not display correctly.
 
-
-### SetTransparentPainting
-
-| Parameter | Type |
-| --- | --- |
-| transparentPainting | bool |
-| __Return__ | void |
-
-This method is intended for use with off-screen rendering only.

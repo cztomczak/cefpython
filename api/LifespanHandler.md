@@ -36,24 +36,27 @@ Table of contents:
 | no_javascript_access_out | list[bool] |
 | __Return__ | bool |
 
-Called on the IO thread before a new popup browser is created. The
-|browser| and |frame| values represent the source of the popup request. The
-|target_url| and |target_frame_name| values indicate where the popup
-browser should navigate and may be empty if not specified with the request.
-The |target_disposition| value indicates where the user intended to open
-the popup (e.g. current tab, new tab, etc). The |user_gesture| value will
-be true if the popup was opened via explicit user gesture (e.g. clicking a
-link) or false if the popup opened automatically (e.g. via the
-DomContentLoaded event). The |popup_features| structure contains additional
-information about the requested popup window. To allow creation of the
-popup browser optionally modify |windowInfo|, |client|, |browserSettings| and
-|no_javascript_access| and return false. To cancel creation of the popup
-browser return true. The |client| and |settings| values will default to the
-source browser's values. If the |no_javascript_access| value is set to
-false the new browser will not be scriptable and may not be hosted in the
-same renderer process as the source browser. Any modifications to
-|window_info| will be ignored if the parent browser is wrapped in a
-CefBrowserView.
+Description from upstream CEF:
+> Called on the UI thread before a new popup browser is created. The
+> |browser| and |frame| values represent the source of the popup request. The
+> |target_url| and |target_frame_name| values indicate where the popup
+> browser should navigate and may be empty if not specified with the request.
+> The |target_disposition| value indicates where the user intended to open
+> the popup (e.g. current tab, new tab, etc). The |user_gesture| value will
+> be true if the popup was opened via explicit user gesture (e.g. clicking a
+> link) or false if the popup opened automatically (e.g. via the
+> DomContentLoaded event). The |popup_features| structure contains additional
+> information about the requested popup window. To allow creation of the
+> popup browser optionally modify |windowInfo|, |client|, |browserSettings| and
+> |no_javascript_access| and return false. To cancel creation of the popup
+> browser return true. The |client| and |settings| values will default to the
+> source browser's values. If the |no_javascript_access| value is set to
+> false the new browser will not be scriptable and may not be hosted in the
+> same renderer process as the source browser. Any modifications to
+> |window_info| will be ignored if the parent browser is wrapped in a
+> CefBrowserView. Popup browser creation will be canceled if the parent
+> browser is destroyed before the popup browser creation completes (indicated
+> by a call to OnAfterCreated for the popup browser).
 
 Note that if you return True and create the popup window yourself, then
 the popup window and parent window will not be able to script each other.

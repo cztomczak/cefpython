@@ -170,6 +170,9 @@ Available flags (access via `cefpython.Request.Flags["xxx"]`):
 
 * **None** - Default behavior.
 * **SkipCache** - If set the cache will be skipped when handling the request.
+  Setting this value is equivalent to specifying the "Cache-Control: no-cache"
+  request header. Setting this value in combination with UR_FLAG_ONLY_FROM_CACHE
+  will cause the request to fail.
 * **AllowCachedCredentials** - If set user name, password, and cookies may be
       sent with the request, and cookies may be saved from the response.
 * **ReportUploadProgress** - If set upload progress events will be generated when a request has a body.
@@ -185,6 +188,7 @@ Available flags (access via `cefpython.Request.Flags["xxx"]`):
 | __Return__ | void |
 
 Set the flags used in combination with [WebRequest](WebRequest.md).
+See GetFlags() for possible values.
 
 
 ### GetFirstPartyForCookies
