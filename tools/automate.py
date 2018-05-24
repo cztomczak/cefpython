@@ -834,6 +834,12 @@ def create_prebuilt_binaries():
     shutil.copy(os.path.join(src, "README.txt"), dst)
     shutil.copy(os.path.join(src, "LICENSE.txt"), dst)
 
+    # Copy cef_version.h
+    cef_version_file = os.path.join(dst, "cef_version_{os_postfix}.h".format(
+                                    os_postfix=OS_POSTFIX))
+    shutil.copy(os.path.join(src, "include", "cef_version.h"),
+                cef_version_file)
+
     print("[automate.py] OK prebuilt binaries created in '%s/'" % dst)
 
 
