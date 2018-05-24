@@ -91,8 +91,9 @@ class CefDisplayHandler : public virtual CefBaseRefCounted {
   // drawing tooltips and the return value is ignored.
   ///
   /*--cef(optional_param=text)--*/
-  virtual bool OnTooltip(CefRefPtr<CefBrowser> browser,
-                         CefString& text) { return false; }
+  virtual bool OnTooltip(CefRefPtr<CefBrowser> browser, CefString& text) {
+    return false;
+  }
 
   ///
   // Called when the browser receives a status message. |value| contains the
@@ -108,9 +109,32 @@ class CefDisplayHandler : public virtual CefBaseRefCounted {
   ///
   /*--cef(optional_param=message,optional_param=source)--*/
   virtual bool OnConsoleMessage(CefRefPtr<CefBrowser> browser,
+                                cef_log_severity_t level,
                                 const CefString& message,
                                 const CefString& source,
-                                int line) { return false; }
+                                int line) {
+    return false;
+  }
+
+  ///
+  // Called when auto-resize is enabled via CefBrowserHost::SetAutoResizeEnabled
+  // and the contents have auto-resized. |new_size| will be the desired size in
+  // view coordinates. Return true if the resize was handled or false for
+  // default handling.
+  ///
+  /*--cef()--*/
+  virtual bool OnAutoResize(CefRefPtr<CefBrowser> browser,
+                            const CefSize& new_size) {
+    return false;
+  }
+
+  ///
+  // Called when the overall page loading progress has changed. |progress|
+  // ranges from 0.0 to 1.0.
+  ///
+  /*--cef()--*/
+  virtual void OnLoadingProgressChange(CefRefPtr<CefBrowser> browser,
+                                       double progress) {}
 };
 
 #endif  // CEF_INCLUDE_CEF_DISPLAY_HANDLER_H_

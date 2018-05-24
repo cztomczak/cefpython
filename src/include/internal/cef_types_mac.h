@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #ifndef CEF_INCLUDE_INTERNAL_CEF_TYPES_MAC_H_
 #define CEF_INCLUDE_INTERNAL_CEF_TYPES_MAC_H_
 #pragma once
@@ -102,16 +101,10 @@ typedef struct _cef_window_info_t {
   // monitor will be used and some functionality that requires a parent view
   // may not function correctly. In order to create windowless browsers the
   // CefSettings.windowless_rendering_enabled value must be set to true.
+  // Transparent painting is enabled by default but can be disabled by setting
+  // CefBrowserSettings.background_color to an opaque value.
   ///
   int windowless_rendering_enabled;
-
-  ///
-  // Set to true (1) to enable transparent painting in combination with
-  // windowless rendering. When this value is true a transparent background
-  // color will be used (RGBA=0x00000000). When this value is false the
-  // background will be white and opaque.
-  ///
-  int transparent_painting_enabled;
 
   ///
   // NSView pointer for the new browser view. Only used with windowed rendering.

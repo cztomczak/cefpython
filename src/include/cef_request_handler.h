@@ -44,10 +44,10 @@
 #include "include/cef_base.h"
 #include "include/cef_browser.h"
 #include "include/cef_frame.h"
+#include "include/cef_request.h"
 #include "include/cef_resource_handler.h"
 #include "include/cef_response.h"
 #include "include/cef_response_filter.h"
-#include "include/cef_request.h"
 #include "include/cef_ssl_info.h"
 #include "include/cef_x509_certificate.h"
 
@@ -62,15 +62,14 @@ class CefRequestCallback : public virtual CefBaseRefCounted {
   // Otherwise, the request will be canceled.
   ///
   /*--cef(capi_name=cont)--*/
-  virtual void Continue(bool allow) =0;
+  virtual void Continue(bool allow) = 0;
 
   ///
   // Cancel the url request.
   ///
   /*--cef()--*/
-  virtual void Cancel() =0;
+  virtual void Cancel() = 0;
 };
-
 
 ///
 // Callback interface used to select a client certificate for authentication.
@@ -83,9 +82,8 @@ class CefSelectClientCertificateCallback : public virtual CefBaseRefCounted {
   // NULL value means that no client certificate should be used.
   ///
   /*--cef(optional_param=cert)--*/
-  virtual void Select(CefRefPtr<CefX509Certificate> cert) =0;
+  virtual void Select(CefRefPtr<CefX509Certificate> cert) = 0;
 };
-
 
 ///
 // Implement this interface to handle events related to browser requests. The
@@ -98,7 +96,7 @@ class CefRequestHandler : public virtual CefBaseRefCounted {
   typedef cef_termination_status_t TerminationStatus;
   typedef cef_urlrequest_status_t URLRequestStatus;
   typedef cef_window_open_disposition_t WindowOpenDisposition;
-  typedef std::vector<CefRefPtr<CefX509Certificate> > X509CertificateList;
+  typedef std::vector<CefRefPtr<CefX509Certificate>> X509CertificateList;
 
   ///
   // Called on the UI thread before browser navigation. Return true to cancel
@@ -108,12 +106,15 @@ class CefRequestHandler : public virtual CefBaseRefCounted {
   // If the navigation is allowed CefLoadHandler::OnLoadStart and
   // CefLoadHandler::OnLoadEnd will be called. If the navigation is canceled
   // CefLoadHandler::OnLoadError will be called with an |errorCode| value of
-  // ERR_ABORTED.
+  // ERR_ABORTED. The |user_gesture| value will be true if the browser
+  // navigated via explicit user gesture (e.g. clicking a link) or false if it
+  // navigated automatically (e.g. via the DomContentLoaded event).
   ///
   /*--cef()--*/
   virtual bool OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
                               CefRefPtr<CefFrame> frame,
                               CefRefPtr<CefRequest> request,
+                              bool user_gesture,
                               bool is_redirect) {
     return false;
   }
@@ -149,7 +150,7 @@ class CefRequestHandler : public virtual CefBaseRefCounted {
   // immediately. Return RV_CONTINUE_ASYNC and call CefRequestCallback::
   // Continue() at a later time to continue or cancel the request
   // asynchronously. Return RV_CANCEL to cancel the request immediately.
-  // 
+  //
   ///
   /*--cef(default_retval=RV_CONTINUE)--*/
   virtual ReturnValue OnBeforeResourceLoad(
@@ -255,6 +256,33 @@ class CefRequestHandler : public virtual CefBaseRefCounted {
   }
 
   ///
+  // Called on the IO thread before sending a network request with a "Cookie"
+  // request header. Return true to allow cookies to be included in the network
+  // request or false to block cookies. The |request| object should not be
+  // modified in this callback.
+  ///
+  /*--cef()--*/
+  virtual bool CanGetCookies(CefRefPtr<CefBrowser> browser,
+                             CefRefPtr<CefFrame> frame,
+                             CefRefPtr<CefRequest> request) {
+    return true;
+  }
+
+  ///
+  // Called on the IO thread when receiving a network request with a
+  // "Set-Cookie" response header value represented by |cookie|. Return true to
+  // allow the cookie to be stored or false to block the cookie. The |request|
+  // object should not be modified in this callback.
+  ///
+  /*--cef()--*/
+  virtual bool CanSetCookie(CefRefPtr<CefBrowser> browser,
+                            CefRefPtr<CefFrame> frame,
+                            CefRefPtr<CefRequest> request,
+                            const CefCookie& cookie) {
+    return true;
+  }
+
+  ///
   // Called on the IO thread when JavaScript requests a specific storage quota
   // size via the webkitStorageInfo.requestQuota function. |origin_url| is the
   // origin of the page making the request. |new_size| is the requested quota
@@ -291,12 +319,11 @@ class CefRequestHandler : public virtual CefBaseRefCounted {
   // be accepted without calling this method.
   ///
   /*--cef()--*/
-  virtual bool OnCertificateError(
-      CefRefPtr<CefBrowser> browser,
-      cef_errorcode_t cert_error,
-      const CefString& request_url,
-      CefRefPtr<CefSSLInfo> ssl_info,
-      CefRefPtr<CefRequestCallback> callback) {
+  virtual bool OnCertificateError(CefRefPtr<CefBrowser> browser,
+                                  cef_errorcode_t cert_error,
+                                  const CefString& request_url,
+                                  CefRefPtr<CefSSLInfo> ssl_info,
+                                  CefRefPtr<CefRequestCallback> callback) {
     return false;
   }
 
