@@ -36,8 +36,9 @@ Table of contents:
 * [v55.3+ Handlers' callbacks and other interfaces](#v553-handlers-callbacks-and-other-interfaces)
 * [v56+ MacOS 10.9+ required to run](#v56-macos-109-required-to-run)
 * [v57.1+ High DPI support on Windows](#v571-high-dpi-support-on-windows)
-* [v66.0+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled](#v660-linux-patch-that-fixed-https-cache-problems-on-pages-with-certificate-errors-was-disabled)
-* [v66.0+ DisplayHandler.OnConsoleMessage new param 'level'](#v660-displayhandleronconsolemessage-new-param-level)
+* [v66+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled](#v66-linux-patch-that-fixed-https-cache-problems-on-pages-with-certificate-errors-was-disabled)
+* [v66+ DisplayHandler.OnConsoleMessage has new param 'level'](#v66-displayhandleronconsolemessage-has-new-param-level)
+* [v66+ LifespanHandler.OnBeforePopup is now called on UI thread](#v66-lifespanhandleronbeforepopup-is-now-called-on-ui-thread)
 
 
 
@@ -298,15 +299,24 @@ for High DPI support. In previous versions the default value was
 "system_dpi" and if you have set it explicitilly in your application,
 then you should change it to an empty string now.
 
-## v66.0+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled
+
+## v66+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled
 
 That patch allowed for HTTPS caching to work when using self-signed
-certificates (or any invalid certificate). This doesn't work anymore. See
-Issue [#125](../../../issues/125) for more details.
+certificates (or any invalid certificate). This doesn't work anymore.
+If you need this feature then you can build from sources and apply
+the patch yourself. See Issue [#125](../../../issues/125) for more details.
 
 
-## v66.0+ DisplayHandler.OnConsoleMessage new param 'level'
+## v66+ DisplayHandler.OnConsoleMessage has new param 'level'
 
 The DisplayHandler.[OnConsoleMessage](../api/DisplayHandler.md#onconsolemessage)
 callback has a new param `level`.
+
+
+## v66+ LifespanHandler.OnBeforePopup is now called on UI thread
+
+The LifespanHandler.[OnBeforePopup](../api/LifespanHandler.md#onbeforepopup)
+callback is now called on UI thread. Previously it was called on
+IO thread.
 

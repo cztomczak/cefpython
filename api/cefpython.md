@@ -237,8 +237,6 @@ Description from upstream CEF:
 
 Post a task for execution on the thread associated with this task runner. Execution will occur asynchronously. Only Browser process threads are allowed.
 
-An example usage is in the wxpython.py example on Windows, in implementation of LifespanHandler.OnBeforePopup().
-
 List of threads in the Browser process:
 * cef.TID_UI: The main thread in the browser. This will be the same as the main application thread if cefpython.Initialize() is called with a ApplicationSettings.multi_threaded_message_loop value of false. Do not perform blocking tasks on this thread. All tasks posted after CefBrowserProcessHandler::OnContextInitialized() and before CefShutdown() are guaranteed to run. This thread will outlive all other CEF threads.
 * cef.TID_DB: Used to interact with the database.

@@ -7,10 +7,10 @@ BREAKAGE (needs updating Migration Guide doc)
 - + OnConsoleMessage: new param 'level'
 - + update migration guide
 
-cef_life_span_handler.h
-- OnBeforePopup: created on UI thread instead of IO thread
-  - update checks for thread
-  - update migration guide
++ cef_life_span_handler.h
+- + OnBeforePopup: created on UI thread instead of IO thread
+  - + update checks for thread
+  - + update migration guide
 
 cef_print_handler.h
 - Modify subprocess/print_handler_gtk.h and .cpp files
