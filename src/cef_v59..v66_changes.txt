@@ -12,12 +12,13 @@ BREAKAGE (needs updating Migration Guide doc)
   - + update checks for thread
   - + update migration guide
 
-cef_print_handler.h
-- Modify subprocess/print_handler_gtk.h and .cpp files
-- OnPrintSettings new param
-- OnPrintDialog new param
-- OnPrintJob new param
-- OnPrintReset new param
++ cef_print_handler.h
+- + Modify subprocess/print_handler_gtk.h and .cpp files
+    (copy from upstream cefclient)
+- + OnPrintSettings new param
+- + OnPrintDialog new param
+- + OnPrintJob new param
+- + OnPrintReset new param
 
 cef_render_process_handler.h
 - Remove OnBeforeNavigation in subprocess/cefpython_app.h and .cpp files
