@@ -99,7 +99,7 @@ Lampix is the first hardware and software solution that turns any surface
 into a smart, augmented reality or interactive surface. Please visit its
 website here: https://lampix.com/
 
-[![lampix600](https://user-images.githubusercontent.com/1187415/40367671-40fecd4e-5dda-11e8-8ef9-1e3d91298c8a.jpg)](https://lampix.com/)
+[![lampix600](https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix600.png)](https://lampix.com/)
 
 ## Install
 
@@ -175,6 +175,8 @@ on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpyt
 
 ### Thanks
 
+* [2018] Many thanks to [Lampix](https://lampix.com/) for sponsoring the v66
+  release for all platforms
 * [2017] Many thanks to [ClearChat Inc.](https://clearchat.com/) for sponsoring
   the v55/v56 releases for all platforms
 * [2016-2018] Thanks to JetBrains for providing an Open Source license for
