@@ -20,11 +20,12 @@ BREAKAGE (needs updating Migration Guide doc)
 - + OnPrintJob new param
 - + OnPrintReset new param
 
-cef_render_process_handler.h
-- Remove OnBeforeNavigation in subprocess/cefpython_app.h and .cpp files
++ cef_render_process_handler.h
+- + Remove OnBeforeNavigation in subprocess/cefpython_app.h and .cpp files
 
 cef_request_handler.h
 - OnBeforeBrowse: new param 'user_gesture'
+- update Migration Guide
 
 internal/cef_linux.h
 internal/cef_types_linux.h
@@ -44,10 +45,11 @@ internal/cef_types_win.h
 internal/cef_types.h
 - cef_settings_t:
   - javascript_open_windows option removed (keep a dummy for BC)
+    - update Migration Guide
 - cef_thread_id_t:
   - TID_DB removed (update Migration Guide)
-  - TID_PROCESS_LAUNCHER removed
-  - TID_CACHE removed
+  - TID_PROCESS_LAUNCHER removed (update Migration Guide)
+  - TID_CACHE removed (update Migration Guide)
 
 
 NEW FEATURES
