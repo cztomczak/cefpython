@@ -75,6 +75,7 @@ Called when the browser receives a status message.
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
+| level | int |
 | message | string |
 | source | string |
 | line | int |
@@ -82,3 +83,6 @@ Called when the browser receives a status message.
 
 Called to display a console message. Return true to stop the message from
 being output to the console.
+
+|level| can be one of the same values as in ApplicationSettings.[log_severity](ApplicationSettings.md#log_severity).
+

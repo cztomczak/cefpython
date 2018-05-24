@@ -85,6 +85,7 @@ cdef public void DisplayHandler_OnStatusMessage(
 
 cdef public cpp_bool DisplayHandler_OnConsoleMessage(
         CefRefPtr[CefBrowser] cefBrowser,
+        cef_log_severity_t level,
         const CefString& cefMessage,
         const CefString& cefSource,
         int line
@@ -100,8 +101,9 @@ cdef public cpp_bool DisplayHandler_OnConsoleMessage(
         pySource = CefToPyString(cefSource)
         callback = pyBrowser.GetClientCallback("OnConsoleMessage")
         if callback:
-            returnValue = callback(browser=pyBrowser, message=pyMessage,
-                                   source=pySource, line=line)
+            returnValue = callback(browser=pyBrowser, level=level,
+                                   message=pyMessage, source=pySource,
+                                   line=line)
             return bool(returnValue)
         return False
     except:

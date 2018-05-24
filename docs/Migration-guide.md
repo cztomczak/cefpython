@@ -37,6 +37,7 @@ Table of contents:
 * [v56+ MacOS 10.9+ required to run](#v56-macos-109-required-to-run)
 * [v57.1+ High DPI support on Windows](#v571-high-dpi-support-on-windows)
 * [v66.0+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled](#v660-linux-patch-that-fixed-https-cache-problems-on-pages-with-certificate-errors-was-disabled)
+* [v66.0+ DisplayHandler.OnConsoleMessage new param 'level'](#v660-displayhandleronconsolemessage-new-param-level)
 
 
 
@@ -299,6 +300,13 @@ then you should change it to an empty string now.
 
 ## v66.0+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled
 
-See Issue [#125](../../../issues/125) for more details.
+That patch allowed for HTTPS caching to work when using self-signed
+certificates (or any invalid certificate). This doesn't work anymore. See
+Issue [#125](../../../issues/125) for more details.
 
+
+## v66.0+ DisplayHandler.OnConsoleMessage new param 'level'
+
+The DisplayHandler.[OnConsoleMessage](../api/DisplayHandler.md#onconsolemessage)
+callback has a new param `level`.
 

@@ -245,6 +245,7 @@ from cef_types cimport (
     CefKeyEvent, CefMouseEvent, CefScreenInfo,
     PathKey, PK_DIR_EXE, PK_DIR_MODULE,
     int32, uint32, int64, uint64,
+    cef_log_severity_t,
 )
 
 # noinspection PyUnresolvedReferences

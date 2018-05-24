@@ -3,9 +3,9 @@ Changes in v59..v66
 BREAKAGE (needs updating Migration Guide doc)
 --------
 
-cef_display_handler.h
-- OnConsoleMessage: new param 'level'
-- update migration guide
++ cef_display_handler.h
+- + OnConsoleMessage: new param 'level'
+- + update migration guide
 
 cef_life_span_handler.h
 - OnBeforePopup: created on UI thread instead of IO thread

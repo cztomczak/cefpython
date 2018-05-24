@@ -15,7 +15,6 @@ Table of contents:
   * [SetAsChild](#setaschild)
   * [SetAsPopup](#setaspopup)
   * [SetAsOffscreen](#setasoffscreen)
-  * [SetTransparentPainting](#settransparentpainting)
 
 ## Methods
 
