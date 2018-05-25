@@ -42,6 +42,7 @@ Table of contents:
 * [v66+ RequestHandler.OnBeforeBrowse has a new param 'user_gesture'](#v66-requesthandleronbeforebrowse-has-a-new-param-user_gesture)
 * [v66+ Window transparency changes](#v66-window-transparency-changes)
 * [v66+ BrowserSettings.javascript_open_windows_disallowed option was removed](#v66-browsersettingsjavascript_open_windows_disallowed-option-was-removed)
+* [v66+ Threads removed: TID_DB, TID_PROCESS_LAUNCHER, TID_CACHE](#v66-threads-removed-tid_db-tid_process_launcher-tid_cache)
 
 
 
@@ -350,4 +351,13 @@ only on Linux (got it working on Fedora with just a change in window setting).
 
 The BrowserSettings.`javascript_open_windows_disallowed` option was removed
 (setting it will do nothing).
+
+
+## v66+ Threads removed: TID_DB, TID_PROCESS_LAUNCHER, TID_CACHE
+
+These threads and their corresponding constants in the cefpython module
+were removed: TID_DB, TID_PROCESS_LAUNCHER, TID_CACHE.
+
+New threads were added, see cefpython.[PostTask](../api/cefpython.md#posttask)
+description for a complete list of threads.
 

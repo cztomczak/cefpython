@@ -122,11 +122,10 @@ cdef extern from "include/internal/cef_types.h":
 
     ctypedef enum cef_thread_id_t:
         TID_UI,
-        TID_DB,
+        TID_FILE_BACKGROUND
         TID_FILE,
+        TID_FILE_USER_VISIBLE
         TID_FILE_USER_BLOCKING,
-        TID_PROCESS_LAUNCHER,
-        TID_CACHE,
         TID_IO,
         TID_RENDERER
 

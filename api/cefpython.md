@@ -239,11 +239,12 @@ Post a task for execution on the thread associated with this task runner. Execut
 
 List of threads in the Browser process:
 * cef.TID_UI: The main thread in the browser. This will be the same as the main application thread if cefpython.Initialize() is called with a ApplicationSettings.multi_threaded_message_loop value of false. Do not perform blocking tasks on this thread. All tasks posted after CefBrowserProcessHandler::OnContextInitialized() and before CefShutdown() are guaranteed to run. This thread will outlive all other CEF threads.
-* cef.TID_DB: Used to interact with the database.
-* cef.TID_FILE: Used for blocking tasks (e.g. file system access) where the user won't notice if the task takes an arbitrarily long time to complete. All tasks posted after CefBrowserProcessHandler::OnContextInitialized() and before CefShutdown() are guaranteed to run.
+* cef.TID_FILE (alias cef.TID_FILE_BACKGROUND): Used for blocking tasks (e.g. file system access) where the user won't notice if the task takes an arbitrarily long time to complete. All tasks posted after CefBrowserProcessHandler::OnContextInitialized() and before CefShutdown() are guaranteed to run.
+* cef.TID_FILE_USER_VISIBLE: Used for blocking tasks (e.g. file system access) that affect UI or responsiveness of future user interactions. Do not use if an immediate response to a user interaction is expected. All tasks posted after CefBrowserProcessHandler::OnContextInitialized() and before CefShutdown() are guaranteed to run. Examples:
+  - Updating the UI to reflect progress on a long task.
+  - Loading data that might be shown in the UI after a future user
+    interaction.
 * cef.TID_FILE_USER_BLOCKING: Used for blocking tasks (e.g. file system access) that affect UI immediately after a user interaction. All tasks posted after CefBrowserProcessHandler::OnContextInitialized() and before CefShutdown() are guaranteed to run. Example: Generating data shown in the UI immediately after a click.
-* cef.TID_PROCESS_LAUNCHER: Used to launch and terminate browser processes.
-* cef.TID_CACHE: Used to handle slow HTTP cache operations.
 * cef.TID_IO: Used to process IPC and network messages. Do not perform blocking tasks on this thread. All tasks posted after CefBrowserProcessHandler::OnContextInitialized() and before CefShutdown() are guaranteed to run.
 
 List of threads in the Renderer process:

@@ -12,7 +12,7 @@ def PostTask(int thread, object func, *args):
 
     # Validate threadId.
     if thread not in g_browserProcessThreads:
-        raise Exception("PoastTask failed: requires a browser process thread")
+        raise Exception("PostTask failed: requires a browser process thread")
 
     # Validate func.
     if not IsFunctionOrMethod(type(func)):
@@ -39,7 +39,7 @@ def PostDelayedTask(int thread, int delay_ms, object func, *args):
 
     # Validate threadId.
     if thread not in g_browserProcessThreads:
-        raise Exception("PoastTask failed: requires a browser process thread")
+        raise Exception("PostTask failed: requires a browser process thread")
 
     # Validate func.
     if not IsFunctionOrMethod(type(func)):
