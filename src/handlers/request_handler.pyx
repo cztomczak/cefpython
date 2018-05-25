@@ -59,26 +59,26 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         CefRefPtr[CefRequest] cefRequest,
-        cpp_bool cefIsRedirect
+        cpp_bool user_gesture,
+        cpp_bool is_redirect
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef PyRequest pyRequest
-    cdef py_bool pyIsRedirect
     cdef object clientCallback
     cdef py_bool returnValue
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeBrowse")
         pyFrame = GetPyFrame(cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
-        pyIsRedirect = bool(cefIsRedirect)
         clientCallback = pyBrowser.GetClientCallback("OnBeforeBrowse")
         if clientCallback:
             returnValue = clientCallback(
                     browser=pyBrowser,
                     frame=pyFrame,
                     request=pyRequest,
-                    is_redirect=pyIsRedirect)
+                    user_gesture=user_gesture,
+                    is_redirect=is_redirect)
             return bool(returnValue)
         else:
             return False

@@ -44,18 +44,21 @@ Table of contents:
 | browser | [Browser](Browser.md) |
 | frame | [Frame](Frame.md) |
 | request | [Request](Request.md) |
+| user_gesture | bool |
 | is_redirect | bool |
 | __Return__ | bool |
 
-Called on the UI thread before browser navigation. Return true to cancel
-the navigation or false to allow the navigation to proceed. The |request|
-object cannot be modified in this callback.
-[DisplayHandler](DisplayHandler.md).`OnLoadingStateChange` will be
-called twice in all cases.
-If the navigation is allowed [LoadHandler](LoadHandler.md).`OnLoadStart` and
-`OnLoadEnd` will be called. If the navigation is canceled
-[LoadHandler](LoadHandler.md).`OnLoadError` will be called with
-an |error_code| value of ERR_ABORTED.
+Description from upstream CEF:
+> Called on the UI thread before browser navigation. Return true to cancel
+> the navigation or false to allow the navigation to proceed. The |request|
+> object cannot be modified in this callback.
+> CefLoadHandler::OnLoadingStateChange will be called twice in all cases.
+> If the navigation is allowed CefLoadHandler::OnLoadStart and
+> CefLoadHandler::OnLoadEnd will be called. If the navigation is canceled
+> CefLoadHandler::OnLoadError will be called with an |errorCode| value of
+> ERR_ABORTED. The |user_gesture| value will be true if the browser
+> navigated via explicit user gesture (e.g. clicking a link) or false if it
+> navigated automatically (e.g. via the DomContentLoaded event).
 
 
 ### OnBeforeResourceLoad

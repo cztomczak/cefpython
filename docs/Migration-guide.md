@@ -33,12 +33,13 @@ Table of contents:
 * [v54+ GTK 3 example doesn't work anymore on Linux](#v54-gtk-3-example-doesnt-work-anymore-on-linux)
 * [v54+ libcef.so library is stripped from symbols on Linux](#v54-libcefso-library-is-stripped-from-symbols-on-linux)
 * [v55+ HTTPS cache problems on pages with certificate errors](#v55-https-cache-problems-on-pages-with-certificate-errors)
-* [v55.3+ Handlers' callbacks and other interfaces](#v553-handlers-callbacks-and-other-interfaces)
+* [v55.3+ Handlers' callbacks and other interfaces are now called using keyword args](#v553-handlers-callbacks-and-other-interfaces-are-now-called-using-keyword-args)
 * [v56+ MacOS 10.9+ required to run](#v56-macos-109-required-to-run)
 * [v57.1+ High DPI support on Windows](#v571-high-dpi-support-on-windows)
 * [v66+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled](#v66-linux-patch-that-fixed-https-cache-problems-on-pages-with-certificate-errors-was-disabled)
-* [v66+ DisplayHandler.OnConsoleMessage has new param 'level'](#v66-displayhandleronconsolemessage-has-new-param-level)
+* [v66+ DisplayHandler.OnConsoleMessage has a new param 'level'](#v66-displayhandleronconsolemessage-has-a-new-param-level)
 * [v66+ LifespanHandler.OnBeforePopup is now called on UI thread](#v66-lifespanhandleronbeforepopup-is-now-called-on-ui-thread)
+* [V66+ RequestHandler.OnBeforeBrowse has a new param 'user_gesture'](#v66-requesthandleronbeforebrowse-has-a-new-param-user_gesture)
 
 
 
@@ -212,6 +213,8 @@ API ref: Request.[GetHeaderMap](../api/Request.md#getheadermap)
 
 ## v54+ GTK 3 example doesn't work anymore on Linux
 
+Update: GTK 3 example is back working in v57+.
+
 Currently GTK 3 example is broken on Linux. You can either
 downgrade to an old cefpython v53 (available on GitHub release
 page) or use GTK 2 example. For more details on the problem see
@@ -236,7 +239,7 @@ cefpython starts using CEF prebuilt binaries from Spotify.
 See Issue [#125](../../../issues/125) for more details.
 
 
-## v55.3+ Handlers' callbacks and other interfaces
+## v55.3+ Handlers' callbacks and other interfaces are now called using keyword args
 
 Since v55.3 all handlers' callbacks and other interfaces such as
 CookieVisitor, StringVisitor and WebRequestClient, are now called
@@ -308,7 +311,7 @@ If you need this feature then you can build from sources and apply
 the patch yourself. See Issue [#125](../../../issues/125) for more details.
 
 
-## v66+ DisplayHandler.OnConsoleMessage has new param 'level'
+## v66+ DisplayHandler.OnConsoleMessage has a new param 'level'
 
 The DisplayHandler.[OnConsoleMessage](../api/DisplayHandler.md#onconsolemessage)
 callback has a new param `level`.
@@ -319,4 +322,10 @@ callback has a new param `level`.
 The LifespanHandler.[OnBeforePopup](../api/LifespanHandler.md#onbeforepopup)
 callback is now called on UI thread. Previously it was called on
 IO thread.
+
+
+## V66+ RequestHandler.OnBeforeBrowse has a new param 'user_gesture'
+
+The RequestHandler.[OnBeforeBrowse](../api/RequestHandler.md#onbeforebrowse)
+callback has a new param `user_gesture`.
 

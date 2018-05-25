@@ -9,10 +9,12 @@
 bool RequestHandler::OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefRequest> request,
+                                    bool user_gesture,
                                     bool is_redirect)
 {
     REQUIRE_UI_THREAD();
-    return RequestHandler_OnBeforeBrowse(browser, frame, request, is_redirect);
+    return RequestHandler_OnBeforeBrowse(browser, frame, request,
+                                         user_gesture, is_redirect);
 }
 
 
