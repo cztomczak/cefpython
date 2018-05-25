@@ -39,7 +39,8 @@ Table of contents:
 * [v66+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled](#v66-linux-patch-that-fixed-https-cache-problems-on-pages-with-certificate-errors-was-disabled)
 * [v66+ DisplayHandler.OnConsoleMessage has a new param 'level'](#v66-displayhandleronconsolemessage-has-a-new-param-level)
 * [v66+ LifespanHandler.OnBeforePopup is now called on UI thread](#v66-lifespanhandleronbeforepopup-is-now-called-on-ui-thread)
-* [V66+ RequestHandler.OnBeforeBrowse has a new param 'user_gesture'](#v66-requesthandleronbeforebrowse-has-a-new-param-user_gesture)
+* [v66+ RequestHandler.OnBeforeBrowse has a new param 'user_gesture'](#v66-requesthandleronbeforebrowse-has-a-new-param-user_gesture)
+* [v66+ Window transparency changes](#v66-window-transparency-changes)
 
 
 
@@ -324,8 +325,22 @@ callback is now called on UI thread. Previously it was called on
 IO thread.
 
 
-## V66+ RequestHandler.OnBeforeBrowse has a new param 'user_gesture'
+## v66+ RequestHandler.OnBeforeBrowse has a new param 'user_gesture'
 
 The RequestHandler.[OnBeforeBrowse](../api/RequestHandler.md#onbeforebrowse)
 callback has a new param `user_gesture`.
+
+
+## v66+ Window transparency changes
+
+1. OSR windows (off-screen rendering, also known as windowless) are now
+transparent by default. You can control its transperency with
+ApplicationSettings.[background_color](../api/ApplicationSettings.md#background_color) and BrowserSettings.[background_color](../api/BrowserSettings.md#background_color) options.
+The WindowInfo.`SetTransparentPainting` method is now deprecated. Calling
+it with True will do nothing, and calling it with False **will result
+in exception**.
+
+2. It is now possible to have
+transparent windows also in **windowed mode**. This seems to be working
+only on Linux (got it working on Fedora with just a change in window setting).
 

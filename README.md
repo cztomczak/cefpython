@@ -748,7 +748,6 @@ Additional information for v31.2 release:
   * [SetAsChild](api/WindowInfo.md#setaschild)
   * [SetAsPopup](api/WindowInfo.md#setaspopup)
   * [SetAsOffscreen](api/WindowInfo.md#setasoffscreen)
-  * [SetTransparentPainting](api/WindowInfo.md#settransparentpainting)
 * [WindowUtils (class)](api/WindowUtils.md#windowutils-class)
   * [OnSetFocus ](api/WindowUtils.md#onsetfocus-win)
   * [OnSize ](api/WindowUtils.md#onsize-win)

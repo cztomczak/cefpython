@@ -434,7 +434,6 @@
   * [SetAsChild](WindowInfo.md#setaschild)
   * [SetAsPopup](WindowInfo.md#setaspopup)
   * [SetAsOffscreen](WindowInfo.md#setasoffscreen)
-  * [SetTransparentPainting](WindowInfo.md#settransparentpainting)
 * [WindowUtils (class)](WindowUtils.md#windowutils-class)
   * [OnSetFocus ](WindowUtils.md#onsetfocus-win)
   * [OnSize ](WindowUtils.md#onsize-win)

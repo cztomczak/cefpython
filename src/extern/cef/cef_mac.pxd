@@ -14,8 +14,7 @@ cdef extern from "include/internal/cef_mac.h":
     cdef cppclass CefWindowInfo:
         void SetAsChild(CefWindowHandle parent,
                         int x, int y, int width, int height)
-        void SetAsWindowless(CefWindowHandle parent,
-                             cpp_bool transparent)
+        void SetAsWindowless(CefWindowHandle parent)
 
     cdef cppclass CefMainArgs:
         CefMainArgs()
