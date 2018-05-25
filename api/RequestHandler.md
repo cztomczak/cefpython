@@ -206,8 +206,8 @@ is the URL of the top-level frame. Cookies managers can be unique
 per browser or shared across multiple browsers. The global cookie
 manager will be used if this method returns None.
 
-**IMPORTANT**: In some cases the `browser` parameter can be
-None, so you should handle such case.
+**IMPORTANT**: In some cases this callback is not called due to a
+race condition. See Issue [#429](../../../issues/429) for details.
 
 To successfully implement separate cookie manager per browser session,
 you have to set ApplicationSettings.`unique_request_context_per_browser`

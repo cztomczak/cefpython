@@ -378,9 +378,9 @@ See a complete list of flags in the description of
 cef.Request.[GetFlags](../api/Request.md#getflags) method.
 
 
-## v66+ RequestHandler.GetCookieManager 'browser' param may be None
+## v66+ RequestHandler.GetCookieManager not getting called in some cases
 
-In some cases in RequestHandler.[GetCookieManager](../api/RequestHandler.md#getcookiemanager)
-callback, the `browser` parameter may be None due to a race condition.
-See Issue [#429](../../../issues/429) for details.
+In some cases the RequestHandler.[GetCookieManager](../api/RequestHandler.md#getcookiemanager)
+callback is not getting called due to a race condition.
+This bug is to be fixed in Issue [#429](../../../issues/429).
 
