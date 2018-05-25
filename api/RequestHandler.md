@@ -206,6 +206,9 @@ is the URL of the top-level frame. Cookies managers can be unique
 per browser or shared across multiple browsers. The global cookie
 manager will be used if this method returns None.
 
+**IMPORTANT**: In some cases the `browser` parameter can be
+None, so you should handle such case.
+
 To successfully implement separate cookie manager per browser session,
 you have to set ApplicationSettings.`unique_request_context_per_browser`
 to True. Otherwise the browser param passed to this callback will
@@ -221,9 +224,6 @@ the window on your own and embed browser in it.
 The `CreateAnotherBrowser` function from the old v31 wxpython
 example does that.
 
-IMPORTANT: in an exceptional case the `browser` parameter could be
-None, so you should handle such case. During testing this issue did
-not occur, but it may happen in some yet unknown scenarios.
 
 
 ### OnProtocolExecution

@@ -44,6 +44,7 @@ Table of contents:
 * [v66+ BrowserSettings.javascript_open_windows_disallowed option was removed](#v66-browsersettingsjavascript_open_windows_disallowed-option-was-removed)
 * [v66+ Threads removed: TID_DB, TID_PROCESS_LAUNCHER, TID_CACHE](#v66-threads-removed-tid_db-tid_process_launcher-tid_cache)
 * [v66+ cef.Request.Flags changed](#v66-cefrequestflags-changed)
+* [v66+ RequestHandler.GetCookieManager 'browser' param may be None](#v66-requesthandlergetcookiemanager-browser-param-may-be-none)
 
 
 
@@ -375,4 +376,11 @@ Flags added:
 
 See a complete list of flags in the description of
 cef.Request.[GetFlags](../api/Request.md#getflags) method.
+
+
+## v66+ RequestHandler.GetCookieManager 'browser' param may be None
+
+In some cases in RequestHandler.[GetCookieManager](../api/RequestHandler.md#getcookiemanager)
+callback, the `browser` parameter may be None due to a race condition.
+See Issue [#429](../../../issues/429) for details.
 

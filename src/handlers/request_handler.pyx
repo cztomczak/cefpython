@@ -291,7 +291,10 @@ cdef public CefRefPtr[CefCookieManager] RequestHandler_GetCookieManager(
     cdef object clientCallback
     cdef PyCookieManager returnValue
     try:
-        pyBrowser = GetPyBrowser(cefBrowser, "GetCookieManager")
+        if cefBrowser.get():
+            pyBrowser = GetPyBrowser(cefBrowser, "GetCookieManager")
+        else:
+            pyBrowser = None
         pyMainUrl = CefToPyString(cefMainUrl)
         if pyBrowser:
             # Browser may be empty.
