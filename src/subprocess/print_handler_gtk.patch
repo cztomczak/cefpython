@@ -1,8 +1,8 @@
 diff --git print_handler_gtk.cc print_handler_gtk.cc
-index 9a822b7a..cfccbaff 100644
+index 9a822b7a..18c8c1c4 100644
 --- print_handler_gtk.cc
 +++ print_handler_gtk.cc
-@@ -1,9 +1,12 @@
+@@ -1,22 +1,23 @@
 +// COPIED from upstream "cef/tests/cefclient/browser/" directory
 +// with minor modifications. See the .patch file in current directory.
 +
@@ -16,18 +16,22 @@ index 9a822b7a..cfccbaff 100644
  
  #include <vector>
  
-@@ -14,10 +17,6 @@
+ #include <gtk/gtk.h>
+ #include <gtk/gtkunixprint.h>
+ 
++#include "include/base/cef_bind.h"
+ #include "include/base/cef_logging.h"
  #include "include/base/cef_macros.h"
  #include "include/wrapper/cef_helpers.h"
- 
+-
 -#include "tests/cefclient/browser/root_window.h"
 -
 -namespace client {
--
++#include "include/wrapper/cef_closure_task.h"
+ 
  namespace {
  
- // CUPS Duplex attribute and values.
-@@ -431,10 +430,12 @@ struct ClientPrintHandlerGtk::PrintHandler {
+@@ -431,10 +432,12 @@ struct ClientPrintHandlerGtk::PrintHandler {
    // Returns the GtkWindow* for the browser. Will return NULL when using the
    // Views framework.
    GtkWindow* GetWindow() {
@@ -44,7 +48,7 @@ index 9a822b7a..cfccbaff 100644
      return NULL;
    }
  
-@@ -626,5 +627,3 @@ ClientPrintHandlerGtk::PrintHandler* ClientPrintHandlerGtk::GetPrintHandler(
+@@ -626,5 +629,3 @@ ClientPrintHandlerGtk::PrintHandler* ClientPrintHandlerGtk::GetPrintHandler(
    DCHECK(it != print_handler_map_.end());
    return it->second;
  }

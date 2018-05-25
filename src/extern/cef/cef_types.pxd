@@ -124,7 +124,7 @@ cdef extern from "include/internal/cef_types.h":
         TID_UI,
         TID_FILE_BACKGROUND
         TID_FILE,
-        TID_FILE_USER_VISIBLE
+        TID_FILE_USER_VISIBLE,
         TID_FILE_USER_BLOCKING,
         TID_IO,
         TID_RENDERER
@@ -160,12 +160,14 @@ cdef extern from "include/internal/cef_types.h":
         
     # WebRequest
     ctypedef enum cef_urlrequest_flags_t:
-        UR_FLAG_NONE                      = 0,
-        UR_FLAG_SKIP_CACHE                = 1 << 0,
-        UR_FLAG_ALLOW_CACHED_CREDENTIALS  = 1 << 1,
-        UR_FLAG_REPORT_UPLOAD_PROGRESS    = 1 << 3,
-        UR_FLAG_NO_DOWNLOAD_DATA          = 1 << 6,
-        UR_FLAG_NO_RETRY_ON_5XX           = 1 << 7,
+        UR_FLAG_NONE = 0,
+        UR_FLAG_SKIP_CACHE = 1 << 0,
+        UR_FLAG_ONLY_FROM_CACHE = 1 << 1,
+        UR_FLAG_ALLOW_STORED_CREDENTIALS = 1 << 2,
+        UR_FLAG_REPORT_UPLOAD_PROGRESS = 1 << 3,
+        UR_FLAG_NO_DOWNLOAD_DATA = 1 << 4,
+        UR_FLAG_NO_RETRY_ON_5XX = 1 << 5,
+        UR_FLAG_STOP_ON_REDIRECT = 1 << 6,
 
     # CefListValue, CefDictionaryValue - types.
     ctypedef enum cef_value_type_t:

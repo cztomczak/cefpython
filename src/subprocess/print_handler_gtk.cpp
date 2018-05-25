@@ -13,9 +13,11 @@
 #include <gtk/gtk.h>
 #include <gtk/gtkunixprint.h>
 
+#include "include/base/cef_bind.h"
 #include "include/base/cef_logging.h"
 #include "include/base/cef_macros.h"
 #include "include/wrapper/cef_helpers.h"
+#include "include/wrapper/cef_closure_task.h"
 
 namespace {
 

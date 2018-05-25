@@ -9,3 +9,9 @@ webcache/
 examples/screenshot.png
 examples/pyinstaller/build/
 examples/pyinstaller/dist/
+examples/GPUCache/
+examples/blob_storage/
+examples/webrtc_event_logs/
+unittests/GPUCache/
+unittests/blob_storage/
+unittests/webrtc_event_logs/

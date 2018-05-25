@@ -43,6 +43,7 @@ Table of contents:
 * [v66+ Window transparency changes](#v66-window-transparency-changes)
 * [v66+ BrowserSettings.javascript_open_windows_disallowed option was removed](#v66-browsersettingsjavascript_open_windows_disallowed-option-was-removed)
 * [v66+ Threads removed: TID_DB, TID_PROCESS_LAUNCHER, TID_CACHE](#v66-threads-removed-tid_db-tid_process_launcher-tid_cache)
+* [v66+ cef.Request.Flags changed](#v66-cefrequestflags-changed)
 
 
 
@@ -360,4 +361,18 @@ were removed: TID_DB, TID_PROCESS_LAUNCHER, TID_CACHE.
 
 New threads were added, see cefpython.[PostTask](../api/cefpython.md#posttask)
 description for a complete list of threads.
+
+
+## v66+ cef.Request.Flags changed
+
+Flags removed:
+- AllowCachedCredentials
+
+Flags added:
+- OnlyFromCache
+- AllowStoredCredentials
+- StopOnRedirect
+
+See a complete list of flags in the description of
+cef.Request.[GetFlags](../api/Request.md#getflags) method.
 

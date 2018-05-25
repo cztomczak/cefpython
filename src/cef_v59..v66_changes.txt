@@ -53,6 +53,13 @@ internal/cef_types.h
   - + Added threads: TID_FILE_BACKGROUND, TID_FILE_USER_VISIBLE
 
 
++ cef_urlrequest.h
+- + cef_urlrequest_flags_t:
+  - + Add: UR_FLAG_ONLY_FROM_CACHE, UR_FLAG_ALLOW_STORED_CREDENTIALS,
+           UR_FLAG_STOP_ON_REDIRECT
+  - + Remove: UR_FLAG_ALLOW_CACHED_CREDENTIALS
+
+
 NEW FEATURES
 ------------
 
@@ -132,9 +139,6 @@ cef_server.h
   doesn't seem to be of great value?
 - CefServer: a web server that supports HTTP and WebSocket requests
 - CefServerHandler
-
-cef_urlrequest.h
-- ResponseWasCached
 
 cef_v8.h
 - CefV8ArrayBufferReleaseCallback

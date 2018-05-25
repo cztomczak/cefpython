@@ -4,17 +4,35 @@
 
 include "cefpython.pyx"
 
+# noinspection PyUnresolvedReferences
+cimport cef_types
+
+# cef_urlrequest_flags_t
+UR_FLAG_NONE = cef_types.UR_FLAG_NONE
+UR_FLAG_SKIP_CACHE = cef_types.UR_FLAG_SKIP_CACHE
+UR_FLAG_ONLY_FROM_CACHE = cef_types.UR_FLAG_ONLY_FROM_CACHE
+UR_FLAG_ALLOW_STORED_CREDENTIALS = cef_types.UR_FLAG_ALLOW_STORED_CREDENTIALS
+UR_FLAG_REPORT_UPLOAD_PROGRESS = cef_types.UR_FLAG_REPORT_UPLOAD_PROGRESS
+UR_FLAG_NO_DOWNLOAD_DATA = cef_types.UR_FLAG_NO_DOWNLOAD_DATA
+UR_FLAG_NO_RETRY_ON_5XX = cef_types.UR_FLAG_NO_RETRY_ON_5XX
+UR_FLAG_STOP_ON_REDIRECT = cef_types.UR_FLAG_STOP_ON_REDIRECT
+
+
 class Request:
+    # TODO: autocomplete in PyCharm doesn't work for these flags
     Flags = {
         "None": cef_types.UR_FLAG_NONE,
         "SkipCache": cef_types.UR_FLAG_SKIP_CACHE,
-        "AllowCachedCredentials": cef_types.UR_FLAG_ALLOW_CACHED_CREDENTIALS,
-        "AllowCookies": 0, # keep for BC
+        "OnlyFromCache": cef_types.UR_FLAG_ONLY_FROM_CACHE,
+        "AllowCachedCredentials": 0, # keep dummy for BC
+        "AllowStoredCredentials": cef_types.UR_FLAG_ALLOW_STORED_CREDENTIALS,
+        "AllowCookies": 0, # keep dummy for BC
         "ReportUploadProgress": cef_types.UR_FLAG_REPORT_UPLOAD_PROGRESS,
-        "ReportLoadTiming": 0, # keep for BC
-        "ReportRawHeaders": 0, # keep for BC
+        "ReportLoadTiming": 0, # keep dummy for BC
+        "ReportRawHeaders": 0, # keep dummy for BC
         "NoDownloadData": cef_types.UR_FLAG_NO_DOWNLOAD_DATA,
         "NoRetryOn5xx": cef_types.UR_FLAG_NO_RETRY_ON_5XX,
+        "StopOnRedirect": cef_types.UR_FLAG_STOP_ON_REDIRECT,
     }
     
     def __init__(self):

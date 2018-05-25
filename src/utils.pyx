@@ -19,7 +19,7 @@ g_browserProcessThreads = [
     TID_UI,
     TID_FILE_BACKGROUND,
     TID_FILE,
-    TID_FILE_USER_VISIBLE
+    TID_FILE_USER_VISIBLE,
     TID_FILE_USER_BLOCKING,
     TID_IO,
 ]
