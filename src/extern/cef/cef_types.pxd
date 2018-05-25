@@ -78,7 +78,6 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t default_encoding
         cef_state_t remote_fonts
         cef_state_t javascript
-        cef_state_t javascript_open_windows
         cef_state_t javascript_close_windows
         cef_state_t javascript_access_clipboard
         cef_state_t javascript_dom_paste

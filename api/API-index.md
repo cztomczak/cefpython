@@ -122,7 +122,6 @@
   * [file_access_from_file_urls_allowed](BrowserSettings.md#file_access_from_file_urls_allowed)
   * [image_load_disabled](BrowserSettings.md#image_load_disabled)
   * [javascript_disabled](BrowserSettings.md#javascript_disabled)
-  * [javascript_open_windows_disallowed](BrowserSettings.md#javascript_open_windows_disallowed)
   * [javascript_close_windows_disallowed](BrowserSettings.md#javascript_close_windows_disallowed)
   * [javascript_access_clipboard_disallowed](BrowserSettings.md#javascript_access_clipboard_disallowed)
   * [local_storage_disabled](BrowserSettings.md#local_storage_disabled)

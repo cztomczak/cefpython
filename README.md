@@ -436,7 +436,6 @@ Additional information for v31.2 release:
   * [file_access_from_file_urls_allowed](api/BrowserSettings.md#file_access_from_file_urls_allowed)
   * [image_load_disabled](api/BrowserSettings.md#image_load_disabled)
   * [javascript_disabled](api/BrowserSettings.md#javascript_disabled)
-  * [javascript_open_windows_disallowed](api/BrowserSettings.md#javascript_open_windows_disallowed)
   * [javascript_close_windows_disallowed](api/BrowserSettings.md#javascript_close_windows_disallowed)
   * [javascript_access_clipboard_disallowed](api/BrowserSettings.md#javascript_access_clipboard_disallowed)
   * [local_storage_disabled](api/BrowserSettings.md#local_storage_disabled)

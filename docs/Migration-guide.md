@@ -41,6 +41,7 @@ Table of contents:
 * [v66+ LifespanHandler.OnBeforePopup is now called on UI thread](#v66-lifespanhandleronbeforepopup-is-now-called-on-ui-thread)
 * [v66+ RequestHandler.OnBeforeBrowse has a new param 'user_gesture'](#v66-requesthandleronbeforebrowse-has-a-new-param-user_gesture)
 * [v66+ Window transparency changes](#v66-window-transparency-changes)
+* [v66+ BrowserSettings.javascript_open_windows_disallowed option was removed](#v66-browsersettingsjavascript_open_windows_disallowed-option-was-removed)
 
 
 
@@ -343,4 +344,10 @@ in exception**.
 2. It is now possible to have
 transparent windows also in **windowed mode**. This seems to be working
 only on Linux (got it working on Fedora with just a change in window setting).
+
+
+## v66+ BrowserSettings.javascript_open_windows_disallowed option was removed
+
+The BrowserSettings.`javascript_open_windows_disallowed` option was removed
+(setting it will do nothing).
 

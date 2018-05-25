@@ -191,12 +191,7 @@ cdef void SetBrowserSettings(
             else:
                 cefBrowserSettings.javascript = cef_types.STATE_ENABLED
         elif key == "javascript_open_windows_disallowed":
-            if browserSettings[key]:
-                cefBrowserSettings.javascript_open_windows = (
-                        cef_types.STATE_DISABLED)
-            else:
-                cefBrowserSettings.javascript_open_windows = (
-                        cef_types.STATE_ENABLED)
+            Debug("DEPRECATED: 'javascript_open_windows_disallowed' setting")
         elif key == "javascript_close_windows_disallowed":
             if browserSettings[key]:
                 cefBrowserSettings.javascript_close_windows = (

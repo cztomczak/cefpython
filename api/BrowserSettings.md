@@ -17,7 +17,6 @@ Table of contents:
   * [file_access_from_file_urls_allowed](#file_access_from_file_urls_allowed)
   * [image_load_disabled](#image_load_disabled)
   * [javascript_disabled](#javascript_disabled)
-  * [javascript_open_windows_disallowed](#javascript_open_windows_disallowed)
   * [javascript_close_windows_disallowed](#javascript_close_windows_disallowed)
   * [javascript_access_clipboard_disallowed](#javascript_access_clipboard_disallowed)
   * [local_storage_disabled](#local_storage_disabled)
@@ -115,11 +114,6 @@ Description from upstream CEF:
 ### javascript_disabled
 
 (bool) Controls whether Javascript can be executed. Also configurable using the --disable-javascript switch.
-
-
-### javascript_open_windows_disallowed
-
-(bool) Controls whether Javascript can be used for opening windows. Also configurable using the --disable-javascript-open-windows switch.
 
 
 ### javascript_close_windows_disallowed

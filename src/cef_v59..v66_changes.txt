@@ -43,9 +43,9 @@ BREAKAGE (needs updating Migration Guide doc)
   - + Update Migration Guide doc
 
 internal/cef_types.h
-- cef_settings_t:
-  - javascript_open_windows option removed (keep a dummy for BC)
-    - update Migration Guide
+- + cef_settings_t:
+  - + javascript_open_windows option removed (keep a dummy for BC)
+    - + update Migration Guide
 - cef_thread_id_t:
   - TID_DB removed (update Migration Guide)
   - TID_PROCESS_LAUNCHER removed (update Migration Guide)
