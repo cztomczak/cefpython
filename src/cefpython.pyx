@@ -132,6 +132,8 @@ import json
 import datetime
 # noinspection PyUnresolvedReferences
 import random
+# noinspection PyUnresolvedReferences
+import struct
 
 if sys.version_info.major == 2:
     # noinspection PyUnresolvedReferences

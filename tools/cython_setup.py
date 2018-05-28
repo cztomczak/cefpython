@@ -360,6 +360,9 @@ def get_libraries():
             "gobject-2.0",
             "glib-2.0",
             "gtk-x11-2.0",
+            "gdk-x11-2.0",
+            # "gdk_pixbuf-2.0",
+            # "gdk_pixbuf_xlib-2.0",
             # CEF and CEF Python libraries
             "cef_dll_wrapper",
             "cefpythonapp",

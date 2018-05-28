@@ -39,6 +39,7 @@ Table of contents:
   * [GetFrameCount](#getframecount)
   * [GetFrameIdentifiers](#getframeidentifiers)
   * [GetFrameNames](#getframenames)
+  * [GetImage](#getimage)
   * [GetJavascriptBindings](#getjavascriptbindings)
   * [GetMainFrame](#getmainframe)
   * [GetNSTextInputContext](#getnstextinputcontext)
@@ -418,6 +419,29 @@ Returns the identifiers of all existing frames.
 | __Return__ | string[] |
 
 Returns the names of all existing frames. This list does not include the main frame.
+
+
+### GetImage
+
+| | |
+| --- | --- |
+| __Return__ | tuple(bytes buffer, int width, int height) |
+
+Currently works only on Linux (Issue [#427](../../../issues/427)).
+
+Get browser contents as image. Only screen visible contents are returned.
+
+Returns an RGB buffer which can be converted to an image
+using PIL library with such code:
+
+```py
+from PIL import Image, ImageFile
+buffer_len = (width * 3 + 3) & -4
+image = Image.frombytes("RGB", (width, height), data,
+                         "raw", "RGB", buffer_len, 1)
+ImageFile.MAXBLOCK = width * height
+image.save("image.png", "PNG")
+```
 
 
 ### GetJavascriptBindings

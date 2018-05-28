@@ -60,6 +60,7 @@
   * [GetFrameCount](Browser.md#getframecount)
   * [GetFrameIdentifiers](Browser.md#getframeidentifiers)
   * [GetFrameNames](Browser.md#getframenames)
+  * [GetImage](Browser.md#getimage)
   * [GetJavascriptBindings](Browser.md#getjavascriptbindings)
   * [GetMainFrame](Browser.md#getmainframe)
   * [GetNSTextInputContext](Browser.md#getnstextinputcontext)

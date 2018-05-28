@@ -274,6 +274,35 @@ cdef class PyBrowser:
     cpdef JavascriptBindings GetJavascriptBindings(self):
         return self.javascriptBindings
 
+    cdef bytes b(self, int x):
+        return struct.pack(b'<B', x)
+
+    cpdef object GetImage(self):
+        IF UNAME_SYSNAME == "Linux":
+            cdef XImage* image
+            image = x11.CefBrowser_GetImage(self.cefBrowser)
+            if not image:
+                return None
+            cdef int width = image.width
+            cdef int height = image.height
+            cdef list pixels = [b'0'] * (3 * width * height)
+            cdef int x, y, blue, green, red, offset
+            cdef unsigned long pixel
+            for x in range(width):
+                for y in range(height):
+                    pixel = XGetPixel(image, x, y)
+                    blue = pixel & 255
+                    green = (pixel & 65280) >> 8
+                    red = (pixel & 16711680) >> 16
+                    offset = (x + width * y) * 3
+                    pixels[offset:offset+3] = self.b(red), self.b(green),\
+                                              self.b(blue)
+            XDestroyImage(image)
+            return b''.join(pixels), width, height
+        ELSE:
+            NonCriticalError("GetImage not implemented on this platform")
+            return None
+
     # --------------
     # CEF API.
     # --------------

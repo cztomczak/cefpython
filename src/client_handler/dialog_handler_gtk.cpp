@@ -138,47 +138,8 @@ void AddFilters(GtkFileChooser* chooser,
   }
 }
 
-GtkWindow* GetWindow(CefRefPtr<CefBrowser> browser) {
-  // -- REWRITTEN FOR CEF PYTHON USE CASE --
-  // X11 window handle
-  ::Window xwindow = browser->GetHost()->GetWindowHandle();
-  // X11 display
-  ::Display* xdisplay = cef_get_xdisplay();
-  // GDK display
-  GdkDisplay* gdk_display = NULL;
-  if (xdisplay) {
-    // See if we can find GDK display using X11 display
-    gdk_display = gdk_x11_lookup_xdisplay(xdisplay);
-  }
-  if (!gdk_display) {
-    // If not then get the default display
-    gdk_display = gdk_display_get_default();
-  }
-  if (!gdk_display) {
-    // The tkinter_.py and hello_world.py examples do not use GTK
-    // internally, so GTK wasn't yet initialized and must do it
-    // now, so that display is available. Also must install X11
-    // error handlers to avoid 'BadWindow' errors.
-    LOG(INFO) << "[Browser process] Initialize GTK";
-    gtk_init(0, NULL);
-    InstallX11ErrorHandlers();
-    // Now the display is available
-    gdk_display = gdk_display_get_default();
-  }
-  // In kivy_.py example getting error message:
-  // > Can't create GtkPlug as child of non-GtkSocket
-  // However dialog handler works just fine.
-  GtkWidget* widget = gtk_plug_new_for_display(gdk_display, xwindow);
-  // Getting top level widget doesn't seem to be required.
-  // OFF: GtkWidget* toplevel = gtk_widget_get_toplevel(widget);
-  GtkWindow* window = GTK_WINDOW(widget);
-  if (!window) {
-    LOG(ERROR) << "No GtkWindow for browser";
-  }
-  return window;
-}
-
 }  // namespace
+
 
 
 ClientDialogHandlerGtk::ClientDialogHandlerGtk()
@@ -238,7 +199,7 @@ bool ClientDialogHandlerGtk::OnFileDialog(
     }
   }
 
-  GtkWindow* window = GetWindow(browser);
+  GtkWindow* window = CefBrowser_GetGtkWindow(browser);
   if (!window)
     return false;
 
@@ -378,7 +339,7 @@ bool ClientDialogHandlerGtk::OnJSDialog(
     // title += CefFormatUrlForSecurityDisplay(origin_url).ToString();
   }
 
-  GtkWindow* window = GetWindow(browser);
+  GtkWindow* window = CefBrowser_GetGtkWindow(browser);
   if (!window)
     return false;
 

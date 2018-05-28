@@ -60,6 +60,13 @@ internal/cef_types.h
   - + Remove: UR_FLAG_ALLOW_CACHED_CREDENTIALS
 
 
+TODO
+----
+1. Compare src/handler/dialog_handler_gtk.cpp (and .h) with upstream
+   cefclient files
+2. In subprocess/print_handler_gtk.cpp use GetWindow implementation
+   from x11.cpp
+
 NEW FEATURES
 ------------
 

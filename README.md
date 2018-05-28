@@ -374,6 +374,7 @@ Additional information for v31.2 release:
   * [GetFrameCount](api/Browser.md#getframecount)
   * [GetFrameIdentifiers](api/Browser.md#getframeidentifiers)
   * [GetFrameNames](api/Browser.md#getframenames)
+  * [GetImage](api/Browser.md#getimage)
   * [GetJavascriptBindings](api/Browser.md#getjavascriptbindings)
   * [GetMainFrame](api/Browser.md#getmainframe)
   * [GetNSTextInputContext](api/Browser.md#getnstextinputcontext)

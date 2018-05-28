@@ -5,9 +5,15 @@
 #pragma once
 
 #include <X11/Xlib.h>
+#include <gtk/gtk.h>
+#include <gdk/gdkx.h>
+
 #include "include/cef_browser.h"
 
 void InstallX11ErrorHandlers();
 void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
                         int x, int y, int width, int height);
 void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title);
+
+GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser);
+XImage* CefBrowser_GetImage(CefRefPtr<CefBrowser> browser);
