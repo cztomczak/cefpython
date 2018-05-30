@@ -3,7 +3,7 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Sponsors](#sponsors)
-* [Funding for v66.0 release](#funding-for-v660-release)
+* [Funding for the v66 release](#funding-for-the-v66-release)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
@@ -92,12 +92,13 @@ See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
 
 
-## Funding for v66.0 release
+## Funding for the v66 release
 
 I am happy to announce that Lampix is sponsoring the v66 release of cefpython.
 Lampix is the first hardware and software solution that turns any surface
 into a smart, augmented reality or interactive surface. Please visit its
-website here: https://lampix.com/
+website here: https://lampix.com/ . See the [v66 milestone](../../milestone/13)
+to see progress on the new release.
 
 [![lampix600](https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix600.png)](https://lampix.com/)
 
