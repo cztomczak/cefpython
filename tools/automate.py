@@ -64,10 +64,10 @@ Options:
     --gyp-generators=<gen>   Set GYP_GENERATORS [default: ninja].
     --gyp-msvs-version=<v>   Set GYP_MSVS_VERSION.
     --use-system-freetype    Use system Freetype library on Linux (Issue #402)
-    --no-depot-tools-update  Do not update depot_tools/ directory. When building
-                             old unsupported versions of Chromium you want to
-                             manually checkout an old version of depot tools
-                             from the time of the release.
+    --no-depot-tools-update  Do not update depot_tools/ directory. When
+                             building old unsupported versions of Chromium
+                             you want to manually checkout an old version
+                             of depot tools from the time of the release.
 
 """
 
@@ -574,11 +574,15 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
     # This replacements must be unique for the undo operation
     # to be reliable.
 
-    mt_find = r"/MT "
-    mt_replace = r"/MD /wd4275 "
+    mt_find = r'CEF_RUNTIME_LIBRARY_FLAG "/MT"'
+    mt_replace = r'CEF_RUNTIME_LIBRARY_FLAG "/MD"'
 
-    mtd_find = r"/MTd "
-    mtd_replace = r"/MDd /wd4275 "
+    wd4275_find = ('/wd4244       '
+                   '# Ignore "conversion possible loss of data" warning')
+    wd4275_replace = ('/wd4244       '
+                      '# Ignore "conversion possible loss of data" warning'
+                      '\r\n'
+                      '    /wd4275 # Ignore "non dll-interface class"')
 
     cmake_variables = os.path.join(Options.cef_binary, "cmake",
                                    "cef_variables.cmake")
@@ -587,7 +591,7 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
 
     if try_undo:
         matches1 = re.findall(re.escape(mt_replace), contents)
-        matches2 = re.findall(re.escape(mtd_replace), contents)
+        matches2 = re.findall(re.escape(wd4275_replace), contents)
         if len(matches1) or len(matches2):
             undo = True
         else:
@@ -596,15 +600,16 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
     if undo:
         (contents, count) = re.subn(re.escape(mt_replace), mt_find,
                                     contents)
-        assert count == 2
-        (contents, count) = re.subn(re.escape(mtd_replace), mtd_find,
+        assert count == 1
+        (contents, count) = re.subn(re.escape(wd4275_replace), wd4275_find,
                                     contents)
         assert count == 1
     else:
         (contents, count) = re.subn(re.escape(mt_find), mt_replace,
                                     contents)
-        assert count == 2
-        (contents, count) = re.subn(re.escape(mtd_find), mtd_replace,
+        print(re.escape(mt_find))
+        assert count == 1
+        (contents, count) = re.subn(re.escape(wd4275_find), wd4275_replace,
                                     contents)
         assert count == 1
 
