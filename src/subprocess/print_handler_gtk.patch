@@ -1,8 +1,8 @@
 diff --git print_handler_gtk.cc print_handler_gtk.cc
-index 9a822b7a..18c8c1c4 100644
+index 9a822b7a..3bfc30c5 100644
 --- print_handler_gtk.cc
 +++ print_handler_gtk.cc
-@@ -1,22 +1,23 @@
+@@ -1,22 +1,25 @@
 +// COPIED from upstream "cef/tests/cefclient/browser/" directory
 +// with minor modifications. See the .patch file in current directory.
 +
@@ -23,32 +23,42 @@ index 9a822b7a..18c8c1c4 100644
  #include "include/base/cef_logging.h"
  #include "include/base/cef_macros.h"
  #include "include/wrapper/cef_helpers.h"
--
++#include "include/wrapper/cef_closure_task.h"
+ 
 -#include "tests/cefclient/browser/root_window.h"
 -
 -namespace client {
-+#include "include/wrapper/cef_closure_task.h"
++#include "client_handler/x11.h"
  
  namespace {
  
-@@ -431,10 +432,12 @@ struct ClientPrintHandlerGtk::PrintHandler {
-   // Returns the GtkWindow* for the browser. Will return NULL when using the
-   // Views framework.
-   GtkWindow* GetWindow() {
+@@ -373,7 +376,7 @@ struct ClientPrintHandlerGtk::PrintHandler {
+                      CefRefPtr<CefPrintDialogCallback> callback) {
+     dialog_callback_ = callback;
+ 
+-    GtkWindow* parent = GetWindow();
++    GtkWindow* parent = CefBrowser_GetGtkWindow(browser_);
+     // TODO(estade): We need a window title here.
+     dialog_ = gtk_print_unix_dialog_new(NULL, parent);
+     g_signal_connect(dialog_, "delete-event",
+@@ -428,16 +431,6 @@ struct ClientPrintHandlerGtk::PrintHandler {
+   }
+ 
+  private:
+-  // Returns the GtkWindow* for the browser. Will return NULL when using the
+-  // Views framework.
+-  GtkWindow* GetWindow() {
 -    scoped_refptr<RootWindow> root_window =
 -        RootWindow::GetForBrowser(browser_->GetIdentifier());
 -    if (root_window)
 -      return GTK_WINDOW(root_window->GetWindowHandle());
-+    // TODO(cefpython): Test the code that is commented out whether it works
-+    /*
-+    CefWindowHandle hwnd = browser_->GetWindowHandle();
-+    if (hwnd)
-+      return GTK_WINDOW(hwnd);
-+    */
-     return NULL;
-   }
- 
-@@ -626,5 +629,3 @@ ClientPrintHandlerGtk::PrintHandler* ClientPrintHandlerGtk::GetPrintHandler(
+-    return NULL;
+-  }
+-
+   void OnDialogResponse(GtkDialog* dialog, gint response_id) {
+     int num_matched_handlers = g_signal_handlers_disconnect_by_func(
+         dialog_, reinterpret_cast<gpointer>(&OnDialogResponseThunk), this);
+@@ -626,5 +619,3 @@ ClientPrintHandlerGtk::PrintHandler* ClientPrintHandlerGtk::GetPrintHandler(
    DCHECK(it != print_handler_map_.end());
    return it->second;
  }
