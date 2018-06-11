@@ -1,0 +1,127 @@
+diff --git dialog_handler_gtk.cc dialog_handler_gtk.cc
+index 042be2ca..ce5a4d4e 100644
+--- dialog_handler_gtk.cc
++++ dialog_handler_gtk.cc
+@@ -1,18 +1,20 @@
++// COPIED from upstream "cef/tests/cefclient/browser/" directory
++// with minor modifications. See the .patch file in current directory.
++
+ // Copyright (c) 2015 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+ 
+-#include "tests/cefclient/browser/dialog_handler_gtk.h"
+-
+ #include <libgen.h>
+ #include <sys/stat.h>
+ 
+ #include "include/cef_browser.h"
+ #include "include/cef_parser.h"
+ #include "include/wrapper/cef_helpers.h"
+-#include "tests/cefclient/browser/root_window.h"
+ 
+-namespace client {
++#include "include/base/cef_logging.h"
++#include "dialog_handler_gtk.h"
++#include "x11.h"
+ 
+ namespace {
+ 
+@@ -129,18 +131,6 @@ void AddFilters(GtkFileChooser* chooser,
+   }
+ }
+ 
+-GtkWindow* GetWindow(CefRefPtr<CefBrowser> browser) {
+-  scoped_refptr<RootWindow> root_window =
+-      RootWindow::GetForBrowser(browser->GetIdentifier());
+-  if (root_window) {
+-    GtkWindow* window = GTK_WINDOW(root_window->GetWindowHandle());
+-    if (!window)
+-      LOG(ERROR) << "No GtkWindow for browser";
+-    return window;
+-  }
+-  return NULL;
+-}
+-
+ }  // namespace
+ 
+ ClientDialogHandlerGtk::ClientDialogHandlerGtk() : gtk_dialog_(NULL) {}
+@@ -198,7 +188,7 @@ bool ClientDialogHandlerGtk::OnFileDialog(
+     }
+   }
+ 
+-  GtkWindow* window = GetWindow(browser);
++  GtkWindow* window = CefBrowser_GetGtkWindow(browser);
+   if (!window)
+     return false;
+ 
+@@ -308,30 +298,30 @@ bool ClientDialogHandlerGtk::OnJSDialog(CefRefPtr<CefBrowser> browser,
+     case JSDIALOGTYPE_ALERT:
+       buttons = GTK_BUTTONS_NONE;
+       gtk_message_type = GTK_MESSAGE_WARNING;
+-      title = "JavaScript Alert";
++      title = "Alert";
+       break;
+ 
+     case JSDIALOGTYPE_CONFIRM:
+       buttons = GTK_BUTTONS_CANCEL;
+       gtk_message_type = GTK_MESSAGE_QUESTION;
+-      title = "JavaScript Confirm";
++      title = "Confirm";
+       break;
+ 
+     case JSDIALOGTYPE_PROMPT:
+       buttons = GTK_BUTTONS_CANCEL;
+       gtk_message_type = GTK_MESSAGE_QUESTION;
+-      title = "JavaScript Prompt";
++      title = "Prompt";
+       break;
+   }
+ 
+   js_dialog_callback_ = callback;
+ 
+   if (!origin_url.empty()) {
+-    title += " - ";
+-    title += CefFormatUrlForSecurityDisplay(origin_url).ToString();
++    // title += " - ";
++    // title += CefFormatUrlForSecurityDisplay(origin_url).ToString();
+   }
+ 
+-  GtkWindow* window = GetWindow(browser);
++  GtkWindow* window = CefBrowser_GetGtkWindow(browser);
+   if (!window)
+     return false;
+ 
+@@ -413,5 +403,3 @@ void ClientDialogHandlerGtk::OnDialogResponse(GtkDialog* dialog,
+ 
+   handler->OnResetDialogState(NULL);
+ }
+-
+-}  // namespace client
+diff --git dialog_handler_gtk.h dialog_handler_gtk.h
+index 163d0a35..59f65eda 100644
+--- dialog_handler_gtk.h
++++ dialog_handler_gtk.h
+@@ -1,3 +1,6 @@
++// COPIED from upstream "cef/tests/cefclient/browser/" directory
++// with minor modifications. See the .patch file in current directory.
++
+ // Copyright (c) 2015 The Chromium Embedded Framework Authors. All rights
+ // reserved. Use of this source code is governed by a BSD-style license that
+ // can be found in the LICENSE file.
+@@ -11,8 +14,6 @@
+ #include "include/cef_dialog_handler.h"
+ #include "include/cef_jsdialog_handler.h"
+ 
+-namespace client {
+-
+ class ClientDialogHandlerGtk : public CefDialogHandler,
+                                public CefJSDialogHandler {
+  public:
+@@ -53,6 +54,4 @@ class ClientDialogHandlerGtk : public CefDialogHandler,
+   DISALLOW_COPY_AND_ASSIGN(ClientDialogHandlerGtk);
+ };
+ 
+-}  // namespace client
+-
+ #endif  // CEF_TESTS_CEFCLIENT_BROWSER_DIALOG_HANDLER_GTK_H_
