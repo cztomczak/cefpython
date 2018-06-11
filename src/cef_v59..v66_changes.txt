@@ -64,7 +64,7 @@ MISC
 ----
 + Compare src/client_handler/dialog_handler_gtk.cpp (and .h) with upstream
   cefclient files
-- In subprocess/print_handler_gtk.cpp use GetWindow implementation
++ In subprocess/print_handler_gtk.cpp use GetWindow implementation
   from x11.cpp
 
 NEW FEATURES

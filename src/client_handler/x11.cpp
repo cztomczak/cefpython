@@ -2,6 +2,9 @@
 // All rights reserved. Licensed under BSD 3-clause license.
 // Project website: https://github.com/cztomczak/cefpython
 
+// NOTE: This file is also used by "subprocess" and "libcefpythonapp"
+//       targets during build.
+
 #include "x11.h"
 #include "include/base/cef_logging.h"
 
@@ -24,6 +27,7 @@ void InstallX11ErrorHandlers() {
     // Copied from upstream cefclient.
     // Install xlib error handlers so that the application won't be terminated
     // on non-fatal errors. Must be done after initializing GTK.
+    LOG(INFO) << "[Browser process] Install X11 error handlers";
     XSetErrorHandler(XErrorHandlerImpl);
     XSetIOErrorHandler(XIOErrorHandlerImpl);
 }
@@ -48,6 +52,7 @@ void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
 }
 
 GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser) {
+  // TODO: Should return NULL when using the Views framework
   // -- REWRITTEN FOR CEF PYTHON USE CASE --
   // X11 window handle
   ::Window xwindow = browser->GetHost()->GetWindowHandle();
@@ -68,6 +73,10 @@ GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser) {
     // internally, so GTK wasn't yet initialized and must do it
     // now, so that display is available. Also must install X11
     // error handlers to avoid 'BadWindow' errors.
+    // --
+    // A similar code is in cefpython_app.cpp and it might already
+    // been executed. If making changes here, make changes there
+    // as well.
     LOG(INFO) << "[Browser process] Initialize GTK";
     gtk_init(0, NULL);
     InstallX11ErrorHandlers();

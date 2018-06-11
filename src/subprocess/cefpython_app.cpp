@@ -21,6 +21,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include "client_handler/x11.h"
 #include "print_handler_gtk.h"
 #endif  // OS_LINUX
 #endif  // BROWSER_PROCESS
@@ -221,10 +222,14 @@ CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
 #if defined(OS_LINUX)
     // For print handler to work GTK must be initialized. This is
     // required for some of the examples.
+    // --
+    // A similar code is in client_handler/x11.cpp. If making changes here,
+    // make changes there as well.
     GdkDisplay* gdk_display = gdk_display_get_default();
     if (!gdk_display) {
         LOG(INFO) << "[Browser process] Initialize GTK";
         gtk_init(0, NULL);
+        InstallX11ErrorHandlers();
     }
 #endif
 #endif

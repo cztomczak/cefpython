@@ -12,7 +12,7 @@ UNAME_S = $(shell uname -s)
 CCFLAGS = -fPIC -DBROWSER_PROCESS $(CEF_CCFLAGS)
 
 ifeq ($(UNAME_S), Linux)
-	SRC_MORE = print_handler_gtk.cpp \
+	SRC_MORE = print_handler_gtk.cpp ../client_handler/x11.cpp \
 			main_message_loop/main_message_loop_external_pump_linux.cpp
 else ifeq ($(UNAME_S), Darwin)
     SRC_MORE = main_message_loop/main_message_loop_external_pump_mac.mm

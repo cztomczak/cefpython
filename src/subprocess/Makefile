@@ -35,8 +35,8 @@ else ifeq ($(UNAME_S), Darwin)
 endif
 
 ifeq ($(UNAME_S), Linux)
-	CPP_FILES = print_handler_gtk.cpp
-	LIBS = -lcef -lgobject-2.0 -lglib-2.0 -lgtk-x11-2.0
+	CPP_FILES = print_handler_gtk.cpp ../client_handler/x11.cpp
+	LIBS = -lcef -lX11 -lgobject-2.0 -lglib-2.0 -lgtk-x11-2.0 -lgdk-x11-2.0
 else ifeq ($(UNAME_S), Darwin)
 	CPP_FILES =
 	# Include framework before libcef_dll_wrapper

@@ -19,6 +19,8 @@
 #include "include/wrapper/cef_helpers.h"
 #include "include/wrapper/cef_closure_task.h"
 
+#include "client_handler/x11.h"
+
 namespace {
 
 // CUPS Duplex attribute and values.
@@ -374,7 +376,7 @@ struct ClientPrintHandlerGtk::PrintHandler {
                      CefRefPtr<CefPrintDialogCallback> callback) {
     dialog_callback_ = callback;
 
-    GtkWindow* parent = GetWindow();
+    GtkWindow* parent = CefBrowser_GetGtkWindow(browser_);
     // TODO(estade): We need a window title here.
     dialog_ = gtk_print_unix_dialog_new(NULL, parent);
     g_signal_connect(dialog_, "delete-event",
@@ -429,18 +431,6 @@ struct ClientPrintHandlerGtk::PrintHandler {
   }
 
  private:
-  // Returns the GtkWindow* for the browser. Will return NULL when using the
-  // Views framework.
-  GtkWindow* GetWindow() {
-    // TODO(cefpython): Test the code that is commented out whether it works
-    /*
-    CefWindowHandle hwnd = browser_->GetWindowHandle();
-    if (hwnd)
-      return GTK_WINDOW(hwnd);
-    */
-    return NULL;
-  }
-
   void OnDialogResponse(GtkDialog* dialog, gint response_id) {
     int num_matched_handlers = g_signal_handlers_disconnect_by_func(
         dialog_, reinterpret_cast<gpointer>(&OnDialogResponseThunk), this);
