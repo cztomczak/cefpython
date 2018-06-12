@@ -344,6 +344,7 @@ cdef extern from "include/internal/cef_types.h":
         PK_FILE_MODULE,
         PK_LOCAL_APP_DATA,
         PK_USER_DATA,
+        PK_DIR_RESOURCES,
     ctypedef cef_path_key_t PathKey
 
     ctypedef enum cef_plugin_policy_t:
