@@ -12,6 +12,11 @@ cimport cef_types
 
 LOGSEVERITY_DEFAULT = cef_types.LOGSEVERITY_DEFAULT
 LOGSEVERITY_VERBOSE = cef_types.LOGSEVERITY_VERBOSE
+# LOGSEVERITY_DEBUG is not exposed, as it is the same
+# as LOGSEVERITY_VERBOSE, and because it would be confusing
+# as currently passing --debug arg to app causes it to
+# set logseverity to LOGSEVERITY_INFO. Verbose logseverity
+# contains too much information.
 LOGSEVERITY_INFO = cef_types.LOGSEVERITY_INFO
 LOGSEVERITY_WARNING = cef_types.LOGSEVERITY_WARNING
 LOGSEVERITY_ERROR = cef_types.LOGSEVERITY_ERROR

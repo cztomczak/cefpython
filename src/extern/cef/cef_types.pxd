@@ -115,6 +115,7 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef enum cef_log_severity_t:
         LOGSEVERITY_DEFAULT,
         LOGSEVERITY_VERBOSE,
+        LOGSEVERITY_DEBUG = LOGSEVERITY_VERBOSE,
         LOGSEVERITY_INFO,
         LOGSEVERITY_WARNING,
         LOGSEVERITY_ERROR,

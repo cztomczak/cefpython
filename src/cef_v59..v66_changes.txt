@@ -71,7 +71,8 @@ NEW FEATURES
 ------------
 
 internal/cef_types.h
-- cef_log_severity_t: new key LOGSEVERITY_DEBUG
++ cef_log_severity_t: new key LOGSEVERITY_DEBUG (no need to expose,
+  same as LOGSEVERITY_VERBOSE, see code comments in setting.pyx
 - cef_settings_t:
   - background_color: OSR windows can set an ARGB background color
 - cef_path_key_t (informational only):

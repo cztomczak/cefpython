@@ -314,7 +314,6 @@ Accepted values - constants available in the cefpython module:
 * LOGSEVERITY_INFO
 * LOGSEVERITY_WARNING
 * LOGSEVERITY_ERROR (default)
-* LOGSEVERITY_ERROR_REPORT
 * LOGSEVERITY_DISABLE
 
 
