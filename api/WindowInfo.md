@@ -50,7 +50,7 @@ Available only on Windows.
 | parentWindowHandle | int |
 | __Return__ | void |
 
-Upstream CEF description:
+Description from upstream CEF:
 > Create the browser using windowless (off-screen) rendering. No window
 will be created for the browser and all rendering will occur via the
 CefRenderHandler interface. The |parent| value will be used to identify

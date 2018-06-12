@@ -86,6 +86,10 @@ Description from upstream CEF:
 > fully transparent for a windowless (off-screen) browser then transparent
 > painting will be enabled.
 
+32-bit ARGB color value, not premultiplied. The color components are always
+in a known order. Equivalent to the `SkColor` type in Chromium.
+
+
 ### databases_disabled
 
 (bool) Controls whether databases can be used. Also configurable using the --disable-databases switch.

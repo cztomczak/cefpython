@@ -118,7 +118,7 @@ Description from upstream CEF:
 > will be enabled.
 
 32-bit ARGB color value, not premultiplied. The color components are always
-in a known order. Equivalent to the `SkColor` type.
+in a known order. Equivalent to the `SkColor` type in Chromium.
 
 
 ### browser_subprocess_path
