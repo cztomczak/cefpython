@@ -24,9 +24,15 @@ PYINSTALLER_MIN_VERSION = "3.2.1"
 # TODO: use this code to work cross-platform:
 # > from PyInstaller.utils.hooks import get_package_paths
 # > get_package_paths("cefpython3")
-CEFPYTHON3_DIR = os.path.join(
-    os.path.dirname(sys.executable),
-    'Lib', 'site-packages', 'cefpython3')
+
+if os.path.splitext(os.path.basename(sys.argv[0]))[0] == "python":
+    CEFPYTHON3_DIR = os.path.join(
+        os.path.dirname(sys.executable),
+        'Lib', 'site-packages', 'cefpython3')
+else:
+    from PyInstaller.utils.hooks import get_package_paths
+    CEFPYTHON3_DIR = get_package_paths("cefpython3")[1]
+
 
 if platform.system() == "Windows":
     CYTHON_MODULE_EXT = ".pyd"
@@ -38,9 +44,9 @@ logger = logging.getLogger(__name__)
 
 
 # Functions
-def check_platforms():
-    if platform.system() != "Windows":
-        raise SystemExit("Error: Currently only Windows platform is "
+def check_platforms():    
+    if platform.system() != "Windows" and platform.system() != "Linux":
+        raise SystemExit("Error: Currently only Windows and Linux platform is "
                          " supported, see Issue #135.")
 
 
@@ -51,7 +57,7 @@ def check_pyinstaller_version():
     # Example version string for dev version of pyinstaller:
     # > 3.3.dev0+g5dc9557c
     version = PyInstaller.__version__
-    match = re.search(r"^\d+\.\d+", version)
+    match = re.search(r"^\d+\.\d+\.\d+", version)
     if not (match.group(0) >= PYINSTALLER_MIN_VERSION):
         raise SystemExit("Error: pyinstaller %s or higher is required"
                          % PYINSTALLER_MIN_VERSION)
@@ -122,15 +128,19 @@ def get_cefpython3_datas():
     for filename in os.listdir(CEFPYTHON3_DIR):
         # Ignore Cython modules which are already handled by
         # pyinstaller automatically.
-        if filename[:-4] in get_cefpython_modules():
+        if filename[:-len(CYTHON_MODULE_EXT)] in get_cefpython_modules():
             continue
+        
+        cefdatadir = "" if platform.system() == "Windows" else "cefpython3/"
+        
         # CEF binaries and datas
-        if filename[-4:] in [".exe", ".dll", ".so", ".pak", ".dat", ".bin",
-                             ".txt"]\
-                or filename in ["License", "subprocess"]:
+        if filename[-4:] in [".exe", ".dll", ".pak", ".dat", ".bin",".txt"]\
+                or filename in ["License", "subprocess"]\
+                or filename[-3:] in [".so"]\
+                :
             logger.info("Include cefpython3 data: %s" % filename)
             ret.append((os.path.join(CEFPYTHON3_DIR, filename),
-                        ""))
+                        cefdatadir))
 
     # The .pak files in cefpython3/locales/ directory
     locales_dir = os.path.join(CEFPYTHON3_DIR, "locales")
@@ -139,7 +149,7 @@ def get_cefpython3_datas():
         logger.info("Include cefpython3 data: %s/%s" % (
             os.path.basename(locales_dir), filename))
         ret.append((os.path.join(locales_dir, filename),
-                    "locales"))
+                    cefdatadir+"locales"))
     return ret
 
 
