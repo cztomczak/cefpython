@@ -151,9 +151,18 @@ def set_compiler_options(options):
         #   function "public: virtual bool __thiscall
         #   ClientHandler::OnProcessMessageReceived
         #
+        # /wd4305 - disable warnnings such as this:
+        #
+        #   warning C4305: '=' : truncation from 'int' to 'bool'
+        #   Code: > cdef public cpp_bool ExecutePythonCallback(...) except *:
+        #         >     return True
+        #   Discussed on cython group error 4800 which is similar to this,
+        #   but there is no other way to fix this warning:
+        #   https://groups.google.com/d/topic/cython-users/X_X0lfIBCqo/discussion
+        #
         # The above warning LNK4217 is caused by the warning below which occurs
         # when building the client_handler.lib static library:
-        extra_compile_args.extend(["/EHsc"])
+        extra_compile_args.extend(["/EHsc", "/wd4305"])
         extra_link_args.extend(["/ignore:4217"])
 
     if LINUX or MAC:
