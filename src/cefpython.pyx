@@ -583,6 +583,15 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         application_settings["single_process"] = False
     # ------------------------------------------------------------------------
 
+    # ------------------------------------------------------------------------
+    # Fix GPUCache/ folder creation when using in-memory cache (Issue #419)
+    # ------------------------------------------------------------------------
+    if not "cache_path" in application_settings:
+        application_settings["cache_path"] = ""
+    if not application_settings["cache_path"]:
+        g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
+
+
     cdef CefRefPtr[CefApp] cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
 
     IF UNAME_SYSNAME == "Windows":
