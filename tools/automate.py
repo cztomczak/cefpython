@@ -786,7 +786,8 @@ def create_prebuilt_binaries():
                 shutil.copy(app, bindir)
 
     if not MAC:
-        # Currently do not copy apps on Mac
+        # Currently do not copy apps on Mac, as they take lots of
+        # additional space (cefsimple is 157 MB).
         copy_app(cefclient)
         copy_app(cefsimple)
         copy_app(ceftests)
