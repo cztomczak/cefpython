@@ -9,7 +9,6 @@ from cef_types cimport int64
 from cef_ptr cimport CefRefPtr
 
 cdef extern from "include/cef_task.h":
-    ctypedef int CefThreadId
     ctypedef cef_types.cef_thread_id_t CefThreadId
     
     cdef cpp_bool CefCurrentlyOn(CefThreadId)
