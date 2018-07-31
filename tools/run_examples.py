@@ -14,6 +14,7 @@ from common import *
 
 import importlib
 import os
+import subprocess
 import sys
 
 
@@ -189,9 +190,10 @@ def check_installed_packages():
 def check_gi_installed():
     # Cannot import both gtk and gi in the same script, thus
     # need another way of checking if gi package is installed.
-    command = ("\"{python}\" -c \"import gi\""
-               .format(python=sys.executable))
-    code = os.system(command)
+    code = subprocess.call([sys.executable, "-c", "import gi"])
+    if code != 0:
+        print("[run_examples.py] gi module not found (PyGI / GTK 3).")
+        print("                  Import error above can be safely ignored.")
     return True if code == 0 else False
 
 
