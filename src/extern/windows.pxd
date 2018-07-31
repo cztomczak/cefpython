@@ -23,6 +23,8 @@ cdef extern from "Windows.h" nogil:
     ctypedef HICON HCURSOR
 
     ctypedef unsigned int UINT
+    ctypedef unsigned int UINT_PTR
+
     # noinspection PyUnresolvedReferences
     ctypedef wchar_t* LPCTSTR
     # noinspection PyUnresolvedReferences
@@ -49,7 +51,11 @@ cdef extern from "Windows.h" nogil:
     cdef size_t mbstowcs(wchar_t *wcstr, const_char *mbstr, size_t count)
 
     ctypedef void* HDWP
+
     cdef int SWP_NOZORDER
+    cdef int SWP_NOACTIVATE
+    cdef int SWP_FRAMECHANGED
+
     cdef HDWP BeginDeferWindowPos(int nNumWindows)
     cdef HDWP DeferWindowPos(
             HDWP hWinPosInfo, HWND hWnd, HWND hWndInsertAfter,
@@ -64,8 +70,6 @@ cdef extern from "Windows.h" nogil:
     cdef BOOL PostMessage(
             HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
-    ctypedef unsigned int UINT_PTR
-    ctypedef unsigned int UINT
     ctypedef struct TIMERPROC:
         pass
     cdef UINT_PTR SetTimer(
@@ -108,9 +112,6 @@ cdef extern from "Windows.h" nogil:
     cdef BOOL SetWindowPos(
             HWND hWnd, HWND hWndInsertAfter,
             int X, int Y, int cx, int cy, UINT uFlags)
-    cdef int SWP_NOZORDER
-    cdef int SWP_NOACTIVATE
-    cdef int SWP_FRAMECHANGED
 
     cdef DWORD GetLastError()
     cdef BOOL IsWindow(HWND hWnd)
