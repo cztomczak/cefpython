@@ -75,17 +75,10 @@ internal/cef_types.h
   same as LOGSEVERITY_VERBOSE, see code comments in setting.pyx
 + cef_settings_t:
   + background_color: OSR windows can set an ARGB background color
-- cef_path_key_t (informational only):
-  - PK_DIR_RESOURCES new key
-- cef_urlrequest_flags_t (expose in cefpython.Request.Flags):
-  - UR_FLAG_ONLY_FROM_CACHE new flag
-  - UR_FLAG_STOP_ON_REDIRECT new flag
-  - enum values have changed due to new key
-- cef_thread_id_t:
-  - TID_FILE_BACKGROUND (deprecated TID_FILE)
-  - TID_FILE_USER_VISIBLE
-- cef_popup_features_t: some keys removed (not exposed, informational only)
-- cef_referrer_policy_t changes (not exposed)
++ cef_path_key_t (informational only):
+  + PK_DIR_RESOURCES new key
++ cef_popup_features_t: some keys removed (not exposed, informational only)
++ cef_referrer_policy_t changes (not exposed, info only)
 
 cef_accessibility_handler.h
 - CefAccessibilityHandler

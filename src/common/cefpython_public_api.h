@@ -44,6 +44,8 @@
 #include "../../build/build_cefpython/cefpython_py35_fixed.h"
 #elif PY_MINOR_VERSION == 6
 #include "../../build/build_cefpython/cefpython_py36_fixed.h"
+#elif PY_MINOR_VERSION == 7
+#include "../../build/build_cefpython/cefpython_py37_fixed.h"
 #endif // PY_MINOR_VERSION
 #endif // PY_MAJOR_VERSION
 

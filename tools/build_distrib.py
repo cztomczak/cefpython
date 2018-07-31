@@ -20,6 +20,9 @@ Options:
                        allows to use CEF prebuilt binaries and libraries
                        downloaded from CEF Python's Github releases to
                        build distribution pacakges.
+    --allow-partial    Do not require all supported Python versions to
+                       be installed. If some are missing they just won't
+                       be included in distribution.
 
 
 This script does the following:
@@ -73,9 +76,10 @@ VERSION = ""
 NO_RUN_EXAMPLES = False
 NO_REBUILD = False
 NO_AUTOMATE = False
+ALLOW_PARTIAL = False
 
 # Python versions
-SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6)]
+SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7)]
 
 # Python search paths. It will use first Python found for specific version.
 # Supports replacement of one environment variable in path eg.: %ENV_KEY%.
@@ -148,7 +152,7 @@ def main():
 
 
 def command_line_args():
-    global VERSION, NO_RUN_EXAMPLES, NO_REBUILD, NO_AUTOMATE
+    global VERSION, NO_RUN_EXAMPLES, NO_REBUILD, NO_AUTOMATE, ALLOW_PARTIAL
     version = get_version_from_command_line_args(__file__)
     if not version or "--help" in sys.argv:
         print(__doc__)
@@ -163,6 +167,9 @@ def command_line_args():
     if "--no-automate" in sys.argv:
         NO_AUTOMATE = True
         sys.argv.remove("--no-automate")
+    if "--allow-partial" in sys.argv:
+        ALLOW_PARTIAL = True
+        sys.argv.remove("--allow-partial")
     args = sys.argv[1:]
     for arg in args:
         if arg == version:
@@ -295,7 +302,8 @@ def check_pythons(pythons_32bit, pythons_64bit):
     if pythons_32bit:
         print("[build_distrib.py] Pythons 32-bit found:")
         pp.pprint(pythons_32bit)
-    if check_32bit and len(pythons_32bit) != len(SUPPORTED_PYTHON_VERSIONS):
+    if check_32bit and len(pythons_32bit) != len(SUPPORTED_PYTHON_VERSIONS) \
+            and not ALLOW_PARTIAL:
         print("[build_distrib.py] ERROR: Couldn't find all supported"
               " python 32-bit installations. Found: {found}."
               .format(found=len(pythons_32bit)))
@@ -303,7 +311,8 @@ def check_pythons(pythons_32bit, pythons_64bit):
     if pythons_64bit:
         print("[build_distrib.py] Pythons 64-bit found:")
         pp.pprint(pythons_64bit)
-    if check_64bit and len(pythons_64bit) != len(SUPPORTED_PYTHON_VERSIONS):
+    if check_64bit and len(pythons_64bit) != len(SUPPORTED_PYTHON_VERSIONS) \
+            and not ALLOW_PARTIAL:
         print("[build_distrib.py] ERROR: Couldn't find all supported"
               " python 64-bit installations. Found: {found}."
               .format(found=len(pythons_64bit)))

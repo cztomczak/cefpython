@@ -44,7 +44,7 @@ if platform.system() == "Linux":
     libcef = os.path.join(package_dir, "libcef.so")
     ctypes.CDLL(libcef, ctypes.RTLD_GLOBAL)
 
-# Load the cefpython module for proper Python version
+# Load the cefpython module for given Python version
 if sys.version_info[:2] == (2, 7):
     # noinspection PyUnresolvedReferences
     from . import cefpython_py27 as cefpython
@@ -57,5 +57,8 @@ elif sys.version_info[:2] == (3, 5):
 elif sys.version_info[:2] == (3, 6):
     # noinspection PyUnresolvedReferences
     from . import cefpython_py36 as cefpython
+elif sys.version_info[:2] == (3, 7):
+    # noinspection PyUnresolvedReferences
+    from . import cefpython_py37 as cefpython
 else:
     raise Exception("Python version not supported: " + sys.version)
