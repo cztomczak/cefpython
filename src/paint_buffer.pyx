@@ -14,9 +14,9 @@ cdef PaintBuffer CreatePaintBuffer(const void* buffer_, int width, int height):
 
 cdef class PaintBuffer:
     cdef const void* buffer
-    cdef int width
-    cdef int height
-    cdef Py_ssize_t length
+    cdef public int width
+    cdef public int height
+    cdef public Py_ssize_t length
 
     cpdef uintptr_t GetPointer(self) except *:
         # BEFORE MODIFYING CODE:
