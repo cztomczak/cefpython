@@ -205,8 +205,8 @@ class RenderHandler(object):
             # reasons it would be better not to copy this string.
             # I think that Python makes a copy of that string when
             # passing it to SetUserData.
-            buffer_string = paint_buffer.GetString(mode="rgba",
-                                                   origin="top-left")
+            buffer_string = paint_buffer.GetBytes(mode="rgba",
+                                                  origin="top-left")
             # Browser object provides GetUserData/SetUserData methods
             # for storing custom data associated with browser.
             browser.SetUserData("OnPaint.buffer_string", buffer_string)

@@ -9,7 +9,7 @@ This object used in: [RenderHandler](RenderHandler.md).OnPaint().
 Table of contents:
 * [Methods](#methods)
   * [GetIntPointer](#getintpointer)
-  * [GetString](#getstring)
+  * [GetBytes](#getbytes)
 
 
 ## Methods
@@ -28,7 +28,7 @@ Description from upstream CEF:
 > image with an upper-left origin.
 
 
-### GetString
+### GetBytes
 
 | Parameter | Type |
 | --- | --- |
