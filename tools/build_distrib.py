@@ -131,22 +131,22 @@ def main():
             run_automate_prebuilt_cef(pythons_32bit[0])
         pack_prebuilt_cef("32bit")
         if LINUX:
-            reduce_package_size_issue_262("32bit")
+            reduce_package_size_issue262("32bit")
         remove_unnecessary_package_files("32bit")
     if pythons_64bit:
         if not NO_AUTOMATE:
             run_automate_prebuilt_cef(pythons_64bit[0])
         pack_prebuilt_cef("64bit")
         if LINUX:
-            reduce_package_size_issue_262("64bit")
+            reduce_package_size_issue262("64bit")
         remove_unnecessary_package_files("64bit")
     if not NO_REBUILD:
         build_cefpython_modules(pythons_32bit, "32bit")
         build_cefpython_modules(pythons_64bit, "64bit")
     if pythons_32bit:
-        make_packages(pythons_32bit[0], "32bit")
+        make_packages(pythons_32bit[0], "32bit", pythons_32bit)
     if pythons_64bit:
-        make_packages(pythons_64bit[0], "64bit")
+        make_packages(pythons_64bit[0], "64bit", pythons_64bit)
     test_wheel_packages(pythons_32bit + pythons_64bit)
     show_summary(pythons_32bit, pythons_64bit)
 
@@ -432,7 +432,7 @@ def zip_directory(path, base_path, archive):
     os.chdir(original_dir)
 
 
-def reduce_package_size_issue_262(arch):
+def reduce_package_size_issue262(arch):
     """Linux only: libcef.so is huge (500 MB) in Chrome v54+. Issue #262."""
     print("[build_distrib.py] Reduce package size for {arch} (Issue #262)"
           .format(arch=arch))
@@ -533,7 +533,7 @@ def restore_subprocess_executable_issue342(arch):
     shutil.copy(src, dst)
 
 
-def make_packages(python, arch):
+def make_packages(python, arch, all_pythons):
     """Make setup and wheel packages."""
     print("[build_distrib.py] Make setup package for {arch}..."
           .format(arch=arch))
@@ -556,6 +556,7 @@ def make_packages(python, arch):
     setup_basename = get_setup_installer_basename(
             VERSION, get_os_postfix2_for_arch(arch))
     setup_dir = os.path.join(BUILD_DIR, setup_basename)
+    check_cpp_extension_dependencies_issue359(setup_dir, all_pythons)
     archive = pack_directory(setup_dir, BUILD_DIR)
     shutil.move(archive, DISTRIB_DIR)
 
@@ -581,6 +582,28 @@ def make_packages(python, arch):
     print("[build_distrib.py] Delete setup directory: {setup_dir}/"
           .format(setup_dir=os.path.basename(setup_dir)))
     shutil.rmtree(setup_dir)
+
+
+def check_cpp_extension_dependencies_issue359(setup_dir, all_pythons):
+    """Windows only: check if msvcpXX.dll exist for all Python versions.
+    Issue #359."""
+    if not WINDOWS:
+        return
+    checked_any = False
+    for python in all_pythons:
+        if python["version2"] in ((3, 5), (3, 6), (3, 7)):
+            checked_any = True
+            if not os.path.exists(os.path.join(setup_dir, "msvcp140.dll")):
+                raise Exception("C++ ext dependency missing: msvcp140.dll")
+        elif python["version2"] == (3, 4):
+            checked_any = True
+            if not os.path.exists(os.path.join(setup_dir, "msvcp100.dll")):
+                raise Exception("C++ ext dependency missing: msvcp100.dll")
+        elif python["version2"] == (2, 7):
+            if not os.path.exists(os.path.join(setup_dir, "msvcp90.dll")):
+                raise Exception("C++ ext dependency missing: msvcp100.dll")
+            checked_any = True
+    assert checked_any
 
 
 def test_wheel_packages(pythons):

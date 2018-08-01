@@ -102,6 +102,8 @@ def main():
     create_empty_log_file(os.path.join(PKG_DIR, "debug.log"))
     create_empty_log_file(os.path.join(PKG_DIR, "examples/debug.log"))
 
+    copy_cpp_extension_dependencies_issue359(PKG_DIR)
+
     print("[make_installer.py] Done. Installer package created: {setup_dir}"
           .format(setup_dir=SETUP_DIR))
 
@@ -184,7 +186,7 @@ def replace_template_vars(string, dictionary):
         string = string.replace("{{"+key+"}}", value)
     if string == orig_string:
         raise Exception("Nothing to format")
-    if re.search(r"\{\{[a-zA-Z0-9_]+\}\}", string):
+    if re.search(r"{{[a-zA-Z0-9_]+}}", string):
         raise Exception("Not all strings were formatted")
     return string
 
@@ -332,6 +334,84 @@ def create_empty_log_file(log_file):
         print("[make_installer.py] {command}"
               .format(command=command.replace(SETUP_DIR, "")))
         subprocess.check_call(command, shell=True)
+
+
+def copy_cpp_extension_dependencies_issue359(pkg_dir):
+    """CEF Python module is written in Cython and is a Python C++
+    extension and depends on msvcpXX.dll. For Python 3.5 / 3.6 / 3.7
+    msvcp140.dll is required. See Issue #359. For Python 2.7
+    msvcp90.dll is required. Etc. These dependencies are not included
+    with Python binaries from Python.org."""
+    if not WINDOWS:
+        return
+
+    windows_dir = os.environ["SYSTEMROOT"]
+    if SYSTEM64:
+        system32 = os.path.join(windows_dir, "SysWOW64")
+        system64 = os.path.join(windows_dir, "System32")
+    else:
+        system32 = os.path.join(windows_dir, "")
+        system64 = None
+    if ARCH64:
+        system = system64
+    else:
+        system = system32
+
+    root_search_paths = []
+
+    # Need to check for .pyd files for all Python version, because
+    # the builder/installer work in a way that previous cefpython
+    # module builds for other Python versions are also included
+    # in the package. Thus if included, msvcpxx.dll dependency is
+    # required as well.
+
+    # Python 3.5 / 3.6 / 3.7
+    if os.path.exists(os.path.join(pkg_dir, "cefpython_py35.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py36.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py37.pyd")):
+        search_paths = [
+            # This is where Microsoft Visual C++ 2015 Update 3 installs
+            # (14.00.24212).
+            os.path.join(system, "msvcp140.dll"),
+        ]
+        root_search_paths.append(search_paths)
+
+    # Python 3.4
+    if os.path.exists(os.path.join(pkg_dir, "cefpython_py34.pyd")):
+        search_paths = [
+            # 10.00.40219.325 installs here on my system.
+            os.path.join(system, "msvcp100.dll"),
+        ]
+        root_search_paths.append(search_paths)
+
+    # Python 2.7
+    if os.path.exists(os.path.join(pkg_dir, "cefpython_py27.pyd")):
+        if ARCH32:
+            search_paths = [
+                # This runtime version is shipped with Python 2.7.14
+                r"c:\Windows\winsxs\x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b"
+                r"_9.0.30729.1_none_e163563597edeada\msvcp90.dll",
+            ]
+        else:
+            search_paths = [
+                # This runtime version is shipped with Python 2.7.14
+                r"c:\Windows\winsxs\amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b"
+                r"_9.0.30729.1_none_99b61f5e8371c1d4\msvcp90.dll",
+            ]
+        root_search_paths.append(search_paths)
+
+    assert len(root_search_paths)
+
+    for search_paths in root_search_paths:
+        found = False
+        for path in search_paths:
+            if os.path.exists(path):
+                shutil.copy(path, pkg_dir)
+                found = True
+        if not found:
+            raise Exception("C++ extension dll dependency not found."
+                            " Search paths: {0}"
+                            .format(", ".join(search_paths)))
 
 
 def short_src_path(path):

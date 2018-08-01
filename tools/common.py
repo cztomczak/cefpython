@@ -15,7 +15,7 @@ import sys
 # These sample apps will be deleted when creating setup/wheel packages
 CEF_SAMPLE_APPS = ["cefclient", "cefsimple", "ceftests", "chrome-sandbox"]
 
-# Architecture and OS postfixes
+# Python architecture and OS postfixes
 ARCH32 = (8 * struct.calcsize('P') == 32)
 ARCH64 = (8 * struct.calcsize('P') == 64)
 # Make sure platform.architecture()[0] shows correctly 32bit when
@@ -25,6 +25,10 @@ if ARCH32:
 if ARCH64:
     assert platform.architecture()[0] == "64bit"
 ARCH_STR = platform.architecture()[0]
+
+# Operating system architecture
+SYSTEM64 = platform.machine().endswith('64')
+SYSTEM32 = not SYSTEM64
 
 # OS_POSTFIX is for directories/files names in cefpython sources
 #            and doesn't include architecture type, just OS name.
