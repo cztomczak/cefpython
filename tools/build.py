@@ -22,12 +22,14 @@ Usage:
                      [--hello-world]
 
 Options:
-    VERSION            Version number eg. 50.0
-    --no-run-examples  Do not run examples after build, only unit tests
-    --fast             Fast mode
-    --clean            Clean C++ projects build files on Linux/Mac
-    --kivy             Run only Kivy example
-    --hello-world      Run only Hello World example
+    VERSION                Version number eg. 50.0
+    --no-run-examples      Do not run examples after build, only unit tests
+    --fast                 Fast mode
+    --clean                Clean C++ projects build files on Linux/Mac
+    --kivy                 Run only Kivy example
+    --hello-world          Run only Hello World example
+    --enable-profiling     Enable cProfile profiling
+    --enable-line-tracing  Enable cProfile line tracing
 """
 
 # --rebuild-cpp      Force rebuild of .vcproj C++ projects (DISABLED)
@@ -82,6 +84,8 @@ CLEAN_FLAG = False
 KIVY_FLAG = False
 HELLO_WORLD_FLAG = False
 REBUILD_CPP = False
+ENABLE_PROFILING = False
+ENABLE_LINE_TRACING = False
 
 # First run
 FIRST_RUN = False
@@ -122,48 +126,72 @@ def command_line_args():
            REBUILD_CPP, VERSION, NO_RUN_EXAMPLES
 
     VERSION = get_version_from_command_line_args(__file__)
+    # Other scripts called by this script expect that version number
+    # is available in sys.argv, so don't remove it like it's done
+    # for all other args starting with "--".
     if not VERSION:
         print(__doc__)
         sys.exit(1)
 
     print("[build.py] Parse command line arguments")
 
-    # --no-run-examples
     if "--no-run-examples" in sys.argv:
         NO_RUN_EXAMPLES = True
         print("[build.py] Running examples disabled (--no-run-examples)")
+        sys.argv.remove("--no-run-examples")
 
-    # -- debug
     if "--debug" in sys.argv:
         DEBUG_FLAG = True
         print("[build.py] DEBUG mode On")
+        sys.argv.remove("--debug")
 
-    # --fast
     if "--fast" in sys.argv:
         # Fast mode doesn't delete C++ .o .a files.
         # Fast mode also disables optimization flags in setup/setup.py .
         FAST_FLAG = True
         print("[build.py] FAST mode On")
+        sys.argv.remove("--fast")
 
-    # --clean
     if "--clean" in sys.argv:
         CLEAN_FLAG = True
+        sys.argv.remove("--clean")
 
-    # --kivy
     if "--kivy" in sys.argv:
         KIVY_FLAG = True
         print("[build.py] KIVY example")
+        sys.argv.remove("--kivy")
 
-    # --kivy
     if "--hello-world" in sys.argv:
         HELLO_WORLD_FLAG = True
         print("[build.py] HELLO WORLD example")
+        sys.argv.remove("--hello-world")
 
-    # --rebuild-cpp
     # Rebuild c++ projects
     if "--rebuild-cpp" in sys.argv:
         REBUILD_CPP = True
         print("[build.py] REBUILD_CPP mode enabled")
+        sys.argv.remove("--rebuild-cpp")
+
+    global ENABLE_PROFILING
+    if "--enable-profiling" in sys.argv:
+        print("[build.py] cProfile profiling enabled")
+        ENABLE_PROFILING = True
+        sys.argv.remove("--enable-profiling")
+
+    global ENABLE_LINE_TRACING
+    if "--enable-line-tracing" in sys.argv:
+        print("[build.py] cProfile line tracing enabled")
+        ENABLE_LINE_TRACING = True
+        sys.argv.remove("--enable-line-tracing")
+
+    for arg in sys.argv:
+        if arg.startswith("--"):
+            print("ERROR: invalid arg {0}".format(arg))
+            sys.exit(1)
+
+    if len(sys.argv) <= 1:
+        print(__doc__)
+        sys.exit(1)
 
     print("[build.py] VERSION=%s" % VERSION)
 
@@ -726,8 +754,18 @@ def build_cefpython_module():
 
     os.chdir(BUILD_CEFPYTHON)
 
+    enable_profiling = ""
+    if ENABLE_PROFILING:
+        enable_profiling = "--enable-profiling"
+    enable_line_tracing = ""
+    if ENABLE_LINE_TRACING:
+        enable_line_tracing = "--enable-line-tracing"
+
     command = ("\"{python}\" {tools_dir}/cython_setup.py build_ext"
-               .format(python=sys.executable, tools_dir=TOOLS_DIR))
+               " {enable_profiling} {enable_line_tracing}"
+               .format(python=sys.executable, tools_dir=TOOLS_DIR,
+                       enable_profiling=enable_profiling,
+                       enable_line_tracing=enable_line_tracing))
     if FAST_FLAG:
         command += " --fast"
     ret = subprocess.call(command, shell=True)

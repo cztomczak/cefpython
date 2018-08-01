@@ -65,8 +65,10 @@ if MAC:
             generate_extern_c_macro_definition)
 
 
-# Constants
+# Command line args
 FAST_FLAG = False
+ENABLE_PROFILING = False
+ENABLE_LINE_TRACING = False
 
 # Cython options. Stop on first error, otherwise hundreds
 # of errors appear in the console.
@@ -80,11 +82,23 @@ def main():
     print("[cython_setup.py] Cython version: %s" % Cython.__version__)
 
     global FAST_FLAG
-    if len(sys.argv) > 1 and "--fast" in sys.argv:
+    if "--fast" in sys.argv:
         # Fast mode disables optimization flags
         print("[cython_setup.py] FAST mode enabled")
         FAST_FLAG = True
         sys.argv.remove("--fast")
+
+    global ENABLE_PROFILING
+    if "--enable-profiling" in sys.argv:
+        print("[cython_setup.py] cProfile profiling enabled")
+        ENABLE_PROFILING = True
+        sys.argv.remove("--enable-profiling")
+
+    global ENABLE_LINE_TRACING
+    if "--enable-line-tracing" in sys.argv:
+        print("[cython_setup.py] cProfile line tracing enabled")
+        ENABLE_LINE_TRACING = True
+        sys.argv.remove("--enable-line-tracing")
 
     if len(sys.argv) <= 1:
         print(__doc__)
@@ -393,6 +407,8 @@ def get_ext_modules(options):
             # Any conversion to unicode must be explicit using .decode().
             "c_string_type": "bytes",
             "c_string_encoding": "utf-8",
+            "profile": ENABLE_PROFILING,
+            "linetrace": ENABLE_LINE_TRACING,
         },
 
         language="c++",
