@@ -28,17 +28,21 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 
     cdef PyFrame pyFrame
     cdef object frameId = cefFrame.get().GetIdentifier()  # int64
-    if frameId < 0:
-        # Underlying frame does not yet exist.
-        Debug("GetPyFrame(): underlying frame does not yet exist"
-              ", frameId = {0}".format(frameId))
-        return None
     cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
     assert (frameId and browserId), "frameId or browserId empty"
     cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
 
-    if uniqueFrameId in g_pyFrames:
-        return g_pyFrames[uniqueFrameId]
+    if frameId < 0:
+        # Underlying frame does not yet exist. In such case PyFrame
+        # is not stored in g_pyFrames since frameId is invalid.
+        # However even though frame is not supposed to exist, you
+        # can still call CefFrame.ExecuteFunction and it works fine
+        # in tutorial.py example.
+        Debug("GetPyFrame(): underlying frame does not yet exist:"
+              " browserId = {0}, frameId = {1}".format(browserId, frameId))
+    else:
+        if uniqueFrameId in g_pyFrames:
+            return g_pyFrames[uniqueFrameId]
 
     # This code probably ain't needed.
     # ----
@@ -56,6 +60,7 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     pyFrame.cefFrame = cefFrame
 
     if uniqueFrameId in g_unreferenced_frames \
+            or frameId < 0 \
             or browserId in g_unreferenced_browsers \
             or browserId in g_closed_browsers:
         # Browser was already globally unreferenced in OnBeforeClose,
