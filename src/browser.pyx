@@ -74,7 +74,8 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser,
     cdef JavascriptBindings javascriptBindings
     cdef PyBrowser tempPyBrowser
 
-    if browserId in g_unreferenced_browsers:
+    if browserId in g_unreferenced_browsers \
+            or browserId in g_closed_browsers:
         # This browser was already unreferenced due to OnBeforeClose
         # was already called. An incomplete new instance of Browser
         # object is created. This instance doesn't have the client
@@ -119,9 +120,13 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser,
 cdef void RemovePyBrowser(int browserId) except *:
     # Called from LifespanHandler_OnBeforeClose().
     global g_pyBrowsers, g_unreferenced_browsers
+    cdef PyBrowser pyBrowser
     if browserId in g_pyBrowsers:
         # noinspection PyUnresolvedReferences
         Debug("del g_pyBrowsers[%s]" % browserId)
+        pyBrowser = g_pyBrowsers[browserId]
+        pyBrowser.cefBrowser.Assign(NULL)
+        del pyBrowser
         del g_pyBrowsers[browserId]
         g_unreferenced_browsers.append(browserId)
     else:

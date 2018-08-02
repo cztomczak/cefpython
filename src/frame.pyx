@@ -7,6 +7,10 @@ include "browser.pyx"
 
 cdef dict g_pyFrames = {}
 
+# If a frame was unreferenced (browser closed or OnContextReleased)
+# it shouldn't be kept global anymore.
+cdef list g_unreferenced_frames = []  # [str unique identifier, ..]
+
 cdef object GetUniqueFrameId(int browserId, object frameId):
     return str(browserId) +"#"+ str(frameId)
 
@@ -24,6 +28,11 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 
     cdef PyFrame pyFrame
     cdef object frameId = cefFrame.get().GetIdentifier()  # int64
+    if frameId < 0:
+        # Underlying frame does not yet exist.
+        Debug("GetPyFrame(): underlying frame does not yet exist"
+              ", frameId = {0}".format(frameId))
+        return None
     cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
     assert (frameId and browserId), "frameId or browserId empty"
     cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
@@ -46,9 +55,12 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     pyFrame = PyFrame(browserId, frameId)
     pyFrame.cefFrame = cefFrame
 
-    if browserId in g_unreferenced_browsers:
+    if uniqueFrameId in g_unreferenced_frames \
+            or browserId in g_unreferenced_browsers \
+            or browserId in g_closed_browsers:
         # Browser was already globally unreferenced in OnBeforeClose,
-        # thus all frames are globally unreferenced too. Create a new
+        # thus all frames are globally unreferenced too, or frame
+        # was unreferenced in OnContextReleased. Create a new
         # incomplete instance of PyFrame object. Read comments in
         # browser.pyx > GetPyBrowser and in Browser.md for what
         # "incomplete" means.
@@ -60,17 +72,22 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
         # SIDE EFFECT: two calls to GetPyFrame for the same frame object
         #              may return two different PyFrame objects. Compare
         #              frame objects always using GetIdentifier().
-        # Debug("GetPyFrame(): create new PyFrame, frameId=%s" % frameId)
+        Debug("GetPyFrame(): create new PyFrame, frameId=%s" % frameId)
         g_pyFrames[uniqueFrameId] = pyFrame
     return pyFrame
 
 cdef void RemovePyFrame(int browserId, object frameId) except *:
     # Called from V8ContextHandler_OnContextReleased().
     global g_pyFrames
+    cdef PyFrame pyFrame
     cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
     if uniqueFrameId in g_pyFrames:
         Debug("del g_pyFrames[%s]" % uniqueFrameId)
+        pyFrame = g_pyFrames[uniqueFrameId]
+        pyFrame.cefFrame.Assign(NULL)
+        del pyFrame
         del g_pyFrames[uniqueFrameId]
+        g_unreferenced_frames.append(uniqueFrameId)
     else:
         Debug("RemovePyFrame() FAILED: uniqueFrameId = %s" % uniqueFrameId)
 
@@ -85,7 +102,11 @@ cdef void RemovePyFramesForBrowser(int browserId) except *:
             toRemove.append(uniqueFrameId)
     for uniqueFrameId in toRemove:
         Debug("del g_pyFrames[%s]" % uniqueFrameId)
+        pyFrame = g_pyFrames[uniqueFrameId]
+        pyFrame.cefFrame.Assign(NULL)
+        del pyFrame
         del g_pyFrames[uniqueFrameId]
+        g_unreferenced_frames.append(uniqueFrameId)
 
 cdef class PyFrame:
     cdef CefRefPtr[CefFrame] cefFrame

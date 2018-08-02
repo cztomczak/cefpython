@@ -110,6 +110,7 @@ cdef public void LifespanHandler_OnBeforeClose(
         CefRefPtr[CefBrowser] cefBrowser
         ) except * with gil:
     cdef PyBrowser pyBrowser
+    cdef int browserId
     cdef object callback
     try:
         Debug("LifespanHandler_OnBeforeClose")
@@ -126,14 +127,20 @@ cdef public void LifespanHandler_OnBeforeClose(
         callback = pyBrowser.GetClientCallback("OnBeforeClose")
         if callback:
             callback(browser=pyBrowser)
-        RemovePythonCallbacksForBrowser(pyBrowser.GetIdentifier())
-        RemovePyFramesForBrowser(pyBrowser.GetIdentifier())
-        RemovePyBrowser(pyBrowser.GetIdentifier())
+
+        browserId = pyBrowser.GetIdentifier()
+        pyBrowser.cefBrowser.Assign(NULL)
+        cefBrowser.Assign(NULL)
+        del pyBrowser
+
+        RemovePythonCallbacksForBrowser(browserId)
+        RemovePyFramesForBrowser(browserId)
+        RemovePyBrowser(browserId)
+
         if g_MessageLoop_called and not len(g_pyBrowsers):
             # Automatically quit message loop when last browser was closed.
             # This is required for hello_world.py example to work.
-            QuitMessageLoop()
-
+            PostTask(TID_UI, QuitMessageLoop)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

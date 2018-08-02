@@ -843,11 +843,6 @@ def QuitMessageLoop():
 def Shutdown():
     Debug("Shutdown()")
 
-    # Release shared request context. This is sometimes causing
-    # segmentation fault, so disabling it for now. See Issue #333:
-    # https://github.com/cztomczak/cefpython/issues/333
-    # OFF: g_shared_request_context.Assign(NULL)
-
     # Run some message loop work, force closing browsers and then run
     # some message loop work again for the browsers to close cleanly.
     #
@@ -928,6 +923,12 @@ def Shutdown():
     if len(g_pyBrowsers):
         NonCriticalError("Shutdown called, but there are still browser"
                          " references alive")
+
+    # Release shared request context. In the past this was sometimes
+    # causing segmentation fault. See Issue #333:
+    # https://github.com/cztomczak/cefpython/issues/333
+    # Debug("Free g_shared_request_context")
+    # g_shared_request_context.Assign(NULL)
 
     Debug("CefShutdown()")
     with nogil:
