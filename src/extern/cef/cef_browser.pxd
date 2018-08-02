@@ -15,6 +15,7 @@ from cef_types cimport int64
 from cef_types cimport CefBrowserSettings, CefPoint
 from cef_drag_data cimport CefDragData
 from cef_types cimport CefMouseEvent
+from cef_request_context cimport CefRequestContext
 
 from cef_process_message cimport CefProcessMessage, CefProcessId
 
@@ -61,6 +62,8 @@ cdef extern from "include/cef_browser.h":
                           const CefBrowserSettings& settings,
                           const CefPoint& inspect_element_at)
         void CloseDevTools()
+
+        CefRefPtr[CefRequestContext] GetRequestContext()
 
         void Find(int identifier, const CefString& searchText, cpp_bool forward,
                 cpp_bool matchCase, cpp_bool findNext)

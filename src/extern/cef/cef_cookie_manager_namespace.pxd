@@ -10,6 +10,8 @@ from cef_cookie cimport CefCookie
 # noinspection PyUnresolvedReferences
 from cef_cookie cimport CefSetCookieCallback, CefDeleteCookiesCallback
 from cef_ptr cimport CefRefPtr
+# noinspection PyUnresolvedReferences
+from cef_callback cimport CefCompletionCallback
 
 # We need to pass C++ class methods by reference to a function,
 # it is not possible with such syntax:
@@ -28,3 +30,5 @@ cdef extern from "include/cef_cookie.h" namespace "CefCookieManager":
     cpp_bool DeleteCookies(const CefString& url,
                            const CefString& cookie_name,
                            CefRefPtr[CefDeleteCookiesCallback] callback)
+
+    cpp_bool FlushStore(CefRefPtr[CefCompletionCallback] callback)

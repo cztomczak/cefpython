@@ -268,6 +268,11 @@ cdef class PyCookieManager:
                 PyToCefStringValue(path), bool(persistSessionCookies),
                 <CefRefPtr[CefCompletionCallback]?>NULL)
 
+    cpdef py_bool FlushStore(self, callback=None):
+        return self.cefCookieManager.get().FlushStore(
+                <CefRefPtr[CefCompletionCallback]?>NULL)
+
+
 # ------------------------------------------------------------------------------
 # PyCookieVisitor
 # ------------------------------------------------------------------------------

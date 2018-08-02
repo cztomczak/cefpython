@@ -174,11 +174,11 @@ browsers do not persist them. Returns false if cookies cannot be accessed.
 
 | Parameter | Type |
 | --- | --- |
-| handler | CompletionHandler |
+| callback | CompletionHandler (optional) |
 | __Return__ | bool |
-
-Not yet implemented.
 
 Flush the backing store (if any) to disk. If |callback| is non-NULL it will
 be executed asnychronously on the IO thread after the flush is complete.
 Returns false if cookies cannot be accessed.
+
+The callback arg is not implemented.

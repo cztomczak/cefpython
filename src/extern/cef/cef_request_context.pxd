@@ -5,6 +5,8 @@
 from cef_ptr cimport CefRefPtr
 # noinspection PyUnresolvedReferences
 from cef_request_context_handler cimport CefRequestContextHandler
+from cef_callback cimport CefCompletionCallback
+from cef_cookie cimport CefCookieManager
 
 cdef extern from "include/cef_request_context.h":
     cdef cppclass CefRequestContext:
@@ -14,3 +16,5 @@ cdef extern from "include/cef_request_context.h":
         CefRefPtr[CefRequestContext] CreateContext(
                 CefRefPtr[CefRequestContext] other,
                 CefRefPtr[CefRequestContextHandler] handler)
+        CefRefPtr[CefCookieManager] GetDefaultCookieManager(
+                CefRefPtr[CefCompletionCallback] callback)

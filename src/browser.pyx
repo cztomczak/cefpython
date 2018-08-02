@@ -328,7 +328,21 @@ cdef class PyBrowser:
         pass
 
     cpdef py_void CloseBrowser(self, py_bool forceClose=False):
+        # Browser can be closed in two ways. Either by calling
+        # CloseBrowser explicitilly or by destroying window
+        # object and in such case lifespanHandler.OnBeforeClose
+        # will be called.
         Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
+
+        # Flush cookies to disk. Temporary solution for Issue #365.
+        # A similar call is made in LifespanHandler_OnBeforeClose.
+        # If using GetCookieManager to implement custom cookie managers
+        # then flushing of cookies would need to be handled manually.
+        self.GetCefBrowserHost().get().GetRequestContext().get() \
+                .GetDefaultCookieManager(
+                        <CefRefPtr[CefCompletionCallback]?>NULL) \
+                .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>NULL)
+
         cdef int browserId = self.GetCefBrowser().get().GetIdentifier()
         self.GetCefBrowserHost().get().CloseBrowser(bool(forceClose))
         global g_closed_browsers
