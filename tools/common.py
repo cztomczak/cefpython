@@ -4,6 +4,7 @@
 
 # Common stuff for tools such as automate.py, build.py, etc.
 
+import atexit
 import glob
 import os
 import platform
@@ -11,6 +12,7 @@ import re
 import shutil
 import struct
 import sys
+import tempfile
 
 # These sample apps will be deleted when creating setup/wheel packages
 CEF_SAMPLE_APPS = ["cefclient", "cefsimple", "ceftests", "chrome-sandbox"]
@@ -268,9 +270,12 @@ def get_python_include_path():
                 return results[0]
     return ".\\" if WINDOWS else "./"
 
+g_deleted_sample_apps = []
+
 
 def delete_cef_sample_apps(caller_script, bin_dir):
     """Delete CEF sample apps to reduce package size."""
+    atexit.register(restore_cef_sample_apps, caller_script)
     for sample_app_name in CEF_SAMPLE_APPS:
         sample_app = os.path.join(bin_dir, sample_app_name + APP_EXT)
         # Not on all platforms sample apps may be available
@@ -278,16 +283,34 @@ def delete_cef_sample_apps(caller_script, bin_dir):
             print("[{script}] Delete {sample_app}"
                   .format(script=os.path.basename(caller_script),
                           sample_app=os.path.basename(sample_app)))
-            if os.path.isdir(sample_app):
-                shutil.rmtree(sample_app)
-            else:
-                os.remove(sample_app)
+            tmpdir = tempfile.mkdtemp()
+            g_deleted_sample_apps.append((bin_dir,
+                                          os.path.basename(sample_app),
+                                          tmpdir))
+            shutil.move(sample_app, tmpdir)
             # Also delete subdirs eg. cefclient_files/, ceftests_files/
             files_subdir = os.path.join(bin_dir, sample_app_name + "_files")
             if os.path.isdir(files_subdir):
-                print("[build_distrib.py] Delete directory: {dir}/"
-                      .format(dir=os.path.basename(files_subdir)))
-                shutil.rmtree(files_subdir)
+                print("[{script}] Delete directory: {dir}/"
+                      .format(script=os.path.basename(caller_script),
+                              dir=os.path.basename(files_subdir)))
+                tmpdir = tempfile.mkdtemp()
+                g_deleted_sample_apps.append((bin_dir,
+                                              os.path.basename(files_subdir),
+                                              tmpdir))
+                shutil.move(files_subdir, tmpdir)
+
+
+def restore_cef_sample_apps(caller_script):
+    for deleted in g_deleted_sample_apps:
+        bin_dir = deleted[0]
+        tmp = os.path.join(deleted[2], deleted[1])
+        print("[{script}] Restore: {path}"
+              .format(script=os.path.basename(caller_script),
+                      path=os.path.join(bin_dir, deleted[1])))
+        shutil.move(tmp, bin_dir)
+        shutil.rmtree(deleted[2])
+    del g_deleted_sample_apps[0:len(g_deleted_sample_apps)]
 
 
 def _detect_cef_binaries_libraries_dir():

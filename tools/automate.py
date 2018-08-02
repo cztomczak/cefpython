@@ -744,7 +744,9 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "cefclient",
             Options.build_type,
             "cefclient" + APP_EXT)
-    if LINUX and os.path.exists(cefclient):
+    if not MAC:
+        assert os.path.exists(cefclient)
+    if LINUX:
         # On Windows resources/*.html files are embedded inside exe
         cefclient_files = os.path.join(
                 src,
@@ -759,6 +761,8 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "cefsimple",
             Options.build_type,
             "cefsimple" + APP_EXT)
+    if not MAC:
+        assert os.path.exists(cefsimple)
 
     # ceftests
     ceftests = os.path.join(
@@ -766,7 +770,9 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "ceftests",
             Options.build_type,
             "ceftests" + APP_EXT)
-    if LINUX and os.path.exists(ceftests):
+    if not MAC:
+        assert os.path.exists(ceftests)
+    if LINUX:
         # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
                 src,
@@ -776,8 +782,7 @@ def create_prebuilt_binaries():
         cpdir(ceftests_files, os.path.join(bindir, "ceftests_files"))
 
     def copy_app(app):
-        if os.path.exists(app):
-            if os.path.isdir(app):
+            if MAC:
                 # On Mac app is a directory
                 shutil.copytree(app,
                                 os.path.join(bindir,
