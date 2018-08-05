@@ -431,18 +431,15 @@ however these APIs were not yet exposed to CEF Python.
 
 ## Javascript exceptions and Python exceptions
 
-There are cases when executing Javascript code may end up with
-Python exception being thrown:
+When a Python function is invoked from Javascript and it fails,
+a Python exception will be thrown. When Python executes a Javascript
+callback and it fails, a Javascript exception will be thrown.
 
-1. When a Python function is invoked from Javascript and it fails,
-   a Python exception will be thrown
-2. When Python executes a Javascript callback and it fails,
-   a Python exception will be thrown
-
-In other cases to see Javascript exceptions open Developer Tools
+To see Javascript exceptions open Developer Tools
 window using mouse context menu and switch to Console tab.
 
-There are multiple ways to catch/intercept javascript exceptions:
+There are multiple ways to intercept javascript exceptions programmaticaly
+in CEF:
 
 1. In Javascript you can register "window.onerror" event to
    catch all Javascript exceptions
