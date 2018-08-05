@@ -409,7 +409,8 @@ html_to_data_uri("test", js_callback_1);
 
 Python and Javascript can also communicate using http requests
 by running an internal web-server. See for example [SimpleHTTPServer](https://docs.python.org/2/library/simplehttpserver.html)
-in Python docs.
+in Python docs. In upstream CEF there is available a fast built-in
+web server and [Issue #445](../../../issues/445) is to expose its API.
 
 With http requests it is possible for synchronous
 communication from Javascript to Python by performing
