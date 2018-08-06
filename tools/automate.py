@@ -34,6 +34,7 @@ Usage:
                 [--ninja-jobs JOBS] [--gyp-generators GENERATORS]
                 [--gyp-msvs-version MSVS]
                 [--use-system-freetype USE_SYSTEM_FREETYPE]
+                [--use-gtk3 USE_GTK3]
                 [--no-depot-tools-update NO_DEPOT_TOOLS_UPDATE]
     automate.py (-h | --help) [type -h to show full description for options]
 
@@ -64,6 +65,7 @@ Options:
     --gyp-generators=<gen>   Set GYP_GENERATORS [default: ninja].
     --gyp-msvs-version=<v>   Set GYP_MSVS_VERSION.
     --use-system-freetype    Use system Freetype library on Linux (Issue #402)
+    --use-gtk3               Link CEF with GTK 3 libraries (Issue #446)
     --no-depot-tools-update  Do not update depot_tools/ directory. When
                              building old unsupported versions of Chromium
                              you want to manually checkout an old version
@@ -111,6 +113,7 @@ class Options(object):
     gyp_generators = "ninja"  # Even though CEF uses now GN, still some GYP
     gyp_msvs_version = ""     # env variables are being used.
     use_system_freetype = False
+    use_gtk3 = False
     no_depot_tools_update = False
 
     # Internal options
@@ -897,14 +900,18 @@ def getenv():
     env["CEF_USE_GN"] = "1"
     # Issue #73 patch applied here with "use_allocator=none"
     env["GN_DEFINES"] = "use_sysroot=true use_allocator=none symbol_level=1"
-    # env["GN_DEFINES"] += " use_gtk3=false"
+
+    # Link with GTK 3 (Issue #446)
+    if Options.use_gtk3:
+        env["GN_DEFINES"] += " use_gtk3=true"
+
     # To perform an official build set GYP_DEFINES=buildtype=Official.
     # This will disable debugging code and enable additional link-time
     # optimizations in Release builds.
     if Options.release_build and not Options.fast_build:
         env["GN_DEFINES"] += " is_official_build=true"
 
-    # Isssue #402 - Blurry font rendering on Linux
+    # Blurry font rendering on Linux (Isssue #402)
     if Options.use_system_freetype:
         env["GN_DEFINES"] += " use_system_freetype=true"
 
