@@ -86,7 +86,7 @@ false.
 
 Called on the IO thread before a resource is loaded. To allow the resource
 to load normally return None. To specify a handler for the resource return
-a [ResourceHandler](ResourceHandler.md) object. The |request| object should 
+a [ResourceHandler](ResourceHandler.md) object. The |request| object should
 not be modified in this callback.
 
 The [ResourceHandler](ResourceHandler.md) object is a python class that
@@ -214,6 +214,12 @@ you have to set ApplicationSettings.`unique_request_context_per_browser`
 to True. Otherwise the browser param passed to this callback will
 always be the same first browser that was created using
 [cefpython](cefpython.md).`CreateBrowserSync`.
+
+**NOTE**: If implementing custom cookie managers you will encounter
+problems similar to [Issue #365](../../../issues/365) ("Cookies not
+flushed to disk when closing app immediately"). To resolve
+it you have to call CookieManager.[FlushStore](CookieManager.md#flushstore)
+method when closing associated browser.
 
 Popup browsers created javascript's window.open share the same
 renderer process and request context. If you want to have separate

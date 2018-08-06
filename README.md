@@ -113,10 +113,6 @@ also download packages for offline installation available on the
 pip install cefpython3==57.0
 ```
 
-If you get an error when importing the cefpython3 package on
-Windows then see this section in the Knowledge Base document:
-[ImportError: DLL load failed (Windows)](docs/Knowledge-Base.md#importerror-dll-load-failed-windows).
-
 ## Tutorial
 
 See the [Tutorial.md](docs/Tutorial.md) file.
