@@ -185,11 +185,13 @@ Downloads are handled automatically. A default `SaveAs` file dialog provided by 
 (bool)
 Default: False
 
-EXPERIMENTAL: So far this was tested only on Linux and actually made app
-              significantly slower. Windows and Mac platforms were not
-              tested yet. Reported issue in upstream, see
-              [Issue #246](https://github.com/cztomczak/cefpython/issues/246) 
-              for details.
+This option is for use on Mac and Linux only. On Windows for best
+performance you should use a multi-threaded message loop instead
+of calling CefDoMessageLoopWork in a timer.
+
+EXPERIMENTAL (Linux): There are issues with this option on Linux. See
+                      [Issue #246](https://github.com/cztomczak/cefpython/issues/246) 
+                      for details.
 
 It is recommended to use this option as a replacement for calls to
 cefpython.MessageLoopWork(). CEF Python will do these calls automatically
@@ -197,6 +199,14 @@ using CEF's OnScheduleMessagePumpWork. This results in improved performance
 on Windows and Mac and resolves some bugs with missing keyboard events
 on these platforms. See [Issue #246](https://github.com/cztomczak/cefpython/issues/246)
 for more details.
+
+IMPORTANT: Currently there are issues on Mac with both message loop work
+           and external message pump. The working solution is to call
+           a message loop work in a timer and enable external message pump
+           both at the same time (an incorrect approach, but it works).
+           This is just a temporary solution and how this affects
+           performance was not tested. See [Issue #442](../../../issues/442)
+           for more details.
 
 Description from upstream CEF:
 > Set to true (1) to control browser process main (UI) thread message pump

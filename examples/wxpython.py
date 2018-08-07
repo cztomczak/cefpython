@@ -33,6 +33,12 @@ def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     settings = {}
+    if MAC:
+        # Issue #442 requires enabling message pump on Mac
+        # and calling message loop work in a timer both at
+        # the same time. This is an incorrect approach
+        # and only a temporary solution.
+        settings["external_message_pump"] = True
     if WINDOWS:
         # noinspection PyUnresolvedReferences, PyArgumentList
         cef.DpiAware.EnableHighDpiSupport()
