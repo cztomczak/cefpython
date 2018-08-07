@@ -622,8 +622,11 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # External message pump
     if GetAppSetting("external_message_pump")\
             and not g_external_message_pump.get():
-        g_external_message_pump.reset(
-                MainMessageLoopExternalPump.Create().get())
+        Debug("Create external message pump")
+        # Using .reset() here to assign new instance was causing
+        # MainMessageLoopExternalPump destructor to be called. Strange.
+        g_external_message_pump.Assign(
+                MainMessageLoopExternalPump.Create())
 
     Debug("CefInitialize()")
     cdef cpp_bool ret
@@ -930,15 +933,16 @@ def Shutdown():
     # Debug("Free g_shared_request_context")
     # g_shared_request_context.Assign(NULL)
 
-    Debug("CefShutdown()")
-    with nogil:
-        CefShutdown()
-
-    # Release external message pump, as in cefclient after Shutdown
+    # Release external message pump before CefShutdown, so that
+    # message pump timer is killed.
     if g_external_message_pump.get():
+        Debug("Reset external message pump")
         # Reset will set it to NULL
         g_external_message_pump.reset()
 
+    Debug("CefShutdown()")
+    with nogil:
+        CefShutdown()
 
 def SetOsModalLoop(py_bool modalLoop):
     cdef cpp_bool cefModalLoop = bool(modalLoop)

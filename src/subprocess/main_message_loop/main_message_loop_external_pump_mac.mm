@@ -92,6 +92,7 @@ void MainMessageLoopExternalPumpMac::Quit() {
 }
 
 int MainMessageLoopExternalPumpMac::Run() {
+  LOG(INFO) << "MainMessageLoopExternalPumpMac::Run";
   // Run the message loop.
   [NSApp run];
 

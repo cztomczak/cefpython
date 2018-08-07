@@ -22,7 +22,7 @@ const int32 kTimerDelayPlaceholder = INT_MAX;
 // DoWork().
 const int64 kMaxTimerDelay = 1000 / 30;  // 30fps
 
-MainMessageLoopExternalPump* g_external_message_pump = NULL;
+::MainMessageLoopExternalPump* g_external_message_pump = NULL;
 
 } // namespace
 
@@ -43,6 +43,8 @@ MainMessageLoopExternalPump* MainMessageLoopExternalPump::Get() {
 
 void MainMessageLoopExternalPump::OnScheduleWork(int64 delay_ms) {
   REQUIRE_MAIN_THREAD();
+  // LOG(INFO) << "MainMessageLoopExternalPump::OnScheduleWork";
+  // LOG(INFO) << delay_ms << " ms";
 
   if (delay_ms == kTimerDelayPlaceholder && IsTimerPending()) {
     // Don't set the maximum timer requested from DoWork() if a timer event is
