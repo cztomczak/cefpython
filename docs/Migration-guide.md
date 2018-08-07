@@ -44,7 +44,8 @@ Table of contents:
 * [v66+ BrowserSettings.javascript_open_windows_disallowed option was removed](#v66-browsersettingsjavascript_open_windows_disallowed-option-was-removed)
 * [v66+ Threads removed: TID_DB, TID_PROCESS_LAUNCHER, TID_CACHE](#v66-threads-removed-tid_db-tid_process_launcher-tid_cache)
 * [v66+ cef.Request.Flags changed](#v66-cefrequestflags-changed)
-* [v66+ RequestHandler.GetCookieManager 'browser' param may be None](#v66-requesthandlergetcookiemanager-browser-param-may-be-none)
+* [v66+ RequestHandler.GetCookieManager not getting called in some cases](#v66-requesthandlergetcookiemanager-not-getting-called-in-some-cases)
+* [v66+ Changes to Mac apps that integrate into existing message loops (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loops-qt-wxpython)
 
 
 
@@ -383,4 +384,20 @@ cef.Request.[GetFlags](../api/Request.md#getflags) method.
 In some cases the RequestHandler.[GetCookieManager](../api/RequestHandler.md#getcookiemanager)
 callback is not getting called due to a race condition.
 This bug is to be fixed in Issue [#429](../../../issues/429).
+
+
+## v66+ Changes to Mac apps that integrate into existing message loops (Qt, wxPython)
+
+The `qt.py` and `wxpython.py` examples were modified to set
+ApplicationSettings.[external_message_pump](../api/ApplicationSettings.md#external_message_pump)
+to `True`. Due to Issue [#442](../../../issues/442) it is required
+to implement both approaches to integrating with existing message
+loops at the same time:
+1. Call `cef.DoMessageLoopWork` in a 10ms timer
+2. Set `ApplicationSettings.external_message_pump` to True
+
+This is not a correct approach and is only a temporary fix. More
+testing is required to check if that resolves all the issues with message
+loop freezing. Only basic testing was performed. It was not tested of
+how this change affects performance.
 

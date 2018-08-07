@@ -341,7 +341,7 @@
   * [ERR_UNSAFE_REDIRECT](NetworkError.md#err_unsafe_redirect)
 * [PaintBuffer (object)](PaintBuffer.md#paintbuffer-object)
   * [GetIntPointer](PaintBuffer.md#getintpointer)
-  * [GetString](PaintBuffer.md#getstring)
+  * [GetBytes](PaintBuffer.md#getbytes)
 * [RenderHandler (interface)](RenderHandler.md#renderhandler-interface)
   * [GetRootScreenRect](RenderHandler.md#getrootscreenrect)
   * [GetViewRect](RenderHandler.md#getviewrect)

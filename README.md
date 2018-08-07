@@ -652,7 +652,7 @@ Additional information for v31.2 release:
   * [ERR_UNSAFE_REDIRECT](api/NetworkError.md#err_unsafe_redirect)
 * [PaintBuffer (object)](api/PaintBuffer.md#paintbuffer-object)
   * [GetIntPointer](api/PaintBuffer.md#getintpointer)
-  * [GetString](api/PaintBuffer.md#getstring)
+  * [GetBytes](api/PaintBuffer.md#getbytes)
 * [RenderHandler (interface)](api/RenderHandler.md#renderhandler-interface)
   * [GetRootScreenRect](api/RenderHandler.md#getrootscreenrect)
   * [GetViewRect](api/RenderHandler.md#getviewrect)
