@@ -187,15 +187,16 @@ Default: False
 
 EXPERIMENTAL: So far this was tested only on Linux and actually made app
               significantly slower. Windows and Mac platforms were not
-              tested yet. Reported issue in upstream, see [Issue #246]
-              (https://github.com/cztomczak/cefpython/issues/246) for details.
+              tested yet. Reported issue in upstream, see
+              [Issue #246](https://github.com/cztomczak/cefpython/issues/246) 
+              for details.
 
 It is recommended to use this option as a replacement for calls to
 cefpython.MessageLoopWork(). CEF Python will do these calls automatically
 using CEF's OnScheduleMessagePumpWork. This results in improved performance
 on Windows and Mac and resolves some bugs with missing keyboard events
-on these platforms. See [Issue #246]
-(https://github.com/cztomczak/cefpython/issues/246) for more details.
+on these platforms. See [Issue #246](https://github.com/cztomczak/cefpython/issues/246)
+for more details.
 
 Description from upstream CEF:
 > Set to true (1) to control browser process main (UI) thread message pump
