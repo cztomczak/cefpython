@@ -21,6 +21,17 @@ WINDOWS = (platform.system() == "Windows")
 LINUX = (platform.system() == "Linux")
 MAC = (platform.system() == "Darwin")
 
+if MAC:
+    try:
+        # noinspection PyUnresolvedReferences
+        from AppKit import NSApp
+    except ImportError:
+        print("[wxpython.py] Error: PyObjC package is missing, "
+              "cannot fix Issue #371")
+        print("[wxpython.py] To install PyObjC type: "
+              "pip install -U pyobjc")
+        sys.exit(1)
+
 # Configuration
 WIDTH = 800
 HEIGHT = 600
@@ -37,7 +48,7 @@ def main():
         # Issue #442 requires enabling message pump on Mac
         # and calling message loop work in a timer both at
         # the same time. This is an incorrect approach
-        # and only a temporary solution.
+        # and only a temporary fix.
         settings["external_message_pump"] = True
     if WINDOWS:
         # noinspection PyUnresolvedReferences, PyArgumentList
@@ -87,20 +98,12 @@ class MainFrame(wx.Frame):
         self.browser_panel.Bind(wx.EVT_SIZE, self.OnSize)
 
         if MAC:
-            try:
-                # noinspection PyUnresolvedReferences
-                from AppKit import NSApp
-                # Make the content view for the window have a layer.
-                # This will make all sub-views have layers. This is
-                # necessary to ensure correct layer ordering of all
-                # child views and their layers. This fixes Window
-                # glitchiness during initial loading on Mac (Issue #371).
-                NSApp.windows()[0].contentView().setWantsLayer_(True)
-            except ImportError:
-                print("[wxpython.py] Warning: PyObjC package is missing, "
-                      "cannot fix Issue #371")
-                print("[wxpython.py] To install PyObjC type: "
-                      "pip install -U pyobjc")
+            # Make the content view for the window have a layer.
+            # This will make all sub-views have layers. This is
+            # necessary to ensure correct layer ordering of all
+            # child views and their layers. This fixes Window
+            # glitchiness during initial loading on Mac (Issue #371).
+            NSApp.windows()[0].contentView().setWantsLayer_(True)
 
         if LINUX:
             # On Linux must show before embedding browser, so that handle

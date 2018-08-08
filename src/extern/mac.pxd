@@ -7,4 +7,5 @@ from cef_browser cimport CefBrowser
 
 cdef extern from "client_handler/util_mac.h":
     void MacInitialize()
+    void MacShutdown()
     void MacSetWindowTitle(CefRefPtr[CefBrowser] browser, char* title)

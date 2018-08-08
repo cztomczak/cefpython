@@ -45,7 +45,7 @@ Table of contents:
 * [v66+ Threads removed: TID_DB, TID_PROCESS_LAUNCHER, TID_CACHE](#v66-threads-removed-tid_db-tid_process_launcher-tid_cache)
 * [v66+ cef.Request.Flags changed](#v66-cefrequestflags-changed)
 * [v66+ RequestHandler.GetCookieManager not getting called in some cases](#v66-requesthandlergetcookiemanager-not-getting-called-in-some-cases)
-* [v66+ Changes to Mac apps that integrate into existing message loops (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loops-qt-wxpython)
+* [v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loop-qt-wxpython)
 
 
 
@@ -386,18 +386,24 @@ callback is not getting called due to a race condition.
 This bug is to be fixed in Issue [#429](../../../issues/429).
 
 
-## v66+ Changes to Mac apps that integrate into existing message loops (Qt, wxPython)
+## v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)
 
-The `qt.py` and `wxpython.py` examples were modified to set
+In Qt apps calling message loop work in a timer doesn't work anymore.
+You have to enable external message pump by setting
 ApplicationSettings.[external_message_pump](../api/ApplicationSettings.md#external_message_pump)
-to `True`. Due to Issue [#442](../../../issues/442) it is required
-to implement both approaches to integrating with existing message
-loops at the same time:
+to `True`. The `qt.py` example was updated to disable calling
+message loop work in a timer. External message pump
+is a recommended way over calling message loop work in a timer on Mac,
+so this should make Qt apps work smoothly.
+
+In wxPython apps you have to implement both approaches for
+integrating with existing message loop at the same time:
 1. Call `cef.DoMessageLoopWork` in a 10ms timer
 2. Set `ApplicationSettings.external_message_pump` to True
 
-This is not a correct approach and is only a temporary fix. More
-testing is required to check if that resolves all the issues with message
-loop freezing. Only basic testing was performed. It was not tested of
-how this change affects performance.
+This is not a correct approach and is only a temporary fix for wxPython
+apps. More testing is required to check if that resolves all the issues
+with message loop freezing. Only basic testing was performed. It was not
+tested of how this change affects performance.
 
+See Issue [#442](../../../issues/442) for more details on the issues.

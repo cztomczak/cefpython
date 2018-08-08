@@ -201,8 +201,10 @@ on these platforms. See [Issue #246](https://github.com/cztomczak/cefpython/issu
 for more details.
 
 IMPORTANT: Currently there are issues on Mac with both message loop work
-           and external message pump. The working solution is to call
-           a message loop work in a timer and enable external message pump
+           and external message pump. In Qt apps calling message loop
+           work in a timer doesn't work anymore, you have to use external
+           message pump. In wxPython apps it is required to call a message
+           loop work in a timer and enable external message pump
            both at the same time (an incorrect approach, but it works).
            This is just a temporary solution and how this affects
            performance was not tested. See [Issue #442](../../../issues/442)

@@ -79,10 +79,10 @@ def main():
     settings = {}
     if MAC:
         # Issue #442 requires enabling message pump on Mac
-        # and calling message loop work in a timer both at
-        # the same time. This is an incorrect approach
-        # and only a temporary solution.
+        # in Qt example. Calling cef.DoMessageLoopWork in a timer
+        # doesn't work anymore.
         settings["external_message_pump"] = True
+
     cef.Initialize(settings)
     app = CefApplication(sys.argv)
     main_window = MainWindow()
@@ -90,7 +90,8 @@ def main():
     main_window.activateWindow()
     main_window.raise_()
     app.exec_()
-    app.stopTimer()
+    if not cef.GetAppSetting("external_message_pump"):
+        app.stopTimer()
     del main_window  # Just to be safe, similarly to "del app"
     del app  # Must destroy app object before calling Shutdown
     cef.Shutdown()
@@ -266,7 +267,8 @@ class CefWidget(CefWidgetParent):
 class CefApplication(QApplication):
     def __init__(self, args):
         super(CefApplication, self).__init__(args)
-        self.timer = self.createTimer()
+        if not cef.GetAppSetting("external_message_pump"):
+            self.timer = self.createTimer()
         self.setupIcon()
 
     def createTimer(self):

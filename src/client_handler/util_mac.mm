@@ -2,6 +2,16 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
+// Copyright (c) 2015 CEF Python, see the Authors file.
+// All rights reserved. Licensed under BSD 3-clause license.
+// Project website: https://github.com/cztomczak/cefpython
+
+// Some code was copied from here:
+// java-cef: src/master/native/util_mac.mm
+// upstream cef: src/tests/ceftests/run_all_unittests_mac.mm
+// upstream cef: src/tests/cefclient/cefclient_mac.mm
+// upstream cef: src/tests/cefsimple/cefsimple_mac.mm
+
 #import "util_mac.h"
 #import <Cocoa/Cocoa.h>
 #include <objc/runtime.h>
@@ -11,13 +21,14 @@
 
 namespace {
 
+// static NSAutoreleasePool* g_autopool = nil;
 BOOL g_handling_send_event = false;
 
 }  // namespace
 
-// Add the necessary CrAppControlProtocol
-// functionality to NSApplication using categories and swizzling.
-@interface NSApplication (CEFPythonApplication)
+// Add the necessary CefAppProtocol functionality to NSApplication
+// using categories and swizzling (Issue #442, Issue #156).
+@interface NSApplication (CEFPythonApplication)<CefAppProtocol>
 
 - (BOOL)isHandlingSendEvent;
 - (void)setHandlingSendEvent:(BOOL)handlingSendEvent;
@@ -63,7 +74,14 @@ BOOL g_handling_send_event = false;
 @end
 
 void MacInitialize() {
+    // OFF: it's causing a crash during shutdown release
+    // g_autopool = [[NSAutoreleasePool alloc] init];
     [NSApplication sharedApplication];
+}
+
+void MacShutdown() {
+    // OFF: it's causing a crash during shutdown release
+    // [g_autopool release];
 }
 
 void MacSetWindowTitle(CefRefPtr<CefBrowser> browser, char* title) {

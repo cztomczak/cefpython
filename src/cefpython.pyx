@@ -499,9 +499,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
 
     Debug("Initialize() called")
 
-    # Mac initialization. Need to call NSApplication.sharedApplication()
-    # and do NSApplication methods swizzling to implement
-    # CrAppControlProtocol. See Issue 156.
+    # Additional initialization on Mac, see util_mac.mm.
     IF UNAME_SYSNAME == "Darwin":
         MacInitialize()
 
@@ -943,6 +941,10 @@ def Shutdown():
     Debug("CefShutdown()")
     with nogil:
         CefShutdown()
+
+    # Additional cleanup on Mac, see util_mac.mm.
+    IF UNAME_SYSNAME == "Darwin":
+        MacShutdown()
 
 def SetOsModalLoop(py_bool modalLoop):
     cdef cpp_bool cefModalLoop = bool(modalLoop)
