@@ -11,6 +11,7 @@ from os.path import basename
 from cefpython3 import cefpython as cef
 import time
 import base64
+import os
 import sys
 
 # To show the window for an extended period of time increase this number.
@@ -158,6 +159,26 @@ class MainTest_IsolatedTest(unittest.TestCase):
         bindings.SetObject("external", external)
         browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
+
+        # Test Request.SetPostData(list)
+        req = cef.Request.CreateRequest()
+        req_file = os.path.dirname(os.path.abspath(__file__))
+        req_file = os.path.join(req_file, "main_test.py")
+        if sys.version_info.major > 2:
+            req_file = req_file.encode()
+        req_data = [b"--key=value", b"@"+req_file]
+        req.SetMethod("POST")
+        req.SetPostData(req_data)
+        self.assertEqual(req_data, req.GetPostData())
+        subtest_message("cef.Request.SetPostData(list) ok")
+
+        # Test Request.SetPostData(dict)
+        req = cef.Request.CreateRequest()
+        req_data = {b"key": b"value"}
+        req.SetMethod("POST")
+        req.SetPostData(req_data)
+        self.assertEqual(req_data, req.GetPostData())
+        subtest_message("cef.Request.SetPostData(dict) ok")
 
         # Run message loop for some time.
         # noinspection PyTypeChecker

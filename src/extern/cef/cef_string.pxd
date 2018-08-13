@@ -21,5 +21,5 @@ cdef extern from "include/internal/cef_string.h":
         cpp_bool FromString(cpp_string& str)
         cpp_string ToString()
         cpp_wstring ToWString()
-        char* c_str()
+        const char* c_str()
         size_t length()

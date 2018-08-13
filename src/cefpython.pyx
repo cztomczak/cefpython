@@ -135,19 +135,23 @@ import random
 # noinspection PyUnresolvedReferences
 import struct
 
-if sys.version_info.major == 2:
+# Must use compile-time condition instead of checking sys.version_info.major
+# otherwise results in "ImportError: cannot import name urlencode" strange
+# error in Python 3.6.
+IF PY_MAJOR_VERSION == 2:
     # noinspection PyUnresolvedReferences
     import urlparse
-else:
-    # noinspection PyUnresolvedReferences
-    from urllib import parse as urlparse
-
-if sys.version_info.major == 2:
     # noinspection PyUnresolvedReferences
     from urllib import pathname2url as urllib_pathname2url
-else:
+    # noinspection PyUnresolvedReferences
+    from urllib import urlencode as urllib_urlencode
+ELSE:
+    # noinspection PyUnresolvedReferences
+    from urllib import parse as urlparse
     # noinspection PyUnresolvedReferences
     from urllib.request import pathname2url as urllib_pathname2url
+    # noinspection PyUnresolvedReferences
+    from urllib.parse import urlencode as urllib_urlencode
 
 # noinspection PyUnresolvedReferences
 from cpython.version cimport PY_MAJOR_VERSION

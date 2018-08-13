@@ -94,6 +94,10 @@ cdef py_string CefToPyString(
                     g_applicationSettings["string_encoding"],
                     errors=BYTES_DECODE_ERRORS))
 
+cdef bytes CefToPyBytes(
+        ConstCefString& cefString):
+    return <bytes>cefString.ToString()
+
 cdef void PyToCefString(
         py_string pyString,
         CefString& cefString
@@ -148,3 +152,7 @@ cdef py_string VoidPtrToString(const void* data, size_t dataLength):
         return <unicode>((<bytes>(<char*>data)[:dataLength]).decode(
                 g_applicationSettings["string_encoding"],
                 errors=BYTES_DECODE_ERRORS))
+
+cdef bytes VoidPtrToBytes(const void* data, size_t dataLength):
+    return <bytes>((<char*>data)[:dataLength])
+

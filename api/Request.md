@@ -95,9 +95,10 @@ Set the request method type.
 | --- | --- |
 | __Return__ | list/dict |
 
-Get the post data. If the form content type is "multipart/form-data"
-then the post data will be returned as a list. If the form content
-type is "application/x-www-form-urlencoded" then the post data will
+Get the post data. All strings are byte strings. If the form content
+type is "multipart/form-data" then the post data will be returned
+as a list. If the form content type is
+"application/x-www-form-urlencoded" then the post data will
 be returned as a dict.
 
 
@@ -108,8 +109,8 @@ be returned as a dict.
 | postData | list/dict |
 | __Return__ | void |
 
-Set the post data. See GetPostData() for an explanation of the
-postData type.
+Set the post data. All strings are expected to be byte strings.
+See GetPostData() for an explanation of the postData type.
 
 ### GetHeaderMap
 
