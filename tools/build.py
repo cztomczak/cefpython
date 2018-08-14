@@ -469,6 +469,12 @@ def build_vcproj_DEPRECATED(vcproj):
     # msbuild /p:BuildProjectReferences=false project.proj
     # MSBuild.exe MyProject.proj /t:build
 
+    VS2008_BUILD = ("%LocalAppData%\\Programs\\Common\\"
+                    "Microsoft\\Visual C++ for Python\\9.0\\"
+                    "VC\\bin\\amd64\\vcbuild.exe")
+    VS2008_BUILD = VS2008_BUILD.replace("%LocalAppData%",
+                                        os.environ["LOCALAPPDATA"])
+
     if PYVERSION == "27":
         args = list()
         args.append(VS2008_VCVARS)

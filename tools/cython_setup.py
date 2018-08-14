@@ -127,11 +127,15 @@ def get_winsdk_lib():
             winsdk_libs = [
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib",
+                # Visual Studio 2008 installation
+                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Lib",
             ]
         elif ARCH64:
             winsdk_libs = [
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib\\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib\\x64",
+                # Visual Studio 2008 installation
+                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Lib\\x64",
             ]
         else:
             raise Exception("Unknown architecture")
