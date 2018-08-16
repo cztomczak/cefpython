@@ -103,6 +103,9 @@ def main():
         # This example often crashes on Mac (Issue #309)
         print("[run_examples.py] PASS: tkinter_.py (Issue #309)")
         passed.append("tkinter_.py (Issue #309)")
+    elif WINDOWS and sys.version_info.major == 2:
+        print("[run_examples.py] PASS: tkinter_.py (Issue #441)")
+        passed.append("tkinter_.py (Issue #441)")
     elif packages["tkinter"] or packages["Tkinter"]:
         examples.append("tkinter_.py")
     else:
