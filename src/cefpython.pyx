@@ -368,11 +368,7 @@ include "command_line.pyx"
 include "app.pyx"
 include "drag_data.pyx"
 include "helpers.pyx"
-
-# Currently used only on Linux via DragData. Do not include on other
-# platforms otherwise warning about unused function appears.
-IF UNAME_SYSNAME == "Linux":
-    include "image.pyx"
+include "image.pyx"
 
 # Handlers
 include "handlers/browser_process_handler.pyx"

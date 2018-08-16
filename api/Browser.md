@@ -427,7 +427,7 @@ Returns the names of all existing frames. This list does not include the main fr
 | --- | --- |
 | __Return__ | tuple(bytes buffer, int width, int height) |
 
-Currently works only on Linux (Issue [#427](../../../issues/427)).
+Currently available only on Linux (Issue [#427](../../../issues/427)).
 
 Get browser contents as image. Only screen visible contents are returned.
 
