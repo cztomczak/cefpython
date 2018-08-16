@@ -524,6 +524,7 @@ Additional information for v31.2 release:
   * [GetSystemDpi](api/DpiAware.md#getsystemdpi)
   * [IsProcessDpiAware](api/DpiAware.md#isprocessdpiaware)
   * [SetProcessDpiAware](api/DpiAware.md#setprocessdpiaware)
+  * [Scale](api/DpiAware.md#scale)
 * [DragData (object)](api/DragData.md#dragdata-object)
   * [IsLink](api/DragData.md#islink)
   * [IsFragment](api/DragData.md#isfragment)

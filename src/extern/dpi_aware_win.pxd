@@ -9,4 +9,3 @@ cdef extern from "client_handler/dpi_aware.h":
     cdef void GetDpiAwareWindowSize(int* width, int* height)
     cdef void SetProcessDpiAware()
     cdef cpp_bool IsProcessDpiAware()
-

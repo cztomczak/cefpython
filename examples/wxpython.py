@@ -33,8 +33,8 @@ if MAC:
         sys.exit(1)
 
 # Configuration
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 900
+HEIGHT = 640
 
 # Globals
 g_count_windows = 0
@@ -71,11 +71,26 @@ def check_versions():
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
 
 
+def scale_window_size_for_high_dpi(width, height):
+    """Scale window size for high DPI devices. This func can be
+    called on all operating systems, but scales only for Windows.
+    If scaled value is bigger than the work area on the display
+    then it will be reduced."""
+    if not WINDOWS:
+        return width, height
+    (_, _, max_width, max_height) = wx.GetClientDisplayRect().Get()
+    # noinspection PyUnresolvedReferences, PyArgumentList
+    (width, height) = cef.DpiAware.Scale((width, height))
+    if width > max_width:
+        width = max_width
+    if height > max_height:
+        height = max_height
+    return width, height
+
+
 class MainFrame(wx.Frame):
 
     def __init__(self):
-        wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
-                          title='wxPython example', size=(WIDTH, HEIGHT))
         self.browser = None
 
         # Must ignore X11 errors like 'BadWindow' and others by
@@ -86,6 +101,22 @@ class MainFrame(wx.Frame):
 
         global g_count_windows
         g_count_windows += 1
+
+        # noinspection PyUnresolvedReferences, PyArgumentList
+        print("[wxpython.py] System DPI settings: %s"
+              % str(cef.DpiAware.GetSystemDpi()))
+        print("[wxpython.py] wx.GetDisplayPPI = %s" % wx.GetDisplayPPI())
+        print("[wxpython.py] wx.GetDisplaySize = %s" % wx.GetDisplaySize())
+
+        print("[wxpython.py] MainFrame declared size: %s" % str((WIDTH, HEIGHT)))
+        size = scale_window_size_for_high_dpi(WIDTH, HEIGHT)
+        print("[wxpython.py] MainFrame DPI scaled size: %s" % str(size))
+
+        wx.Frame.__init__(self, parent=None, id=wx.ID_ANY,
+                          title='wxPython example', size=size)
+        # wxPython will set a smaller size when it is bigger
+        # than desktop size.
+        print("[wxpython.py] MainFrame actual size: %s" % self.GetSize())
 
         self.setup_icon()
         self.create_menu()

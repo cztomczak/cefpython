@@ -67,7 +67,7 @@ class MainFrame(tk.Frame):
         self.navigation_bar = None
 
         # Root
-        root.geometry("800x600")
+        root.geometry("900x640")
         tk.Grid.rowconfigure(root, 0, weight=1)
         tk.Grid.columnconfigure(root, 0, weight=1)
 

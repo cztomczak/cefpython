@@ -213,6 +213,7 @@
   * [GetSystemDpi](DpiAware.md#getsystemdpi)
   * [IsProcessDpiAware](DpiAware.md#isprocessdpiaware)
   * [SetProcessDpiAware](DpiAware.md#setprocessdpiaware)
+  * [Scale](DpiAware.md#scale)
 * [DragData (object)](DragData.md#dragdata-object)
   * [IsLink](DragData.md#islink)
   * [IsFragment](DragData.md#isfragment)

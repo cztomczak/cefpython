@@ -16,6 +16,7 @@ Table of contents:
   * [GetSystemDpi](#getsystemdpi)
   * [IsProcessDpiAware](#isprocessdpiaware)
   * [SetProcessDpiAware](#setprocessdpiaware)
+  * [Scale](#scale)
 
 
 
@@ -37,12 +38,12 @@ Enabling High DPI support in app can be done by embedding a DPI awareness xml ma
 | height | int |
 | __Return__ | tuple |
 
+Deprecated. Use `Scale()` method instead which can handle
+non standard DPI settings such as '132%' on Windows 10.
+
 This utility function will adjust width/height using
 OS DPI settings. For 800/600 with Win7 DPI settings
 being set to "Larger 150%" will return 1200/900.
-
-Calculation for DPI < 96 is not yet supported. Use
-the `GetSystemDpi` method for that.
 
 
 ### EnableHighDpiSupport
@@ -68,20 +69,29 @@ Description from upstream CEF:
 
 Returns tuple(int dpix, int dpiy).
 
+Returns Windows DPI settings ("Custom scaling" on Win10).
+
 Win7 DPI (Control Panel > Appearance and Personalization > Display):
 
   * text size Larger 150% => dpix/dpiy 144
   * text size Medium 125% => dpix/dpiy 120
   * text size Smaller 100% => dpix/dpiy 96
 
-Example zoom levels based on DPI. For use with the ApplicationSettings.`auto_zooming` option.
+Example zoom levels based on DPI. For use with the
+ApplicationSettings.`auto_zooming` option.
 
   * dpix=96 zoomlevel=0.0
   * dpix=120 zoomlevel=1.0
   * dpix=144 zoomlevel=2.0
   * dpix=72 zoomlevel=-1.0
 
-If DPI awareness wasn't yet enabled, then `GetSystemDpi` will always return a default 96 DPI.
+If DPI awareness wasn't yet enabled, then `GetSystemDpi` will always
+return a default 96 DPI.
+
+DPI settings should not be cached. When `SetProcessDpiAware`
+is not yet called, then OS returns 96 DPI, even though it
+is set to 144 DPI. After DPI Awareness is enabled for the
+running process it will return the correct 144 DPI.
 
 
 ### IsProcessDpiAware
@@ -106,3 +116,13 @@ See [Issue #358](../../../issues/358) for how the behavior changed in
 latest CEF. This method now internally calls `EnableHighDpiSupport()`.
 
 Enables DPI awareness for the running process. Embedding a DPI manifest in .exe is the prefered way, as it gives more reliable results, otherwise some display bugs may appear (discussed in the "Introduction" section on this page).
+
+
+### Scale
+
+| Parameter | Type |
+| --- | --- |
+| size | int/tuple/list |
+| __Return__ | tuple |
+
+Scale units for high DPI devices.

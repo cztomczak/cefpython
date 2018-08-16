@@ -128,3 +128,5 @@ cdef extern from "Windows.h" nogil:
     cdef int ICON_SMALL
     cdef HWND GetParent(HWND hwnd)
 
+    cdef int MulDiv(int number, int numerator, int denominator)
+
