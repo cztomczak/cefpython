@@ -210,7 +210,7 @@ VS2010_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 10.0"
 VS2008_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 9.0"
                  "\\VC\\vcvarsall.bat")
 
-if not os.path.exists(VS2008_VCVARS):
+if WINDOWS and not os.path.exists(VS2008_VCVARS):
     VS2008_VCVARS = (os.environ["LOCALAPPDATA"]+"\\Programs\\Common\\Microsoft"
                      "\\Visual C++ for Python\\9.0\\vcvarsall.bat")
 
