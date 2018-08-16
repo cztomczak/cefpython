@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "../cefpython.pyx"
+include "../browser.pyx"
 
 # noinspection PyUnresolvedReferences
 cimport cef_types
@@ -72,39 +73,67 @@ cdef public cpp_bool KeyboardHandler_OnPreKeyEvent(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
+
+cdef py_bool HandleKeyboardShortcuts(PyBrowser browser, dict event):
+    """Default implementation for keyboard shortcuts on Mac (Issue #161)."""
+    if platform.system() == "Darwin":
+        if event["modifiers"] == 128 \
+                and event["type"] != KEYEVENT_RAWKEYDOWN:
+            # Copy and paste was handled in RAWKEYDOWN, return True
+            if event["native_key_code"] in [8, 9]:
+                return True
+        if event["modifiers"] == 128 \
+                and event["type"] == KEYEVENT_RAWKEYDOWN:
+            # Select all: command + a
+            if event["native_key_code"] == 0:
+                browser.GetMainFrame().SelectAll()
+                return True
+            # Copy: command + c
+            elif event["native_key_code"] == 8:
+                browser.GetMainFrame().Copy()
+                return True
+            # Paste: command + v
+            elif event["native_key_code"] == 9:
+                browser.GetMainFrame().Paste()
+                return True
+            # Cut: command + x
+            elif event["native_key_code"] == 7:
+                browser.GetMainFrame().Cut()
+                return True
+            # Undo: command + z
+            elif event["native_key_code"] == 6:
+                browser.GetMainFrame().Undo()
+                return True
+        elif event["modifiers"] == 130 \
+                and event["type"] == KEYEVENT_RAWKEYDOWN:
+            # Redo: command + shift + z
+            if event["native_key_code"] == 6:
+                browser.GetMainFrame().Redo()
+                return True
+    return False
+
 cdef public cpp_bool KeyboardHandler_OnKeyEvent(
         CefRefPtr[CefBrowser] cefBrowser,
         const cef_types.CefKeyEvent& cefEvent,
         cef_types.CefEventHandle cefEventHandle
         ) except * with gil:
-    cdef PyBrowser pyBrowser
-    cdef dict pyEvent
+    cdef PyBrowser browser
+    cdef dict event
     cdef py_bool returnValue
     cdef object callback
     try:
-        pyBrowser = GetPyBrowser(cefBrowser, "OnKeyEvent")
-        pyEvent = CefToPyKeyEvent(cefEvent)
-        callback = pyBrowser.GetClientCallback("OnKeyEvent")
+        browser = GetPyBrowser(cefBrowser, "OnKeyEvent")
+        event = CefToPyKeyEvent(cefEvent)
+        callback = browser.GetClientCallback("OnKeyEvent")
         if callback:
             returnValue = callback(
-                    browser=pyBrowser,
-                    event=pyEvent,
+                    browser=browser,
+                    event=event,
                     event_handle=<object>PyLong_FromVoidPtr(cefEventHandle))
             # If returnValue is False then handle copy/paste on Mac
             if returnValue:
                 return bool(returnValue)
-        if platform.system() == "Darwin":
-            # Handle copy: command + c
-            if pyEvent["modifiers"] == 128 \
-                    and pyEvent["native_key_code"] == 8:
-                pyBrowser.GetFocusedFrame().Copy()
-                return True
-            # Handle paste: command + v
-            elif pyEvent["modifiers"] == 128 \
-                    and pyEvent["native_key_code"] == 9:
-                pyBrowser.GetFocusedFrame().Paste()
-                return True
-        return False
+        return bool(HandleKeyboardShortcuts(browser, event))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
