@@ -106,7 +106,8 @@ class MainFrame(wx.Frame):
         if WINDOWS:
             print("[wxpython.py] System DPI settings: %s"
                   % str(cef.DpiAware.GetSystemDpi()))
-        print("[wxpython.py] wx.GetDisplayPPI = %s" % wx.GetDisplayPPI())
+        if hasattr(wx, "GetDisplayPPI"):
+            print("[wxpython.py] wx.GetDisplayPPI = %s" % wx.GetDisplayPPI())
         print("[wxpython.py] wx.GetDisplaySize = %s" % wx.GetDisplaySize())
 
         print("[wxpython.py] MainFrame declared size: %s" % str((WIDTH, HEIGHT)))
