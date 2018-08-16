@@ -103,8 +103,9 @@ class MainFrame(wx.Frame):
         g_count_windows += 1
 
         # noinspection PyUnresolvedReferences, PyArgumentList
-        print("[wxpython.py] System DPI settings: %s"
-              % str(cef.DpiAware.GetSystemDpi()))
+        if WINDOWS:
+            print("[wxpython.py] System DPI settings: %s"
+                  % str(cef.DpiAware.GetSystemDpi()))
         print("[wxpython.py] wx.GetDisplayPPI = %s" % wx.GetDisplayPPI())
         print("[wxpython.py] wx.GetDisplaySize = %s" % wx.GetDisplaySize())
 
