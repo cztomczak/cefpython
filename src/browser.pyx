@@ -33,6 +33,20 @@ cdef PyBrowser GetPyBrowserById(int browserId):
         return g_pyBrowsers[browserId]
     return None
 
+cdef py_bool IsBrowserClosed(CefRefPtr[CefBrowser] cefBrowser):
+    """Possibly fix Issue #455 by using this helper function to detect
+    if browser is closing/closed."""
+    # CefBrowser may sometimes be NULL e.g. Issue #429, Issue #454.
+    if not cefBrowser.get():
+        return True
+    if not cefBrowser.get().GetHost().get():
+        return True
+    cdef int browserId = cefBrowser.get().GetIdentifier()
+    if browserId in g_unreferenced_browsers \
+            or browserId in g_closed_browsers:
+        return True
+    return False
+
 cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser,
                                     callerIdStr="GetPyBrowser"):
     """The second argument 'callerIdStr' is so that a debug
