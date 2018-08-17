@@ -334,6 +334,17 @@ cdef class PyBrowser:
         # will be called.
         Debug("CefBrowser::CloseBrowser(%s)" % forceClose)
 
+        # Fix Issue #454 "Crash on exit when closing browser
+        #                 immediately during initial loading".
+        if not self.cefBrowser.get():
+            Debug("cefBrowser.get() failed in CloseBrowser")
+            return
+        # From testing it seems that only cefBrowser.get() can fail,
+        # however let's check the host as well just to be safe.
+        if not self.cefBrowser.get().GetHost().get():
+            Debug("cefBrowser.get().GetHost() failed in CloseBrowser")
+            return
+
         # Flush cookies to disk. Temporary solution for Issue #365.
         # A similar call is made in LifespanHandler_OnBeforeClose.
         # If using GetCookieManager to implement custom cookie managers
