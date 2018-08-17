@@ -102,15 +102,16 @@ class MainFrame(wx.Frame):
         global g_count_windows
         g_count_windows += 1
 
-        # noinspection PyUnresolvedReferences, PyArgumentList
         if WINDOWS:
+            # noinspection PyUnresolvedReferences, PyArgumentList
             print("[wxpython.py] System DPI settings: %s"
                   % str(cef.DpiAware.GetSystemDpi()))
         if hasattr(wx, "GetDisplayPPI"):
             print("[wxpython.py] wx.GetDisplayPPI = %s" % wx.GetDisplayPPI())
         print("[wxpython.py] wx.GetDisplaySize = %s" % wx.GetDisplaySize())
 
-        print("[wxpython.py] MainFrame declared size: %s" % str((WIDTH, HEIGHT)))
+        print("[wxpython.py] MainFrame declared size: %s"
+              % str((WIDTH, HEIGHT)))
         size = scale_window_size_for_high_dpi(WIDTH, HEIGHT)
         print("[wxpython.py] MainFrame DPI scaled size: %s" % str(size))
 
