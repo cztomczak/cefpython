@@ -5,7 +5,7 @@
 # - wxPython 4.0 on Windows/Mac/Linux
 # - wxPython 3.0 on Windows/Mac
 # - wxPython 2.8 on Linux
-# - CEF Python v55.4+
+# - CEF Python v66.0+
 
 import wx
 from cefpython3 import cefpython as cef
@@ -68,7 +68,7 @@ def check_versions():
             ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[wxpython.py] wxPython {ver}".format(ver=wx.version()))
     # CEF Python version requirement
-    assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
+    assert cef.__version__ >= "66.0", "CEF Python v66.0+ required to run this"
 
 
 def scale_window_size_for_high_dpi(width, height):

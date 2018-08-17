@@ -37,7 +37,6 @@ workarounds.
   discussed in great details in Tutorial in the [Off-screen rendering](../docs/Tutorial.md#off-screen-rendering)
   section.
 
-
 **Embedding using various GUI frameworks**
 
 - [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
@@ -55,14 +54,14 @@ workarounds.
 - [tkinter_.py](tkinter_.py): example for [Tkinter](https://wiki.python.org/moin/TkInter).
   Currently broken on Mac ([#309](../../../issues/309)).
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)
-  toolkit
+  toolkit. This example implements High DPI support on Windows.
 
 
 **Build executable using Python packagers**
 
 - [PyInstaller example](pyinstaller/README-pyinstaller.md):
   example of packaging app using [PyInstaller](http://www.pyinstaller.org/)
-  packager
+  packager (currently example supports only Windows platform)
 
 
 **Unit tests**
