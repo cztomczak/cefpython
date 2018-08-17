@@ -89,6 +89,7 @@ yet ported to latest CEF. Some of them are externally maintained.
   example in the cefpython31 branch.
 - Example of using Python network library (urllib3/openssl) instead of Chromium's
   network library - see [gist by Massimiliano Dal Cero](https://gist.github.com/yattamax/0252a3c5dc54a2f81650d5c0eafabf99)
+- Example of passing exceptions from Python to Javascript and using await syntax to receive values from python return values - see [Managed python calls example by Elliot Woods](https://github.com/elliotwoods/cefpython-tests/tree/0180b22eac10a1bde08820ca192fdc30eb93f00d/6.%20Managed%20python%20calls)
 
 ## More examples to come
 
