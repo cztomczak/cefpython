@@ -93,6 +93,7 @@ cdef void RemovePyFrame(int browserId, object frameId) except *:
         del pyFrame
         del g_pyFrames[uniqueFrameId]
         g_unreferenced_frames.append(uniqueFrameId)
+        RemovePythonCallbacksForFrame(frameId)
     else:
         Debug("RemovePyFrame() FAILED: uniqueFrameId = %s" % uniqueFrameId)
 
@@ -112,6 +113,8 @@ cdef void RemovePyFramesForBrowser(int browserId) except *:
         del pyFrame
         del g_pyFrames[uniqueFrameId]
         g_unreferenced_frames.append(uniqueFrameId)
+    # RemovePythonCallbacksForBrowser already called
+    # in LifespanHandler_OnBeforeClose.
 
 cdef class PyFrame:
     cdef CefRefPtr[CefFrame] cefFrame

@@ -337,15 +337,10 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
     // ------------------------------------------------------------------------
     // 2. Remove python callbacks for a frame.
     // ------------------------------------------------------------------------
-    // If this is the main frame then the message won't arrive
-    // to the browser process, as browser is being destroyed,
-    // but it doesn't matter because in LifespanHandler_BeforeClose()
+    // This is already done via RemovePyFrame called from
+    // V8ContextHandler_OnContextReleased.
+    // If this is the main frame then in LifespanHandler_BeforeClose()
     // we're calling RemovePythonCallbacksForBrowser().
-    message = CefProcessMessage::Create("RemovePythonCallbacksForFrame");
-    arguments = message->GetArgumentList();
-    // TODO: int64 precision lost
-    arguments->SetInt(0, (int)(frame->GetIdentifier()));
-    browser->SendProcessMessage(PID_BROWSER, message);
     // ------------------------------------------------------------------------
     // 3. Clear javascript callbacks.
     // ------------------------------------------------------------------------

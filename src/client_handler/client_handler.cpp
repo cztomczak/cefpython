@@ -30,6 +30,7 @@ bool ClientHandler::OnProcessMessageReceived(
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message)
 {
+    // Return true if message was handled.
     if (source_process != PID_RENDERER) {
         return false;
     }
@@ -42,6 +43,12 @@ bool ClientHandler::OnProcessMessageReceived(
         if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_INT) {
             int64 frameId = arguments->GetInt(0);
             CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
+            if (!frame.get()) {
+                // Frame was already destroyed while IPC messaging was
+                // executing. Issue #431. User callback will not be
+                // executed in such case.
+                return true;
+            }
             V8ContextHandler_OnContextCreated(browser, frame);
             return true;
         } else {
@@ -56,6 +63,11 @@ bool ClientHandler::OnProcessMessageReceived(
                 && arguments->GetType(1) == VTYPE_INT) {
             int browserId = arguments->GetInt(0);
             int64 frameId = arguments->GetInt(1);
+            // Even if frame was alrady destroyed (Issue #431) you still
+            // want to call V8ContextHandler_OnContextReleased as it releases
+            // some resources. Thus passing IDs instead of actual
+            // objects. Cython code in V8ContextHandler_OnContextReleased
+            // will handle a case when frame is already destroyed.
             V8ContextHandler_OnContextReleased(browserId, frameId);
             return true;
         } else {
@@ -75,8 +87,13 @@ bool ClientHandler::OnProcessMessageReceived(
             int64 frameId = arguments->GetInt(0);
             CefString functionName = arguments->GetString(1);
             CefRefPtr<CefListValue> functionArguments = arguments->GetList(2);
-            CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
-            V8FunctionHandler_Execute(browser, frame, functionName,
+            // Even if frame was already destroyed (Issue #431) you still
+            // want to call V8FunctionHandler_Execute, as it can run
+            // Python code without issues and doesn't require an actual
+            // frame. Thus passing IDs instead of actual objects. Cython
+            // code in V8FunctionHandler_Execute will handle a case when
+            // frame is already destroyed.
+            V8FunctionHandler_Execute(browser, frameId, functionName,
                                       functionArguments);
             return true;
         } else {
@@ -93,18 +110,6 @@ bool ClientHandler::OnProcessMessageReceived(
             int callbackId = arguments->GetInt(0);
             CefRefPtr<CefListValue> functionArguments = arguments->GetList(1);
             ExecutePythonCallback(browser, callbackId, functionArguments);
-            return true;
-        } else {
-            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
-                          " invalid arguments,"
-                          " messageName=ExecutePythonCallback";
-            return false;
-        }
-    } else if (messageName == "RemovePythonCallbacksForFrame") {
-        CefRefPtr<CefListValue> arguments = message->GetArgumentList();
-        if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_INT) {
-            int frameId = arguments->GetInt(0);
-            RemovePythonCallbacksForFrame(frameId);
             return true;
         } else {
             LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"

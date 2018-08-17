@@ -5,10 +5,12 @@
 include "cefpython.pyx"
 
 cdef int g_pythonCallbackMaxId = 0
+# [callbackId] = (browserId, frameId, func)
 cdef dict g_pythonCallbacks = {}
 
 # TODO: send callbackId using CefBinaryNamedValue, see:
-# http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10881
+#       http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10881
+
 cdef struct PythonCallback:
     int callbackId
     char uniqueCefBinaryValueSize[16]
@@ -16,7 +18,7 @@ cdef struct PythonCallback:
 cdef CefRefPtr[CefBinaryValue] PutPythonCallback(
         object browserId,
         object frameId, 
-        object function
+        object func
         ) except *:
     global g_pythonCallbacks
     global g_pythonCallbackMaxId
@@ -29,12 +31,11 @@ cdef CefRefPtr[CefBinaryValue] PutPythonCallback(
     pyCallback.callbackId = g_pythonCallbackMaxId
     cdef CefRefPtr[CefBinaryValue] binaryValue = CefBinaryValue_Create(
             &pyCallback, sizeof(pyCallback))
-    # [0] browserId, [1] frameId, [2] function.
-    g_pythonCallbacks[g_pythonCallbackMaxId] = (browserId, frameId, function)
+    g_pythonCallbacks[g_pythonCallbackMaxId] = (browserId, frameId, func)
     return binaryValue
 
 cdef public void RemovePythonCallbacksForFrame(
-        int frameId
+        object frameId
         ) except * with gil:
     # Cannot remove elements from g_pythonCallbacks (dict) while iterating.
     cdef list toRemove = []
@@ -46,8 +47,8 @@ cdef public void RemovePythonCallbacksForFrame(
         for callbackId in toRemove:
             del g_pythonCallbacks[callbackId]
             Debug("RemovePythonCallbacksForFrame(): " \
-                    "removed python callback, callbackId = %s" \
-                    % callbackId)
+                  "removed python callback, callbackId = %s" \
+                  % callbackId)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -62,33 +63,28 @@ cdef void RemovePythonCallbacksForBrowser(
     for callbackId in toRemove:
         del g_pythonCallbacks[callbackId]
         Debug("RemovePythonCallbacksForBrowser(): " \
-                "removed python callback, callbackId = %s" \
-                % callbackId)
+              "removed python callback, callbackId = %s" \
+              % callbackId)
 
 cdef public cpp_bool ExecutePythonCallback(
         CefRefPtr[CefBrowser] cefBrowser,
         int callbackId, 
-        CefRefPtr[CefListValue] cefFunctionArguments,
+        CefRefPtr[CefListValue] cefFuncArgs,
         ) except * with gil:
-    cdef object function
-    cdef list functionArguments
+    cdef object func
+    cdef list funcArgs
     cdef object returnValue
     try:
         global g_pythonCallbacks
         if callbackId in g_pythonCallbacks:
-            # [0] browserId, [1] frameId, [2] function.
-            function = g_pythonCallbacks[callbackId][2]
-            functionArguments = CefListValueToPyList(
-                    cefBrowser, cefFunctionArguments)
-            returnValue = function(*functionArguments)
-            if returnValue is not None:
-                Debug("ExecutePythonCallback() WARNING: function returned" \
-                        "value, but returning values to javascript is not " \
-                        "supported, function name = %s" % function.__name__)
+            func = g_pythonCallbacks[callbackId][2]
+            funcArgs = CefListValueToPyList(
+                    cefBrowser, cefFuncArgs)
+            func(*funcArgs)
             return True
         else:
             Debug("ExecutePythonCallback() FAILED: callback not found, " \
-                    "callbackId = %s" % callbackId)
+                  "callbackId = %s" % callbackId)
             return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()

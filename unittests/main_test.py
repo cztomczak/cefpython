@@ -154,13 +154,15 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # supports passing functions as callbacks when called from
         # javascript, and as a side effect any value and in this case
         # a property can also be a function.
-        bindings.SetProperty("test_property3_function", external.test_property3_function)
+        bindings.SetProperty("test_property3_function",
+                             external.test_property3_function)
         bindings.SetProperty("cefpython_version", cef.GetVersion())
         bindings.SetObject("external", external)
         browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
 
         # Test Request.SetPostData(list)
+        # noinspection PyArgumentList
         req = cef.Request.CreateRequest()
         req_file = os.path.dirname(os.path.abspath(__file__))
         req_file = os.path.join(req_file, "main_test.py")
@@ -173,6 +175,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         subtest_message("cef.Request.SetPostData(list) ok")
 
         # Test Request.SetPostData(dict)
+        # noinspection PyArgumentList
         req = cef.Request.CreateRequest()
         req_data = {b"key": b"value"}
         req.SetMethod("POST")
@@ -199,6 +202,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
             time.sleep(0.01)
 
         # Automatic check of asserts in handlers and in external
+        # noinspection PyTypeChecker
         for obj in [] + client_handlers + [global_handler, external]:
             test_for_True = False  # Test whether asserts are working correctly
             for key, value in obj.__dict__.items():

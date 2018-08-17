@@ -4,46 +4,48 @@
 
 include "../cefpython.pyx"
 include "../browser.pyx"
+include "../frame.pyx"
 
 cdef public void V8FunctionHandler_Execute(
         CefRefPtr[CefBrowser] cefBrowser,
-        CefRefPtr[CefFrame] cefFrame,
-        CefString& cefFunctionName,
-        CefRefPtr[CefListValue] cefFunctionArguments
+        int64 frameId,
+        CefString& cefFuncName,
+        CefRefPtr[CefListValue] cefFuncArgs
         ) except * with gil:
     cdef PyBrowser pyBrowser
-    cdef PyFrame pyFrame
-    cdef py_string functionName
-    cdef object function
-    cdef list functionArguments
+    cdef CefRefPtr[CefFrame] cefFrame
+    cdef PyFrame pyFrame  # may be None
+    cdef py_string funcName
+    cdef object func
+    cdef list funcArgs
     cdef object returnValue
-    cdef py_string jsErrorMessage
+    cdef py_string errorMessage
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "V8FunctionHandler_Execute")
-        pyFrame = GetPyFrame(cefFrame)
-        functionName = CefToPyString(cefFunctionName)
-        Debug("V8FunctionHandler_Execute(): functionName=%s" % functionName)
+        cefFrame = cefBrowser.get().GetFrame(frameId)
+        if cefFrame.get():
+            pyFrame = GetPyFrame(cefFrame)
+        else:
+            pyFrame = None
+        funcName = CefToPyString(cefFuncName)
+        Debug("V8FunctionHandler_Execute(): funcName=%s" % funcName)
         jsBindings = pyBrowser.GetJavascriptBindings()
-        function = jsBindings.GetFunctionOrMethod(functionName)
-        if not function:
+        func = jsBindings.GetFunctionOrMethod(funcName)
+        if not func:
             # The Renderer process already checks whether function
             # name is valid before calling V8FunctionHandler_Execute(),
             # but it is possible for the javascript bindings to change
             # during execution, so it's possible for the Browser/Renderer
             # bindings to be out of sync due to delay in process messaging.
-            jsErrorMessage = "V8FunctionHandler_Execute() FAILED: " \
-                    "python function not found: %s" % functionName
-            Debug(jsErrorMessage)
-            # Raise a javascript exception in that frame.
-            pyFrame.ExecuteJavascript("throw '%s';" % jsErrorMessage)
+            errorMessage = "V8FunctionHandler_Execute() FAILED: " \
+                           "python function not found: %s" % funcName
+            NonCriticalError(errorMessage)
+            # Raise a javascript exception in that frame if it still exists
+            if pyFrame:
+                pyFrame.ExecuteJavascript("throw '%s';" % errorMessage)
             return
-        functionArguments = CefListValueToPyList(cefBrowser, 
-                cefFunctionArguments)
-        returnValue = function(*functionArguments)
-        if returnValue is not None:
-            Debug("V8FunctionHandler_Execute() WARNING: function returned" \
-                    "value, but returning values to javascript is not " \
-                    "supported, functionName=%s" % functionName)
+        funcArgs = CefListValueToPyList(cefBrowser, cefFuncArgs)
+        func(*funcArgs)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
