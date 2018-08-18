@@ -31,9 +31,17 @@ g_datauri_data = """
         msg = msg.replace("error", "<b style='color:red'>error</b>");
         document.getElementById("console").innerHTML += msg+"<br>";
     }
-    window.onload = function(){
-        print("window.onload() ok");
-
+    function onload_helper() {
+        if (!window.hasOwnProperty("cefpython_version")) {
+            // Sometimes page could finish loading before javascript
+            // bindings are available. Javascript bindings are sent
+            // from the browser process to the renderer process via
+            // IPC messaging and it can take some time (5-10ms). If
+            // the page loads very fast window.onload could execute
+            // before bindings are available.
+            setTimeout(onload_helper, 10);
+            return;
+        }
         version = cefpython_version
         print("CEF Python: <b>"+version.version+"</b>");
         print("Chrome: <b>"+version.chrome_version+"</b>");
@@ -78,7 +86,12 @@ g_datauri_data = """
             py_callback("String sent from Javascript");
             print("py_callback() ok");
         });
-    };
+        js_code_completed();
+    }
+    window.onload = function() {
+        print("window.onload() ok");
+        onload_helper();
+    }
     </script>
 </head>
 <body>
@@ -133,6 +146,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         external = External(self)
         bindings = cef.JavascriptBindings(
                 bindToFrames=False, bindToPopups=False)
+        bindings.SetFunction("js_code_completed", js_code_completed)
         bindings.SetFunction("test_function", external.test_function)
         bindings.SetProperty("test_property1", external.test_property1)
         bindings.SetProperty("test_property2", external.test_property2)
@@ -181,6 +195,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # and calling shutdown.
         do_message_loop_work(25)
 
+        # Asserts before shutdown
         # noinspection PyTypeChecker
         check_auto_asserts(self, [] + client_handlers
                                     + [global_handler,

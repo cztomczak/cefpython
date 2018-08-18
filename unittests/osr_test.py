@@ -31,13 +31,26 @@ g_datauri_data = """
         msg = msg.replace("error", "<b style='color:red'>error</b>");
         document.getElementById("console").innerHTML += msg+"<br>";
     }
-    window.onload = function(){
-        print("window.onload() ok");
-
+    function onload_helper() {
+        if (!window.hasOwnProperty("cefpython_version")) {
+            // Sometimes page could finish loading before javascript
+            // bindings are available. Javascript bindings are sent
+            // from the browser process to the renderer process via
+            // IPC messaging and it can take some time (5-10ms). If
+            // the page loads very fast window.onload could execute
+            // before bindings are available.
+            setTimeout(onload_helper, 10);
+            return;
+        }
         version = cefpython_version
         print("CEF Python: <b>"+version.version+"</b>");
         print("Chrome: <b>"+version.chrome_version+"</b>");
         print("CEF: <b>"+version.cef_version+"</b>");
+        js_code_completed();
+    }
+    window.onload = function() {
+        print("window.onload() ok");
+        onload_helper();
     }
     </script>
 </head>
@@ -95,6 +108,7 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         # Javascript bindings
         bindings = cef.JavascriptBindings(
                 bindToFrames=False, bindToPopups=False)
+        bindings.SetFunction("js_code_completed", js_code_completed)
         bindings.SetProperty("cefpython_version", cef.GetVersion())
         browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
@@ -126,7 +140,7 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         # and calling shutdown.
         do_message_loop_work(25)
 
-        # Automatic check of asserts in handlers
+        # Asserts before shutdown
         # noinspection PyTypeChecker
         check_auto_asserts(self, [] + client_handlers
                                     + [global_handler,

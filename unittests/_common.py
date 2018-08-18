@@ -13,6 +13,7 @@ import time
 MESSAGE_LOOP_RANGE = 100  # each iteration is 0.01 sec
 
 g_subtests_ran = 0
+g_js_code_completed = False
 
 
 def subtest_message(message):
@@ -50,7 +51,21 @@ def do_message_loop_work(work_loops):
         time.sleep(0.01)
 
 
+def js_code_completed():
+    """Sometimes window.onload can execute before javascript bindings
+    are ready if the document loads very fast. When setting javascript
+    bindings it can take some time, because these bindings are sent
+    via IPC messaging to the Renderer process."""
+    global g_js_code_completed
+    assert not g_js_code_completed
+    g_js_code_completed = True
+    subtest_message("js_code_completed() ok")
+
+
 def check_auto_asserts(test_case, objects):
+    # Check if js code completed
+    test_case.assertTrue(g_js_code_completed)
+
     # Automatic check of asserts in handlers and in external
     for obj in objects:
         test_for_True = False  # Test whether asserts are working correctly
@@ -170,4 +185,3 @@ class FrameSourceVisitor(object):
         self.load_handler.FrameSourceVisitor_True = True
         self.test_case.assertIn("747ef3e6011b6a61e6b3c6e54bdd2dee",
                                 value)
-
