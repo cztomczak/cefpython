@@ -25,6 +25,25 @@ cdef public void DisplayHandler_OnAddressChange(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
+
+cdef public cpp_bool DisplayHandler_OnAutoResize(
+        CefRefPtr[CefBrowser] cef_browser,
+        const CefSize& new_size
+        ) except * with gil:
+    cdef PyBrowser browser
+    cdef object callback
+    try:
+        browser = GetPyBrowser(cef_browser, "OnAutoResize")
+        callback = browser.GetClientCallback("OnAutoResize")
+        if callback:
+            return bool(callback(browser=browser, new_size=[new_size.width,
+                                                  new_size.height]))
+        return False
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
+
 cdef public void DisplayHandler_OnTitleChange(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& cefTitle

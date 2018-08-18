@@ -11,6 +11,7 @@ For an example of how to implement handler see [cefpython](cefpython.md).CreateB
 Table of contents:
 * [Callbacks](#callbacks)
   * [OnAddressChange](#onaddresschange)
+  * [OnAutoResize](#onautoresize)
   * [OnTitleChange](#ontitlechange)
   * [OnTooltip](#ontooltip)
   * [OnStatusMessage](#onstatusmessage)
@@ -30,6 +31,22 @@ Table of contents:
 | __Return__ | void |
 
 Called when a frame's address has changed.
+
+
+
+### OnAutoResize
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| new_size | list[width, height] |
+| __Return__ | bool |
+
+Description from upstream CEF:
+> Called when auto-resize is enabled via CefBrowserHost::SetAutoResizeEnabled
+> and the contents have auto-resized. |new_size| will be the desired size in
+> view coordinates. Return true if the resize was handled or false for
+> default handling.
 
 
 ### OnTitleChange

@@ -93,7 +93,7 @@ cef_render_handler.h
 
 cef_browser.h
 + SetAccessibilityState
-- SetAutoResizeEnabled
++ SetAutoResizeEnabled
 - GetExtension
 - IsBackgroundHost
 
@@ -101,7 +101,7 @@ cef_cookie.h
 - GetBlockingManager
 
 cef_display_handler.h
-- OnAutoResize
++ OnAutoResize
 - OnLoadingProgressChange
 
 cef_drag_data.h

@@ -22,6 +22,7 @@ Table of contents:
   * [OnPaint](#onpaint)
   * [OnCursorChange](#oncursorchange)
   * [OnScrollOffsetChanged](#onscrolloffsetchanged)
+  * [OnTextSelectionChanged](#ontextselectionchanged)
   * [StartDragging](#startdragging)
   * [UpdateDragCursor](#updatedragcursor)
 

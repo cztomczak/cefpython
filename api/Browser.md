@@ -55,6 +55,7 @@ Table of contents:
   * [HandleKeyEventAfterTextInputClient](#handlekeyeventaftertextinputclient)
   * [HandleKeyEventBeforeTextInputClient](#handlekeyeventbeforetextinputclient)
   * [HasDocument](#hasdocument)
+  * [Invalidate](#invalidate)
   * [IsFullscreen](#isfullscreen)
   * [IsLoading](#isloading)
   * [IsMouseCursorChangeDisabled](#ismousecursorchangedisabled)
@@ -69,6 +70,7 @@ Table of contents:
   * [Reload](#reload)
   * [ReloadIgnoreCache](#reloadignorecache)
   * [ReplaceMisspelling](#replacemisspelling)
+  * [SetAutoResizeEnabled](#setautoresizeenabled)
   * [SetBounds](#setbounds)
   * [SendKeyEvent](#sendkeyevent)
   * [SendMouseClickEvent](#sendmouseclickevent)
@@ -751,6 +753,21 @@ Reload the current page ignoring any cached data.
 
 If a misspelled word is currently selected in an editable node calling
 this method will replace it with the specified |word|.
+
+
+### SetAutoResizeEnabled
+
+| Parameter | Type |
+| --- | --- |
+| enabled | bool |
+| min_size | list[width, height] |
+| max_size | list[width, heifght] |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Enable notifications of auto resize via CefDisplayHandler::OnAutoResize.
+> Notifications are disabled by default. |min_size| and |max_size| define the
+> range of allowed sizes.
 
 
 ### SetBounds

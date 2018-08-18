@@ -218,7 +218,7 @@ cdef class PyBrowser:
             # DisplayHandler
             self.allowedClientCallbacks += [
                     "OnAddressChange", "OnTitleChange", "OnTooltip",
-                    "OnStatusMessage", "OnConsoleMessage"]
+                    "OnStatusMessage", "OnConsoleMessage", "OnAutoResize"]
             # KeyboardHandler
             self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"]
             # RequestHandler
@@ -512,6 +512,17 @@ cdef class PyBrowser:
         cdef CefString cef_word
         PyToCefString(word, cef_word)
         self.GetCefBrowserHost().get().ReplaceMisspelling(cef_word)
+
+    cpdef py_void SetAutoResizeEnabled(self,
+                                       py_bool enabled,
+                                       list min_size,
+                                       list max_size):
+        self.GetCefBrowserHost().get().SetAutoResizeEnabled(
+            bool(enabled),
+            CefSize(min_size[0], min_size[1]),
+            CefSize(max_size[0], max_size[1])
+        )
+
 
     cpdef py_void SetBounds(self, int x, int y, int width, int height):
         IF UNAME_SYSNAME == "Linux":

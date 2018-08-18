@@ -33,6 +33,9 @@ public:
                           const CefString& source,
                           int line) override;
 
+    bool OnAutoResize(CefRefPtr<CefBrowser> browser,
+                      const CefSize& new_size) override;
+
 private:
     IMPLEMENT_REFCOUNTING(DisplayHandler);
 };

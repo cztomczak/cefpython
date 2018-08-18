@@ -6,8 +6,17 @@ from cefpython3 import cefpython as cef
 
 import base64
 import os
+import platform
 import sys
 import time
+
+# Platforms
+SYSTEM = platform.system().upper()
+if SYSTEM == "DARWIN":
+    SYSTEM = "MAC"
+WINDOWS = SYSTEM if SYSTEM == "WINDOWS" else False
+LINUX = SYSTEM if SYSTEM == "LINUX" else False
+MAC = SYSTEM if SYSTEM == "MAC" else False
 
 # To show the window for an extended period of time increase this number.
 MESSAGE_LOOP_RANGE = 100  # each iteration is 0.01 sec

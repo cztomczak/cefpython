@@ -14,6 +14,7 @@ from cefpython3 import cefpython as cef
 import os
 import sys
 
+
 g_datauri_data = """
 <!DOCTYPE html>
 <html>
@@ -134,10 +135,13 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Create browser
         browser = cef.CreateBrowserSync(url=g_datauri)
         self.assertIsNotNone(browser, "Browser object")
+        browser.SetFocus(True)
         subtest_message("cef.CreateBrowserSync() ok")
 
         # Client handlers
-        client_handlers = [LoadHandler(self, g_datauri), DisplayHandler(self)]
+        client_handlers = [LoadHandler(self, g_datauri),
+                           DisplayHandler(self),
+                           DisplayHandler2(self)]
         for handler in client_handlers:
             browser.SetClientHandler(handler)
         subtest_message("browser.SetClientHandler() ok")
@@ -160,6 +164,12 @@ class MainTest_IsolatedTest(unittest.TestCase):
         bindings.SetObject("external", external)
         browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
+
+        # Set auto resize. Call it after js bindings were set.
+        browser.SetAutoResizeEnabled(enabled=True,
+                                     min_size=[800, 600],
+                                     max_size=[800, 600])
+        subtest_message("browser.SetAutoResizeEnabled() ok")
 
         # Test Request.SetPostData(list)
         # noinspection PyArgumentList
@@ -208,6 +218,20 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Display summary
         show_test_summary(__file__)
         sys.stdout.flush()
+
+
+class DisplayHandler2(object):
+    def __init__(self, test_case):
+        self.test_case = test_case
+        # Asserts for True/False will be checked just before shutdown.
+        # Test whether asserts are working correctly.
+        self.test_for_True = True
+        self.OnAutoResize_True = False
+
+    def OnAutoResize(self, new_size, **_):
+        assert not self.OnAutoResize_True
+        self.OnAutoResize_True = True
+        self.test_case.assertEqual(new_size, [800, 600])
 
 
 class External(object):
