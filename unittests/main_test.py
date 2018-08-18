@@ -23,8 +23,10 @@ g_datauri_data = """
     body,html {
         font-family: Arial;
         font-size: 11pt;
-        width: 800px;
-        heiht: 600px;
+    }
+    body {
+        width: 810px;
+        heiht: 610px;
     }
     </style>
     <script>
