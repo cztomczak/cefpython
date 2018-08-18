@@ -247,7 +247,8 @@ cdef class PyBrowser:
                     "GetScreenRect",
                     "OnPopupShow", "OnPopupSize", "OnPaint", "OnCursorChange",
                     "OnScrollOffsetChanged",
-                    "StartDragging", "UpdateDragCursor"]
+                    "StartDragging", "UpdateDragCursor",
+                    "OnTextSelectionChanged"]
             # JavascriptDialogHandler
             self.allowedClientCallbacks += ["OnJavascriptDialog",
                     "OnBeforeUnloadJavascriptDialog",
@@ -475,6 +476,10 @@ cdef class PyBrowser:
 
     cpdef py_bool HasDocument(self):
         return self.GetCefBrowser().get().HasDocument()
+
+    cpdef py_void Invalidate(self,
+                             cef_types.cef_paint_element_type_t element_type):
+        return self.GetCefBrowserHost().get().Invalidate(element_type)
 
     cpdef py_bool IsFullscreen(self):
         return bool(self.isFullscreen)

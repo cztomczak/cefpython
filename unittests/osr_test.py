@@ -58,6 +58,7 @@ g_datauri_data = """
     <!-- FrameSourceVisitor hash = 747ef3e6011b6a61e6b3c6e54bdd2dee -->
     <h1>Off-screen rendering test</h1>
     <div id="console"></div>
+    <div id="OnTextSelectionChanged">Test selection.</div>
 </body>
 </html>
 """
@@ -128,6 +129,9 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         browser.SendFocusEvent(True)
         browser.WasResized()
 
+        # Test selection
+        on_load_end(select_h1_text, browser)
+
         # Message loop
         run_message_loop()
 
@@ -188,6 +192,17 @@ class AccessibilityHandler(object):
         self._OnAccessibilityLocationChange_True = True
 
 
+def select_h1_text(browser):
+    browser.SendMouseClickEvent(0, 0, cef.MOUSEBUTTON_LEFT,
+                                mouseUp=False, clickCount=1)
+    browser.SendMouseMoveEvent(400, 20, mouseLeave=False,
+                               modifiers=cef.EVENTFLAG_LEFT_MOUSE_BUTTON)
+    browser.SendMouseClickEvent(400, 20, cef.MOUSEBUTTON_LEFT,
+                                mouseUp=True, clickCount=1)
+    browser.Invalidate(cef.PET_VIEW)
+    subtest_message("select_h1_text() ok")
+
+
 class RenderHandler(object):
     def __init__(self, test_case):
         self.test_case = test_case
@@ -198,6 +213,7 @@ class RenderHandler(object):
 
         self.GetViewRect_True = False
         self.OnPaint_True = False
+        self.OnTextSelectionChanged_True = False
 
     def GetViewRect(self, rect_out, **_):
         """Called to retrieve the view rectangle which is relative
@@ -208,7 +224,7 @@ class RenderHandler(object):
         rect_out.extend([0, 0, 800, 600])
         return True
 
-    def OnPaint(self, element_type, paint_buffer, **_):
+    def OnPaint(self, browser, element_type, paint_buffer, **_):
         """Called when an element should be painted."""
         if element_type == cef.PET_VIEW:
             self.test_case.assertEqual(paint_buffer.width, 800)
@@ -218,6 +234,18 @@ class RenderHandler(object):
                 subtest_message("RenderHandler.OnPaint: viewport ok")
         else:
             raise Exception("Unsupported element_type in OnPaint")
+
+    def OnTextSelectionChanged(self, selected_text, selected_range, **_):
+        if not self.OnTextSelectionChanged_True:
+            self.OnTextSelectionChanged_True = True
+            # First call
+            self.test_case.assertEqual(selected_text, "")
+            self.test_case.assertEqual(selected_range, [0, 0])
+        else:
+            # Second call.
+            # <h1> tag should be selected.
+            self.test_case.assertEqual(selected_text,
+                                       "Off-screen rendering test")
 
 
 if __name__ == "__main__":

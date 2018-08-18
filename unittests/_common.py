@@ -14,6 +14,7 @@ MESSAGE_LOOP_RANGE = 100  # each iteration is 0.01 sec
 
 g_subtests_ran = 0
 g_js_code_completed = False
+g_on_load_end_callbacks = []
 
 
 def subtest_message(message):
@@ -49,6 +50,11 @@ def do_message_loop_work(work_loops):
     for i in range(work_loops):
         cef.MessageLoopWork()
         time.sleep(0.01)
+
+
+def on_load_end(callback, *args):
+    global g_on_load_end_callbacks
+    g_on_load_end_callbacks.append([callback, args])
 
 
 def js_code_completed():
@@ -153,6 +159,12 @@ class LoadHandler(object):
         self.frame_source_visitor = FrameSourceVisitor(self, self.test_case)
         frame.GetSource(self.frame_source_visitor)
         browser.ExecuteJavascript("print('LoadHandler.OnLoadEnd() ok')")
+
+        subtest_message("Executing callbacks registered with on_load_end()")
+        global g_on_load_end_callbacks
+        for callback_data in g_on_load_end_callbacks:
+            callback_data[0](*callback_data[1])
+        del g_on_load_end_callbacks
 
     def OnLoadingStateChange(self, browser, is_loading, can_go_back,
                              can_go_forward, **_):

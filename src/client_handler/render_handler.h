@@ -64,6 +64,10 @@ public:
     void UpdateDragCursor(CefRefPtr<CefBrowser> browser,
                           cef_drag_operations_mask_t operation) override;
 
+    void OnTextSelectionChanged(CefRefPtr<CefBrowser> browser,
+                                const CefString& selected_text,
+                                const CefRange& selected_range) override;
+
 private:
     IMPLEMENT_REFCOUNTING(RenderHandler);
 };

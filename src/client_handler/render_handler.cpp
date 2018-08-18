@@ -106,3 +106,11 @@ void RenderHandler::UpdateDragCursor(CefRefPtr<CefBrowser> browser,
     REQUIRE_UI_THREAD();
     RenderHandler_UpdateDragCursor(browser, operation);
 }
+
+void RenderHandler::OnTextSelectionChanged(CefRefPtr<CefBrowser> browser,
+                            const CefString& selected_text,
+                            const CefRange& selected_range) {
+    REQUIRE_UI_THREAD();
+    RenderHandler_OnTextSelectionChanged(browser, selected_text,
+                                         selected_range);
+}

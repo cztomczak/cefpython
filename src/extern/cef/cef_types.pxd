@@ -377,3 +377,7 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef enum cef_focus_source_t:
         FOCUS_SOURCE_NAVIGATION,
         FOCUS_SOURCE_SYSTEM,
+
+    cdef cppclass CefRange:
+        int from_val "from"
+        int to_val "to"

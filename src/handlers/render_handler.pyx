@@ -4,8 +4,10 @@
 
 include "../cefpython.pyx"
 include "../browser.pyx"
+include "../string_utils.pyx"
 
 cimport cef_types
+from cef_types cimport CefRange
 
 # cef_paint_element_type_t, PaintElementType
 PET_VIEW = cef_types.PET_VIEW
@@ -288,3 +290,20 @@ cdef public void RenderHandler_UpdateDragCursor(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
+cdef public void RenderHandler_OnTextSelectionChanged(
+        CefRefPtr[CefBrowser] cef_browser,
+        const CefString& selected_text,
+        const CefRange& selected_range
+        ) except * with gil:
+    cdef PyBrowser browser
+    try:
+        browser = GetPyBrowser(cef_browser, "OnTextSelectionChanged")
+        callback = browser.GetClientCallback("OnTextSelectionChanged")
+        if callback:
+            callback(browser=browser,
+                     selected_text=CefToPyString(selected_text),
+                     selected_range=[selected_range.from_val,
+                                     selected_range.to_val])
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)

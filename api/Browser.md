@@ -591,6 +591,23 @@ machinery.
 Returns true if a document has been loaded in the browser.
 
 
+### Invalidate
+
+| | |
+| --- | --- |
+| element_type | PaintElementType |
+| __Return__ | void |
+
+Description from upstream CEF:
+> Invalidate the view. The browser will call CefRenderHandler::OnPaint
+> asynchronously. This method is only used when window rendering is
+> disabled.
+
+`PaintElementType` enum values defined in cefpython module:
+* PET_VIEW
+* PET_POPUP
+
+
 ### IsFullscreen
 
 | | |

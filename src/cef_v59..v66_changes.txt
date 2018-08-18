@@ -71,6 +71,8 @@ NEW FEATURES
 ------------
 
 + unittests/osr_test.py - new test for off-screen rendering mode
++ cefpython.SetGlobalClientHandler
++ Browser.Invalidate
 
 internal/cef_types.h
 + cef_log_severity_t: new key LOGSEVERITY_DEBUG (no need to expose,
@@ -85,10 +87,9 @@ internal/cef_types.h
 cef_accessibility_handler.h
 + CefAccessibilityHandler
 + CefRenderHandler::GetAccessibilityHandler
-+ cefpython.SetGlobalClientHandler
 
 cef_render_handler.h
-- OnTextSelectionChanged
++ OnTextSelectionChanged
 
 cef_browser.h
 + SetAccessibilityState
