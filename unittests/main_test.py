@@ -23,6 +23,8 @@ g_datauri_data = """
     body,html {
         font-family: Arial;
         font-size: 11pt;
+        width: 800px;
+        heiht: 600px;
     }
     </style>
     <script>
@@ -168,7 +170,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Set auto resize. Call it after js bindings were set.
         browser.SetAutoResizeEnabled(enabled=True,
                                      min_size=[800, 600],
-                                     max_size=[800, 600])
+                                     max_size=[1024, 768])
         subtest_message("browser.SetAutoResizeEnabled() ok")
 
         # Test Request.SetPostData(list)
@@ -229,9 +231,11 @@ class DisplayHandler2(object):
         self.OnAutoResize_True = False
 
     def OnAutoResize(self, new_size, **_):
-        assert not self.OnAutoResize_True
         self.OnAutoResize_True = True
-        self.test_case.assertEqual(new_size, [800, 600])
+        self.test_case.assertGreaterEqual(new_size[0], 800)
+        self.test_case.assertLessEqual(new_size[0], 1024)
+        self.test_case.assertGreaterEqual(new_size[1], 600)
+        self.test_case.assertLessEqual(new_size[1], 768)
 
 
 class External(object):
