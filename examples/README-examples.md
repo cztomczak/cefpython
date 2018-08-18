@@ -50,7 +50,9 @@ workarounds.
   library
 - [qt.py](qt.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4),
   [PyQt5](https://pypi.python.org/pypi/PyQt5)
-  and [PySide](https://wiki.qt.io/PySide) libraries
+  and [PySide](https://wiki.qt.io/PySide) libraries.
+  PyQt4 and PySide examples are currently broken on Linux, see
+  [Issue #452](../../../issues/452).
 - [tkinter_.py](tkinter_.py): example for [Tkinter](https://wiki.python.org/moin/TkInter).
   Currently broken on Mac ([#309](../../../issues/309)).
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)
