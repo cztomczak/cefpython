@@ -2,6 +2,9 @@
 
 # API index
 
+* [AccessibilityHandler (interface)](AccessibilityHandler.md#accessibilityhandler-interface)
+  * [_OnAccessibilityTreeChange](AccessibilityHandler.md#_onaccessibilitytreechange)
+  * [_OnAccessibilityLocationChange](AccessibilityHandler.md#_onaccessibilitylocationchange)
 * [Application settings](ApplicationSettings.md#application-settings)
   * [accept_language_list](ApplicationSettings.md#accept_language_list)
   * [app_user_model_id](ApplicationSettings.md#app_user_model_id)
@@ -97,6 +100,7 @@
   * [SendMouseWheelEvent](Browser.md#sendmousewheelevent)
   * [SendFocusEvent](Browser.md#sendfocusevent)
   * [SendCaptureLostEvent](Browser.md#sendcapturelostevent)
+  * [SetAccessibilityState](Browser.md#setaccessibilitystate)
   * [SetClientCallback](Browser.md#setclientcallback)
   * [SetClientHandler](Browser.md#setclienthandler)
   * [SetFocus](Browser.md#setfocus)
@@ -158,6 +162,7 @@
   * [PostDelayedTask](cefpython.md#postdelayedtask)
   * [QuitMessageLoop](cefpython.md#quitmessageloop)
   * [SetGlobalClientCallback](cefpython.md#setglobalclientcallback)
+  * [SetGlobalClientHandler](cefpython.md#setglobalclienthandler)
   * [SetOsModalLoop](cefpython.md#setosmodalloop)
   * [Shutdown](cefpython.md#shutdown)
 * [Command line switches](CommandLineSwitches.md#command-line-switches)

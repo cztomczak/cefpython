@@ -12,6 +12,19 @@ cdef extern from "include/cef_values.h":
     cdef CefRefPtr[CefBinaryValue] CefBinaryValue_Create \
         "CefBinaryValue::Create"(const void* data, size_t data_size)
 
+    cdef cppclass CefValue:
+        cpp_bool IsValid()
+        cpp_bool IsOwned()
+        cpp_bool IsReadOnly()
+        cef_value_type_t GetType()
+        cpp_bool GetBool()
+        int GetInt()
+        double GetDouble()
+        CefString GetString()
+        CefRefPtr[CefBinaryValue] GetBinary()
+        CefRefPtr[CefDictionaryValue] GetDictionary()
+        CefRefPtr[CefListValue] GetList()
+
     cdef cppclass CefBinaryValue:
         cpp_bool IsValid()
         cpp_bool IsOwned()

@@ -5,6 +5,7 @@
 include "cefpython.pyx"
 
 cimport cef_types
+from cef_types cimport cef_state_t
 IF UNAME_SYSNAME == "Linux":
     cimport x11
 
@@ -512,6 +513,9 @@ cdef class PyBrowser:
             x11.SetX11WindowBounds(self.GetCefBrowser(), x, y, width, height)
         ELSE:
             NonCriticalError("SetBounds() not implemented on this platform")
+
+    cpdef py_void SetAccessibilityState(self, cef_state_t state):
+        self.GetCefBrowserHost().get().SetAccessibilityState(state)
 
     cpdef py_void SetFocus(self, enable):
         self.GetCefBrowserHost().get().SetFocus(bool(enable))

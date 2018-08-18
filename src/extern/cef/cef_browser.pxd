@@ -11,7 +11,7 @@ from libcpp cimport bool as cpp_bool
 from libcpp.vector cimport vector as cpp_vector
 from cef_frame cimport CefFrame
 cimport cef_types
-from cef_types cimport int64
+from cef_types cimport int64, cef_state_t
 from cef_types cimport CefBrowserSettings, CefPoint
 from cef_drag_data cimport CefDragData
 from cef_types cimport CefMouseEvent
@@ -85,6 +85,8 @@ cdef extern from "include/cef_browser.h":
         # Spell checking
         void ReplaceMisspelling(const CefString& word)
         void AddWordToDictionary(const CefString& word)
+
+        void SetAccessibilityState(cef_state_t accessibility_state)
 
 
     cdef cppclass CefBrowser:

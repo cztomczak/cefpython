@@ -634,7 +634,7 @@ def test_wheel_packages(pythons):
         command = ("\"{python}\" {unittests}"
                    .format(python=python["executable"],
                            unittests=os.path.join(UNITTESTS_DIR,
-                                                  "main_test.py")))
+                                                  "_test_runner.py")))
         pcode = subprocess.call(command, cwd=DISTRIB_DIR, shell=True)
         if pcode != 0:
             print("[build_distrib.py] ERROR: Unit tests failed for"

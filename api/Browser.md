@@ -76,6 +76,7 @@ Table of contents:
   * [SendMouseWheelEvent](#sendmousewheelevent)
   * [SendFocusEvent](#sendfocusevent)
   * [SendCaptureLostEvent](#sendcapturelostevent)
+  * [SetAccessibilityState](#setaccessibilitystate)
   * [SetClientCallback](#setclientcallback)
   * [SetClientHandler](#setclienthandler)
   * [SetFocus](#setfocus)
@@ -843,6 +844,44 @@ Send a focus event to the browser.
 
 Send a capture lost event to the browser.
 
+
+### SetAccessibilityState
+
+| | |
+| --- | --- |
+| state | cef_state_t |
+| __Return__ | void |
+
+cef_state_t enum values defined in cefpython module:
+- STATE_DEFAULT
+- STATE_ENABLED
+- STATE_DISABLED
+
+Description from upstream CEF:
+> Set accessibility state for all frames. |accessibility_state| may be
+> default, enabled or disabled. If |accessibility_state| is STATE_DEFAULT
+> then accessibility will be disabled by default and the state may be further
+> controlled with the "force-renderer-accessibility" and
+> "disable-renderer-accessibility" command-line switches. If
+> |accessibility_state| is STATE_ENABLED then accessibility will be enabled.
+> If |accessibility_state| is STATE_DISABLED then accessibility will be
+> completely disabled.
+>
+> For windowed browsers accessibility will be enabled in Complete mode (which
+> corresponds to kAccessibilityModeComplete in Chromium). In this mode all
+> platform accessibility objects will be created and managed by Chromium's
+> internal implementation. The client needs only to detect the screen reader
+> and call this method appropriately. For example, on macOS the client can
+> handle the @"AXEnhancedUserInterface" accessibility attribute to detect
+> VoiceOver state changes and on Windows the client can handle WM_GETOBJECT
+> with OBJID_CLIENT to detect accessibility readers.
+>
+> For windowless browsers accessibility will be enabled in TreeOnly mode
+> (which corresponds to kAccessibilityModeWebContentsOnly in Chromium). In
+> this mode renderer accessibility is enabled, the full tree is computed, and
+> events are passed to CefAccessibiltyHandler, but platform accessibility
+> objects are not created. The client may implement platform accessibility
+> objects using CefAccessibiltyHandler callbacks if desired.
 
 ### SetClientCallback
 

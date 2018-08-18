@@ -329,6 +329,7 @@ cdef dict g_globalClientCallbacks = {}
 
 # -----------------------------------------------------------------------------
 
+include "cef_types.pyx"
 include "utils.pyx"
 include "string_utils.pyx"
 IF UNAME_SYSNAME == "Windows":
@@ -371,6 +372,7 @@ include "helpers.pyx"
 include "image.pyx"
 
 # Handlers
+include "handlers/accessibility_handler.pyx"
 include "handlers/browser_process_handler.pyx"
 include "handlers/display_handler.pyx"
 include "handlers/focus_handler.pyx"
@@ -953,11 +955,31 @@ def SetOsModalLoop(py_bool modalLoop):
 
 cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     global g_globalClientCallbacks
-    if name in ["OnCertificateError", "OnBeforePluginLoad", "OnAfterCreated"]:
+    # Global callbacks are prefixed with "_" in documentation.
+    # Accept both with and without a prefix.
+    if name.startswith("_"):
+        name = name[1:]
+    if name in ["OnCertificateError", "OnBeforePluginLoad", "OnAfterCreated",
+                "OnAccessibilityTreeChange", "OnAccessibilityLocationChange"]:
         g_globalClientCallbacks[name] = callback
     else:
         raise Exception("SetGlobalClientCallback() failed: "\
                 "invalid callback name = %s" % name)
+
+cpdef py_void SetGlobalClientHandler(object clientHandler):
+    if not hasattr(clientHandler, "__class__"):
+        raise Exception("SetGlobalClientHandler() failed: __class__ "
+                        "attribute missing")
+    cdef dict methods = {}
+    cdef py_string key
+    cdef object method
+    cdef tuple value
+    for value in inspect.getmembers(clientHandler,
+            predicate=inspect.ismethod):
+        key = value[0]
+        method = value[1]
+        if key and key[0:2] != '__':
+            SetGlobalClientCallback(key, method)
 
 cpdef object GetGlobalClientCallback(py_string name):
     global g_globalClientCallbacks

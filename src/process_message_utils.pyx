@@ -10,6 +10,7 @@
 # enumerate(), to an int.
 
 include "cefpython.pyx"
+include "utils.pyx"
 
 # -----------------------------------------------------------------------------
 # CEF values to Python values
@@ -36,6 +37,53 @@ cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
             return jsCallback
     return pyString
 
+cdef object CefValueToPyValue(CefRefPtr[CefValue] cefValue):
+    assert cefValue.get().IsValid(), "cefValue is invalid"
+    cdef cef_types.cef_value_type_t valueType = cefValue.get().GetType()
+    cdef CefRefPtr[CefBinaryValue] binaryValue
+    cdef uint32 uint32_value = 0
+    cdef int64 int64_value = 0
+
+    if valueType == cef_types.VTYPE_NULL:
+        return None
+    elif valueType == cef_types.VTYPE_BOOL:
+        return bool(cefValue.get().GetBool())
+    elif valueType == cef_types.VTYPE_INT:
+        return cefValue.get().GetInt()
+    elif valueType == cef_types.VTYPE_DOUBLE:
+        return cefValue.get().GetDouble()
+    elif valueType == cef_types.VTYPE_STRING:
+        return CefToPyString(cefValue.get().GetString())
+    elif valueType == cef_types.VTYPE_DICTIONARY:
+        return CefDictionaryValueToPyDict(
+                <CefRefPtr[CefBrowser]>NULL,
+                cefValue.get().GetDictionary(),
+                1)
+    elif valueType == cef_types.VTYPE_LIST:
+        return CefListValueToPyList(
+                <CefRefPtr[CefBrowser]>NULL,
+                cefValue.get().GetList(),
+                1)
+    elif valueType == cef_types.VTYPE_BINARY:
+        binaryValue = cefValue.get().GetBinary()
+        if binaryValue.get().GetSize() == sizeof(uint32_value):
+            binaryValue.get().GetData(
+                    &uint32_value, sizeof(uint32_value), 0)
+            return uint32_value
+        elif binaryValue.get().GetSize() == sizeof(int64_value):
+            binaryValue.get().GetData(
+                    &int64_value, sizeof(int64_value), 0)
+            return int64_value
+        else:
+            NonCriticalError("Unknown binary value, size=%s" % \
+                    binaryValue.get().GetSize())
+            return None
+    else:
+        raise Exception("Unknown CefValue type=%s" % valueType)
+
+# TODO: Use CefListValue.GetValue to get CefValue and use CefValueToPyValue
+#       for dictionary and lists?
+
 cdef list CefListValueToPyList(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefListValue] cefListValue,
@@ -49,8 +97,8 @@ cdef list CefListValueToPyList(
     cdef cef_types.cef_value_type_t valueType
     cdef list ret = []
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef uint32 uint32_value
-    cdef int64 int64_value
+    cdef uint32 uint32_value = 0
+    cdef int64 int64_value = 0
     cdef object originallyString
     for index in range(0, size):
         valueType = cefListValue.get().GetType(index)
@@ -65,8 +113,9 @@ cdef list CefListValueToPyList(
         elif valueType == cef_types.VTYPE_STRING:
             originallyString = CefToPyString(
                     cefListValue.get().GetString(index))
-            originallyString = CheckForCefPythonMessageHash(cefBrowser,
-                    originallyString)
+            if cefBrowser.get():
+                originallyString = CheckForCefPythonMessageHash(cefBrowser,
+                        originallyString)
             ret.append(originallyString)
         elif valueType == cef_types.VTYPE_DICTIONARY:
             ret.append(CefDictionaryValueToPyDict(
@@ -89,10 +138,11 @@ cdef list CefListValueToPyList(
                         &int64_value, sizeof(int64_value), 0)
                 ret.append(int64_value)
             else:
-                raise Exception("Unknown binary value, size=%s" % \
-                        binaryValue.get().GetSize())
+                NonCriticalError("Unknown binary value, size=%s" % \
+                    binaryValue.get().GetSize())
+                ret.append(None)
         else:
-            raise Exception("Unknown value type=%s" % valueType)
+            raise Exception("Unknown CefValue type=%s" % valueType)
     return ret
 
 cdef dict CefDictionaryValueToPyDict(
@@ -107,16 +157,19 @@ cdef dict CefDictionaryValueToPyDict(
     cefDictionaryValue.get().GetKeys(keyList)
     cdef cef_types.cef_value_type_t valueType
     cdef dict ret = {}
+    # noinspection PyUnresolvedReferences
     cdef cpp_vector[CefString].iterator iterator = keyList.begin()
     cdef CefString cefKey
     cdef py_string pyKey
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef uint32 uint32_value
-    cdef int64 int64_value
+    cdef uint32 uint32_value = 0
+    cdef int64 int64_value = 0
     cdef object originallyString
     while iterator != keyList.end():
+        # noinspection PyUnresolvedReferences
         cefKey = deref(iterator)
         pyKey = CefToPyString(cefKey)
+        # noinspection PyUnresolvedReferences
         preinc(iterator)
         valueType = cefDictionaryValue.get().GetType(cefKey)
         if valueType == cef_types.VTYPE_NULL:
@@ -130,8 +183,9 @@ cdef dict CefDictionaryValueToPyDict(
         elif valueType == cef_types.VTYPE_STRING:
             originallyString = CefToPyString(
                     cefDictionaryValue.get().GetString(cefKey))
-            originallyString = CheckForCefPythonMessageHash(cefBrowser,
-                    originallyString)
+            if cefBrowser.get():
+                originallyString = CheckForCefPythonMessageHash(cefBrowser,
+                        originallyString)
             ret[pyKey] = originallyString
         elif valueType == cef_types.VTYPE_DICTIONARY:
             ret[pyKey] = CefDictionaryValueToPyDict(
@@ -154,10 +208,11 @@ cdef dict CefDictionaryValueToPyDict(
                         &int64_value, sizeof(int64_value), 0)
                 ret[pyKey] = int64_value
             else:
-                raise Exception("Unknown binary value, size=%s" % \
-                        binaryValue.get().GetSize())
+                NonCriticalError("Unknown binary value, size=%s" % \
+                    binaryValue.get().GetSize())
+                ret[pyKey] = None
         else:
-            raise Exception("Unknown value type = %s" % valueType)
+            raise Exception("Unknown CefValue type = %s" % valueType)
     return ret
 
 # -----------------------------------------------------------------------------

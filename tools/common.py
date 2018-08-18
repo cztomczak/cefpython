@@ -125,8 +125,9 @@ else:
 assert __file__
 ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-# API reference
+# API reference and docs
 API_DIR = os.path.join(ROOT_DIR, "api")
+DOCS_DIR = os.path.join(ROOT_DIR, "docs")
 
 # Build directories
 BUILD_DIR = os.path.join(ROOT_DIR, "build")

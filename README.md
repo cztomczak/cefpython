@@ -291,6 +291,7 @@ Additional information for v31.2 release:
 
 #### Client handlers (interfaces)
 
+ * [AccessibilityHandler](api/AccessibilityHandler.md#accessibilityhandler-interface)
  * [DisplayHandler](api/DisplayHandler.md#displayhandler-interface)
  * [DownloadHandler](api/DownloadHandler.md#downloadhandler)
  * [FocusHandler](api/FocusHandler.md#focushandler-interface)
@@ -313,6 +314,9 @@ Additional information for v31.2 release:
 
 ### API index
 
+* [AccessibilityHandler (interface)](api/AccessibilityHandler.md#accessibilityhandler-interface)
+  * [_OnAccessibilityTreeChange](api/AccessibilityHandler.md#_onaccessibilitytreechange)
+  * [_OnAccessibilityLocationChange](api/AccessibilityHandler.md#_onaccessibilitylocationchange)
 * [Application settings](api/ApplicationSettings.md#application-settings)
   * [accept_language_list](api/ApplicationSettings.md#accept_language_list)
   * [app_user_model_id](api/ApplicationSettings.md#app_user_model_id)
@@ -408,6 +412,7 @@ Additional information for v31.2 release:
   * [SendMouseWheelEvent](api/Browser.md#sendmousewheelevent)
   * [SendFocusEvent](api/Browser.md#sendfocusevent)
   * [SendCaptureLostEvent](api/Browser.md#sendcapturelostevent)
+  * [SetAccessibilityState](api/Browser.md#setaccessibilitystate)
   * [SetClientCallback](api/Browser.md#setclientcallback)
   * [SetClientHandler](api/Browser.md#setclienthandler)
   * [SetFocus](api/Browser.md#setfocus)
@@ -469,6 +474,7 @@ Additional information for v31.2 release:
   * [PostDelayedTask](api/cefpython.md#postdelayedtask)
   * [QuitMessageLoop](api/cefpython.md#quitmessageloop)
   * [SetGlobalClientCallback](api/cefpython.md#setglobalclientcallback)
+  * [SetGlobalClientHandler](api/cefpython.md#setglobalclienthandler)
   * [SetOsModalLoop](api/cefpython.md#setosmodalloop)
   * [Shutdown](api/cefpython.md#shutdown)
 * [Command line switches](api/CommandLineSwitches.md#command-line-switches)

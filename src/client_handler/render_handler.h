@@ -4,13 +4,20 @@
 
 #include "common/cefpython_public_api.h"
 #include "include/cef_render_handler.h"
+#include "accessibility_handler.h"
 
 
-class RenderHandler : public CefRenderHandler
+class RenderHandler : public CefRenderHandler,
+                      public AccessibilityHandler
 {
 public:
     RenderHandler(){}
     virtual ~RenderHandler(){}
+
+    CefRefPtr<CefAccessibilityHandler> GetAccessibilityHandler()
+                override {
+        return this;
+    }
 
     bool GetRootScreenRect(CefRefPtr<CefBrowser> browser,
                            CefRect& rect) override;

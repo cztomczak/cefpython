@@ -26,6 +26,7 @@ Table of contents:
   * [PostDelayedTask](#postdelayedtask)
   * [QuitMessageLoop](#quitmessageloop)
   * [SetGlobalClientCallback](#setglobalclientcallback)
+  * [SetGlobalClientHandler](#setglobalclienthandler)
   * [SetOsModalLoop](#setosmodalloop)
   * [Shutdown](#shutdown)
 
@@ -133,7 +134,8 @@ Returns the [CommandLineSwitches](CommandLineSwitches.md) switch that was passed
 | name | string |
 | __Return__ | object |
 
-Returns a global client callback that was set using SetGlobalClientCallback(). Returns None if callback was not set.
+Returns a global client callback that was set using SetGlobalClientCallback()
+or SetGlobalClientHandler. Returns None if callback was not set.
 
 
 ### GetModuleDirectory
@@ -288,6 +290,23 @@ Current CEF Python implementation is limited in handling callbacks that occur du
 Some client callbacks are not associated with any browser. In such case use this function instead of the SetClientCallback() and SetClientHandler() [Browser](Browser.md) methods. An example of such callback is OnCertificateError() in [RequestHandler](RequestHandler.md).
 
 Example of using SetGlobalClientCallback() is provided in the wxpython.py example.
+
+
+### SetGlobalClientHandler
+
+| Parameter | Type |
+| --- | --- |
+| handler | object |
+| __Return__ | void |
+
+Set client handler object (class instance). Its members will be inspected.
+Private methods that are not meant to be callbacks should have their names
+prepended with two underscores. Methods with single underscore or no
+underscore are treated the same as client callbacks.
+
+You can call this method multiple times to set many handlers. For
+example you can create in your code several objects named AccessibilityHandler,
+RequestHandler etc.
 
 
 ### SetOsModalLoop

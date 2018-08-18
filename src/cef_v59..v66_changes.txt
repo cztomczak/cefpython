@@ -70,6 +70,8 @@ MISC
 NEW FEATURES
 ------------
 
++ unittests/osr_test.py - new test for off-screen rendering mode
+
 internal/cef_types.h
 + cef_log_severity_t: new key LOGSEVERITY_DEBUG (no need to expose,
   same as LOGSEVERITY_VERBOSE, see code comments in setting.pyx
@@ -81,14 +83,15 @@ internal/cef_types.h
 + cef_referrer_policy_t changes (not exposed, info only)
 
 cef_accessibility_handler.h
-- CefAccessibilityHandler
-- CefRenderHandler::GetAccessibilityHandler
++ CefAccessibilityHandler
++ CefRenderHandler::GetAccessibilityHandler
++ cefpython.SetGlobalClientHandler
 
 cef_render_handler.h
 - OnTextSelectionChanged
 
 cef_browser.h
-- SetAccessibilityState
++ SetAccessibilityState
 - SetAutoResizeEnabled
 - GetExtension
 - IsBackgroundHost
@@ -101,9 +104,9 @@ cef_display_handler.h
 - OnLoadingProgressChange
 
 cef_drag_data.h
-- GetImage (cross-platform)
-- GetImageHotspot (cross-platform)
-- HasImage (cross-platform)
++ GetImage (cross-platform)
++ GetImageHotspot (cross-platform)
++ HasImage (cross-platform)
 
 cef_extension.h
 - CefExtension
