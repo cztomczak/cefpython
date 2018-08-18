@@ -188,8 +188,12 @@ def check_installed_packages():
     }
     for package in packages:
         try:
-            importlib.import_module(package)
-            packages[package] = True
+            if package == "PyQt5":
+                # Strange issue on Mac, PyQt5 is an empty built-in module
+                from PyQt5 import QtGui
+            else:
+                importlib.import_module(package)
+                packages[package] = True
         except ImportError:
             packages[package] = False
     packages["gi"] = check_gi_installed()
