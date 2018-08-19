@@ -76,6 +76,7 @@ except NameError:
     pass
 
 # Command line args variables
+SYS_ARGV_ORIGINAL = None
 VERSION = ""
 NO_RUN_EXAMPLES = False
 DEBUG_FLAG = False
@@ -134,6 +135,9 @@ def command_line_args():
         sys.exit(1)
 
     print("[build.py] Parse command line arguments")
+
+    global SYS_ARGV_ORIGINAL
+    SYS_ARGV_ORIGINAL = sys.argv
 
     if "--no-run-examples" in sys.argv:
         NO_RUN_EXAMPLES = True
@@ -802,7 +806,7 @@ def build_cefpython_module():
             args.append("\"{python}\"".format(python=sys.executable))
             args.append(os.path.join(TOOLS_DIR, os.path.basename(__file__)))
             assert __file__ in sys.argv[0]
-            args.extend(sys.argv[1:])
+            args.extend(SYS_ARGV_ORIGINAL[1:])
             command = " ".join(args)
             ret = subprocess.call(command, shell=True)
             # Always pass fixed value to sys.exit, read note at
