@@ -18,9 +18,14 @@ def main():
 
 def click_after_1_second(browser):
     print("Click after 1 second")
+    # Mouse move to the top-left corner of the text
     browser.SendMouseMoveEvent(0, 70, False, 0)
+    # Left mouse button click in the top-left corner of the text
     browser.SendMouseClickEvent(0, 70, cef.MOUSEBUTTON_LEFT, False, 1)
+    # Mouse move to the bottom-right corner of the text,
+    # while holding left mouse button.
     browser.SendMouseMoveEvent(400, 80, False, cef.EVENTFLAG_LEFT_MOUSE_BUTTON)
+    # Release left mouse button
     browser.SendMouseClickEvent(400, 80, cef.MOUSEBUTTON_LEFT, True, 1)
     cef.PostDelayedTask(cef.TID_UI, 1000, click_after_2_seconds, browser)
 

@@ -81,6 +81,7 @@ NEW FEATURES
 + examples/snippets/
     + onbeforeclose.py
     + network_cookies.py
+    + mouse_clicks.py
 
 internal/cef_types.h
 + cef_log_severity_t: new key LOGSEVERITY_DEBUG (no need to expose,
