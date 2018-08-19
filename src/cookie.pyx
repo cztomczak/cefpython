@@ -181,9 +181,12 @@ cdef class Cookie:
 # CookieManager
 # ------------------------------------------------------------------------------
 
-class CookieManager:
-    @staticmethod
-    def GetGlobalManager():
+class CookieManager(object):
+    """Class used for managing cookies. To instantiate this class
+    call CreateManager() static method."""
+
+    @classmethod
+    def GetGlobalManager(cls):
         global g_globalCookieManager
         cdef CefRefPtr[CefCookieManager] cefCookieManager
         if not g_globalCookieManager:
@@ -192,11 +195,28 @@ class CookieManager:
             g_globalCookieManager = CreatePyCookieManager(cefCookieManager)
         return g_globalCookieManager
 
-    @staticmethod
-    def CreateManager(py_string path, py_bool persistSessionCookies=False):
+    @classmethod
+    def GetBlockingManager(cls):
+        return CreatePyCookieManager(CefCookieManager_GetBlockingManager())
+
+    @classmethod
+    def CreateManager(cls, py_string path,
+                      py_bool persist_session_cookies=False):
+        """
+        Create a new cookie manager.
+        :param path:
+        :type path: str
+        :param persist_session_cookies:
+        :type path: bool
+        :return: CookieManager object
+        :rtype: CookieManager
+        """
+        # When PyCharm generates a stub for the cefpython module
+        # it doesn't use the above docstring for code inspections.
+        # No idea why.
         cdef CefRefPtr[CefCookieManager] cefCookieManager
         cefCookieManager = CefCookieManager_CreateManager(
-                PyToCefStringValue(path), bool(persistSessionCookies),
+                PyToCefStringValue(path), bool(persist_session_cookies),
                 <CefRefPtr[CefCompletionCallback]?>NULL)
         if <void*>cefCookieManager != NULL and cefCookieManager.get():
             return CreatePyCookieManager(cefCookieManager)

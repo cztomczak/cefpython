@@ -3,10 +3,11 @@
 
 # CookieManager (class)
 
-This class cannot be instantiated directly, use the CreateManager()
-static method for this purpose.
+Class used for managing cookies. The methods of this class may be called on
+any thread unless otherwise indicated.
 
-The cookie tests can be found in the wxpython.py script.
+Use the `CookieManager.CreateManager` static method to instantiate
+this class.
 
 TODO: in upstream CEF some methods here have a callback parameter
 that when non-NULL will execute asynchronously on the IO thread
@@ -17,6 +18,7 @@ also have an OnComplete callback.
 Table of contents:
 * [Methods](#methods)
   * [GetGlobalManager](#getglobalmanager)
+  * [GetBlockingManager](#getblockingmanager)
   * [CreateManager](#createmanager)
   * [SetSupportedSchemes](#setsupportedschemes)
   * [VisitAllCookies](#visitallcookies)
@@ -34,10 +36,32 @@ Table of contents:
 
 | | |
 | --- | --- |
-| __Return__ | static [CookieManager](CookieManager.md) |
+| __Return__ | [CookieManager](CookieManager.md) |
 
 Returns the global cookie manager. By default data will be stored at
 [ApplicationSettings](ApplicationSettings.md).cache_path if specified or in memory otherwise.
+
+Description from upstream CEF:
+> Returns the global cookie manager. By default data will be stored at
+> CefSettings.cache_path if specified or in memory otherwise. If |callback|
+> is non-NULL it will be executed asnychronously on the IO thread after the
+> manager's storage has been initialized. Using this method is equivalent to
+> calling CefRequestContext::GetGlobalContext()->GetDefaultCookieManager()
+
+
+### GetBlockingManager
+
+| | |
+| --- | --- |
+| __Return__ | [CookieManager](CookieManager.md) |
+
+Description from upstream CEF:
+> Returns a cookie manager that neither stores nor retrieves cookies. All
+> usage of cookies will be blocked including cookies accessed via the network
+> (request/response headers), via JavaScript (document.cookie), and via
+> CefCookieManager methods. No cookies will be displayed in DevTools. If you
+> wish to only block cookies sent via the network use the CefRequestHandler
+> CanGetCookies and CanSetCookie methods instead.
 
 
 ### CreateManager
@@ -46,7 +70,7 @@ Returns the global cookie manager. By default data will be stored at
 | --- | --- |
 | path | string |
 | persistSessionCookies=False | bool |
-| __Return__ | static [CookieManager](CookieManager.md) |
+| __Return__ | [CookieManager](CookieManager.md) |
 
 Creates a new cookie manager. Otherwise, data will be stored at the
 specified |path|. To persist session cookies (cookies without an expiry
@@ -181,4 +205,4 @@ Flush the backing store (if any) to disk. If |callback| is non-NULL it will
 be executed asnychronously on the IO thread after the flush is complete.
 Returns false if cookies cannot be accessed.
 
-The callback arg is not implemented.
+The callback arg is not implemented yet.

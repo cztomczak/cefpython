@@ -79,7 +79,7 @@ def scale_window_size_for_high_dpi(width, height):
     if not WINDOWS:
         return width, height
     (_, _, max_width, max_height) = wx.GetClientDisplayRect().Get()
-    # noinspection PyUnresolvedReferences, PyArgumentList
+    # noinspection PyUnresolvedReferences
     (width, height) = cef.DpiAware.Scale((width, height))
     if width > max_width:
         width = max_width
@@ -174,7 +174,7 @@ class MainFrame(wx.Frame):
     def embed_browser(self):
         window_info = cef.WindowInfo()
         (width, height) = self.browser_panel.GetClientSize().Get()
-        assert self.browser_panel.GetHandle(), "Window handle not available yet"
+        assert self.browser_panel.GetHandle(), "Window handle not available"
         window_info.SetAsChild(self.browser_panel.GetHandle(),
                                [0, 0, width, height])
         self.browser = cef.CreateBrowserSync(window_info,

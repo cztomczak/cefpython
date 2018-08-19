@@ -73,6 +73,7 @@ NEW FEATURES
 + unittests/osr_test.py - new test for off-screen rendering mode
 + cefpython.SetGlobalClientHandler
 + Browser.Invalidate
++ CookieManager.FlushStore
 
 internal/cef_types.h
 + cef_log_severity_t: new key LOGSEVERITY_DEBUG (no need to expose,
@@ -98,7 +99,7 @@ cef_browser.h
 - IsBackgroundHost
 
 cef_cookie.h
-- GetBlockingManager
++ GetBlockingManager
 
 cef_display_handler.h
 + OnAutoResize

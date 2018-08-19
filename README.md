@@ -509,6 +509,7 @@ Additional information for v31.2 release:
   * [GetExpires](api/Cookie.md#getexpires)
 * [CookieManager (class)](api/CookieManager.md#cookiemanager-class)
   * [GetGlobalManager](api/CookieManager.md#getglobalmanager)
+  * [GetBlockingManager](api/CookieManager.md#getblockingmanager)
   * [CreateManager](api/CookieManager.md#createmanager)
   * [SetSupportedSchemes](api/CookieManager.md#setsupportedschemes)
   * [VisitAllCookies](api/CookieManager.md#visitallcookies)

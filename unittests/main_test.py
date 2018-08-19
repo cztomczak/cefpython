@@ -197,6 +197,15 @@ class MainTest_IsolatedTest(unittest.TestCase):
         self.assertEqual(req_data, req.GetPostData())
         subtest_message("cef.Request.SetPostData(dict) ok")
 
+        # Cookie manager
+        self.assertIsInstance(cef.CookieManager.CreateManager(path=""),
+                              cef.PyCookieManager)
+        self.assertIsInstance(cef.CookieManager.GetGlobalManager(),
+                              cef.PyCookieManager)
+        self.assertIsInstance(cef.CookieManager.GetBlockingManager(),
+                              cef.PyCookieManager)
+        subtest_message("cef.CookieManager ok")
+
         # Run message loop
         run_message_loop()
 

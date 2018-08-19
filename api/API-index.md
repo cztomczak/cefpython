@@ -197,6 +197,7 @@
   * [GetExpires](Cookie.md#getexpires)
 * [CookieManager (class)](CookieManager.md#cookiemanager-class)
   * [GetGlobalManager](CookieManager.md#getglobalmanager)
+  * [GetBlockingManager](CookieManager.md#getblockingmanager)
   * [CreateManager](CookieManager.md#createmanager)
   * [SetSupportedSchemes](CookieManager.md#setsupportedschemes)
   * [VisitAllCookies](CookieManager.md#visitallcookies)
