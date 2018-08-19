@@ -127,7 +127,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Test initialization of CEF
         settings = {
             "debug": False,
-            "log_severity": cef.LOGSEVERITY_WARNING,
+            "log_severity": cef.LOGSEVERITY_ERROR,
             "log_file": "",
         }
         if "--debug" in sys.argv:
@@ -150,15 +150,14 @@ class MainTest_IsolatedTest(unittest.TestCase):
         elif MAC:
             certrevoc_dir = r"/Users/*/Library/Application Support/Google" \
                             r"/Chrome/CertificateRevocation"
-        if os.path.exists(certrevoc_dir):
-            crlset_files = glob.iglob(os.path.join(certrevoc_dir, "*",
-                                                   "crl-set"))
-            crlset = ""
-            for crlset in crlset_files:
-                pass
-            if os.path.exists(crlset):
-                cef.LoadCrlSetsFile(crlset)
-                subtest_message("cef.LoadCrlSetsFile ok")
+        crlset_files = glob.iglob(os.path.join(certrevoc_dir, "*",
+                                               "crl-set"))
+        crlset = ""
+        for crlset in crlset_files:
+            pass
+        if os.path.exists(crlset):
+            cef.LoadCrlSetsFile(crlset)
+            subtest_message("cef.LoadCrlSetsFile ok")
 
         # High DPI on Windows
         if WINDOWS:
