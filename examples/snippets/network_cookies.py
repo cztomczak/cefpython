@@ -30,6 +30,7 @@ class RequestHandler(object):
             print("-- CanGetCookies #"+str(self.getcount))
             print("url="+request.GetUrl()[0:80])
             print("")
+        # Return True to allow reading cookies and False to block
         return True
 
     def CanSetCookie(self, frame, request, cookie, **_):
@@ -42,6 +43,7 @@ class RequestHandler(object):
             print("Name="+cookie.GetName())
             print("Value="+cookie.GetValue())
             print("")
+        # Return True to allow setting cookie and False to block
         return True
 
 
