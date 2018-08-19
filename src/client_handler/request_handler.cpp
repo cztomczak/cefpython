@@ -117,3 +117,18 @@ void RequestHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
     REQUIRE_UI_THREAD();
     RequestHandler_OnPluginCrashed(browser, plugin_path);
 }
+
+bool RequestHandler::CanGetCookies(CefRefPtr<CefBrowser> browser,
+                                   CefRefPtr<CefFrame> frame,
+                                   CefRefPtr<CefRequest> request) {
+    REQUIRE_IO_THREAD();
+    return RequestHandler_CanGetCookies(browser, frame, request);
+}
+
+bool RequestHandler::CanSetCookie(CefRefPtr<CefBrowser> browser,
+                                  CefRefPtr<CefFrame> frame,
+                                  CefRefPtr<CefRequest> request,
+                                  const CefCookie& cookie) {
+    REQUIRE_IO_THREAD();
+    return RequestHandler_CanSetCookie(browser, frame, request, cookie);
+}

@@ -3,20 +3,69 @@
 
 # LifespanHandler (interface)
 
-Implement this interface to handle events related to browser life span. The methods of this class will be called on the UI thread.
+Implement this interface to handle events related to browser life span.
+The methods of this class will be called on the UI thread.
 
-For an example of how to implement a handler see [cefpython](cefpython.md).CreateBrowser(). For a list of all handler interfaces see [API > Client handlers](API#Client_handlers).
+Related code snippets:
+- [onbeforeclose.py](../examples/snippets/onbeforeclose.py)
 
 
 Table of contents:
 * [Callbacks](#callbacks)
-  * [OnBeforePopup](#onbeforepopup)
-  * [_OnAfterCreated](#_onaftercreated)
   * [DoClose](#doclose)
+  * [_OnAfterCreated](#_onaftercreated)
   * [OnBeforeClose](#onbeforeclose)
+  * [OnBeforePopup](#onbeforepopup)
 
 
 ## Callbacks
+
+
+### DoClose
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| __Return__ | bool |
+
+Called when a browser has recieved a request to close. This may result
+directly from a call to [Browser](Browser.md).`CloseBrowser` or indirectly
+if the
+browser is a top-level OS window created by CEF and the user attempts to
+close the window. This method will be called after the Javascript
+'onunload' event has been fired. It will not be called for browsers after
+the associated OS window has been destroyed (for those browsers it is no
+longer possible to cancel the close).
+
+See complete description of this callback in [cef_life_span_handler.h]
+(..|src|include|cef_life_span_handler.h).
+
+
+### _OnAfterCreated
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| __Return__ | void |
+
+Called after a new browser is created. This callback will be the first
+notification that references |browser|.
+
+This callback will be executed during browser creation, thus you must call [cefpython](cefpython.md).SetGlobalClientCallback() to use it. The callback name was prefixed with "`_`" to distinguish this special behavior.
+
+
+### OnBeforeClose
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| __Return__ | void |
+
+Called just before a browser is destroyed. Release all references to the
+browser object and do not attempt to execute any methods on the browser
+object after this callback returns. This callback will be the last
+notification that references |browser|. See DoClose() documentation for
+additional usage information.
 
 
 ### OnBeforePopup
@@ -73,50 +122,3 @@ There will be no "window.opener" property available in the popup window.
 * WOD_SAVE_TO_DISK,
 * WOD_OFF_THE_RECORD,
 * WOD_IGNORE_ACTION
-
-
-### _OnAfterCreated
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| __Return__ | void |
-
-Called after a new browser is created. This callback will be the first
-notification that references |browser|.
-
-This callback will be executed during browser creation, thus you must call [cefpython](cefpython.md).SetGlobalClientCallback() to use it. The callback name was prefixed with "`_`" to distinguish this special behavior.
-
-
-### DoClose
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| __Return__ | bool |
-
-Called when a browser has recieved a request to close. This may result
-directly from a call to [Browser](Browser.md).`CloseBrowser` or indirectly
-if the
-browser is a top-level OS window created by CEF and the user attempts to
-close the window. This method will be called after the Javascript
-'onunload' event has been fired. It will not be called for browsers after
-the associated OS window has been destroyed (for those browsers it is no
-longer possible to cancel the close).
-
-See complete description of this callback in [cef_life_span_handler.h]
-(..|src|include|cef_life_span_handler.h).
-
-
-### OnBeforeClose
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| __Return__ | void |
-
-Called just before a browser is destroyed. Release all references to the
-browser object and do not attempt to execute any methods on the browser
-object after this callback returns. This callback will be the last
-notification that references |browser|. See DoClose() documentation for
-additional usage information.

@@ -78,6 +78,9 @@ NEW FEATURES
 + Browser.GetSetting
 + cefpython.GetBrowserByIdentifier
 + Browser.HasDevTools
++ examples/snippets/
+    + onbeforeclose.py
+    + network_cookies.py
 
 internal/cef_types.h
 + cef_log_severity_t: new key LOGSEVERITY_DEBUG (no need to expose,
@@ -137,8 +140,8 @@ cef_file_util.h
 + CefLoadCRLSetsFile
 
 cef_request_handler.h
-- CanGetCookies
-- CanSetCookie
++ CanGetCookies
++ CanSetCookie
 
 cef_response.h
 - GetURL

@@ -67,6 +67,15 @@ public:
     void OnPluginCrashed(CefRefPtr<CefBrowser> browser,
                          const CefString& plugin_path) override;
 
+    bool CanGetCookies(CefRefPtr<CefBrowser> browser,
+                       CefRefPtr<CefFrame> frame,
+                       CefRefPtr<CefRequest> request) override;
+
+    bool CanSetCookie(CefRefPtr<CefBrowser> browser,
+                      CefRefPtr<CefFrame> frame,
+                      CefRefPtr<CefRequest> request,
+                      const CefCookie& cookie) override;
+
 private:
     IMPLEMENT_REFCOUNTING(RequestHandler);
 };

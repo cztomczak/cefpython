@@ -3,6 +3,11 @@
 Table of contents:
 * [Hello World!](#hello-world)
 * [Supported examples](#supported-examples)
+  * [Featured](#featured)
+  * [GUI frameworks](#gui-frameworks)
+  * [Snippets](#snippets)
+  * [Build executable with PyInstaller](#build-executable-with-pyinstaller)
+  * [Unit tests](#unit-tests)
 * [Other examples](#other-examples)
 * [More examples to come](#more-examples-to-come)
 
@@ -27,7 +32,7 @@ in sources to see whether this is a known issue with available
 workarounds.
 
 
-**Featured**
+### Featured
 
 - [hello_world.py](hello_world.py) - Basic example, doesn't require any
   third party GUI framework to run
@@ -37,7 +42,7 @@ workarounds.
   discussed in great details in Tutorial in the [Off-screen rendering](../docs/Tutorial.md#off-screen-rendering)
   section.
 
-**Embedding using various GUI frameworks**
+### GUI frameworks
 
 - [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
   library (GTK 2)
@@ -59,17 +64,25 @@ workarounds.
   toolkit. This example implements High DPI support on Windows.
 
 
-**Build executable using Python packagers**
+### Snippets
+
+See small code snippets that test various features in the
+[examples/snippets/](snippets/) directory.
+
+
+### Build executable with PyInstaller
 
 - [PyInstaller example](pyinstaller/README-pyinstaller.md):
   example of packaging app using [PyInstaller](http://www.pyinstaller.org/)
-  packager (currently example supports only Windows platform)
+  packager. Currently this example supports only Windows platform.
 
 
-**Unit tests**
+### Unit tests
 
 There are also available unit tests and its usage of the API can
-be of some use. See [main_test.py](../unittests/main_test.py).
+be of some use. See:
+- [main_test.py](../unittests/main_test.py) - windowed rendering general tests
+- [osr_test.py](../unittests/osr_test.py) - off-screen rendering tests
 
 
 ## Other examples

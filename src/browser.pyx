@@ -248,7 +248,7 @@ cdef class PyBrowser:
                     "OnQuotaRequest", "OnProtocolExecution",
                     "GetResourceHandler",
                     "OnBeforeBrowse", "OnRendererProcessTerminated",
-                    "OnPluginCrashed"]
+                    "OnPluginCrashed", "CanGetCookies", "CanSetCookie"]
             # RequestContextHandler
             self.allowedClientCallbacks += ["GetCookieManager"]
             # LoadHandler

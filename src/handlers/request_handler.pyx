@@ -4,6 +4,7 @@
 
 include "../cefpython.pyx"
 include "../browser.pyx"
+include "../cookie.pyx"
 
 # cef_termination_status_t
 cimport cef_types
@@ -509,6 +510,78 @@ cdef public void RequestHandler_OnPluginCrashed(
             clientCallback(
                     browser=pyBrowser,
                     plugin_path=CefToPyString(cefPluginPath))
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
+
+cdef public cpp_bool RequestHandler_CanGetCookies(
+        CefRefPtr[CefBrowser] cef_browser,
+        CefRefPtr[CefFrame] cef_frame,
+        CefRefPtr[CefRequest] cef_request
+        ) except * with gil:
+    cdef PyBrowser browser
+    cdef PyFrame frame
+    cdef PyRequest request
+    cdef object callback
+    cdef py_bool retval
+    try:
+        # Issue #455: CefRequestHandler callbacks still executed after
+        # browser was closed.
+        if IsBrowserClosed(cef_browser):
+            return False
+
+        browser = GetPyBrowser(cef_browser, "CanGetCookies")
+        frame = GetPyFrame(cef_frame)
+        request = CreatePyRequest(cef_request)
+        callback = browser.GetClientCallback("CanGetCookies")
+        if callback:
+            retval = callback(
+                    browser=browser,
+                    frame=frame,
+                    request=request)
+            return bool(retval)
+        else:
+            # Return True by default
+            return True
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
+
+cdef public cpp_bool RequestHandler_CanSetCookie(
+        CefRefPtr[CefBrowser] cef_browser,
+        CefRefPtr[CefFrame] cef_frame,
+        CefRefPtr[CefRequest] cef_request,
+        const CefCookie& cef_cookie
+        ) except * with gil:
+    cdef PyBrowser browser
+    cdef PyFrame frame
+    cdef PyRequest request
+    cdef PyCookie cookie
+    cdef object callback
+    cdef py_bool retval
+    try:
+        # Issue #455: CefRequestHandler callbacks still executed after
+        # browser was closed.
+        if IsBrowserClosed(cef_browser):
+            return False
+
+        browser = GetPyBrowser(cef_browser, "CanSetCookie")
+        frame = GetPyFrame(cef_frame)
+        request = CreatePyRequest(cef_request)
+        cookie = CreatePyCookie(cef_cookie)
+        callback = browser.GetClientCallback("CanSetCookie")
+        if callback:
+            retval = callback(
+                    browser=browser,
+                    frame=frame,
+                    request=request,
+                    cookie=cookie)
+            return bool(retval)
+        else:
+            # Return True by default
+            return True
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
