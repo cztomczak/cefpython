@@ -15,6 +15,7 @@ Table of contents:
   * [default_encoding](#default_encoding)
   * [dom_paste_disabled](#dom_paste_disabled)
   * [file_access_from_file_urls_allowed](#file_access_from_file_urls_allowed)
+  * [inherit_client_handlers_for_popups](#inherit_client_handlers_for_popups)
   * [image_load_disabled](#image_load_disabled)
   * [javascript_disabled](#javascript_disabled)
   * [javascript_close_windows_disallowed](#javascript_close_windows_disallowed)
@@ -108,6 +109,21 @@ in a known order. Equivalent to the `SkColor` type in Chromium.
 ### file_access_from_file_urls_allowed
 
 (bool) Controls whether file URLs will have access to other file URLs. Also configurable using the --allow-access-from-files switch. Other similar switches are: --allow-file-access and --allow-file-access-from-files.
+
+
+### inherit_client_handlers_for_popups
+
+
+(bool) Default: True.
+
+Whether to inherit client handlers and callbacks for popup windows
+opened with "window.open". For example when you set a handler using
+`browser.SetClientHandler` then this handler will also be resued
+for popup windows that are created implicitilly via "window.open"
+call in javascript or similar. If you implement
+`LifespanHandler.OnBeforePopup` then you can control explicitilly
+what handlers are set for the popup browser. To disable the default
+behavior set this option to False.
 
 
 ### image_load_disabled

@@ -19,6 +19,8 @@ MOUSEBUTTON_RIGHT = cef_types.MBT_RIGHT
 
 cdef dict g_pyBrowsers = {}
 
+# See also g_browser_settings defined in cefpython.pyx
+
 # Unreferenced browsers are added to this list in OnBeforeClose().
 # Must keep a list of unreferenced browsers so that a new reference
 # is not created in GetPyBrowser() when browser was closed.
@@ -122,9 +124,15 @@ cdef PyBrowser GetPyBrowser(CefRefPtr[CefBrowser] cefBrowser,
             openerHandle = pyBrowser.GetOpenerWindowHandle()
             for identifier, tempPyBrowser in g_pyBrowsers.items():
                 if tempPyBrowser.GetWindowHandle() == openerHandle:
-                    clientCallbacks = tempPyBrowser.GetClientCallbacksDict()
-                    if clientCallbacks:
-                        pyBrowser.SetClientCallbacksDict(clientCallbacks)
+                    # tempPyBrowser is a parent browser
+                    if tempPyBrowser.GetSetting("inherit_client_handlers_for_popups"):
+                        if pyBrowser.GetIdentifier() not in g_browser_settings:
+                            g_browser_settings[pyBrowser.GetIdentifier()] = {}
+                        g_browser_settings[pyBrowser.GetIdentifier()]["inherit_client_handlers_for_popups"] =\
+                            tempPyBrowser.GetSetting("inherit_client_handlers_for_popups")
+                        clientCallbacks = tempPyBrowser.GetClientCallbacksDict()
+                        if clientCallbacks:
+                            pyBrowser.SetClientCallbacksDict(clientCallbacks)
                     javascriptBindings = tempPyBrowser.GetJavascriptBindings()
                     if javascriptBindings:
                         if javascriptBindings.GetBindToPopups():
@@ -155,6 +163,15 @@ cpdef PyBrowser GetBrowserByWindowHandle(WindowHandle windowHandle):
         pyBrowser = g_pyBrowsers[browserId]
         if (pyBrowser.GetWindowHandle() == windowHandle or
                 pyBrowser.GetUserData("__outerWindowHandle") == windowHandle):
+            return pyBrowser
+    return None
+
+
+cpdef PyBrowser GetBrowserByIdentifier(int identifier):
+    cdef PyBrowser pyBrowser
+    for browserId in g_pyBrowsers:
+        pyBrowser = g_pyBrowsers[browserId]
+        if pyBrowser.GetIdentifier() == identifier:
             return pyBrowser
     return None
 
@@ -324,6 +341,13 @@ cdef class PyBrowser:
             NonCriticalError("GetImage not implemented on this platform")
             return None
 
+    cpdef object GetSetting(self, py_string key):
+        cdef int browser_id = self.GetIdentifier()
+        if browser_id in g_browser_settings:
+            if key in g_browser_settings[browser_id]:
+                return g_browser_settings[browser_id][key]
+        return None
+
     # --------------
     # CEF API.
     # --------------
@@ -473,6 +497,9 @@ cdef class PyBrowser:
 
     cpdef py_void GoForward(self):
         self.GetCefBrowser().get().GoForward()
+
+    cpdef py_bool HasDevTools(self):
+        return self.GetCefBrowserHost().get().HasDevTools()
 
     cpdef py_bool HasDocument(self):
         return self.GetCefBrowser().get().HasDocument()

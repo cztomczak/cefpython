@@ -62,6 +62,7 @@ cdef extern from "include/cef_browser.h":
                           const CefBrowserSettings& settings,
                           const CefPoint& inspect_element_at)
         void CloseDevTools()
+        cpp_bool HasDevTools()
 
         CefRefPtr[CefRequestContext] GetRequestContext()
 

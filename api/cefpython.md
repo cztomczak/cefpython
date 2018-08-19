@@ -13,6 +13,7 @@ Table of contents:
   * [ExceptHook](#excepthook)
   * [GetAppSetting](#getappsetting)
   * [GetAppPath](#getapppath)
+  * [GetBrowserByIdentifier](#getbrowserbyidentifier)
   * [GetBrowserByWindowHandle](#getbrowserbywindowhandle)
   * [GetCommandLineSwitch](#getcommandlineswitch)
   * [GetGlobalClientCallback](#getglobalclientcallback)
@@ -105,6 +106,17 @@ to Initialize(). Returns None if key is not found.
 | __Return__ | string |
 
 Get path to where application resides.
+
+
+### GetBrowserByIdentifier
+
+| Parameter | Type |
+| --- | --- |
+| identifier | int |
+| __Return__ | void |
+
+Get browser by identifier. Browser identifier can be obtained by
+calling `Browser.GetIdentifier`.
 
 
 ### GetBrowserByWindowHandle

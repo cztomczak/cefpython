@@ -19,7 +19,10 @@ LINUX = SYSTEM if SYSTEM == "LINUX" else False
 MAC = SYSTEM if SYSTEM == "MAC" else False
 
 # To show the window for an extended period of time increase this number.
-MESSAGE_LOOP_RANGE = 100  # each iteration is 0.01 sec
+MESSAGE_LOOP_RANGE = 200  # each iteration is 0.01 sec
+
+MAIN_BROWSER_ID = 1
+POPUP_BROWSER_ID = 2
 
 g_subtests_ran = 0
 g_js_code_completed = False
@@ -122,22 +125,64 @@ class DisplayHandler(object):
             subtest_message(message)
 
 
+def close_popup(global_handler, browser):
+    browser.CloseBrowser()
+    global_handler.PopupClosed_True = True
+
+    # Test developer tools popup
+    main_browser = cef.GetBrowserByIdentifier(MAIN_BROWSER_ID)
+    main_browser.ShowDevTools()
+    cef.PostDelayedTask(cef.TID_UI, 1500, close_devtools, global_handler)
+    cef.PostDelayedTask(cef.TID_UI, 500, main_browser.SetFocus, True)
+
+
+def close_devtools(global_handler):
+    main_browser = cef.GetBrowserByIdentifier(MAIN_BROWSER_ID)
+    global_handler.HasDevTools_True = main_browser.HasDevTools()
+    main_browser.CloseDevTools()
+    subtest_message("DevTools popup ok")
+
+
 class GlobalHandler(object):
     def __init__(self, test_case):
         self.test_case = test_case
 
         # Asserts for True/False will be checked just before shutdown
         self.test_for_True = True  # Test whether asserts are working correctly
-        self.OnAfterCreated_True = False
+        self.OnAfterCreatedMain_True = False
+
+        if "main_test" in test_case.id():
+            self.OnAfterCreatedPopup_True = False
+            self.PopupClosed_True = False
+            self.HasDevTools_True = False
 
     def _OnAfterCreated(self, browser, **_):
         # For asserts that are checked automatically before shutdown its
         # values should be set first, so that when other asserts fail
         # (the ones called through the test_case member) they are reported
         # correctly.
-        self.test_case.assertFalse(self.OnAfterCreated_True)
-        self.OnAfterCreated_True = True
-        self.test_case.assertEqual(browser.GetIdentifier(), 1)
+        if not self.OnAfterCreatedMain_True:
+            # First call for main browser.
+            # browser.GetUrl() returns empty at this moment.
+            self.OnAfterCreatedMain_True = True
+            self.test_case.assertEqual(browser.GetIdentifier(),
+                                       MAIN_BROWSER_ID)
+            self.test_case.assertFalse(browser.IsPopup())
+        else:
+            # Second call for implicit popup browser opened via js.
+            # Should execute only for main test.
+            # Should not execute for DevTools window.
+            assert "main_test" in self.test_case.id()
+            assert not self.OnAfterCreatedPopup_True
+            self.OnAfterCreatedPopup_True = True
+            self.test_case.assertEqual(browser.GetIdentifier(),
+                                       POPUP_BROWSER_ID)
+            # browser.GetUrl() returns empty at this moment.
+            self.test_case.assertTrue(browser.IsPopup())
+            if WINDOWS:
+                cef.WindowUtils.SetTitle(browser, "Popup test")
+            # Close the popup browser after 250 ms
+            cef.PostDelayedTask(cef.TID_UI, 250, close_popup, self, browser)
 
 
 class LoadHandler(object):

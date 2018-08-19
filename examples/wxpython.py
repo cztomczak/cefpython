@@ -13,9 +13,6 @@ import platform
 import sys
 import os
 
-# Fix for PyCharm hints warnings when using static methods
-WindowUtils = cef.WindowUtils()
-
 # Platforms
 WINDOWS = (platform.system() == "Windows")
 LINUX = (platform.system() == "Linux")
@@ -97,7 +94,7 @@ class MainFrame(wx.Frame):
         # installing X11 error handlers. This must be done after
         # wx was intialized.
         if LINUX:
-            WindowUtils.InstallX11ErrorHandlers()
+            cef.WindowUtils.InstallX11ErrorHandlers()
 
         global g_count_windows
         g_count_windows += 1
@@ -185,16 +182,16 @@ class MainFrame(wx.Frame):
         if not self.browser:
             return
         if WINDOWS:
-            WindowUtils.OnSetFocus(self.browser_panel.GetHandle(),
-                                   0, 0, 0)
+            cef.WindowUtils.OnSetFocus(self.browser_panel.GetHandle(),
+                                       0, 0, 0)
         self.browser.SetFocus(True)
 
     def OnSize(self, _):
         if not self.browser:
             return
         if WINDOWS:
-            WindowUtils.OnSize(self.browser_panel.GetHandle(),
-                               0, 0, 0)
+            cef.WindowUtils.OnSize(self.browser_panel.GetHandle(),
+                                   0, 0, 0)
         elif LINUX:
             (x, y) = (0, 0)
             (width, height) = self.browser_panel.GetSize().Get()

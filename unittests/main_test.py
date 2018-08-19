@@ -91,6 +91,11 @@ g_datauri_data = """
             py_callback("String sent from Javascript");
             print("py_callback() ok");
         });
+
+        // Test popup
+        window.open("about:blank");
+
+        // Done
         js_code_completed();
     }
     window.onload = function() {
@@ -130,6 +135,22 @@ class MainTest_IsolatedTest(unittest.TestCase):
         cef.Initialize(settings)
         subtest_message("cef.Initialize() ok")
 
+        # High DPI on Windows
+        if WINDOWS:
+            self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
+            window_size = cef.DpiAware.CalculateWindowSize(800, 600)
+            self.assertIsInstance(window_size, tuple)
+            self.assertGreater(window_size[0], 0)
+            self.assertGreater(cef.DpiAware.Scale((800, 600))[0], 0)
+            cef.DpiAware.EnableHighDpiSupport()
+            self.assertTrue(cef.DpiAware.IsProcessDpiAware())
+            # Make some calls again after DPI Aware was set
+            self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
+            self.assertGreater(cef.DpiAware.Scale([800, 600])[0], 0)
+            self.assertIsInstance(cef.DpiAware.Scale(800), int)
+            self.assertGreater(cef.DpiAware.Scale(800), 0)
+            subtest_message("cef.DpiAware ok")
+
         # Global handler
         global_handler = GlobalHandler(self)
         cef.SetGlobalClientCallback("OnAfterCreated",
@@ -137,7 +158,11 @@ class MainTest_IsolatedTest(unittest.TestCase):
         subtest_message("cef.SetGlobalClientCallback() ok")
 
         # Create browser
-        browser = cef.CreateBrowserSync(url=g_datauri)
+        browser_settings = {
+            "inherit_client_handlers_for_popups": False,
+        }
+        browser = cef.CreateBrowserSync(url=g_datauri,
+                                        settings=browser_settings)
         self.assertIsNotNone(browser, "Browser object")
         browser.SetFocus(True)
         subtest_message("cef.CreateBrowserSync() ok")
@@ -206,8 +231,33 @@ class MainTest_IsolatedTest(unittest.TestCase):
                               cef.PyCookieManager)
         subtest_message("cef.CookieManager ok")
 
+        # Window Utils
+        if WINDOWS:
+            hwnd = 1  # When using 0 getting issues with OnautoResize
+            self.assertFalse(cef.WindowUtils.IsWindowHandle(hwnd))
+            cef.WindowUtils.OnSetFocus(hwnd, 0, 0, 0)
+            cef.WindowUtils.OnSize(hwnd, 0, 0, 0)
+            cef.WindowUtils.OnEraseBackground(hwnd, 0, 0, 0)
+            cef.WindowUtils.GetParentHandle(hwnd)
+            cef.WindowUtils.SetTitle(browser, "Main test")
+            subtest_message("cef.WindowUtils ok")
+        elif LINUX:
+            cef.WindowUtils.InstallX11ErrorHandlers()
+            subtest_message("cef.WindowUtils ok")
+        elif MAC:
+            hwnd = 0
+            cef.WindowUtils.GetParentHandle(hwnd)
+            cef.WindowUtils.IsWindowHandle(hwnd)
+            subtest_message("cef.WindowUtils ok")
+
         # Run message loop
         run_message_loop()
+
+        # Make sure popup browser was destroyed
+        self.assertIsInstance(cef.GetBrowserByIdentifier(MAIN_BROWSER_ID),
+                              cef.PyBrowser)
+        self.assertIsNone(cef.GetBrowserByIdentifier(POPUP_BROWSER_ID))
+        subtest_message("cef.GetBrowserByIdentifier() ok")
 
         # Close browser and clean reference
         browser.CloseBrowser(True)

@@ -6,16 +6,18 @@ include "cefpython.pyx"
 
 class WindowUtils(object):
 
-    @staticmethod
-    def OnSetFocus(WindowHandle windowHandle, long msg, long wparam, long lparam):
+    @classmethod
+    def OnSetFocus(cls, WindowHandle windowHandle, long msg, long wparam,
+                   long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
             return 0
         pyBrowser.SetFocus(True)
         return 0
 
-    @staticmethod
-    def OnSize(WindowHandle windowHandle, long msg, long wparam, long lparam):
+    @classmethod
+    def OnSize(cls, WindowHandle windowHandle, long msg, long wparam,
+               long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
             return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
@@ -34,9 +36,9 @@ class WindowUtils(object):
 
         return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
 
-    @staticmethod
-    def OnEraseBackground(WindowHandle windowHandle, long msg, long wparam,
-                          long lparam):
+    @classmethod
+    def OnEraseBackground(cls, WindowHandle windowHandle, long msg,
+                          long wparam, long lparam):
         cdef PyBrowser pyBrowser = GetBrowserByWindowHandle(windowHandle)
         if not pyBrowser:
             return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
@@ -48,8 +50,8 @@ class WindowUtils(object):
 
         return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
 
-    @staticmethod
-    def SetTitle(PyBrowser pyBrowser, str pyTitle):
+    @classmethod
+    def SetTitle(cls, PyBrowser pyBrowser, str pyTitle):
         # Each browser window should have a title (Issue 3).
         # When popup is created, the window that sits in taskbar
         # has no title.
@@ -86,8 +88,8 @@ class WindowUtils(object):
             # is displayed currently.
             SetWindowTextW(<HWND>windowHandle, cefTitle.ToWString().c_str())
 
-    @staticmethod
-    def SetIcon(PyBrowser pyBrowser, py_string icon="inherit"):
+    @classmethod
+    def SetIcon(cls, PyBrowser pyBrowser, py_string icon="inherit"):
         # `icon` parameter is not implemented.
         # Popup window inherits icon from the main window.
 
@@ -135,17 +137,17 @@ class WindowUtils(object):
                 SendMessage(<HWND>windowHandle, WM_SETICON,
                             ICON_SMALL, parentIconSmall)
 
-    @staticmethod
-    def GetParentHandle(WindowHandle windowHandle):
+    @classmethod
+    def GetParentHandle(cls, WindowHandle windowHandle):
         return <WindowHandle>GetParent(<HWND>windowHandle)
 
-    @staticmethod
-    def IsWindowHandle(WindowHandle windowHandle):
+    @classmethod
+    def IsWindowHandle(cls, WindowHandle windowHandle):
         IF UNAME_SYSNAME == "Windows":
             return bool(IsWindow(<HWND>windowHandle))
         ELSE:
             return False
 
-    @staticmethod
-    def InstallX11ErrorHandlers():
+    @classmethod
+    def InstallX11ErrorHandlers(cls):
         pass

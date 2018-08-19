@@ -6,8 +6,8 @@ include "cefpython.pyx"
 
 class DpiAware:
 
-    @staticmethod
-    def GetSystemDpi():
+    @classmethod
+    def GetSystemDpi(cls):
         """Returns Windows DPI settings ("Custom scaling" on Win10).
 
         Win7 DPI (Control Panel > Appearance and Personalization > Display):
@@ -25,15 +25,15 @@ class DpiAware:
         GetSystemDpi(&dpix, &dpiy)
         return dpix, dpiy
 
-    @staticmethod
-    def CalculateWindowSize(int width, int height):
+    @classmethod
+    def CalculateWindowSize(cls, int width, int height):
         """@DEPRECATED. Use Scale() method instead."""
         # Calculation for DPI < 96 is not yet supported.
         GetDpiAwareWindowSize(&width, &height)
         return width, height
 
-    @staticmethod
-    def Scale(arg):
+    @classmethod
+    def Scale(cls, arg):
         """Scale units for high DPI devices. Argument can be an int,
         tuple or list."""
         (dpix, dpiy) = DpiAware.GetSystemDpi()
@@ -54,17 +54,17 @@ class DpiAware:
             return tuple(ret)
         return ret
 
-    @staticmethod
-    def IsProcessDpiAware():
+    @classmethod
+    def IsProcessDpiAware(cls):
         return IsProcessDpiAware()
 
-    @staticmethod
-    def SetProcessDpiAware():
+    @classmethod
+    def SetProcessDpiAware(cls):
         """Deprecated."""
         DpiAware.EnableHighDpiSupport()
 
-    @staticmethod
-    def EnableHighDpiSupport():
+    @classmethod
+    def EnableHighDpiSupport(cls):
         # This CEF function sets process to be DPI aware. This
         # CEF func is also called in subprocesses.
         CefEnableHighDPISupport()

@@ -74,6 +74,10 @@ NEW FEATURES
 + cefpython.SetGlobalClientHandler
 + Browser.Invalidate
 + CookieManager.FlushStore
++ BrowserSettings.inherit_client_handlers_for_popups
++ Browser.GetSetting
++ cefpython.GetBrowserByIdentifier
++ Browser.HasDevTools
 
 internal/cef_types.h
 + cef_log_severity_t: new key LOGSEVERITY_DEBUG (no need to expose,

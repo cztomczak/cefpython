@@ -312,6 +312,7 @@ g_debug = False
 # The string_encoding key must be set early here and also in Initialize.
 g_applicationSettings = {"string_encoding": "utf-8"}
 g_commandLineSwitches = {}
+g_browser_settings = {}
 
 # If ApplicationSettings.unique_request_context_per_browser is False
 # then a shared request context is used for all browsers. Otherwise
@@ -721,9 +722,12 @@ def CreateBrowserSync(windowInfo=None,
     if window_title and windowInfo.parentWindowHandle == 0:
         windowInfo.windowName = window_title
 
+    # Browser settings
     if not browserSettings:
         browserSettings = {}
-
+    # CEF Python only settings
+    if "inherit_client_handlers_for_popups" not in browserSettings:
+        browserSettings["inherit_client_handlers_for_popups"] = True
     cdef CefBrowserSettings cefBrowserSettings
     SetBrowserSettings(browserSettings, &cefBrowserSettings)
 
@@ -773,6 +777,15 @@ def CreateBrowserSync(windowInfo=None,
 
     Debug("CefBrowser window handle = "
           +str(<uintptr_t>cefBrowser.get().GetHost().get().GetWindowHandle()))
+
+    # Make a copy as browserSettings is a reference only that might
+    # get destroyed later.
+    global g_browser_settings
+    cdef int browser_id = cefBrowser.get().GetIdentifier()
+    g_browser_settings[browser_id] = {}
+    for key in browserSettings:
+        g_browser_settings[browser_id][key] =\
+            copy.deepcopy(browserSettings[key])
 
     # Request context - part 2/2.
     if g_applicationSettings["unique_request_context_per_browser"]:

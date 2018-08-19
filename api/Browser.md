@@ -45,6 +45,7 @@ Table of contents:
   * [GetNSTextInputContext](#getnstextinputcontext)
   * [GetOpenerWindowHandle](#getopenerwindowhandle)
   * [GetOuterWindowHandle](#getouterwindowhandle)
+  * [GetSetting](#getsetting)
   * [GetUrl](#geturl)
   * [GetUserData](#getuserdata)
   * [GetWindowHandle](#getwindowhandle)
@@ -54,6 +55,7 @@ Table of contents:
   * [GoForward](#goforward)
   * [HandleKeyEventAfterTextInputClient](#handlekeyeventaftertextinputclient)
   * [HandleKeyEventBeforeTextInputClient](#handlekeyeventbeforetextinputclient)
+  * [HasDevTools](#hasdevtools)
   * [HasDocument](#hasdocument)
   * [Invalidate](#invalidate)
   * [IsFullscreen](#isfullscreen)
@@ -495,6 +497,17 @@ Retrieve the CEF-internal (inner or outer) window handle of the browser that ope
 Get the most outer window handle.
 
 
+### GetSetting
+
+| Parameter | Type |
+| --- | --- |
+| key | str |
+| __Return__ | mixed |
+
+Get a browser setting. You can set browser settings by passing
+`settings` parameter to `cef.CreateBrowserSync`.
+
+
 ### GetUrl
 
 | | |
@@ -582,6 +595,17 @@ Available only in CEF 3. Not yet implemented.
 
 Handles a keyDown event prior to passing it through the NSTextInputClient
 machinery.
+
+
+### HasDevTools
+
+| | |
+| --- | --- |
+| __Return__ | bool |
+
+Description from upstream CEF:
+> Returns true if this browser currently has an associated DevTools browser.
+> Must be called on the browser process UI thread.
 
 
 ### HasDocument
