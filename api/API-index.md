@@ -162,6 +162,7 @@
   * [GetVersion](cefpython.md#getversion)
   * [Initialize](cefpython.md#initialize)
   * [IsThread](cefpython.md#isthread)
+  * [LoadCrlSetsFile](cefpython.md#loadcrlsetsfile)
   * [MessageLoop](cefpython.md#messageloop)
   * [MessageLoopWork](cefpython.md#messageloopwork)
   * [PostTask](cefpython.md#posttask)

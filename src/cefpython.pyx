@@ -300,6 +300,7 @@ from main_message_loop cimport *
 # noinspection PyUnresolvedReferences
 from cef_views cimport *
 from cef_log cimport *
+from cef_file_util cimport *
 
 # -----------------------------------------------------------------------------
 # GLOBAL VARIABLES
@@ -1019,3 +1020,6 @@ cpdef dict GetVersion():
         cef_commit_hash=__cef_commit_hash__,
         cef_commit_number=__cef_commit_number__,
     )
+
+cpdef LoadCrlSetsFile(py_string path):
+    CefLoadCRLSetsFile(PyToCefStringValue(path))

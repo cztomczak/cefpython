@@ -474,6 +474,7 @@ Additional information for v31.2 release:
   * [GetVersion](api/cefpython.md#getversion)
   * [Initialize](api/cefpython.md#initialize)
   * [IsThread](api/cefpython.md#isthread)
+  * [LoadCrlSetsFile](api/cefpython.md#loadcrlsetsfile)
   * [MessageLoop](api/cefpython.md#messageloop)
   * [MessageLoopWork](api/cefpython.md#messageloopwork)
   * [PostTask](api/cefpython.md#posttask)

@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "cefpython.pyx"
+include "string_utils.pyx"
 
 # noinspection PyUnresolvedReferences
 cimport cef_types

@@ -134,7 +134,7 @@ cef_extension_handler.h
 - CefExtensionHandler
 
 cef_file_util.h
-- CefLoadCRLSetsFile
++ CefLoadCRLSetsFile
 
 cef_request_handler.h
 - CanGetCookies

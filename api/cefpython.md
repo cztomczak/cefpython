@@ -21,6 +21,7 @@ Table of contents:
   * [GetVersion](#getversion)
   * [Initialize](#initialize)
   * [IsThread](#isthread)
+  * [LoadCrlSetsFile](#loadcrlsetsfile)
   * [MessageLoop](#messageloop)
   * [MessageLoopWork](#messageloopwork)
   * [PostTask](#posttask)
@@ -198,6 +199,22 @@ Returns true if called on the specified thread.
 CEF maintains multiple internal threads that are used for handling different types of tasks. The UI thread creates the browser window and is used for all interaction with the webkit rendering engine and V8 Javascript engine. The UI thread will be the same as the main application thread if CefInitialize() is called with an [ApplicationSettings](ApplicationSettings.md) 'multi_threaded_message_loop' option set to false. The IO thread is used for handling schema and network requests. The FILE thread is used for the application cache and other miscellaneous activities.
 
 See PostTask() for a list of threads.
+
+
+### LoadCrlSetsFile
+
+| Parameter | Type |
+| --- | --- |
+| path | bytes |
+| __Return__ | bool |
+
+Description from upstream CEF:
+> Loads the existing "Certificate Revocation Lists" file that is managed by
+> Google Chrome. This file can generally be found in Chrome's User Data
+> directory (e.g. "C:\Users\[User]\AppData\Local\Google\Chrome\User Data\" on
+> Windows) and is updated periodically by Chrome's component updater service.
+> Must be called in the browser process after the context has been initialized.
+> See https://dev.chromium.org/Home/chromium-security/crlsets for background.
 
 
 ### MessageLoop
