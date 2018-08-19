@@ -81,9 +81,16 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             "log_file": "",
             "windowless_rendering_enabled": True
         }
+        if not LINUX:
+            # On Linux you get a lot of "X error received" messages
+            # from Chromium's "x11_util.cc", so do not show them.
+            settings["log_severity"] = cef.LOGSEVERITY_WARNING
         if "--debug" in sys.argv:
             settings["debug"] = True
             settings["log_severity"] = cef.LOGSEVERITY_INFO
+        if "--debug-warning" in sys.argv:
+            settings["debug"] = True
+            settings["log_severity"] = cef.LOGSEVERITY_WARNING
 
         # Initialize
         cef.Initialize(settings)
