@@ -60,6 +60,7 @@ Options:
 # 6. More commands: http://docs.cython.org/src/userguide/debugging.html
 
 from common import *
+import copy
 import sys
 import os
 import glob
@@ -137,7 +138,7 @@ def command_line_args():
     print("[build.py] Parse command line arguments")
 
     global SYS_ARGV_ORIGINAL
-    SYS_ARGV_ORIGINAL = sys.argv
+    SYS_ARGV_ORIGINAL = copy.copy(sys.argv)
 
     if "--no-run-examples" in sys.argv:
         NO_RUN_EXAMPLES = True
@@ -656,8 +657,8 @@ def copy_and_fix_pyx_files():
     shutil.copy("../../src/%s" % mainfile_original, "./%s" % mainfile_newname)
     with open("./%s" % mainfile_newname, "rb") as fo:
         content = fo.read().decode("utf-8")
-        (content, subs) = re.subn(r"^include \"handlers/",
-                                  "include \"",
+        (content, subs) = re.subn(ur"^include \"handlers/",
+                                  u"include \"",
                                   content,
                                   flags=re.MULTILINE)
         # Add __version__ variable in cefpython.pyx
@@ -685,8 +686,8 @@ def copy_and_fix_pyx_files():
             # Do not remove the newline - so that line numbers
             # are exact with originals.
             (content, subs) = re.subn(
-                    r"^include[\t ]+[\"'][^\"'\n\r]+[\"'][\t ]*",
-                    "",
+                    ur"^include[\t ]+[\"'][^\"'\n\r]+[\"'][\t ]*",
+                    u"",
                     content,
                     flags=re.MULTILINE)
             if subs:
@@ -808,6 +809,7 @@ def build_cefpython_module():
             assert __file__ in sys.argv[0]
             args.extend(SYS_ARGV_ORIGINAL[1:])
             command = " ".join(args)
+            print("[build.py] Running command: %s" % command)
             ret = subprocess.call(command, shell=True)
             # Always pass fixed value to sys.exit, read note at
             # the top of the script about os.system and sys.exit
