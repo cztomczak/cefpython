@@ -657,7 +657,7 @@ def copy_and_fix_pyx_files():
     shutil.copy("../../src/%s" % mainfile_original, "./%s" % mainfile_newname)
     with open("./%s" % mainfile_newname, "rb") as fo:
         content = fo.read().decode("utf-8")
-        (content, subs) = re.subn(ur"^include \"handlers/",
+        (content, subs) = re.subn(u"^include \"handlers/",
                                   u"include \"",
                                   content,
                                   flags=re.MULTILINE)
@@ -686,7 +686,7 @@ def copy_and_fix_pyx_files():
             # Do not remove the newline - so that line numbers
             # are exact with originals.
             (content, subs) = re.subn(
-                    ur"^include[\t ]+[\"'][^\"'\n\r]+[\"'][\t ]*",
+                    u"^include[\\t ]+[\"'][^\"'\\n\\r]+[\"'][\\t ]*",
                     u"",
                     content,
                     flags=re.MULTILINE)
