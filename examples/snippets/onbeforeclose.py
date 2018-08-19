@@ -1,5 +1,7 @@
-# Implement LifespanHandler.OnBeforeClose to execute custom
-# code before browser window closes.
+"""
+Implement LifespanHandler.OnBeforeClose to execute custom
+code before browser window closes.
+"""
 
 from cefpython3 import cefpython as cef
 

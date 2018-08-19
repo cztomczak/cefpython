@@ -1,5 +1,7 @@
-# Implement RequestHandler.CanGetCookies and CanSetCookie
-# to block or allow cookies over network requests.
+"""
+Implement RequestHandler.CanGetCookies and CanSetCookie
+to block or allow cookies over network requests.
+"""
 
 from cefpython3 import cefpython as cef
 
