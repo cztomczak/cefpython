@@ -54,3 +54,9 @@ bool DisplayHandler::OnAutoResize(CefRefPtr<CefBrowser> browser,
     REQUIRE_UI_THREAD();
     return DisplayHandler_OnAutoResize(browser, new_size);
 }
+
+void DisplayHandler::OnLoadingProgressChange(CefRefPtr<CefBrowser> browser,
+                                             double progress) {
+    REQUIRE_UI_THREAD();
+    return DisplayHandler_OnLoadingProgressChange(browser, progress);
+}

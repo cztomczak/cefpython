@@ -128,3 +128,18 @@ cdef public cpp_bool DisplayHandler_OnConsoleMessage(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public void DisplayHandler_OnLoadingProgressChange(
+        CefRefPtr[CefBrowser] cefBrowser,
+        double progress
+        ) except * with gil:
+    cdef PyBrowser pyBrowser
+    cdef object callback
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser, "OnLoadingProgressChange")
+        callback = pyBrowser.GetClientCallback("OnLoadingProgressChange")
+        if callback:
+            callback(browser=pyBrowser, progress=progress)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)

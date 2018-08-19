@@ -107,7 +107,7 @@ cef_cookie.h
 
 cef_display_handler.h
 + OnAutoResize
-- OnLoadingProgressChange
++ OnLoadingProgressChange
 
 cef_drag_data.h
 + GetImage (cross-platform)

@@ -235,7 +235,8 @@ cdef class PyBrowser:
             # DisplayHandler
             self.allowedClientCallbacks += [
                     "OnAddressChange", "OnTitleChange", "OnTooltip",
-                    "OnStatusMessage", "OnConsoleMessage", "OnAutoResize"]
+                    "OnStatusMessage", "OnConsoleMessage", "OnAutoResize",
+                    "OnLoadingProgressChange"]
             # KeyboardHandler
             self.allowedClientCallbacks += ["OnPreKeyEvent", "OnKeyEvent"]
             # RequestHandler

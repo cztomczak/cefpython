@@ -168,9 +168,10 @@ class MainTest_IsolatedTest(unittest.TestCase):
         subtest_message("cef.CreateBrowserSync() ok")
 
         # Client handlers
+        display_handler2 = DisplayHandler2(self)
         client_handlers = [LoadHandler(self, g_datauri),
                            DisplayHandler(self),
-                           DisplayHandler2(self)]
+                           display_handler2]
         for handler in client_handlers:
             browser.SetClientHandler(handler)
         subtest_message("browser.SetClientHandler() ok")
@@ -269,6 +270,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
         do_message_loop_work(25)
 
         # Asserts before shutdown
+        self.assertEqual(display_handler2.OnLoadingProgressChange_Progress,
+                         1.0)
         # noinspection PyTypeChecker
         check_auto_asserts(self, [] + client_handlers
                                     + [global_handler,
@@ -290,6 +293,8 @@ class DisplayHandler2(object):
         # Test whether asserts are working correctly.
         self.test_for_True = True
         self.OnAutoResize_True = False
+        self.OnLoadingProgressChange_True = False
+        self.OnLoadingProgressChange_Progress = 0.0
 
     def OnAutoResize(self, new_size, **_):
         self.OnAutoResize_True = True
@@ -297,6 +302,10 @@ class DisplayHandler2(object):
         self.test_case.assertLessEqual(new_size[0], 1024)
         self.test_case.assertGreaterEqual(new_size[1], 600)
         self.test_case.assertLessEqual(new_size[1], 768)
+
+    def OnLoadingProgressChange(self, progress, **_):
+        self.OnLoadingProgressChange_True = True
+        self.OnLoadingProgressChange_Progress = progress
 
 
 class External(object):
