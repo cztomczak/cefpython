@@ -34,8 +34,8 @@ def click_after_2_seconds(browser):
     print("Click after 2 seconds")
     browser.SendMouseMoveEvent(0, 90, False, 0)
     browser.SendMouseClickEvent(0, 90, cef.MOUSEBUTTON_LEFT, False, 1)
-    browser.SendMouseMoveEvent(400, 100, False, cef.EVENTFLAG_LEFT_MOUSE_BUTTON)
-    browser.SendMouseClickEvent(400, 100, cef.MOUSEBUTTON_LEFT, True, 1)
+    browser.SendMouseMoveEvent(400, 99, False, cef.EVENTFLAG_LEFT_MOUSE_BUTTON)
+    browser.SendMouseClickEvent(400, 99, cef.MOUSEBUTTON_LEFT, True, 1)
     cef.PostDelayedTask(cef.TID_UI, 1000, click_after_1_second, browser)
 
 
