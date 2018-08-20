@@ -9,7 +9,8 @@ basics. This tutorial will discuss the three featured examples:
 [hello_world.py](../examples/hello_world.py),
 [tutorial.py](../examples/tutorial.py)
 and [screenshot.py](../examples/screenshot.py). There are many
-more examples that you can find in the [README-examples.md](../examples/README-examples.md)
+more examples that you can find in the
+[README-examples.md](../examples/README-examples.md)
 file, but these examples are out of scope for this tutorial.
 
 

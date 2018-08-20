@@ -17,7 +17,6 @@ g_htmlcode = """
     </style>
     <script>
     function print(msg) {
-        console.log(msg+" [JS]");
         document.getElementById("console").innerHTML += msg+"<br>";
     }
     function js_function(value) {
@@ -41,7 +40,7 @@ g_htmlcode = """
 def main():
     cef.Initialize()
     browser = cef.CreateBrowserSync(url=cef.GetDataUrl(g_htmlcode),
-                                    window_title="OnBeforeClose")
+                                    window_title="Javascript Bindings")
     browser.SetClientHandler(LifespanHandler())
     bindings = cef.JavascriptBindings()
     bindings.SetFunction("py_function", py_function)

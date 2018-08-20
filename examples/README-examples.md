@@ -4,8 +4,8 @@ Table of contents:
 * [Hello World!](#hello-world)
 * [Supported examples](#supported-examples)
   * [Featured](#featured)
-  * [GUI frameworks](#gui-frameworks)
   * [Snippets](#snippets)
+  * [GUI frameworks](#gui-frameworks)
   * [Build executable with PyInstaller](#build-executable-with-pyinstaller)
   * [Unit tests](#unit-tests)
 * [Other examples](#other-examples)
@@ -42,7 +42,30 @@ workarounds.
   discussed in great details in Tutorial in the [Off-screen rendering](../docs/Tutorial.md#off-screen-rendering)
   section.
 
+
+### Snippets
+
+See small code snippets that show various CEF features in the
+[examples/snippets/](snippets/) directory:
+
+- [javascript_bindings.py](snippets/javascript_bindings.py) - Communicate
+    between Python and Javascript asynchronously using
+    inter-process messaging with the use of Javascript Bindings.
+- [javascript_errors.py](snippets/javascript_errors.py) - Two ways for
+    intercepting Javascript errors.
+- [mouse_clicks.py](snippets/mouse_clicks.py) - Perform mouse clicks
+    and mouse movements programmatically.
+- [network_cookies.py](snippets/network_cookies.py) - Implement
+    interfaces to block or allow cookies over network requests.
+- [onbeforeclose.py](snippets/onbeforeclose.py) - Implement interface
+    to execute custom code before browser window closes.
+- [ondomready.py](snippets/ondomready.py) - Execute custom Python code
+    on a web page as soon as DOM is ready.
+
+
 ### GUI frameworks
+
+Examples of embedding CEF browser using various GUI frameworks:
 
 - [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
   library (GTK 2)
@@ -62,22 +85,6 @@ workarounds.
   Currently broken on Mac ([#309](../../../issues/309)).
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)
   toolkit. This example implements High DPI support on Windows.
-
-
-### Snippets
-
-See small code snippets that test various features in the
-[examples/snippets/](snippets/) directory:
-
-- [javascript_bindings.py](snippets/javascript_bindings.py) - Communicate
-    between Python and Javascript asynchronously using
-    inter-process messaging with the use of Javascript Bindings.
-- [mouse_clicks.py](snippets/mouse_clicks.py) - Perform mouse clicks
-    and mouse movements programmatically.
-- [network_cookies.py](snippets/network_cookies.py) - Implement
-    interfaces to block or allow cookies over network requests.
-- [onbeforeclose.py](snippets/onbeforeclose.py) - Implement interface
-    to execute custom code before browser window closes.
 
 
 ### Build executable with PyInstaller

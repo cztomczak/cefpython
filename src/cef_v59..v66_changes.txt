@@ -83,6 +83,8 @@ NEW FEATURES
     + network_cookies.py
     + mouse_clicks.py
     + javascript_bindings.py
+    + javascript_errors.py
+    + ondomready.py
 + cef.GetDataUrl
 
 internal/cef_types.h
