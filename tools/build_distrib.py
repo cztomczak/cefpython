@@ -593,15 +593,18 @@ def check_cpp_extension_dependencies_issue359(setup_dir, all_pythons):
     for python in all_pythons:
         if python["version2"] in ((3, 5), (3, 6), (3, 7)):
             checked_any = True
-            if not os.path.exists(os.path.join(setup_dir, "msvcp140.dll")):
+            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
+                                               "msvcp140.dll")):
                 raise Exception("C++ ext dependency missing: msvcp140.dll")
         elif python["version2"] == (3, 4):
             checked_any = True
-            if not os.path.exists(os.path.join(setup_dir, "msvcp100.dll")):
+            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
+                                               "msvcp100.dll")):
                 raise Exception("C++ ext dependency missing: msvcp100.dll")
         elif python["version2"] == (2, 7):
-            if not os.path.exists(os.path.join(setup_dir, "msvcp90.dll")):
-                raise Exception("C++ ext dependency missing: msvcp100.dll")
+            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
+                                               "msvcp90.dll")):
+                raise Exception("C++ ext dependency missing: msvcp90.dll")
             checked_any = True
     assert checked_any
 
