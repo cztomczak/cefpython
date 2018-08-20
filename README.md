@@ -3,7 +3,7 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Sponsors](#sponsors)
-* [Funding for the v66 release](#funding-for-the-v66-release)
+  * [Thanks to Lampix for the v66 release](#thanks-to-lampix-for-the-v66-release)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
@@ -92,15 +92,15 @@ See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
 
 
-## Funding for the v66 release
+### Thanks to Lampix for the v66 release
 
-I am happy to announce that Lampix is sponsoring the v66 release of cefpython.
+Many Thanks to Lampix for sponsoring the [v66 release](../../releases) of CEF Python.
 Lampix is the first hardware and software solution that turns any surface
 into a smart, augmented reality or interactive surface. Please visit its
-website here: https://lampix.com/ . See the [v66 milestone](../../milestone/13)
-to see progress on the new release.
+website here: https://lampix.com/ .
 
-[![lampix600](https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix600.png)](https://lampix.com/)
+[![lampix360](https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix360.png)](https://lampix.com/)
+
 
 ## Install
 
@@ -110,8 +110,9 @@ also download packages for offline installation available on the
 [GitHub Releases](../../releases) pages. Command to install with pip:
 
 ```
-pip install cefpython3==57.0
+pip install cefpython3==66.0
 ```
+
 
 ## Tutorial
 
@@ -169,6 +170,7 @@ This README page alone has 1,070 visitors and 2,402 views every two weeks,
 so your company logo and a website link will be visible to many Python developers.
 The statistics are from Mar 9, 2018. Complete statistics are available in this topic
 on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpython/CjkZF2P4rMk/discussion).
+
 
 ### Thanks
 

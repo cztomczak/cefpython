@@ -166,3 +166,6 @@ cef_v8.h
   - IsArrayBuffer
   - GetArrayBufferReleaseCallback
   - NeuterArrayBuffer
+
+cef_urlrequest.h
+- ResponseWasCached

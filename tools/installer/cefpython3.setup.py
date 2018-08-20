@@ -129,7 +129,7 @@ def main():
                          "https://github.com/cztomczak/cefpython",
         license="BSD 3-clause",
         author="Czarek Tomczak",
-        author_email="czarek.tomczak2@@gmail.com",
+        author_email="czarek.tomczak@gmail.com",
         url="https://github.com/cztomczak/cefpython",
         download_url="https://github.com/cztomczak/cefpython/releases",
         platforms=["{{SYSCONFIG_PLATFORM}}"],

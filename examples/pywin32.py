@@ -108,7 +108,7 @@ def check_versions():
         pywin32_version = fp.read().strip()
     print("[pywin32.py] pywin32 {ver}".format(ver=pywin32_version))
 
-    assert cef.__version__ >= "57.0", "CEF Python v57.0 required to run this"
+    assert cef.__version__ >= "57.0", "CEF Python v57.0+ required to run this"
 
 
 def create_browser(window_info, settings, url):
