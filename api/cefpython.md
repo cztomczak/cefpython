@@ -66,7 +66,8 @@ any third party GUI framework for creation of top-level window.
 
 After the call to CreateBrowserSync() the page is not yet loaded,
 if you want your next lines of code to do some stuff on the
-webpage you will have to implement LoadHandler.[OnLoadingStateChange]((LoadHandler.md#onloadingstatechange))
+webpage you will have to implement
+LoadHandler.[OnLoadingStateChange](LoadHandler.md#onloadingstatechange)
 callback.
 
 
