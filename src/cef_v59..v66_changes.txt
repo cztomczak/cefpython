@@ -85,6 +85,7 @@ NEW FEATURES
     + javascript_bindings.py
     + javascript_errors.py
     + ondomready.py
+    + onpagecomplete
 + cef.GetDataUrl
 
 internal/cef_types.h

@@ -61,6 +61,8 @@ See small code snippets that show various CEF features in the
     to execute custom code before browser window closes.
 - [ondomready.py](snippets/ondomready.py) - Execute custom Python code
     on a web page as soon as DOM is ready.
+- [onpagecomplete.py](snippets/onpagecomplete.py) - Execute custom
+    Python code on a web page when page loading is complete.
 
 
 ### GUI frameworks

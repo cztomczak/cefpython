@@ -3,7 +3,8 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 """
-Run all examples that can be run on current configuration.
+Run all examples that can be run on current configuration
+and display a summary at the end.
 
 Note on GTK 2 / GTK 3 on Windows:
     Installing both PyGTK and PyGI on Windows will cause errors.

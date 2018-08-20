@@ -158,6 +158,7 @@ BUILD_SUBPROCESS = os.path.join(BUILD_CEFPYTHON,
 # -- end build directories
 
 EXAMPLES_DIR = os.path.join(ROOT_DIR, "examples")
+SNIPPETS_DIR = os.path.join(EXAMPLES_DIR, "snippets")
 SRC_DIR = os.path.join(ROOT_DIR, "src")
 
 # Subdirectories in src/
