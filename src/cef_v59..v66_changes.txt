@@ -82,6 +82,8 @@ NEW FEATURES
     + onbeforeclose.py
     + network_cookies.py
     + mouse_clicks.py
+    + javascript_bindings.py
++ cef.GetDataUrl
 
 internal/cef_types.h
 + cef_log_severity_t: new key LOGSEVERITY_DEBUG (no need to expose,

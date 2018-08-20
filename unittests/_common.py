@@ -41,13 +41,6 @@ def show_test_summary(pyfile):
           + os.path.basename(pyfile))
 
 
-def html_to_data_uri(html):
-    html = html.encode("utf-8", "replace")
-    b64 = base64.b64encode(html).decode("utf-8", "replace")
-    ret = "data:text/html;base64,{data}".format(data=b64)
-    return ret
-
-
 def run_message_loop():
     # Run message loop for some time.
     # noinspection PyTypeChecker

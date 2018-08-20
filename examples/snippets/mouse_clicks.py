@@ -43,7 +43,7 @@ class LifespanHandler(object):
     def OnLoadEnd(self, browser, **_):
         # Execute function with a delay of 1 second after page
         # has completed loading.
-        print("Page completed loading")
+        print("Page loading is complete")
         cef.PostDelayedTask(cef.TID_UI, 1000, click_after_1_second, browser)
 
 

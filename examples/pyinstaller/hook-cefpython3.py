@@ -162,6 +162,7 @@ logger.info("CEF Python package directory: %s" % CEFPYTHON3_DIR)
 # TODO: Write a tool script that would find such imports in
 #       .pyx files automatically.
 hiddenimports = [
+    "base64",
     "codecs",
     "copy",
     "datetime",

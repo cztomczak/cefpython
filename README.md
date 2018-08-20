@@ -469,6 +469,7 @@ Additional information for v31.2 release:
   * [GetBrowserByIdentifier](api/cefpython.md#getbrowserbyidentifier)
   * [GetBrowserByWindowHandle](api/cefpython.md#getbrowserbywindowhandle)
   * [GetCommandLineSwitch](api/cefpython.md#getcommandlineswitch)
+  * [GetDataUrl](api/cefpython.md#getdataurl)
   * [GetGlobalClientCallback](api/cefpython.md#getglobalclientcallback)
   * [GetModuleDirectory](api/cefpython.md#getmoduledirectory)
   * [GetVersion](api/cefpython.md#getversion)

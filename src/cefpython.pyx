@@ -134,6 +134,8 @@ import datetime
 import random
 # noinspection PyUnresolvedReferences
 import struct
+# noinspection PyUnresolvedReferences
+import base64
 
 # Must use compile-time condition instead of checking sys.version_info.major
 # otherwise results in "ImportError: cannot import name urlencode" strange
@@ -1023,3 +1025,9 @@ cpdef dict GetVersion():
 
 cpdef LoadCrlSetsFile(py_string path):
     CefLoadCRLSetsFile(PyToCefStringValue(path))
+
+cpdef GetDataUrl(data, mediatype="html"):
+    html = data.encode("utf-8", "replace")
+    b64 = base64.b64encode(html).decode("utf-8", "replace")
+    ret = "data:text/html;base64,{data}".format(data=b64)
+    return ret

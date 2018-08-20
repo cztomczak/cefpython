@@ -67,7 +67,17 @@ workarounds.
 ### Snippets
 
 See small code snippets that test various features in the
-[examples/snippets/](snippets/) directory.
+[examples/snippets/](snippets/) directory:
+
+- [javascript_bindings.py](snippets/javascript_bindings.py) - Communicate
+    between Python and Javascript asynchronously using
+    inter-process messaging with the use of Javascript Bindings.
+- [mouse_clicks.py](snippets/mouse_clicks.py) - Perform mouse clicks
+    and mouse movements programmatically.
+- [network_cookies.py](snippets/network_cookies.py) - Implement
+    interfaces to block or allow cookies over network requests.
+- [onbeforeclose.py](snippets/onbeforeclose.py) - Implement interface
+    to execute custom code before browser window closes.
 
 
 ### Build executable with PyInstaller

@@ -16,6 +16,7 @@ Table of contents:
   * [GetBrowserByIdentifier](#getbrowserbyidentifier)
   * [GetBrowserByWindowHandle](#getbrowserbywindowhandle)
   * [GetCommandLineSwitch](#getcommandlineswitch)
+  * [GetDataUrl](#getdataurl)
   * [GetGlobalClientCallback](#getglobalclientcallback)
   * [GetModuleDirectory](#getmoduledirectory)
   * [GetVersion](#getversion)
@@ -138,6 +139,20 @@ Get browser by outer or inner window handle. An outer window handle is the one t
 | __Return__ | object |
 
 Returns the [CommandLineSwitches](CommandLineSwitches.md) switch that was passed to Initialize(). Returns None if key is not found.
+
+
+### GetDataUrl
+
+| Parameter | Type |
+| --- | --- |
+| data | string |
+| mediatype="html" (optional) | string |
+| __Return__ | object |
+
+Convert data to a Data URL. Only "html" media type is currently supported.
+
+See:
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
 
 
 ### GetGlobalClientCallback

@@ -62,7 +62,7 @@ g_datauri_data = """
 </body>
 </html>
 """
-g_datauri = html_to_data_uri(g_datauri_data)
+g_datauri = cef.GetDataUrl(g_datauri_data)
 
 
 class OsrTest_IsolatedTest(unittest.TestCase):
