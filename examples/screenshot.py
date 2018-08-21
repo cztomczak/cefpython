@@ -24,6 +24,15 @@ Usage:
 Tested configurations:
 - CEF Python v57.0+
 - Pillow 2.3.0 / 4.1.0
+
+NOTE: There are limits in Chromium on viewport size. For some
+      websites with huge viewport size it won't work. In such
+      case it is required to reduce viewport size to an usual
+      size of a window and perform scrolling programmatically
+      using javascript while making a screenshot for each of
+      the scrolled region. Then at the end combine all the
+      screenshots into one. To force a paint event in OSR
+      mode call cef.Invalidate().
 """
 
 from cefpython3 import cefpython as cef
