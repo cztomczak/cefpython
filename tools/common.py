@@ -175,6 +175,25 @@ INSTALLER_DIR = os.path.join(TOOLS_DIR, "installer")
 UNITTESTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, "unittests"))
 # ----------------------------------------------------------------------------
 
+
+# Auto cleanup in the examples/ directory, so that build scripts
+# do not include trash directories. See Issue #432.
+
+shutil.rmtree(os.path.join(EXAMPLES_DIR, "blob_storage"),
+              ignore_errors=True)
+shutil.rmtree(os.path.join(EXAMPLES_DIR, "webrtc_event_logs"),
+              ignore_errors=True)
+shutil.rmtree(os.path.join(EXAMPLES_DIR, "webcache"),
+              ignore_errors=True)
+
+shutil.rmtree(os.path.join(SNIPPETS_DIR, "blob_storage"),
+              ignore_errors=True)
+shutil.rmtree(os.path.join(SNIPPETS_DIR, "webrtc_event_logs"),
+              ignore_errors=True)
+shutil.rmtree(os.path.join(SNIPPETS_DIR, "webcache"),
+              ignore_errors=True)
+
+
 # cefpython API header file and a fixed copy of it
 CEFPYTHON_API_HFILE = os.path.join(BUILD_CEFPYTHON,
                                    "cefpython_py{pyver}.h"
