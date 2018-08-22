@@ -69,10 +69,10 @@ Google website. Let's analyze the code from that example:
 1. `from cefpython3 import cefpython as cef` - Import the cefpython
    module and make a short "cef" alias
 2. `sys.excepthook = cef.ExceptHook` - Overwrite Python's default
-   exception handler so that all CEF sub-processes are terminated
-   when Python exception occurs. To understand this better read the
-   "Architecture" and "Handling Python exceptions" sections
-   further down in this Tutorial.
+   exception handler so that all CEF sub-processes are reliably
+   terminated when Python exception occurs. To understand this
+   better read the "Architecture" and "Handling Python exceptions"
+   sections further down in this Tutorial.
 3. `cef.Initialize()` - Initialize CEF. This function must be called
    somewhere in the beginning of your code. It must be called before
    any application window is created. It must be called only once
@@ -140,9 +140,9 @@ special handling. When Python exception occurs then main process
 is terminated. For CEF this means that the Browser process is
 terminated, however there may still be running CEF sub-processes
 like Renderer process, GPU process, etc. To terminate these
-sub-processes cef.[Shutdown](../api/cefpython.md#shutdown)
+sub-processes cleanly cef.[Shutdown](../api/cefpython.md#shutdown)
 must be called and if running CEF message loop then it must be
-stopped first. In all CEF Python examples you can find such
+stopped first. In most of CEF Python examples you can find such
 a line that overwrites the default exception handler in Python:
 
 ```python
@@ -160,7 +160,8 @@ The cef.ExceptHook helper function does the following:
    which exits the process with status 1, without calling
    cleanup handlers, flushing stdio buffers, etc.
 
-See CEF Python's ExceptHook source code in src/[helpers.pyx](../src/helpers.pyx).
+If you would like to modify `ExceptHook` behavior, see its source code
+in src/[helpers.pyx](../src/helpers.pyx) file.
 
 
 ## Settings
