@@ -63,6 +63,8 @@ See small code snippets that show various CEF features in the
     on a web page as soon as DOM is ready.
 - [onpagecomplete.py](snippets/onpagecomplete.py) - Execute custom
     Python code on a web page when page loading is complete.
+- [window_size.py](snippets/window_size.py) - Set initial window size
+    without using any third party GUI framework.
 
 
 ### GUI frameworks
