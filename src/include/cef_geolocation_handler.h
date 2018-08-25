@@ -46,7 +46,7 @@
 // permission requests.
 ///
 /*--cef(source=library)--*/
-class CefGeolocationCallback : public virtual CefBaseRefCounted {
+class CefGeolocationCallback : public virtual CefBase {
  public:
   ///
   // Call to allow or deny geolocation access.
@@ -62,7 +62,7 @@ class CefGeolocationCallback : public virtual CefBaseRefCounted {
 // thread.
 ///
 /*--cef(source=client)--*/
-class CefGeolocationHandler : public virtual CefBaseRefCounted {
+class CefGeolocationHandler : public virtual CefBase {
  public:
   ///
   // Called when a page requests permission to access geolocation information.

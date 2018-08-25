@@ -62,7 +62,7 @@ class CefZipArchive : public base::RefCountedThreadSafe<CefZipArchive> {
   // Class representing a file in the archive. Accessing the file data from
   // multiple threads is safe provided a reference to the File object is kept.
   ///
-  class File : public CefBaseRefCounted {
+  class File : public CefBase {
    public:
     ///
     // Returns the read-only data contained in the file.

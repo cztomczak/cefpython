@@ -37,7 +37,6 @@
 #define CEF_INCLUDE_WRAPPER_CEF_STREAM_RESOURCE_HANDLER_H_
 #pragma once
 
-#include "include/base/cef_logging.h"
 #include "include/base/cef_macros.h"
 #include "include/base/cef_scoped_ptr.h"
 #include "include/cef_base.h"
@@ -92,7 +91,7 @@ class CefStreamResourceHandler : public CefResourceHandler {
 
   class Buffer;
   scoped_ptr<Buffer> buffer_;
-#if DCHECK_IS_ON()
+#ifndef NDEBUG
   // Used in debug builds to verify that |buffer_| isn't being accessed on
   // multiple threads at the same time.
   bool buffer_owned_by_file_thread_;

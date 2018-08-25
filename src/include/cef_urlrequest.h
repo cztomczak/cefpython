@@ -54,7 +54,7 @@ class CefURLRequestClient;
 // on the same thread that created it.
 ///
 /*--cef(source=library)--*/
-class CefURLRequest : public virtual CefBaseRefCounted {
+class CefURLRequest : public virtual CefBase {
  public:
   typedef cef_urlrequest_status_t Status;
   typedef cef_errorcode_t ErrorCode;
@@ -127,7 +127,7 @@ class CefURLRequest : public virtual CefBaseRefCounted {
 // request unless otherwise documented.
 ///
 /*--cef(source=client)--*/
-class CefURLRequestClient : public virtual CefBaseRefCounted {
+class CefURLRequestClient : public virtual CefBase {
  public:
   ///
   // Notifies the client that the request has completed. Use the

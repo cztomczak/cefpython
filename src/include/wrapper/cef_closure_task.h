@@ -64,7 +64,7 @@
 // Example of executing a bound method:
 //
 // // Define a class.
-// class MyClass : public CefBaseRefCounted {
+// class MyClass : public CefBase {
 //  public:
 //   MyClass() {}
 //   void MyMethod(int arg) { /* do something with |arg| on the UI thread */ }

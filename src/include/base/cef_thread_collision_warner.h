@@ -37,10 +37,10 @@
 // This can happen in cases where Chromium code is used directly by the
 // client application. When using Chromium code directly always include
 // the Chromium header first to avoid type conflicts.
-#elif defined(USING_CHROMIUM_INCLUDES)
+#elif defined(BUILDING_CEF_SHARED)
 // When building CEF include the Chromium header directly.
 #include "base/threading/thread_collision_warner.h"
-#else  // !USING_CHROMIUM_INCLUDES
+#else  // !BUILDING_CEF_SHARED
 // The following is substantially similar to the Chromium implementation.
 // If the Chromium implementation diverges the below implementation should be
 // updated to match.
@@ -50,7 +50,6 @@
 #include "include/base/cef_atomicops.h"
 #include "include/base/cef_basictypes.h"
 #include "include/base/cef_build.h"
-#include "include/base/cef_logging.h"
 #include "include/base/cef_macros.h"
 
 // A helper class alongside macros to be used to verify assumptions about thread
@@ -140,7 +139,7 @@
 // };
 
 
-#if DCHECK_IS_ON()
+#if !defined(NDEBUG)
 
 // Defines a class member that acts like a mutex. It is used only as a
 // verification tool.
@@ -283,6 +282,6 @@ class ThreadCollisionWarner {
 
 }  // namespace base
 
-#endif  // !USING_CHROMIUM_INCLUDES
+#endif  // !BUILDING_CEF_SHARED
 
 #endif  // CEF_INCLUDE_BASE_CEF_THREAD_COLLISION_WARNER_H_

@@ -53,7 +53,7 @@ typedef cef_value_type_t CefValueType;
 // process and thread.
 ///
 /*--cef(source=library)--*/
-class CefValue : public virtual CefBaseRefCounted {
+class CefValue : public virtual CefBase {
  public:
   ///
   // Creates a new object.
@@ -234,7 +234,7 @@ class CefValue : public virtual CefBaseRefCounted {
 // Class representing a binary value. Can be used on any process and thread.
 ///
 /*--cef(source=library)--*/
-class CefBinaryValue : public virtual CefBaseRefCounted {
+class CefBinaryValue : public virtual CefBase {
  public:
   ///
   // Creates a new object that is not owned by any other object. The specified
@@ -300,7 +300,7 @@ class CefBinaryValue : public virtual CefBaseRefCounted {
 // Class representing a dictionary value. Can be used on any process and thread.
 ///
 /*--cef(source=library)--*/
-class CefDictionaryValue : public virtual CefBaseRefCounted {
+class CefDictionaryValue : public virtual CefBase {
  public:
   typedef std::vector<CefString> KeyList;
 
@@ -533,7 +533,7 @@ class CefDictionaryValue : public virtual CefBaseRefCounted {
 // Class representing a list value. Can be used on any process and thread.
 ///
 /*--cef(source=library)--*/
-class CefListValue : public virtual CefBaseRefCounted {
+class CefListValue : public virtual CefBase {
  public:
   ///
   // Creates a new object that is not owned by any other object.
@@ -606,14 +606,14 @@ class CefListValue : public virtual CefBaseRefCounted {
   ///
   // Removes the value at the specified index.
   ///
-  /*--cef()--*/
-  virtual bool Remove(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool Remove(int index) =0;
 
   ///
   // Returns the value type at the specified index.
   ///
-  /*--cef(default_retval=VTYPE_INVALID)--*/
-  virtual CefValueType GetType(size_t index) =0;
+  /*--cef(default_retval=VTYPE_INVALID,index_param=index)--*/
+  virtual CefValueType GetType(int index) =0;
 
   ///
   // Returns the value at the specified index. For simple types the returned
@@ -622,55 +622,55 @@ class CefListValue : public virtual CefBaseRefCounted {
   // returned value will reference existing data and modifications to the value
   // will modify this object.
   ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefValue> GetValue(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual CefRefPtr<CefValue> GetValue(int index) =0;
 
   ///
   // Returns the value at the specified index as type bool.
   ///
-  /*--cef()--*/
-  virtual bool GetBool(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool GetBool(int index) =0;
 
   ///
   // Returns the value at the specified index as type int.
   ///
-  /*--cef()--*/
-  virtual int GetInt(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual int GetInt(int index) =0;
 
   ///
   // Returns the value at the specified index as type double.
   ///
-  /*--cef()--*/
-  virtual double GetDouble(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual double GetDouble(int index) =0;
 
   ///
   // Returns the value at the specified index as type string.
   ///
-  /*--cef()--*/
-  virtual CefString GetString(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual CefString GetString(int index) =0;
 
   ///
   // Returns the value at the specified index as type binary. The returned
   // value will reference existing data.
   ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefBinaryValue> GetBinary(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual CefRefPtr<CefBinaryValue> GetBinary(int index) =0;
 
   ///
   // Returns the value at the specified index as type dictionary. The returned
   // value will reference existing data and modifications to the value will
   // modify this object.
   ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefDictionaryValue> GetDictionary(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual CefRefPtr<CefDictionaryValue> GetDictionary(int index) =0;
 
   ///
   // Returns the value at the specified index as type list. The returned
   // value will reference existing data and modifications to the value will
   // modify this object.
   ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefListValue> GetList(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual CefRefPtr<CefListValue> GetList(int index) =0;
 
   ///
   // Sets the value at the specified index. Returns true if the value was set
@@ -680,43 +680,43 @@ class CefListValue : public virtual CefBaseRefCounted {
   // underlying data will be referenced and modifications to |value| will modify
   // this object.
   ///
-  /*--cef()--*/
-  virtual bool SetValue(size_t index, CefRefPtr<CefValue> value) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool SetValue(int index, CefRefPtr<CefValue> value) =0;
 
   ///
   // Sets the value at the specified index as type null. Returns true if the
   // value was set successfully.
   ///
-  /*--cef()--*/
-  virtual bool SetNull(size_t index) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool SetNull(int index) =0;
 
   ///
   // Sets the value at the specified index as type bool. Returns true if the
   // value was set successfully.
   ///
-  /*--cef()--*/
-  virtual bool SetBool(size_t index, bool value) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool SetBool(int index, bool value) =0;
 
   ///
   // Sets the value at the specified index as type int. Returns true if the
   // value was set successfully.
   ///
-  /*--cef()--*/
-  virtual bool SetInt(size_t index, int value) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool SetInt(int index, int value) =0;
 
   ///
   // Sets the value at the specified index as type double. Returns true if the
   // value was set successfully.
   ///
-  /*--cef()--*/
-  virtual bool SetDouble(size_t index, double value) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool SetDouble(int index, double value) =0;
 
   ///
   // Sets the value at the specified index as type string. Returns true if the
   // value was set successfully.
   ///
-  /*--cef(optional_param=value)--*/
-  virtual bool SetString(size_t index, const CefString& value) =0;
+  /*--cef(optional_param=value,index_param=index)--*/
+  virtual bool SetString(int index, const CefString& value) =0;
 
   ///
   // Sets the value at the specified index as type binary. Returns true if the
@@ -725,8 +725,8 @@ class CefListValue : public virtual CefBaseRefCounted {
   // Otherwise, ownership will be transferred to this object and the |value|
   // reference will be invalidated.
   ///
-  /*--cef()--*/
-  virtual bool SetBinary(size_t index, CefRefPtr<CefBinaryValue> value) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool SetBinary(int index, CefRefPtr<CefBinaryValue> value) =0;
 
   ///
   // Sets the value at the specified index as type dict. Returns true if the
@@ -735,8 +735,8 @@ class CefListValue : public virtual CefBaseRefCounted {
   // Otherwise, ownership will be transferred to this object and the |value|
   // reference will be invalidated.
   ///
-  /*--cef()--*/
-  virtual bool SetDictionary(size_t index, CefRefPtr<CefDictionaryValue> value) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool SetDictionary(int index, CefRefPtr<CefDictionaryValue> value) =0;
 
   ///
   // Sets the value at the specified index as type list. Returns true if the
@@ -745,8 +745,8 @@ class CefListValue : public virtual CefBaseRefCounted {
   // Otherwise, ownership will be transferred to this object and the |value|
   // reference will be invalidated.
   ///
-  /*--cef()--*/
-  virtual bool SetList(size_t index, CefRefPtr<CefListValue> value) =0;
+  /*--cef(index_param=index)--*/
+  virtual bool SetList(int index, CefRefPtr<CefListValue> value) =0;
 };
 
 #endif  // CEF_INCLUDE_CEF_VALUES_H_

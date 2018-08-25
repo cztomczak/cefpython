@@ -65,13 +65,14 @@ bool CefCreateURL(const CefURLParts& parts,
 // friendly way to help users make security-related decisions (or in other
 // circumstances when people need to distinguish sites, origins, or otherwise-
 // simplified URLs from each other). Internationalized domain names (IDN) may be
-// presented in Unicode if the conversion is considered safe. The returned value
-// will (a) omit the path for standard schemes, excepting file and filesystem,
-// and (b) omit the port if it is the default for the scheme. Do not use this
-// for URLs which will be parsed or sent to other applications.
+// presented in Unicode if |languages| accepts the Unicode representation. The
+// returned value will (a) omit the path for standard schemes, excepting file
+// and filesystem, and (b) omit the port if it is the default for the scheme. Do
+// not use this for URLs which will be parsed or sent to other applications.
 ///
 /*--cef(optional_param=languages)--*/
-CefString CefFormatUrlForSecurityDisplay(const CefString& origin_url);
+CefString CefFormatUrlForSecurityDisplay(const CefString& origin_url,
+                                         const CefString& languages);
 
 ///
 // Returns the mime type for the specified file extension or an empty string if
@@ -126,6 +127,17 @@ CefString CefURIEncode(const CefString& text, bool use_plus);
 CefString CefURIDecode(const CefString& text,
                        bool convert_to_utf8,
                        cef_uri_unescape_rule_t unescape_rule);
+
+///
+// Parses |string| which represents a CSS color value. If |strict| is true
+// strict parsing rules will be applied. Returns true on success or false on
+// error. If parsing succeeds |color| will be set to the color value otherwise
+// |color| will remain unchanged.
+///
+/*--cef()--*/
+bool CefParseCSSColor(const CefString& string,
+                      bool strict,
+                      cef_color_t& color);
 
 ///
 // Parses the specified |json_string| and returns a dictionary or list

@@ -44,7 +44,7 @@
 // Class used to represent a download item.
 ///
 /*--cef(source=library)--*/
-class CefDownloadItem : public virtual CefBaseRefCounted {
+class CefDownloadItem : public virtual CefBase {
  public:
   ///
   // Returns true if this object is valid. Do not call any other methods if this

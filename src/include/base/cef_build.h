@@ -32,10 +32,10 @@
 #define CEF_INCLUDE_BASE_CEF_BUILD_H_
 #pragma once
 
-#if defined(USING_CHROMIUM_INCLUDES)
+#if defined(BUILDING_CEF_SHARED)
 // When building CEF include the Chromium header directly.
 #include "base/compiler_specific.h"
-#else  // !USING_CHROMIUM_INCLUDES
+#else  // !BUILDING_CEF_SHARED
 // The following is substantially similar to the Chromium implementation.
 // If the Chromium implementation diverges the below implementation should be
 // updated to match.
@@ -165,7 +165,7 @@
 #define ALLOW_UNUSED_LOCAL(x) false ? (void)x : (void)0
 #endif
 
-#endif  // !USING_CHROMIUM_INCLUDES
+#endif  // !BUILDING_CEF_SHARED
 
 // Annotate a virtual method indicating it must be overriding a virtual method
 // in the parent class.
@@ -188,14 +188,5 @@
 #define OVERRIDE
 #endif
 #endif  // OVERRIDE
-
-// Check for C++11 template alias support which was added in VS2013 and GCC4.7.
-// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf
-#if __cplusplus > 199711L || \
-    (defined(_MSC_VER) && _MSC_VER >= 1800) || \
-    (defined(__GNUC__) && \
-      (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__ >= 40700))
-#define HAS_CPP11_TEMPLATE_ALIAS_SUPPORT
-#endif
 
 #endif  // CEF_INCLUDE_BASE_CEF_BUILD_H_

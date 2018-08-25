@@ -44,7 +44,7 @@
 // Generic callback interface used for asynchronous continuation.
 ///
 /*--cef(source=library)--*/
-class CefCallback : public virtual CefBaseRefCounted {
+class CefCallback : public virtual CefBase {
  public:
   ///
   // Continue processing.
@@ -63,7 +63,7 @@ class CefCallback : public virtual CefBaseRefCounted {
 // Generic callback interface used for asynchronous completion.
 ///
 /*--cef(source=client)--*/
-class CefCompletionCallback : public virtual CefBaseRefCounted {
+class CefCompletionCallback : public virtual CefBase {
  public:
   ///
   // Method that will be called once the task is complete.

@@ -39,13 +39,12 @@
 #pragma once
 
 #include "include/cef_base.h"
-#include "include/cef_ssl_status.h"
 
 ///
 // Class used to represent an entry in navigation history.
 ///
 /*--cef(source=library)--*/
-class CefNavigationEntry : public virtual CefBaseRefCounted {
+class CefNavigationEntry : public virtual CefBase {
  public:
   typedef cef_transition_type_t TransitionType;
 
@@ -109,12 +108,6 @@ class CefNavigationEntry : public virtual CefBaseRefCounted {
   ///
   /*--cef()--*/
   virtual int GetHttpStatusCode() =0;
-
-  ///
-  // Returns the SSL information for this navigation entry.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefSSLStatus> GetSSLStatus() =0;
 };
 
 #endif  // CEF_INCLUDE_CEF_NAVIGATION_ENTRY_H_

@@ -46,11 +46,11 @@
 // Class representing print settings.
 ///
 /*--cef(source=library)--*/
-class CefPrintSettings : public virtual CefBaseRefCounted {
+class CefPrintSettings : public virtual CefBase {
  public:
   typedef cef_color_model_t ColorModel;
   typedef cef_duplex_mode_t DuplexMode;
-  typedef std::vector<CefRange> PageRangeList;
+  typedef std::vector<CefPageRange> PageRangeList;
 
   ///
   // Create a new CefPrintSettings object.

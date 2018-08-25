@@ -43,7 +43,7 @@
 // Implement this interface to receive string values asynchronously.
 ///
 /*--cef(source=client)--*/
-class CefStringVisitor : public virtual CefBaseRefCounted {
+class CefStringVisitor : public virtual CefBase {
  public:
   ///
   // Method that will be executed.

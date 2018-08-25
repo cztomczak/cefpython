@@ -48,9 +48,10 @@
 #endif
 
 ///
-// All ref-counted framework classes must extend this class.
+// Interface defining the reference count implementation methods. All framework
+// classes must extend the CefBase class.
 ///
-class CefBaseRefCounted {
+class CefBase {
  public:
   ///
   // Called to increment the reference count for the object. Should be called
@@ -70,15 +71,7 @@ class CefBaseRefCounted {
   virtual bool HasOneRef() const =0;
 
  protected:
-  virtual ~CefBaseRefCounted() {}
-};
-
-///
-// All scoped framework classes must extend this class.
-///
-class CefBaseScoped {
- public:
-  virtual ~CefBaseScoped() {}
+  virtual ~CefBase() {}
 };
 
 ///
@@ -148,7 +141,7 @@ class CefRefCount {
 // #include "include/base/cef_lock.h"
 //
 // // Class declaration.
-// class MyClass : public CefBaseRefCounted {
+// class MyClass : public CefBase {
 //  public:
 //   MyClass() : value_(0) {}
 //   // Method that may be called on multiple threads.

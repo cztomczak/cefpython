@@ -50,7 +50,7 @@ typedef cef_thread_id_t CefThreadId;
 // task object destructor.
 ///
 /*--cef(source=client)--*/
-class CefTask : public virtual CefBaseRefCounted {
+class CefTask : public virtual CefBase {
  public:
   ///
   // Method that will be executed on the target thread.
@@ -69,7 +69,7 @@ class CefTask : public virtual CefBaseRefCounted {
 // other CEF threads as appropriate (for example, V8 WebWorker threads).
 ///
 /*--cef(source=library)--*/
-class CefTaskRunner : public virtual CefBaseRefCounted {
+class CefTaskRunner : public virtual CefBase {
  public:
   ///
   // Returns the task runner for the current thread. Only CEF threads will have

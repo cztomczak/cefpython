@@ -49,7 +49,7 @@ class CefDOMNode;
 // be called on the render process main thread.
 ///
 /*--cef(source=client)--*/
-class CefDOMVisitor : public virtual CefBaseRefCounted {
+class CefDOMVisitor : public virtual CefBase {
  public:
   ///
   // Method executed for visiting the DOM. The document object passed to this
@@ -68,7 +68,7 @@ class CefDOMVisitor : public virtual CefBaseRefCounted {
 // be called on the render process main thread thread.
 ///
 /*--cef(source=library)--*/
-class CefDOMDocument : public virtual CefBaseRefCounted {
+class CefDOMDocument : public virtual CefBase {
  public:
   typedef cef_dom_document_type_t Type;
 
@@ -164,7 +164,7 @@ class CefDOMDocument : public virtual CefBaseRefCounted {
 // called on the render process main thread.
 ///
 /*--cef(source=library)--*/
-class CefDOMNode : public virtual CefBaseRefCounted {
+class CefDOMNode : public virtual CefBase {
  public:
   typedef std::map<CefString, CefString> AttributeMap;
   typedef cef_dom_node_type_t Type;
@@ -323,12 +323,6 @@ class CefDOMNode : public virtual CefBaseRefCounted {
   ///
   /*--cef()--*/
   virtual CefString GetElementInnerText() =0;
-
-  ///
-  // Returns the bounds of the element.
-  ///
-  /*--cef()--*/
-  virtual CefRect GetElementBounds() =0;
 };
 
 #endif  // CEF_INCLUDE_CEF_DOM_H_

@@ -47,7 +47,7 @@
 // this class will be called on the UI thread.
 ///
 /*--cef(source=client)--*/
-class CefDragHandler : public virtual CefBaseRefCounted {
+class CefDragHandler : public virtual CefBase {
  public:
   typedef cef_drag_operations_mask_t DragOperationsMask;
 
