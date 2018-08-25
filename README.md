@@ -1,5 +1,13 @@
 # CEF Python
 
+## About 'cefpython49-winxp' branch
+
+This is a special branch of Chromium v49 for Windows only
+with Windows XP support. This is the latest version of Chromium
+that supports Windows XP. This cefpython branch was forked from
+cefpython57 branch.
+
+
 Table of contents:
 * [Introduction](#introduction)
 * [Install](#install)
@@ -39,12 +47,12 @@ or other kind of internet bots.
 ## Install
 
 You can install [pypi/cefpython3](https://pypi.python.org/pypi/cefpython3)
-package using pip tool. On Linux pip 8.1+ is required. You can
+package using pip tool. You can
 also download packages for offline installation available on the
 [GitHub Releases](../../releases) pages. Command to install with pip:
 
 ```
-pip install cefpython3==57.0
+pip install cefpython3==49.0
 ```
 
 ## Tutorial
@@ -82,17 +90,19 @@ Information on supported platforms, python versions, architectures
 and requirements. If you want to support old operating systems then
 choose the v31 release.
 
-**Latest release**
+
+**v49 release**
 
 OS | Py2 | Py3 | 32bit | 64bit | Requirements
 --- | --- | --- | --- | --- | ---
-Windows | 2.7 | 3.4 / 3.5 / 3.6 | Yes | Yes | Windows 7+
-Linux | 2.7 | 3.4 / 3.5 / 3.6 | Yes | Yes | Debian 7+ / Ubuntu 12.04+
-Mac | 2.7 | 3.4 / 3.5 / 3.6 | No | Yes | MacOS 10.9+
+Windows | 2.7 | 3.4 | Yes | Yes | Windows XP+
 
-These platforms are not supported yet:
-- ARM - see [Issue #267](../../issues/267)
-- Android - see [Issue #307](../../issues/307)
+- Install with command: `pip install cefpython3==49.0`
+- Downloads are available on GitHub Releases tagged
+    [v49.0](../../releases/tag/v49.0).
+- API reference is available in revision [master](../../tree/master/docs)
+- API reference is available in revision [master](../../tree/master/api)
+
 
 **v31 release**
 
@@ -128,6 +138,8 @@ directly.
 
 ### Thanks
 
+* Thanks to [FiveStars Loyalty, Inc.](https://www.fivestars.com/) for
+  sponsoring the v49 release for Windows with WinXP support
 * Many thanks to [ClearChat Inc.](https://clearchat.com) for sponsoring
   the v55/v56 releases for all platforms
 * Thanks to JetBrains for providing an Open Source license for

@@ -283,7 +283,7 @@ if sys.version_info.major == 2:
     # noinspection PyUnresolvedReferences
     import urlparse
 else:
-    # noinspection PyUnresolvedReferences
+    # noinspection PyUnresolvedReferences, PyProtectedMember
     from urllib import parse as urlparse
 
 if sys.version_info.major == 2:
@@ -377,6 +377,7 @@ from cpp_utils cimport *
 from task cimport *
 
 IF UNAME_SYSNAME == "Linux":
+    # noinspection PyUnresolvedReferences
     cimport x11
 
 from cef_string cimport *
