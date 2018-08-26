@@ -102,6 +102,11 @@ def main():
     create_empty_log_file(os.path.join(PKG_DIR, "debug.log"))
     create_empty_log_file(os.path.join(PKG_DIR, "examples/debug.log"))
 
+    # Remove screenshot.png
+    screenshot_png = os.path.join(PKG_DIR, "examples", "screenshot.png")
+    if os.path.exists(screenshot_png):
+        os.remove(screenshot_png)
+
     copy_cpp_extension_dependencies_issue359(PKG_DIR)
 
     print("[make_installer.py] Done. Installer package created: {setup_dir}"
@@ -377,13 +382,13 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
     if os.path.exists(os.path.join(pkg_dir, "cefpython_py27.pyd")):
         if ARCH32:
             search_paths = [
-                # This runtime version is shipped with Python 2.7.14
+                # This runtime version is shipped with Python 2.7.15
                 r"c:\Windows\winsxs\x86_microsoft.vc90.crt_1fc8b3b9a1e18e3b"
                 r"_9.0.30729.1_none_e163563597edeada\msvcp90.dll",
             ]
         else:
             search_paths = [
-                # This runtime version is shipped with Python 2.7.14
+                # This runtime version is shipped with Python 2.7.15
                 r"c:\Windows\winsxs\amd64_microsoft.vc90.crt_1fc8b3b9a1e18e3b"
                 r"_9.0.30729.1_none_99b61f5e8371c1d4\msvcp90.dll",
             ]
