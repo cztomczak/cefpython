@@ -30,7 +30,7 @@ class CefPythonApp :
       CefRefPtr<CefCommandLine> command_line) override;
 
   void OnRegisterCustomSchemes(
-      CefRawPtr<CefSchemeRegistrar> registrar) override;
+      CefRefPtr<CefSchemeRegistrar> registrar) override;
 
   CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler()
         override;
@@ -54,9 +54,6 @@ class CefPythonApp :
       CefRefPtr<CefListValue> extra_info) override;
 
   CefRefPtr<CefPrintHandler> GetPrintHandler() override;
-
-  void OnScheduleMessagePumpWork(int64 delay_ms) override;
-
 
   // ---------------------------------------------------------------------------
   // CefRenderProcessHandler

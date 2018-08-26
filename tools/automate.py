@@ -156,7 +156,9 @@ def setup_options(docopt_args):
         if int(Options.cef_branch) >= 2704:
             Options.gyp_msvs_version = "2015"
         else:
-            Options.gyp_msvs_version = "2013"
+            # Branch 2623 supports building with VS 2013, so you can
+            # change it to 2013 below.
+            Options.gyp_msvs_version = "2015"
 
     # --build-dir
     if Options.build_dir:
@@ -232,7 +234,7 @@ def build_cef():
               " --prebuilt-cef on Linux 32-bit.")
         sys.exit(0)
     else:
-        # Build cefclient, cefsimple, ceftests, libcef_dll_wrapper
+        # Build cefclient, cefsimple, libcef_dll_wrapper
         build_cef_projects()
         create_prebuilt_binaries()
 
@@ -337,13 +339,14 @@ def update_cef_patches():
 
 
 def build_cef_projects():
-    """Build cefclient, cefsimple, ceftests, libcef_dll_wrapper."""
+    """Build cefclient, cefsimple, libcef_dll_wrapper."""
     print("[automate.py] Build cef projects...")
 
     if WINDOWS:
-        fix_cmake_variables_permanently_windows()
+        # fix_cmake_variables_permanently_windows()
+        pass
 
-    fix_cef_include_files()
+    # fix_cef_include_files()
 
     # Find cef_binary directory.
     # Might already be set if --prebuilt-cef flag was passed.
@@ -373,8 +376,7 @@ def build_cef_projects():
     # Set build directory
     build_cefclient_dir = os.path.join(Options.cef_binary,
                                        "build_cefclient")
-    cefclient_exe = os.path.join(build_cefclient_dir, "tests", "cefclient",
-                                 Options.build_type,
+    cefclient_exe = os.path.join(build_cefclient_dir, "cefclient",
                                  "cefclient" + APP_EXT)
 
     # Check whether already built
@@ -391,11 +393,11 @@ def build_cef_projects():
         print("[automate.py] Create build_cefclient/ dir in cef_binary*/ dir")
         os.makedirs(build_cefclient_dir)
 
-    # Build cefclient, cefsimple, ceftests
+    # Build cefclient, cefsimple
     if already_built:
-        print("[automate.py] Already built: cefclient, cefsimple, ceftests")
+        print("[automate.py] Already built: cefclient, cefsimple")
     else:
-        print("[automate.py] Build cefclient, cefsimple, ceftests")
+        print("[automate.py] Build cefclient, cefsimple")
         # Cmake
         command = prepare_build_command()
         command.extend(["cmake", "-G", "Ninja"])
@@ -415,7 +417,7 @@ def build_cef_projects():
                             "cefsimple"])
         else:
             command.extend(["ninja", "-j", Options.ninja_jobs,
-                            "cefclient", "cefsimple", "ceftests"])
+                            "cefclient", "cefsimple"])
         run_command(command, build_cefclient_dir)
         print("[automate.py] OK")
         assert os.path.exists(cefclient_exe)
@@ -460,7 +462,7 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
             Options.cef_binary,
             "build_wrapper_{runtime_library}_VS{msvs}"
             .format(runtime_library=runtime_library, msvs=msvs))
-    wrapper_lib = os.path.join(build_wrapper_dir, "libcef_dll_wrapper",
+    wrapper_lib = os.path.join(build_wrapper_dir, "libcef_dll",
                                "libcef_dll_wrapper{ext}".format(ext=LIB_EXT))
 
     # Check whether library is already built
@@ -559,14 +561,14 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
     # This replacements must be unique for the undo operation
     # to be reliable.
 
-    mt_find = r"/MT "
-    mt_replace = r"/MD /wd4275 "
+    mt_find = u'"/MT '
+    mt_replace = u'"/MD /wd4275 '
 
-    mtd_find = r"/MTd "
-    mtd_replace = r"/MDd /wd4275 "
+    mtd_find = u'"/MTd '
+    mtd_replace = u'"/MDd /wd4275 '
 
-    cmake_variables = os.path.join(Options.cef_binary, "cmake",
-                                   "cef_variables.cmake")
+    cmake_variables = os.path.join(Options.cef_binary,
+                                   "CMakeLists.txt")
     with open(cmake_variables, "rb") as fp:
         contents = fp.read().decode("utf-8")
 
@@ -581,14 +583,14 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
     if undo:
         (contents, count) = re.subn(re.escape(mt_replace), mt_find,
                                     contents)
-        assert count == 2
+        assert count == 1
         (contents, count) = re.subn(re.escape(mtd_replace), mtd_find,
                                     contents)
         assert count == 1
     else:
         (contents, count) = re.subn(re.escape(mt_find), mt_replace,
                                     contents)
-        assert count == 2
+        assert count == 1
         (contents, count) = re.subn(re.escape(mtd_find), mtd_replace,
                                     contents)
         assert count == 1
@@ -659,7 +661,9 @@ def prepare_build_command(build_lib=False, vcvars=None):
             if int(Options.cef_branch) >= 2704:
                 command.append(VS2015_VCVARS)
             else:
-                command.append(VS2013_VCVARS)
+                # Branch 2623 supports building with VS 2013, so you can
+                # change it to 2013 below.
+                command.append(VS2015_VCVARS)
             command.append(VS_PLATFORM_ARG)
         command.append("&&")
     return command
@@ -716,44 +720,26 @@ def create_prebuilt_binaries():
         run_command(["install_name_tool", "-id", new_id, cef_library],
                     working_dir=cef_framework_dir)
 
-    # Copy cefclient, cefsimple, ceftests
+    # Copy cefclient, cefsimple
 
     # cefclient
     cefclient = os.path.join(
             src,
-            "build_cefclient", "tests", "cefclient",
-            Options.build_type,
+            "build_cefclient", "cefclient",
             "cefclient" + APP_EXT)
     if LINUX and os.path.exists(cefclient):
         # On Windows resources/*.html files are embedded inside exe
         cefclient_files = os.path.join(
                 src,
-                "build_cefclient", "tests", "cefclient",
-                Options.build_type,
+                "build_cefclient", "cefclient",
                 "cefclient_files")
         cpdir(cefclient_files, os.path.join(bindir, "cefclient_files"))
 
     # cefsimple
     cefsimple = os.path.join(
             src,
-            "build_cefclient", "tests", "cefsimple",
-            Options.build_type,
+            "build_cefclient", "cefsimple",
             "cefsimple" + APP_EXT)
-
-    # ceftests
-    ceftests = os.path.join(
-            src,
-            "build_cefclient", "tests", "ceftests",
-            Options.build_type,
-            "ceftests" + APP_EXT)
-    if LINUX and os.path.exists(ceftests):
-        # On Windows resources/*.html files are embedded inside exe
-        ceftests_files = os.path.join(
-                src,
-                "build_cefclient", "tests", "ceftests",
-                Options.build_type,
-                "ceftests_files")
-        cpdir(ceftests_files, os.path.join(bindir, "ceftests_files"))
 
     def copy_app(app):
         if os.path.exists(app):
@@ -769,9 +755,8 @@ def create_prebuilt_binaries():
         # Currently do not copy apps on Mac
         copy_app(cefclient)
         copy_app(cefsimple)
-        copy_app(ceftests)
 
-    # END: Copy cefclient, cefsimple, ceftests
+    # END: Copy cefclient, cefsimple
 
     # Copy libraries
     if platform.system() == "Windows":
@@ -784,13 +769,13 @@ def create_prebuilt_binaries():
             # MT library
             libsrc = os.path.join(
                     src, "build_wrapper_MT_VS{msvs}".format(msvs=msvs),
-                    "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
+                    "libcef_dll", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MT.lib")
             shutil.copy(libsrc, libdst)
             # MD library
             libsrc = os.path.join(
                     src, "build_wrapper_MD_VS{msvs}".format(msvs=msvs),
-                    "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
+                    "libcef_dll", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MD.lib")
             shutil.copy(libsrc, libdst)
     elif platform.system() == "Darwin":
@@ -819,6 +804,12 @@ def create_prebuilt_binaries():
     shutil.copy(os.path.join(src, "README.txt"), dst)
     shutil.copy(os.path.join(src, "LICENSE.txt"), dst)
 
+    # Copy cef_version_{os}.h
+    cef_version_file = os.path.join(dst, "cef_version_{os_postfix}.h".format(
+                                    os_postfix=OS_POSTFIX))
+    shutil.copy(os.path.join(src, "include", "cef_version.h"),
+                cef_version_file)
+
     print("[automate.py] OK prebuilt binaries created in '%s/'" % dst)
 
 
@@ -826,7 +817,6 @@ def get_available_python_compilers():
     all_python_compilers = OrderedDict([
         ("2008", VS2008_VCVARS),
         ("2010", VS2010_VCVARS),
-        ("2015", VS2015_VCVARS),
     ])
     ret_compilers = OrderedDict()
     for msvs in all_python_compilers:

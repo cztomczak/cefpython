@@ -103,7 +103,6 @@ The `GetResourceHandler` example can be found in the old v31
 | old_url | string |
 | new_url_out | list[string] |
 | request | [Request](Request.md) |
-| response | [Response](Response.md) |
 | __Return__ | void |
 
 Description from upstream CEF:
@@ -244,7 +243,6 @@ this on Linux.
 | browser | [Browser](Browser.md) |
 | mime_type | string |
 | plugin_url | string |
-| is_main_frame | bool |
 | top_origin_url | string |
 | plugin_info | [WebPluginInfo](WebPluginInfo.md) |
 | __Return__ | bool |

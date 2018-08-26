@@ -1,15 +1,17 @@
-# CEF Python
-
 ## About 'cefpython49-winxp' branch
 
 This is a special branch of Chromium v49 for Windows only
-with Windows XP support. This is the latest version of Chromium
-that supports Windows XP. This cefpython branch was forked from
-cefpython57 branch.
+with Windows XP and Vista support. This is the latest version of
+Chromium that supports Windows XP. This cefpython branch was forked
+from cefpython57 branch.
 
+
+# CEF Python
 
 Table of contents:
+* [About 'cefpython49-winxp' branch](#about-cefpython49-winxp-branch)
 * [Introduction](#introduction)
+* [Thanks to Fivestars for the v49 release](#thanks-to-fivestars-for-the-v49-release)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
@@ -42,6 +44,15 @@ can render web content off-screen in applications that use custom
 drawing frameworks. You can use it for automated testing of existing
 applications. You can use it for web scraping or as a web crawler,
 or other kind of internet bots.
+
+
+## Thanks to Fivestars for the v49 release
+
+Thanks to Fivestars Loyalty, Inc. for sponsoring the
+[v49 release](../../releases) of CEF Python.
+Please visit its website: https://www.fivestars.com/ .
+
+[![fivestars360](https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars360.png)](https://www.fivestars.com/)
 
 
 ## Install
@@ -100,8 +111,12 @@ Windows | 2.7 | 3.4 | Yes | Yes | Windows XP+
 - Install with command: `pip install cefpython3==49.0`
 - Downloads are available on GitHub Releases tagged
     [v49.0](../../releases/tag/v49.0).
-- API reference is available in revision [master](../../tree/master/docs)
-- API reference is available in revision [master](../../tree/master/api)
+- See [Migration guide](docs/Migration-guide.md) document for changes
+  in this release
+- Documentation is available in the [docs/](../../tree/cefpython49-winxp/docs)
+  directory
+- API reference is available in the [api/](../../tree/cefpython49-winxp/api)
+  directory
 
 
 **v31 release**
@@ -237,8 +252,6 @@ directly.
   * [command_line_args_disabled](api/ApplicationSettings.md#command_line_args_disabled)
   * [context_menu](api/ApplicationSettings.md#context_menu)
   * [downloads_enabled](api/ApplicationSettings.md#downloads_enabled)
-  * [external_message_pump](api/ApplicationSettings.md#external_message_pump)
-  * [framework_dir_path](api/ApplicationSettings.md#framework_dir_path)
   * [ignore_certificate_errors](api/ApplicationSettings.md#ignore_certificate_errors)
   * [javascript_flags](api/ApplicationSettings.md#javascript_flags)
   * [locale](api/ApplicationSettings.md#locale)
@@ -247,7 +260,6 @@ directly.
   * [log_file](api/ApplicationSettings.md#log_file)
   * [log_severity](api/ApplicationSettings.md#log_severity)
   * [multi_threaded_message_loop](api/ApplicationSettings.md#multi_threaded_message_loop)
-  * [net_security_expiration_enabled](api/ApplicationSettings.md#net_security_expiration_enabled)
   * [pack_loading_disabled](api/ApplicationSettings.md#pack_loading_disabled)
   * [persist_session_cookies](api/ApplicationSettings.md#persist_session_cookies)
   * [persist_user_preferences](api/ApplicationSettings.md#persist_user_preferences)
@@ -332,7 +344,6 @@ directly.
   * [StopLoad](api/Browser.md#stopload)
   * [StopFinding](api/Browser.md#stopfinding)
   * [ToggleFullscreen](api/Browser.md#togglefullscreen)
-  * [TryCloseBrowser](api/Browser.md#tryclosebrowser)
   * [WasResized](api/Browser.md#wasresized)
   * [WasHidden](api/Browser.md#washidden)
 * [Browser settings](api/BrowserSettings.md#browser-settings)
@@ -356,7 +367,6 @@ directly.
   * [tab_to_links_disabled](api/BrowserSettings.md#tab_to_links_disabled)
   * [text_area_resize_disabled](api/BrowserSettings.md#text_area_resize_disabled)
   * [universal_access_from_file_urls_allowed](api/BrowserSettings.md#universal_access_from_file_urls_allowed)
-  * [user_style_sheet_location](api/BrowserSettings.md#user_style_sheet_location)
   * [web_security_disabled](api/BrowserSettings.md#web_security_disabled)
   * [webgl_disabled](api/BrowserSettings.md#webgl_disabled)
   * [windowless_frame_rate](api/BrowserSettings.md#windowless_frame_rate)
@@ -508,6 +518,7 @@ directly.
   * [_OnAfterCreated](api/LifespanHandler.md#_onaftercreated)
   * [DoClose](api/LifespanHandler.md#doclose)
   * [OnBeforeClose](api/LifespanHandler.md#onbeforeclose)
+  * [RunModal](api/LifespanHandler.md#runmodal)
 * [LoadHandler (interface)](api/LoadHandler.md#loadhandler-interface)
   * [OnLoadingStateChange](api/LoadHandler.md#onloadingstatechange)
   * [OnLoadStart](api/LoadHandler.md#onloadstart)
@@ -666,6 +677,7 @@ directly.
   * [OnEraseBackground ](api/WindowUtils.md#onerasebackground-win)
   * [SetTitle ](api/WindowUtils.md#settitle-win)
   * [SetIcon ](api/WindowUtils.md#seticon-win)
+  * [UpdateBrowserSize ](api/WindowUtils.md#updatebrowsersize-win)
   * [GetParentHandle](api/WindowUtils.md#getparenthandle)
   * [IsWindowHandle](api/WindowUtils.md#iswindowhandle)
   * [gtk_plug_new ](api/WindowUtils.md#gtk_plug_new-linux)

@@ -6,7 +6,7 @@
 # - PyQt 5.8.2 on Windows/Linux/Mac
 # - PyQt 4.11 (qt 4.8) on Windows/Linux
 # - PySide 1.2 (qt 4.8) on Windows/Linux/Mac
-# - CEF Python v55.4+
+# - CEF Python v49.0+
 #
 # Issues with PySide 1.2 on Mac:
 # - Keyboard focus issues when switching between controls (Issue #284)
@@ -101,7 +101,7 @@ def check_versions():
         print("[qt.py] PySide {v1} (qt {v2})".format(
               v1=PySide.__version__, v2=QtCore.__version__))
     # CEF Python version requirement
-    assert cef.__version__ >= "55.4", "CEF Python v55.4+ required to run this"
+    assert cef.__version__ >= "49.0", "CEF Python v49.0+ required to run this"
 
 
 class MainWindow(QMainWindow):
@@ -237,7 +237,7 @@ class CefWidget(CefWidgetParent):
         self.y = 0
         if self.browser:
             if WINDOWS:
-                WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
+                WindowUtils.UpdateBrowserSize(self.getHandle(), self.browser)
             elif LINUX:
                 self.browser.SetBounds(self.x, self.y,
                                        self.width(), self.height())
@@ -247,7 +247,7 @@ class CefWidget(CefWidgetParent):
         size = event.size()
         if self.browser:
             if WINDOWS:
-                WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
+                WindowUtils.UpdateBrowserSize(self.getHandle(), self.browser)
             elif LINUX:
                 self.browser.SetBounds(self.x, self.y,
                                        size.width(), size.height())

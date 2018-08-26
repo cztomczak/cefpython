@@ -23,6 +23,16 @@
 #include "request_handler.h"
 
 
+class DevToolsClientHandler : public CefClient
+{
+public:
+    DevToolsClientHandler(){}
+    virtual ~DevToolsClientHandler(){}
+private:
+    IMPLEMENT_REFCOUNTING(DevToolsClientHandler);
+};
+
+
 class ClientHandler : public CefClient,
                       public ContextMenuHandler,
                       public DialogHandler,

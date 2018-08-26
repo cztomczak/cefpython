@@ -26,6 +26,10 @@ if ARCH64:
     assert platform.architecture()[0] == "64bit"
 ARCH_STR = platform.architecture()[0]
 
+# Operating system architecture
+SYSTEM64 = platform.machine().endswith('64')
+SYSTEM32 = not SYSTEM64
+
 # OS_POSTFIX is for directories/files names in cefpython sources
 #            and doesn't include architecture type, just OS name.
 
@@ -121,6 +125,7 @@ ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 # API reference
 API_DIR = os.path.join(ROOT_DIR, "api")
+DOCS_DIR = os.path.join(ROOT_DIR, "docs")
 
 # Build directories
 BUILD_DIR = os.path.join(ROOT_DIR, "build")
@@ -151,6 +156,7 @@ BUILD_SUBPROCESS = os.path.join(BUILD_CEFPYTHON,
 # -- end build directories
 
 EXAMPLES_DIR = os.path.join(ROOT_DIR, "examples")
+SNIPPETS_DIR = os.path.join(EXAMPLES_DIR, "snippets")
 SRC_DIR = os.path.join(ROOT_DIR, "src")
 
 # Subdirectories in src/
@@ -420,10 +426,6 @@ def get_msvs_for_python(vs_prefix=False):
         return "VS2008" if vs_prefix else "2008"
     elif sys.version_info[:2] == (3, 4):
         return "VS2010" if vs_prefix else "2010"
-    elif sys.version_info[:2] == (3, 5):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 6):
-        return "VS2015" if vs_prefix else "2015"
     else:
         print("ERROR: This version of Python is not supported")
         sys.exit(1)

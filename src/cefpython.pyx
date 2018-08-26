@@ -278,6 +278,8 @@ import json
 import datetime
 # noinspection PyUnresolvedReferences
 import random
+# noinspection PyUnresolvedReferences
+import base64
 
 if sys.version_info.major == 2:
     # noinspection PyUnresolvedReferences
@@ -435,8 +437,6 @@ from request_context_handler cimport *
 from cef_jsdialog_handler cimport *
 from cef_path_util cimport *
 from cef_drag_data cimport *
-from cef_image cimport *
-from main_message_loop cimport *
 # noinspection PyUnresolvedReferences
 from cef_views cimport *
 from cef_log cimport *
@@ -452,14 +452,13 @@ g_debug = False
 # The string_encoding key must be set early here and also in Initialize.
 g_applicationSettings = {"string_encoding": "utf-8"}
 g_commandLineSwitches = {}
+g_browser_settings = {}
 
 # If ApplicationSettings.unique_request_context_per_browser is False
 # then a shared request context is used for all browsers. Otherwise
 # a unique one is created for each call to CreateBrowserSync.
 # noinspection PyUnresolvedReferences
 cdef CefRefPtr[CefRequestContext] g_shared_request_context
-
-cdef scoped_ptr[MainMessageLoopExternalPump] g_external_message_pump
 
 cdef py_bool g_MessageLoop_called = False
 cdef py_bool g_MessageLoopWork_called = False
@@ -508,11 +507,6 @@ include "command_line.pyx"
 include "app.pyx"
 include "drag_data.pyx"
 include "helpers.pyx"
-
-# Currently used only on Linux via DragData. Do not include on other
-# platforms otherwise warning about unused function appears.
-IF UNAME_SYSNAME == "Linux":
-    include "image.pyx"
 
 # Handlers
 include "handlers/browser_process_handler.pyx"
@@ -675,21 +669,12 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # Paths
     # ------------------------------------------------------------------------
     cdef str module_dir = GetModuleDirectory()
-    if platform.system() == "Darwin":
-        if  "framework_dir_path" not in application_settings:
-            application_settings["framework_dir_path"] = os.path.join(
-                    module_dir, "Chromium Embedded Framework.framework")
     if "locales_dir_path" not in application_settings:
         if platform.system() != "Darwin":
             application_settings["locales_dir_path"] = os.path.join(
                     module_dir, "locales")
     if "resources_dir_path" not in application_settings:
         application_settings["resources_dir_path"] = module_dir
-        if platform.system() == "Darwin":
-            # "framework_dir_path" will always be set, see code above.
-            application_settings["resources_dir_path"] = os.path.join(
-                    application_settings["framework_dir_path"],
-                    "Resources")
     if "browser_subprocess_path" not in application_settings:
         application_settings["browser_subprocess_path"] = os.path.join(
                 module_dir, "subprocess")
@@ -753,12 +738,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # No sandboxing for the subprocesses
     cefApplicationSettings.no_sandbox = 1
     SetApplicationSettings(application_settings, &cefApplicationSettings)
-
-    # External message pump
-    if GetAppSetting("external_message_pump")\
-            and not g_external_message_pump.get():
-        g_external_message_pump.reset(
-                MainMessageLoopExternalPump.Create().get())
 
     Debug("CefInitialize()")
     cdef cpp_bool ret
@@ -855,6 +834,10 @@ def CreateBrowserSync(windowInfo=None,
 
     if not browserSettings:
         browserSettings = {}
+    # CEF Python only settings
+    if "inherit_client_handlers_for_popups" not in browserSettings:
+        browserSettings["inherit_client_handlers_for_popups"] = True
+
 
     cdef CefBrowserSettings cefBrowserSettings
     SetBrowserSettings(browserSettings, &cefBrowserSettings)
@@ -1068,11 +1051,6 @@ def Shutdown():
     with nogil:
         CefShutdown()
 
-    # Release external message pump, as in cefclient after Shutdown
-    if g_external_message_pump.get():
-        # Reset will set it to NULL
-        g_external_message_pump.reset()
-
 
 def SetOsModalLoop(py_bool modalLoop):
     cdef cpp_bool cefModalLoop = bool(modalLoop)
@@ -1081,11 +1059,30 @@ def SetOsModalLoop(py_bool modalLoop):
 
 cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     global g_globalClientCallbacks
+    # Global callbacks are prefixed with "_" in documentation.
+    # Accept both with and without a prefix.
+    if name.startswith("_"):
+        name = name[1:]
     if name in ["OnCertificateError", "OnBeforePluginLoad", "OnAfterCreated"]:
         g_globalClientCallbacks[name] = callback
     else:
         raise Exception("SetGlobalClientCallback() failed: "\
                 "invalid callback name = %s" % name)
+
+cpdef py_void SetGlobalClientHandler(object clientHandler):
+    if not hasattr(clientHandler, "__class__"):
+        raise Exception("SetGlobalClientHandler() failed: __class__ "
+                        "attribute missing")
+    cdef dict methods = {}
+    cdef py_string key
+    cdef object method
+    cdef tuple value
+    for value in inspect.getmembers(clientHandler,
+            predicate=inspect.ismethod):
+        key = value[0]
+        method = value[1]
+        if key and key[0:2] != '__':
+            SetGlobalClientCallback(key, method)
 
 cpdef object GetGlobalClientCallback(py_string name):
     global g_globalClientCallbacks
@@ -1112,3 +1109,9 @@ cpdef dict GetVersion():
         cef_commit_hash=__cef_commit_hash__,
         cef_commit_number=__cef_commit_number__,
     )
+
+cpdef GetDataUrl(data, mediatype="html"):
+    html = data.encode("utf-8", "replace")
+    b64 = base64.b64encode(html).decode("utf-8", "replace")
+    ret = "data:text/html;base64,{data}".format(data=b64)
+    return ret

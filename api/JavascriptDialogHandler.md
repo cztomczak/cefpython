@@ -43,6 +43,7 @@ pressed. The |user_input| value should be specified for prompt dialogs.
 | --- | --- |
 | browser | [Browser](Browser.md) |
 | origin_url | str |
+| accept_lang | str |
 | dialog_type | int |
 | message_text | str |
 | default_prompt_text | str |

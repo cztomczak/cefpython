@@ -12,16 +12,13 @@ public:
     LoadHandler(){}
     virtual ~LoadHandler(){}
 
-    typedef cef_transition_type_t TransitionType;
-
     void OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
                               bool isLoading,
                               bool canGoBack,
                               bool canGoForward) override;
 
     void OnLoadStart(CefRefPtr<CefBrowser> browser,
-                     CefRefPtr<CefFrame> frame,
-                     TransitionType transition_type) override;
+                     CefRefPtr<CefFrame> frame) override;
 
     void OnLoadEnd(CefRefPtr<CefBrowser> browser,
                    CefRefPtr<CefFrame> frame,

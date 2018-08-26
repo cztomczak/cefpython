@@ -151,8 +151,6 @@ def build_library(lib_name, macros, output_dir,
 
 def build_cefpython_app_library():
     sources = get_sources(SUBPROCESS_DIR, exclude_names=["main.cpp"])
-    main_message_loop_dir = os.path.join(SUBPROCESS_DIR, "main_message_loop")
-    sources.extend(get_sources(main_message_loop_dir))
     build_library(lib_name="cefpython_app",
                   macros=cefpython_app_MACROS,
                   sources=sources,

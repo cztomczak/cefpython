@@ -33,7 +33,6 @@ public:
     void OnResourceRedirect(CefRefPtr<CefBrowser> browser,
                             CefRefPtr<CefFrame> frame,
                             CefRefPtr<CefRequest> request,
-                            CefRefPtr<CefResponse> response,
                             CefString& new_url) override;
 
     bool GetAuthCredentials(CefRefPtr<CefBrowser> browser,

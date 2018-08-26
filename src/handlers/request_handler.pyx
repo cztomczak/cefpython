@@ -151,15 +151,13 @@ cdef public void RequestHandler_OnResourceRedirect(
         CefRefPtr[CefFrame] cefFrame,
         const CefString& cefOldUrl,
         CefString& cefNewUrl,
-        CefRefPtr[CefRequest] cefRequest,
-        CefRefPtr[CefResponse] cefResponse
+        CefRefPtr[CefRequest] cefRequest
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef str pyOldUrl
     cdef list pyNewUrlOut
     cdef PyRequest pyRequest
-    cdef PyResponse pyResponse
     cdef object clientCallback
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnResourceRedirect")
@@ -167,7 +165,6 @@ cdef public void RequestHandler_OnResourceRedirect(
         pyOldUrl = CefToPyString(cefOldUrl)
         pyNewUrlOut = [CefToPyString(cefNewUrl)]
         pyRequest = CreatePyRequest(cefRequest)
-        pyResponse = CreatePyResponse(cefResponse)
         clientCallback = pyBrowser.GetClientCallback("OnResourceRedirect")
         if clientCallback:
             clientCallback(
@@ -175,8 +172,7 @@ cdef public void RequestHandler_OnResourceRedirect(
                     frame=pyFrame,
                     old_url=pyOldUrl,
                     new_url_out=pyNewUrlOut,
-                    request=pyRequest,
-                    response=pyResponse)
+                    request=pyRequest)
             if pyNewUrlOut[0]:
                 PyToCefString(pyNewUrlOut[0], cefNewUrl)
     except:
@@ -348,7 +344,6 @@ cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
         CefRefPtr[CefBrowser] browser,
         const CefString& mime_type,
         const CefString& plugin_url,
-        cpp_bool is_main_frame,
         const CefString& top_origin_url,
         CefRefPtr[CefWebPluginInfo] plugin_info,
         cef_types.cef_plugin_policy_t* plugin_policy
@@ -375,7 +370,6 @@ cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
                     browser=py_browser,
                     mime_type=CefToPyString(mime_type),
                     plugin_url=CefToPyString(plugin_url),
-                    is_main_frame=bool(is_main_frame),
                     top_origin_url=CefToPyString(top_origin_url),
                     plugin_info=py_plugin_info)
             if returnValue:

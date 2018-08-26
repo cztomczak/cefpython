@@ -12,17 +12,13 @@ UNAME_S = $(shell uname -s)
 CCFLAGS = -fPIC -DBROWSER_PROCESS $(CEF_CCFLAGS)
 
 ifeq ($(UNAME_S), Linux)
-	SRC_MORE = print_handler_gtk.cpp \
-			main_message_loop/main_message_loop_external_pump_linux.cpp
+	SRC_MORE = print_handler_gtk.cpp
 else ifeq ($(UNAME_S), Darwin)
-    SRC_MORE = main_message_loop/main_message_loop_external_pump_mac.mm
+    SRC_MORE =
 endif
 
 SRC = cefpython_app.cpp v8function_handler.cpp v8utils.cpp \
 		javascript_callback.cpp \
-		main_message_loop/main_message_loop.cpp \
-		main_message_loop/main_message_loop_std.cpp \
-		main_message_loop/main_message_loop_external_pump.cpp \
 		$(SRC_MORE)
 
 OBJ = $(filter %.o, $(SRC:.cpp=.o) $(SRC:.mm=.o))

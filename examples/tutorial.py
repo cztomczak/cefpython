@@ -1,5 +1,5 @@
 # Tutorial example. Doesn't depend on any third party GUI framework.
-# Tested with CEF Python v56.2+
+# Tested with CEF Python v49.0+
 
 from cefpython3 import cefpython as cef
 import base64
@@ -74,7 +74,7 @@ def check_versions():
     print("[tutorial.py] CEF Python {ver}".format(ver=cef.__version__))
     print("[tutorial.py] Python {ver} {arch}".format(
           ver=platform.python_version(), arch=platform.architecture()[0]))
-    assert cef.__version__ >= "56.2", "CEF Python v56.2+ required to run this"
+    assert cef.__version__ >= "49.0", "CEF Python v49.0+ required to run this"
 
 
 def html_to_data_uri(html, js_callback=None):

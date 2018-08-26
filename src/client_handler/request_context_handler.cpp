@@ -24,7 +24,6 @@ CefRefPtr<CefCookieManager> RequestContextHandler::GetCookieManager() {
 bool RequestContextHandler::OnBeforePluginLoad(
                         const CefString& mime_type,
                         const CefString& plugin_url,
-                        bool is_main_frame,
                         const CefString& top_origin_url,
                         CefRefPtr<CefWebPluginInfo> plugin_info,
                         PluginPolicy* plugin_policy) {
@@ -32,7 +31,6 @@ bool RequestContextHandler::OnBeforePluginLoad(
     return RequestHandler_OnBeforePluginLoad(browser_,
                                              mime_type,
                                              plugin_url,
-                                             is_main_frame,
                                              top_origin_url,
                                              plugin_info,
                                              plugin_policy);

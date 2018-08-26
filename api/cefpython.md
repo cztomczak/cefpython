@@ -217,10 +217,7 @@ Description from upstream CEF:
 > existing application message loop. Use of this function is not recommended
 > for most users; use either the CefRunMessageLoop() function or
 > CefSettings.multi_threaded_message_loop if possible. When using this function
-> care must be taken to balance performance against excessive CPU usage. It is
-> recommended to enable the CefSettings.external_message_pump option when using
-> this function so that CefBrowserProcessHandler::OnScheduleMessagePumpWork()
-> callbacks can facilitate the scheduling process. This function should only be
+> care must be taken to balance performance against excessive CPU usage. This function should only be
 > called on the main application thread and only if CefInitialize() is called
 > with a CefSettings.multi_threaded_message_loop value of false. This function
 > will not block.

@@ -17,10 +17,31 @@ from common import *
 import glob
 import os
 import re
+import subprocess
 
 
 def main():
     """Main entry point."""
+    # Call toc.py for docs/ and api/ directories and for README.md in root dir
+    print("Running toc.py in {}/ dir".format(os.path.basename(API_DIR)))
+    retcode = subprocess.call([sys.executable,
+                               os.path.join(TOOLS_DIR, "toc.py"),
+                               API_DIR])
+    assert retcode == 0, "Executing toc.py for API_DIR failed"
+
+    print("Running toc.py in {}/ dir".format(os.path.basename(DOCS_DIR)))
+    retcode = subprocess.call([sys.executable,
+                               os.path.join(TOOLS_DIR, "toc.py"),
+                               DOCS_DIR])
+    assert retcode == 0, "Executing toc.py for DOCS_DIR failed"
+
+    print("Running toc.py for root/README.md")
+    retcode = subprocess.call([sys.executable,
+                               os.path.join(TOOLS_DIR, "toc.py"),
+                               os.path.join(ROOT_DIR, "README.md")])
+    assert retcode == 0, "Executing toc.py for root/README.md failed"
+
+    # Generate API reference in api/ dir and in root/README.md
     api_links = generate_api_links()
     update_api_index_file(api_links)
     update_readme_file(api_links)
@@ -69,8 +90,8 @@ def update_readme_file(api_links):
     assert re.search(re_find, readme_contents), ("API categories not found"
                                                  " in README")
     contents = re.sub(re_find,
-                      ("### API categories\r\n\r\n{categories_contents}"
-                       "\r\n### API index"
+                      (u"### API categories\r\n\r\n{categories_contents}"
+                       u"\r\n### API index"
                        .format(categories_contents=categories_contents)),
                       contents)
 
@@ -80,7 +101,7 @@ def update_readme_file(api_links):
     assert re.search(re_find, readme_contents), ("API index not found"
                                                  " in README")
     contents = re.sub(re_find,
-                      ("### API index\r\n\r\n{api_links}"
+                      (u"### API index\r\n\r\n{api_links}"
                        .format(api_links=api_links)),
                       contents)
 
@@ -103,7 +124,7 @@ def generate_api_links():
             continue
         with open(file_, "rb") as fo:
             md_contents = fo.read().decode("utf-8")
-        md_contents = re.sub(r"```[\s\S]+?```", "", md_contents)
+        md_contents = re.sub(u"```[\\s\\S]+?```", u"", md_contents)
         matches = re.findall(r"^(#|###)\s+(.*)", md_contents,
                              re.MULTILINE)
         for match in matches:

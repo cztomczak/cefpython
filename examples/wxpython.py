@@ -5,7 +5,7 @@
 # - wxPython 4.0 on Windows/Mac/Linux
 # - wxPython 3.0 on Windows/Mac
 # - wxPython 2.8 on Linux
-# - CEF Python v55.4+
+# - CEF Python v49.0+
 
 import wx
 from cefpython3 import cefpython as cef
@@ -33,9 +33,11 @@ def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     settings = {}
-    if WINDOWS:
-        # noinspection PyUnresolvedReferences, PyArgumentList
-        cef.DpiAware.EnableHighDpiSupport()
+    # To enable High DPI support embed a DPI awareness manifest in
+    # both the main process and the subprocess.exe executable. Calling
+    # cef.DpiAware.SetProcessDpiAware sets DPI awareness only for
+    # the main process and thus is not recommended. Also you have to
+    # set ApplicationSettings.auto_zooming to "system_dpi".
     cef.Initialize(settings=settings)
     app = CefApp(False)
     app.MainLoop()
@@ -51,7 +53,7 @@ def check_versions():
             ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[wxpython.py] wxPython {ver}".format(ver=wx.version()))
     # CEF Python version requirement
-    assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
+    assert cef.__version__ >= "49.0", "CEF Python v49.0+ required to run this"
 
 
 class MainFrame(wx.Frame):
@@ -133,8 +135,8 @@ class MainFrame(wx.Frame):
         if not self.browser:
             return
         if WINDOWS:
-            WindowUtils.OnSize(self.browser_panel.GetHandle(),
-                               0, 0, 0)
+            WindowUtils.UpdateBrowserSize(self.browser_panel.GetHandle(),
+                                          self.browser)
         elif LINUX:
             (x, y) = (0, 0)
             (width, height) = self.browser_panel.GetSize().Get()

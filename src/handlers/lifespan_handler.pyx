@@ -137,3 +137,17 @@ cdef public void LifespanHandler_OnBeforeClose(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public cpp_bool LifespanHandler_RunModal(
+        CefRefPtr[CefBrowser] cefBrowser
+        ) except * with gil:
+    cdef PyBrowser pyBrowser
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser)
+        callback = pyBrowser.GetClientCallback("RunModal")
+        if callback:
+            return bool(callback(pyBrowser))
+        return False
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)

@@ -13,6 +13,7 @@ Table of contents:
   * [OnEraseBackground (Win)](#onerasebackground-win)
   * [SetTitle (Win)](#settitle-win)
   * [SetIcon (Win)](#seticon-win)
+  * [UpdateBrowserSize (Win)](#updatebrowsersize-win)
   * [GetParentHandle](#getparenthandle)
   * [IsWindowHandle](#iswindowhandle)
   * [gtk_plug_new (Linux)](#gtk_plug_new-linux)
@@ -48,6 +49,11 @@ Windows-only. This method processes WM_SETFOCUS message which is sent to a windo
 
 Windows-only. This method processes WM_SIZE message which is sent to a window after its size has changed.
 
+Do not call this function unless you know what you're doing, as it
+can sometimes cause app hanging during window resize. You should
+call instead the `UpdateBrowserSize` method with the help of
+`cef.PostTask`.
+
 
 ### OnEraseBackground (Win)
 
@@ -82,6 +88,20 @@ Windows-only. Set the title for the main window or popup window. The default imp
 | __Return__ | void |
 
 Windows-only. Set the icon for the popup window. The default implementation of [DisplayHandler](DisplayHandler.md).OnTitleChange() calls this method to set the icon for a window that wasn't created explicitily (for example a popup window), the icon is inherited from the parent window. Icon parameter accepts only "inherit", you cannot pass here a path to an icon (currently not implemented).
+
+
+### UpdateBrowserSize (Win)
+
+| Parameter | Type |
+| --- | --- |
+| parent_window_handle | int |
+| browser | [Browser](Browser.md) |
+| redraw=True (optional) | bool |
+| __Return__ | void |
+
+Windows-only. This function will resize browser using client coordinates
+from the parent window in which browser is embedded. You should
+call this function during a size event of your app window.
 
 
 ### GetParentHandle

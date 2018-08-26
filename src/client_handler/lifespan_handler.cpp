@@ -59,3 +59,8 @@ void LifespanHandler::OnBeforeClose(CefRefPtr<CefBrowser> browser)
     REQUIRE_UI_THREAD();
     LifespanHandler_OnBeforeClose(browser);
 }
+
+bool LifespanHandler::RunModal(CefRefPtr<CefBrowser> browser) {
+    REQUIRE_UI_THREAD();
+    return LifespanHandler_RunModal(browser);
+}

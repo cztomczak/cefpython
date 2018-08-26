@@ -23,13 +23,13 @@ class DpiAware:
         cdef int dpix = 0
         cdef int dpiy = 0
         GetSystemDpi(&dpix, &dpiy)
-        return tuple(dpix, dpiy)
+        return dpix, dpiy
 
     @staticmethod
     def CalculateWindowSize(int width, int height):
         # Calculation for DPI < 96 is not yet supported.
         GetDpiAwareWindowSize(&width, &height)
-        return tuple(width, height)
+        return width, height
 
     @staticmethod
     def IsProcessDpiAware():
@@ -37,11 +37,10 @@ class DpiAware:
 
     @staticmethod
     def SetProcessDpiAware():
-        """Deprecated."""
-        DpiAware.EnableHighDpiSupport()
+        SetProcessDpiAware()
 
     @staticmethod
     def EnableHighDpiSupport():
         # This CEF function sets process to be DPI aware. This
-        # CEF func is also called in subprocesses.
+        # CEF func is also called in subprocesses. Only for Win7+.
         CefEnableHighDPISupport()

@@ -38,7 +38,7 @@ Run the commands below to install the cefpython3 package, clone
 the repository and run the Hello World example:
 
 ```commandline
-pip install cefpython3==57.0
+pip install cefpython3==49.0
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/examples/
 python hello_world.py
@@ -181,13 +181,12 @@ Calling cef.MessageLoopWork() in a timer is not the best performant
 way to run CEF message loop, also there are known bugs on some
 platforms when calling message loop work in a timer. There are two
 options to increase performance depending on platform. On Windows
-use a multi-threaded message loop for best performance. On Mac use
-an external message pump for best performance.
+use a multi-threaded message loop for best performance.
 
 **Windows: multi-threaded message loop**
 
 On Windows for best performance a multi-threaded message loop should
-be used instead of cef.MessageLoopWork() or external message pump. To do
+be used instead of cef.MessageLoopWork(). To do
 so, set ApplicationSettings.[multi_threaded_message_loop](../api/ApplicationSettings.md#multi_threaded_message_loop)
 to True and run a native message loop in your app. Don't call CEF's
 message loop. Create browser using `cef.PostTask(cef.TID_UI, cef.CreateBrowserSync, ...)`.
@@ -197,24 +196,6 @@ to correctly use CEF API. API docs explain on which threads a function
 may be called and in case of handlers' callbacks (and other interfaces)
 it is stated on which thread a callback will be called. See also
 [Issue #133](../../../issues/133).
-
-**Mac: external message pump**
-
-CEF provides ApplicationSettings.[external_message_pump](../api/ApplicationSettings.md#external_message_pump)
-option for running an external message pump that you should use for
-best performance and to get rid of some bugs that appear when using
-cef.MessageLoopWork() in a timer.
-
-This option is currently marked experimental as it wasn't yet fully
-tested. This option should work good on Mac - in upstream CEF it was
-tested mainly on Mac. If you've successfully used this option on Mac
-please let us know on the Forum.
-
-**Linux**
-
-External message pump option is not recommended to use on Linux,
-as during testing it actually made app x2 slower - it's a bug in
-upstream CEF. See [Issue #246](../../../issues/246) for more details.
 
 
 ## Settings

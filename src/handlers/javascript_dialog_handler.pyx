@@ -33,6 +33,7 @@ cdef class PyJavascriptDialogCallback:
 cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& origin_url,
+        const CefString& accept_lang,
         cef_types.cef_jsdialog_type_t dialog_type,
         const CefString& message_text,
         const CefString& default_prompt_text,
@@ -41,6 +42,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef py_string pyOriginUrl
+    cdef py_string pyAcceptLang
     cdef py_string pyMessageText
     cdef py_string pyDefaultPromptText
     cdef PyJavascriptDialogCallback pyCallback
@@ -51,6 +53,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnJavascriptDialog")
         pyOriginUrl = CefToPyString(origin_url)
+        pyAcceptLang = CefToPyString(accept_lang)
         pyMessageText = CefToPyString(message_text)
         pyDefaultPromptText = CefToPyString(default_prompt_text)
         pyCallback = CreatePyJavascriptDialogCallback(callback)
@@ -61,6 +64,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
             returnValue = clientCallback(
                     browser=pyBrowser,
                     origin_url=pyOriginUrl,
+                    accept_lang=pyAcceptLang,
                     dialog_type=dialog_type,
                     message_text=pyMessageText,
                     default_prompt_text=pyDefaultPromptText,

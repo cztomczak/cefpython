@@ -22,7 +22,7 @@ Usage:
     python screenshot.py https://www.google.com/ncr 1024 768
 
 Tested configurations:
-- CEF Python v57.0+
+- CEF Python v49.0+
 - Pillow 2.3.0 / 4.1.0
 """
 
@@ -55,9 +55,26 @@ def main():
         os.remove(SCREENSHOT_PATH)
     command_line_arguments()
     # Off-screen-rendering requires setting "windowless_rendering_enabled"
-    # option, so that RenderHandler callbacks are called.
-    cef.Initialize(settings={"windowless_rendering_enabled": True})
-    create_browser()
+    # option.
+    settings = {
+        "windowless_rendering_enabled": True,
+    }
+    switches = {
+        # GPU acceleration is not supported in OSR mode, so must disable
+        # it using these Chromium switches (Issues #240 and #463)
+        "disable-gpu": "",
+        "disable-gpu-compositing": "",
+        # Tweaking OSR performance by setting the same Chromium flags
+        # as in upstream cefclient (Issue #240).
+        "enable-begin-frame-scheduling": "",
+        "disable-surfaces": "",  # This is required for PDF ext to work
+    }
+    browser_settings = {
+        # Tweaking OSR performance (Issue #240)
+        "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
+    }
+    cef.Initialize(settings=settings, switches=switches)
+    create_browser(browser_settings)
     cef.MessageLoop()
     cef.Shutdown()
     print("[screenshot.py] Opening screenshot with default application")
@@ -69,7 +86,7 @@ def check_versions():
     print("[screenshot.py] Python {ver} {arch}".format(
           ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[screenshot.py] Pillow {ver}".format(ver=PILLOW_VERSION))
-    assert cef.__version__ >= "57.0", "CEF Python v57.0+ required to run this"
+    assert cef.__version__ >= "49.0", "CEF Python v49.0+ required to run this"
 
 
 def command_line_arguments():
@@ -95,7 +112,7 @@ def command_line_arguments():
         sys.exit(1)
 
 
-def create_browser():
+def create_browser(settings):
     # Create browser in off-screen-rendering mode (windowless mode)
     # by calling SetAsOffscreen method. In such mode parent window
     # handle can be NULL (0).
@@ -107,6 +124,7 @@ def create_browser():
     print("[screenshot.py] Loading url: {url}"
           .format(url=URL))
     browser = cef.CreateBrowserSync(window_info=window_info,
+                                    settings=settings,
                                     url=URL)
     browser.SetClientHandler(LoadHandler())
     browser.SetClientHandler(RenderHandler())

@@ -21,18 +21,44 @@ class WindowUtils(object):
             return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
 
         cdef HWND innerHwnd = <HWND>pyBrowser.GetWindowHandle()
-        cdef RECT rect2
-        GetClientRect(<HWND>windowHandle, &rect2)
+        if not innerHwnd:
+            return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
 
-        cdef HDWP hdwp = BeginDeferWindowPos(1)
-        hdwp = DeferWindowPos(hdwp, innerHwnd, NULL,
+        cdef RECT rect2
+        cdef BOOL result = GetClientRect(<HWND>windowHandle, &rect2)
+
+        cdef HDWP hdwp
+        if result != 0:
+            hdwp = BeginDeferWindowPos(1)
+            if hdwp:
+                hdwp = DeferWindowPos(hdwp, innerHwnd, NULL,
+                        rect2.left, rect2.top,
+                        rect2.right - rect2.left,
+                        rect2.bottom - rect2.top,
+                        SWP_NOZORDER)
+                if hdwp:
+                    EndDeferWindowPos(hdwp)
+
+        return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
+
+    @staticmethod
+    def UpdateBrowserSize(WindowHandle parent_window_handle,
+                          PyBrowser browser,
+                          py_bool redraw=True):
+        cdef HWND innerHwnd = <HWND>browser.GetWindowHandle()
+        if not innerHwnd:
+            return
+        cdef RECT rect2
+        cdef BOOL result = GetClientRect(<HWND>parent_window_handle, &rect2)
+        cdef UINT flags = SWP_NOZORDER
+        if not redraw:
+            flags = SWP_NOZORDER | SWP_NOREDRAW
+        if result != 0:
+            SetWindowPos(innerHwnd, NULL,
                 rect2.left, rect2.top,
                 rect2.right - rect2.left,
                 rect2.bottom - rect2.top,
-                SWP_NOZORDER)
-        EndDeferWindowPos(hdwp)
-
-        return DefWindowProc(<HWND>windowHandle, msg, wparam, lparam)
+                flags)
 
     @staticmethod
     def OnEraseBackground(WindowHandle windowHandle, long msg, long wparam,

@@ -41,7 +41,7 @@ def main():
     print("[gkt3.py] GTK {major}.{minor}".format(
             major=Gtk.get_major_version(),
             minor=Gtk.get_minor_version()))
-    assert cef.__version__ >= "53.1", "CEF Python v53.1+ required to run this"
+    assert cef.__version__ >= "49.0", "CEF Python v49.0+ required to run this"
     if not MAC:
         # On Mac exception hook doesn't work and is causing a strange error:
         # > Python[57738:d07] _createMenuRef called with existing principal
@@ -126,7 +126,8 @@ class Gtk3Example(Gtk.Application):
     def on_size_allocate(self, _, data):
         if self.browser:
             if WINDOWS:
-                WindowUtils.OnSize(self.win32_handle, 0, 0, 0)
+                WindowUtils.UpdateBrowserSize(self.win32_handle,
+                                              self.browser)
             elif LINUX:
                 self.browser.SetBounds(data.x, data.y,
                                        data.width, data.height)

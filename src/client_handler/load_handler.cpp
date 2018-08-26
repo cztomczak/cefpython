@@ -17,8 +17,7 @@ void LoadHandler::OnLoadingStateChange(CefRefPtr<CefBrowser> browser,
 
 
 void LoadHandler::OnLoadStart(CefRefPtr<CefBrowser> browser,
-                              CefRefPtr<CefFrame> frame,
-                              TransitionType transition_type)
+                              CefRefPtr<CefFrame> frame)
 {
     REQUIRE_UI_THREAD();
     LoadHandler_OnLoadStart(browser, frame);

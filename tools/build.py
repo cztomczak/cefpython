@@ -475,7 +475,6 @@ def clean_cpp_projects_unix():
     delete_files_by_pattern("{0}/*.o".format(SUBPROCESS_DIR))
     delete_files_by_pattern("{0}/*.a".format(SUBPROCESS_DIR))
     delete_files_by_pattern("{0}/subprocess".format(SUBPROCESS_DIR))
-    delete_files_by_pattern("{0}/main_message_loop/*.o".format(SUBPROCESS_DIR))
 
     delete_files_by_pattern("{0}/*.o".format(CPP_UTILS_DIR))
     delete_files_by_pattern("{0}/*.a".format(CPP_UTILS_DIR))

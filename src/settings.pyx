@@ -70,9 +70,6 @@ cdef void SetApplicationSettings(
             cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
         elif key == "multi_threaded_message_loop":
             cefAppSettings.multi_threaded_message_loop = int(appSettings[key])
-        elif key == "net_security_expiration_enabled":
-            cefAppSettings.enable_net_security_expiration =\
-                    int(appSettings[key])
         elif key == "release_dcheck_enabled":
             # Keep for BC, just log info - no error
             Debug("DEPRECATED: 'release_dcheck_enabled' setting")
@@ -117,13 +114,6 @@ cdef void SetApplicationSettings(
         elif key == "windowless_rendering_enabled":
             cefAppSettings.windowless_rendering_enabled = \
                     int(appSettings[key])
-        elif key == "external_message_pump":
-            cefAppSettings.external_message_pump = \
-                    int(appSettings[key])
-        elif key == "framework_dir_path":
-            cefString = new CefString(&cefAppSettings.framework_dir_path)
-            PyToCefStringPointer(appSettings[key], cefString)
-            del cefString
         else:
             raise Exception("Invalid appSettings key: %s" % key)
 
@@ -134,7 +124,10 @@ cdef void SetBrowserSettings(
     cdef CefString* cefString
 
     for key in browserSettings:
-        if key == "accept_language_list":
+        if key == "inherit_client_handlers_for_popups":
+            # CEF Python only options. These are not to be found in CEF.
+            continue
+        elif key == "accept_language_list":
             cefString = new CefString(&cefBrowserSettings.accept_language_list)
             PyToCefStringPointer(browserSettings[key], cefString)
             del cefString

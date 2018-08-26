@@ -75,7 +75,7 @@ NO_REBUILD = False
 NO_AUTOMATE = False
 
 # Python versions
-SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6)]
+SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4)]
 
 # Python search paths. It will use first Python found for specific version.
 # Supports replacement of one environment variable in path eg.: %ENV_KEY%.
@@ -140,9 +140,9 @@ def main():
         build_cefpython_modules(pythons_32bit, "32bit")
         build_cefpython_modules(pythons_64bit, "64bit")
     if pythons_32bit:
-        make_packages(pythons_32bit[0], "32bit")
+        make_packages(pythons_32bit[0], "32bit", pythons_32bit)
     if pythons_64bit:
-        make_packages(pythons_64bit[0], "64bit")
+        make_packages(pythons_64bit[0], "64bit", pythons_64bit)
     test_wheel_packages(pythons_32bit + pythons_64bit)
     show_summary(pythons_32bit, pythons_64bit)
 
@@ -192,6 +192,28 @@ def clean_build_directories():
 
     # Delete cef binaries and libraries dirs
     if not NO_AUTOMATE:
+        # Delete cef binlib dir only if cef_binary dir exists,
+        # otherwise you will end up with cef binlib directory
+        # deleted and script failing further when calling
+        # automate.py --prebuilt-cef.
+        version = get_cefpython_version()
+        # 32-bit
+        if not MAC:
+            postfix2 = get_cef_postfix2_for_arch("32bit")
+            cef_binary_dir = "cef_binary_{cef_version}_{postfix2}"\
+                             .format(cef_version=version["CEF_VERSION"],
+                                     postfix2=postfix2)
+            if len(glob.glob(cef_binary_dir)) != 1:
+                raise Exception("Directory not found: "+cef_binary_dir)
+        # 64-bit
+        postfix2 = get_cef_postfix2_for_arch("64bit")
+        cef_binary_dir = "cef_binary_{cef_version}_windows64"\
+                         .format(cef_version=version["CEF_VERSION"],
+                                 postfix2=postfix2)
+        if len(glob.glob(cef_binary_dir)) != 1:
+            raise Exception("Directory not found: "+cef_binary_dir)
+
+        # Delete
         delete_cef_binaries_libraries_dir("32bit")
         delete_cef_binaries_libraries_dir("64bit")
 
@@ -524,7 +546,7 @@ def restore_subprocess_executable_issue342(arch):
     shutil.copy(src, dst)
 
 
-def make_packages(python, arch):
+def make_packages(python, arch, all_pythons):
     """Make setup and wheel packages."""
     print("[build_distrib.py] Make setup package for {arch}..."
           .format(arch=arch))
@@ -547,6 +569,7 @@ def make_packages(python, arch):
     setup_basename = get_setup_installer_basename(
             VERSION, get_os_postfix2_for_arch(arch))
     setup_dir = os.path.join(BUILD_DIR, setup_basename)
+    check_cpp_extension_dependencies_issue359(setup_dir, all_pythons)
     archive = pack_directory(setup_dir, BUILD_DIR)
     shutil.move(archive, DISTRIB_DIR)
 
@@ -572,6 +595,26 @@ def make_packages(python, arch):
     print("[build_distrib.py] Delete setup directory: {setup_dir}/"
           .format(setup_dir=os.path.basename(setup_dir)))
     shutil.rmtree(setup_dir)
+
+
+def check_cpp_extension_dependencies_issue359(setup_dir, all_pythons):
+    """Windows only: check if msvcpXX.dll exist for all Python versions.
+    Issue #359."""
+    if not WINDOWS:
+        return
+    checked_any = False
+    for python in all_pythons:
+        if python["version2"] == (3, 4):
+            checked_any = True
+            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
+                                               "msvcp100.dll")):
+                raise Exception("C++ ext dependency missing: msvcp100.dll")
+        elif python["version2"] == (2, 7):
+            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
+                                               "msvcp90.dll")):
+                raise Exception("C++ ext dependency missing: msvcp90.dll")
+            checked_any = True
+    assert checked_any
 
 
 def test_wheel_packages(pythons):

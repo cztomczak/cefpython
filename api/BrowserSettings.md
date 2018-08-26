@@ -27,7 +27,6 @@ Table of contents:
   * [tab_to_links_disabled](#tab_to_links_disabled)
   * [text_area_resize_disabled](#text_area_resize_disabled)
   * [universal_access_from_file_urls_allowed](#universal_access_from_file_urls_allowed)
-  * [user_style_sheet_location](#user_style_sheet_location)
   * [web_security_disabled](#web_security_disabled)
   * [webgl_disabled](#webgl_disabled)
   * [windowless_frame_rate](#windowless_frame_rate)
@@ -166,13 +165,6 @@ switch.
 ### universal_access_from_file_urls_allowed
 
 (bool) Controls whether file URLs will have access to all URLs. Also configurable using the --allow-universal-access-from-files switch. Other similar switches are --allow-file-access and --allow-file-access-from-files.
-
-
-### user_style_sheet_location
-
-(string) Location of the user style sheet that will be used for all pages. This must be a data URL of the form `data:text/css;charset=utf-8;base64,content` where "content" is the base64 encoded contents of the CSS file. Also configurable using the "user-style-sheet-location" command-line switch.
-
-This setting was removed in Chrome 33. Soon it will be removed from cefpython as well.
 
 
 ### web_security_disabled

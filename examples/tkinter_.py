@@ -8,7 +8,7 @@
 # Tested configurations:
 # - Tk 8.5 on Windows/Mac
 # - Tk 8.6 on Linux
-# - CEF Python v55.3+
+# - CEF Python v49.0+
 #
 # Known issue on Linux: When typing url, mouse must be over url
 # entry widget otherwise keyboard focus is lost (Issue #255
@@ -50,7 +50,7 @@ def main():
     logger.info("Python {ver} {arch}".format(
             ver=platform.python_version(), arch=platform.architecture()[0]))
     logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
-    assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
+    assert cef.__version__ >= "49.0", "CEF Python v49.0+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     root = tk.Tk()
     app = MainFrame(root)
@@ -201,7 +201,8 @@ class BrowserFrame(tk.Frame):
     def on_mainframe_configure(self, width, height):
         if self.browser:
             if WINDOWS:
-                WindowUtils.OnSize(self.get_window_handle(), 0, 0, 0)
+                WindowUtils.UpdateBrowserSize(self.get_window_handle(),
+                                              self.browser)
             elif LINUX:
                 self.browser.SetBounds(0, 0, width, height)
             self.browser.NotifyMoveOrResizeStarted()

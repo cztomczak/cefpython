@@ -50,6 +50,7 @@ cdef extern from "Windows.h" nogil:
 
     ctypedef void* HDWP
     cdef int SWP_NOZORDER
+    cdef int SWP_NOREDRAW
     cdef HDWP BeginDeferWindowPos(int nNumWindows)
     cdef HDWP DeferWindowPos(
             HDWP hWinPosInfo, HWND hWnd, HWND hWndInsertAfter,

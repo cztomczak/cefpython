@@ -16,8 +16,6 @@ Table of contents:
   * [command_line_args_disabled](#command_line_args_disabled)
   * [context_menu](#context_menu)
   * [downloads_enabled](#downloads_enabled)
-  * [external_message_pump](#external_message_pump)
-  * [framework_dir_path](#framework_dir_path)
   * [ignore_certificate_errors](#ignore_certificate_errors)
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
@@ -26,7 +24,6 @@ Table of contents:
   * [log_file](#log_file)
   * [log_severity](#log_severity)
   * [multi_threaded_message_loop](#multi_threaded_message_loop)
-  * [net_security_expiration_enabled](#net_security_expiration_enabled)
   * [pack_loading_disabled](#pack_loading_disabled)
   * [persist_session_cookies](#persist_session_cookies)
   * [persist_user_preferences](#persist_user_preferences)
@@ -175,44 +172,6 @@ Default: True
 Downloads are handled automatically. A default `SaveAs` file dialog provided by OS is displayed. See also the [DownloadHandler](DownloadHandler.md) wiki page.
 
 
-### external_message_pump
-
-(bool)
-Default: False
-
-EXPERIMENTAL: So far this was tested only on Linux and actually made app
-              significantly slower. Windows and Mac platforms were not
-              tested yet. Reported issue in upstream, see [Issue #246]
-              (https://github.com/cztomczak/cefpython/issues/246) for details.
-
-It is recommended to use this option as a replacement for calls to
-cefpython.MessageLoopWork(). CEF Python will do these calls automatically
-using CEF's OnScheduleMessagePumpWork. This results in improved performance
-on Windows and Mac and resolves some bugs with missing keyboard events
-on these platforms. See [Issue #246]
-(https://github.com/cztomczak/cefpython/issues/246) for more details.
-
-Description from upstream CEF:
-> Set to true (1) to control browser process main (UI) thread message pump
-> scheduling via the CefBrowserProcessHandler::OnScheduleMessagePumpWork()
-> callback. This option is recommended for use in combination with the
-> CefDoMessageLoopWork() function in cases where the CEF message loop must be
-> integrated into an existing application message loop (see additional
-> comments and warnings on CefDoMessageLoopWork). Enabling this option is not
-> recommended for most users; leave this option disabled and use either the
-> CefRunMessageLoop() function or multi_threaded_message_loop if possible.
-
-
-### framework_dir_path
-
-The path to the CEF framework directory on macOS. If this value is empty
-then the framework must exist at "Contents/Frameworks/Chromium Embedded
-Framework.framework" in the top-level app bundle. Also configurable using
-the "framework-dir-path" command-line switch.
-
-See also [Issue #304](../../../issues/304).
-
-
 ### ignore_certificate_errors
 
 (bool)
@@ -320,19 +279,6 @@ function must be called from your application message loop. This option is
 only supported on Windows.
 
 This option is not and cannot be supported on OS-X for architectural reasons.
-
-
-### net_security_expiration_enabled
-
-(bool)
-Set to true (1) to enable date-based expiration of built in network
-security information (i.e. certificate transparency logs, HSTS preloading
-and pinning information). Enabling this option improves network security
-but may cause HTTPS load failures when using CEF binaries built more than
-10 weeks in the past. See https://www.certificate-transparency.org/ and
-https://www.chromium.org/hsts for details. Can be set globally using the
-CefSettings.enable_net_security_expiration value.
-
 
 
 ### pack_loading_disabled
@@ -447,7 +393,7 @@ set `unique_request_context_per_browser` to True.
 
 In upstream CEF each request context may have separate settings like
 cache_path, persist_session_cookies, persist_user_preferences,
-ignore_certificate_errors, enable_net_security_expiration,
+ignore_certificate_errors,
 accept_language_list. Such functionality wasn't yet exposed in CEF Python.
 
 

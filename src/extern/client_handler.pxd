@@ -7,3 +7,5 @@ cdef extern from "client_handler/client_handler.h":
     cdef cppclass ClientHandler:
         pass
 
+    cdef cppclass DevToolsClientHandler:
+        pass

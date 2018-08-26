@@ -45,12 +45,11 @@ CefRefPtr<CefResourceHandler> RequestHandler::GetResourceHandler(
 void RequestHandler::OnResourceRedirect(CefRefPtr<CefBrowser> browser,
                                         CefRefPtr<CefFrame> frame,
                                         CefRefPtr<CefRequest> request,
-                                        CefRefPtr<CefResponse> response,
                                         CefString& new_url)
 {
     REQUIRE_IO_THREAD();
     RequestHandler_OnResourceRedirect(browser, frame, request->GetURL(),
-                                      new_url, request, response);
+                                      new_url, request);
 }
 
 

@@ -86,20 +86,11 @@ Table of contents:
   * [StopLoad](#stopload)
   * [StopFinding](#stopfinding)
   * [ToggleFullscreen](#togglefullscreen)
-  * [TryCloseBrowser](#tryclosebrowser)
   * [WasResized](#wasresized)
   * [WasHidden](#washidden)
 
 
 ## Notes
-
-Methods available in upstream CEF which were not yet exposed in CEF Python
-(see src/include/cef_browser.h):
-
-* ImeSetComposition
-* ImeCommitText
-* ImeFinishComposingText
-* ImeCancelComposition
 
 There are some edge cases when after the OnBeforeClose event browser objects
 are no more globally referenced thus a new instance is created that
@@ -931,16 +922,6 @@ Cancel all searches that are currently going on.
 Switch between fullscreen mode / windowed mode. To check whether in fullscreen mode call IsFullscreen().
 
 This function is Windows-only.
-
-
-### TryCloseBrowser
-
-Helper for closing a browser. Call this method from the top-level window
-close handler. Internally this calls CloseBrowser(false) if the close has
-not yet been initiated. This method returns false while the close is
-pending and true after the close has completed. See CloseBrowser() and
-CefLifeSpanHandler::DoClose() documentation for additional usage
-information. This method must be called on the browser process UI thread.
 
 
 ### WasResized

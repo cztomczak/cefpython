@@ -37,6 +37,9 @@ cdef extern from "include/internal/cef_types.h":
         int minimum_cross_axis_size;
         int default_flex;
 
+"""
+# CEF Views
+
 cdef extern from "include/views/cef_box_layout.h":
     cdef cppclass CefBoxLayout:
         void SetFlexForView(CefRefPtr[CefWindow] view, int flex)
@@ -82,3 +85,4 @@ cdef extern from "include/views/cef_window.h":
         size_t GetChildViewCount()
         void AddChildView(CefRefPtr[CefPanel] view)
         void ReorderChildView(CefRefPtr[CefPanel] view, int index)
+"""

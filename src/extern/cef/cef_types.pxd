@@ -38,7 +38,6 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t browser_subprocess_path
         int command_line_args_disabled
         cef_string_t cache_path
-        int enable_net_security_expiration
         int persist_session_cookies
         cef_string_t user_agent
         cef_string_t product_version
@@ -59,8 +58,6 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t user_data_path
         int windowless_rendering_enabled
         int no_sandbox
-        int external_message_pump
-        cef_string_t framework_dir_path
 
     ctypedef struct CefBrowserSettings:
         cef_string_t accept_language_list

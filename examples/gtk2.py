@@ -2,7 +2,7 @@
 
 # Tested configurations:
 # - GTK 2.24 on Windows/Linux/Mac
-# - CEF Python v55.3+
+# - CEF Python v49.0+
 
 from cefpython3 import cefpython as cef
 import pygtk
@@ -54,7 +54,7 @@ def check_versions():
             ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[gtk2.py] GTK {ver}".format(ver='.'.join(
                                            map(str, list(gtk.gtk_version)))))
-    assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
+    assert cef.__version__ >= "49.0", "CEF Python v49.0+ required to run this"
     pygtk.require('2.0')
 
 
@@ -161,7 +161,8 @@ class Gtk2Example:
             width = data.width
             height = data.height - self.menubar_height
             if WINDOWS:
-                WindowUtils.OnSize(self.get_window_handle(), 0, 0, 0)
+                WindowUtils.UpdateBrowserSize(self.get_window_handle(),
+                                              self.browser)
             elif LINUX:
                 self.browser.SetBounds(x, y, width, height)
 

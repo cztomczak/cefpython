@@ -1,6 +1,28 @@
+## Note on the `cefpython49-winxp` branch
+
+This branch was not tested for building CEF from sources. Build
+instructions were copied from the `cefpython57` branch. To build
+CEF Python you should use the prebuilt CEF binaries and libraries
+tagged `v49-upstream` on the GitHub Releases page.
+
+To use the `automate.py --prebuilt-cef` tool you need to have
+VS 2015 installed so that cefclient/cefsimple applications can
+be built. If you want to use VS 2013 then edit `automate.py`
+tool and replace "VS2015_VCVARS" with "VS2013_VCVARS" in the
+`prepare_build_command` function.
+
+If you want to try to build CEF from sources then see the "Building
+old unsupported versions of Chromium" section in master branch in
+the Build-instructions.md document. Note that you will also have
+to revert the upstream `automate-git.py` tool that resides in
+cefpython's tools/ directory to an appropriate revision from the
+times when CEF supported branch was 2623.
+
+
 # Build instructions
 
 Table of contents:
+* [Note on the `cefpython49-winxp` branch](#note-on-the-cefpython49-winxp-branch)
 * [Preface](#preface)
 * [Quick build instructions for Windows](#quick-build-instructions-for-windows)
 * [Quick build instructions for Linux](#quick-build-instructions-for-linux)
@@ -21,7 +43,7 @@ Table of contents:
 
 ## Preface
 
-These instructions are for the new releases of CEF Python v50+.
+These instructions are for the new releases of CEF Python v49+.
 For the old v31 release see the build instructions on Wiki pages.
 
 If you would like to quickly build cefpython then see the
@@ -47,7 +69,7 @@ Before you can build CEF Python or CEF you must satisfy
 
 ## Quick build instructions for Windows
 
-Complete steps for building CEF Python v50+ with Python 2.7 using
+Complete steps for building CEF Python v49+ with Python 2.7 using
 prebuilt binaries and libraries from GitHub Releases:
 
 1) Tested and works fine on Windows 7 64-bit

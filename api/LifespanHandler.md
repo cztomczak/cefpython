@@ -14,6 +14,7 @@ Table of contents:
   * [_OnAfterCreated](#_onaftercreated)
   * [DoClose](#doclose)
   * [OnBeforeClose](#onbeforeclose)
+  * [RunModal](#runmodal)
 
 
 ## Callbacks
@@ -117,3 +118,15 @@ browser object and do not attempt to execute any methods on the browser
 object after this callback returns. This callback will be the last
 notification that references |browser|. See DoClose() documentation for
 additional usage information.
+
+
+### RunModal
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| __Return__ | bool |
+
+Called when a modal window is about to display and the modal loop should
+begin running. Return false to use the default modal loop implementation or
+true to use a custom implementation.
