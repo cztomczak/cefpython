@@ -110,8 +110,6 @@ Lampix is the first hardware and software solution that turns any surface
 into a smart, augmented reality or interactive surface. Please visit its
 website here: https://lampix.com/ .
 
-[![lampix360](https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix360.png)](https://lampix.com/)
-
 
 **Thanks to Fivestars for the v49 release (WinXP/Vista)**
 
@@ -119,9 +117,6 @@ Thanks to Fivestars Loyalty, Inc. for sponsoring the
 [v49 release](../../releases/tag/v49.0) for legacy systems such
 as Windows XP and Vista. Please visit its website:
 https://www.fivestars.com/ .
-
-[![fivestars360](https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars360.png)](https://www.fivestars.com/)
-
 
 
 ## Install
