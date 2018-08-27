@@ -20,7 +20,7 @@ Table of contents:
 
 ## Introduction
 
-CEF Python is a BSD-licensed open source project founded by Czarek Tomczak (hire me! download my [resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)) in 2012 and is based on Google Chromium and the
+CEF Python is a BSD-licensed open source project founded by Czarek Tomczak (hire me! see my [resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)) in 2012 and is based on Google Chromium and the
 [CEF Framework](https://bitbucket.org/chromiumembedded/cef)
 projects. The Chromium project focuses mainly on Google Chrome application
 development, while CEF focuses on facilitating embedded browser use cases
