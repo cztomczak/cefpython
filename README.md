@@ -3,8 +3,6 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Sponsors](#sponsors)
-  * [Thanks to Lampix for the v66 release](#thanks-to-lampix-for-the-v66-release)
-  * [Thanks to Fivestars for the v49 release (WinXP/Vista)](#thanks-to-fivestars-for-the-v49-release-winxpvista)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
@@ -105,7 +103,7 @@ See the [Support development](#support-development) section for a list of
 all the individuals and companies supporting CEF Python.
 
 
-### Thanks to Lampix for the v66 release
+**Thanks to Lampix for the v66 release**
 
 Many Thanks to Lampix for sponsoring the [v66 release](../../releases/tag/v66.0) of CEF Python.
 Lampix is the first hardware and software solution that turns any surface
@@ -115,7 +113,7 @@ website here: https://lampix.com/ .
 [![lampix360](https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix360.png)](https://lampix.com/)
 
 
-### Thanks to Fivestars for the v49 release (WinXP/Vista)
+**Thanks to Fivestars for the v49 release (WinXP/Vista)**
 
 Thanks to Fivestars Loyalty, Inc. for sponsoring the
 [v49 release](../../releases/tag/v49.0) for legacy systems such
