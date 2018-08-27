@@ -63,8 +63,14 @@ also download packages for offline installation available on the
 [GitHub Releases](../../releases) pages. Command to install with pip:
 
 ```
-pip install cefpython3==49.0
+pip --no-cache-dir install cefpython3==49.0
 ```
+
+Please note that if you were previously installing cefpython3 package it
+is required to use the `--no-cache-dir` flag, otherwise pip will end up
+with error message `No matching distribution found for cefpython3==49.0`.
+This happens because 49.0 release occured after 57.0 and 66.0 releases.
+
 
 ## Tutorial
 
@@ -108,7 +114,13 @@ OS | Py2 | Py3 | 32bit | 64bit | Requirements
 --- | --- | --- | --- | --- | ---
 Windows | 2.7 | 3.4 | Yes | Yes | Windows XP+
 
-- Install with command: `pip install cefpython3==49.0`
+- Install with command: `pip --no-cache-dir install cefpython3==49.0`.
+    - Please note that if you were previously installing cefpython3
+      package it is required to use the `--no-cache-dir` flag,
+      otherwise pip will end up with error message
+      `No matching distribution found for cefpython3==49.0`.
+      This happens because 49.0 release occured after 57.0 and 66.0
+      releases.
 - Downloads are available on GitHub Releases tagged
     [v49.0](../../releases/tag/v49.0).
 - See [Migration guide](docs/Migration-guide.md) document for changes

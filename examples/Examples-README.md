@@ -15,11 +15,16 @@ Instructions to install the cefpython3 package, clone the repository
 and run the hello_world.py example:
 
 ```
-pip install cefpython3==49.0
+pip --no-cache-dir install cefpython3==49.0
 git clone https://github.com/cztomczak/cefpython.git
 cd cefpython/examples/
 python hello_world.py
 ```
+
+Please note that if you were previously installing cefpython3 package it
+is required to use the `--no-cache-dir` flag, otherwise pip will end up
+with error message `No matching distribution found for cefpython3==49.0`.
+This happens because 49.0 release occured after 57.0 and 66.0 releases.
 
 
 ## Supported examples
