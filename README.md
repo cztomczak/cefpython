@@ -191,6 +191,8 @@ on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpyt
 
 ### Thanks
 
+* [2018] Thanks to [Fivestars](https://www.fivestars.com/) for sponsoring
+  the v49 release for legacy systems (WinXP/Vista)
 * [2018] Many thanks to [Lampix](https://lampix.com/) for sponsoring the v66
   release for all platforms
 * [2017] Many thanks to [ClearChat Inc.](https://clearchat.com/) for sponsoring
