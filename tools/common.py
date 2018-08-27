@@ -289,6 +289,7 @@ def get_python_include_path():
                 return results[0]
     return ".\\" if WINDOWS else "./"
 
+
 g_deleted_sample_apps = []
 
 

@@ -1,7 +1,7 @@
 """
 Installs Python dependencies using the pip tool.
 See the requirements.txt file.
-pip install --upgrade -r ../tools/requirements.txt
+python -m pip install --upgrade -r ../tools/requirements.txt
 """
 
 from common import *
@@ -13,7 +13,8 @@ def main():
     if sys.executable.startswith("/usr/"):
         args.append("sudo")
     requirements = os.path.join(TOOLS_DIR, "requirements.txt")
-    args.extend(["pip", "install", "--upgrade", "-r", requirements])
+    args.extend([sys.executable, "-m", "pip", "install", "--upgrade",
+                 "-r", requirements])
     retcode = subprocess.call(args)
     sys.exit(retcode)
 
