@@ -15,25 +15,29 @@ in your application.
 
 
 Table of contents:
-* [v50+ Distribution packages](#v50-distribution-packages)
+* [v49+ Distribution packages](#v49-distribution-packages)
+* [v49+ cefbuilds.com is deprected, use Spotify Automated CEF Builds](#v49-cefbuildscom-is-deprected-use-spotify-automated-cef-builds)
+* [v49+ Build instructions and build tools](#v49-build-instructions-and-build-tools)
+* [v49: GPU acceleration should be disabled on Windows XP](#v49-gpu-acceleration-should-be-disabled-on-windows-xp)
+* [v49 (Win) Handlers' callbacks and other interfaces](#v49-win-handlers-callbacks-and-other-interfaces)
+* [v49+ High DPI support on Windows](#v49-high-dpi-support-on-windows)
+* [v49 (Win) Do not call the 'WindowUtils.OnSize' function](#v49-win-do-not-call-the-windowutilsonsize-function)
+* [v49+ Notify CEF on move or resize events](#v49-notify-cef-on-move-or-resize-events)
+* [v49+ Flash support](#v49-flash-support)
+* [v49+ Off-screen-rendering: new option "windowless_rendering_enabled"](#v49-off-screen-rendering-new-option-windowless_rendering_enabled)
+* [v49+ BrowserSettings options removed](#v49-browsersettings-options-removed)
+* [v49+ cef.Request.Flags changed](#v49-cefrequestflags-changed)
+* [v49+ Request.GetHeaderMap and SetHeaderMap change](#v49-requestgetheadermap-and-setheadermap-change)
+* [v49+ (Win) HTTPS cache problems on pages with certificate errors](#v49-win-https-cache-problems-on-pages-with-certificate-errors)
 * [v50+ Importing the cefpython3 package on Linux](#v50-importing-the-cefpython3-package-on-linux)
 * [v50+ Install X11 error handlers on Linux](#v50-install-x11-error-handlers-on-linux)
 * [v50+ Set window bounds on Linux](#v50-set-window-bounds-on-linux)
-* [v50+ Notify CEF on move or resize events](#v50-notify-cef-on-move-or-resize-events)
 * [v50+ Keyboard focus issues on Linux](#v50-keyboard-focus-issues-on-linux)
 * [v50+ Windows XP and Vista are no more supported](#v50-windows-xp-and-vista-are-no-more-supported)
 * [v50+ Mac 32-bit is no more supported](#v50-mac-32-bit-is-no-more-supported)
-* [v50+ cefbuilds.com is deprected, use Spotify Automated CEF Builds](#v50-cefbuildscom-is-deprected-use-spotify-automated-cef-builds)
-* [v50+ Build instructions and build tools](#v50-build-instructions-and-build-tools)
-* [v51+ Off-screen-rendering: new option "windowless_rendering_enabled"](#v51-off-screen-rendering-new-option-windowless_rendering_enabled)
 * [v51+ Remove LifespanHandler.RunModal](#v51-remove-lifespanhandlerrunmodal)
-* [v51+ BrowserSettings options removed](#v51-browsersettings-options-removed)
-* [v51+ cef.Request.Flags changed](#v51-cefrequestflags-changed)
-* [v51+ Request.GetHeaderMap and SetHeaderMap change](#v51-requestgetheadermap-and-setheadermap-change)
-* [v54+ GTK 3 example doesn't work anymore on Linux](#v54-gtk-3-example-doesnt-work-anymore-on-linux)
 * [v54+ libcef.so library is stripped from symbols on Linux](#v54-libcefso-library-is-stripped-from-symbols-on-linux)
-* [v55+ HTTPS cache problems on pages with certificate errors](#v55-https-cache-problems-on-pages-with-certificate-errors)
-* [v55.3+ Handlers' callbacks and other interfaces are now called using keyword args](#v553-handlers-callbacks-and-other-interfaces-are-now-called-using-keyword-args)
+* [v55.3+ Handlers' callbacks and other interfaces](#v553-handlers-callbacks-and-other-interfaces)
 * [v56+ MacOS 10.9+ required to run](#v56-macos-109-required-to-run)
 * [v57.1+ High DPI support on Windows](#v571-high-dpi-support-on-windows)
 * [v66+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled](#v66-linux-patch-that-fixed-https-cache-problems-on-pages-with-certificate-errors-was-disabled)
@@ -46,10 +50,10 @@ Table of contents:
 * [v66+ cef.Request.Flags changed](#v66-cefrequestflags-changed)
 * [v66+ RequestHandler.GetCookieManager not getting called in some cases](#v66-requesthandlergetcookiemanager-not-getting-called-in-some-cases)
 * [v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loop-qt-wxpython)
+* [v67+ Do not call the 'WindowUtils.OnSize' function](#v67-do-not-call-the-windowutilsonsize-function)
 
 
-
-## v50+ Distribution packages
+## v49+ Distribution packages
 
 In latest CEF Python there is only one distribution package
 available: a wheel package. Wheel packages are distributed on
@@ -75,6 +79,168 @@ that might not be installed by default on other OSes like e.g.
 Fedora, and since debian packages allow to list these and install
 in an automated manner, it might be reconsidered in the future
 to provide debian packages again.
+
+
+## v49+ cefbuilds.com is deprected, use Spotify Automated CEF Builds
+
+The cefbuilds.com site with CEF prebuilt binaries is now deprecated.
+From now on download prebuilt CEF binaries from the Spotify Automated
+CEF Builds:
+
+http://opensource.spotify.com/cefbuilds/index.html
+
+
+## v49+ Build instructions and build tools
+
+There were many changes in regards to building CEF and CEF Python.
+There are now new tools in the tools/ root directory that fully
+automate building CEF and CEF Python. CEF Python now provides
+upstream CEF prebuilt binaries and libraries on GitHub Releases
+tagged eg. "v49-upstream". With these binaries you can build
+CEF Python from sources in less than 10 minutes. See the new
+[Build instructions](Build-instructions.md) document.
+
+
+## v49: GPU acceleration should be disabled on Windows XP
+
+On XP you should disable GPU acceleration by setting the `--disable-gpu`
+and `--disable-gpu-compositing` switches. These switches can
+be passed programmatically to `cef.Initialize`, see
+[api/Command Line Switches](../api/CommandLineSwitches.md).
+
+
+## v49 (Win) Handlers' callbacks and other interfaces
+
+In v49.0 release for Windows all handlers'
+callbacks and other interfaces such as
+CookieVisitor, StringVisitor and WebRequestClient, are now called
+using keyword arguments (Issue [#291](../../../issues/291)).
+This will cause many of existing code to break. This is how you
+should declare callbacks using the new style:
+
+```
+def OnLoadStart(self, browser, **_):
+	pass
+
+def OnLoadStart(self, **kwargs):
+	browser = kwargs["browser"]
+```
+
+In the first declaration you see that only one argument is
+declared, the browser, the others unused will be in the "_"
+variable (the name of the variable is so that PyCharm doesn't
+warn about unused variable).
+
+Even if you specify and use all arguments, always add the
+unused kwargs (`**_`) at the end:
+
+```
+def OnLoadStart(self, browser, frame, **_):
+	pass
+```
+
+This will be handy in the future, in a case when upstream CEF
+adds a new argument to the API, your code won't break. When
+an argument is removed in upstream CEF API, if it's possible
+CEF Python will try to keep backward compatibility by
+emulating behavior of the old argument.
+
+In case of OnLoadStart, when you've used "browser" and "frame"
+names for the arguments, your code won't break. However in
+many other callbacks, where you've used argument names that
+differed from how they were named in API docs, your code will
+break. Also argument names were changed from camelCase
+to underscores. For example the OnLoadEnd callback has renamed
+the `httpStatusCode` argument to `http_code`. So in this case
+your code will definitely break, unless you've also used
+"http_code" for argument name.
+
+
+## v49+ High DPI support on Windows
+
+It is recommended to embed a DPI awareness manifest in both the main
+process and the subprocesses (the subprocess.exe executable) instead
+of calling `DpiAware`.[SetProcessDpiAware](../api/DpiAware.md#setprocessdpiaware)
+which sets DPI awareness only for the main process.
+
+The `ApplicationSettings`.[auto_zooming](../api/ApplicationSettings.md#auto_zooming)
+option has a default value of an empty string now. Previously the
+default was "system_dpi". When enabling High DPI support you should
+set it to "system_dpi" explicitilly.
+
+Note that `DpiAware`.[CalculateWindowSize](../api/DpiAware.md#calculatewindowsize)
+does not handle all DPI settings (e.g. 132% on Windows 10).
+In newer CEF Python there is available `DpiAware`[Scale](../api/DpiAware.md#scale)
+which is more reliable and can handle all DPI resolutions. You can copy see
+its implementation in `src/dpi_aware_win.pyx`.
+
+
+## v49 (Win) Do not call the 'WindowUtils.OnSize' function
+
+This function can sometimes cause app hanging during window resize.
+Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#updatebrowsersize)
+function. See [Issue #464](../../../issues/464) for more details.
+
+
+## v49+ Notify CEF on move or resize events
+
+It is required to notify the browser on move or resize events
+so that popup widgets (e.g. \<select\>) are displayed in the correct
+location and dismissed when the window moves. Also so that
+drag & drop areas are updated accordingly. Call
+Browser.[NotifyMoveOrResizeStarted()](../api/Browser.md#notifymoveorresizestarted)
+during a move or resize event in your app window.
+
+
+## v49+ Flash support
+
+See [Issue #235](../../../issues/235) ("Flash support in CEF v49+")
+for instructions on how to enable Flash.
+
+
+## v49+ Off-screen-rendering: new option "windowless_rendering_enabled"
+
+When using off-screen-rendering you must set the ApplicationSettings
+"windowless_rendering_enabled" option to True. This applies to
+examples such as: Kivy, Panda3D, PySDL2 and screenshot example.
+
+API ref: ApplicationSettings.[windowless_rendering_enabled](../api/ApplicationSettings.md#windowless_rendering_enabled)
+
+
+## v49+ BrowserSettings options removed
+
+The following options were removed from BrowserSettings:
+- user_style_sheet_location
+- java_disabled
+- accelerated_compositing
+- author_and_user_styles_disabled
+
+
+## v49+ cef.Request.Flags changed
+
+The following flags were removed from cef.Request.Flags:
+- AllowCookies
+- ReportLoadTiming
+- ReportRawHeaders
+
+API ref: Request.[GetFlags](../api/Request.md#getflags)
+
+
+## v49+ Request.GetHeaderMap and SetHeaderMap change
+
+GetHeaderMap() will not include the Referer value if any
+and SetHeaderMap() will ignore the Referer value.
+
+API ref: Request.[GetHeaderMap](../api/Request.md#getheadermap)
+
+
+## v49+ (Win) HTTPS cache problems on pages with certificate errors
+
+The fix for HTTPS cache problems on pages with certificate errors
+(and that includes self-signed certificates) is no more applied
+on Windows.
+
+See Issue [#125](../../../issues/125) for more details.
 
 
 ## v50+ Importing the cefpython3 package on Linux
@@ -118,20 +284,6 @@ browser.SetBounds(x, y, width, height)
 API ref: Browser.[SetBounds()](../api/Browser.md#setbounds)
 
 
-## v50+ Notify CEF on move or resize events
-
-It is required to notify the browser on move or resize events
-so that popup widgets (e.g. \<select\>) are displayed in the correct
-location and dismissed when the window moves. Also so that
-drag & drop areas are updated accordingly.
-
-```
-browser.NotifyMoveOrResizeStarted()
-```
-
-API ref: Browser.[NotifyMoveOrResizeStarted()](../api/Browser.md#notifymoveorresizestarted)
-
-
 ## v50+ Keyboard focus issues on Linux
 
 There several keyboard focus issues on Linux since CEF library
@@ -144,7 +296,7 @@ fixed in usptream CEF. For more details see Issue [#284](../../../issues/284).
 
 ## v50+ Windows XP and Vista are no more supported
 
-CEF Python v31.2 was the last version to support Windows XP.
+CEF Python v49.0 was the last version to support Windows XP.
 This is due to Chromium/CEF dropping XP support, last version
 that supported XP was CEF v49.
 
@@ -156,75 +308,9 @@ This is due to CEF/Chromium dropping 32-bit support, last version
 that supported 32-bit was CEF v38.
 
 
-## v50+ cefbuilds.com is deprected, use Spotify Automated CEF Builds
-
-The cefbuilds.com site with CEF prebuilt binaries is now deprecated.
-From now on download prebuilt CEF binaries from the Spotify Automated
-CEF Builds:
-
-http://opensource.spotify.com/cefbuilds/index.html
-
-
-## v50+ Build instructions and build tools
-
-There were many changes in regards to building CEF and CEF Python.
-There are now new tools in the tools/ root directory that fully
-automate building CEF and CEF Python. CEF Python now provides
-upstream CEF prebuilt binaries and libraries on GitHub Releases
-tagged eg. "v56-upstream". With these binaries you can build
-CEF Python from sources in less than 10 minutes. See the new
-[Build instructions](Build-instructions.md) document.
-
-
-## v51+ Off-screen-rendering: new option "windowless_rendering_enabled"
-
-When using off-screen-rendering you must set the ApplicationSettings
-"windowless_rendering_enabled" option to True. This applies to
-examples such as: Kivy, Panda3D and screenshot example.
-
-API ref: ApplicationSettings.[windowless_rendering_enabled](../api/ApplicationSettings.md#windowless_rendering_enabled)
-
-
 ## v51+ Remove LifespanHandler.RunModal
 
 LifespanHandler.RunModal callback is no more available.
-
-
-## v51+ BrowserSettings options removed
-
-The following options were removed from BrowserSettings:
-- user_style_sheet_location
-- java_disabled
-- accelerated_compositing
-- author_and_user_styles_disabled
-
-
-## v51+ cef.Request.Flags changed
-
-The following flags were removed from cef.Request.Flags:
-- AllowCookies
-- ReportLoadTiming
-- ReportRawHeaders
-
-API ref: Request.[GetFlags](../api/Request.md#getflags)
-
-
-## v51+ Request.GetHeaderMap and SetHeaderMap change
-
-GetHeaderMap() will not include the Referer value if any
-and SetHeaderMap() will ignore the Referer value.
-
-API ref: Request.[GetHeaderMap](../api/Request.md#getheadermap)
-
-
-## v54+ GTK 3 example doesn't work anymore on Linux
-
-Update: GTK 3 example is back working in v57+.
-
-Currently GTK 3 example is broken on Linux. You can either
-downgrade to an old cefpython v53 (available on GitHub release
-page) or use GTK 2 example. For more details on the problem see
-Issue [#261](../../../issues/261).
 
 
 ## v54+ libcef.so library is stripped from symbols on Linux
@@ -234,18 +320,7 @@ shipped with distribution packages on Linux. This is explained
 in details in Issue [#262](../../../issues/262).
 
 
-## v55+ HTTPS cache problems on pages with certificate errors
-
-The fix for HTTPS cache problems on pages with certificate errors
-is no more applied on Windows.
-
-Soon this will fix also won't be applied on Linux anymore when
-cefpython starts using CEF prebuilt binaries from Spotify.
-
-See Issue [#125](../../../issues/125) for more details.
-
-
-## v55.3+ Handlers' callbacks and other interfaces are now called using keyword args
+## v55.3+ Handlers' callbacks and other interfaces
 
 Since v55.3 all handlers' callbacks and other interfaces such as
 CookieVisitor, StringVisitor and WebRequestClient, are now called
@@ -407,3 +482,11 @@ with message loop freezing. Only basic testing was performed. It was not
 tested of how this change affects performance.
 
 See Issue [#442](../../../issues/442) for more details on the issues.
+
+
+## v67+ Do not call the 'WindowUtils.OnSize' function
+
+This function can sometimes cause app hanging during window resize.
+Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#updatebrowsersize)
+function. See [Issue #464](../../../issues/464) for more details.
+
