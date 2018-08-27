@@ -34,15 +34,14 @@ To be notified on new commits subscribe to this [RSS/Atom feed](../../../commits
 
 CEF Python depends on CEF and API breaks are inevitable when updating
 to latest CEF. The [Migration Guide](Migration-guide.md) document
-lists most notable breaking changes for each release. Other changes
-that do not backwards compatibility can be seen on [GitHub Releases](../../../releases)
-pages.
+lists most notable breaking changes for each release. Full chanelogs
+can be found on [GitHub Releases](../../../releases) pages.
 
-Due to unavoidable changes in API it is recommended for your setup
-scripts that use for example PIP to install the cefpython3 package,
+Due to unavoidable changes in upstream API it is recommended for your setup
+scripts, that for example use PIP to install the cefpython3 package,
 to hardcode the cefpython version string. If for example using PIP's
-requirements.txt file then list the cefpython3 package in the
-following format if using cefpython v57.0: `cefpython3 == 57.0`.
+`requirements.txt` file then include the cefpython3 package in the
+following format if using e.g. cefpython v57.0: `cefpython3 == 57.0`.
 
 
 ## Differences between Python 2 and Python 3
