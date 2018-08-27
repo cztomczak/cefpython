@@ -23,7 +23,7 @@ g_datauri_data = """
         font-size: 11pt;
     }
     </style>
-    
+
     <script>
     function print(msg) {
         console.log(msg+" [JS]");
@@ -92,8 +92,23 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             settings["debug"] = True
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
 
+        switches = {
+            # GPU acceleration is not supported in OSR mode, so must disable
+            # it using these Chromium switches (Issue #240 and #463)
+            "disable-gpu": "",
+            "disable-gpu-compositing": "",
+            # Tweaking OSR performance by setting the same Chromium flags
+            # as in upstream cefclient (Issue #240).
+            "enable-begin-frame-scheduling": "",
+            "disable-surfaces": "",  # This is required for PDF ext to work
+        }
+        browser_settings = {
+            # Tweaking OSR performance (Issue #240)
+            "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
+        }
+
         # Initialize
-        cef.Initialize(settings)
+        cef.Initialize(settings=settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 
         # Accessibility handler
@@ -111,6 +126,7 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         window_info = cef.WindowInfo()
         window_info.SetAsOffscreen(0)
         browser = cef.CreateBrowserSync(window_info=window_info,
+                                        settings=browser_settings,
                                         url=g_datauri)
 
         # Javascript bindings
@@ -231,7 +247,7 @@ class RenderHandler(object):
         rect_out.extend([0, 0, 800, 600])
         return True
 
-    def OnPaint(self, browser, element_type, paint_buffer, **_):
+    def OnPaint(self, element_type, paint_buffer, **_):
         """Called when an element should be painted."""
         if element_type == cef.PET_VIEW:
             self.test_case.assertEqual(paint_buffer.width, 800)
