@@ -490,7 +490,7 @@ See Issue [#442](../../../issues/442) for more details on the issues.
 
 This function can sometimes cause app hanging during window resize.
 Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#updatebrowsersize)
-function. Unless you use the `pywin32.py` example, in such case
+function. Except when you use the `pywin32.py` example, in such case
 `WindowUtils.OnSize` must be called.
 See [Issue #464](../../../issues/464) for more details.
 
