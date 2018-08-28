@@ -41,7 +41,7 @@ def main():
     cef.Initialize()
     browser = cef.CreateBrowserSync(url=cef.GetDataUrl(g_htmlcode),
                                     window_title="Javascript Bindings")
-    browser.SetClientHandler(LifespanHandler())
+    browser.SetClientHandler(LoadHandler())
     bindings = cef.JavascriptBindings()
     bindings.SetFunction("py_function", py_function)
     bindings.SetFunction("py_callback", py_callback)
@@ -60,7 +60,7 @@ def py_callback(value):
     print("Value sent from Javascript: "+value)
 
 
-class LifespanHandler(object):
+class LoadHandler(object):
     def OnLoadEnd(self, browser, **_):
         browser.ExecuteFunction("js_function", "I am a Python string #1")
 
