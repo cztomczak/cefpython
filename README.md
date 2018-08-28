@@ -133,12 +133,16 @@ pip install cefpython3==66.0
 
 ## Tutorial
 
-See the [Tutorial.md](docs/Tutorial.md) file.
+See the [Tutorial.md](docs/Tutorial.md) document.
 
 
 ## Examples
 
-See the [README-examples.md](examples/README-examples.md) file.
+See the [README-examples.md](examples/README-examples.md) document.
+
+For small and easy to understand code snippets that show various CEF
+features see the [README-snippets.md](examples/snippets/README-snippets.md)
+document.
 
 
 ## Support

@@ -22,18 +22,15 @@ import subprocess
 
 def main():
     """Main entry point."""
-    # Call toc.py for docs/ and api/ directories
-    print("Running toc.py in {}/ dir".format(os.path.basename(API_DIR)))
-    retcode = subprocess.call([sys.executable,
-                               os.path.join(TOOLS_DIR, "toc.py"),
-                               API_DIR])
-    assert retcode == 0, "Executing toc.py for API_DIR failed"
-
-    print("Running toc.py in {}/ dir".format(os.path.basename(DOCS_DIR)))
-    retcode = subprocess.call([sys.executable,
-                               os.path.join(TOOLS_DIR, "toc.py"),
-                               DOCS_DIR])
-    assert retcode == 0, "Executing toc.py for DOCS_DIR failed"
+    # Call toc.py for docs/, api/, examples/ and examples/snippets/
+    # directories.
+    toc_dirs = [API_DIR, DOCS_DIR, EXAMPLES_DIR, SNIPPETS_DIR]
+    for toc_dir in toc_dirs:
+        print("Running toc.py in {}/ dir".format(os.path.basename(toc_dir)))
+        retcode = subprocess.call([sys.executable,
+                                   os.path.join(TOOLS_DIR, "toc.py"),
+                                   toc_dir])
+        assert retcode == 0, "Executing toc.py failed"
 
     # Generate API reference in api/ dir and in root/README.md
     api_links = generate_api_links()

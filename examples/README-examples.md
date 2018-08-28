@@ -45,27 +45,9 @@ workarounds.
 
 ### Snippets
 
-See small code snippets that show various CEF features in the
-[examples/snippets/](snippets/) directory:
-
-- [javascript_bindings.py](snippets/javascript_bindings.py) - Communicate
-    between Python and Javascript asynchronously using
-    inter-process messaging with the use of Javascript Bindings.
-- [javascript_errors.py](snippets/javascript_errors.py) - Two ways for
-    intercepting Javascript errors.
-- [mouse_clicks.py](snippets/mouse_clicks.py) - Perform mouse clicks
-    and mouse movements programmatically.
-- [network_cookies.py](snippets/network_cookies.py) - Implement
-    interfaces to block or allow cookies over network requests.
-- [onbeforeclose.py](snippets/onbeforeclose.py) - Implement interface
-    to execute custom code before browser window closes.
-- [ondomready.py](snippets/ondomready.py) - Execute custom Python code
-    on a web page as soon as DOM is ready.
-- [onpagecomplete.py](snippets/onpagecomplete.py) - Execute custom
-    Python code on a web page when page loading is complete.
-- [setcookie.py](snippets/setcookie.py) - Shows how to set a cookie
-- [window_size.py](snippets/window_size.py) - Set initial window size
-    without use of any third party GUI framework.
+For small code snippets that show various CEF features and are easy to
+understand see the [README-snippets.md](snippets/README-snippets.md)
+document.
 
 
 ### GUI frameworks
