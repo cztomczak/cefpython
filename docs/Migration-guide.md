@@ -179,7 +179,9 @@ its implementation in `src/dpi_aware_win.pyx`.
 
 This function can sometimes cause app hanging during window resize.
 Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#updatebrowsersize)
-function. See [Issue #464](../../../issues/464) for more details.
+function. Unless you use the `pywin32.py` example, in such case
+`WindowUtils.OnSize` must be called.
+See [Issue #464](../../../issues/464) for more details.
 
 
 ## v49+ Notify CEF on move or resize events
@@ -488,5 +490,7 @@ See Issue [#442](../../../issues/442) for more details on the issues.
 
 This function can sometimes cause app hanging during window resize.
 Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#updatebrowsersize)
-function. See [Issue #464](../../../issues/464) for more details.
+function. Unless you use the `pywin32.py` example, in such case
+`WindowUtils.OnSize` must be called.
+See [Issue #464](../../../issues/464) for more details.
 
