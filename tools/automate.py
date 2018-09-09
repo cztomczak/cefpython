@@ -59,9 +59,11 @@ Options:
     --build-dir=<dir1>       Build directory.
     --cef-build-dir=<dir2>   CEF build directory. By default same
                              as --build-dir.
-    --ninja-jobs=<jobs>      How many CEF jobs to run in parallel. To speed up
-                             building set it to number of cores in your CPU.
-                             By default set to cpu_count / 2.
+    --ninja-jobs=<jobs>      How many CEF jobs to run in parallel. By default
+                             sets to CPU threads * 2. If you need to perform
+                             other tasks on computer and it is slowed down
+                             by the build then decrease the number of ninja
+                             jobs.
     --gyp-generators=<gen>   Set GYP_GENERATORS [default: ninja].
     --gyp-msvs-version=<v>   Set GYP_MSVS_VERSION.
     --use-system-freetype    Use system Freetype library on Linux (Issue #402)
@@ -213,12 +215,11 @@ def setup_options(docopt_args):
 
     # ninja_jobs
     # cpu_count() returns number of CPU threads, not CPU cores.
-    # On i5 with 2 cores and 4 cpu threads the default of 4 ninja
-    # jobs slows down computer significantly.
+    # On i5 with 2 cores there are 4 cpu threads and will enable
+    # 8 ninja jobs by default.
     if not Options.ninja_jobs:
-        Options.ninja_jobs = int(multiprocessing.cpu_count() / 2)
-        if Options.ninja_jobs < 1:
-            Options.ninja_jobs = 1
+        Options.ninja_jobs = int(multiprocessing.cpu_count() * 2)
+        assert Options.ninja_jobs > 0
     Options.ninja_jobs = str(Options.ninja_jobs)
 
 
