@@ -577,15 +577,15 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
     # This replacements must be unique for the undo operation
     # to be reliable.
 
-    mt_find = r'CEF_RUNTIME_LIBRARY_FLAG "/MT"'
-    mt_replace = r'CEF_RUNTIME_LIBRARY_FLAG "/MD"'
+    mt_find = u'CEF_RUNTIME_LIBRARY_FLAG "/MT"'
+    mt_replace = u'CEF_RUNTIME_LIBRARY_FLAG "/MD"'
 
-    wd4275_find = ('/wd4244       '
-                   '# Ignore "conversion possible loss of data" warning')
-    wd4275_replace = ('/wd4244       '
-                      '# Ignore "conversion possible loss of data" warning'
-                      '\r\n'
-                      '    /wd4275 # Ignore "non dll-interface class"')
+    wd4275_find = (u'/wd4244       '
+                   u'# Ignore "conversion possible loss of data" warning')
+    wd4275_replace = (u'/wd4244       '
+                      u'# Ignore "conversion possible loss of data" warning'
+                      u'\r\n'
+                      u'    /wd4275 # Ignore "non dll-interface class"')
 
     cmake_variables = os.path.join(Options.cef_binary, "cmake",
                                    "cef_variables.cmake")
@@ -996,13 +996,10 @@ def run_automate_git():
         # later in cef_binary/ with cmake/ninja do works fine.
         args.append("--build-target=cefsimple")
 
-    # On Windows automate-git.py must be run using Python 2.7
-    # from depot_tools. depot_tools should already be added to PATH.
-    python = "python"  # *do not* replace with sys.executable!
     args = " ".join(args)
     command = script + " " + args
     working_dir = Options.cef_build_dir
-    return run_command("%s %s" % (python, command), working_dir)
+    return run_command("%s %s" % (sys.executable, command), working_dir)
 
 
 def run_make_distrib():
