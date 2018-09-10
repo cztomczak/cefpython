@@ -193,7 +193,8 @@ requirements common for all platforms.
 
 * Install packages: `sudo apt-get install cmake g++ libgtk2.0-dev libgtkglext1-dev`
 * If building CEF from sources:
-    * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4)
+    * Official binaries are built on Ubuntu 14.04 (cmake 2.8.12, g++ 4.8.4) and these instructions apply to that OS
+    * For Fedora build dependencies see [Issue #466](https://github.com/cztomczak/cefpython/issues/466#issuecomment-419794341)
     * Download [ninja](https://github.com/ninja-build/ninja/releases) 1.7.1 or later
       and copy it to /usr/bin and chmod 755.
     * Install/upgrade required packages using one of the four methods below
