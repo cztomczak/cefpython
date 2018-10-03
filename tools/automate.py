@@ -36,6 +36,7 @@ Usage:
                 [--use-system-freetype USE_SYSTEM_FREETYPE]
                 [--use-gtk3 USE_GTK3]
                 [--use-ccache USE_CCACHE]
+                [--proprietary-codecs PROPRIETARY_CODECS]
                 [--no-depot-tools-update NO_DEPOT_TOOLS_UPDATE]
     automate.py (-h | --help) [type -h to show full description for options]
 
@@ -70,6 +71,8 @@ Options:
     --use-system-freetype    Use system Freetype library on Linux (Issue #402)
     --use-gtk3               Link CEF with GTK 3 libraries (Issue #446)
     --use-ccache             Use ccache for faster (re)builds
+    --proprietary-codecs     Enable proprietary codecs such as H264 and AAC,
+                             licensing restrictions may apply.
     --no-depot-tools-update  Do not update depot_tools/ directory. When
                              building old unsupported versions of Chromium
                              you want to manually checkout an old version
@@ -119,6 +122,7 @@ class Options(object):
     use_system_freetype = False
     use_gtk3 = False
     use_ccache = False
+    proprietary_codecs = False
     no_depot_tools_update = False
 
     # Internal options
@@ -912,6 +916,10 @@ def getenv():
     # Use ccache for faster (re)builds
     if Options.use_ccache:
         env["GN_DEFINES"] += " cc_wrapper=ccache"
+
+    # Enable proprietary codecs
+    if Options.proprietary_codecs:
+        env["GN_DEFINES"] += " proprietary_codecs=true ffmpeg_branding=Chrome"
 
     # To perform an official build set GYP_DEFINES=buildtype=Official.
     # This will disable debugging code and enable additional link-time
