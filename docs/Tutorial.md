@@ -262,7 +262,7 @@ MyProduct/10.00 Safari/537.36
 ```
 
 To change the whole user agent string use the "user_agent"
-option. For example set it to "MyApp/40.00 MyProduct/10.00"
+option. For example set it to "MyAgent/20.00 MyProduct/10.00"
 and both User-Agent HTTP header and js navigator.userAgent will be:
 
 ```text
