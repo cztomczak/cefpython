@@ -29,7 +29,7 @@ Usage:
                 [--fast-build FAST_BUILD]
                 [--force-chromium-update FORCE_CHROMIUM_UPDATE]
                 [--no-cef-update NO_CEF_UPDATE]
-                [--cef-branch BRANCH] [--cef-commit COMMIT]
+                [--cef-git-url URL] [--cef-branch BRANCH] [--cef-commit COMMIT]
                 [--build-dir BUILD_DIR] [--cef-build-dir CEF_BUILD_DIR]
                 [--ninja-jobs JOBS] [--gyp-generators GENERATORS]
                 [--gyp-msvs-version MSVS]
@@ -54,6 +54,7 @@ Options:
     --force-chromium-update  Force Chromium update (gclient sync etc).
     --no-cef-update          Do not update CEF sources (by default both cef/
                              directories are deleted on every run).
+    --cef-git-url=<url>      Git URL to clone CEF from, defaults to upstream
     --cef-branch=<b>         CEF branch. Defaults to CHROME_VERSION_BUILD from
                              "src/version/cef_version_{platform}.h".
     --cef-commit=<c>         CEF revision. Defaults to CEF_COMMIT_HASH from
@@ -95,7 +96,7 @@ from collections import OrderedDict
 from setuptools.msvc import msvc9_query_vcvarsall
 
 # Constants
-CEF_GIT_URL = "https://bitbucket.org/chromiumembedded/cef.git"
+CEF_UPSTREAM_GIT_URL = "https://bitbucket.org/chromiumembedded/cef.git"
 RUNTIME_MT = "MT"
 RUNTIME_MD = "MD"
 
@@ -111,6 +112,7 @@ class Options(object):
     fast_build = False
     force_chromium_update = False
     no_cef_update = False
+    cef_git_url = ""
     cef_branch = ""
     cef_commit = ""
     cef_version = ""
@@ -169,6 +171,9 @@ def setup_options(docopt_args):
 
     Options.tools_dir = os.path.dirname(os.path.realpath(__file__))
     Options.cefpython_dir = os.path.dirname(Options.tools_dir)
+
+    if not Options.cef_git_url:
+        Options.cef_git_url = CEF_UPSTREAM_GIT_URL
 
     # If --cef-branch is specified will use latest CEF commit from that
     # branch. Otherwise get cef branch/commit from src/version/.
@@ -307,7 +312,7 @@ def create_cef_directories():
     # Clone cef repo and checkout branch
     if os.path.exists(cef_dir):
         rmdir(cef_dir)
-    run_git("clone -b %s %s cef" % (Options.cef_branch, CEF_GIT_URL),
+    run_git("clone -b %s %s cef" % (Options.cef_branch, Options.cef_git_url),
             Options.cef_build_dir)
     if Options.cef_commit:
         run_git("checkout %s" % Options.cef_commit, cef_dir)
