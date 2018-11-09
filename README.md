@@ -226,12 +226,11 @@ support old operating systems then choose the v31 release.
 
 ### Next release
 
-- To see planned new features or bugs to be fixed in the
-  next release, see the
+- To see planned new features or bugs to be fixed in the near future in one of
+  next releases, see the
   [next release](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release%22)
   label in the tracker
-- To see planned new features or bugs to be fixed in the
-  in one of next releases, see the
+- To see planned new features or bugs to be fixed in further future, see the
   [next release 2](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release+2%22)
   label in the tracker
 
