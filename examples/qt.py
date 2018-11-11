@@ -22,6 +22,7 @@ import sys
 PYQT4 = False
 PYQT5 = False
 PYSIDE = False
+PYSIDE2 = False
 
 if "pyqt4" in sys.argv:
     PYQT4 = True
@@ -47,11 +48,24 @@ elif "pyside" in sys.argv:
     from PySide.QtGui import *
     # noinspection PyUnresolvedReferences
     from PySide.QtCore import *
+elif "pyside2" in sys.argv:
+    PYSIDE2 = True
+    # noinspection PyUnresolvedReferences
+    import PySide2
+    # noinspection PyUnresolvedReferences
+    from PySide2 import QtCore
+    # noinspection PyUnresolvedReferences
+    from PySide2.QtGui import *
+    # noinspection PyUnresolvedReferences
+    from PySide2.QtCore import *
+    # noinspection PyUnresolvedReferences
+    from PySide2.QtWidgets import *
 else:
     print("USAGE:")
     print("  qt.py pyqt4")
     print("  qt.py pyqt5")
     print("  qt.py pyside")
+    print("  qt.py pyside2")
     sys.exit(1)
 
 # Fix for PyCharm hints warnings when using static methods
@@ -107,6 +121,9 @@ def check_versions():
     elif PYSIDE:
         print("[qt.py] PySide {v1} (qt {v2})".format(
               v1=PySide.__version__, v2=QtCore.__version__))
+    elif PYSIDE2:
+        print("[qt.py] PySide2 {v1} (qt {v2})".format(
+              v1=PySide2.__version__, v2=QtCore.__version__))
     # CEF Python version requirement
     assert cef.__version__ >= "55.4", "CEF Python v55.4+ required to run this"
 
@@ -126,6 +143,8 @@ class MainWindow(QMainWindow):
             self.setWindowTitle("PyQt5 example")
         elif PYSIDE:
             self.setWindowTitle("PySide example")
+        elif PYSIDE2:
+            self.setWindowTitle("PySide2 example")
         self.setFocusPolicy(Qt.StrongFocus)
         self.setupLayout()
 
@@ -147,7 +166,7 @@ class MainWindow(QMainWindow):
         frame.setLayout(layout)
         self.setCentralWidget(frame)
 
-        if PYQT5 and WINDOWS:
+        if (PYSIDE2 or PYQT5) and WINDOWS:
             # On Windows with PyQt5 main window must be shown first
             # before CEF browser is embedded, otherwise window is
             # not resized and application hangs during resize.
@@ -156,7 +175,7 @@ class MainWindow(QMainWindow):
         # Browser can be embedded only after layout was set up
         self.cef_widget.embedBrowser()
 
-        if PYQT5 and LINUX:
+        if (PYSIDE2 or PYQT5) and LINUX:
             # On Linux with PyQt5 the QX11EmbedContainer widget is
             # no more available. An equivalent in Qt5 is to create
             # a hidden window, embed CEF browser in it and then
@@ -204,7 +223,7 @@ class CefWidget(CefWidgetParent):
             self.browser.SetFocus(False)
 
     def embedBrowser(self):
-        if PYQT5 and LINUX:
+        if (PYSIDE2 or PYQT5) and LINUX:
             # noinspection PyUnresolvedReferences
             self.hidden_window = QWindow()
         window_info = cef.WindowInfo()
