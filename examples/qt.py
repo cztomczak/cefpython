@@ -6,6 +6,7 @@
 # - PyQt 5.8.2 (qt 5.8.0) on Windows/Linux/Mac
 # - PyQt 4.10.4 / 4.11.4 (qt 4.8.6 / 4.8.7) on Windows/Linux
 # - PySide 1.2.1 (qt 4.8.6) on Windows/Linux/Mac
+# - PySide2 5.6.0, 5.11.2 (qt 5.6.2, 5.11.2) on Windows/Linux/Mac
 # - CEF Python v55.4+
 #
 # Issues with PySide 1.2:
