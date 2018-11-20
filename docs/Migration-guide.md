@@ -475,7 +475,7 @@ so this should make Qt apps work smoothly.
 
 In wxPython apps you have to implement both approaches for
 integrating with existing message loop at the same time:
-1. Call `cef.DoMessageLoopWork` in a 10ms timer
+1. Call `cef.MessageLoopWork` in a 10ms timer
 2. Set `ApplicationSettings.external_message_pump` to True
 
 This is not a correct approach and is only a temporary fix for wxPython
