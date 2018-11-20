@@ -465,6 +465,8 @@ This bug is to be fixed in Issue [#429](../../../issues/429).
 
 ## v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)
 
+These changes are required only on Mac platform.
+
 In Qt apps calling message loop work in a timer doesn't work anymore.
 You have to enable external message pump by setting
 ApplicationSettings.[external_message_pump](../api/ApplicationSettings.md#external_message_pump)
