@@ -5,6 +5,7 @@ Table of contents:
 * [Changes in API after CEF updates](#changes-in-api-after-cef-updates)
 * [Differences between Python 2 and Python 3](#differences-between-python-2-and-python-3)
 * [How to enable debug information in examples?](#how-to-enable-debug-information-in-examples)
+* [Remote debugging with Google Chrome instance](#remote-debugging-with-google-chrome-instance)
 * [Debugging using various chrome:// protocol uris](#debugging-using-various-chrome-protocol-uris)
 * [A blank window on Mac/Linux](#a-blank-window-on-maclinux)
 * [Location of CEF framework in Mac apps](#location-of-cef-framework-in-mac-apps)
@@ -76,6 +77,46 @@ Now you should see debug information displayed in console like this:
 ```
 
 
+## Remote debugging with Google Chrome instance
+
+Remote debugging is enabled by default and is configurable using
+the ApplicationSettings.[remote_debugging_port](../api/ApplicationSettings.md#remote_debugging_port) option.
+When launching app you can see in console log the random port that
+was generated:
+
+```
+DevTools listening on ws://127.0.0.1:63967/devtools/browser/c52ad9ad-bf40-47d1-b2d1-be392d536a2b
+```
+
+You can debug remotely in two ways:
+
+1. Debug with CEF devtools. Open the `http://127.0.0.1:port` url
+   (replace port with e.g. 63967 in our case) in a Google Chrome
+   browser. You will see a list of CEF browser instances running
+   which you can debug with DevTools.
+   This way of debugging has the same sets of features as opening DevTools
+   popup via `Browser.ShowDevTools` method or using the "Show DevTools"
+   option from mouse context menu in a CEF app. CEF DevTools has some
+   limits, not all features of Google Chrome DevTools do work. There
+   is another way to remotely debug that can workaround these limits,
+   see the point 2 below.
+
+2. If some features don't work when debugging with CEF devtools you can
+   use dedicated DevTools for Node in Google Chrome browser. For example
+   as of CEF v70 the devtools feature "Save as HAR file" doesn't work,
+   however it works with dedicated DevTools for Node. Follow these steps
+   to use dedicated DevTools for Node with CEF:
+
+   1. In Google Chrome browser open `chrome://inspect` url and click
+      "Open dedicated DevTools for Node"
+   2. Add `localhost:1234` connection and close the popup window
+   3. Set `ApplicationSettings.remote_debugging_port` to `1234` and
+      run your app
+   4. Refresh the `chrome://inspect` page in Google Chrome browser
+   5. You should see a new target on the Remote Target list. Click
+      "inspect" link for this target.
+
+
 ## Debugging using various chrome:// protocol uris
 
 The `chrome://` protocol uris give you access to various debugging
@@ -104,7 +145,7 @@ Here is a list of supported `chrome://` protocol uris as of v55.2:
 - chrome://view-http-cache
 - chrome://webrtc-internals
 - chrome://webui-hosts
-
+  
 
 ## A blank window on Mac/Linux
 
