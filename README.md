@@ -44,7 +44,7 @@ or other kind of internet bots.
 
 ## Sponsors
 
-If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear below along the others. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time.
+If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear below along with others. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time.
 
 <table>
  <tr>
