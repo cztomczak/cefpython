@@ -45,7 +45,7 @@ or other kind of internet bots.
 
 ## Sponsors
 
-If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear below along with others. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time. Currently there is no company actively supporting this project. From time to time there appear opportunities with companies sponsoring a specific release with updated Chromium version and that's it. There is a lot more that can be done like the many proposals for new features submitted in the issue tracker, more of CEF API exposed, monthly releases with latest Chromium version and an automated build system.
+If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear below along with others. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time. Currently there is no company actively supporting this project. From time to time there appear opportunities with companies sponsoring a specific release with updated Chromium version. But there is a lot more that can be done like the many proposals for new features submitted in the issue tracker, more of CEF API exposed, monthly releases with latest Chromium version and an automated build system.
 
 <table>
  <tr>
