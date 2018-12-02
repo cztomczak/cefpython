@@ -44,6 +44,8 @@ or other kind of internet bots.
 
 ## Sponsors
 
+If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear below along the others. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time.
+
 <table>
  <tr>
   <td>
@@ -185,11 +187,7 @@ a higher priority.
 If you are interested in sponsorship opportunities please contact Czarek
 directly - contact details are available in his [Resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
 
-If you would like to sponsor CEF Python development efforts and see your company
-logo with a link in README, please contact Czarek.
-This README page alone has 1,070 visitors and 2,402 views every two weeks,
-so your company logo and a website link will be visible to many Python developers.
-The statistics are from Mar 9, 2018. Complete statistics are available in this topic
+If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear below along the others. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time. Github statistics are available in this topic
 on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpython/CjkZF2P4rMk/discussion).
 
 
