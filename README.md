@@ -20,7 +20,8 @@ Table of contents:
 
 ## Introduction
 
-CEF Python is a BSD-licensed open source project founded by Czarek Tomczak (hire me! see my [resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)) in 2012 and is based on Google Chromium and the
+CEF Python is a BSD-licensed open source project founded by [Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
+(hire me!) in 2012 and is based on Google Chromium and the
 [CEF Framework](https://bitbucket.org/chromiumembedded/cef)
 projects. The Chromium project focuses mainly on Google Chrome application
 development while CEF focuses on facilitating embedded browser use cases
@@ -184,10 +185,9 @@ If you would like to see some feature implemented you can make
 a comment about that when making a donation. It will give it
 a higher priority.
 
-If you are interested in sponsorship opportunities please contact Czarek
-directly - contact details are available in his [Resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
+If you are interested in sponsorship opportunities please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
 
-If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear below along the others. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time. Github statistics are available in this topic
+Github statistics are available in this topic
 on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpython/CjkZF2P4rMk/discussion).
 
 
