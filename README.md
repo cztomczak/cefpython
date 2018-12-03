@@ -48,8 +48,8 @@ or other kind of internet bots.
 
 The CEF Python project is seeking for companies to help make the project even greater than it is today. If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear on the project's main page. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time. Currently there is no company actively supporting this project. From time to time there appear opportunities with companies sponsoring a specific release with updated Chromium version. But there is a lot more that can be done for the project like the many proposals for new features submitted in the issue tracker, more examples, more of CEF API exposed, monthly releases with latest Chromium version and an automated build system.
 
-
-**Thanks to Lampix for the v66 release**
+<table border="0"><tr>
+<td width="50%" valign="top">
 
 <p align="center">
  <a href="https://lampix.com/">
@@ -57,13 +57,12 @@ The CEF Python project is seeking for companies to help make the project even gr
  </a>
 </p>
 
-Many Thanks to Lampix for sponsoring the [v66 release](../../releases/tag/v66.0) of CEF Python.
+Many Thanks to Lampix for sponsoring the [v66 release](../../releases/tag/v66.0).
 Lampix is the first hardware and software solution that turns any surface
-into a smart, augmented reality or interactive surface. Please visit its website:
+into a smart, augmented reality or interactive surface. Please visit their website:
 <a href="https://lampix.com/">Lampix.com</a>
 
-
-**Thanks to Fivestars for the v49 release (WinXP/Vista)**
+</td><td width="50%" valign="top">
 
 <p align="center">
  <a href="https://www.fivestars.com/">
@@ -71,10 +70,13 @@ into a smart, augmented reality or interactive surface. Please visit its website
  </a>
 </p>
 
-Many thanks to Fivestars Loyalty, Inc. for sponsoring the
-[v49 release](../../releases/tag/v49.0) for legacy systems such
-as Windows XP and Vista. Please visit its website:
+Many thanks to Fivestars for sponsoring the
+[v49 legacy release](../../releases/tag/v49.0). Fivestars helps local
+communities thrive by empowering small
+businesses with cutting edge marketing technology. Please visit their website:
 <a href="https://www.fivestars.com/">Fivestars.com</a>
+
+</tr></table>
 
 
 ## Install
