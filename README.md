@@ -55,13 +55,12 @@ The CEF Python project is seeking for companies to help make the project even gr
  <a href="https://lampix.com/">
   <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix360.png">
  </a>
- <br>
- <a href="https://lampix.com/">Lampix.com</a>
 </p>
 
 Many Thanks to Lampix for sponsoring the [v66 release](../../releases/tag/v66.0) of CEF Python.
 Lampix is the first hardware and software solution that turns any surface
-into a smart, augmented reality or interactive surface.
+into a smart, augmented reality or interactive surface. Please visit its website:
+<a href="https://lampix.com/">Lampix.com</a>
 
 
 **Thanks to Fivestars for the v49 release (WinXP/Vista)**
@@ -70,13 +69,12 @@ into a smart, augmented reality or interactive surface.
  <a href="https://www.fivestars.com/">
   <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars360.png">
  </a>
- <br>
- <a href="https://www.fivestars.com/">Fivestars.com</a>
 </p>
 
 Many thanks to Fivestars Loyalty, Inc. for sponsoring the
 [v49 release](../../releases/tag/v49.0) for legacy systems such
-as Windows XP and Vista.
+as Windows XP and Vista. Please visit its website:
+<a href="https://www.fivestars.com/">Fivestars.com</a>
 
 
 ## Install
