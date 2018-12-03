@@ -46,8 +46,6 @@ or other kind of internet bots.
 
 ## Sponsors
 
-The CEF Python project is seeking companies to help make the project even greater than it is today. If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear on the project's main page. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time. Currently there is no company actively supporting this project. From time to time there appear opportunities with companies sponsoring a specific release with updated Chromium version. But there is a lot more that can be done for the project like the many proposals for new features submitted in the issue tracker, more examples, more of CEF API exposed, monthly releases with latest Chromium version and an automated build system.
-
 <table border="0"><tr>
 <td width="50%" valign="top">
 
@@ -77,6 +75,8 @@ businesses with cutting edge marketing technology. Please visit their website:
 <a href="https://www.fivestars.com/">Fivestars.com</a>
 
 </tr></table>
+
+The CEF Python project is seeking companies to help make the project even greater than it is today. If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear on the project's main page. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time. Currently there is no company actively supporting this project. From time to time there appear opportunities with companies sponsoring a specific release with updated Chromium version. But there is a lot more that can be done for the project like the many proposals for new features submitted in the issue tracker, more examples, more of CEF API exposed, monthly releases with latest Chromium version and an automated build system.
 
 
 ## Install
