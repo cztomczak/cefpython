@@ -8,7 +8,8 @@ Table of contents:
 * [Examples](#examples)
 * [Support](#support)
 * [Support development](#support-development)
-  * [Thanks](#thanks)
+  * [Thanks to sponsors](#thanks-to-sponsors)
+  * [Thanks to all](#thanks-to-all)
 * [Releases](#releases)
   * [Next release](#next-release)
   * [Latest release](#latest-release)
@@ -45,7 +46,95 @@ or other kind of internet bots.
 
 ## Sponsors
 
-If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear on the project's main page. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time. Currently there is no company actively supporting this project. From time to time there appear opportunities with companies sponsoring a specific release with updated Chromium version. But there is a lot more that can be done for the project like the many proposals for new features submitted in the issue tracker, more examples, more of CEF API exposed, monthly releases with latest Chromium version and an automated build system.
+The CEF Python project is seeking for companies to help make the project even greater than it is today. If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Your company logo would appear on the project's main page. Long term sponsorships are welcome. Czarek would love to spend more time on developing this project, but he can't afford doing so in his free time. Currently there is no company actively supporting this project. From time to time there appear opportunities with companies sponsoring a specific release with updated Chromium version. But there is a lot more that can be done for the project like the many proposals for new features submitted in the issue tracker, more examples, more of CEF API exposed, monthly releases with latest Chromium version and an automated build system.
+
+**Thanks to Lampix for the v66 release**
+
+<a href="https://lampix.com/">
+ <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix360.png">
+</a>
+
+Many Thanks to Lampix for sponsoring the [v66 release](../../releases/tag/v66.0) of CEF Python.
+Lampix is the first hardware and software solution that turns any surface
+into a smart, augmented reality or interactive surface. Please visit its
+website: [www.lampix.com](https://lampix.com/) .
+
+
+**Thanks to Fivestars for the v49 release (WinXP/Vista)**
+
+<a href="https://www.fivestars.com/">
+ <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars360.png">
+</a>
+
+Many thanks to Fivestars Loyalty, Inc. for sponsoring the
+[v49 release](../../releases/tag/v49.0) for legacy systems such
+as Windows XP and Vista. Please visit its website:
+[www.fivestars.com](https://www.fivestars.com/) .
+
+
+## Install
+
+You can install [pypi/cefpython3](https://pypi.python.org/pypi/cefpython3)
+package using pip tool. On Linux pip 8.1+ is required. You can
+also download packages for offline installation available on the
+[GitHub Releases](../../releases) pages. Command to install with pip:
+
+```
+pip install cefpython3==66.0
+```
+
+
+## Tutorial
+
+See the [Tutorial.md](docs/Tutorial.md) document.
+
+
+## Examples
+
+See the [README-examples.md](examples/README-examples.md) document.
+
+For small and easy to understand code snippets that show various CEF
+features see the [README-snippets.md](examples/snippets/README-snippets.md)
+document.
+
+
+## Support
+
+- Ask questions, report problems and issues on the [Forum](https://groups.google.com/group/cefpython)
+- Supported examples are listed in the [README-examples.md](examples/README-examples.md) file
+- Documentation is in the [docs/](docs) directory:
+  - [Build instructions](docs/Build-instructions.md)
+  - [Contributing code](docs/Contributing-code.md)
+  - [Knowledge Base](docs/Knowledge-Base.md)
+  - [Migration guide](docs/Migration-guide.md)
+  - [Tutorial](docs/Tutorial.md)
+- API reference is in the [api/](api) directory:
+  - [API categories](api/API-categories.md#api-categories)
+  - [API index](api/API-index.md#api-index)
+- Additional documentation is available in [Issues labelled Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+- To search documentation use GitHub "This repository" search
+  at the top. To narrow results to documentation only select
+  "Markdown" in the right pane.
+- You can vote on issues in the tracker to let us know which issues are important to you.
+  To do that add a +1 thumb up reaction to the first post in the issue. See
+  [Most popular issues](../../issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
+  sorted by reactions.
+- Wiki pages are deprecated and for v31 only
+
+
+## Support development
+
+If you would like to support general CEF Python development efforts
+by making a donation then please click the Paypal Donate button below.
+If you would like to see a specific feature implemented then you can make
+a comment about that when making a donation and that will give it a higher
+priority.
+
+<a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=V7LU7PD4N4GGG'>
+<img src='https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/donate.gif' />
+</a><br><br>
+
+### Thanks to sponsors
 
 <table>
  <tr>
@@ -102,96 +191,8 @@ If your company would like to sponsor CEF Python development efforts then please
  <tr>
 </table>
 
-See the [Support development](#support-development) section for a list of
-all the individuals and companies supporting CEF Python.
 
-
-**Thanks to Lampix for the v66 release**
-
-Many Thanks to Lampix for sponsoring the [v66 release](../../releases/tag/v66.0) of CEF Python.
-Lampix is the first hardware and software solution that turns any surface
-into a smart, augmented reality or interactive surface. Please visit its
-website here: https://lampix.com/ .
-
-
-**Thanks to Fivestars for the v49 release (WinXP/Vista)**
-
-Thanks to Fivestars Loyalty, Inc. for sponsoring the
-[v49 release](../../releases/tag/v49.0) for legacy systems such
-as Windows XP and Vista. Please visit its website:
-https://www.fivestars.com/ .
-
-
-## Install
-
-You can install [pypi/cefpython3](https://pypi.python.org/pypi/cefpython3)
-package using pip tool. On Linux pip 8.1+ is required. You can
-also download packages for offline installation available on the
-[GitHub Releases](../../releases) pages. Command to install with pip:
-
-```
-pip install cefpython3==66.0
-```
-
-
-## Tutorial
-
-See the [Tutorial.md](docs/Tutorial.md) document.
-
-
-## Examples
-
-See the [README-examples.md](examples/README-examples.md) document.
-
-For small and easy to understand code snippets that show various CEF
-features see the [README-snippets.md](examples/snippets/README-snippets.md)
-document.
-
-
-## Support
-
-- Ask questions, report problems and issues on the [Forum](https://groups.google.com/group/cefpython)
-- Supported examples are listed in the [README-examples.md](examples/README-examples.md) file
-- Documentation is in the [docs/](docs) directory:
-  - [Build instructions](docs/Build-instructions.md)
-  - [Contributing code](docs/Contributing-code.md)
-  - [Knowledge Base](docs/Knowledge-Base.md)
-  - [Migration guide](docs/Migration-guide.md)
-  - [Tutorial](docs/Tutorial.md)
-- API reference is in the [api/](api) directory:
-  - [API categories](api/API-categories.md#api-categories)
-  - [API index](api/API-index.md#api-index)
-- Additional documentation is available in [Issues labelled Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
-- To search documentation use GitHub "This repository" search
-  at the top. To narrow results to documentation only select
-  "Markdown" in the right pane.
-- You can vote on issues in the tracker to let us know which issues are important to you.
-  To do that add a +1 thumb up reaction to the first post in the issue. See
-  [Most popular issues](../../issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
-  sorted by reactions.
-- Wiki pages are deprecated and for v31 only
-
-
-## Support development
-
-If you would like to support general CEF Python development efforts
-by making a donation please click the Paypal Donate button:
-
-<a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=V7LU7PD4N4GGG'>
-<img src='https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/donate.gif' />
-</a><br><br>
-
-If you would like to see some feature implemented you can make
-a comment about that when making a donation. It will give it
-a higher priority.
-
-If you are interested in sponsorship opportunities please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
-
-Github statistics are available in this topic
-on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpython/CjkZF2P4rMk/discussion).
-
-
-### Thanks
+### Thanks to all
 
 * [2018] Thanks to [Fivestars](https://www.fivestars.com/) for sponsoring
   the v49 release for legacy systems (WinXP/Vista)
