@@ -21,27 +21,42 @@ Table of contents:
 
 ## Introduction
 
-CEF Python is a BSD-licensed open source project founded by [Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
-(hire me!) in 2012 and is based on Google Chromium and the
-[CEF Framework](https://bitbucket.org/chromiumembedded/cef)
-projects. The Chromium project focuses mainly on Google Chrome application
+CEF Python is a an open source project founded by [Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
+in 2012 to provide Python bindings for the [Chromium Embedded
+Framework](https://bitbucket.org/chromiumembedded/cef).
+The project provides more than just Python bindings, it helps you integrate
+the CEF framework with the Python environment and the numerous Python GUI
+frameworks and tools such as
+[PyQt](https://wiki.python.org/moin/PyQt),
+[wxPython](https://wxpython.org/),
+[PyGTK](http://www.pygtk.org/),
+[PyGObject](https://wiki.gnome.org/Projects/PyGObject),
+[Tkinter](https://wiki.python.org/moin/TkInter),
+[Kivy](http://kivy.org/),
+[Panda3D](http://www.panda3d.org/),
+[PyGame](https://www.pygame.org/),
+[PyOpenGL](http://pyopengl.sourceforge.net/),
+[PyWin32](https://github.com/mhammond/pywin32),
+[PySide](https://wiki.qt.io/PySide),
+[PyInstaller](http://www.pyinstaller.org/)
+and [PySDL2](https://github.com/marcusva/py-sdl2).
+
+The Chromium project focuses mainly on Google Chrome application
 development while CEF focuses on facilitating embedded browser use cases
 in third-party applications. Lots of applications use CEF control, there are
 more than [100 million CEF instances](http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
-installed around the world. [Examples of embedding](examples/README-examples.md)
-Chrome browser are available for many popular GUI toolkits including:
-wxPython, PyGTK, PyQt, PySide, Kivy, Panda3D and PyGame/PyOpenGL.
+installed around the world.
 
-There are many use cases for CEF. You can embed a web browser control
-based on Chromium with great HTML 5 support. You can use it to create
-a HTML 5 based GUI in an application, this can act as a replacement for
-standard GUI toolkits such as wxWidgets, Qt or GTK. In such case to
-communicate between Python<>Javascript use [javascript bindings](docs/Tutorial.md#javascript-integration)
-or embed an internal web server and talk using http requests. You
-can render web content off-screen in applications that use custom
-drawing frameworks. You can use it for automated testing of existing
-applications. You can use it for web scraping or as a web crawler,
-or other kind of internet bots.
+There are numerous use cases for CEF:
+1. Embed a web browser widget in a classic Qt / GTK / wxPython desktop application
+2. Use it as a modern HTML5 based rendering engine that can act as a replacement
+   for classic desktop GUI frameworks. Think of it as [Electron](https://electronjs.org/)
+   for Python.
+3. Render web content off-screen in applications that use custom drawing frameworks
+4. Use it for automated testing of web applications with more advanced capabilities
+   than [Selenium](https://www.seleniumhq.org/) web browser automation thanks to
+   CEF low level programming APIs
+5. Use it for web scraping, as a web crawler or other kind of internet bots
 
 
 ## Sponsors
