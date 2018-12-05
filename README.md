@@ -55,7 +55,7 @@ There are numerous use cases for CEF:
    for Python.
 3. Render web content off-screen in applications that use custom drawing frameworks
 4. Use it for automated testing of web applications with more advanced capabilities
-   than [Selenium](https://www.seleniumhq.org/) web browser automation thanks to
+   than [Selenium](https://www.seleniumhq.org/) web browser automation due to
    CEF low level programming APIs
 5. Use it for web scraping, as a web crawler or other kind of internet bots
 
