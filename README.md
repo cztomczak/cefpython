@@ -39,8 +39,8 @@ the desktop and the numerous Python GUI frameworks and tools such as
 [PyOpenGL](http://pyopengl.sourceforge.net/),
 [PyWin32](https://github.com/mhammond/pywin32),
 [PySide](https://wiki.qt.io/PySide),
-[PyInstaller](http://www.pyinstaller.org/)
-and [PySDL2](https://github.com/marcusva/py-sdl2).
+[PySDL2](https://github.com/marcusva/py-sdl2)
+and [PyInstaller](http://www.pyinstaller.org/).
 
 The Chromium project focuses mainly on Google Chrome application
 development while CEF focuses on facilitating embedded browser use cases
