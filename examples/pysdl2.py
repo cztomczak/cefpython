@@ -24,7 +24,7 @@ Tested configurations:
 Install instructions:
 1. Install SDL libraries for your OS, e.g:
    - Windows: Download SDL2.dll from http://www.libsdl.org/download-2.0.php
-              and put SDL2.dll in C:\Python27\ (where you've installed Python)
+              and put SDL2.dll in C:\\Python27\\ (where you've installed Python)
    - Mac: Install Homebrew from https://brew.sh/
           and then type "brew install sdl2"
    - Fedora: sudo dnf install SDL2 SDL2_ttf SDL2_image SDL2_gfx SDL2_mixer

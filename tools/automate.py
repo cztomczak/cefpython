@@ -984,11 +984,11 @@ def run_automate_git():
     script = os.path.join(Options.cefpython_dir, "tools", "automate-git.py")
     """
     Example automate-git.py command:
-        C:\chromium>call python automate-git.py --download-dir=./test/
+        C:\\chromium>call python automate-git.py --download-dir=./test/
         --branch=2526 --no-debug-build --verbose-build
     Run ninja build manually:
         cd chromium/src
-        ninja -v -j2 -Cout\Release cefclient
+        ninja -v -j2 -Cout\\Release cefclient
     """
     args = []
     if ARCH64 and not Options.x86:

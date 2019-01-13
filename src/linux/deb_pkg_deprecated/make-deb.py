@@ -156,7 +156,7 @@ def create_copyright_file():
     with open(INSTALLER+"/../../../License", "r") as f:
         license = f.readlines()
     for line in license:
-        if not len(re.sub("\s+", "", line)):
+        if not len(re.sub(r"\s+", "", line)):
             copyright += " .\n"
         else:
             copyright += " "+line.rstrip()+"\n"
