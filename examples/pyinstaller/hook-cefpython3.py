@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # Functions
 def check_platforms():
     if not is_win and not is_darwin:
-        raise SystemExit("Error: Currently only Windows and Darwin platform is "
+        raise SystemExit("Error: Currently only Windows and Darwin platforms are "
                          " supported, see Issue #135.")
 
 
@@ -95,8 +95,8 @@ def get_excluded_cefpython_modules():
 
 
 def get_cefpython3_datas():
-    """Returning all cefpython binaries as DATAS, because
-    pyinstaller does strange things and fails if these are
+    """Returning almost all of cefpython binaries as DATAS (see exception
+    below), because pyinstaller does strange things and fails if these are
     returned as BINARIES. It first updates manifest in .dll files:
     >> Updating manifest in chrome_elf.dll
 
@@ -111,6 +111,10 @@ def get_cefpython3_datas():
     The .pak .dat and .bin files cannot be marked as BINARIES
     as pyinstaller would fail to find binary depdendencies on
     these files.
+
+    One exception is subprocess (subprocess.exe on Windows) executable
+    file, which is passed to pyinstaller as BINARIES in order to collect
+    its dependecies.
 
     DATAS are in format: tuple(full_path, dest_subdir).
     """
@@ -133,7 +137,8 @@ def get_cefpython3_datas():
         # CEF binaries and datas
         extension = os.path.splitext(filename)[1]
         if extension in [".exe", ".dll", ".pak", ".dat", ".bin",".txt", ".so", ".plist"] \
-            or filename.lower().startswith("license"):
+                or filename.lower().startswith("license") \
+            :
             logger.info("Include cefpython3 data: {}".format(filename))
             ret.append((os.path.join(CEFPYTHON3_DIR, filename), cefdatadir))
 
@@ -203,7 +208,7 @@ if is_py2:
 # Excluded modules
 excludedimports = get_excluded_cefpython_modules()
 
-# Include binaries
+# Include binaries requiring to collect its dependencies
 if is_darwin:
     binaries = [(os.path.join(CEFPYTHON3_DIR, "subprocess"), ".")]
 elif is_win:
