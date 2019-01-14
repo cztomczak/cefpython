@@ -13,7 +13,7 @@ import platform
 import re
 import sys
 import PyInstaller
-from PyInstaller.utils.hooks import is_module_satisfies
+from PyInstaller.utils.hooks import is_module_satisfies, get_package_paths
 from PyInstaller.compat import is_win, is_darwin, is_linux, is_py2
 from PyInstaller import log as logging
 
@@ -26,7 +26,6 @@ PYINSTALLER_MIN_VERSION = "3.2.1"
 # > from PyInstaller.utils.hooks import get_package_paths
 # > get_package_paths("cefpython3")
 
-from PyInstaller.utils.hooks import get_package_paths
 CEFPYTHON3_DIR = get_package_paths("cefpython3")[1]
 
 CYTHON_MODULE_EXT = ".pyd" if is_win else ".so"
@@ -38,8 +37,8 @@ logger = logging.getLogger(__name__)
 # Functions
 def check_platforms():
     if not is_win and not is_darwin:
-        raise SystemExit("Error: Currently only Windows and Darwin platforms are "
-                         " supported, see Issue #135.")
+        raise SystemExit("Error: Currently only Windows and Darwin "
+                         "platforms are  supported, see Issue #135.")
 
 
 def check_pyinstaller_version():
@@ -136,18 +135,21 @@ def get_cefpython3_datas():
 
         # CEF binaries and datas
         extension = os.path.splitext(filename)[1]
-        if extension in [".exe", ".dll", ".pak", ".dat", ".bin",".txt", ".so", ".plist"] \
-                or filename.lower().startswith("license") \
-            :
+        if extension in \
+            [".exe", ".dll", ".pak", ".dat", ".bin", ".txt", ".so", ".plist"] \
+                or filename.lower().startswith("license"):
             logger.info("Include cefpython3 data: {}".format(filename))
             ret.append((os.path.join(CEFPYTHON3_DIR, filename), cefdatadir))
 
     if is_darwin:
         # "Chromium Embedded Framework.framework/Resources" with subdirectories
-        # is required. Contain .pak files and locales (each locale in separate subdirectory).
-        resources_subdir = os.path.join("Chromium Embedded Framework.framework", "Resources")
+        # is required. Contain .pak files and locales (each locale in separate
+        # subdirectory).
+        resources_subdir = \
+            os.path.join("Chromium Embedded Framework.framework", "Resources")
         base_path = os.path.join(CEFPYTHON3_DIR, resources_subdir)
-        assert os.path.exists(base_path), "{} dir not found in cefpython3".format(resources_subdir)
+        assert os.path.exists(base_path), \
+            "{} dir not found in cefpython3".format(resources_subdir)
         for path, dirs, files in os.walk(base_path):
             for file in files:
                 absolute_file_path = os.path.join(path, file)
@@ -157,11 +159,13 @@ def get_cefpython3_datas():
     elif is_win:
         # The .pak files in cefpython3/locales/ directory
         locales_dir = os.path.join(CEFPYTHON3_DIR, "locales")
-        assert os.path.exists(locales_dir), "locales/ dir not found in cefpython3"
+        assert os.path.exists(locales_dir), \
+            "locales/ dir not found in cefpython3"
         for filename in os.listdir(locales_dir):
             logger.info("Include cefpython3 data: {}/{}".format(
                 os.path.basename(locales_dir), filename))
-            ret.append((os.path.join(locales_dir, filename), os.path.join(cefdatadir, "locales")))
+            ret.append((os.path.join(locales_dir, filename),
+                        os.path.join(cefdatadir, "locales")))
     return ret
 
 
