@@ -7,116 +7,74 @@ Table of contents:
 * [Tutorial](#tutorial)
 * [Examples](#examples)
 * [Support](#support)
-* [Support development](#support-development)
-  * [Thanks](#thanks)
 * [Releases](#releases)
   * [Next release](#next-release)
   * [Latest release](#latest-release)
   * [v49 release (WinXP/Vista)](#v49-release-winxpvista)
   * [v31 release (old systems)](#v31-release-old-systems)
+* [Support development](#support-development)
+  * [Thanks to sponsors](#thanks-to-sponsors)
+  * [Thanks to all](#thanks-to-all)
+* [Seeking new sponsors](#seeking-new-sponsors)
 * [Other READMEs](#other-readmes)
 * [Quick links](#quick-links)
 
 
 ## Introduction
 
-CEF Python is a BSD-licensed open source project founded by Czarek Tomczak (hire me! see my [resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)) in 2012 and is based on Google Chromium and the
-[CEF Framework](https://bitbucket.org/chromiumembedded/cef)
-projects. The Chromium project focuses mainly on Google Chrome application
+CEF Python is an open source project founded by [Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
+(available for contract work) in 2012 to provide Python bindings for the
+[Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef) (CEF). The Chromium project focuses mainly on Google Chrome application
 development while CEF focuses on facilitating embedded browser use cases
 in third-party applications. Lots of applications use CEF control, there are
 more than [100 million CEF instances](http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
-installed around the world. [Examples of embedding](examples/README-examples.md)
-Chrome browser are available for many popular GUI toolkits including:
-wxPython, PyGTK, PyQt, PySide, Kivy, Panda3D and PyGame/PyOpenGL.
+installed around the world. There are numerous use cases for CEF:
+1. Use it as a modern HTML5 based rendering engine that can act as a replacement
+   for classic desktop GUI frameworks. Think of it as Electron for Python.
+2. Embed a web browser widget in a classic Qt / GTK / wxPython desktop
+application
+3. Render web content off-screen in applications that use custom drawing frameworks
+4. Use it for automated testing of web applications with more advanced capabilities
+   than Selenium web browser automation due to
+   CEF low level programming APIs
+5. Use it for web scraping, as a web crawler or other kind of internet bots
 
-There are many use cases for CEF. You can embed a web browser control
-based on Chromium with great HTML 5 support. You can use it to create
-a HTML 5 based GUI in an application, this can act as a replacement for
-standard GUI toolkits such as wxWidgets, Qt or GTK. In such case to
-communicate between Python<>Javascript use [javascript bindings](docs/Tutorial.md#javascript-integration)
-or embed an internal web server and talk using http requests. You
-can render web content off-screen in applications that use custom
-drawing frameworks. You can use it for automated testing of existing
-applications. You can use it for web scraping or as a web crawler,
-or other kind of internet bots.
+CEF Python also provides examples of embedding CEF for many Python GUI
+frameworks such as PyQt, wxPython, PyGTK, PyGObject, Tkinter, Kivy, Panda3D,
+PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 
 
 ## Sponsors
 
-<table>
- <tr>
-  <td>
-   <div align="center">
-    <a href="https://www.fivestars.com/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars200.png">
-    </a><br>
-    <a href="https://www.fivestars.com/">www.fivestars.com</a>
-   </div>
-  </td>
-  <td>
-   <div align="center">
-    <a href="https://lampix.com/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix200.png">
-    </a><br>
-    <a href="https://lampix.com/">www.lampix.com</a>
-   </div>
-  </td>
-  <td>
-   <div align="center">
-    <a href="http://www.blueplanet.com/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
-    </a><br>
-    <a href="http://www.blueplanet.com/">www.blueplanet.com</a>
-   </div>
-  </td>
- </tr>
- <tr>
-  <td>
-   <div align="center">
-    <a href="https://clearchat.com/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
-    </a><br>
-    <a href="https://clearchat.com/">www.clearchat.com</a>
-   <div align="center">
-  </td>
-  <td>
-   <div align="center">
-    <a href="http://www.rentouch.ch/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
-    </a><br>
-    <a href="http://www.rentouch.ch/">www.rentouch.ch</a>
-   </div>
-  </td>
-  <td>
-   <div align="center">
-    <a href="https://www.jetbrains.com/pycharm/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
-    </a><br>
-    <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com</a>
-   </div>
-  </td>
- <tr>
-</table>
+<table border="0"><tr>
+<td width="50%" valign="top">
 
-See the [Support development](#support-development) section for a list of
-all the individuals and companies supporting CEF Python.
+<p align="center">
+ <a href="https://lampix.com/">
+  <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix360.png">
+ </a>
+</p>
 
-
-**Thanks to Lampix for the v66 release**
-
-Many Thanks to Lampix for sponsoring the [v66 release](../../releases/tag/v66.0) of CEF Python.
+Many Thanks to Lampix for sponsoring the [v66 release](../../releases/tag/v66.0).
 Lampix is the first hardware and software solution that turns any surface
-into a smart, augmented reality or interactive surface. Please visit its
-website here: https://lampix.com/ .
+into a smart, augmented reality or interactive surface. Please visit their website:
+<a href="https://lampix.com/">Lampix.com</a>
 
+</td><td width="50%" valign="top">
 
-**Thanks to Fivestars for the v49 release (WinXP/Vista)**
+<p align="center">
+ <a href="https://www.fivestars.com/">
+  <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars360.png">
+ </a>
+</p>
 
-Thanks to Fivestars Loyalty, Inc. for sponsoring the
-[v49 release](../../releases/tag/v49.0) for legacy systems such
-as Windows XP and Vista. Please visit its website:
-https://www.fivestars.com/ .
+Many thanks to Fivestars for sponsoring the
+[v49 legacy release](../../releases/tag/v49.0). Fivestars helps local
+communities thrive by empowering small
+businesses with cutting edge marketing technology. Please visit their website:
+<a href="https://www.fivestars.com/">Fivestars.com</a>
+
+</tr></table>
 
 
 ## Install
@@ -167,55 +125,6 @@ document.
   [Most popular issues](../../issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
   sorted by reactions.
 - Wiki pages are deprecated and for v31 only
-
-
-## Support development
-
-If you would like to support general CEF Python development efforts
-by making a donation please click the Paypal Donate button:
-
-<a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=V7LU7PD4N4GGG'>
-<img src='https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/donate.gif' />
-</a><br><br>
-
-If you would like to see some feature implemented you can make
-a comment about that when making a donation. It will give it
-a higher priority.
-
-If you are interested in sponsorship opportunities please contact Czarek
-directly - contact details are available in his [Resume](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
-
-If you would like to sponsor CEF Python development efforts and see your company
-logo with a link in README, please contact Czarek.
-This README page alone has 1,070 visitors and 2,402 views every two weeks,
-so your company logo and a website link will be visible to many Python developers.
-The statistics are from Mar 9, 2018. Complete statistics are available in this topic
-on the Forum: [[ANN] Call for sponsors](https://groups.google.com/d/topic/cefpython/CjkZF2P4rMk/discussion).
-
-
-### Thanks
-
-* [2018] Thanks to [Fivestars](https://www.fivestars.com/) for sponsoring
-  the v49 release for legacy systems (WinXP/Vista)
-* [2018] Many thanks to [Lampix](https://lampix.com/) for sponsoring the v66
-  release for all platforms
-* [2017] Many thanks to [ClearChat Inc.](https://clearchat.com/) for sponsoring
-  the v55/v56 releases for all platforms
-* [2016-2018] Thanks to JetBrains for providing an Open Source license for
-  [PyCharm](https://www.jetbrains.com/pycharm/)
-* [2014] Thanks to Adam Duston for donating a Macbook to aid the development
-  of Mac port
-* [2013-2015] Lots of thanks goes to [Cyan Inc.](http://www.blueplanet.com/)
-  for sponsoring this project for a long time, making CEF Python 3 mature
-* [2013] Thanks to [Rentouch GmbH](http://www.rentouch.ch/) for sponsoring the
-  development of the off-screen rendering support
-* [2013] Thanks to Thomas Wusatiuk for sponsoring the development of the web
-  response reading features
-* [2012-2018] Thanks to those who have made a Paypal donation:
-  [Rentouch GmbH](http://www.rentouch.ch/), Walter Purvis, Rokas Stupuras,
-  Alex Rattray, Greg Kacy, Paul Korzhyk, Tomasz Tomanek.
-* [2012-2017] Thanks to those who have donated their time through code contributions,
-  they are listed in the [Authors](Authors) file
 
 
 ## Releases
@@ -284,6 +193,128 @@ Additional information for v31.2 release:
   and on GitHub Releases tagged [v31.2](../../releases/tag/v31.2).
 - Documentation is on [wiki pages](../../wiki)
 - API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
+
+
+## Support development
+
+If you would like to support general CEF Python development efforts
+by making a donation then please click the Paypal Donate button below.
+If you would like to see a specific feature implemented then you can make
+a comment about that when making a donation and that will give it a higher
+priority.
+
+<a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=V7LU7PD4N4GGG'>
+<img src='https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/donate.gif' />
+</a><br><br>
+
+### Thanks to sponsors
+
+<table>
+ <tr>
+  <td>
+   <div align="center">
+    <a href="https://www.fivestars.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars200.png">
+    </a><br>
+    <a href="https://www.fivestars.com/">www.fivestars.com</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
+    <a href="https://lampix.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix200.png">
+    </a><br>
+    <a href="https://lampix.com/">www.lampix.com</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
+    <a href="http://www.blueplanet.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
+    </a><br>
+    <a href="http://www.blueplanet.com/">www.blueplanet.com</a>
+   </div>
+  </td>
+ </tr>
+ <tr>
+  <td>
+   <div align="center">
+    <a href="https://clearchat.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
+    </a><br>
+    <a href="https://clearchat.com/">www.clearchat.com</a>
+   <div align="center">
+  </td>
+  <td>
+   <div align="center">
+    <a href="http://www.rentouch.ch/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
+    </a><br>
+    <a href="http://www.rentouch.ch/">www.rentouch.ch</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
+    <a href="https://www.jetbrains.com/pycharm/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
+    </a><br>
+    <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com</a>
+   </div>
+  </td>
+ <tr>
+</table>
+
+
+### Thanks to all
+
+* [2018] Thanks to [Fivestars](https://www.fivestars.com/) for sponsoring
+  the v49 release for legacy systems (WinXP/Vista)
+* [2018] Many thanks to [Lampix](https://lampix.com/) for sponsoring the v66
+  release for all platforms
+* [2017] Many thanks to [ClearChat Inc.](https://clearchat.com/) for sponsoring
+  the v55/v56 releases for all platforms
+* [2016-2018] Thanks to JetBrains for providing an Open Source license for
+  [PyCharm](https://www.jetbrains.com/pycharm/)
+* [2014] Thanks to Adam Duston for donating a Macbook to aid the development
+  of Mac port
+* [2013-2015] Lots of thanks goes to [Cyan Inc.](http://www.blueplanet.com/)
+  for sponsoring this project for a long time, making CEF Python 3 mature
+* [2013] Thanks to [Rentouch GmbH](http://www.rentouch.ch/) for sponsoring the
+  development of the off-screen rendering support
+* [2013] Thanks to Thomas Wusatiuk for sponsoring the development of the web
+  response reading features
+* [2012-2018] Thanks to those who have made a Paypal donation:
+  [Rentouch GmbH](http://www.rentouch.ch/), Walter Purvis, Rokas Stupuras,
+  Alex Rattray, Greg Kacy, Paul Korzhyk, Tomasz Tomanek.
+* [2012-2017] Thanks to those who have donated their time through code
+  contributions, they are listed in the [Authors](Authors) file
+
+
+## Seeking new sponsors
+
+CEF Python is seeking companies to sponsor further development of the project.
+There are many proposals for new features submitted in the issue tracker. Most
+notable are:
+
+* Monthly releases with latest Chromium
+* An automated build system similar to upstream CEF Spotify Automated Builds
+* ARM and Android support
+* Multi-threaded support for increased performance
+* Proprietary codecs support in build tools: H264, H265,AC3, EAC3, MPEG-4
+* More CEF API exposed, only about 50% is exposed so far
+* Hundreds of new settings and Chromium preferences not yet exposed
+* Easier integration with popular GUI toolkits in just a few lines of code
+  and support for more third party GUI frameworks
+* More examples of implementing various advanced features and more snippets
+  as well
+
+If your company would like to sponsor CEF Python development efforts then
+please contact
+[Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
+Long term sponsorships are welcome and Czarek is open to ideas about
+the project. He would love to spend more time on developing this project,
+but he can't afford doing so in his free time. Currently there is no company
+supporting this project actively on a daily basis.
 
 
 ## Other READMEs
