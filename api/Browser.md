@@ -3,6 +3,9 @@
 
 # Browser (object)
 
+The methods of this object may be called on any thread unless otherwise
+indicated in the comments.
+
 Remember to free all browser references when closing app
 for the browser to shut down cleanly.
 Otherwise data such as cookies or other storage might not be flushed to disk

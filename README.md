@@ -7,58 +7,41 @@ Table of contents:
 * [Tutorial](#tutorial)
 * [Examples](#examples)
 * [Support](#support)
-* [Support development](#support-development)
-  * [Thanks to sponsors](#thanks-to-sponsors)
-  * [Thanks to all](#thanks-to-all)
 * [Releases](#releases)
   * [Next release](#next-release)
   * [Latest release](#latest-release)
   * [v49 release (WinXP/Vista)](#v49-release-winxpvista)
   * [v31 release (old systems)](#v31-release-old-systems)
+* [Support development](#support-development)
+  * [Thanks to sponsors](#thanks-to-sponsors)
+  * [Thanks to all](#thanks-to-all)
+* [Seeking new sponsors](#seeking-new-sponsors)
 * [Other READMEs](#other-readmes)
 * [Quick links](#quick-links)
 
 
 ## Introduction
 
-CEF Python is a an open source project founded by [Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
-in 2012 to provide Python bindings for the [Chromium Embedded
-Framework](https://bitbucket.org/chromiumembedded/cef).
-Simply put, CEF is kind of [Electron](https://electronjs.org/) for Python,
-but with numerous use cases making it a lot more. The project has evolved
-and it is now much more than just pure Python bindings,
-it helps you integrate the CEF framework with the Python environment,
-the desktop and the numerous Python GUI frameworks and tools such as
-[PyQt](https://wiki.python.org/moin/PyQt),
-[wxPython](https://wxpython.org/),
-[PyGTK](http://www.pygtk.org/),
-[PyGObject](https://wiki.gnome.org/Projects/PyGObject),
-[Tkinter](https://wiki.python.org/moin/TkInter),
-[Kivy](http://kivy.org/),
-[Panda3D](http://www.panda3d.org/),
-[PyGame](https://www.pygame.org/),
-[PyOpenGL](http://pyopengl.sourceforge.net/),
-[PyWin32](https://github.com/mhammond/pywin32),
-[PySide](https://wiki.qt.io/PySide),
-[PySDL2](https://github.com/marcusva/py-sdl2)
-and [PyInstaller](http://www.pyinstaller.org/).
-
-The Chromium project focuses mainly on Google Chrome application
+CEF Python is an open source project founded by [Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
+(available for contract work) in 2012 to provide Python bindings for the
+[Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef) (CEF). The Chromium project focuses mainly on Google Chrome application
 development while CEF focuses on facilitating embedded browser use cases
 in third-party applications. Lots of applications use CEF control, there are
 more than [100 million CEF instances](http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
-installed around the world.
-
-There are numerous use cases for CEF:
-1. Embed a web browser widget in a classic Qt / GTK / wxPython desktop application
-2. Use it as a modern HTML5 based rendering engine that can act as a replacement
-   for classic desktop GUI frameworks. Think of it as [Electron](https://electronjs.org/)
-   for Python.
+installed around the world. There are numerous use cases for CEF:
+1. Use it as a modern HTML5 based rendering engine that can act as a replacement
+   for classic desktop GUI frameworks. Think of it as Electron for Python.
+2. Embed a web browser widget in a classic Qt / GTK / wxPython desktop
+application
 3. Render web content off-screen in applications that use custom drawing frameworks
 4. Use it for automated testing of web applications with more advanced capabilities
-   than [Selenium](https://www.seleniumhq.org/) web browser automation due to
+   than Selenium web browser automation due to
    CEF low level programming APIs
 5. Use it for web scraping, as a web crawler or other kind of internet bots
+
+CEF Python also provides examples of embedding CEF for many Python GUI
+frameworks such as PyQt, wxPython, PyGTK, PyGObject, Tkinter, Kivy, Panda3D,
+PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 
 
 ## Sponsors
@@ -92,8 +75,6 @@ businesses with cutting edge marketing technology. Please visit their website:
 <a href="https://www.fivestars.com/">Fivestars.com</a>
 
 </tr></table>
-
-The CEF Python project is seeking companies to help make the project even greater than it is today. There is a lot that can be done for the project such as monthly releases with latest Chromium version, an automated build system, more CEF API exposed (only about 50% is exposed so far), more examples, ARM and Android support, easier integration with popular GUI toolkits in just a few lines of code, H264 / H265 / AC3 / EAC3 / MPEG-4 codecs support in build tools, multi-threaded support, hundreds of new settings and preferences, and the many more proposals for new features submitted in the issue tracker. If your company would like to sponsor CEF Python development efforts then please contact [Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view). Long term sponsorships are welcome and Czarek is open to ideas about the project. He would love to spend more time on developing this project, but he can't afford doing so in his free time. Currently there is no company supporting this project actively on a day to day basis.
 
 
 ## Install
@@ -144,6 +125,74 @@ document.
   [Most popular issues](../../issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
   sorted by reactions.
 - Wiki pages are deprecated and for v31 only
+
+
+## Releases
+
+Information on planned new and current releases, supported platforms,
+python versions, architectures and requirements. If you want to
+support old operating systems then choose the v31 release.
+
+### Next release
+
+- To see planned new features or bugs to be fixed in the near future in one of
+  next releases, see the
+  [next release](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release%22)
+  label in the tracker
+- To see planned new features or bugs to be fixed in further future, see the
+  [next release 2](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release+2%22)
+  label in the tracker
+
+### Latest release
+
+OS | Py2 | Py3 | 32bit | 64bit | Requirements
+--- | --- | --- | --- | --- | ---
+Windows | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | Yes | Yes | Windows 7+
+Linux | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | Yes | Yes | Debian 8+, Ubuntu 14.04+,<br> Fedora 24+, openSUSE 13.3+
+Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
+
+These platforms are not supported yet:
+- ARM - see [Issue #267](../../issues/267)
+- Android - see [Issue #307](../../issues/307)
+
+
+### v49 release (WinXP/Vista)
+
+OS | Py2 | Py3 | 32bit | 64bit | Requirements
+--- | --- | --- | --- | --- | ---
+Windows | 2.7 | 3.4 | Yes | Yes | Windows XP+
+
+- Install with command: `pip --no-cache-dir install cefpython3==49.0`.
+    - Please note that if you were previously installing cefpython3
+      package it is required to use the `--no-cache-dir` flag,
+      otherwise pip will end up with error message
+      `No matching distribution found for cefpython3==49.0`.
+      This happens because 49.0 release occured after 57.0 and 66.0
+      releases.
+- Downloads are available on GitHub Releases tagged
+    [v49.0](../../releases/tag/v49.0).
+- See [Migration guide](docs/Migration-guide.md) document for changes
+  in this release
+- Documentation is available in the [docs/](../../tree/cefpython49-winxp/docs)
+  directory in the `cefpython49-winxp` branch
+- API reference is available in the [api/](../../tree/cefpython49-winxp/api)
+  directory in the `cefpython49-winxp` branch
+
+
+### v31 release (old systems)
+
+OS | Py2 | Py3 | 32bit | 64bit | Requirements
+--- | --- | --- | --- | --- | ---
+Windows | 2.7 | No | Yes | Yes | Windows XP+
+Linux | 2.7 | No | Yes | Yes | Debian 7+ / Ubuntu 12.04+
+Mac | 2.7 | No | Yes | Yes | MacOS 10.7+
+
+Additional information for v31.2 release:
+- On Windows/Mac you can install with command: `pip install cefpython3==31.2`
+- Downloads are available on [wiki pages](../../wiki#downloads)
+  and on GitHub Releases tagged [v31.2](../../releases/tag/v31.2).
+- Documentation is on [wiki pages](../../wiki)
+- API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
 
 
 ## Support development
@@ -237,76 +286,35 @@ priority.
 * [2012-2018] Thanks to those who have made a Paypal donation:
   [Rentouch GmbH](http://www.rentouch.ch/), Walter Purvis, Rokas Stupuras,
   Alex Rattray, Greg Kacy, Paul Korzhyk, Tomasz Tomanek.
-* [2012-2017] Thanks to those who have donated their time through code contributions,
-  they are listed in the [Authors](Authors) file
+* [2012-2017] Thanks to those who have donated their time through code
+  contributions, they are listed in the [Authors](Authors) file
 
 
-## Releases
+## Seeking new sponsors
 
-Information on planned new and current releases, supported platforms,
-python versions, architectures and requirements. If you want to
-support old operating systems then choose the v31 release.
+CEF Python is seeking companies to sponsor further development of the project.
+There are many proposals for new features submitted in the issue tracker. Most
+notable are:
 
-### Next release
+* Monthly releases with latest Chromium
+* An automated build system similar to upstream CEF Spotify Automated Builds
+* ARM and Android support
+* Multi-threaded support for increased performance
+* Proprietary codecs support in build tools: H264, H265,AC3, EAC3, MPEG-4
+* More CEF API exposed, only about 50% is exposed so far
+* Hundreds of new settings and Chromium preferences not yet exposed
+* Easier integration with popular GUI toolkits in just a few lines of code
+  and support for more third party GUI frameworks
+* More examples of implementing various advanced features and more snippets
+  as well
 
-- To see planned new features or bugs to be fixed in the near future in one of
-  next releases, see the
-  [next release](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release%22)
-  label in the tracker
-- To see planned new features or bugs to be fixed in further future, see the
-  [next release 2](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22next+release+2%22)
-  label in the tracker
-
-### Latest release
-
-OS | Py2 | Py3 | 32bit | 64bit | Requirements
---- | --- | --- | --- | --- | ---
-Windows | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | Yes | Yes | Windows 7+
-Linux | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | Yes | Yes | Debian 8+, Ubuntu 14.04+,<br> Fedora 24+, openSUSE 13.3+
-Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
-
-These platforms are not supported yet:
-- ARM - see [Issue #267](../../issues/267)
-- Android - see [Issue #307](../../issues/307)
-
-
-### v49 release (WinXP/Vista)
-
-OS | Py2 | Py3 | 32bit | 64bit | Requirements
---- | --- | --- | --- | --- | ---
-Windows | 2.7 | 3.4 | Yes | Yes | Windows XP+
-
-- Install with command: `pip --no-cache-dir install cefpython3==49.0`.
-    - Please note that if you were previously installing cefpython3
-      package it is required to use the `--no-cache-dir` flag,
-      otherwise pip will end up with error message
-      `No matching distribution found for cefpython3==49.0`.
-      This happens because 49.0 release occured after 57.0 and 66.0
-      releases.
-- Downloads are available on GitHub Releases tagged
-    [v49.0](../../releases/tag/v49.0).
-- See [Migration guide](docs/Migration-guide.md) document for changes
-  in this release
-- Documentation is available in the [docs/](../../tree/cefpython49-winxp/docs)
-  directory in the `cefpython49-winxp` branch
-- API reference is available in the [api/](../../tree/cefpython49-winxp/api)
-  directory in the `cefpython49-winxp` branch
-
-
-### v31 release (old systems)
-
-OS | Py2 | Py3 | 32bit | 64bit | Requirements
---- | --- | --- | --- | --- | ---
-Windows | 2.7 | No | Yes | Yes | Windows XP+
-Linux | 2.7 | No | Yes | Yes | Debian 7+ / Ubuntu 12.04+
-Mac | 2.7 | No | Yes | Yes | MacOS 10.7+
-
-Additional information for v31.2 release:
-- On Windows/Mac you can install with command: `pip install cefpython3==31.2`
-- Downloads are available on [wiki pages](../../wiki#downloads)
-  and on GitHub Releases tagged [v31.2](../../releases/tag/v31.2).
-- Documentation is on [wiki pages](../../wiki)
-- API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
+If your company would like to sponsor CEF Python development efforts then
+please contact
+[Czarek](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view).
+Long term sponsorships are welcome and Czarek is open to ideas about
+the project. He would love to spend more time on developing this project,
+but he can't afford doing so in his free time. Currently there is no company
+supporting this project actively on a daily basis.
 
 
 ## Other READMEs
