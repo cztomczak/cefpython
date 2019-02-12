@@ -29,9 +29,9 @@ elif platform.system() == "Darwin":
 
 def main():
     # Platforms supported
-    if platform.system() != "Windows":
-        raise SystemExit("Error: Only Windows platform is currently "
-                         "supported. See Issue #135 for details.")
+    if platform.system() not in ["Windows", "Darwin"]:
+        raise SystemExit("Error: Only Windows and Darwin platforms are "
+                         "currently supported. See Issue #135 for details.")
 
     # Make sure nothing is cached from previous build.
     # Delete the build/ and dist/ directories.
