@@ -26,7 +26,7 @@ if platform.system() == "Windows":
 elif platform.system() == "Darwin":
     EXE_EXT = ".app"
 elif platform.system() == "Linux":
-	EXE_EXT = ""
+    EXE_EXT = ""
 
 
 def main():
