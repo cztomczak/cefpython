@@ -25,12 +25,14 @@ if platform.system() == "Windows":
     EXE_EXT = ".exe"
 elif platform.system() == "Darwin":
     EXE_EXT = ".app"
+elif platform.system() == "Linux":
+	EXE_EXT = ""
 
 
 def main():
     # Platforms supported
-    if platform.system() not in ["Windows", "Darwin"]:
-        raise SystemExit("Error: Only Windows and Darwin platforms are "
+    if platform.system() not in ["Windows", "Darwin", "Linux"]:
+        raise SystemExit("Error: Only Windows, Linux and Darwin platforms are "
                          "currently supported. See Issue #135 for details.")
 
     # Make sure nothing is cached from previous build.

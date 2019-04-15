@@ -36,8 +36,8 @@ logger = logging.getLogger(__name__)
 
 # Functions
 def check_platforms():
-    if not is_win and not is_darwin:
-        raise SystemExit("Error: Currently only Windows and Darwin "
+    if not is_win and not is_darwin and not is_linux:
+        raise SystemExit("Error: Currently only Windows, Linux and Darwin "
                          "platforms are  supported, see Issue #135.")
 
 
@@ -121,7 +121,7 @@ def get_cefpython3_datas():
 
     if is_win:
         cefdatadir = "."
-    elif is_darwin:
+    elif is_darwin or is_linux:
         cefdatadir = "."
     else:
         assert False, "Unsupported system {}".format(platform.system())
@@ -156,7 +156,7 @@ def get_cefpython3_datas():
                 dest_path = os.path.relpath(path, CEFPYTHON3_DIR)
                 ret.append((absolute_file_path, dest_path))
                 logger.info("Include cefpython3 data: {}".format(dest_path))
-    elif is_win:
+    elif is_win or is_linux:
         # The .pak files in cefpython3/locales/ directory
         locales_dir = os.path.join(CEFPYTHON3_DIR, "locales")
         assert os.path.exists(locales_dir), \
@@ -166,6 +166,15 @@ def get_cefpython3_datas():
                 os.path.basename(locales_dir), filename))
             ret.append((os.path.join(locales_dir, filename),
                         os.path.join(cefdatadir, "locales")))
+
+        # Optional .so/.dll files in cefpython3/swiftshader/ directory
+        swiftshader_dir = os.path.join(CEFPYTHON3_DIR, "swiftshader")
+        if os.path.isdir(swiftshader_dir):
+            for filename in os.listdir(swiftshader_dir):
+                logger.info("Include cefpython3 data: {}/{}".format(
+                    os.path.basename(swiftshader_dir), filename))
+                ret.append((os.path.join(swiftshader_dir, filename),
+                            os.path.join(cefdatadir, "swiftshader")))
     return ret
 
 
@@ -213,7 +222,7 @@ if is_py2:
 excludedimports = get_excluded_cefpython_modules()
 
 # Include binaries requiring to collect its dependencies
-if is_darwin:
+if is_darwin or is_linux:
     binaries = [(os.path.join(CEFPYTHON3_DIR, "subprocess"), ".")]
 elif is_win:
     binaries = [(os.path.join(CEFPYTHON3_DIR, "subprocess.exe"), ".")]
