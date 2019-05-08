@@ -22,21 +22,26 @@ Table of contents:
 
 ## Introduction
 
-CEF Python is an open source project founded by [Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
-(available for contract work) in 2012 to provide Python bindings for the
-[Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef) (CEF). The Chromium project focuses mainly on Google Chrome application
+CEF Python is an open source project founded by
+[Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
+in 2012 to provide Python bindings for the
+[Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef) (CEF).
+The Chromium project focuses mainly on Google Chrome application
 development while CEF focuses on facilitating embedded browser use cases
 in third-party applications. Lots of applications use CEF control, there are
 more than [100 million CEF instances](http://en.wikipedia.org/wiki/Chromium_Embedded_Framework#Applications_using_CEF)
 installed around the world. There are numerous use cases for CEF:
-1. Use it as a modern HTML5 based rendering engine that can act as a replacement
-   for classic desktop GUI frameworks. Think of it as Electron for Python.
+
+1. Use it as a modern HTML5 based rendering engine that can act as
+   a replacement for classic desktop GUI frameworks. Think of it as Electron
+   for Python.
 2. Embed a web browser widget in a classic Qt / GTK / wxPython desktop
-application
-3. Render web content off-screen in applications that use custom drawing frameworks
-4. Use it for automated testing of web applications with more advanced capabilities
-   than Selenium web browser automation due to
-   CEF low level programming APIs
+   application
+3. Render web content off-screen in applications that use custom drawing
+   frameworks
+4. Use it for automated testing of web applications with more advanced
+   capabilities than Selenium web browser automation due to CEF low level
+   programming APIs
 5. Use it for web scraping, as a web crawler or other kind of internet bots
 
 CEF Python also provides examples of embedding CEF for many Python GUI
@@ -55,9 +60,10 @@ PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
  </a>
 </p>
 
-Many Thanks to Lampix for sponsoring the [v66 release](../../releases/tag/v66.0).
-Lampix is the first hardware and software solution that turns any surface
-into a smart, augmented reality or interactive surface. Please visit their website:
+Many Thanks to Lampix for sponsoring the
+[v66 release](../../releases/tag/v66.0). Lampix is the first hardware
+and software solution that turns any surface into a smart, augmented reality
+or interactive surface. Please visit their website:
 <a href="https://lampix.com/">Lampix.com</a>
 
 </td><td width="50%" valign="top">
@@ -96,17 +102,16 @@ See the [Tutorial.md](docs/Tutorial.md) document.
 
 ## Examples
 
-See the [README-examples.md](examples/README-examples.md) document.
-
-For small and easy to understand code snippets that show various CEF
-features see the [README-snippets.md](examples/snippets/README-snippets.md)
-document.
+See the [README-examples.md](examples/README-examples.md) and
+[README-snippets.md](examples/snippets/README-snippets.md) documents.
 
 
 ## Support
 
-- Ask questions, report problems and issues on the [Forum](https://groups.google.com/group/cefpython)
-- Supported examples are listed in the [README-examples.md](examples/README-examples.md) file
+- Ask questions and report problems on the
+  [Forum](https://groups.google.com/group/cefpython)
+- Supported examples are listed in the
+  [README-examples.md](examples/README-examples.md) file
 - Documentation is in the [docs/](docs) directory:
   - [Build instructions](docs/Build-instructions.md)
   - [Contributing code](docs/Contributing-code.md)
@@ -116,12 +121,14 @@ document.
 - API reference is in the [api/](api) directory:
   - [API categories](api/API-categories.md#api-categories)
   - [API index](api/API-index.md#api-index)
-- Additional documentation is available in [Issues labelled Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
+- Additional documentation is available in
+  [Issues labelled Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
 - To search documentation use GitHub "This repository" search
   at the top. To narrow results to documentation only select
   "Markdown" in the right pane.
-- You can vote on issues in the tracker to let us know which issues are important to you.
-  To do that add a +1 thumb up reaction to the first post in the issue. See
+- You can vote on issues in the tracker to let us know which issues are
+  important to you. To do that add a +1 thumb up reaction to the first post
+  in the issue. See
   [Most popular issues](../../issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
   sorted by reactions.
 - Wiki pages are deprecated and for v31 only
