@@ -169,7 +169,7 @@ def main():
     logging.debug("SDL2 initialised")
     # Create the window
     window = sdl2.video.SDL_CreateWindow(
-        'cefpython3 SDL2 Demo',
+        b'cefpython3 SDL2 Demo',
         sdl2.video.SDL_WINDOWPOS_UNDEFINED,
         sdl2.video.SDL_WINDOWPOS_UNDEFINED,
         width,
@@ -382,7 +382,7 @@ def main():
         # regulate frame rate
         if sdl2.timer.SDL_GetTicks() - startTime < 1000.0 / frameRate:
             sdl2.timer.SDL_Delay(
-                (1000 / frameRate) - (sdl2.timer.SDL_GetTicks() - startTime)
+                (1000 // frameRate) - (sdl2.timer.SDL_GetTicks() - startTime)
             )
     # User exited
     exit_app()
