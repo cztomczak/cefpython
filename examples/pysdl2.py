@@ -38,7 +38,6 @@ Known issues (pull requests are welcome):
 - Performance is still not perfect, see Issue #324 for further details
 - Keyboard modifiers that are not yet handled in this example:
   ctrl, marking text inputs with the shift key.
-- Backspace key doesn't work on Mac
 - Dragging with mouse not implemented
 - Window size is fixed, cannot be resized
 
@@ -105,6 +104,10 @@ if sys.platform == 'darwin':
 
 
 def main():
+    """
+    Parses input, initializes everything and then runs the main loop of the
+    program, which handles input and draws the scene.
+    """
     parser = argparse.ArgumentParser(
         description='PySDL2 / cefpython example',
         add_help=True
@@ -223,6 +226,7 @@ def main():
     # viewport size is available and that OnPaint may be called.
     browser.SendFocusEvent(True)
     browser.WasResized()
+
     # Begin the main rendering loop
     running = True
     # FPS debug variables
@@ -340,8 +344,11 @@ def main():
                         key_event = {
                             "type": cef.KEYEVENT_RAWKEYDOWN,
                             "windows_key_code": keycode,
-                            "character": keycode,
-                            "unmodified_character": keycode,
+                            "native_key_code": get_native_key(keycode),
+                            # For raw key events, the character and unmodified
+                            # character codes should be 0.
+                            "character": 0,
+                            "unmodified_character": 0,
                             "modifiers": cef.EVENTFLAG_NONE
                         }
                         browser.SendKeyEvent(key_event)
@@ -364,6 +371,11 @@ def main():
                         key_event = {
                             "type": cef.KEYEVENT_KEYUP,
                             "windows_key_code": keycode,
+                            "native_key_code": get_native_key(keycode),
+                            # On raw key up events, the character and unmodified
+                            # character need to be defined, otherwise pressing
+                            # one of the above-listed keys will eat the next
+                            # normal keypress.
                             "character": keycode,
                             "unmodified_character": keycode,
                             "modifiers": cef.EVENTFLAG_NONE
@@ -427,6 +439,34 @@ def get_key_code(key):
         """ % key
     )
     return None
+
+
+# The key events on MacOS have different native keycode than on other operating
+# systems. This table is a translation from Windows-keycodes to MacOS ones.
+MACOS_TRANSLATION_TABLE = {
+    # Backspace
+    0x08: 0x33,
+
+    # Left arrow
+    0x25: 0x7B,
+    # Up arrow
+    0x26: 0x7E,
+    # Right arrow
+    0x27: 0x7C,
+    # Down arrow
+    0x28: 0x7D,
+}
+
+
+def get_native_key(key):
+    """
+    Helper function for returning the correct native key map for the operating
+    system.
+    """
+    if sys.platform == 'darwin':
+        return MACOS_TRANSLATION_TABLE.get(key, key)
+
+    return key
 
 
 class LoadHandler(object):
