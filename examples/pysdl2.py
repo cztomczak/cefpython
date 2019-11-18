@@ -96,6 +96,14 @@ except ImportError:
         "       To install type: pip install Pillow")
 
 
+if sys.platform == 'darwin':
+    try:
+        import AppKit
+    except ImportError:
+        die("ERROR: pyobjc package not found\n"
+            "       To install type: pip install pyobjc")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='PySDL2 / cefpython example',
@@ -159,6 +167,14 @@ def main():
     }
     cef.Initialize(settings={"windowless_rendering_enabled": True},
                    switches=switches)
+
+    if sys.platform == 'darwin':
+        # On MacOS, the NSApplication created in the cefpython initialization
+        # will be hidden if windowless is specified. In order for SDL to receive
+        # propper input events and for the application to show up in the
+        # command-tab list, the application must be made "regular".
+        AppKit.NSApplication.sharedApplication().setActivationPolicy_(
+            AppKit.NSApplicationActivationPolicyRegular)
     logging.debug("cef initialised")
     window_info = cef.WindowInfo()
     window_info.SetAsOffscreen(0)
