@@ -24,7 +24,7 @@ Table of contents:
 
 CEF Python is an open source project founded by
 [Czarek Tomczak](https://drive.google.com/file/d/17xmoT5Z_zTHkVclqPzrs2aAV64Uiu7fh/view)
-(hire me!) in 2012 to provide Python bindings for the
+in 2012 to provide Python bindings for the
 [Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef) (CEF).
 The Chromium project focuses mainly on Google Chrome application
 development while CEF focuses on facilitating embedded browser use cases
