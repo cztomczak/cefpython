@@ -311,7 +311,7 @@ Passing a python function here is not allowed, it is only possible through [Java
 | startLine=1 | int |
 | __Return__ | void |
 
-Execute a string of JavaScript code in this frame. The `sciptURL` parameter is the URL where the script in question can be found, if any. The renderer may request this URL to show the developer the source of the error.  The `startLine` parameter is the base line number to use for error reporting.
+Execute a string of JavaScript code in this frame. The `scriptURL` parameter is the URL where the script in question can be found, if any. The renderer may request this URL to show the developer the source of the error.  The `startLine` parameter is the base line number to use for error reporting.
 
 This function executes asynchronously so there is no way to get the returned value.
 
