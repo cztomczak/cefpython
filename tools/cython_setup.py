@@ -25,6 +25,7 @@ from common import *
 import sys
 import platform
 import Cython
+import copy
 import os
 
 # Must monkey patch Cython's ModuleNode to inject custom C++ code
@@ -73,10 +74,13 @@ if LINUX:
         libraries = get_libraries_old(self, ext)
         libpython = ('python' + str(sys.version_info.major) + '.'
                      + str(sys.version_info.minor))
-        if libpython in libraries:
-            print("[cython_setup.py] Do not link against -l%s (Issue #554)"
-                  % libpython)
-            libraries.remove(libpython)
+        for lib in copy.copy(libraries):
+            # Library name for Python versions before 3.8 may have
+            # an 'm' at the end.
+            if lib.startswith(libpython):
+                print("[cython_setup.py] Do not link against -l%s (Issue #554)"
+                    % lib)
+                libraries.remove(lib)
         return libraries
     build_ext.get_libraries = (
             get_libraries_new
