@@ -238,7 +238,7 @@ def check_directories():
         prebuilt_name = get_cef_binaries_libraries_basename(OS_POSTFIX2)
         print("[build.py] ERROR: Couldn't find CEF prebuilt binaries and"
               " libraries: 'build/{prebuilt_dir}/'. Download it"
-              " from GitHub released tagged eg. 'v50-upstream` or download"
+              " from GitHub released tagged eg. 'vXX-upstream` or download"
               " CEF binaries from Spotify Automated Builds and then run"
               "`automate.py --prebuilt-cef`."
               .format(prebuilt_dir=prebuilt_name))
