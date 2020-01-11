@@ -147,9 +147,11 @@ IF PY_MAJOR_VERSION == 2:
     from urllib import pathname2url as urllib_pathname2url
     # noinspection PyUnresolvedReferences
     from urllib import urlencode as urllib_urlencode
+    from urllib import quote as urlparse_quote
 ELSE:
     # noinspection PyUnresolvedReferences
     from urllib import parse as urlparse
+    from urllib.parse import quote as urlparse_quote
     # noinspection PyUnresolvedReferences
     from urllib.request import pathname2url as urllib_pathname2url
     # noinspection PyUnresolvedReferences
@@ -1027,7 +1029,8 @@ cpdef LoadCrlSetsFile(py_string path):
     CefLoadCRLSetsFile(PyToCefStringValue(path))
 
 cpdef GetDataUrl(data, mediatype="html"):
-    html = data.encode("utf-8", "replace")
-    b64 = base64.b64encode(html).decode("utf-8", "replace")
+    if PY_MAJOR_VERSION >= 3:
+        data = data.encode("utf-8", "replace")
+    b64 = base64.b64encode(data).decode("utf-8", "replace")
     ret = "data:text/html;base64,{data}".format(data=b64)
     return ret

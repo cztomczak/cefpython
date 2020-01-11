@@ -235,7 +235,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         req_file = os.path.dirname(os.path.abspath(__file__))
         req_file = os.path.join(req_file, "main_test.py")
         if sys.version_info.major > 2:
-            req_file = req_file.encode()
+            req_file = req_file.encode("utf-8")
         req_data = [b"--key=value", b"@"+req_file]
         req.SetMethod("POST")
         req.SetPostData(req_data)
