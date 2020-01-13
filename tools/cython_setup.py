@@ -25,6 +25,7 @@ from common import *
 import sys
 import platform
 import Cython
+import copy
 import os
 
 # Must monkey patch Cython's ModuleNode to inject custom C++ code
@@ -63,6 +64,27 @@ if MAC:
     # Overwrite Cython function
     ModuleNode.generate_extern_c_macro_definition = (
             generate_extern_c_macro_definition)
+
+
+# Issue #554: Shared libraries in manylinux1 wheel should not
+#             be linked against libpythonX.Y.so.1.0.
+if LINUX:
+    get_libraries_old = (build_ext.get_libraries)
+    def get_libraries_new(self, ext):
+        libraries = get_libraries_old(self, ext)
+        libpython = ('python' + str(sys.version_info.major) + '.'
+                     + str(sys.version_info.minor))
+        for lib in copy.copy(libraries):
+            # Library name for Python versions before 3.8 may have
+            # an 'm' at the end.
+            if lib.startswith(libpython):
+                print("[cython_setup.py] Do not link against -l%s (Issue #554)"
+                    % lib)
+                libraries.remove(lib)
+        return libraries
+    build_ext.get_libraries = (
+            get_libraries_new
+    )
 
 
 # Command line args
