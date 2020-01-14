@@ -92,8 +92,8 @@ cdef list CefListValueToPyList(
     if nestingLevel > 8:
         raise Exception("CefListValueToPyList(): max nesting level (8)"
                 " exceeded")
-    cdef int index
-    cdef int size = int(cefListValue.get().GetSize())
+    cdef size_t index
+    cdef size_t size = cefListValue.get().GetSize()
     cdef cef_types.cef_value_type_t valueType
     cdef list ret = []
     cdef CefRefPtr[CefBinaryValue] binaryValue
@@ -230,7 +230,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
     cdef type valueType
     cdef CefRefPtr[CefListValue] ret = CefListValue_Create()
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef int index
+    cdef size_t index
     for index_size_t, value in enumerate(pyList):
         index = int(index_size_t)
         valueType = type(value)
@@ -289,7 +289,7 @@ cdef void PyListToExistingCefListValue(
                 " exceeded")
     cdef type valueType
     cdef CefRefPtr[CefListValue] newCefListValue
-    cdef int index
+    cdef size_t index
     for index_size_t, value in enumerate(pyList):
         index = int(index_size_t)
         valueType = type(value)
