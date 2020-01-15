@@ -119,6 +119,19 @@ cdef class Cookie:
         return CefToPyString(cefString)
 
     cpdef py_void SetDomain(self, py_string domain):
+        pattern = re.compile(r"^(?:[a-z0-9](?:[a-z0-9-_]{0,61}[a-z0-9])?\.)"
+                             r"+[a-z0-9][a-z0-9-_]{0,61}[a-z]$")
+        if PY_MAJOR_VERSION == 2:
+            assert isinstance(domain, bytes), "domain type is not bytes"
+            domain = domain.decode(g_applicationSettings["string_encoding"],
+                                   errors=BYTES_DECODE_ERRORS)
+        try:
+            if not pattern.match(domain.encode("idna").decode("ascii")):
+                raise Exception("Cookie.SetDomain() failed, invalid domain: {0}"
+                                .format(domain))
+        except UnicodeError:
+            raise Exception("Cookie.SetDomain() failed, invalid domain: {0}"
+                                .format(domain))
         cdef CefString cefString
         cefString.Attach(&self.cefCookie.domain, False)
         PyToCefString(domain, cefString)
