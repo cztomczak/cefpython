@@ -199,7 +199,7 @@ Additional information for v31.2 release:
   [v31.2](../../releases/tag/v31.2).
 - API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
 - Other documentation can be downloaded by cloning the
-  [cefpython.wiki.git](git@github.com:cztomczak/cefpython.wiki.git) repository.
+  cefpython.wiki repository: `git clone git@github.com:cztomczak/cefpython.wiki.git`
 
 
 ## Support development
