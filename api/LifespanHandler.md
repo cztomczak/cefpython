@@ -107,10 +107,6 @@ Description from upstream CEF:
 > browser is destroyed before the popup browser creation completes (indicated
 > by a call to OnAfterCreated for the popup browser).
 
-Note that if you return True and create the popup window yourself, then
-the popup window and parent window will not be able to script each other.
-There will be no "window.opener" property available in the popup window.
-
 `WindowOpenDisposition` constants in the cefpython module:
 * WOD_UNKNOWN,
 * WOD_CURRENT_TAB,
@@ -122,3 +118,11 @@ There will be no "window.opener" property available in the popup window.
 * WOD_SAVE_TO_DISK,
 * WOD_OFF_THE_RECORD,
 * WOD_IGNORE_ACTION
+
+Note that if you return True and create the popup window yourself, then
+the popup window and parent window will not be able to script each other.
+There will be no "window.opener" property available in the popup window.
+To avoid this issue create a hidden window when your application starts.
+Parent the new popup browser to the hidden window in OnBeforePopup. After
+the browser exists (OnAfterCreated) create the desired target window
+and re-parent the browser to that target window.
