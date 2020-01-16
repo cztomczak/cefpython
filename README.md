@@ -131,7 +131,6 @@ See the [README-examples.md](examples/README-examples.md) and
   in the issue. See
   [Most popular issues](../../issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc)
   sorted by reactions.
-- Wiki pages are deprecated and for v31 only
 
 
 ## Releases
@@ -196,10 +195,11 @@ Mac | 2.7 | No | Yes | Yes | MacOS 10.7+
 
 Additional information for v31.2 release:
 - On Windows/Mac you can install with command: `pip install cefpython3==31.2`
-- Downloads are available on [wiki pages](../../wiki#downloads)
-  and on GitHub Releases tagged [v31.2](../../releases/tag/v31.2).
-- Documentation is on [wiki pages](../../wiki)
+- Downloads are available on the GitHub Releases page tagged
+  [v31.2](../../releases/tag/v31.2).
 - API reference is available in revision [169a1b2](../../tree/169a1b20d3cd09879070d41aab28cfa195d2a7d5/docs/api)
+- Other documentation can be downloaded by cloning the
+  [cefpython.wiki.git](git@github.com:cztomczak/cefpython.wiki.git) repository.
 
 
 ## Support development
