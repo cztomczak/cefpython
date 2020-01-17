@@ -197,9 +197,11 @@ class MainTest_IsolatedTest(unittest.TestCase):
 
         # Client handlers
         display_handler2 = DisplayHandler2(self)
+        v8context_handler = V8ContextHandler(self)
         client_handlers = [LoadHandler(self, g_datauri),
                            DisplayHandler(self),
-                           display_handler2]
+                           display_handler2,
+                           v8context_handler]
         for handler in client_handlers:
             browser.SetClientHandler(handler)
         subtest_message("browser.SetClientHandler() ok")
@@ -335,6 +337,35 @@ class DisplayHandler2(object):
         self.OnLoadingProgressChange_True = True
         self.OnLoadingProgressChange_Progress = progress
 
+
+class V8ContextHandler(object):
+    def __init__(self, test_case):
+        self.test_case = test_case
+        self.OnContextCreatedFirstCall_True = False
+        self.OnContextCreatedSecondCall_True = False
+        self.OnContextReleased_True = False
+
+    def OnContextCreated(self, browser, frame):
+        """CEF creates one context when creating browser and this one is
+           released immediately. Then when it loads url another context is
+           created."""
+        if not self.OnContextCreatedFirstCall_True:
+            self.OnContextCreatedFirstCall_True = True
+        else:
+            self.test_case.assertFalse(self.OnContextCreatedSecondCall_True)
+            self.OnContextCreatedSecondCall_True = True
+        self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
+        self.test_case.assertEqual(frame.GetIdentifier(), 2)
+
+    def OnContextReleased(self, browser, frame):
+        """This gets called only for the initial empty context, see comment
+           in OnContextCreated. This should never get called for the main frame
+           of the main browser, because it happens during app exit and there
+           isn't enough time for the IPC messages to go through."""
+        self.test_case.assertFalse(self.OnContextReleased_True)
+        self.OnContextReleased_True = True
+        self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
+        self.test_case.assertEqual(frame.GetIdentifier(), 2)
 
 class External(object):
     """Javascript 'window.external' object."""

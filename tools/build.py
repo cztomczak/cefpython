@@ -18,12 +18,15 @@ Option 2: Use the automate.py tool. With this tool you can build CEF
 from sources or use ready binaries from Spotify Automated Builds.
 
 Usage:
-    build.py VERSION [--rebuild-cpp] [--fast] [--clean] [--kivy]
-                     [--hello-world]
+    build.py VERSION [--rebuild-cpp] [--unittests] [--fast] [--clean] [--kivy]
+                     [--hello-world] [--enable-profiling]
+                     [--enable-line-tracing]
 
 Options:
     VERSION                Version number eg. 50.0
-    --no-run-examples      Do not run examples after build, only unit tests
+    --unittests            Run only unit tests. Do not run examples while
+                           building cefpython modules. Examples require
+                           interaction such as closing window before proceeding.
     --fast                 Fast mode
     --clean                Clean C++ projects build files on Linux/Mac
     --kivy                 Run only Kivy example
@@ -79,7 +82,7 @@ except NameError:
 # Command line args variables
 SYS_ARGV_ORIGINAL = None
 VERSION = ""
-NO_RUN_EXAMPLES = False
+UNITTESTS = False
 DEBUG_FLAG = False
 FAST_FLAG = False
 CLEAN_FLAG = False
@@ -125,7 +128,7 @@ def main():
 
 def command_line_args():
     global DEBUG_FLAG, FAST_FLAG, CLEAN_FLAG, KIVY_FLAG, HELLO_WORLD_FLAG, \
-           REBUILD_CPP, VERSION, NO_RUN_EXAMPLES
+           REBUILD_CPP, VERSION, UNITTESTS
 
     VERSION = get_version_from_command_line_args(__file__)
     # Other scripts called by this script expect that version number
@@ -140,10 +143,10 @@ def command_line_args():
     global SYS_ARGV_ORIGINAL
     SYS_ARGV_ORIGINAL = copy.copy(sys.argv)
 
-    if "--no-run-examples" in sys.argv:
-        NO_RUN_EXAMPLES = True
-        print("[build.py] Running examples disabled (--no-run-examples)")
-        sys.argv.remove("--no-run-examples")
+    if "--unittests" in sys.argv:
+        UNITTESTS = True
+        print("[build.py] Running examples disabled (--unittests)")
+        sys.argv.remove("--unittests")
 
     if "--debug" in sys.argv:
         DEBUG_FLAG = True
@@ -913,7 +916,7 @@ def install_and_run():
         sys.exit(1)
 
     # Run examples
-    if not NO_RUN_EXAMPLES:
+    if not UNITTESTS:
         print("[build.py] Run examples")
         os.chdir(EXAMPLES_DIR)
         flags = ""

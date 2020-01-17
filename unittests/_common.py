@@ -82,7 +82,7 @@ def check_auto_asserts(test_case, objects):
         test_for_True = False  # Test whether asserts are working correctly
         for key, value in obj.__dict__.items():
             if key == "test_for_True":
-                test_for_True = True
+                test_for_True = value
                 continue
             if "_True" in key:
                 test_case.assertTrue(value, "Check assert: " +
@@ -96,7 +96,8 @@ def check_auto_asserts(test_case, objects):
                 subtest_message(obj.__class__.__name__ + "." +
                                 key.replace("_False", "") +
                                 " ok")
-        test_case.assertTrue(test_for_True)
+        if "test_for_True" in obj.__dict__.keys():
+            test_case.assertTrue(test_for_True)
 
 
 class DisplayHandler(object):
