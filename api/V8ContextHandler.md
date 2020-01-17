@@ -3,7 +3,9 @@
 
 # V8ContextHandler (interface)
 
-Implement this interface to handle javascript exceptions globally.
+Implement this interface to handle render process callbacks.
+Through inter-process messaging you are notified about these events
+in the browser process.
 
 
 Table of contents:
