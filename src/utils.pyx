@@ -72,52 +72,6 @@ cpdef str GetSystemError():
     ELSE:
         return ""
 
-cpdef str GetNavigateUrl(py_string url):
-    # Encode local file paths so that CEF can load them correctly:
-    # | some.html, some/some.html, D:\, /var, file://
-    if re.search(r"^file:", url, re.I) or \
-            re.search(r"^[a-zA-Z]:", url) or \
-            not re.search(r"^[\w-]+:", url):
-
-        # Function pathname2url will complain if url starts with "file://".
-        # CEF may also change local urls to "file:///C:/" - three slashes.
-        is_file_protocol = False
-        file_prefix = ""
-        file_prefixes = ["file:///", "file://"]
-        for file_prefix in file_prefixes:
-            if url.startswith(file_prefix):
-                is_file_protocol = True
-                # Remove the file:// prefix
-                url = url[len(file_prefix):]
-                break
-
-        # Need to encode chinese characters in local file paths,
-        # otherwise CEF will try to encode them by itself. But it
-        # will fail in doing so. CEF will return the following string:
-        # >> %EF%BF%97%EF%BF%80%EF%BF%83%EF%BF%A6
-        # But it should be:
-        # >> %E6%A1%8C%E9%9D%A2
-        url = urllib_pathname2url(url)
-
-        if is_file_protocol:
-            url = "%s%s" % (file_prefix, url)
-
-        # If it is C:\ then colon was encoded. Decode it back.
-        url = re.sub(r"^([a-zA-Z])%3A", r"\1:", url)
-
-        # Allow hash when loading urls. The pathname2url function
-        # replaced hashes with "%23" (Issue #114).
-        url = url.replace("%23", "#")
-
-        # Allow more special characters when loading urls. The pathname2url
-        # function encoded them and need to decode them back here
-        # Characters: ? & = (Issue #273).
-        url = url.replace("%3F", "?")
-        url = url.replace("%26", "&")
-        url = url.replace("%3D", "=")
-
-    return str(url)
-
 cpdef py_bool IsFunctionOrMethod(object valueType):
     if (valueType == types.FunctionType
             or valueType == types.MethodType

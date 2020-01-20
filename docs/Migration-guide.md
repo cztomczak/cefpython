@@ -50,6 +50,7 @@ Table of contents:
 * [v66+ cef.Request.Flags changed](#v66-cefrequestflags-changed)
 * [v66+ RequestHandler.GetCookieManager not getting called in some cases](#v66-requesthandlergetcookiemanager-not-getting-called-in-some-cases)
 * [v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loop-qt-wxpython)
+* [v66.1+ Navigation urls passed to CreateBrowserSync or LoadUrl methods need to be encoded by app code](#v661-navigation-urls-passed-to-createbrowsersync-or-loadurl-methods-need-to-be-encoded-by-app-code)
 * [v67+ Do not call the 'WindowUtils.OnSize' function](#v67-do-not-call-the-windowutilsonsize-function)
 
 
@@ -487,6 +488,16 @@ tested of how this change affects performance.
 
 See Issue [#442](../../../issues/442) for more details on the issues.
 
+## v66.1+ Navigation urls passed to CreateBrowserSync or LoadUrl methods need to be encoded by app code
+
+[Issue #384](../../../issues/384) fixes problems with browser failing to load
+urls containing certain characters by not encoding the url anymore. From now
+on it is required for the app code to encode the url properly. You can use
+the `pathlib.PurePath.as_uri` in Python 3 or `urllib.pathname2url` in
+Python 2 (`urllib.request.pathname2url` in Python 3) depending on your case.
+
+The `cef.GetNavigateUrl` function was removed from the cefpython3 module.
+
 
 ## v67+ Do not call the 'WindowUtils.OnSize' function
 
@@ -495,4 +506,3 @@ Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#upd
 function. Except when you use the `pywin32.py` example, in such case
 `WindowUtils.OnSize` must be called.
 See [Issue #464](../../../issues/464) for more details.
-

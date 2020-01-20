@@ -211,7 +211,6 @@ cdef class PyFrame:
         self.GetCefFrame().get().LoadString(cefValue, cefUrl)
 
     cpdef py_void LoadUrl(self, py_string url):
-        url = GetNavigateUrl(url)
         cdef CefString cefUrl
         PyToCefString(url, cefUrl)
         self.GetCefFrame().get().LoadURL(cefUrl)

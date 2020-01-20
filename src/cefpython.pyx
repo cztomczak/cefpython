@@ -144,16 +144,12 @@ IF PY_MAJOR_VERSION == 2:
     # noinspection PyUnresolvedReferences
     import urlparse
     # noinspection PyUnresolvedReferences
-    from urllib import pathname2url as urllib_pathname2url
-    # noinspection PyUnresolvedReferences
     from urllib import urlencode as urllib_urlencode
     from urllib import quote as urlparse_quote
 ELSE:
     # noinspection PyUnresolvedReferences
     from urllib import parse as urlparse
     from urllib.parse import quote as urlparse_quote
-    # noinspection PyUnresolvedReferences
-    from urllib.request import pathname2url as urllib_pathname2url
     # noinspection PyUnresolvedReferences
     from urllib.parse import urlencode as urllib_urlencode
 
@@ -739,8 +735,6 @@ def CreateBrowserSync(windowInfo=None,
     cdef CefWindowInfo cefWindowInfo
     SetCefWindowInfo(cefWindowInfo, windowInfo)
 
-    navigateUrl = GetNavigateUrl(navigateUrl)
-    Debug("navigateUrl: %s" % navigateUrl)
     cdef CefString cefNavigateUrl
     PyToCefString(navigateUrl, cefNavigateUrl)
 
