@@ -246,10 +246,10 @@ priority.
  <tr>
   <td>
    <div align="center">
-    <a href="https://clearchat.com/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/clearchat.png">
+    <a href="https://highside.io/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/highside-onlight-200x48.png">
     </a><br>
-    <a href="https://clearchat.com/">www.clearchat.com</a>
+    <a href="https://highside.io/">www.highside.io</a>
    <div align="center">
   </td>
   <td>
@@ -278,7 +278,7 @@ priority.
   the v49 release for legacy systems (WinXP/Vista)
 * [2018] Many thanks to [Lampix](https://lampix.com/) for sponsoring the v66
   release for all platforms
-* [2017] Many thanks to [ClearChat Inc.](https://clearchat.com/) for sponsoring
+* [2017] Many thanks to [HighSide Inc.](https://highside.io/) for sponsoring
   the v55/v56 releases for all platforms
 * [2016-2018] Thanks to JetBrains for providing an Open Source license for
   [PyCharm](https://www.jetbrains.com/pycharm/)
