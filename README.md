@@ -2,7 +2,8 @@
 
 Table of contents:
 * [Introduction](#introduction)
-* [Sponsors](#sponsors)
+* [Latest releases sponsored by](#latest-releases-sponsored-by)
+  * [Thanks to all sponsors](#thanks-to-all-sponsors)
 * [Install](#install)
 * [Tutorial](#tutorial)
 * [Examples](#examples)
@@ -13,7 +14,6 @@ Table of contents:
   * [v49 release (WinXP/Vista)](#v49-release-winxpvista)
   * [v31 release (old systems)](#v31-release-old-systems)
 * [Support development](#support-development)
-  * [Thanks to sponsors](#thanks-to-sponsors)
   * [Thanks to all](#thanks-to-all)
 * [Seeking new sponsors](#seeking-new-sponsors)
 * [Other READMEs](#other-readmes)
@@ -49,7 +49,7 @@ frameworks such as PyQt, wxPython, PyGTK, PyGObject, Tkinter, Kivy, Panda3D,
 PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 
 
-## Sponsors
+## Latest releases sponsored by
 
 <table border="0"><tr>
 <td width="50%" valign="top">
@@ -81,6 +81,63 @@ businesses with cutting edge marketing technology. Please visit their website:
 <a href="https://www.fivestars.com/">Fivestars.com</a>
 
 </tr></table>
+
+### Thanks to all sponsors
+
+<table>
+ <tr>
+  <td>
+   <div align="center">
+    <a href="https://www.fivestars.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars200.png">
+    </a><br>
+    <a href="https://www.fivestars.com/">www.fivestars.com</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
+    <a href="https://lampix.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix200.png">
+    </a><br>
+    <a href="https://lampix.com/">www.lampix.com</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
+    <a href="http://www.blueplanet.com/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan_new_logo_200x48.png">
+    </a><br>
+    <a href="http://www.blueplanet.com/">www.blueplanet.com</a>
+   </div>
+  </td>
+ </tr>
+ <tr>
+  <td>
+   <div align="center">
+    <a href="https://highside.io/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/highside-onlight-200x48.png">
+    </a><br>
+    <a href="https://highside.io/">www.highside.io</a>
+   <div align="center">
+  </td>
+  <td>
+   <div align="center">
+    <a href="http://www.rentouch.ch/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
+    </a><br>
+    <a href="http://www.rentouch.ch/">www.rentouch.ch</a>
+   </div>
+  </td>
+  <td>
+   <div align="center">
+    <a href="https://www.jetbrains.com/pycharm/">
+     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
+    </a><br>
+    <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com</a>
+   </div>
+  </td>
+ <tr>
+</table>
 
 
 ## Install
@@ -213,63 +270,6 @@ priority.
 <a href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=V7LU7PD4N4GGG'>
 <img src='https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/donate.gif' />
 </a><br><br>
-
-### Thanks to sponsors
-
-<table>
- <tr>
-  <td>
-   <div align="center">
-    <a href="https://www.fivestars.com/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars200.png">
-    </a><br>
-    <a href="https://www.fivestars.com/">www.fivestars.com</a>
-   </div>
-  </td>
-  <td>
-   <div align="center">
-    <a href="https://lampix.com/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix200.png">
-    </a><br>
-    <a href="https://lampix.com/">www.lampix.com</a>
-   </div>
-  </td>
-  <td>
-   <div align="center">
-    <a href="http://www.blueplanet.com/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/cyan.png">
-    </a><br>
-    <a href="http://www.blueplanet.com/">www.blueplanet.com</a>
-   </div>
-  </td>
- </tr>
- <tr>
-  <td>
-   <div align="center">
-    <a href="https://highside.io/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/highside-onlight-200x48.png">
-    </a><br>
-    <a href="https://highside.io/">www.highside.io</a>
-   <div align="center">
-  </td>
-  <td>
-   <div align="center">
-    <a href="http://www.rentouch.ch/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/rentouch.png">
-    </a><br>
-    <a href="http://www.rentouch.ch/">www.rentouch.ch</a>
-   </div>
-  </td>
-  <td>
-   <div align="center">
-    <a href="https://www.jetbrains.com/pycharm/">
-     <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/pycharm.png">
-    </a><br>
-    <a href="https://www.jetbrains.com/pycharm/">www.jetbrains.com</a>
-   </div>
-  </td>
- <tr>
-</table>
 
 
 ### Thanks to all
