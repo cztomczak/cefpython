@@ -212,6 +212,8 @@ class CefWidget(CefWidgetParent):
     def focusInEvent(self, event):
         # This event seems to never get called on Linux, as CEF is
         # stealing all focus due to Issue #284.
+        if cef.GetAppSetting("debug"):
+            print("[qt.py] CefWidget.focusInEvent")
         if self.browser:
             if WINDOWS:
                 WindowUtils.OnSetFocus(self.getHandle(), 0, 0, 0)
@@ -220,6 +222,8 @@ class CefWidget(CefWidgetParent):
     def focusOutEvent(self, event):
         # This event seems to never get called on Linux, as CEF is
         # stealing all focus due to Issue #284.
+        if cef.GetAppSetting("debug"):
+            print("[qt.py] CefWidget.focusOutEvent")
         if self.browser:
             self.browser.SetFocus(False)
 
@@ -336,18 +340,20 @@ class FocusHandler(object):
     def __init__(self, cef_widget):
         self.cef_widget = cef_widget
 
+    def OnTakeFocus(self, **_):
+        if cef.GetAppSetting("debug"):
+            print("[qt.py] FocusHandler.OnTakeFocus")
+
     def OnSetFocus(self, **_):
-        print("[qt.py] FocusHandler.OnSetFocus")
-        if LINUX:
-            return False
-        else:
-            return True
+        if cef.GetAppSetting("debug"):
+            print("[qt.py] FocusHandler.OnSetFocus")
 
     def OnGotFocus(self, browser, **_):
+        if cef.GetAppSetting("debug"):
+            print("[qt.py] FocusHandler.OnGotFocus")
+        self.cef_widget.setFocus()
         # Temporary fix no. 1 for focus issues on Linux (Issue #284)
         if LINUX:
-            print("[qt.py] FocusHandler.OnGotFocus:"
-                  " keyboard focus fix no. 1 (Issue #284)")
             browser.SetFocus(True)
 
 
