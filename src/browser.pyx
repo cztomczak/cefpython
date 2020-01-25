@@ -576,15 +576,8 @@ cdef class PyBrowser:
     cpdef py_void ShowDevTools(self):
         cdef CefWindowInfo window_info
         IF UNAME_SYSNAME == "Windows":
-            # On Windows with empty window_info structure the devtools
-            # window doesn't appear.
-            window_info.SetAsPopup(
-                    # TODO:
-                    # According to docs this returns NULL for non-popup
-                    # windows, so looks like we shouldn't use that and
-                    # either pass NULL or GetWindowHandle().
-                    <CefWindowHandle>self.GetOpenerWindowHandle(),
-                    PyToCefStringValue("DevTools"))
+            window_info.SetAsPopup(<CefWindowHandle>self.GetWindowHandle(),
+                                   PyToCefStringValue("DevTools"))
         cdef CefBrowserSettings settings
         cdef CefPoint inspect_element_at
         self.GetCefBrowserHost().get().ShowDevTools(
