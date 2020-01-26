@@ -378,6 +378,7 @@ supporting this project actively on a daily basis.
 #### Client handlers (interfaces)
 
  * [AccessibilityHandler](api/AccessibilityHandler.md#accessibilityhandler-interface)
+ * [DevToolsHandler](api/DevToolsHandler#devtoolshandler-interface)
  * [DisplayHandler](api/DisplayHandler.md#displayhandler-interface)
  * [DownloadHandler](api/DownloadHandler.md#downloadhandler)
  * [FocusHandler](api/FocusHandler.md#focushandler-interface)
