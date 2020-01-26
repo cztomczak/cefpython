@@ -39,7 +39,7 @@
 ### Client handlers (interfaces)
 
  * [AccessibilityHandler](AccessibilityHandler.md#accessibilityhandler-interface)
- * [DevToolsHandler](DevToolsHandler#devtoolshandler-interface)
+ * [DevToolsHandler](DevToolsHandler.md#devtoolshandler-interface)
  * [DisplayHandler](DisplayHandler.md#displayhandler-interface)
  * [DownloadHandler](DownloadHandler.md#downloadhandler)
  * [FocusHandler](FocusHandler.md#focushandler-interface)
