@@ -278,6 +278,8 @@ cdef class PyBrowser:
             # FocusHandler
             self.allowedClientCallbacks += ["OnTakeFocus", "OnSetFocus",
                                             "OnGotFocus"]
+            # DevToolsHandler
+            self.allowedClientCallbacks += ["ShowDevTools"]
 
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "
@@ -574,15 +576,19 @@ cdef class PyBrowser:
         self.GetCefBrowserHost().get().SetZoomLevel(zoomLevel)
 
     cpdef py_void ShowDevTools(self):
+        cdef object callback = self.GetClientCallback("ShowDevTools")
         cdef CefWindowInfo window_info
-        IF UNAME_SYSNAME == "Windows":
-            window_info.SetAsPopup(<CefWindowHandle>self.GetWindowHandle(),
-                                   PyToCefStringValue("DevTools"))
         cdef CefBrowserSettings settings
         cdef CefPoint inspect_element_at
-        self.GetCefBrowserHost().get().ShowDevTools(
-                window_info, <CefRefPtr[CefClient]?>NULL, settings,
-                inspect_element_at)
+        if callback:
+            callback(self)
+        else:
+            IF UNAME_SYSNAME == "Windows":
+                window_info.SetAsPopup(<CefWindowHandle>self.GetWindowHandle(),
+                                    PyToCefStringValue("DevTools"))
+            self.GetCefBrowserHost().get().ShowDevTools(
+                    window_info, <CefRefPtr[CefClient]?>NULL, settings,
+                    inspect_element_at)
 
     cpdef py_void StopLoad(self):
         self.GetCefBrowser().get().StopLoad()

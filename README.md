@@ -612,6 +612,8 @@ supporting this project actively on a daily basis.
   * [FlushStore](api/CookieManager.md#flushstore)
 * [CookieVisitor (interface)](api/CookieVisitor.md#cookievisitor-interface)
   * [Visit](api/CookieVisitor.md#visit)
+* [DevToolsHandler (interface)](api/DevToolsHandler.md#devtoolshandler-interface)
+  * [ShowDevTools](api/DevToolsHandler.md#showdevtools)
 * [DisplayHandler (interface)](api/DisplayHandler.md#displayhandler-interface)
   * [OnAddressChange](api/DisplayHandler.md#onaddresschange)
   * [OnAutoResize](api/DisplayHandler.md#onautoresize)
