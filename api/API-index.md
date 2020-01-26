@@ -213,6 +213,8 @@
   * [FlushStore](CookieManager.md#flushstore)
 * [CookieVisitor (interface)](CookieVisitor.md#cookievisitor-interface)
   * [Visit](CookieVisitor.md#visit)
+* [DevToolsHandler (interface)](DevToolsHandler.md#devtoolshandler-interface)
+  * [ShowDevTools](DevToolsHandler.md#showdevtools)
 * [DisplayHandler (interface)](DisplayHandler.md#displayhandler-interface)
   * [OnAddressChange](DisplayHandler.md#onaddresschange)
   * [OnAutoResize](DisplayHandler.md#onautoresize)
