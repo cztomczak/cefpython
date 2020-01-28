@@ -556,12 +556,13 @@ cdef class PyBrowser:
             CefSize(max_size[0], max_size[1])
         )
 
-
     cpdef py_void SetBounds(self, int x, int y, int width, int height):
         IF UNAME_SYSNAME == "Linux":
             x11.SetX11WindowBounds(self.GetCefBrowser(), x, y, width, height)
-        ELSE:
-            NonCriticalError("SetBounds() not implemented on this platform")
+        ELIF UNAME_SYSNAME == "Windows":
+            SetWindowPos(<HWND>self.GetWindowHandle(), <HWND>NULL,
+                         0, 0, width, height,
+                         SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE)
 
     cpdef py_void SetAccessibilityState(self, cef_state_t state):
         self.GetCefBrowserHost().get().SetAccessibilityState(state)

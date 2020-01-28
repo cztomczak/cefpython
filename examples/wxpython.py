@@ -204,10 +204,7 @@ class MainFrame(wx.Frame):
     def OnSize(self, _):
         if not self.browser:
             return
-        if WINDOWS:
-            cef.WindowUtils.OnSize(self.browser_panel.GetHandle(),
-                                   0, 0, 0)
-        elif LINUX:
+        if WINDOWS or LINUX:
             (x, y) = (0, 0)
             (width, height) = self.browser_panel.GetSize().Get()
             self.browser.SetBounds(x, y, width, height)

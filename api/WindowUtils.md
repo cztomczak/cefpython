@@ -46,7 +46,11 @@ Windows-only. This method processes WM_SETFOCUS message which is sent to a windo
 | lparam | long |
 | __Return__ | void |
 
-Windows-only. This method processes WM_SIZE message which is sent to a window after its size has changed.
+Windows-only. This method should be called during WM_SIZE message which
+is sent to a window after its size has changed. Most examples should call
+the `Browser`.[SetBounds](Browser.md#setbounds) method during size events.
+The `pywin32.py` example is an exception and it needs to use the
+`WindowUtils.OnSize` method.
 
 
 ### OnEraseBackground (Win)
