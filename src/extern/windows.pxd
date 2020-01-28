@@ -52,9 +52,10 @@ cdef extern from "Windows.h" nogil:
 
     ctypedef void* HDWP
 
-    cdef int SWP_NOZORDER
-    cdef int SWP_NOACTIVATE
-    cdef int SWP_FRAMECHANGED
+    cdef UINT SWP_NOZORDER
+    cdef UINT SWP_NOMOVE
+    cdef UINT SWP_NOACTIVATE
+    cdef UINT SWP_FRAMECHANGED
 
     cdef HDWP BeginDeferWindowPos(int nNumWindows)
     cdef HDWP DeferWindowPos(

@@ -15,20 +15,15 @@ def main():
     cef.Initialize()
     window_info = cef.WindowInfo()
     parent_handle = 0
-    # This call has effect only on Mac and Linux.
+    # SetAsChild() call has effect only on Mac and Linux.
     # All rect coordinates are applied including X and Y parameters.
     window_info.SetAsChild(parent_handle, [0, 0, 900, 640])
     browser = cef.CreateBrowserSync(url="https://www.google.com/",
                                     window_info=window_info,
                                     window_title="Window size")
     if platform.system() == "Windows":
-        window_handle = browser.GetOuterWindowHandle()
-        insert_after_handle = 0
-        # X and Y parameters are ignored by setting the SWP_NOMOVE flag
-        SWP_NOMOVE = 0x0002
-        # noinspection PyUnresolvedReferences
-        ctypes.windll.user32.SetWindowPos(window_handle, insert_after_handle,
-                                          0, 0, 900, 640, SWP_NOMOVE)
+        # X and Y parameters are ignored.
+        browser.SetBounds(0, 0, 900, 640)
     cef.MessageLoop()
     del browser
     cef.Shutdown()

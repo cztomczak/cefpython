@@ -814,7 +814,12 @@ Description from upstream CEF:
 | height | int |
 | __Return__ | void |
 
-Linux-only. Set window bounds.
+Set browser internal window bounds. This method should be called during
+size events of parent window in which CEF browser is embedded.
+
+On Windows the x and y parameters are ignored.
+
+On Mac this function does nothing.
 
 
 ### SendKeyEvent

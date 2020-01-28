@@ -192,8 +192,14 @@ class MainTest_IsolatedTest(unittest.TestCase):
         browser = cef.CreateBrowserSync(url=g_datauri,
                                         settings=browser_settings)
         self.assertIsNotNone(browser, "Browser object")
-        browser.SetFocus(True)
         subtest_message("cef.CreateBrowserSync() ok")
+
+        if WINDOWS or LINUX:
+            browser.SetBounds(0, 0, 800, 600)
+            subtest_message('Browser.SetBounds() ok')
+
+        browser.SetFocus(True)
+        subtest_message("Browser.SetFocus() ok")
 
         # Client handlers
         display_handler2 = DisplayHandler2(self)
@@ -204,7 +210,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
                            v8context_handler]
         for handler in client_handlers:
             browser.SetClientHandler(handler)
-        subtest_message("browser.SetClientHandler() ok")
+        subtest_message("Browser.SetClientHandler() ok")
 
         # Javascript bindings
         external = External(self)
@@ -223,13 +229,13 @@ class MainTest_IsolatedTest(unittest.TestCase):
         bindings.SetProperty("cefpython_version", cef.GetVersion())
         bindings.SetObject("external", external)
         browser.SetJavascriptBindings(bindings)
-        subtest_message("browser.SetJavascriptBindings() ok")
+        subtest_message("Browser.SetJavascriptBindings() ok")
 
         # Set auto resize. Call it after js bindings were set.
         browser.SetAutoResizeEnabled(enabled=True,
                                      min_size=[800, 600],
                                      max_size=[1024, 768])
-        subtest_message("browser.SetAutoResizeEnabled() ok")
+        subtest_message("Browser.SetAutoResizeEnabled() ok")
 
         # Test Request.SetPostData(list)
         # noinspection PyArgumentList
@@ -266,7 +272,6 @@ class MainTest_IsolatedTest(unittest.TestCase):
             hwnd = 1  # When using 0 getting issues with OnautoResize
             self.assertFalse(cef.WindowUtils.IsWindowHandle(hwnd))
             cef.WindowUtils.OnSetFocus(hwnd, 0, 0, 0)
-            cef.WindowUtils.OnSize(hwnd, 0, 0, 0)
             cef.WindowUtils.OnEraseBackground(hwnd, 0, 0, 0)
             cef.WindowUtils.GetParentHandle(hwnd)
             cef.WindowUtils.SetTitle(browser, "Main test")
@@ -292,7 +297,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Close browser and clean reference
         browser.CloseBrowser(True)
         del browser
-        subtest_message("browser.CloseBrowser() ok")
+        subtest_message("Browser.CloseBrowser() ok")
 
         # Give it some time to close before checking asserts
         # and calling shutdown.

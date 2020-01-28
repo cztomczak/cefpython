@@ -153,11 +153,24 @@ def save_screenshot(browser):
     # "OnPaint.buffer_string" data is set in RenderHandler.OnPaint.
     buffer_string = browser.GetUserData("OnPaint.buffer_string")
     if not buffer_string:
-        raise Exception("buffer_string is empty, OnPaint never called?")
+        # Sometimes LoadHandler.OnLoadingStateChange gets called
+        # before RenderHandler.OnPaint.
+        if not browser.GetUserData("save_screenshot.delay_printed"):
+            sys.stdout.write("[screenshot.py] Delay")
+            sys.stdout.flush()
+            browser.SetUserData("save_screenshot.delay_printed", True)
+        else:
+            sys.stdout.write(".")
+            sys.stdout.flush()
+        cef.PostDelayedTask(cef.TID_UI, 13, save_screenshot, browser)
+        return
     image = Image.frombytes("RGBA", VIEWPORT_SIZE, buffer_string,
                             "raw", "RGBA", 0, 1)
     image.save(SCREENSHOT_PATH, "PNG")
+    sys.stdout.write(os.linesep)
     print("[screenshot.py] Saved image: {path}".format(path=SCREENSHOT_PATH))
+    # See comments in exit_app() why PostTask must be used
+    cef.PostTask(cef.TID_UI, exit_app, browser)
 
 
 def open_with_default_application(path):
@@ -187,10 +200,9 @@ class LoadHandler(object):
         if not is_loading:
             # Loading is complete
             sys.stdout.write(os.linesep)
+            sys.stdout.flush()
             print("[screenshot.py] Web page loading is complete")
             save_screenshot(browser)
-            # See comments in exit_app() why PostTask must be used
-            cef.PostTask(cef.TID_UI, exit_app, browser)
 
     def OnLoadError(self, browser, frame, error_code, failed_url, **_):
         """Called when the resource load for a navigation fails
@@ -225,7 +237,10 @@ class RenderHandler(object):
             sys.stdout.write(".")
             sys.stdout.flush()
         else:
+            if browser.GetUserData("save_screenshot.delay_printed"):
+                sys.stdout.write(os.linesep)
             sys.stdout.write("[screenshot.py] OnPaint")
+            sys.stdout.flush()
             self.OnPaint_called = True
         if element_type == cef.PET_VIEW:
             # Buffer string is a huge string, so for performance
