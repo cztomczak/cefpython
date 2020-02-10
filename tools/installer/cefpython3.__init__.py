@@ -28,7 +28,9 @@ package_dir = os.path.dirname(os.path.abspath(__file__))
 
 # This loads the libcef.so library for the subprocess executable.
 # On Mac it works without setting library paths.
-os.environ["LD_LIBRARY_PATH"] = package_dir
+ld_library_path = os.environ["LD_LIBRARY_PATH"]
+if package_dir not in ld_library_path.split(os.pathsep):
+    os.environ["LD_LIBRARY_PATH"] = package_dir + os.pathsep + ld_library_path
 
 # This env variable will be returned by cefpython.GetModuleDirectory().
 os.environ["CEFPYTHON3_PATH"] = package_dir
