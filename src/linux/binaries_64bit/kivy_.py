@@ -8,8 +8,6 @@
 
 from cefpython3 import cefpython as cef
 
-import pygtk
-import gtk
 import sys
 import os
 import time
@@ -27,9 +25,6 @@ from kivy.base import EventLoop
 
 # Global variables
 g_switches = None
-
-# PyGTK required
-pygtk.require('2.0')
 
 
 class BrowserLayout(BoxLayout):
@@ -190,18 +185,9 @@ class CefBrowser(Widget):
         # Start idle - CEF message loop work.
         Clock.schedule_once(self._message_loop_work, 0)
 
-        # TODO: For printing to work in off-screen-rendering mode
-        #       it is enough to call gtk_init(). It is not required
-        #       to provide window handle when calling SetAsOffscreen().
-        #       However it still needs to be tested whether providing
-        #       window handle is required for mouse context menu and
-        #       popup widgets to work.
-        gtkwin = gtk.Window()
-        gtkwin.realize()
-
         # WindowInfo offscreen flag
         windowInfo = cef.WindowInfo()
-        windowInfo.SetAsOffscreen(gtkwin.window.xid)
+        windowInfo.SetAsOffscreen(0)
 
         # Create Broswer and naviagte to empty page <= OnPaint won't get
         # called yet
