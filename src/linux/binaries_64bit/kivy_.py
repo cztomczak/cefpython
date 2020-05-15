@@ -519,12 +519,12 @@ class CefBrowser(Widget):
 
     def go_forward(self, *_):
         """Going to forward in browser history."""
-        print "go forward"
+        print("go forward")
         self.browser.GoForward()
 
     def go_back(self, *_):
         """Going back in browser history."""
-        print "go back"
+        print("go back")
         self.browser.GoBack()
 
     def reload(self, *_):
@@ -864,7 +864,7 @@ class ClientHandler:
     def OnPaint(self, element_type, paint_buffer, **_):
         # print "OnPaint()"
         if element_type != cef.PET_VIEW:
-            print "Popups aren't implemented yet"
+            print("Popups aren't implemented yet")
             return
 
         # FPS meter ("fps" arg)
