@@ -11,6 +11,17 @@ from cefpython3 import cefpython as cef
 import sys
 import os
 import time
+if sys.platform == 'linux':
+    import pygtk
+    import gtk
+    pygtk.require('2.0')
+elif sys.platform == 'darwin':
+    import gi
+    gi.require_version("Gtk", "3.0")
+    from gi.repository import Gtk
+elif sys.platform == 'win32':
+    # no gtk needed on Windows
+    pass
 
 from kivy.app import App
 from kivy.uix.button import Button
@@ -145,9 +156,6 @@ class CefBrowser(Widget):
 
         # Configure CEF
         settings = {
-            # This directories must be set on Linux
-            "locales_dir_path": cef.GetModuleDirectory()+"/locales",
-            "resources_dir_path": cef.GetModuleDirectory(),
             "browser_subprocess_path": "%s/%s" % (
                 cef.GetModuleDirectory(), "subprocess"),
             "windowless_rendering_enabled": True,
@@ -157,6 +165,11 @@ class CefBrowser(Widget):
             },
             "external_message_pump": False,  # See Issue #246
         }
+        if sys.platform == 'linux':
+            # This directories must be set on Linux
+            settings["locales_dir_path"] = cef.GetModuleDirectory() + "/locales"
+            settings["resources_dir_path"] = cef.GetModuleDirectory()
+
         switches = {
             # Tweaking OSR performance by setting the same Chromium flags
             # as in upstream cefclient (# Issue #240).
@@ -185,9 +198,21 @@ class CefBrowser(Widget):
         # Start idle - CEF message loop work.
         Clock.schedule_once(self._message_loop_work, 0)
 
-        # WindowInfo offscreen flag
         windowInfo = cef.WindowInfo()
-        windowInfo.SetAsOffscreen(0)
+
+        # TODO: For printing to work in off-screen-rendering mode
+        #       it is enough to call gtk_init(). It is not required
+        #       to provide window handle when calling SetAsOffscreen().
+        #       However it still needs to be tested whether providing
+        #       window handle is required for mouse context menu and
+        #       popup widgets to work.
+        # WindowInfo offscreen flag
+        if sys.platform == 'linux':
+            gtkwin = gtk.Window()
+            gtkwin.realize()
+            windowInfo.SetAsOffscreen(gtkwin.window.xid)
+        elif sys.platform == 'darwin' or sys.platform == 'win32':
+            windowInfo.SetAsOffscreen(0)
 
         # Create Broswer and naviagte to empty page <= OnPaint won't get
         # called yet
