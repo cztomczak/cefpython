@@ -163,14 +163,15 @@ class CefBrowser(Widget):
                 # Disable context menu, popup widgets not supported
                 "enabled": False,
             },
-            "external_message_pump": True,
+            "external_message_pump": False,  # See Issue #246
             "multi_threaded_message_loop": False,
         }
         if sys.platform == 'linux':
-            settings["external_message_pump"] = False,  # See Issue #246
             # This directories must be set on Linux
             settings["locales_dir_path"] = cef.GetModuleDirectory() + "/locales"
             settings["resources_dir_path"] = cef.GetModuleDirectory()
+        if sys.platform == 'darwin':
+            settings["external_message_pump"] = True
 
         switches = {
             # Tweaking OSR performance by setting the same Chromium flags
