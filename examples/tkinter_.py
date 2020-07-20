@@ -44,7 +44,7 @@ IMAGE_EXT = ".png" if tk.TkVersion > 8.5 else ".gif"
 
 
 def main():
-    logger.setLevel(_logging.INFO)
+    logger.setLevel(_logging.DEBUG)
     stream_handler = _logging.StreamHandler()
     formatter = _logging.Formatter("[%(filename)s] %(message)s")
     stream_handler.setFormatter(formatter)
@@ -55,19 +55,23 @@ def main():
     logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
     assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
+    # Tk must be initialized before CEF otherwise fatal error (Issue #306)
     root = tk.Tk()
     app = MainFrame(root)
-    # Tk must be initialized before CEF otherwise fatal error (Issue #306)
-    cef.Initialize()
+    settings = {}
+    if MAC:
+        settings["external_message_pump"] = True
+    cef.Initialize(settings=settings)
     app.mainloop()
+    logger.debug("Main loop exited")
     cef.Shutdown()
-
 
 class MainFrame(tk.Frame):
 
     def __init__(self, root):
         self.browser_frame = None
         self.navigation_bar = None
+        self.root = root
 
         # Root
         root.geometry("900x640")
@@ -124,7 +128,9 @@ class MainFrame(tk.Frame):
     def on_close(self):
         if self.browser_frame:
             self.browser_frame.on_root_close()
-        self.master.destroy()
+            self.browser_frame = None
+        else:
+            self.master.destroy()
 
     def get_browser(self):
         if self.browser_frame:
@@ -147,11 +153,12 @@ class MainFrame(tk.Frame):
 
 class BrowserFrame(tk.Frame):
 
-    def __init__(self, master, navigation_bar=None):
+    def __init__(self, mainframe, navigation_bar=None):
         self.navigation_bar = navigation_bar
         self.closing = False
         self.browser = None
-        tk.Frame.__init__(self, master)
+        tk.Frame.__init__(self, mainframe)
+        self.mainframe = mainframe
         self.bind("<FocusIn>", self.on_focus_in)
         self.bind("<FocusOut>", self.on_focus_out)
         self.bind("<Configure>", self.on_configure)
@@ -165,27 +172,42 @@ class BrowserFrame(tk.Frame):
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         assert self.browser
+        self.browser.SetClientHandler(LifespanHandler(self))
         self.browser.SetClientHandler(LoadHandler(self))
         self.browser.SetClientHandler(FocusHandler(self))
         self.message_loop_work()
 
     def get_window_handle(self):
-        if self.winfo_id() > 0:
-            return self.winfo_id()
-        elif MAC:
-            # On Mac window id is an invalid negative value (Issue #308).
-            # This is kind of a dirty hack to get window handle using
-            # PyObjC package. If you change structure of windows then you
+        if MAC:
+            # Do not use self.winfo_id() on Mac, because of these issues:
+            # 1. Window id sometimes has an invalid negative value (Issue #308).
+            # 2. Even with valid window id it crashes during the call to NSView.setAutoresizingMask:
+            #    https://github.com/cztomczak/cefpython/issues/309#issuecomment-661094466
+            #
+            # To fix it using PyObjC package to obtain window handle. If you change structure of windows then you
             # need to do modifications here as well.
+            #
+            # There is still one issue with this solution. Sometimes there is more than one window, for example when application
+            # didn't close cleanly last time Python displays an NSAlert window asking whether to Reopen that window. In such
+            # case app will crash and you will see in console:
+            # > Fatal Python error: PyEval_RestoreThread: NULL tstate
+            # > zsh: abort      python tkinter_.py
+            # Error messages related to this: https://github.com/cztomczak/cefpython/issues/441
+            #
+            # There is yet another issue that might be related as well:
+            # https://github.com/cztomczak/cefpython/issues/583
+            
             # noinspection PyUnresolvedReferences
             from AppKit import NSApp
             # noinspection PyUnresolvedReferences
             import objc
-            # Sometimes there is more than one window, when application
-            # didn't close cleanly last time Python displays an NSAlert
-            # window asking whether to Reopen that window.
+            logger.info("winfo_id={}".format(self.winfo_id()))
             # noinspection PyUnresolvedReferences
-            return objc.pyobjc_id(NSApp.windows()[-1].contentView())
+            content_view = objc.pyobjc_id(NSApp.windows()[-1].contentView())
+            logger.info("content_view={}".format(content_view))
+            return content_view
+        elif self.winfo_id() > 0:
+            return self.winfo_id()
         else:
             raise Exception("Couldn't obtain window handle")
 
@@ -224,15 +246,30 @@ class BrowserFrame(tk.Frame):
             self.browser.SetFocus(False)
 
     def on_root_close(self):
+        logger.info("BrowserFrame.on_root_close")
         if self.browser:
+            logger.debug("CloseBrowser")
             self.browser.CloseBrowser(True)
             self.clear_browser_references()
-        self.destroy()
+        else:
+            logger.debug("tk.Frame.destroy")
+            self.destroy()
+            
 
     def clear_browser_references(self):
         # Clear browser references that you keep anywhere in your
         # code. All references must be cleared for CEF to shutdown cleanly.
         self.browser = None
+
+
+class LifespanHandler(object):
+
+    def __init__(self, tkFrame):
+        self.tkFrame = tkFrame
+
+    def OnBeforeClose(self, browser, **_):
+        logger.debug("LifespanHandler.OnBeforeClose")
+        self.tkFrame.quit()
 
 
 class LoadHandler(object):
