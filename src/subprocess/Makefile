@@ -24,7 +24,8 @@ INC = -I./../ -I./../common/ -I$(PYTHON_INCLUDE) \
 	-I/usr/lib64/glib-2.0/include \
 	-I/usr/lib/gtk-2.0/include \
 	-I/usr/lib/gtk-2.0/gtk-unix-print-2.0 \
-	-I/usr/lib/glib-2.0/include
+	-I/usr/lib/glib-2.0/include \
+	-I/usr/include/harfbuzz
 
 ifeq ($(UNAME_S), Linux)
 	LIB_DIRS = -L$(CEF_BIN) \

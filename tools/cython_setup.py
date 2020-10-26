@@ -327,6 +327,7 @@ def get_include_dirs():
             '/usr/lib/gtk-2.0/include',
             '/usr/lib/gtk-2.0/gtk-unix-print-2.0',
             '/usr/lib/glib-2.0/include',
+            '/usr/include/harfbuzz',
         ])
     elif LINUX:
         include_dirs.extend([LINUX_DIR])
@@ -353,6 +354,7 @@ def get_include_dirs():
             '/usr/lib/gtk-2.0/include',
             '/usr/lib/gtk-2.0/gtk-unix-print-2.0',
             '/usr/lib/glib-2.0/include',
+            '/usr/include/harfbuzz',
         ])
     return include_dirs
 
