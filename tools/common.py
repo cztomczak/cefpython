@@ -219,17 +219,20 @@ SUBPROCESS_EXE = os.path.join(BUILD_SUBPROCESS,
 
 VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 
-VS2015_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0"
-                 "\\VC\\vcvarsall.bat")
+VS2019_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio"
+                 r"\2019\Community\VC\Auxiliary\Build\vcvarsall.bat")
 
-VS2013_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0"
-                 "\\VC\\vcvarsall.bat")
+VS2015_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio 14.0"
+                 r"\VC\vcvarsall.bat")
 
-VS2010_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 10.0"
-                 "\\VC\\vcvarsall.bat")
+VS2013_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio 12.0"
+                 r"\VC\vcvarsall.bat")
 
-VS2008_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 9.0"
-                 "\\VC\\vcvarsall.bat")
+VS2010_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio 10.0"
+                 r"\VC\vcvarsall.bat")
+
+VS2008_VCVARS = (r"C:\Program Files (x86)\Microsoft Visual Studio 9.0"
+                 r"\VC\vcvarsall.bat")
 
 if WINDOWS and not os.path.exists(VS2008_VCVARS):
     VS2008_VCVARS = (os.environ["LOCALAPPDATA"]+"\\Programs\\Common\\Microsoft"

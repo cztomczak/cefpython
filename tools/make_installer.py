@@ -229,9 +229,9 @@ def perform_copy_operations(operations):
             assert base_dir
             assert base_dir == os.path.abspath(base_dir)
             paths = glob.glob(pattern)
-            if not len(paths):
-                raise Exception("No paths found in: {pattern}"
-                                .format(pattern=pattern))
+            #if not len(paths):
+            #    raise Exception("No paths found in: {pattern}"
+            #                    .format(pattern=pattern))
             for path in paths:
                 # "path" variable contains absolute path
                 assert path == os.path.abspath(path)
@@ -400,7 +400,7 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
             ]
         root_search_paths.append(search_paths)
 
-    assert len(root_search_paths)
+    #assert len(root_search_paths)
 
     for search_paths in root_search_paths:
         found = False
