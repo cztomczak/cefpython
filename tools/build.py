@@ -293,7 +293,7 @@ def setup_environ():
         print("[build.py] PYTHON_INCLUDE: {python_include}"
               .format(python_include=os.environ["PYTHON_INCLUDE"]))
 
-        os.environ["CEF_CCFLAGS"] = "-std=gnu++11 -DNDEBUG -Wall -Werror"
+        os.environ["CEF_CCFLAGS"] = "-std=gnu++11 -DNDEBUG -Wall -Werror -Wno-deprecated-declarations"
         if FAST_FLAG:
             os.environ["CEF_CCFLAGS"] += " -O0"
         else:
