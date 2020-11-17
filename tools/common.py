@@ -475,9 +475,11 @@ def get_msvs_for_python(vs_prefix=False):
     elif sys.version_info[:2] == (3, 6):
         return "VS2015" if vs_prefix else "2015"
     elif sys.version_info[:2] == (3, 7):
-        return "VS2015" if vs_prefix else "2015"
+        return "VS2019" if vs_prefix else "2019"
     elif sys.version_info[:2] == (3, 8):
-        return "VS2015" if vs_prefix else "2015"
+        return "VS2019" if vs_prefix else "2019"
+    elif sys.version_info[:2] == (3, 9):
+        return "VS2019" if vs_prefix else "2019"
     else:
         print("ERROR: This version of Python is not supported")
         sys.exit(1)

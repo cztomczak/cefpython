@@ -80,7 +80,7 @@ NO_AUTOMATE = False
 ALLOW_PARTIAL = False
 
 # Python versions
-SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8)]
+SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9)]
 
 # Python search paths. It will use first Python found for specific version.
 # Supports replacement of one environment variable in path eg.: %ENV_KEY%.
@@ -378,7 +378,7 @@ def uninstall_cefpython3_packages(pythons):
                    .format(python=python["executable"]))
         try:
             output = subprocess.check_output(command, shell=True)
-        except subprocess.CalledProcessError, exc:
+        except subprocess.CalledProcessError as exc:
             # pip show returns error code when package is not installed
             output = exc.output
         if not len(output.strip()):

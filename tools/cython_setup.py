@@ -154,6 +154,7 @@ def get_winsdk_lib():
             ]
         elif ARCH64:
             winsdk_libs = [
+                r"C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib\\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib\\x64",
                 # Visual Studio 2008 installation

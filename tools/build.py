@@ -221,10 +221,7 @@ def check_cython_version():
         print("[build.py] ERROR: Cython is not installed ({0} required)"
               .format(require_version))
         sys.exit(1)
-    if version != require_version:
-        print("[build.py] ERROR: Wrong Cython version: {0}. Required: {1}"
-              .format(version, require_version))
-        sys.exit(1)
+
     print("[build.py] Cython version: {0}".format(version))
 
 
