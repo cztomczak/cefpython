@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2020 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,39 +34,16 @@
 // tools directory for more information.
 //
 
-#ifndef CEF_INCLUDE_CEF_SSL_INFO_H_
-#define CEF_INCLUDE_CEF_SSL_INFO_H_
+#ifndef CEF_INCLUDE_CEF_REGISTRATION_H_
+#define CEF_INCLUDE_CEF_REGISTRATION_H_
 #pragma once
 
 #include "include/cef_base.h"
-#include "include/cef_values.h"
-
-#include "include/cef_x509_certificate.h"
 
 ///
-// Class representing SSL information.
+// Generic callback interface used for managing the lifespan of a registration.
 ///
 /*--cef(source=library)--*/
-class CefSSLInfo : public virtual CefBaseRefCounted {
- public:
-  ///
-  // Returns a bitmask containing any and all problems verifying the server
-  // certificate.
-  ///
-  /*--cef(default_retval=CERT_STATUS_NONE)--*/
-  virtual cef_cert_status_t GetCertStatus() = 0;
+class CefRegistration : public virtual CefBaseRefCounted {};
 
-  ///
-  // Returns the X.509 certificate.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefX509Certificate> GetX509Certificate() = 0;
-};
-
-///
-// Returns true if the certificate status represents an error.
-///
-/*--cef()--*/
-bool CefIsCertStatusError(cef_cert_status_t status);
-
-#endif  // CEF_INCLUDE_CEF_SSL_INFO_H_
+#endif  // CEF_INCLUDE_CEF_REGISTRATION_H_

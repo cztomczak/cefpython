@@ -89,6 +89,32 @@ struct CefDeleteOnIOThread : public CefDeleteOnThread<TID_IO> {};
 struct CefDeleteOnFileThread : public CefDeleteOnThread<TID_FILE> {};
 struct CefDeleteOnRendererThread : public CefDeleteOnThread<TID_RENDERER> {};
 
+// Same as IMPLEMENT_REFCOUNTING() but using the specified Destructor.
+#define IMPLEMENT_REFCOUNTING_EX(ClassName, Destructor)              \
+ public:                                                             \
+  void AddRef() const OVERRIDE { ref_count_.AddRef(); }              \
+  bool Release() const OVERRIDE {                                    \
+    if (ref_count_.Release()) {                                      \
+      Destructor::Destruct(this);                                    \
+      return true;                                                   \
+    }                                                                \
+    return false;                                                    \
+  }                                                                  \
+  bool HasOneRef() const OVERRIDE { return ref_count_.HasOneRef(); } \
+  bool HasAtLeastOneRef() const OVERRIDE {                           \
+    return ref_count_.HasAtLeastOneRef();                            \
+  }                                                                  \
+                                                                     \
+ private:                                                            \
+  CefRefCount ref_count_
+
+#define IMPLEMENT_REFCOUNTING_DELETE_ON_UIT(ClassName) \
+  IMPLEMENT_REFCOUNTING_EX(ClassName, CefDeleteOnUIThread)
+
+#define IMPLEMENT_REFCOUNTING_DELETE_ON_IOT(ClassName) \
+  IMPLEMENT_REFCOUNTING_EX(ClassName, CefDeleteOnIOThread)
+
+
 ///
 // Helper class to manage a scoped copy of |argv|.
 ///
@@ -97,8 +123,9 @@ class CefScopedArgArray {
   CefScopedArgArray(int argc, char* argv[]) {
     // argv should have (argc + 1) elements, the last one always being NULL.
     array_ = new char*[argc + 1];
+    values_.resize(argc);
     for (int i = 0; i < argc; ++i) {
-      values_.push_back(argv[i]);
+      values_[i] = argv[i];
       array_[i] = const_cast<char*>(values_[i].c_str());
     }
     array_[argc] = NULL;

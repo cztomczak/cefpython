@@ -60,19 +60,18 @@ class CefURLRequest : public virtual CefBaseRefCounted {
   typedef cef_errorcode_t ErrorCode;
 
   ///
-  // Create a new URL request. Only GET, POST, HEAD, DELETE and PUT request
-  // methods are supported. Multiple post data elements are not supported and
-  // elements of type PDE_TYPE_FILE are only supported for requests originating
-  // from the browser process. Requests originating from the render process will
-  // receive the same handling as requests originating from Web content -- if
-  // the response contains Content-Disposition or Mime-Type header values that
-  // would not normally be rendered then the response may receive special
-  // handling inside the browser (for example, via the file download code path
-  // instead of the URL request code path). The |request| object will be marked
-  // as read-only after calling this method. In the browser process if
-  // |request_context| is empty the global request context will be used. In the
-  // render process |request_context| must be empty and the context associated
-  // with the current renderer process' browser will be used.
+  // Create a new URL request that is not associated with a specific browser or
+  // frame. Use CefFrame::CreateURLRequest instead if you want the request to
+  // have this association, in which case it may be handled differently (see
+  // documentation on that method). A request created with this method may only
+  // originate from the browser process, and will behave as follows:
+  //   - It may be intercepted by the client via CefResourceRequestHandler or
+  //     CefSchemeHandlerFactory.
+  //   - POST data may only contain only a single element of type PDE_TYPE_FILE
+  //     or PDE_TYPE_BYTES.
+  //   - If |request_context| is empty the global request context will be used.
+  //
+  // The |request| object will be marked as read-only after calling this method.
   ///
   /*--cef(optional_param=request_context)--*/
   static CefRefPtr<CefURLRequest> Create(
@@ -180,8 +179,11 @@ class CefURLRequestClient : public virtual CefBaseRefCounted {
   // |isProxy| indicates whether the host is a proxy server. |host| contains the
   // hostname and |port| contains the port number. Return true to continue the
   // request and call CefAuthCallback::Continue() when the authentication
-  // information is available. Return false to cancel the request. This method
-  // will only be called for requests initiated from the browser process.
+  // information is available. If the request has an associated browser/frame
+  // then returning false will result in a call to GetAuthCredentials on the
+  // CefRequestHandler associated with that browser, if any. Otherwise,
+  // returning false will cancel the request immediately. This method will only
+  // be called for requests initiated from the browser process.
   ///
   /*--cef(optional_param=realm)--*/
   virtual bool GetAuthCredentials(bool isProxy,

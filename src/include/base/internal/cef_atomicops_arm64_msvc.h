@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Google Inc. All rights reserved.
+// Copyright (c) 2008 Google Inc. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -30,10 +30,14 @@
 // Do not include this header file directly. Use base/cef_atomicops.h
 // instead.
 
-#ifndef CEF_INCLUDE_BASE_INTERNAL_CEF_ATOMICOPS_MAC_H_
-#define CEF_INCLUDE_BASE_INTERNAL_CEF_ATOMICOPS_MAC_H_
+#ifndef CEF_INCLUDE_BASE_INTERNAL_CEF_ATOMICOPS_ARM64_MSVC_H_
+#define CEF_INCLUDE_BASE_INTERNAL_CEF_ATOMICOPS_ARM64_MSVC_H_
 
-#include <libkern/OSAtomic.h>
+#include <windows.h>
+
+#include <intrin.h>
+
+#include "include/base/cef_macros.h"
 
 namespace base {
 namespace subtle {
@@ -41,59 +45,45 @@ namespace subtle {
 inline Atomic32 NoBarrier_CompareAndSwap(volatile Atomic32* ptr,
                                          Atomic32 old_value,
                                          Atomic32 new_value) {
-  Atomic32 prev_value;
-  do {
-    if (OSAtomicCompareAndSwap32(old_value, new_value,
-                                 const_cast<Atomic32*>(ptr))) {
-      return old_value;
-    }
-    prev_value = *ptr;
-  } while (prev_value == old_value);
-  return prev_value;
+  LONG result = _InterlockedCompareExchange(
+      reinterpret_cast<volatile LONG*>(ptr), static_cast<LONG>(new_value),
+      static_cast<LONG>(old_value));
+  return static_cast<Atomic32>(result);
 }
 
 inline Atomic32 NoBarrier_AtomicExchange(volatile Atomic32* ptr,
                                          Atomic32 new_value) {
-  Atomic32 old_value;
-  do {
-    old_value = *ptr;
-  } while (!OSAtomicCompareAndSwap32(old_value, new_value,
-                                     const_cast<Atomic32*>(ptr)));
-  return old_value;
-}
-
-inline Atomic32 NoBarrier_AtomicIncrement(volatile Atomic32* ptr,
-                                          Atomic32 increment) {
-  return OSAtomicAdd32(increment, const_cast<Atomic32*>(ptr));
+  LONG result = _InterlockedExchange(reinterpret_cast<volatile LONG*>(ptr),
+                                     static_cast<LONG>(new_value));
+  return static_cast<Atomic32>(result);
 }
 
 inline Atomic32 Barrier_AtomicIncrement(volatile Atomic32* ptr,
                                         Atomic32 increment) {
-  return OSAtomicAdd32Barrier(increment, const_cast<Atomic32*>(ptr));
+  return _InterlockedExchangeAdd(reinterpret_cast<volatile LONG*>(ptr),
+                                 static_cast<LONG>(increment)) +
+         increment;
 }
 
-inline void MemoryBarrier() {
-  OSMemoryBarrier();
+inline Atomic32 NoBarrier_AtomicIncrement(volatile Atomic32* ptr,
+                                          Atomic32 increment) {
+  return Barrier_AtomicIncrement(ptr, increment);
 }
+
+#if !(defined(_MSC_VER) && _MSC_VER >= 1400)
+#error "We require at least vs2005 for MemoryBarrier"
+#endif
 
 inline Atomic32 Acquire_CompareAndSwap(volatile Atomic32* ptr,
                                        Atomic32 old_value,
                                        Atomic32 new_value) {
-  Atomic32 prev_value;
-  do {
-    if (OSAtomicCompareAndSwap32Barrier(old_value, new_value,
-                                        const_cast<Atomic32*>(ptr))) {
-      return old_value;
-    }
-    prev_value = *ptr;
-  } while (prev_value == old_value);
-  return prev_value;
+  return NoBarrier_CompareAndSwap(ptr, old_value, new_value);
 }
 
 inline Atomic32 Release_CompareAndSwap(volatile Atomic32* ptr,
                                        Atomic32 old_value,
                                        Atomic32 new_value) {
-  return Acquire_CompareAndSwap(ptr, old_value, new_value);
+  return NoBarrier_CompareAndSwap(ptr, old_value, new_value);
 }
 
 inline void NoBarrier_Store(volatile Atomic32* ptr, Atomic32 value) {
@@ -101,13 +91,13 @@ inline void NoBarrier_Store(volatile Atomic32* ptr, Atomic32 value) {
 }
 
 inline void Acquire_Store(volatile Atomic32* ptr, Atomic32 value) {
-  *ptr = value;
-  MemoryBarrier();
+  NoBarrier_AtomicExchange(ptr, value);
+  // acts as a barrier in this implementation
 }
 
 inline void Release_Store(volatile Atomic32* ptr, Atomic32 value) {
-  MemoryBarrier();
   *ptr = value;
+  // See comments in Atomic64 version of Release_Store() below.
 }
 
 inline Atomic32 NoBarrier_Load(volatile const Atomic32* ptr) {
@@ -116,7 +106,6 @@ inline Atomic32 NoBarrier_Load(volatile const Atomic32* ptr) {
 
 inline Atomic32 Acquire_Load(volatile const Atomic32* ptr) {
   Atomic32 value = *ptr;
-  MemoryBarrier();
   return value;
 }
 
@@ -125,65 +114,39 @@ inline Atomic32 Release_Load(volatile const Atomic32* ptr) {
   return *ptr;
 }
 
-#ifdef __LP64__
+#if defined(_WIN64)
 
-// 64-bit implementation on 64-bit platform
+// 64-bit low-level operations on 64-bit platform.
+
+COMPILE_ASSERT(sizeof(Atomic64) == sizeof(PVOID), atomic_word_is_atomic);
 
 inline Atomic64 NoBarrier_CompareAndSwap(volatile Atomic64* ptr,
                                          Atomic64 old_value,
                                          Atomic64 new_value) {
-  Atomic64 prev_value;
-  do {
-    if (OSAtomicCompareAndSwap64(old_value, new_value,
-                                 reinterpret_cast<volatile int64_t*>(ptr))) {
-      return old_value;
-    }
-    prev_value = *ptr;
-  } while (prev_value == old_value);
-  return prev_value;
+  PVOID result = InterlockedCompareExchangePointer(
+      reinterpret_cast<volatile PVOID*>(ptr),
+      reinterpret_cast<PVOID>(new_value), reinterpret_cast<PVOID>(old_value));
+  return reinterpret_cast<Atomic64>(result);
 }
 
 inline Atomic64 NoBarrier_AtomicExchange(volatile Atomic64* ptr,
                                          Atomic64 new_value) {
-  Atomic64 old_value;
-  do {
-    old_value = *ptr;
-  } while (!OSAtomicCompareAndSwap64(old_value, new_value,
-                                     reinterpret_cast<volatile int64_t*>(ptr)));
-  return old_value;
-}
-
-inline Atomic64 NoBarrier_AtomicIncrement(volatile Atomic64* ptr,
-                                          Atomic64 increment) {
-  return OSAtomicAdd64(increment, reinterpret_cast<volatile int64_t*>(ptr));
+  PVOID result =
+      InterlockedExchangePointer(reinterpret_cast<volatile PVOID*>(ptr),
+                                 reinterpret_cast<PVOID>(new_value));
+  return reinterpret_cast<Atomic64>(result);
 }
 
 inline Atomic64 Barrier_AtomicIncrement(volatile Atomic64* ptr,
                                         Atomic64 increment) {
-  return OSAtomicAdd64Barrier(increment,
-                              reinterpret_cast<volatile int64_t*>(ptr));
+  return InterlockedExchangeAdd64(reinterpret_cast<volatile LONGLONG*>(ptr),
+                                  static_cast<LONGLONG>(increment)) +
+         increment;
 }
 
-inline Atomic64 Acquire_CompareAndSwap(volatile Atomic64* ptr,
-                                       Atomic64 old_value,
-                                       Atomic64 new_value) {
-  Atomic64 prev_value;
-  do {
-    if (OSAtomicCompareAndSwap64Barrier(
-            old_value, new_value, reinterpret_cast<volatile int64_t*>(ptr))) {
-      return old_value;
-    }
-    prev_value = *ptr;
-  } while (prev_value == old_value);
-  return prev_value;
-}
-
-inline Atomic64 Release_CompareAndSwap(volatile Atomic64* ptr,
-                                       Atomic64 old_value,
-                                       Atomic64 new_value) {
-  // The lib kern interface does not distinguish between
-  // Acquire and Release memory barriers; they are equivalent.
-  return Acquire_CompareAndSwap(ptr, old_value, new_value);
+inline Atomic64 NoBarrier_AtomicIncrement(volatile Atomic64* ptr,
+                                          Atomic64 increment) {
+  return Barrier_AtomicIncrement(ptr, increment);
 }
 
 inline void NoBarrier_Store(volatile Atomic64* ptr, Atomic64 value) {
@@ -191,12 +154,11 @@ inline void NoBarrier_Store(volatile Atomic64* ptr, Atomic64 value) {
 }
 
 inline void Acquire_Store(volatile Atomic64* ptr, Atomic64 value) {
-  *ptr = value;
-  MemoryBarrier();
+  NoBarrier_AtomicExchange(ptr, value);
+  // acts as a barrier in this implementation
 }
 
 inline void Release_Store(volatile Atomic64* ptr, Atomic64 value) {
-  MemoryBarrier();
   *ptr = value;
 }
 
@@ -206,7 +168,6 @@ inline Atomic64 NoBarrier_Load(volatile const Atomic64* ptr) {
 
 inline Atomic64 Acquire_Load(volatile const Atomic64* ptr) {
   Atomic64 value = *ptr;
-  MemoryBarrier();
   return value;
 }
 
@@ -215,9 +176,22 @@ inline Atomic64 Release_Load(volatile const Atomic64* ptr) {
   return *ptr;
 }
 
-#endif  // defined(__LP64__)
+inline Atomic64 Acquire_CompareAndSwap(volatile Atomic64* ptr,
+                                       Atomic64 old_value,
+                                       Atomic64 new_value) {
+  return NoBarrier_CompareAndSwap(ptr, old_value, new_value);
+}
+
+inline Atomic64 Release_CompareAndSwap(volatile Atomic64* ptr,
+                                       Atomic64 old_value,
+                                       Atomic64 new_value) {
+  return NoBarrier_CompareAndSwap(ptr, old_value, new_value);
+}
+
+#endif  // defined(_WIN64)
 
 }  // namespace base::subtle
 }  // namespace base
 
-#endif  // CEF_INCLUDE_BASE_INTERNAL_CEF_ATOMICOPS_MAC_H_
+#endif  // CEF_INCLUDE_BASE_INTERNAL_CEF_ATOMICOPS_ARM64_MSVC_H_
+

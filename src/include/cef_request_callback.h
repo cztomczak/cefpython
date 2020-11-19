@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2011 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,39 +34,30 @@
 // tools directory for more information.
 //
 
-#ifndef CEF_INCLUDE_CEF_SSL_INFO_H_
-#define CEF_INCLUDE_CEF_SSL_INFO_H_
+#ifndef CEF_INCLUDE_CEF_REQUEST_CALLBACK_H_
+#define CEF_INCLUDE_CEF_REQUEST_CALLBACK_H_
 #pragma once
 
 #include "include/cef_base.h"
-#include "include/cef_values.h"
-
-#include "include/cef_x509_certificate.h"
 
 ///
-// Class representing SSL information.
+// Callback interface used for asynchronous continuation of url requests.
 ///
 /*--cef(source=library)--*/
-class CefSSLInfo : public virtual CefBaseRefCounted {
+class CefRequestCallback : public virtual CefBaseRefCounted {
  public:
   ///
-  // Returns a bitmask containing any and all problems verifying the server
-  // certificate.
+  // Continue the url request. If |allow| is true the request will be continued.
+  // Otherwise, the request will be canceled.
   ///
-  /*--cef(default_retval=CERT_STATUS_NONE)--*/
-  virtual cef_cert_status_t GetCertStatus() = 0;
+  /*--cef(capi_name=cont)--*/
+  virtual void Continue(bool allow) = 0;
 
   ///
-  // Returns the X.509 certificate.
+  // Cancel the url request.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefX509Certificate> GetX509Certificate() = 0;
+  virtual void Cancel() = 0;
 };
 
-///
-// Returns true if the certificate status represents an error.
-///
-/*--cef()--*/
-bool CefIsCertStatusError(cef_cert_status_t status);
-
-#endif  // CEF_INCLUDE_CEF_SSL_INFO_H_
+#endif  // CEF_INCLUDE_CEF_REQUEST_CALLBACK_H_

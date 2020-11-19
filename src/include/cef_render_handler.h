@@ -57,6 +57,7 @@ class CefRenderHandler : public virtual CefBaseRefCounted {
   typedef cef_drag_operations_mask_t DragOperationsMask;
   typedef cef_paint_element_type_t PaintElementType;
   typedef std::vector<CefRect> RectList;
+  typedef cef_text_input_mode_t TextInputMode;
 
   ///
   // Return the handler for accessibility notifications. If no handler is
@@ -64,12 +65,13 @@ class CefRenderHandler : public virtual CefBaseRefCounted {
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefAccessibilityHandler> GetAccessibilityHandler() {
-    return NULL;
+    return nullptr;
   }
 
   ///
   // Called to retrieve the root window rectangle in screen coordinates. Return
-  // true if the rectangle was provided.
+  // true if the rectangle was provided. If this method returns false the
+  // rectangle from GetViewRect will be used.
   ///
   /*--cef()--*/
   virtual bool GetRootScreenRect(CefRefPtr<CefBrowser> browser, CefRect& rect) {
@@ -78,10 +80,10 @@ class CefRenderHandler : public virtual CefBaseRefCounted {
 
   ///
   // Called to retrieve the view rectangle which is relative to screen
-  // coordinates. Return true if the rectangle was provided.
+  // coordinates. This method must always provide a non-empty rectangle.
   ///
   /*--cef()--*/
-  virtual bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) = 0;
+  virtual void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) = 0;
 
   ///
   // Called to retrieve the translation from view coordinates to actual screen
@@ -134,7 +136,8 @@ class CefRenderHandler : public virtual CefBaseRefCounted {
   // contains the pixel data for the whole image. |dirtyRects| contains the set
   // of rectangles in pixel coordinates that need to be repainted. |buffer| will
   // be |width|*|height|*4 bytes in size and represents a BGRA image with an
-  // upper-left origin.
+  // upper-left origin. This method is only called when
+  // CefWindowInfo::shared_texture_enabled is set to false.
   ///
   /*--cef()--*/
   virtual void OnPaint(CefRefPtr<CefBrowser> browser,
@@ -143,6 +146,21 @@ class CefRenderHandler : public virtual CefBaseRefCounted {
                        const void* buffer,
                        int width,
                        int height) = 0;
+
+  ///
+  // Called when an element has been rendered to the shared texture handle.
+  // |type| indicates whether the element is the view or the popup widget.
+  // |dirtyRects| contains the set of rectangles in pixel coordinates that need
+  // to be repainted. |shared_handle| is the handle for a D3D11 Texture2D that
+  // can be accessed via ID3D11Device using the OpenSharedResource method. This
+  // method is only called when CefWindowInfo::shared_texture_enabled is set to
+  // true, and is currently only supported on Windows.
+  ///
+  /*--cef()--*/
+  virtual void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
+                                  PaintElementType type,
+                                  const RectList& dirtyRects,
+                                  void* shared_handle) {}
 
   ///
   // Called when the browser's cursor has changed. If |type| is CT_CUSTOM then
@@ -214,6 +232,16 @@ class CefRenderHandler : public virtual CefBaseRefCounted {
   virtual void OnTextSelectionChanged(CefRefPtr<CefBrowser> browser,
                                       const CefString& selected_text,
                                       const CefRange& selected_range) {}
+
+  ///
+  // Called when an on-screen keyboard should be shown or hidden for the
+  // specified |browser|. |input_mode| specifies what kind of keyboard
+  // should be opened. If |input_mode| is CEF_TEXT_INPUT_MODE_NONE, any
+  // existing keyboard for this browser should be hidden.
+  ///
+  /*--cef()--*/
+  virtual void OnVirtualKeyboardRequested(CefRefPtr<CefBrowser> browser,
+                                          TextInputMode input_mode) {}
 };
 
 #endif  // CEF_INCLUDE_CEF_RENDER_HANDLER_H_
