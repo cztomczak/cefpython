@@ -55,12 +55,9 @@ if MAC:
         g_generate_extern_c_macro_definition_old(self, code)
         code.putln("// Added by: cefpython/tools/cython_setup.py")
         code.putln("#undef PyMODINIT_FUNC")
-        if sys.version_info[:2] == (2, 7):
-            code.putln("#define PyMODINIT_FUNC extern \"C\""
-                       " __attribute__((visibility(\"default\"))) void")
-        else:
-            code.putln("#define PyMODINIT_FUNC extern \"C\""
-                       " __attribute__((visibility(\"default\"))) PyObject*")
+
+        code.putln("#define PyMODINIT_FUNC extern \"C\""
+                   " __attribute__((visibility(\"default\"))) PyObject*")
     # Overwrite Cython function
     ModuleNode.generate_extern_c_macro_definition = (
             generate_extern_c_macro_definition)

@@ -137,21 +137,12 @@ import struct
 # noinspection PyUnresolvedReferences
 import base64
 
-# Must use compile-time condition instead of checking sys.version_info.major
-# otherwise results in "ImportError: cannot import name urlencode" strange
-# error in Python 3.6.
-IF PY_MAJOR_VERSION == 2:
-    # noinspection PyUnresolvedReferences
-    import urlparse
-    # noinspection PyUnresolvedReferences
-    from urllib import urlencode as urllib_urlencode
-    from urllib import quote as urlparse_quote
-ELSE:
-    # noinspection PyUnresolvedReferences
-    from urllib import parse as urlparse
-    from urllib.parse import quote as urlparse_quote
-    # noinspection PyUnresolvedReferences
-    from urllib.parse import urlencode as urllib_urlencode
+
+# noinspection PyUnresolvedReferences
+from urllib import parse as urlparse
+from urllib.parse import quote as urlparse_quote
+# noinspection PyUnresolvedReferences
+from urllib.parse import urlencode as urllib_urlencode
 
 # noinspection PyUnresolvedReferences
 from cpython.version cimport PY_MAJOR_VERSION

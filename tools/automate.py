@@ -147,11 +147,6 @@ def main():
     setup_options(docopt.docopt(__doc__))
 
     if Options.build_cef:
-        if not sys.version_info[:2] == (2, 7):
-            print("ERROR: To build CEF from sources you need Python 2.7.")
-            print("       Upstream automate-git.py works only with that")
-            print("       version of python.")
-            sys.exit(1)
         build_cef()
     elif Options.prebuilt_cef:
         prebuilt_cef()
