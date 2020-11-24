@@ -97,8 +97,6 @@ cdef void SetApplicationSettings(
             cefAppSettings.pack_loading_disabled = int(appSettings[key])
         elif key == "uncaught_exception_stack_size":
             cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
-        elif key == "single_process":
-            cefAppSettings.single_process = int(appSettings[key])
         elif key == "browser_subprocess_path":
             cefString = new CefString(&cefAppSettings.browser_subprocess_path)
             PyToCefStringPointer(appSettings[key], cefString)

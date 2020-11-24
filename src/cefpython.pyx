@@ -572,8 +572,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # ------------------------------------------------------------------------
     if not "multi_threaded_message_loop" in application_settings:
         application_settings["multi_threaded_message_loop"] = False
-    if not "single_process" in application_settings:
-        application_settings["single_process"] = False
     # ------------------------------------------------------------------------
 
     # ------------------------------------------------------------------------

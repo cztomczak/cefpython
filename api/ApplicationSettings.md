@@ -33,7 +33,6 @@ Table of contents:
   * [product_version](#product_version)
   * [remote_debugging_port](#remote_debugging_port)
   * [resources_dir_path](#resources_dir_path)
-  * [single_process](#single_process)
   * [string_encoding](#string_encoding)
   * [uncaught_exception_stack_size](#uncaught_exception_stack_size)
   * [unique_request_context_per_browser](#unique_request_context_per_browser)
@@ -423,14 +422,6 @@ empty the cef.pak and/or devtools_resources.pak files must be located in
 the module directory on Windows/Linux or the app bundle Resources directory  
 on Mac OS X. Also configurable using the --resources-dir-path switch.
 
-
-### single_process
-
-(bool)
-Set to true (1) to use a single process for the browser and renderer. This  
-run mode is not officially supported by Chromium and is less stable than  
-the multi-process default. Also configurable using the "single-process"  
-[command-line switch](CommandLineSwitches.md).
 
 
 ### string_encoding

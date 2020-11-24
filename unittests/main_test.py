@@ -354,7 +354,7 @@ class V8ContextHandler(object):
             self.test_case.assertFalse(self.OnContextCreatedSecondCall_True)
             self.OnContextCreatedSecondCall_True = True
         self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
-        self.test_case.assertEqual(frame.GetIdentifier(), 2)
+        self.test_case.assertEqual(frame.GetIdentifier(), 3)
 
     def OnContextReleased(self, browser, frame):
         """This gets called only for the initial empty context, see comment
@@ -364,7 +364,7 @@ class V8ContextHandler(object):
         self.test_case.assertFalse(self.OnContextReleased_True)
         self.OnContextReleased_True = True
         self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
-        self.test_case.assertEqual(frame.GetIdentifier(), 2)
+        self.test_case.assertEqual(frame.GetIdentifier(), 3)
 
 class External(object):
     """Javascript 'window.external' object."""
