@@ -115,7 +115,13 @@ typedef enum {
   LOGSEVERITY_ERROR,
 
   ///
-  // Completely disable logging.
+  // FATAL logging.
+  ///
+  LOGSEVERITY_FATAL,
+
+  ///
+  // Disable logging to file for all messages, and to stderr for messages with
+  // severity less than FATAL.
   ///
   LOGSEVERITY_DISABLE = 99
 } cef_log_severity_t;
@@ -152,14 +158,6 @@ typedef struct _cef_settings_t {
   size_t size;
 
   ///
-  // Set to true (1) to use a single process for the browser and renderer. This
-  // run mode is not officially supported by Chromium and is less stable than
-  // the multi-process default. Also configurable using the "single-process"
-  // command-line switch.
-  ///
-  int single_process;
-
-  ///
   // Set to true (1) to disable the sandbox for sub-processes. See
   // cef_sandbox_win.h for requirements to enable the sandbox on Windows. Also
   // configurable using the "no-sandbox" command-line switch.
@@ -189,7 +187,7 @@ typedef struct _cef_settings_t {
   // Set to true (1) to have the browser process message loop run in a separate
   // thread. If false (0) than the CefDoMessageLoopWork() function must be
   // called from your application message loop. This option is only supported on
-  // Windows.
+  // Windows and Linux.
   ///
   int multi_threaded_message_loop;
 
@@ -298,9 +296,10 @@ typedef struct _cef_settings_t {
 
   ///
   // The log severity. Only messages of this severity level or higher will be
-  // logged. Also configurable using the "log-severity" command-line switch with
-  // a value of "verbose", "info", "warning", "error", "error-report" or
-  // "disable".
+  // logged. When set to DISABLE no messages will be written to the log file,
+  // but FATAL messages will still be output to stderr. Also configurable using
+  // the "log-severity" command-line switch with a value of "verbose", "info",
+  // "warning", "error", "fatal" or "disable".
   ///
   cef_log_severity_t log_severity;
 
@@ -797,6 +796,11 @@ typedef enum {
   // Segmentation fault.
   ///
   TS_PROCESS_CRASHED,
+
+  ///
+  // Out of memory. Some platforms may use TS_PROCESS_CRASHED instead.
+  ///
+  TS_PROCESS_OOM,
 } cef_termination_status_t;
 
 ///
@@ -989,6 +993,25 @@ typedef enum {
   DRAG_OPERATION_DELETE = 32,
   DRAG_OPERATION_EVERY = UINT_MAX
 } cef_drag_operations_mask_t;
+
+///
+// Input mode of a virtual keyboard. These constants match their equivalents
+// in Chromium's text_input_mode.h and should not be renumbered.
+// See https://html.spec.whatwg.org/#input-modalities:-the-inputmode-attribute
+///
+typedef enum {
+  CEF_TEXT_INPUT_MODE_DEFAULT,
+  CEF_TEXT_INPUT_MODE_NONE,
+  CEF_TEXT_INPUT_MODE_TEXT,
+  CEF_TEXT_INPUT_MODE_TEL,
+  CEF_TEXT_INPUT_MODE_URL,
+  CEF_TEXT_INPUT_MODE_EMAIL,
+  CEF_TEXT_INPUT_MODE_NUMERIC,
+  CEF_TEXT_INPUT_MODE_DECIMAL,
+  CEF_TEXT_INPUT_MODE_SEARCH,
+
+  CEF_TEXT_INPUT_MODE_MAX = CEF_TEXT_INPUT_MODE_SEARCH,
+} cef_text_input_mode_t;
 
 ///
 // V8 access control values.
@@ -1238,38 +1261,47 @@ typedef enum {
   // If set the request will fail if it cannot be served from the cache (or some
   // equivalent local store). Setting this value is equivalent to specifying the
   // "Cache-Control: only-if-cached" request header. Setting this value in
-  // combination with UR_FLAG_SKIP_CACHE will cause the request to fail.
+  // combination with UR_FLAG_SKIP_CACHE or UR_FLAG_DISABLE_CACHE will cause the
+  // request to fail.
   ///
   UR_FLAG_ONLY_FROM_CACHE = 1 << 1,
+
+  ///
+  // If set the cache will not be used at all. Setting this value is equivalent
+  // to specifying the "Cache-Control: no-store" request header. Setting this
+  // value in combination with UR_FLAG_ONLY_FROM_CACHE will cause the request to
+  // fail.
+  ///
+  UR_FLAG_DISABLE_CACHE = 1 << 2,
 
   ///
   // If set user name, password, and cookies may be sent with the request, and
   // cookies may be saved from the response.
   ///
-  UR_FLAG_ALLOW_STORED_CREDENTIALS = 1 << 2,
+  UR_FLAG_ALLOW_STORED_CREDENTIALS = 1 << 3,
 
   ///
   // If set upload progress events will be generated when a request has a body.
   ///
-  UR_FLAG_REPORT_UPLOAD_PROGRESS = 1 << 3,
+  UR_FLAG_REPORT_UPLOAD_PROGRESS = 1 << 4,
 
   ///
   // If set the CefURLRequestClient::OnDownloadData method will not be called.
   ///
-  UR_FLAG_NO_DOWNLOAD_DATA = 1 << 4,
+  UR_FLAG_NO_DOWNLOAD_DATA = 1 << 5,
 
   ///
   // If set 5XX redirect errors will be propagated to the observer instead of
   // automatically re-tried. This currently only applies for requests
   // originated in the browser process.
   ///
-  UR_FLAG_NO_RETRY_ON_5XX = 1 << 5,
+  UR_FLAG_NO_RETRY_ON_5XX = 1 << 6,
 
   ///
   // If set 3XX responses will cause the fetch to halt immediately rather than
   // continue through the redirect.
   ///
-  UR_FLAG_STOP_ON_REDIRECT = 1 << 6,
+  UR_FLAG_STOP_ON_REDIRECT = 1 << 7,
 } cef_urlrequest_flags_t;
 
 ///
@@ -1422,6 +1454,11 @@ typedef enum {
   // Example: Generating data shown in the UI immediately after a click.
   ///
   TID_FILE_USER_BLOCKING,
+
+  ///
+  // Used to launch and terminate browser processes.
+  ///
+  TID_PROCESS_LAUNCHER,
 
   ///
   // Used to process IPC and network messages. Do not perform blocking tasks on
@@ -1667,6 +1704,90 @@ typedef struct _cef_mouse_event_t {
   ///
   uint32 modifiers;
 } cef_mouse_event_t;
+
+///
+// Touch points states types.
+///
+typedef enum {
+  CEF_TET_RELEASED = 0,
+  CEF_TET_PRESSED,
+  CEF_TET_MOVED,
+  CEF_TET_CANCELLED
+} cef_touch_event_type_t;
+
+///
+// The device type that caused the event.
+///
+typedef enum {
+  CEF_POINTER_TYPE_TOUCH = 0,
+  CEF_POINTER_TYPE_MOUSE,
+  CEF_POINTER_TYPE_PEN,
+  CEF_POINTER_TYPE_ERASER,
+  CEF_POINTER_TYPE_UNKNOWN
+} cef_pointer_type_t;
+
+///
+// Structure representing touch event information.
+///
+typedef struct _cef_touch_event_t {
+  ///
+  // Id of a touch point. Must be unique per touch, can be any number except -1.
+  // Note that a maximum of 16 concurrent touches will be tracked; touches
+  // beyond that will be ignored.
+  ///
+  int id;
+
+  ///
+  // X coordinate relative to the left side of the view.
+  ///
+  float x;
+
+  ///
+  // Y coordinate relative to the top side of the view.
+  ///
+  float y;
+
+  ///
+  // X radius in pixels. Set to 0 if not applicable.
+  ///
+  float radius_x;
+
+  ///
+  // Y radius in pixels. Set to 0 if not applicable.
+  ///
+  float radius_y;
+
+  ///
+  // Rotation angle in radians. Set to 0 if not applicable.
+  ///
+  float rotation_angle;
+
+  ///
+  // The normalized pressure of the pointer input in the range of [0,1].
+  // Set to 0 if not applicable.
+  ///
+  float pressure;
+
+  ///
+  // The state of the touch point. Touches begin with one CEF_TET_PRESSED event
+  // followed by zero or more CEF_TET_MOVED events and finally one
+  // CEF_TET_RELEASED or CEF_TET_CANCELLED event. Events not respecting this
+  // order will be ignored.
+  ///
+  cef_touch_event_type_t type;
+
+  ///
+  // Bit flags describing any pressed modifier keys. See
+  // cef_event_flags_t for values.
+  ///
+  uint32 modifiers;
+
+  ///
+  // The device type that caused the event.
+  ///
+  cef_pointer_type_t pointer_type;
+
+} cef_touch_event_t;
 
 ///
 // Paint element types.
@@ -2487,7 +2608,7 @@ typedef enum {
   REFERRER_POLICY_NO_REFERRER,
 
   // Always the last value in this enumeration.
-  REFERRER_POLICY_LAST_VALUE,
+  REFERRER_POLICY_LAST_VALUE = REFERRER_POLICY_NO_REFERRER,
 } cef_referrer_policy_t;
 
 ///
@@ -2736,6 +2857,90 @@ typedef enum {
   SSL_CONTENT_RAN_INSECURE_CONTENT = 1 << 1,
 } cef_ssl_content_status_t;
 
+//
+// Configuration options for registering a custom scheme.
+// These values are used when calling AddCustomScheme.
+//
+typedef enum {
+  CEF_SCHEME_OPTION_NONE = 0,
+
+  ///
+  // If CEF_SCHEME_OPTION_STANDARD is set the scheme will be treated as a
+  // standard scheme. Standard schemes are subject to URL canonicalization and
+  // parsing rules as defined in the Common Internet Scheme Syntax RFC 1738
+  // Section 3.1 available at http://www.ietf.org/rfc/rfc1738.txt
+  //
+  // In particular, the syntax for standard scheme URLs must be of the form:
+  // <pre>
+  //  [scheme]://[username]:[password]@[host]:[port]/[url-path]
+  // </pre> Standard scheme URLs must have a host component that is a fully
+  // qualified domain name as defined in Section 3.5 of RFC 1034 [13] and
+  // Section 2.1 of RFC 1123. These URLs will be canonicalized to
+  // "scheme://host/path" in the simplest case and
+  // "scheme://username:password@host:port/path" in the most explicit case. For
+  // example, "scheme:host/path" and "scheme:///host/path" will both be
+  // canonicalized to "scheme://host/path". The origin of a standard scheme URL
+  // is the combination of scheme, host and port (i.e., "scheme://host:port" in
+  // the most explicit case).
+  //
+  // For non-standard scheme URLs only the "scheme:" component is parsed and
+  // canonicalized. The remainder of the URL will be passed to the handler as-
+  // is. For example, "scheme:///some%20text" will remain the same. Non-standard
+  // scheme URLs cannot be used as a target for form submission.
+  ///
+  CEF_SCHEME_OPTION_STANDARD = 1 << 0,
+
+  ///
+  // If CEF_SCHEME_OPTION_LOCAL is set the scheme will be treated with the same
+  // security rules as those applied to "file" URLs. Normal pages cannot link to
+  // or access local URLs. Also, by default, local URLs can only perform
+  // XMLHttpRequest calls to the same URL (origin + path) that originated the
+  // request. To allow XMLHttpRequest calls from a local URL to other URLs with
+  // the same origin set the CefSettings.file_access_from_file_urls_allowed
+  // value to true (1). To allow XMLHttpRequest calls from a local URL to all
+  // origins set the CefSettings.universal_access_from_file_urls_allowed value
+  // to true (1).
+  ///
+  CEF_SCHEME_OPTION_LOCAL = 1 << 1,
+
+  ///
+  // If CEF_SCHEME_OPTION_DISPLAY_ISOLATED is set the scheme can only be
+  // displayed from other content hosted with the same scheme. For example,
+  // pages in other origins cannot create iframes or hyperlinks to URLs with the
+  // scheme. For schemes that must be accessible from other schemes don't set
+  // this, set CEF_SCHEME_OPTION_CORS_ENABLED, and use CORS
+  // "Access-Control-Allow-Origin" headers to further restrict access.
+  ///
+  CEF_SCHEME_OPTION_DISPLAY_ISOLATED = 1 << 2,
+
+  ///
+  // If CEF_SCHEME_OPTION_SECURE is set the scheme will be treated with the same
+  // security rules as those applied to "https" URLs. For example, loading this
+  // scheme from other secure schemes will not trigger mixed content warnings.
+  ///
+  CEF_SCHEME_OPTION_SECURE = 1 << 3,
+
+  ///
+  // If CEF_SCHEME_OPTION_CORS_ENABLED is set the scheme can be sent CORS
+  // requests. This value should be set in most cases where
+  // CEF_SCHEME_OPTION_STANDARD is set.
+  ///
+  CEF_SCHEME_OPTION_CORS_ENABLED = 1 << 4,
+
+  ///
+  // If CEF_SCHEME_OPTION_CSP_BYPASSING is set the scheme can bypass Content-
+  // Security-Policy (CSP) checks. This value should not be set in most cases
+  // where CEF_SCHEME_OPTION_STANDARD is set.
+  ///
+  CEF_SCHEME_OPTION_CSP_BYPASSING = 1 << 5,
+
+  ///
+  // If CEF_SCHEME_OPTION_FETCH_ENABLED is set the scheme can perform Fetch API
+  // requests.
+  ///
+  CEF_SCHEME_OPTION_FETCH_ENABLED = 1 << 6,
+} cef_scheme_options_t;
+
 ///
 // Error codes for CDM registration. See cef_web_plugin.h for details.
 ///
@@ -2787,6 +2992,117 @@ typedef struct _cef_composition_underline_t {
   ///
   int thick;
 } cef_composition_underline_t;
+
+///
+// Enumerates the various representations of the ordering of audio channels.
+// Logged to UMA, so never reuse a value, always add new/greater ones!
+// See media\base\channel_layout.h
+///
+typedef enum {
+  CEF_CHANNEL_LAYOUT_NONE = 0,
+  CEF_CHANNEL_LAYOUT_UNSUPPORTED = 1,
+
+  // Front C
+  CEF_CHANNEL_LAYOUT_MONO = 2,
+
+  // Front L, Front R
+  CEF_CHANNEL_LAYOUT_STEREO = 3,
+
+  // Front L, Front R, Back C
+  CEF_CHANNEL_LAYOUT_2_1 = 4,
+
+  // Front L, Front R, Front C
+  CEF_CHANNEL_LAYOUT_SURROUND = 5,
+
+  // Front L, Front R, Front C, Back C
+  CEF_CHANNEL_LAYOUT_4_0 = 6,
+
+  // Front L, Front R, Side L, Side R
+  CEF_CHANNEL_LAYOUT_2_2 = 7,
+
+  // Front L, Front R, Back L, Back R
+  CEF_CHANNEL_LAYOUT_QUAD = 8,
+
+  // Front L, Front R, Front C, Side L, Side R
+  CEF_CHANNEL_LAYOUT_5_0 = 9,
+
+  // Front L, Front R, Front C, LFE, Side L, Side R
+  CEF_CHANNEL_LAYOUT_5_1 = 10,
+
+  // Front L, Front R, Front C, Back L, Back R
+  CEF_CHANNEL_LAYOUT_5_0_BACK = 11,
+
+  // Front L, Front R, Front C, LFE, Back L, Back R
+  CEF_CHANNEL_LAYOUT_5_1_BACK = 12,
+
+  // Front L, Front R, Front C, Side L, Side R, Back L, Back R
+  CEF_CHANNEL_LAYOUT_7_0 = 13,
+
+  // Front L, Front R, Front C, LFE, Side L, Side R, Back L, Back R
+  CEF_CHANNEL_LAYOUT_7_1 = 14,
+
+  // Front L, Front R, Front C, LFE, Side L, Side R, Front LofC, Front RofC
+  CEF_CHANNEL_LAYOUT_7_1_WIDE = 15,
+
+  // Stereo L, Stereo R
+  CEF_CHANNEL_LAYOUT_STEREO_DOWNMIX = 16,
+
+  // Stereo L, Stereo R, LFE
+  CEF_CHANNEL_LAYOUT_2POINT1 = 17,
+
+  // Stereo L, Stereo R, Front C, LFE
+  CEF_CHANNEL_LAYOUT_3_1 = 18,
+
+  // Stereo L, Stereo R, Front C, Rear C, LFE
+  CEF_CHANNEL_LAYOUT_4_1 = 19,
+
+  // Stereo L, Stereo R, Front C, Side L, Side R, Back C
+  CEF_CHANNEL_LAYOUT_6_0 = 20,
+
+  // Stereo L, Stereo R, Side L, Side R, Front LofC, Front RofC
+  CEF_CHANNEL_LAYOUT_6_0_FRONT = 21,
+
+  // Stereo L, Stereo R, Front C, Rear L, Rear R, Rear C
+  CEF_CHANNEL_LAYOUT_HEXAGONAL = 22,
+
+  // Stereo L, Stereo R, Front C, LFE, Side L, Side R, Rear Center
+  CEF_CHANNEL_LAYOUT_6_1 = 23,
+
+  // Stereo L, Stereo R, Front C, LFE, Back L, Back R, Rear Center
+  CEF_CHANNEL_LAYOUT_6_1_BACK = 24,
+
+  // Stereo L, Stereo R, Side L, Side R, Front LofC, Front RofC, LFE
+  CEF_CHANNEL_LAYOUT_6_1_FRONT = 25,
+
+  // Front L, Front R, Front C, Side L, Side R, Front LofC, Front RofC
+  CEF_CHANNEL_LAYOUT_7_0_FRONT = 26,
+
+  // Front L, Front R, Front C, LFE, Back L, Back R, Front LofC, Front RofC
+  CEF_CHANNEL_LAYOUT_7_1_WIDE_BACK = 27,
+
+  // Front L, Front R, Front C, Side L, Side R, Rear L, Back R, Back C.
+  CEF_CHANNEL_LAYOUT_OCTAGONAL = 28,
+
+  // Channels are not explicitly mapped to speakers.
+  CEF_CHANNEL_LAYOUT_DISCRETE = 29,
+
+  // Front L, Front R, Front C. Front C contains the keyboard mic audio. This
+  // layout is only intended for input for WebRTC. The Front C channel
+  // is stripped away in the WebRTC audio input pipeline and never seen outside
+  // of that.
+  CEF_CHANNEL_LAYOUT_STEREO_AND_KEYBOARD_MIC = 30,
+
+  // Front L, Front R, Side L, Side R, LFE
+  CEF_CHANNEL_LAYOUT_4_1_QUAD_SIDE = 31,
+
+  // Actual channel layout is specified in the bitstream and the actual channel
+  // count is unknown at Chromium media pipeline level (useful for audio
+  // pass-through mode).
+  CEF_CHANNEL_LAYOUT_BITSTREAM = 32,
+
+  // Max value, must always equal the largest entry ever logged.
+  CEF_CHANNEL_LAYOUT_MAX = CEF_CHANNEL_LAYOUT_BITSTREAM
+} cef_channel_layout_t;
 
 #ifdef __cplusplus
 }

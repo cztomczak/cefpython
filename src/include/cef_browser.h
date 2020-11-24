@@ -596,6 +596,13 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
   virtual void Invalidate(PaintElementType type) = 0;
 
   ///
+  // Issue a BeginFrame request to Chromium.  Only valid when
+  // CefWindowInfo::external_begin_frame_enabled is set to true.
+  ///
+  /*--cef()--*/
+  virtual void SendExternalBeginFrame() = 0;
+
+  ///
   // Send a key event to the browser.
   ///
   /*--cef()--*/
@@ -630,6 +637,12 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
   virtual void SendMouseWheelEvent(const CefMouseEvent& event,
                                    int deltaX,
                                    int deltaY) = 0;
+
+  ///
+  // Send a touch event to the browser for a windowless browser.
+  ///
+  /*--cef()--*/
+  virtual void SendTouchEvent(const CefTouchEvent& event) = 0;
 
   ///
   // Send a focus event to the browser.
@@ -858,6 +871,19 @@ class CefBrowserHost : public virtual CefBaseRefCounted {
   ///
   /*--cef()--*/
   virtual bool IsBackgroundHost() = 0;
+
+  ///
+  //  Set whether the browser's audio is muted.
+  ///
+  /*--cef()--*/
+  virtual void SetAudioMuted(bool mute) = 0;
+
+  ///
+  // Returns true if the browser's audio is muted.  This method can only be
+  // called on the UI thread.
+  ///
+  /*--cef()--*/
+  virtual bool IsAudioMuted() = 0;
 };
 
 #endif  // CEF_INCLUDE_CEF_BROWSER_H_
