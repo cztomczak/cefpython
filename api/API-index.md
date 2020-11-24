@@ -32,7 +32,6 @@
   * [product_version](ApplicationSettings.md#product_version)
   * [remote_debugging_port](ApplicationSettings.md#remote_debugging_port)
   * [resources_dir_path](ApplicationSettings.md#resources_dir_path)
-  * [single_process](ApplicationSettings.md#single_process)
   * [string_encoding](ApplicationSettings.md#string_encoding)
   * [uncaught_exception_stack_size](ApplicationSettings.md#uncaught_exception_stack_size)
   * [unique_request_context_per_browser](ApplicationSettings.md#unique_request_context_per_browser)

@@ -430,7 +430,6 @@ supporting this project actively on a daily basis.
   * [product_version](api/ApplicationSettings.md#product_version)
   * [remote_debugging_port](api/ApplicationSettings.md#remote_debugging_port)
   * [resources_dir_path](api/ApplicationSettings.md#resources_dir_path)
-  * [single_process](api/ApplicationSettings.md#single_process)
   * [string_encoding](api/ApplicationSettings.md#string_encoding)
   * [uncaught_exception_stack_size](api/ApplicationSettings.md#uncaught_exception_stack_size)
   * [unique_request_context_per_browser](api/ApplicationSettings.md#unique_request_context_per_browser)
