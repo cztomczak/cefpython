@@ -39,7 +39,6 @@
 #pragma once
 
 #include "include/cef_base.h"
-#include "include/cef_client.h"
 #include "include/cef_command_line.h"
 #include "include/cef_print_handler.h"
 #include "include/cef_values.h"
@@ -48,26 +47,9 @@
 // Class used to implement browser process callbacks. The methods of this class
 // will be called on the browser process main thread unless otherwise indicated.
 ///
-/*--cef(source=client,no_debugct_check)--*/
+/*--cef(source=client)--*/
 class CefBrowserProcessHandler : public virtual CefBaseRefCounted {
  public:
-  ///
-  // Called on the browser process UI thread to retrieve the list of schemes
-  // that should support cookies. If |include_defaults| is true the default
-  // schemes ("http", "https", "ws" and "wss") will also be supported. Providing
-  // an empty |schemes| value and setting |include_defaults| to false will
-  // disable all loading and saving of cookies.
-  //
-  // This state will apply to the CefCookieManager associated with the global
-  // CefRequestContext. It will also be used as the initial state for any new
-  // CefRequestContexts created by the client. After creating a new
-  // CefRequestContext the CefCookieManager::SetSupportedSchemes method may be
-  // called on the associated CefCookieManager to futher override these values.
-  ///
-  /*--cef()--*/
-  virtual void GetCookieableSchemes(std::vector<CefString>& schemes,
-                                    bool& include_defaults) {}
-
   ///
   // Called on the browser process UI thread immediately after the CEF context
   // has been initialized.
@@ -87,11 +69,22 @@ class CefBrowserProcessHandler : public virtual CefBaseRefCounted {
       CefRefPtr<CefCommandLine> command_line) {}
 
   ///
+  // Called on the browser process IO thread after the main thread has been
+  // created for a new render process. Provides an opportunity to specify extra
+  // information that will be passed to
+  // CefRenderProcessHandler::OnRenderThreadCreated() in the render process. Do
+  // not keep a reference to |extra_info| outside of this method.
+  ///
+  /*--cef()--*/
+  virtual void OnRenderProcessThreadCreated(
+      CefRefPtr<CefListValue> extra_info) {}
+
+  ///
   // Return the handler for printing on Linux. If a print handler is not
   // provided then printing will not be supported on the Linux platform.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefPrintHandler> GetPrintHandler() { return nullptr; }
+  virtual CefRefPtr<CefPrintHandler> GetPrintHandler() { return NULL; }
 
   ///
   // Called from any thread when work has been scheduled for the browser process
@@ -108,16 +101,6 @@ class CefBrowserProcessHandler : public virtual CefBaseRefCounted {
   ///
   /*--cef()--*/
   virtual void OnScheduleMessagePumpWork(int64 delay_ms) {}
-
-  ///
-  // Return the default client for use with a newly created browser window. If
-  // null is returned the browser will be unmanaged (no callbacks will be
-  // executed for that browser) and application shutdown will be blocked until
-  // the browser window is closed manually. This method is currently only used
-  // with the chrome runtime.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefClient> GetDefaultClient() { return nullptr; }
 };
 
 #endif  // CEF_INCLUDE_CEF_BROWSER_PROCESS_HANDLER_H_

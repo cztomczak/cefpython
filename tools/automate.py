@@ -781,8 +781,7 @@ def create_prebuilt_binaries():
             "build_cefclient", "tests", "ceftests",
             Options.build_type,
             "ceftests" + APP_EXT)
-    if not MAC:
-        assert os.path.exists(ceftests)
+
     if LINUX:
         # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
@@ -806,7 +805,7 @@ def create_prebuilt_binaries():
         # additional space (cefsimple is 157 MB).
         copy_app(cefclient)
         copy_app(cefsimple)
-        copy_app(ceftests)
+        #copy_app(ceftests)
 
     # END: Copy cefclient, cefsimple, ceftests
 

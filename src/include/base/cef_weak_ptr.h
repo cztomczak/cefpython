@@ -250,11 +250,11 @@ class WeakPtr : public cef_internal::WeakPtrBase {
   T* get() const { return ref_.is_valid() ? ptr_ : NULL; }
 
   T& operator*() const {
-    CHECK(ref_.is_valid());
+    DCHECK(get() != NULL);
     return *get();
   }
   T* operator->() const {
-    CHECK(ref_.is_valid());
+    DCHECK(get() != NULL);
     return get();
   }
 

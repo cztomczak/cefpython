@@ -136,11 +136,7 @@
 #define CEF_INCLUDE_BASE_CEF_LOGGING_H_
 #pragma once
 
-#if defined(USING_CHROMIUM_INCLUDES)
-// When building CEF include the Chromium header directly.
-#include "base/logging.h"
-#include "base/notreached.h"
-#elif defined(DCHECK)
+#if defined(DCHECK)
 // Do nothing if the macros provided by this header already exist.
 // This can happen in cases where Chromium code is used directly by the
 // client application. When using Chromium code directly always include
@@ -148,12 +144,15 @@
 
 // Always define the DCHECK_IS_ON macro which is used from other CEF headers.
 #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON)
-#define DCHECK_IS_ON() false
+#define DCHECK_IS_ON() 0
 #else
-#define DCHECK_IS_ON() true
+#define DCHECK_IS_ON() 1
 #endif
 
-#else  // !defined(DCHECK)
+#elif defined(USING_CHROMIUM_INCLUDES)
+// When building CEF include the Chromium header directly.
+#include "base/logging.h"
+#else  // !USING_CHROMIUM_INCLUDES
 // The following is substantially similar to the Chromium implementation.
 // If the Chromium implementation diverges the below implementation should be
 // updated to match.

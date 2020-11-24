@@ -44,14 +44,6 @@
 #define OS_WIN 1
 #endif
 #elif defined(__APPLE__)
-// New platform defines after https://crbug.com/1105907.
-#ifndef OS_MAC
-#define OS_MAC 1
-#endif
-#ifndef OS_APPLE
-#define OS_APPLE 1
-#endif
-// Old platform defines retained for backwards compatibility.
 #ifndef OS_MACOSX
 #define OS_MACOSX 1
 #endif
@@ -65,7 +57,7 @@
 
 // For access to standard POSIXish features, use OS_POSIX instead of a
 // more specific macro.
-#if defined(OS_MAC) || defined(OS_LINUX)
+#if defined(OS_MACOSX) || defined(OS_LINUX)
 #ifndef OS_POSIX
 #define OS_POSIX 1
 #endif
@@ -103,7 +95,7 @@
 #define ARCH_CPU_ARMEL 1
 #define ARCH_CPU_32_BITS 1
 #define ARCH_CPU_LITTLE_ENDIAN 1
-#elif defined(__aarch64__) || defined(_M_ARM64)
+#elif defined(__aarch64__)
 #define ARCH_CPU_ARM_FAMILY 1
 #define ARCH_CPU_ARM64 1
 #define ARCH_CPU_64_BITS 1
@@ -168,16 +160,6 @@
 //   ALLOW_UNUSED_LOCAL(x);
 #ifndef ALLOW_UNUSED_LOCAL
 #define ALLOW_UNUSED_LOCAL(x) false ? (void)x : (void)0
-#endif
-
-// Sanitizers annotations.
-#if defined(__has_attribute)
-#if __has_attribute(no_sanitize)
-#define NO_SANITIZE(what) __attribute__((no_sanitize(what)))
-#endif
-#endif
-#if !defined(NO_SANITIZE)
-#define NO_SANITIZE(what)
 #endif
 
 #endif  // !USING_CHROMIUM_INCLUDES

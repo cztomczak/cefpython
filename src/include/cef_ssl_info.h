@@ -64,9 +64,16 @@ class CefSSLInfo : public virtual CefBaseRefCounted {
 };
 
 ///
-// Returns true if the certificate status represents an error.
+// Returns true if the certificate status has any error, major or minor.
 ///
 /*--cef()--*/
 bool CefIsCertStatusError(cef_cert_status_t status);
+
+///
+// Returns true if the certificate status represents only minor errors
+// (e.g. failure to verify certificate revocation).
+///
+/*--cef()--*/
+bool CefIsCertStatusMinorError(cef_cert_status_t status);
 
 #endif  // CEF_INCLUDE_CEF_SSL_INFO_H_

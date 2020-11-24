@@ -75,20 +75,7 @@ class CefWindowDelegate : public CefPanelDelegate {
   virtual CefRefPtr<CefWindow> GetParentWindow(CefRefPtr<CefWindow> window,
                                                bool* is_menu,
                                                bool* can_activate_menu) {
-    return nullptr;
-  }
-
-  ///
-  // Return the initial bounds for |window| in density independent pixel (DIP)
-  // coordinates. If this method returns an empty CefRect then
-  // GetPreferredSize() will be called to retrieve the size, and the window will
-  // be placed on the screen with origin (0,0). This method can be used in
-  // combination with CefView::GetBoundsInScreen() to restore the previous
-  // window bounds.
-  ///
-  /*--cef()--*/
-  virtual CefRect GetInitialBounds(CefRefPtr<CefWindow> window) {
-    return CefRect();
+    return NULL;
   }
 
   ///

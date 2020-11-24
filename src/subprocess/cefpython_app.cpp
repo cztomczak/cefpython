@@ -199,6 +199,23 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
     LOG(INFO) << logMessage.c_str();
 }
 
+void CefPythonApp::OnRenderProcessThreadCreated(
+        CefRefPtr<CefListValue> extra_info) {
+#ifdef BROWSER_PROCESS
+    // If you have an existing CefListValue that you would like
+    // to provide, do this:
+    // | extra_info = mylist.get()
+    // The equivalent in Cython is:
+    // | extra_info.Assign(mylist.get())
+    REQUIRE_IO_THREAD();
+    // Eg.:
+    // | extra_info->SetBool(0, false);
+    // | extra_info->SetString(1, "test");
+    // This is included only in the Browser process, when building
+    // the libcefpythonapp library.
+    BrowserProcessHandler_OnRenderProcessThreadCreated(extra_info);
+#endif // BROWSER_PROCESS
+}
 
 CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
 #ifdef BROWSER_PROCESS
@@ -233,10 +250,14 @@ void CefPythonApp::OnScheduleMessagePumpWork(int64 delay_ms) {
 // CefRenderProcessHandler
 // -----------------------------------------------------------------------------
 
+void CefPythonApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) {
+}
 
 void CefPythonApp::OnWebKitInitialized() {
 }
 
+void CefPythonApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
+}
 
 void CefPythonApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser) {
     LOG(INFO) << "[Renderer process] OnBrowserDestroyed()";
@@ -272,7 +293,7 @@ void CefPythonApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
     //       that number of frames will exceed int range, so
     //       casting it to int for now.
     arguments->SetInt(0, (int)(frame->GetIdentifier()));
-    browser->GetMainFrame()->SendProcessMessage(PID_BROWSER, message);
+    browser->SendProcessMessage(PID_BROWSER, message);
     CefRefPtr<CefDictionaryValue> jsBindings = GetJavascriptBindings(browser);
     if (jsBindings.get()) {
         // Javascript bindings are most probably not yet set for
@@ -312,7 +333,7 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
     // Should we send the message using current "browser"
     // when this is not the main frame? It could fail, so
     // it is more reliable to always use the main browser.
-    browser->GetMainFrame()->SendProcessMessage(PID_BROWSER, message);
+    browser->SendProcessMessage(PID_BROWSER, message);
     // ------------------------------------------------------------------------
     // 2. Remove python callbacks for a frame.
     // ------------------------------------------------------------------------
@@ -339,7 +360,6 @@ void CefPythonApp::OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser,
 }
 
 bool CefPythonApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
-                                        CefRefPtr<CefFrame> frame,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message) {
     std::string messageName = message->GetName().ToString();
