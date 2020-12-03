@@ -83,7 +83,7 @@ class CefRenderHandler : public virtual CefBaseRefCounted {
   // coordinates. This method must always provide a non-empty rectangle.
   ///
   /*--cef()--*/
-  virtual bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) = 0;
+  virtual void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) = 0;
 
   ///
   // Called to retrieve the translation from view coordinates to actual screen

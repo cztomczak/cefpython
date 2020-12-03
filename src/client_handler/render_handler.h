@@ -22,7 +22,7 @@ public:
     bool GetRootScreenRect(CefRefPtr<CefBrowser> browser,
                            CefRect& rect) override;
 
-    bool GetViewRect(CefRefPtr<CefBrowser> browser,
+    void GetViewRect(CefRefPtr<CefBrowser> browser,
                      CefRect& rect) override;
 
     bool GetScreenPoint(CefRefPtr<CefBrowser> browser,
