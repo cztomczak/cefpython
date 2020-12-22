@@ -133,7 +133,7 @@ def main():
         url="https://github.com/cztomczak/cefpython",
         download_url="https://github.com/cztomczak/cefpython/releases",
         platforms=["{{SYSCONFIG_PLATFORM}}"],
-        packages=["cefpython3"],  # Disabled: "cefpython3.wx"
+        packages=["cefpython3", "_cefpython_PyInstaller_hook"],  # Disabled: "cefpython3.wx"
         package_data=get_package_data(),
         classifiers=[
             "Development Status :: 6 - Mature",
@@ -155,6 +155,10 @@ def main():
             "Topic :: Multimedia",
             "Topic :: Software Development :: User Interfaces",
         ],
+        entry_points={
+            "pyinstaller40": [
+                "hook-dirs=_cefpython_PyInstaller_hook:get_hooks_dir"],
+        },
     )
     if "install" in sys.argv:
         print("[setup.py] OK installed")
