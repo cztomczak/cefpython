@@ -14,8 +14,14 @@ import re
 import sys
 import PyInstaller
 from PyInstaller.utils.hooks import is_module_satisfies, get_package_paths
-from PyInstaller.compat import is_win, is_darwin, is_linux, is_py2
+from PyInstaller.compat import is_win, is_darwin, is_linux
 from PyInstaller import log as logging
+try:
+    # PyInstaller 4.0 dropped Python 2 support.
+    from PyInstaller.compat import is_py2
+except ImportError:
+    # It's impossible to run PyInstaller 4.0 on Python 2.7.
+    is_py2 = False
 
 # Constants
 CEFPYTHON_MIN_VERSION = "57.0"
