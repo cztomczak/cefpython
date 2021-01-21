@@ -468,6 +468,9 @@ def compile_time_constants():
         # A way around Python 3.2 bug: UNAME_SYSNAME is not set
         contents += 'DEF UNAME_SYSNAME = "%s"\n' % platform.uname()[0]
         contents += 'DEF PY_MAJOR_VERSION = %s\n' % sys.version_info.major
+        contents += 'cdef extern from "limits.h":\n'
+        contents += '    cdef int INT_MIN\n'
+        contents += '    cdef int INT_MAX\n'
         fo.write(contents.encode("utf-8"))
 
 

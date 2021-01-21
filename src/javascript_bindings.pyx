@@ -139,7 +139,11 @@ cdef class JavascriptBindings:
         elif valueType == float:
             return True
         elif valueType == int:
-            return True
+            if PY_MAJOR_VERSION < 3:
+                return True
+            if INT_MIN <= value <= INT_MAX:
+                return True
+            return "long"
         elif valueType == type(None):
             return True
         elif IsFunctionOrMethod(valueType):
