@@ -5,3 +5,6 @@
 
 DEF UNAME_SYSNAME = "Windows"
 DEF PY_MAJOR_VERSION = 3
+cdef extern from "limits.h":
+    cdef int INT_MIN
+    cdef int INT_MAX

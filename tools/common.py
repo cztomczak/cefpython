@@ -219,15 +219,19 @@ SUBPROCESS_EXE = os.path.join(BUILD_SUBPROCESS,
 
 VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 
+# Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9
 VS2015_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0"
                  "\\VC\\vcvarsall.bat")
 
+# Required for building old CEF branches < 2704
 VS2013_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0"
                  "\\VC\\vcvarsall.bat")
 
+# Python 3.4
 VS2010_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 10.0"
                  "\\VC\\vcvarsall.bat")
 
+# Python 2.7
 VS2008_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 9.0"
                  "\\VC\\vcvarsall.bat")
 
@@ -474,6 +478,8 @@ def get_msvs_for_python(vs_prefix=False):
     elif sys.version_info[:2] == (3, 7):
         return "VS2015" if vs_prefix else "2015"
     elif sys.version_info[:2] == (3, 8):
+        return "VS2015" if vs_prefix else "2015"
+    elif sys.version_info[:2] == (3, 9):
         return "VS2015" if vs_prefix else "2015"
     else:
         print("ERROR: This version of Python is not supported")

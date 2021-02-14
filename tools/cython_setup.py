@@ -147,17 +147,15 @@ def get_winsdk_lib():
     if WINDOWS:
         if ARCH32:
             winsdk_libs = [
+                # Windows 7 SDKs.
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib",
-                # Visual Studio 2008 installation
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Lib",
             ]
         elif ARCH64:
             winsdk_libs = [
+                # Windows 7 SDKs.
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib\\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib\\x64",
-                # Visual Studio 2008 installation
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Lib\\x64",
             ]
         else:
             raise Exception("Unknown architecture")
@@ -433,6 +431,7 @@ def get_ext_modules(options):
         # > Unknown Extension options: 'cython_directives' warnings.warn(msg)
         cython_directives={
             # Any conversion to unicode must be explicit using .decode().
+            "language_level": 2,  # Yes, Py2 for all python versions.
             "c_string_type": "bytes",
             "c_string_encoding": "utf-8",
             "profile": ENABLE_PROFILING,

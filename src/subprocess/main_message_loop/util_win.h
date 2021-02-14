@@ -31,7 +31,7 @@ WNDPROC SetWndProcPtr(HWND hWnd, WNDPROC wndProc);
 
 int GetCefMouseModifiers(WPARAM wparam);
 int GetCefKeyboardModifiers(WPARAM wparam, LPARAM lparam);
-bool IsKeyDown(WPARAM wparam);
+bool IsKeyDown(int keycode);
 
 // Returns the device scale factor. For example, 200% display scaling will
 // return 2.0.
