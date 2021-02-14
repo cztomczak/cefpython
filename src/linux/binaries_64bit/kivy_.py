@@ -171,7 +171,7 @@ class CefBrowser(Widget):
             settings["locales_dir_path"] = cef.GetModuleDirectory() + "/locales"
             settings["resources_dir_path"] = cef.GetModuleDirectory()
         if sys.platform == 'darwin':
-            settings["external_message_pump"] = True
+            settings["external_message_pump"] = True  # Temporary fix for Issue #246
 
         switches = {
             # Tweaking OSR performance by setting the same Chromium flags
