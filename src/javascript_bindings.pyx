@@ -140,6 +140,8 @@ cdef class JavascriptBindings:
             return True
         elif valueType == int:
             return True
+        elif valueType == long:
+            return True
         elif valueType == type(None):
             return True
         elif IsFunctionOrMethod(valueType):
