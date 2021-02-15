@@ -86,7 +86,7 @@ SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3,
 # Supports replacement of one environment variable in path eg.: %ENV_KEY%.
 PYTHON_SEARCH_PATHS = dict(
     WINDOWS=[
-        "C:\\Python*\\",
+        "C:\\Python??*\\",
         "C:\\Pythons\\Python*\\",
         "%LOCALAPPDATA%\\Programs\\Python\\Python*\\",
         "C:\\Program Files\\Python*\\",
@@ -277,6 +277,8 @@ def search_for_pythons(search_arch):
                 version_str = subprocess.check_output([python, "-c",
                                                        version_code])
                 version_str = version_str.strip()
+                if sys.version_info >= (3, 0):
+                    version_str = version_str.decode("utf-8")
                 match = re.search("^\((\d+), (\d+), (\d+)\)$", version_str)
                 assert match, version_str
                 major = match.group(1)
@@ -288,6 +290,8 @@ def search_for_pythons(search_arch):
                              "print(str(platform.architecture()[0]));")
                 arch = subprocess.check_output([python, "-c", arch_code])
                 arch = arch.strip()
+                if sys.version_info >= (3, 0):
+                    arch = arch.decode("utf-8")
                 if version_tuple2 in SUPPORTED_PYTHON_VERSIONS \
                         and arch == search_arch:
                     name = ("Python {major}.{minor}.{micro} {arch}"
