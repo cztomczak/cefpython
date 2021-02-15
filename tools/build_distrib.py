@@ -379,7 +379,7 @@ def uninstall_cefpython3_packages(pythons):
                    .format(python=python["executable"]))
         try:
             output = subprocess.check_output(command, shell=True)
-        except subprocess.CalledProcessError, exc:
+        except subprocess.CalledProcessError as exc:
             # pip show returns error code when package is not installed
             output = exc.output
         if not len(output.strip()):
