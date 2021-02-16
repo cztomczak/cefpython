@@ -55,30 +55,29 @@ PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 <td width="50%" valign="top">
 
 <p align="center">
- <a href="https://lampix.com/">
-  <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix360.png">
- </a>
-</p>
-
-Many Thanks to Lampix for sponsoring the
-[v66 release](../../releases/tag/v66.0). Lampix is the first hardware
-and software solution that turns any surface into a smart, augmented reality
-or interactive surface. Please visit their website:
-<a href="https://lampix.com/">Lampix.com</a>
-
-</td><td width="50%" valign="top">
-
-<p align="center">
  <a href="https://www.fivestars.com/">
   <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/fivestars360.png">
  </a>
 </p>
 
-Many thanks to Fivestars for sponsoring the
-[v49 legacy release](../../releases/tag/v49.0). Fivestars helps local
-communities thrive by empowering small
-businesses with cutting edge marketing technology. Please visit their website:
+Thank you to Fivestars for sponsoring the [v66.1 release](../../releases/tag/v66.1)
+with Python 3.8 / 3.9 support. Fivestars helps local communities thrive by empowering
+small businesses with cutting edge marketing technology. Please visit their website:
 <a href="https://www.fivestars.com/">Fivestars.com</a>
+
+</td><td width="50%" valign="top">
+
+<p align="center">
+ <a href="https://lampix.com/">
+  <img src="https://raw.githubusercontent.com/wiki/cztomczak/cefpython/images/lampix360.png">
+ </a>
+</p>
+
+Thank you to Lampix for sponsoring the
+[v66 release](../../releases/tag/v66.0). Lampix is the first hardware
+and software solution that turns any surface into a smart, augmented reality
+or interactive surface. Please visit their website:
+<a href="https://lampix.com/">Lampix.com</a>
 
 </tr></table>
 
@@ -274,6 +273,8 @@ priority.
 
 ### Thanks to all
 
+* [2021] Thank you to [Fivestars](https://www.fivestars.com/) for sponsoring
+  the v66.1 release with Python 3.8 / 3.9 support
 * [2018] Thanks to [Fivestars](https://www.fivestars.com/) for sponsoring
   the v49 release for legacy systems (WinXP/Vista)
 * [2018] Many thanks to [Lampix](https://lampix.com/) for sponsoring the v66
