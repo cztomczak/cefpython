@@ -58,17 +58,18 @@ g_datauri_data = """
         print("test_function() ok");
 
         // Test binding property: test_property1
-        if (test_property1 == "Test binding property to the 'window' object") {
+        if (test_property1 === "Test binding property to the 'window' object") {
             print("test_property_1 ok");
         } else {
             throw new Error("test_property1 contains invalid string");
         }
 
         // Test binding property: test_property2
-        if (JSON.stringify(test_property2) == '{"key1":"Test binding property'+
-                ' to the \\'window\\' object","key2":["Inside list",1,2]}') {
+        if (JSON.stringify(test_property2) === '{"key1":"Test binding property'+
+                ' to the \\'window\\' object","key2":["Inside list",2147483647,"2147483648"]}') {
             print("test_property2 ok");
         } else {
+            print("test_property2 invalid value: " + JSON.stringify(test_property2));
             throw new Error("test_property2 contains invalid value");
         }
 
@@ -81,7 +82,7 @@ g_datauri_data = """
         print("[TIMER] Call Python function and then js callback that was"+
               " passed (Issue #277 test)");
         external.test_callbacks(function(msg_from_python, py_callback){
-            if (msg_from_python == "String sent from Python") {
+            if (msg_from_python === "String sent from Python") {
                 print("test_callbacks() ok");
                 var execution_time = new Date().getTime() - start_time;
                 print("[TIMER]: Elapsed = "+String(execution_time)+" ms");
@@ -163,15 +164,23 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.LoadCrlSetsFile(crlset)
             subtest_message("cef.LoadCrlSetsFile ok")
 
-        # High DPI on Windows
+        # High DPI on Windows.
+        # Setting DPI awareness from Python is usually too late and should be done
+        # via manifest file. Alternatively change python.exe properties > Compatibility
+        # > High DPI scaling override > Application.
+        # Using cef.DpiAware.EnableHighDpiSupport is problematic, it can cause
+        # display glitches.
         if WINDOWS:
             self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
             window_size = cef.DpiAware.CalculateWindowSize(800, 600)
             self.assertIsInstance(window_size, tuple)
             self.assertGreater(window_size[0], 0)
             self.assertGreater(cef.DpiAware.Scale((800, 600))[0], 0)
-            cef.DpiAware.EnableHighDpiSupport()
-            self.assertTrue(cef.DpiAware.IsProcessDpiAware())
+
+            # OFF - see comments above.
+            # cef.DpiAware.EnableHighDpiSupport()
+            # self.assertTrue(cef.DpiAware.IsProcessDpiAware())
+
             # Make some calls again after DPI Aware was set
             self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
             self.assertGreater(cef.DpiAware.Scale([800, 600])[0], 0)
@@ -374,9 +383,10 @@ class External(object):
         self.test_case = test_case
 
         # Test binding properties to the 'window' object.
+        # 2147483648 is out of INT_MAX limit and will be sent to JS as string value.
         self.test_property1 = "Test binding property to the 'window' object"
         self.test_property2 = {"key1": self.test_property1,
-                               "key2": ["Inside list", 1, 2]}
+                               "key2": ["Inside list", 2147483647, 2147483648]}
 
         # Asserts for True/False will be checked just before shutdown
         self.test_for_True = True  # Test whether asserts are working correctly
