@@ -1,7 +1,5 @@
-# An example of embedding CEF browser in the Kivy framework.
-# The browser is embedded using off-screen rendering mode.
-
-# Tested using Kivy 1.7.2 stable, only on Linux.
+# An example of embedding CEF browser with the Kivy framework
+# by using off-screen rendering mode.
 
 # In this example kivy-lang is used to declare the layout which
 # contains two buttons (back, forward) and the browser view.
@@ -44,7 +42,7 @@ class BrowserLayout(BoxLayout):
         super(BrowserLayout, self).__init__(**kwargs)
         self.orientation = "vertical"
 
-        self.browser_widget = CefBrowser(id="browser")
+        self.browser_widget = CefBrowser()
 
         layout = BoxLayout()
         layout.size_hint_y = None
