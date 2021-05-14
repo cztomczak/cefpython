@@ -65,7 +65,7 @@ response (or -1 if not determined).
 | Parameter | Type |
 | --- | --- |
 | web_request | [WebRequest](WebRequest.md) |
-| data | string |
+| data | bytes |
 | __Return__ | void |
 
 Called when some part of the response is read. |data| contains the current
