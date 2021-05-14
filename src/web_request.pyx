@@ -176,7 +176,7 @@ cdef public void WebRequestClient_OnDownloadData(
             if userCallback:
                 userCallback(
                         web_request=webRequest,
-                        data=VoidPtrToString(data, dataLength))
+                        data=VoidPtrToBytes(data, dataLength))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
