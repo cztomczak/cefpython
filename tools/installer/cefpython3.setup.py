@@ -103,7 +103,7 @@ def main():
     setup(
         distclass=Distribution,
         cmdclass=cmdclass,
-        name="cefpython3",  # No spaces here, so that it works with deb pkg
+        name="cefpython3-v66.1-for-python-3.9.6-unofficial",  # No spaces here, so that it works with deb pkg
         version="{{VERSION}}",
         description="GUI toolkit for embedding a Chromium widget"
                     " in desktop applications",
@@ -128,10 +128,10 @@ def main():
                          "Project website:\n"
                          "https://github.com/cztomczak/cefpython",
         license="BSD 3-clause",
-        author="Czarek Tomczak",
-        author_email="czarek.tomczak@gmail.com",
-        url="https://github.com/cztomczak/cefpython",
-        download_url="https://github.com/cztomczak/cefpython/releases",
+        author="Sébastien DROUIN",
+        author_email="sebastien@kletel.net",
+        url="https://github.com/kletel/cefpython",
+        download_url="https://github.com/kletel/cefpython/releases",
         platforms=["{{SYSCONFIG_PLATFORM}}"],
         packages=["cefpython3"],  # Disabled: "cefpython3.wx"
         package_data=get_package_data(),
