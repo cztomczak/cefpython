@@ -107,8 +107,11 @@ def main():
         version="{{VERSION}}",
         description="GUI toolkit for embedding a Chromium widget"
                     " in desktop applications",
-        long_description="CEF Python is an open source project founded"
+        long_description=" This is an unofficial version of cefpython"
+                         " for mac build "
+                         " CEF Python is an open source project founded"
                          " by Czarek Tomczak in 2012 to provide python"
+                         
                          " bindings for the Chromium Embedded Framework."
                          " Examples of embedding CEF browser are available"
                          " for many popular GUI toolkits including:"
@@ -126,7 +129,7 @@ def main():
                          " for web scraping or as a web crawler, or other"
                          " kind of internet bots.\n\n"
                          "Project website:\n"
-                         "https://github.com/cztomczak/cefpython",
+                         "https://github.com/kletel/cefpython",
         license="BSD 3-clause",
         author="Sébastien DROUIN",
         author_email="sebastien@kletel.net",
