@@ -147,7 +147,7 @@ also download packages for offline installation available on the
 [GitHub Releases](../../releases) pages. Command to install with pip:
 
 ```
-pip install cefpython3==66.0
+pip install -U cefpython3
 ```
 
 
