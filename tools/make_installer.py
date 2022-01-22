@@ -365,11 +365,12 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
     # in the package. Thus if included, msvcpxx.dll dependency is
     # required as well.
 
-    # Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9
+    # Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10
     if os.path.exists(os.path.join(pkg_dir, "cefpython_py35.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py36.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py37.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py38.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py310.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py39.pyd")):
         search_paths = [
             # This is where Microsoft Visual C++ 2015 Update 3 installs
