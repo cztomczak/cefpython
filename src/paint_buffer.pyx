@@ -48,10 +48,15 @@ cdef class PaintBuffer:
                     self.height)
 
         if origin == "bottom-left":
-            if not dest_alloced:
+            if dest_alloced:
+                tmp = <void*>malloc(self.length)
+                FlipBufferUpsideDown(tmp, dest, self.width, self.height)
+                free(dest)
+                dest = tmp
+            else:
                 dest = <void*>malloc(self.length)
                 dest_alloced = True
-            FlipBufferUpsideDown(dest, self.buffer, self.width, self.height)
+                FlipBufferUpsideDown(dest, self.buffer, self.width, self.height)
 
         if dest_alloced:
             ret = (<char*>dest)[:self.length]
@@ -91,10 +96,15 @@ cdef class PaintBuffer:
                     self.height)
 
         if origin == "bottom-left":
-            if not dest_alloced:
+            if dest_alloced:
+                tmp = <void*>malloc(self.length)
+                FlipBufferUpsideDown(tmp, dest, self.width, self.height)
+                free(dest)
+                dest = tmp
+            else:
                 dest = <void*>malloc(self.length)
                 dest_alloced = True
-            FlipBufferUpsideDown(dest, self.buffer, self.width, self.height)
+                FlipBufferUpsideDown(dest, self.buffer, self.width, self.height)
 
         if dest_alloced:
             ret = (<char*>dest)[:self.length]
