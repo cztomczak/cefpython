@@ -103,12 +103,15 @@ def main():
     setup(
         distclass=Distribution,
         cmdclass=cmdclass,
-        name="cefpython3",  # No spaces here, so that it works with deb pkg
+        name="cefpython3-v66.1-for-python-3.10.2-unofficial",  # No spaces here, so that it works with deb pkg
         version="{{VERSION}}",
         description="GUI toolkit for embedding a Chromium widget"
                     " in desktop applications",
-        long_description="CEF Python is an open source project founded"
+        long_description=" This is an unofficial version of cefpython"
+                         " for mac build "
+                         " CEF Python is an open source project founded"
                          " by Czarek Tomczak in 2012 to provide python"
+                         
                          " bindings for the Chromium Embedded Framework."
                          " Examples of embedding CEF browser are available"
                          " for many popular GUI toolkits including:"
@@ -126,12 +129,12 @@ def main():
                          " for web scraping or as a web crawler, or other"
                          " kind of internet bots.\n\n"
                          "Project website:\n"
-                         "https://github.com/cztomczak/cefpython",
+                         "https://github.com/kletel/cefpython",
         license="BSD 3-clause",
-        author="Czarek Tomczak",
-        author_email="czarek.tomczak@gmail.com",
-        url="https://github.com/cztomczak/cefpython",
-        download_url="https://github.com/cztomczak/cefpython/releases",
+        author="Sébastien DROUIN",
+        author_email="sebastien@kletel.net",
+        url="https://github.com/kletel/cefpython",
+        download_url="https://github.com/kletel/cefpython/releases",
         platforms=["{{SYSCONFIG_PLATFORM}}"],
         packages=["cefpython3"],  # Disabled: "cefpython3.wx"
         package_data=get_package_data(),
@@ -150,6 +153,7 @@ def main():
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
             "Topic :: Desktop Environment",
             "Topic :: Internet",
             "Topic :: Internet :: WWW/HTTP",
