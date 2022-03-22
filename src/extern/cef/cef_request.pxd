@@ -5,7 +5,7 @@
 from cef_ptr cimport CefRefPtr
 from cef_string cimport CefString
 # noinspection PyUnresolvedReferences
-from cef_types cimport cef_urlrequest_flags_t, cef_postdataelement_type_t
+from cef_types cimport cef_urlrequest_flags_t, cef_postdataelement_type_t, cef_referrer_policy_t
 # noinspection PyUnresolvedReferences
 from libcpp.vector cimport vector as cpp_vector
 from libcpp cimport bool as cpp_bool
@@ -16,6 +16,7 @@ cdef extern from "include/cef_request.h":
     # This types won't be visible in pyx files!
     ctypedef cpp_multimap[CefString, CefString] HeaderMap
     # ctypedef cef_urlrequest_flags_t CefRequestFlags
+    ctypedef cef_referrer_policy_t ReferrerPolicy
 
     cdef CefRefPtr[CefRequest] CefRequest_Create "CefRequest::Create"()
     cdef cppclass CefRequest:
@@ -24,6 +25,9 @@ cdef extern from "include/cef_request.h":
         void SetURL(CefString& url)
         CefString GetMethod()
         void SetMethod(CefString& method)
+        void SetReferrer(CefString& referrer_url, ReferrerPolicy& policy)
+        CefString GetReferrerURL()
+        ReferrerPolicy GetReferrerPolicy()
         CefRefPtr[CefPostData] GetPostData()
         void SetPostData(CefRefPtr[CefPostData] postData)
         void GetHeaderMap(HeaderMap& headerMap)

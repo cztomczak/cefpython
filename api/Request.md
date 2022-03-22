@@ -14,6 +14,9 @@ Table of contents:
   * [SetUrl](#seturl)
   * [GetMethod](#getmethod)
   * [SetMethod](#setmethod)
+  * [SetReferrer](#setreferrer)
+  * [GetReferrerURL](#getreferrerurl)
+  * [GetReferrerPolicy](#getreferrerpolicy)
   * [GetPostData](#getpostdata)
   * [SetPostData](#setpostdata)
   * [GetHeaderMap](#getheadermap)
@@ -87,6 +90,49 @@ if post data is provided and GET otherwise.
 | __Return__ | void |
 
 Set the request method type.
+
+
+### SetReferrer
+
+| Parameter | Type |
+| --- | --- |
+| referrer_url | string |
+| policy | ReferrerPolicy |
+| __Return__ | void |
+
+Set the request referrer.
+
+`referrer` must be a fully qualified url.
+
+`ReferrerPolicy` constants in the cefpython module:
+* **REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_FROM_SECURE_TO_INSECURE**
+* **REFERRER_POLICY_DEFAULT** - equivalent to REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_FROM_SECURE_TO_INSECURE
+* **REFERRER_POLICY_REDUCE_REFERRER_GRANULARITY_ON_TRANSITION_CROSS_ORIGIN**
+* **REFERRER_POLICY_ORIGIN_ONLY_ON_TRANSITION_CROSS_ORIGIN**
+* **REFERRER_POLICY_NEVER_CLEAR_REFERRER**
+* **REFERRER_POLICY_ORIGIN**
+* **REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_CROSS_ORIGIN**
+* **REFERRER_POLICY_ORIGIN_CLEAR_ON_TRANSITION_FROM_SECURE_TO_INSECURE**
+* **REFERRER_POLICY_NO_REFERRER**
+* **REFERRER_POLICY_LAST_VALUE**
+
+
+### GetReferrerURL
+
+| | |
+| --- | --- |
+| __Return__ | string |
+
+Get the referrer url.
+
+
+### GetReferrerPolicy
+
+| | |
+| --- | --- |
+| __Return__ | ReferrerPolicy |
+
+Get the referrer policy for this request.
 
 
 ### GetPostData
