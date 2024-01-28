@@ -93,7 +93,6 @@ import glob
 import shutil
 import multiprocessing
 from collections import OrderedDict
-from setuptools.msvc import msvc9_query_vcvarsall
 
 # Constants
 CEF_UPSTREAM_GIT_URL = "https://bitbucket.org/chromiumembedded/cef.git"
@@ -147,11 +146,6 @@ def main():
     setup_options(docopt.docopt(__doc__))
 
     if Options.build_cef:
-        if not sys.version_info[:2] == (2, 7):
-            print("ERROR: To build CEF from sources you need Python 2.7.")
-            print("       Upstream automate-git.py works only with that")
-            print("       version of python.")
-            sys.exit(1)
         build_cef()
     elif Options.prebuilt_cef:
         prebuilt_cef()
@@ -525,6 +519,7 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
         if msvs == "2010":
             # When Using WinSDK 7.1 vcvarsall.bat doesn't work. Use
             # setuptools.msvc.msvc9_query_vcvarsall to query env vars.
+            from setuptools.msvc import msvc9_query_vcvarsall
             env.update(msvc9_query_vcvarsall(10.0, arch=VS_PLATFORM_ARG))
             # On Python 2.7 env values returned by both distutils
             # and setuptools are unicode, but Python expects env

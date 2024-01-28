@@ -138,7 +138,7 @@ import subprocess
 import sys
 import tempfile
 import urllib
-import urllib2
+from urllib.request import urlopen, FancyURLopener
 import zipfile
 
 ##
@@ -258,7 +258,7 @@ def exec_cmd(cmd, path):
         stderr=subprocess.PIPE,
         shell=(sys.platform == 'win32'))
     out, err = process.communicate()
-  except IOError, (errno, strerror):
+  except IOError:
     raise
   except:
     raise
@@ -300,7 +300,7 @@ def download_and_extract(src, target):
 
   if src[:4] == 'http':
     # Attempt to download a URL.
-    opener = urllib.FancyURLopener({})
+    opener = FancyURLopener({})
     response = opener.open(src)
 
     temporary = True
@@ -462,7 +462,7 @@ def onerror(func, path, exc_info):
 def read_json_url(url):
   """ Read a JSON URL. """
   msg('Downloading %s' % url)
-  response = urllib2.urlopen(url)
+  response = urlopen(url)
   return json.loads(response.read())
 
 
@@ -1051,7 +1051,7 @@ parser.add_option('--distrib-subdir', dest='distribsubdir',
 (options, args) = parser.parse_args()
 
 if options.downloaddir is None:
-  print "The --download-dir option is required."
+  print("The --download-dir option is required.")
   parser.print_help(sys.stderr)
   sys.exit()
 
@@ -1074,7 +1074,7 @@ if (options.nochromiumupdate and options.forceupdate) or \
   if (options.nocefupdate and options.forceupdate):
     pass
   else:
-    print "Invalid combination of options."
+    print("Invalid combination of options.")
     parser.print_help(sys.stderr)
     sys.exit()
   # --
@@ -1083,17 +1083,17 @@ if (options.noreleasebuild and \
      (options.minimaldistrib or options.minimaldistribonly or \
       options.clientdistrib or options.clientdistribonly)) or \
    (options.minimaldistribonly + options.clientdistribonly + options.sandboxdistribonly > 1):
-  print 'Invalid combination of options.'
+  print('Invalid combination of options.')
   parser.print_help(sys.stderr)
   sys.exit()
 
 if options.x64build and options.armbuild:
-  print 'Invalid combination of options.'
+  print('Invalid combination of options.')
   parser.print_help(sys.stderr)
   sys.exit()
 
 if (options.buildtests or options.runtests) and len(options.testtarget) == 0:
-  print "A test target must be specified via --test-target."
+  print("A test target must be specified via --test-target.")
   parser.print_help(sys.stderr)
   sys.exit()
 
@@ -1101,7 +1101,7 @@ if (options.buildtests or options.runtests) and len(options.testtarget) == 0:
 if options.dryrun and options.dryrunplatform is not None:
   platform = options.dryrunplatform
   if not platform in ['windows', 'macosx', 'linux']:
-    print 'Invalid dry-run-platform value: %s' % (platform)
+    print('Invalid dry-run-platform value: %s' % (platform))
     sys.exit()
 elif sys.platform == 'win32':
   platform = 'windows'
@@ -1110,7 +1110,7 @@ elif sys.platform == 'darwin':
 elif sys.platform.startswith('linux'):
   platform = 'linux'
 else:
-  print 'Unknown operating system platform'
+  print('Unknown operating system platform')
   sys.exit()
 
 # Script extension.
@@ -1125,25 +1125,25 @@ if options.clientdistrib or options.clientdistribonly:
   else:
     client_app = 'cefclient'
   if options.buildtarget.find(client_app) == -1:
-    print 'A client distribution cannot be generated if --build-target '+\
-          'excludes %s.' % client_app
+    print('A client distribution cannot be generated if --build-target '+\
+          'excludes %s.' % client_app)
     parser.print_help(sys.stderr)
     sys.exit()
 
 if platform != 'windows' and (options.sandboxdistrib or
                               options.sandboxdistribonly):
-  print 'The sandbox distribution is only supported on Windows.'
+  print('The sandbox distribution is only supported on Windows.')
   sys.exit()
 
 # CEF branch.
 if options.branch != 'trunk' and not options.branch.isdigit():
-  print 'Invalid branch value: %s' % (options.branch)
+  print('Invalid branch value: %s' % (options.branch))
   sys.exit()
 
 cef_branch = options.branch
 
 if cef_branch != 'trunk' and int(cef_branch) <= 1453:
-  print 'The requested branch is too old to build using this tool.'
+  print('The requested branch is too old to build using this tool.')
   sys.exit()
 
 # True if the requested branch is 2272 or newer.
@@ -1166,28 +1166,28 @@ if branch_is_newer_than_2785 and not 'CEF_USE_GN' in os.environ.keys():
 use_gn = bool(int(os.environ.get('CEF_USE_GN', '0')))
 if use_gn:
   if branch_is_2743_or_older:
-    print 'GN is not supported with branch 2743 and older (set CEF_USE_GN=0).'
+    print('GN is not supported with branch 2743 and older (set CEF_USE_GN=0).')
     sys.exit()
 
   if options.armbuild:
     if platform != 'linux':
-      print 'The ARM build option is only supported on Linux.'
+      print('The ARM build option is only supported on Linux.')
       sys.exit()
 
     if not branch_is_newer_than_2785:
-      print 'The ARM build option is not supported with branch 2785 and older.'
+      print('The ARM build option is not supported with branch 2785 and older.')
       sys.exit()
 else:
   if options.armbuild:
-    print 'The ARM build option is not supported by GYP.'
+    print('The ARM build option is not supported by GYP.')
     sys.exit()
 
   if options.x64build and platform != 'windows' and platform != 'macosx':
-    print 'The x64 build option is only used on Windows and Mac OS X.'
+    print('The x64 build option is only used on Windows and Mac OS X.')
     sys.exit()
 
   if platform == 'windows' and not 'GYP_MSVS_VERSION' in os.environ.keys():
-    print 'You must set the GYP_MSVS_VERSION environment variable on Windows.'
+    print('You must set the GYP_MSVS_VERSION environment variable on Windows.')
     sys.exit()
 
   # True if GYP_DEFINES=target_arch=x64 must be set.
@@ -1203,8 +1203,8 @@ else:
   deps_file = '.DEPS.git'
 
 if platform == 'macosx' and not options.x64build and branch_is_2272_or_newer:
-  print '32-bit Mac OS X builds are no longer supported with 2272 branch and '+\
-        'newer. Add --x64-build flag to generate a 64-bit build.'
+  print('32-bit Mac OS X builds are no longer supported with 2272 branch and '+\
+        'newer. Add --x64-build flag to generate a 64-bit build.')
   sys.exit()
 
 # Options that force the sources to change.
@@ -1214,7 +1214,7 @@ force_change = options.forceclean or options.forceupdate
 discard_local_changes = force_change or options.forcecefupdate
 
 if options.resave and (options.forcepatchupdate or discard_local_changes):
-  print '--resave cannot be combined with options that modify or discard patches.'
+  print('--resave cannot be combined with options that modify or discard patches.')
   parser.print_help(sys.stderr)
   sys.exit()
 
