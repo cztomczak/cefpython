@@ -14,7 +14,7 @@ and with v50 on Windows, so if there are issues report them on the Forum.
 Option 2 is to use CEF binaries from Spotify Automated Builds using
 the --prebuilt-cef flag. In such case check the cefpython/src/version/
 directory to know which version of CEF to download from Spotify:
-http://opensource.spotify.com/cefbuilds/index.html
+https://cef-builds.spotifycdn.com/index.html
 Download and extract it so that for example you have such a directory:
 cefpython/build/cef_binary_3.2883.1553.g80bd606_windows32/ .
 
