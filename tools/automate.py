@@ -180,7 +180,7 @@ def setup_options(docopt_args):
     # --gyp-msvs-version
     if not Options.gyp_msvs_version:
         if int(Options.cef_branch) >= 2704:
-            Options.gyp_msvs_version = "2015"
+            Options.gyp_msvs_version = "2022"
         else:
             Options.gyp_msvs_version = "2013"
 
@@ -870,6 +870,7 @@ def get_available_python_compilers():
         ("2008", VS2008_VCVARS),
         ("2010", VS2010_VCVARS),
         ("2015", VS2015_VCVARS),
+        ("2022", VS2015_VCVARS),
     ])
     ret_compilers = OrderedDict()
     for msvs in all_python_compilers:
@@ -980,7 +981,7 @@ def run_automate_git():
     """
     Example automate-git.py command:
         C:\chromium>call python automate-git.py --download-dir=./test/
-        --branch=2526 --no-debug-build --verbose-build
+        --branch=2526 --no-debug-build --verbose-build --with-pgo-profiles
     Run ninja build manually:
         cd chromium/src
         ninja -v -j2 -Cout\Release cefclient
@@ -1006,6 +1007,7 @@ def run_automate_git():
     if Options.force_chromium_update:
         args.append("--force-update")
     args.append("--no-distrib-archive")
+    args.append("--with-pgo-profiles")
     if platform.system() == "Linux":
         # Building cefclient target isn't supported on Linux when
         # using sysroot (cef/#1916). However building cefclient

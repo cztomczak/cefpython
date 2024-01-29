@@ -147,6 +147,7 @@ def get_winsdk_lib():
     if WINDOWS:
         if ARCH32:
             winsdk_libs = [
+                r"C:\Program Files (x86)\Microsoft SDKs\Windows Kits\10",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib",
                 # Visual Studio 2008 installation
@@ -154,6 +155,7 @@ def get_winsdk_lib():
             ]
         elif ARCH64:
             winsdk_libs = [
+                r"C:\Program Files (x86)\Microsoft SDKs\Windows Kits\10",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib\\x64",
                 r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib\\x64",
                 # Visual Studio 2008 installation

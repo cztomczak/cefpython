@@ -79,7 +79,7 @@ NO_AUTOMATE = False
 ALLOW_PARTIAL = False
 
 # Python versions
-SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8)]
+SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10)]
 
 # Python search paths. It will use first Python found for specific version.
 # Supports replacement of one environment variable in path eg.: %ENV_KEY%.
@@ -273,7 +273,7 @@ def search_for_pythons(search_arch):
                           .format(executable=python))
                     sys.exit(1)
                 version_str = subprocess.check_output([python, "-c",
-                                                       version_code])
+                                                       version_code]).decode()
                 version_str = version_str.strip()
                 match = re.search("^\((\d+), (\d+), (\d+)\)$", version_str)
                 assert match, version_str
@@ -284,7 +284,7 @@ def search_for_pythons(search_arch):
                 version_tuple3 = (int(major), int(minor), int(micro))
                 arch_code = ("import platform;"
                              "print(str(platform.architecture()[0]));")
-                arch = subprocess.check_output([python, "-c", arch_code])
+                arch = subprocess.check_output([python, "-c", arch_code]).decode()
                 arch = arch.strip()
                 if version_tuple2 in SUPPORTED_PYTHON_VERSIONS \
                         and arch == search_arch:
@@ -376,8 +376,8 @@ def uninstall_cefpython3_packages(pythons):
         command = ("\"{python}\" -m pip show cefpython3"
                    .format(python=python["executable"]))
         try:
-            output = subprocess.check_output(command, shell=True)
-        except subprocess.CalledProcessError, exc:
+            output = subprocess.check_output(command, shell=True).decode()
+        except subprocess.CalledProcessError as exc:
             # pip show returns error code when package is not installed
             output = exc.output
         if not len(output.strip()):

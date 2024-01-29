@@ -160,7 +160,7 @@ def build_cefpython_app_library():
 
 
 def build_subprocess_executable():
-    print("[buil_cpp_projects.py] Build executable: subprocess")
+    print("[build_cpp_projects.py] Build executable: subprocess")
     compiler = get_compiler(static=True)
     sources = get_sources(SUBPROCESS_DIR,
                           exclude_names=["print_handler_gtk.cpp"])

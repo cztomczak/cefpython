@@ -48,7 +48,7 @@ OS_POSTFIX2 = "unknown"
 CEF_POSTFIX2 = "unknown"  # Upstream CEF binaries postfix
 
 if OS_POSTFIX == "win":
-    OS_POSTFIX2 = "win32" if ARCH32 else "win64"
+    OS_POSTFIX2 = "windows32" if ARCH32 else "windows64"
     CEF_POSTFIX2 = "windows32" if ARCH32 else "windows64"
 elif OS_POSTFIX == "mac":
     OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
@@ -219,8 +219,7 @@ SUBPROCESS_EXE = os.path.join(BUILD_SUBPROCESS,
 
 VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 
-VS2015_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0"
-                 "\\VC\\vcvarsall.bat")
+VS2015_VCVARS = (r"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat")
 
 VS2013_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0"
                  "\\VC\\vcvarsall.bat")
@@ -270,7 +269,8 @@ def get_python_include_path():
     # 3) ~/.pyenv/versions/3.4.6/include/python2.7m
     # 4) /usr/include/python2.7
     base_dir = os.path.dirname(sys.executable)
-    try_dirs = ["{base_dir}/include",
+    try_dirs = [r"C:\Users\opopp\AppData\Local\Programs\Python\Python310\include",
+                "{base_dir}/include",
                 "{base_dir}/../include/python{ver}",
                 "{base_dir}/../include/python{ver}*",
                 ("{base_dir}/../Frameworks/Python.framework/Versions/{ver}"
@@ -451,7 +451,7 @@ def get_cefpython_version():
 
 
 def get_version_from_file(header_file):
-    with open(header_file, "rU") as fp:
+    with open(header_file, "r") as fp:
         contents = fp.read()  # no need to decode() as "rU" specified
     ret = dict()
     matches = re.findall(r'^#define (\w+) "?([^\s"]+)"?', contents,
@@ -475,6 +475,10 @@ def get_msvs_for_python(vs_prefix=False):
         return "VS2015" if vs_prefix else "2015"
     elif sys.version_info[:2] == (3, 8):
         return "VS2015" if vs_prefix else "2015"
+    elif sys.version_info[:2] == (3, 9):
+        return "VS2015" if vs_prefix else "2015"
+    elif sys.version_info[:2] == (3, 10):
+        return "VS2015" if vs_prefix else "2022"
     else:
         print("ERROR: This version of Python is not supported")
         sys.exit(1)
