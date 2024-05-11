@@ -26,9 +26,13 @@ __author__ = "The CEF Python authors"
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 
-# This loads the libcef.so library for the subprocess executable.
-# On Mac it works without setting library paths.
-os.environ["LD_LIBRARY_PATH"] = package_dir
+# This loads the libcef.so library for the subprocess executable on Linux.
+# TODO: Use -Wl,-rpath=\$$ORIGIN in Makefile.
+ld_library_path = os.environ.get("LD_LIBRARY_PATH")
+if ld_library_path and ld_library_path.strip():
+    os.environ["LD_LIBRARY_PATH"] = package_dir + os.pathsep + ld_library_path
+else:
+    os.environ["LD_LIBRARY_PATH"] = package_dir
 
 # This env variable will be returned by cefpython.GetModuleDirectory().
 os.environ["CEFPYTHON3_PATH"] = package_dir
@@ -63,5 +67,14 @@ elif sys.version_info[:2] == (3, 7):
 elif sys.version_info[:2] == (3, 8):
     # noinspection PyUnresolvedReferences
     from . import cefpython_py38 as cefpython
+elif sys.version_info[:2] == (3, 9):
+    # noinspection PyUnresolvedReferences
+    from . import cefpython_py39 as cefpython
+elif sys.version_info[:2] == (3, 10):
+    # noinspection PyUnresolvedReferences
+    from . import cefpython_py310 as cefpython
+elif sys.version_info[:2] == (3, 11):
+    # noinspection PyUnresolvedReferences
+    from . import cefpython_py311 as cefpython
 else:
     raise Exception("Python version not supported: " + sys.version)

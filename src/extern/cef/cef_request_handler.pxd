@@ -11,7 +11,3 @@ cdef extern from "include/cef_auth_callback.h":
                       const CefString& password)
         void Cancel()
 
-cdef extern from "include/cef_request_handler.h":
-    cdef cppclass CefRequestCallback:
-        void Continue(cpp_bool allow)
-        void Cancel()

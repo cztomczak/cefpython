@@ -48,7 +48,7 @@ OS_POSTFIX2 = "unknown"
 CEF_POSTFIX2 = "unknown"  # Upstream CEF binaries postfix
 
 if OS_POSTFIX == "win":
-    OS_POSTFIX2 = "windows32" if ARCH32 else "windows64"
+    OS_POSTFIX2 = "win32" if ARCH32 else "win64"
     CEF_POSTFIX2 = "windows32" if ARCH32 else "windows64"
 elif OS_POSTFIX == "mac":
     OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
@@ -478,7 +478,9 @@ def get_msvs_for_python(vs_prefix=False):
     elif sys.version_info[:2] == (3, 9):
         return "VS2015" if vs_prefix else "2015"
     elif sys.version_info[:2] == (3, 10):
-        return "VS2015" if vs_prefix else "2022"
+        return "VS2015" if vs_prefix else "2015"
+    elif sys.version_info[:2] == (3, 11):
+        return "VS2015" if vs_prefix else "2015"
     else:
         print("ERROR: This version of Python is not supported")
         sys.exit(1)

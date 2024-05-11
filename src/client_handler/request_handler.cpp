@@ -4,6 +4,7 @@
 
 #include "request_handler.h"
 #include "include/base/cef_logging.h"
+#include "include/base/cef_callback.h"
 
 
 bool RequestHandler::OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
@@ -22,7 +23,7 @@ ReturnValue RequestHandler::OnBeforeResourceLoad(
                                         CefRefPtr<CefBrowser> browser,
                                         CefRefPtr<CefFrame> frame,
                                         CefRefPtr<CefRequest> request,
-                                        CefRefPtr<CefRequestCallback> callback)
+                                        CefRefPtr<CefCallback> callback)
 {
     REQUIRE_IO_THREAD();
     bool retval = RequestHandler_OnBeforeResourceLoad(browser, frame, request);
@@ -73,8 +74,8 @@ bool RequestHandler::GetAuthCredentials(CefRefPtr<CefBrowser> browser,
 
 bool RequestHandler::OnQuotaRequest(CefRefPtr<CefBrowser> browser,
                                     const CefString& origin_url,
-                                    int64 new_size,
-                                    CefRefPtr<CefRequestCallback> callback) {
+                                    int64_t new_size,
+                                    CefRefPtr<CefCallback> callback) {
     REQUIRE_IO_THREAD();
     return RequestHandler_OnQuotaRequest(browser, origin_url, new_size,
                                          callback);
@@ -94,7 +95,7 @@ bool RequestHandler::OnCertificateError(
                                   cef_errorcode_t cert_error,
                                   const CefString& request_url,
                                   CefRefPtr<CefSSLInfo> ssl_info, // not used
-                                  CefRefPtr<CefRequestCallback> callback)
+                                  CefRefPtr<CefCallback> callback)
 {
     REQUIRE_UI_THREAD();
     return RequestHandler_OnCertificateError(cert_error, request_url,
@@ -118,17 +119,17 @@ void RequestHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
     RequestHandler_OnPluginCrashed(browser, plugin_path);
 }
 
-bool RequestHandler::CanGetCookies(CefRefPtr<CefBrowser> browser,
-                                   CefRefPtr<CefFrame> frame,
-                                   CefRefPtr<CefRequest> request) {
-    REQUIRE_IO_THREAD();
-    return RequestHandler_CanGetCookies(browser, frame, request);
-}
+// bool RequestHandler::CanGetCookies(CefRefPtr<CefBrowser> browser,
+//                                    CefRefPtr<CefFrame> frame,
+//                                    CefRefPtr<CefRequest> request) {
+//     REQUIRE_IO_THREAD();
+//     return RequestHandler_CanGetCookies(browser, frame, request);
+// }
 
-bool RequestHandler::CanSetCookie(CefRefPtr<CefBrowser> browser,
-                                  CefRefPtr<CefFrame> frame,
-                                  CefRefPtr<CefRequest> request,
-                                  const CefCookie& cookie) {
-    REQUIRE_IO_THREAD();
-    return RequestHandler_CanSetCookie(browser, frame, request, cookie);
-}
+// bool RequestHandler::CanSetCookie(CefRefPtr<CefBrowser> browser,
+//                                   CefRefPtr<CefFrame> frame,
+//                                   CefRefPtr<CefRequest> request,
+//                                   const CefCookie& cookie) {
+//     REQUIRE_IO_THREAD();
+//     return RequestHandler_CanSetCookie(browser, frame, request, cookie);
+// }

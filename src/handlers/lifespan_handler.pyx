@@ -11,16 +11,16 @@ from cef_types cimport WindowOpenDisposition
 cimport cef_types
 
 # WindowOpenDisposition
-WOD_UNKNOWN = cef_types.WOD_UNKNOWN
-WOD_CURRENT_TAB = cef_types.WOD_CURRENT_TAB
-WOD_SINGLETON_TAB = cef_types.WOD_SINGLETON_TAB
-WOD_NEW_FOREGROUND_TAB = cef_types.WOD_NEW_FOREGROUND_TAB
-WOD_NEW_BACKGROUND_TAB = cef_types.WOD_NEW_BACKGROUND_TAB
-WOD_NEW_POPUP = cef_types.WOD_NEW_POPUP
-WOD_NEW_WINDOW = cef_types.WOD_NEW_WINDOW
-WOD_SAVE_TO_DISK = cef_types.WOD_SAVE_TO_DISK
-WOD_OFF_THE_RECORD = cef_types.WOD_OFF_THE_RECORD
-WOD_IGNORE_ACTION = cef_types.WOD_IGNORE_ACTION
+CEF_WOD_UNKNOWN = cef_types.CEF_WOD_UNKNOWN
+CEF_WOD_CURRENT_TAB = cef_types.CEF_WOD_CURRENT_TAB
+CEF_WOD_SINGLETON_TAB = cef_types.CEF_WOD_SINGLETON_TAB
+CEF_WOD_NEW_FOREGROUND_TAB = cef_types.CEF_WOD_NEW_FOREGROUND_TAB
+CEF_WOD_NEW_BACKGROUND_TAB = cef_types.CEF_WOD_NEW_BACKGROUND_TAB
+CEF_WOD_NEW_POPUP = cef_types.CEF_WOD_NEW_POPUP
+CEF_WOD_NEW_WINDOW = cef_types.CEF_WOD_NEW_WINDOW
+CEF_WOD_SAVE_TO_DISK = cef_types.CEF_WOD_SAVE_TO_DISK
+CEF_WOD_OFF_THE_RECORD = cef_types.CEF_WOD_OFF_THE_RECORD
+CEF_WOD_IGNORE_ACTION = cef_types.CEF_WOD_IGNORE_ACTION
 
 
 cdef public cpp_bool LifespanHandler_OnBeforePopup(
@@ -34,6 +34,7 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
         CefWindowInfo& windowInfo,
         CefRefPtr[CefClient]& client,
         CefBrowserSettings& settings,
+        CefRefPtr[CefDictionaryValue]& extra_info,
         cpp_bool* noJavascriptAccess
         ) except * with gil:
     # Empty place-holders: popupFeatures, client.
@@ -133,13 +134,13 @@ cdef public void LifespanHandler_OnBeforeClose(
         # GetCookieManager to implement custom cookie managers then
         # flushing of cookies would need to be handled manually.
         cefBrowser.get().GetHost().get().GetRequestContext().get() \
-                .GetDefaultCookieManager(
-                        <CefRefPtr[CefCompletionCallback]?>NULL) \
-                .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>NULL)
+                .GetCookieManager(
+                        <CefRefPtr[CefCompletionCallback]?>nullptr) \
+                .get().FlushStore(<CefRefPtr[CefCompletionCallback]?>nullptr)
 
         browserId = pyBrowser.GetIdentifier()
-        pyBrowser.cefBrowser.Assign(NULL)
-        cefBrowser.Assign(NULL)
+        pyBrowser.cefBrowser.Assign(nullptr)
+        cefBrowser.Assign(nullptr)
         del pyBrowser
 
         RemovePythonCallbacksForBrowser(browserId)

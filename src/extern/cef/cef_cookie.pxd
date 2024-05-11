@@ -50,9 +50,6 @@ cdef extern from "include/cef_cookie.h":
         cpp_bool DeleteCookies(const CefString& url,
                                const CefString& cookie_name,
                                CefRefPtr[CefDeleteCookiesCallback] callback)
-        cpp_bool SetStoragePath(const CefString& path,
-                                cpp_bool persist_session_cookies,
-                                CefRefPtr[CefCompletionCallback] callback)
         cpp_bool FlushStore(CefRefPtr[CefCompletionCallback] callback)
 
     cdef cppclass CefCookieVisitor:

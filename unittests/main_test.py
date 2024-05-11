@@ -58,17 +58,18 @@ g_datauri_data = """
         print("test_function() ok");
 
         // Test binding property: test_property1
-        if (test_property1 == "Test binding property to the 'window' object") {
+        if (test_property1 === "Test binding property to the 'window' object") {
             print("test_property_1 ok");
         } else {
             throw new Error("test_property1 contains invalid string");
         }
 
         // Test binding property: test_property2
-        if (JSON.stringify(test_property2) == '{"key1":"Test binding property'+
-                ' to the \\'window\\' object","key2":["Inside list",1,2]}') {
+        if (JSON.stringify(test_property2) === '{"key1":"Test binding property'+
+                ' to the \\'window\\' object","key2":["Inside list",2147483647,"2147483648"]}') {
             print("test_property2 ok");
         } else {
+            print("test_property2 invalid value: " + JSON.stringify(test_property2));
             throw new Error("test_property2 contains invalid value");
         }
 
@@ -81,7 +82,7 @@ g_datauri_data = """
         print("[TIMER] Call Python function and then js callback that was"+
               " passed (Issue #277 test)");
         external.test_callbacks(function(msg_from_python, py_callback){
-            if (msg_from_python == "String sent from Python") {
+            if (msg_from_python === "String sent from Python") {
                 print("test_callbacks() ok");
                 var execution_time = new Date().getTime() - start_time;
                 print("[TIMER]: Elapsed = "+String(execution_time)+" ms");
@@ -163,15 +164,23 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.LoadCrlSetsFile(crlset)
             subtest_message("cef.LoadCrlSetsFile ok")
 
-        # High DPI on Windows
+        # High DPI on Windows.
+        # Setting DPI awareness from Python is usually too late and should be done
+        # via manifest file. Alternatively change python.exe properties > Compatibility
+        # > High DPI scaling override > Application.
+        # Using cef.DpiAware.EnableHighDpiSupport is problematic, it can cause
+        # display glitches.
         if WINDOWS:
             self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
             window_size = cef.DpiAware.CalculateWindowSize(800, 600)
             self.assertIsInstance(window_size, tuple)
             self.assertGreater(window_size[0], 0)
             self.assertGreater(cef.DpiAware.Scale((800, 600))[0], 0)
-            cef.DpiAware.EnableHighDpiSupport()
-            self.assertTrue(cef.DpiAware.IsProcessDpiAware())
+
+            # OFF - see comments above.
+            # cef.DpiAware.EnableHighDpiSupport()
+            # self.assertTrue(cef.DpiAware.IsProcessDpiAware())
+
             # Make some calls again after DPI Aware was set
             self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
             self.assertGreater(cef.DpiAware.Scale([800, 600])[0], 0)
@@ -197,9 +206,11 @@ class MainTest_IsolatedTest(unittest.TestCase):
 
         # Client handlers
         display_handler2 = DisplayHandler2(self)
+        v8context_handler = V8ContextHandler(self)
         client_handlers = [LoadHandler(self, g_datauri),
                            DisplayHandler(self),
-                           display_handler2]
+                           display_handler2,
+                           v8context_handler]
         for handler in client_handlers:
             browser.SetClientHandler(handler)
         subtest_message("browser.SetClientHandler() ok")
@@ -252,12 +263,12 @@ class MainTest_IsolatedTest(unittest.TestCase):
         subtest_message("cef.Request.SetPostData(dict) ok")
 
         # Cookie manager
-        self.assertIsInstance(cef.CookieManager.CreateManager(path=""),
-                              cef.PyCookieManager)
+        # self.assertIsInstance(cef.CookieManager.CreateManager(path=""),
+        #                       cef.PyCookieManager)
         self.assertIsInstance(cef.CookieManager.GetGlobalManager(),
                               cef.PyCookieManager)
-        self.assertIsInstance(cef.CookieManager.GetBlockingManager(),
-                              cef.PyCookieManager)
+        # self.assertIsInstance(cef.CookieManager.GetBlockingManager(),
+        #                       cef.PyCookieManager)
         subtest_message("cef.CookieManager ok")
 
         # Window Utils
@@ -331,10 +342,39 @@ class DisplayHandler2(object):
         self.test_case.assertGreaterEqual(new_size[1], 600)
         self.test_case.assertLessEqual(new_size[1], 768)
 
-    def OnLoadingProgressChange(self, progress, **_):
+    def OnLoadingProgressChange(self, browser, progress, **_):
         self.OnLoadingProgressChange_True = True
         self.OnLoadingProgressChange_Progress = progress
 
+
+class V8ContextHandler(object):
+    def __init__(self, test_case):
+        self.test_case = test_case
+        self.OnContextCreatedFirstCall_True = False
+        self.OnContextCreatedSecondCall_True = False
+        self.OnContextReleased_True = False
+
+    def OnContextCreated(self, browser, frame):
+        """CEF creates one context when creating browser and this one is
+           released immediately. Then when it loads url another context is
+           created."""
+        if not self.OnContextCreatedFirstCall_True:
+            self.OnContextCreatedFirstCall_True = True
+        else:
+            self.test_case.assertFalse(self.OnContextCreatedSecondCall_True)
+            self.OnContextCreatedSecondCall_True = True
+        self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
+        self.test_case.assertTrue(frame.GetIdentifier())
+
+    def OnContextReleased(self, browser, frame):
+        """This gets called only for the initial empty context, see comment
+           in OnContextCreated. This should never get called for the main frame
+           of the main browser, because it happens during app exit and there
+           isn't enough time for the IPC messages to go through."""
+        self.test_case.assertFalse(self.OnContextReleased_True)
+        self.OnContextReleased_True = True
+        self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
+        self.test_case.assertTrue(frame.GetIdentifier())
 
 class External(object):
     """Javascript 'window.external' object."""
@@ -343,9 +383,10 @@ class External(object):
         self.test_case = test_case
 
         # Test binding properties to the 'window' object.
+        # 2147483648 is out of INT_MAX limit and will be sent to JS as string value.
         self.test_property1 = "Test binding property to the 'window' object"
         self.test_property2 = {"key1": self.test_property1,
-                               "key2": ["Inside list", 1, 2]}
+                               "key2": ["Inside list", 2147483647, 2147483648]}
 
         # Asserts for True/False will be checked just before shutdown
         self.test_for_True = True  # Test whether asserts are working correctly

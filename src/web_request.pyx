@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "cefpython.pyx"
+from libc.stdint cimport int64_t
 import weakref
 
 cdef object g_pyWebRequests = weakref.WeakValueDictionary()
@@ -83,7 +84,7 @@ cdef class PyWebRequest:
         self.cefWebRequest = <CefRefPtr[CefURLRequest]?>(CefURLRequest_Create(
                 pyRequest.cefRequest,
                 <CefRefPtr[CefURLRequestClient]?>cppWebRequestClient,
-                <CefRefPtr[CefRequestContext]?>NULL))
+                <CefRefPtr[CefRequestContext]?>nullptr))
 
     cdef object GetCallback(self, str funcName):
         if hasattr(self.pyWebRequestClient, funcName) and (
@@ -122,8 +123,8 @@ cdef class PyWebRequest:
 cdef public void WebRequestClient_OnUploadProgress(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
-        int64 current,
-        int64 total
+        int64_t current,
+        int64_t total
         ) except * with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
@@ -143,8 +144,8 @@ cdef public void WebRequestClient_OnUploadProgress(
 cdef public void WebRequestClient_OnDownloadProgress(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
-        int64 current,
-        int64 total
+        int64_t current,
+        int64_t total
         ) except * with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback

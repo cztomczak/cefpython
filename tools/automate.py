@@ -180,7 +180,7 @@ def setup_options(docopt_args):
     # --gyp-msvs-version
     if not Options.gyp_msvs_version:
         if int(Options.cef_branch) >= 2704:
-            Options.gyp_msvs_version = "2022"
+            Options.gyp_msvs_version = "2015"
         else:
             Options.gyp_msvs_version = "2013"
 
@@ -870,7 +870,6 @@ def get_available_python_compilers():
         ("2008", VS2008_VCVARS),
         ("2010", VS2010_VCVARS),
         ("2015", VS2015_VCVARS),
-        ("2022", VS2015_VCVARS),
     ])
     ret_compilers = OrderedDict()
     for msvs in all_python_compilers:

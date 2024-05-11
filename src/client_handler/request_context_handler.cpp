@@ -9,31 +9,15 @@
 // CefRequestContextHandler
 // --------------------------------------------------------------------------
 
-CefRefPtr<CefCookieManager> RequestContextHandler::GetCookieManager() {
-    REQUIRE_IO_THREAD();
-    if (browser_.get()) {
-        return RequestHandler_GetCookieManager(browser_,
-            browser_->GetMainFrame()->GetURL());
-    } else {
-        CefString mainUrl;
-        return RequestHandler_GetCookieManager(browser_, mainUrl);
-    }    
-    // Default: return NULL.
-}
+// CefRefPtr<CefCookieManager> RequestContextHandler::GetCookieManager() {
+//     REQUIRE_IO_THREAD();
+//     if (browser_.get()) {
+//         return RequestHandler_GetCookieManager(browser_,
+//             browser_->GetMainFrame()->GetURL());
+//     } else {
+//         CefString mainUrl;
+//         return RequestHandler_GetCookieManager(browser_, mainUrl);
+//     }    
+//     // Default: return NULL.
+// }
 
-bool RequestContextHandler::OnBeforePluginLoad(
-                        const CefString& mime_type,
-                        const CefString& plugin_url,
-                        bool is_main_frame,
-                        const CefString& top_origin_url,
-                        CefRefPtr<CefWebPluginInfo> plugin_info,
-                        PluginPolicy* plugin_policy) {
-    // Called on multiple threads
-    return RequestHandler_OnBeforePluginLoad(browser_,
-                                             mime_type,
-                                             plugin_url,
-                                             is_main_frame,
-                                             top_origin_url,
-                                             plugin_info,
-                                             plugin_policy);
-}

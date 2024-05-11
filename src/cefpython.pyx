@@ -197,6 +197,8 @@ from libcpp.string cimport string as cpp_string
 # noinspection PyUnresolvedReferences
 from wstring cimport wstring as cpp_wstring
 # noinspection PyUnresolvedReferences
+from libcpp.memory cimport unique_ptr
+# noinspection PyUnresolvedReferences
 from libc.string cimport strlen
 # noinspection PyUnresolvedReferences
 from libc.string cimport memcpy
@@ -254,15 +256,11 @@ from cef_types cimport (
     CefSettings, CefBrowserSettings, CefRect, CefSize, CefPoint,
     CefKeyEvent, CefMouseEvent, CefScreenInfo,
     PathKey, PK_DIR_EXE, PK_DIR_MODULE,
-    int32, uint32, int64, uint64,
     cef_log_severity_t,
 )
 
 # noinspection PyUnresolvedReferences
 from cef_ptr cimport CefRefPtr
-
-# noinspection PyUnresolvedReferences
-from cef_scoped_ptr cimport scoped_ptr
 
 from cef_task cimport *
 from cef_platform cimport *
@@ -277,7 +275,6 @@ from cef_time cimport *
 from cef_values cimport *
 from cefpython_app cimport *
 from cef_process_message cimport *
-from cef_web_plugin cimport *
 from cef_request_handler cimport *
 from cef_request cimport *
 from cef_cookie cimport *
@@ -325,7 +322,7 @@ g_browser_settings = {}
 # noinspection PyUnresolvedReferences
 cdef CefRefPtr[CefRequestContext] g_shared_request_context
 
-cdef scoped_ptr[MainMessageLoopExternalPump] g_external_message_pump
+cdef unique_ptr[MainMessageLoopExternalPump] g_external_message_pump
 
 cdef py_bool g_MessageLoop_called = False
 cdef py_bool g_MessageLoopWork_called = False
@@ -362,7 +359,6 @@ include "window_info.pyx"
 include "process_message_utils.pyx"
 include "javascript_callback.pyx"
 include "python_callback.pyx"
-include "web_plugin_info.pyx"
 include "request.pyx"
 include "cookie.pyx"
 include "string_visitor.pyx"
@@ -585,8 +581,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # ------------------------------------------------------------------------
     if not "multi_threaded_message_loop" in application_settings:
         application_settings["multi_threaded_message_loop"] = False
-    if not "single_process" in application_settings:
-        application_settings["single_process"] = False
     # ------------------------------------------------------------------------
 
     # ------------------------------------------------------------------------
@@ -596,7 +590,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         application_settings["cache_path"] = ""
     if not application_settings["cache_path"]:
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
-
 
     cdef CefRefPtr[CefApp] cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
 
@@ -631,8 +624,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         Debug("Create external message pump")
         # Using .reset() here to assign new instance was causing
         # MainMessageLoopExternalPump destructor to be called. Strange.
-        g_external_message_pump.Assign(
-                MainMessageLoopExternalPump.Create())
+        # g_external_message_pump.Assign(
+        #         MainMessageLoopExternalPump.Create())
+        g_external_message_pump.reset()
 
     Debug("CefInitialize()")
     cdef cpp_bool ret
@@ -767,14 +761,16 @@ def CreateBrowserSync(windowInfo=None,
     else:
         cefRequestContext.Assign(g_shared_request_context.get())
 
+    cdef CefRefPtr[CefDictionaryValue] extra_info
+
     # CEF browser creation.
     with nogil:
         cefBrowser = cef_browser_static.CreateBrowserSync(
                 cefWindowInfo, <CefRefPtr[CefClient]?>clientHandler,
-                cefNavigateUrl, cefBrowserSettings,
+                cefNavigateUrl, cefBrowserSettings, extra_info,
                 cefRequestContext)
 
-    if <void*>cefBrowser == NULL or not cefBrowser.get():
+    if not cefBrowser or not cefBrowser.get():
         Debug("CefBrowser::CreateBrowserSync() failed")
         return None
     else:
@@ -977,7 +973,7 @@ cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     # Accept both with and without a prefix.
     if name.startswith("_"):
         name = name[1:]
-    if name in ["OnCertificateError", "OnBeforePluginLoad", "OnAfterCreated",
+    if name in ["OnCertificateError", "OnAfterCreated",
                 "OnAccessibilityTreeChange", "OnAccessibilityLocationChange"]:
         g_globalClientCallbacks[name] = callback
     else:

@@ -204,7 +204,7 @@ def set_compiler_options(options):
         #
         # The above warning LNK4217 is caused by the warning below which occurs
         # when building the client_handler.lib static library:
-        extra_compile_args.extend(["/EHsc", "/wd4305"])
+        extra_compile_args.extend(["/EHsc", "/wd4305", "/std:c++17"])
         extra_link_args.extend(["/ignore:4217"])
 
     if LINUX or MAC:
@@ -437,6 +437,7 @@ def get_ext_modules(options):
             "c_string_encoding": "utf-8",
             "profile": ENABLE_PROFILING,
             "linetrace": ENABLE_LINE_TRACING,
+            "language_level": "2",
         },
 
         language="c++",
@@ -470,6 +471,9 @@ def compile_time_constants():
         # A way around Python 3.2 bug: UNAME_SYSNAME is not set
         contents += 'DEF UNAME_SYSNAME = "%s"\n' % platform.uname()[0]
         contents += 'DEF PY_MAJOR_VERSION = %s\n' % sys.version_info.major
+        contents += 'cdef extern from "limits.h":\n'
+        contents += '    cdef int INT_MIN\n'
+        contents += '    cdef int INT_MAX\n'
         fo.write(contents.encode("utf-8"))
 
 
