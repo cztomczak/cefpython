@@ -78,25 +78,25 @@ def check_auto_asserts(test_case, objects):
     test_case.assertTrue(g_js_code_completed)
 
     # Automatic check of asserts in handlers and in external
-    # for obj in objects:
-    #     test_for_True = False  # Test whether asserts are working correctly
-    #     for key, value in obj.__dict__.items():
-    #         if key == "test_for_True":
-    #             test_for_True = True
-    #             continue
-    #         if "_True" in key:
-    #             test_case.assertTrue(value, "Check assert: " +
-    #                                  obj.__class__.__name__ + "." + key)
-    #             subtest_message(obj.__class__.__name__ + "." +
-    #                             key.replace("_True", "") +
-    #                             " ok")
-    #         elif "_False" in key:
-    #             test_case.assertFalse(value, "Check assert: " +
-    #                                   obj.__class__.__name__ + "." + key)
-    #             subtest_message(obj.__class__.__name__ + "." +
-    #                             key.replace("_False", "") +
-    #                             " ok")
-    #     test_case.assertTrue(test_for_True)
+    for obj in objects:
+        test_for_True = False  # Test whether asserts are working correctly
+        for key, value in obj.__dict__.items():
+            if key == "test_for_True":
+                test_for_True = True
+                continue
+            if "_True" in key:
+                test_case.assertTrue(value, "Check assert: " +
+                                     obj.__class__.__name__ + "." + key)
+                subtest_message(obj.__class__.__name__ + "." +
+                                key.replace("_True", "") +
+                                " ok")
+            elif "_False" in key:
+                test_case.assertFalse(value, "Check assert: " +
+                                      obj.__class__.__name__ + "." + key)
+                subtest_message(obj.__class__.__name__ + "." +
+                                key.replace("_False", "") +
+                                " ok")
+        test_case.assertTrue(test_for_True)
 
 
 class DisplayHandler(object):
