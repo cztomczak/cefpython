@@ -338,7 +338,7 @@ def create_empty_log_file(log_file):
 
 def copy_cpp_extension_dependencies_issue359(pkg_dir):
     """CEF Python module is written in Cython and is a Python C++
-    extension and depends on msvcpXX.dll. For Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9
+    extension and depends on msvcpXX.dll. For Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 / 3.11
     msvcp140.dll is required. See Issue #359. For Python 2.7
     msvcp90.dll is required. Etc. These dependencies are not included
     with Python binaries from Python.org."""
