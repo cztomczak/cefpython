@@ -203,7 +203,7 @@ cdef class PyRequest:
 
     cpdef py_void SetHeaderMap(self, dict headerMap):
         assert len(headerMap) > 0, "headerMap param is empty"
-        cpdef list headerMultimap = []
+        cdef list headerMultimap = []
         cdef object key
         for key in headerMap:
             headerMultimap.append((str(key), str(headerMap[key])))
