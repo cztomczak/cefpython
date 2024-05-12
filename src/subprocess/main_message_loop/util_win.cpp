@@ -136,8 +136,8 @@ int GetCefKeyboardModifiers(WPARAM wparam, LPARAM lparam) {
   return modifiers;
 }
 
-bool IsKeyDown(WPARAM wparam) {
-  return (GetKeyState(wparam) & 0x8000) != 0;
+bool IsKeyDown(int keycode) {
+  return (GetKeyState(keycode) & 0x8000) != 0;
 }
 
 float GetDeviceScaleFactor() {
