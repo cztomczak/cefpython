@@ -269,8 +269,7 @@ def get_python_include_path():
     # 3) ~/.pyenv/versions/3.4.6/include/python2.7m
     # 4) /usr/include/python2.7
     base_dir = os.path.dirname(sys.executable)
-    try_dirs = [r"C:\Users\opopp\AppData\Local\Programs\Python\Python310\include",
-                "{base_dir}/include",
+    try_dirs = ["{base_dir}/include",
                 "{base_dir}/../include/python{ver}",
                 "{base_dir}/../include/python{ver}*",
                 ("{base_dir}/../Frameworks/Python.framework/Versions/{ver}"
