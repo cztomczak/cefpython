@@ -9,6 +9,7 @@
 
 #include <CommCtrl.h>
 
+#include "include/base/cef_ptr_util.h"
 #include "include/cef_app.h"
 #include "util_win.h"
 
@@ -141,9 +142,7 @@ LRESULT CALLBACK MainMessageLoopExternalPumpWin::WndProc(
 } // namespace
 
 // static
-// TODO
-// std::unique_ptr<MainMessageLoopExternalPump>
-// MainMessageLoopExternalPump::Create() {
-//   // return std::make_unique<MainMessageLoopExternalPumpWin>();
-//   return nullptr;
-// }
+std::unique_ptr<MainMessageLoopExternalPump>
+MainMessageLoopExternalPump::Create() {
+  return base::WrapUnique(new MainMessageLoopExternalPumpWin());
+}

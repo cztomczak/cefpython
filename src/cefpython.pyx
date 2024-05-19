@@ -622,11 +622,10 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if GetAppSetting("external_message_pump")\
             and not g_external_message_pump.get():
         Debug("Create external message pump")
+        global g_external_message_pump
         # Using .reset() here to assign new instance was causing
         # MainMessageLoopExternalPump destructor to be called. Strange.
-        # g_external_message_pump.Assign(
-        #         MainMessageLoopExternalPump.Create())
-        g_external_message_pump.reset()
+        g_external_message_pump = MainMessageLoopExternalPump.Create()
 
     Debug("CefInitialize()")
     cdef cpp_bool ret

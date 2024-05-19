@@ -248,14 +248,6 @@ cdef class PyFrame:
         Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
                 messageName,
                 message.get().GetArgumentList().get().GetSize()))
-        #lc test
-        # cdef cpp_bool success = \
-        #         self.GetCefFrame().get().SendProcessMessage(
-        #                 targetProcess, 
-        #                 message)
-        # if not success:
-        #     raise Exception("Frame.SendProcessMessage() failed: "\
-        #             "messageName=%s" % messageName)
 
         self.GetCefFrame().get().SendProcessMessage(targetProcess, message)
 
