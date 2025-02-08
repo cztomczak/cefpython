@@ -41,14 +41,15 @@ PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 
 ## Install
 
-You can install [pypi/cefpython3](https://pypi.python.org/pypi/cefpython3)
-package using pip tool. On Linux pip 8.1+ is required. You can
-also download packages for offline installation available on the
-[GitHub Releases](../../releases) pages. Command to install with pip:
+Command to install with pip:
 
 ```
 pip install cefpython3==66.1
 ```
+
+Hosted at [pypi/cefpython3](https://pypi.python.org/pypi/cefpython3). On Linux pip 8.1+ is required.
+
+You can also download packages for offline installation available on the [GitHub Releases](../../releases) pages.
 
 Below is a table with supported platforms, python versions and architectures.
 
