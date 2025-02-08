@@ -95,7 +95,7 @@ by making a donation then please click the Paypal Donate button below.
 
 <a href='https://www.paypal.com/donate/?hosted_button_id=V7LU7PD4N4GGG'>
 <img src='https://raw.githubusercontent.com/wiki/cztomczak/phpdesktop/donate.gif' />
-</a><br><br>
+</a><br>
 
 
 ## Seeking sponsors
