@@ -62,9 +62,9 @@ Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
 ## Examples
 
 - [Tutorial](docs/Tutorial.md)
-- [All examples](examples/README-examples.md).
-- [Snippets](examples/snippets/README-snippets.md).
-- [PyInstaller packager](examples/pyinstaller/README-pyinstaller.md).
+- [All examples](examples/README-examples.md)
+- [Snippets](examples/snippets/README-snippets.md)
+- [PyInstaller packager](examples/pyinstaller/README-pyinstaller.md)
 
 
 ## Support
