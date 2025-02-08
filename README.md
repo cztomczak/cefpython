@@ -90,8 +90,7 @@ Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
 
 ## Support development
 
-If you would like to support general CEF Python development efforts
-by making a donation then please click the Paypal Donate button below.
+To support general CEF Python development efforts please make a donation using PayPal button below:
 
 <a href='https://www.paypal.com/donate/?hosted_button_id=V7LU7PD4N4GGG'>
 <img src='https://raw.githubusercontent.com/wiki/cztomczak/phpdesktop/donate.gif' />
