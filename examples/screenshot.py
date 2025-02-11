@@ -143,7 +143,7 @@ def create_browser(settings):
     print('created browser ', browser)
     browser.SetClientHandler(LoadHandler())
     browser.SetClientHandler(RenderHandler())
-    # browser.SendFocus(True)
+    browser.SetFocus(True)
     # You must call WasResized at least once to let know CEF that
     # viewport size is available and that OnPaint may be called.
     browser.WasResized()

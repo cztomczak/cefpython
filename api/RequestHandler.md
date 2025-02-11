@@ -16,10 +16,7 @@ Available in upstream CEF, but not yet exposed to CEF Python:
 
 Table of contents:
 * [Callbacks](#callbacks)
-  * [CanGetCookies](#cangetcookies)
-  * [CanSetCookie](#cansetcookie)
   * [GetAuthCredentials](#getauthcredentials)
-  * [GetCookieManager](#getcookiemanager)
   * [GetResourceHandler](#getresourcehandler)
   * [OnBeforeBrowse](#onbeforebrowse)
   * [_OnBeforePluginLoad](#_onbeforepluginload)
@@ -34,39 +31,6 @@ Table of contents:
 
 
 ## Callbacks
-
-
-### CanGetCookies
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| frame | [Frame](Frame.md) |
-| request | [Request](Request.md) |
-| __Return__ | bool |
-
-Description from upstream CEF:
-> Called on the IO thread before sending a network request with a "Cookie"
-> request header. Return true to allow cookies to be included in the network
-> request or false to block cookies. The |request| object should not be
-> modified in this callback.
-
-
-### CanSetCookie
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| frame | [Frame](Frame.md) |
-| request | [Request](Request.md) |
-| cookie | [Cookie](Cookie.md) |
-| __Return__ | bool |
-
-Description from upstream CEF:
-> Called on the IO thread when receiving a network request with a
-> "Set-Cookie" response header value represented by |cookie|. Return true to
-> allow the cookie to be stored or false to block the cookie. The |request|
-> object should not be modified in this callback.
 
 
 ### GetAuthCredentials
@@ -104,44 +68,6 @@ Example implementations:
   CEF Python 1: [[1]](https://github.com/cztomczak/cefpython/tree/cefpython31/cefpython/cef1/http_authentication),
   [[2]](https://github.com/cztomczak/cefpython/blob/cefpython31/cefpython/request_handler_cef1.pyx#L231),
   [[3]](https://github.com/cztomczak/cefpython/blob/cefpython31/cefpython/http_authentication_win.pyx).
-
-
-### GetCookieManager
-
-| Parameter | Type |
-| --- | --- |
-| browser | None or [Browser](Browser.md) |
-| main_url | string |
-| __Return__ | [CookieManager](CookieManager.md) |
-
-Called on the IO thread to retrieve the cookie manager. |main_url|
-is the URL of the top-level frame. Cookies managers can be unique
-per browser or shared across multiple browsers. The global cookie
-manager will be used if this method returns None.
-
-**IMPORTANT**: In some cases this callback is not called due to a
-race condition. See Issue [#429](../../../issues/429) for details.
-
-To successfully implement separate cookie manager per browser session,
-you have to set ApplicationSettings.`unique_request_context_per_browser`
-to True. Otherwise the browser param passed to this callback will
-always be the same first browser that was created using
-[cefpython](cefpython.md).`CreateBrowserSync`.
-
-**NOTE**: If implementing custom cookie managers you will encounter
-problems similar to [Issue #365](../../../issues/365) ("Cookies not
-flushed to disk when closing app immediately"). To resolve
-it you have to call CookieManager.[FlushStore](CookieManager.md#flushstore)
-method when closing associated browser.
-
-Popup browsers created javascript's window.open share the same
-renderer process and request context. If you want to have separate
-cookie managers for popups created using window.open then you have
-to implement the LifespanHandler.`OnBeforePopup` callback. Return
-True in that callback to cancel popup creation and instead create
-the window on your own and embed browser in it.
-The `CreateAnotherBrowser` function from the old v31 wxpython
-example does that.
 
 
 ### GetResourceHandler

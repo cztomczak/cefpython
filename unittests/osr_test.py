@@ -149,7 +149,7 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             browser.SetClientHandler(handler)
 
         # Initiate OSR rendering
-        # browser.SendFocusEvent(True)
+        browser.SetFocus(True)
         browser.WasResized()
 
         # Test selection

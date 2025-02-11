@@ -229,7 +229,7 @@ def main():
     browser.SetClientHandler(renderHandler)
     # Must call WasResized at least once to let know CEF that
     # viewport size is available and that OnPaint may be called.
-    # browser.SendFocus(True)
+    browser.SetFocus(True)
     browser.WasResized()
 
     # Begin the main rendering loop

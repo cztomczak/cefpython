@@ -46,10 +46,6 @@ cdef void SetApplicationSettings(
                 or key == "app_user_model_id":
             # CEF Python only options. These are not to be found in CEF.
             continue
-        # elif key == "accept_language_list":
-        #     cefString = new CefString(&cefAppSettings.accept_language_list)
-        #     PyToCefStringPointer(appSettings[key], cefString)
-        #     del cefString
         elif key == "cache_path":
             cefString = new CefString(&cefAppSettings.cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
@@ -106,18 +102,12 @@ cdef void SetApplicationSettings(
             cefAppSettings.command_line_args_disabled = int(appSettings[key])
         elif key == "remote_debugging_port":
             cefAppSettings.remote_debugging_port = int(appSettings[key])
-        # elif key == "ignore_certificate_errors":
-        #     cefAppSettings.ignore_certificate_errors = int(appSettings[key])
         elif key == "background_color":
             cefAppSettings.background_color = \
                     <uint32_t>int(appSettings[key])
         elif key == "persist_user_preferences":
             cefAppSettings.persist_user_preferences = \
                     int(appSettings[key])
-        # elif key == "user_data_path":
-        #     cefString = new CefString(&cefAppSettings.user_data_path)
-        #     PyToCefStringPointer(appSettings[key], cefString)
-        #     del cefString
         elif key == "windowless_rendering_enabled":
             cefAppSettings.windowless_rendering_enabled = \
                     int(appSettings[key])
@@ -141,10 +131,6 @@ cdef void SetBrowserSettings(
         if key == "inherit_client_handlers_for_popups":
             # CEF Python only options. These are not to be found in CEF.
             continue
-        # elif key == "accept_language_list":
-        #     cefString = new CefString(&cefBrowserSettings.accept_language_list)
-        #     PyToCefStringPointer(browserSettings[key], cefString)
-        #     del cefString
         elif key == "background_color":
             cefBrowserSettings.background_color = \
                     <uint32_t>int(browserSettings[key])
@@ -226,30 +212,6 @@ cdef void SetBrowserSettings(
         elif key == "java_disabled":
             # Keep the key for BC
             Debug("DEPRECATED: 'java_disabled' setting")
-        # elif key == "plugins_disabled":
-        #     if browserSettings[key]:
-        #         cefBrowserSettings.plugins = cef_types.STATE_DISABLED
-        #     else:
-        #         cefBrowserSettings.plugins = cef_types.STATE_ENABLED
-        # elif key == "universal_access_from_file_urls_allowed":
-        #     if browserSettings[key]:
-        #         cefBrowserSettings.universal_access_from_file_urls = (
-        #                 cef_types.STATE_ENABLED)
-        #     else:
-        #         cefBrowserSettings.universal_access_from_file_urls = (
-        #                 cef_types.STATE_DISABLED)
-        # elif key == "file_access_from_file_urls_allowed":
-        #     if browserSettings[key]:
-        #         cefBrowserSettings.file_access_from_file_urls = (
-        #                 cef_types.STATE_ENABLED)
-        #     else:
-        #         cefBrowserSettings.file_access_from_file_urls = (
-        #                 cef_types.STATE_DISABLED)
-        # elif key == "web_security_disabled":
-        #     if browserSettings[key]:
-        #         cefBrowserSettings.web_security = cef_types.STATE_DISABLED
-        #     else:
-        #         cefBrowserSettings.web_security = cef_types.STATE_ENABLED
         elif key == "image_load_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.image_loading = cef_types.STATE_DISABLED

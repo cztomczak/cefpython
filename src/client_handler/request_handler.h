@@ -68,15 +68,6 @@ public:
     void OnPluginCrashed(CefRefPtr<CefBrowser> browser,
                          const CefString& plugin_path) ;
 
-    bool CanGetCookies(CefRefPtr<CefBrowser> browser,
-                       CefRefPtr<CefFrame> frame,
-                       CefRefPtr<CefRequest> request) ;
-
-    bool CanSetCookie(CefRefPtr<CefBrowser> browser,
-                      CefRefPtr<CefFrame> frame,
-                      CefRefPtr<CefRequest> request,
-                      const CefCookie& cookie) ;
-
 private:
     IMPLEMENT_REFCOUNTING(RequestHandler);
 };

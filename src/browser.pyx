@@ -248,9 +248,8 @@ cdef class PyBrowser:
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
                     "OnQuotaRequest", "OnProtocolExecution",
-                    "GetResourceHandler",
-                    "OnBeforeBrowse", "OnRendererProcessTerminated",
-                    "OnPluginCrashed", "CanGetCookies", "CanSetCookie"]
+                    "GetResourceHandler", "OnBeforeBrowse", 
+                    "OnRendererProcessTerminated", "OnPluginCrashed"]
             # RequestContextHandler
             self.allowedClientCallbacks += ["GetCookieManager"]
             # LoadHandler
@@ -739,22 +738,12 @@ cdef class PyBrowser:
         self.GetCefBrowserHost().get().SendMouseWheelEvent(mouseEvent,
                 deltaX, deltaY)
 
-    # cpdef py_void SendFocusEvent(self, py_bool setFocus):
-    #     self.GetCefBrowserHost().get().SendFocusEvent(bool(setFocus))
-
     cpdef py_void SendCaptureLostEvent(self):
         self.GetCefBrowserHost().get().SendCaptureLostEvent()
 
     cpdef py_void StartDownload(self, py_string url):
         self.GetCefBrowserHost().get().StartDownload(PyToCefStringValue(
                 url))
-
-    # cpdef py_void SetMouseCursorChangeDisabled(self, py_bool disabled):
-    #     self.GetCefBrowserHost().get().SetMouseCursorChangeDisabled(
-    #             bool(disabled))
-
-    # cpdef py_bool IsMouseCursorChangeDisabled(self):
-    #     return self.GetCefBrowserHost().get().IsMouseCursorChangeDisabled()
 
     cpdef py_bool TryCloseBrowser(self):
         return self.GetCefBrowserHost().get().TryCloseBrowser()
@@ -767,29 +756,6 @@ cdef class PyBrowser:
 
     cpdef py_void NotifyScreenInfoChanged(self):
         self.GetCefBrowserHost().get().NotifyScreenInfoChanged()
-
-    # cdef void SendProcessMessage(self, cef_process_id_t targetProcess,
-    #         object frameId, py_string messageName, list pyArguments
-    #         ) except *:
-    #     cdef CefRefPtr[CefProcessMessage] message = \
-    #             CefProcessMessage_Create(PyToCefStringValue(messageName))
-    #     # This does not work, no idea why, the CEF implementation
-    #     # seems not to allow it, both Assign() and swap() do not work:
-    #     # | message.get().GetArgumentList().Assign(arguments.get())
-    #     # | message.get().GetArgumentList().swap(arguments)
-    #     cdef CefRefPtr[CefListValue] messageArguments = \
-    #             message.get().GetArgumentList()
-    #     PyListToExistingCefListValue(self.GetIdentifier(), frameId,
-    #             pyArguments, messageArguments)
-    #     Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
-    #             messageName,
-    #             message.get().GetArgumentList().get().GetSize()))
-    #     cdef cpp_bool success = \
-    #             self.GetCefBrowser().get().GetMainFrame().SendProcessMessage(
-    #                     targetProcess, message)
-    #     if not success:
-    #         raise Exception("Browser.SendProcessMessage() failed: "\
-    #                 "messageName=%s" % messageName)
 
     # -------------------------------------------------------------------------
     # OSR drag & drop

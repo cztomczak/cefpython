@@ -8,27 +8,23 @@ Table of contents:
 * [Introduction](#introduction)
 * [Settings](#settings)
   * [Font settings](#font-settings)
-  * [accept_language_list](#accept_language_list)
   * [application_cache_disabled](#application_cache_disabled)
   * [background_color](#background_color)
   * [databases_disabled](#databases_disabled)
   * [default_encoding](#default_encoding)
   * [dom_paste_disabled](#dom_paste_disabled)
-  * [file_access_from_file_urls_allowed](#file_access_from_file_urls_allowed)
   * [inherit_client_handlers_for_popups](#inherit_client_handlers_for_popups)
   * [image_load_disabled](#image_load_disabled)
   * [javascript_disabled](#javascript_disabled)
   * [javascript_close_windows_disallowed](#javascript_close_windows_disallowed)
   * [javascript_access_clipboard_disallowed](#javascript_access_clipboard_disallowed)
   * [local_storage_disabled](#local_storage_disabled)
-  * [plugins_disabled](#plugins_disabled)
   * [remote_fonts](#remote_fonts)
   * [shrink_standalone_images_to_fit](#shrink_standalone_images_to_fit)
   * [tab_to_links_disabled](#tab_to_links_disabled)
   * [text_area_resize_disabled](#text_area_resize_disabled)
   * [universal_access_from_file_urls_allowed](#universal_access_from_file_urls_allowed)
   * [user_style_sheet_location](#user_style_sheet_location)
-  * [web_security_disabled](#web_security_disabled)
   * [webgl_disabled](#webgl_disabled)
   * [windowless_frame_rate](#windowless_frame_rate)
 
@@ -58,15 +54,6 @@ In some cases, the default values of settings that are suggested by its name may
 * default_fixed_font_size (int)
 * minimum_font_size (int)
 * minimum_logical_font_size (int)
-
-
-### accept_language_list
-
-(string)
-Comma delimited ordered list of language codes without any whitespace that
-will be used in the "Accept-Language" HTTP header. May be set globally
-using the CefBrowserSettings.accept_language_list value. If both values are
-empty then "en-US,en" will be used.
 
 
 ### application_cache_disabled
@@ -104,11 +91,6 @@ in a known order. Equivalent to the `SkColor` type in Chromium.
 ### dom_paste_disabled
 
 (bool) Controls whether DOM pasting is supported in the editor via `execCommand("paste")`. The |javascript_access_clipboard_disallowed| setting must also be set (to true or false). Also configurable using the --disable-javascript-dom-paste switch.
-
-
-### file_access_from_file_urls_allowed
-
-(bool) Controls whether file URLs will have access to other file URLs. Also configurable using the --allow-access-from-files switch. Other similar switches are: --allow-file-access and --allow-file-access-from-files.
 
 
 ### inherit_client_handlers_for_popups
@@ -155,11 +137,6 @@ switch.
 (bool) Controls whether local storage can be used. Also configurable using the --disable-local-storage switch.
 
 
-### plugins_disabled
-
-(bool) Controls whether any plugins will be loaded. Also configurable using the --disable-plugins switch.
-
-
 ### remote_fonts
 
 (bool) Controls the loading of fonts from remote sources. Also configurable using the --disable-remote-fonts switch.
@@ -180,21 +157,11 @@ switch.
 (bool) Controls whether text areas can be resized. Also configurable using the --disable-text-area-resize switch.
 
 
-### universal_access_from_file_urls_allowed
-
-(bool) Controls whether file URLs will have access to all URLs. Also configurable using the --allow-universal-access-from-files switch. Other similar switches are --allow-file-access and --allow-file-access-from-files.
-
-
 ### user_style_sheet_location
 
 (string) Location of the user style sheet that will be used for all pages. This must be a data URL of the form `data:text/css;charset=utf-8;base64,content` where "content" is the base64 encoded contents of the CSS file. Also configurable using the "user-style-sheet-location" command-line switch.
 
 This setting was removed in Chrome 33. Soon it will be removed from cefpython as well.
-
-
-### web_security_disabled
-
-(bool) Controls whether web security restrictions (same-origin policy) will be enforced. Disabling this setting is not recommend as it will allow risky security behavior such as cross-site scripting (XSS). Also configurable using the --disable-web-security switch.
 
 
 ### webgl_disabled

@@ -615,7 +615,7 @@ def check_cpp_extension_dependencies_issue359(setup_dir, all_pythons):
         return
     checked_any = False
     for python in all_pythons:
-        if python["version2"] in ((3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10)):
+        if python["version2"] in ((3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11)):
             checked_any = True
             if not os.path.exists(os.path.join(setup_dir, "cefpython3",
                                                "msvcp140.dll")):

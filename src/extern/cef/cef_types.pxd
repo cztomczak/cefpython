@@ -24,7 +24,6 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef uint32_t cef_color_t
 
     ctypedef struct CefSettings:
-        cef_string_t accept_language_list
         cef_string_t browser_subprocess_path
         int command_line_args_disabled
         cef_string_t cache_path
@@ -46,14 +45,12 @@ cdef extern from "include/internal/cef_types.h":
         int ignore_certificate_errors
         cef_color_t background_color
         int persist_user_preferences
-        cef_string_t user_data_path
         int windowless_rendering_enabled
         int no_sandbox
         int external_message_pump
         cef_string_t framework_dir_path
 
     ctypedef struct CefBrowserSettings:
-        cef_string_t accept_language_list
         cef_color_t background_color
         cef_string_t standard_font_family
         cef_string_t fixed_font_family
@@ -322,7 +319,9 @@ cdef extern from "include/internal/cef_types.h":
         CEF_WOD_NEW_WINDOW,
         CEF_WOD_SAVE_TO_DISK,
         CEF_WOD_OFF_THE_RECORD,
-        CEF_WOD_IGNORE_ACTION
+        CEF_WOD_IGNORE_ACTION,
+        CEF_WOD_SWITCH_TO_TAB,
+        CEF_WOD_NEW_PICTURE_IN_PICTURE
     ctypedef cef_window_open_disposition_t WindowOpenDisposition
 
     ctypedef enum cef_path_key_t:

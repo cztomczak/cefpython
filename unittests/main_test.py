@@ -177,10 +177,6 @@ class MainTest_IsolatedTest(unittest.TestCase):
             self.assertGreater(window_size[0], 0)
             self.assertGreater(cef.DpiAware.Scale((800, 600))[0], 0)
 
-            # OFF - see comments above.
-            # cef.DpiAware.EnableHighDpiSupport()
-            # self.assertTrue(cef.DpiAware.IsProcessDpiAware())
-
             # Make some calls again after DPI Aware was set
             self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
             self.assertGreater(cef.DpiAware.Scale([800, 600])[0], 0)
@@ -263,12 +259,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
         subtest_message("cef.Request.SetPostData(dict) ok")
 
         # Cookie manager
-        # self.assertIsInstance(cef.CookieManager.CreateManager(path=""),
-        #                       cef.PyCookieManager)
         self.assertIsInstance(cef.CookieManager.GetGlobalManager(),
                               cef.PyCookieManager)
-        # self.assertIsInstance(cef.CookieManager.GetBlockingManager(),
-        #                       cef.PyCookieManager)
         subtest_message("cef.CookieManager ok")
 
         # Window Utils

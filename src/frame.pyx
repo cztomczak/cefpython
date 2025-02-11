@@ -125,7 +125,7 @@ cdef class PyFrame:
         # Do not call IsValid() here, if the frame does not exist
         # then no big deal, no reason to crash the application.
         # The CEF calls will fail, but they also won't cause crash.
-        if self.cefFrame.get():
+        if self.cefFrame and self.cefFrame.get():
             return self.cefFrame
         raise Exception("PyFrame.GetCefFrame() failed: CefFrame was destroyed")
 
@@ -202,13 +202,6 @@ cdef class PyFrame:
 
     cpdef py_bool IsMain(self):
         return self.GetCefFrame().get().IsMain()
-
-    # cpdef py_void LoadString(self, py_string value, py_string url):
-    #     cdef CefString cefValue
-        # cdef CefString cefUrl
-    #     PyToCefString(value, cefValue)
-    #     PyToCefString(url, cefUrl)
-    #     self.GetCefFrame().get().LoadString(cefValue, cefUrl)
 
     cpdef py_void LoadUrl(self, py_string url):
         url = GetNavigateUrl(url)
