@@ -82,6 +82,7 @@ additional usage information.
 | window_info_out | list[[WindowInfo](WindowInfo.md)] |
 | client | None |
 | browser_settings_out | list[[BrowserSettings](BrowserSettings.md)] |
+| extra_info_out | dict |
 | no_javascript_access_out | list[bool] |
 | __Return__ | bool |
 

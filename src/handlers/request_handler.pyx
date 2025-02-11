@@ -346,49 +346,6 @@ cdef public void RequestHandler_OnProtocolExecution(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 
-cdef public cpp_bool RequestHandler_OnBeforePluginLoad(
-        CefRefPtr[CefBrowser] browser,
-        const CefString& mime_type,
-        const CefString& plugin_url,
-        cpp_bool is_main_frame,
-        const CefString& top_origin_url
-        ) except * with gil:
-    cdef PyBrowser pyBrowser
-    cdef py_bool returnValue
-    cdef object clientCallback
-    try:
-        # OnBeforePluginLoad is called from RequestContexthandler.
-        # The Browser object might not be available, because it is
-        # being set synchronously during CreateBrowserSync, after
-        # Browser is created. From testing it always works, however
-        # better be safe.
-        if not browser.get():
-            Debug("WARNING: RequestHandler_OnBeforePluginLoad() failed,"
-                  " Browser object is not available")
-            return False
-
-        # Issue #455: CefRequestHandler callbacks still executed after
-        # browser was closed.
-        if IsBrowserClosed(browser):
-            return False
-
-        py_browser = GetPyBrowser(browser, "OnBeforePluginLoad")
-        clientCallback = GetGlobalClientCallback("OnBeforePluginLoad")
-        if clientCallback:
-            returnValue = clientCallback(
-                    browser=py_browser,
-                    mime_type=CefToPyString(mime_type),
-                    plugin_url=CefToPyString(plugin_url),
-                    is_main_frame=bool(is_main_frame),
-                    top_origin_url=CefToPyString(top_origin_url))
-            return bool(returnValue)
-        else:
-            return False
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-
 cdef public cpp_bool RequestHandler_OnCertificateError(
         int certError,
         const CefString& cefRequestUrl,

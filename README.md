@@ -369,7 +369,6 @@ supporting this project actively on a daily basis.
  * [PaintBuffer](api/PaintBuffer.md#paintbuffer-object) object
  * [Request](api/Request.md#request-class) class
  * [Response](api/Response.md#response-object) object
- * [WebPluginInfo](api/WebPluginInfo.md#webplugininfo-object) object
  * [WebRequest](api/WebRequest.md#webrequest-class) class
  * [WindowInfo](api/WindowInfo.md#windowinfo-class) class
  * [WindowUtils](api/WindowUtils.md#windowutils-class) class
@@ -814,11 +813,6 @@ supporting this project actively on a daily basis.
   * [OnContextCreated](api/V8ContextHandler.md#oncontextcreated)
   * [OnContextReleased](api/V8ContextHandler.md#oncontextreleased)
 * [Virtual Key codes](api/VirtualKey.md#virtual-key-codes)
-* [WebPluginInfo (object)](api/WebPluginInfo.md#webplugininfo-object)
-  * [GetName](api/WebPluginInfo.md#getname)
-  * [GetPath](api/WebPluginInfo.md#getpath)
-  * [GetVersion](api/WebPluginInfo.md#getversion)
-  * [GetDescription](api/WebPluginInfo.md#getdescription)
 * [WebRequest (class)](api/WebRequest.md#webrequest-class)
   * [Create](api/WebRequest.md#create)
   * [GetRequest](api/WebRequest.md#getrequest)
