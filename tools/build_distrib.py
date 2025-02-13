@@ -277,6 +277,8 @@ def search_for_pythons(search_arch):
                 version_str = subprocess.check_output([python, "-c",
                                                        version_code]).decode()
                 version_str = version_str.strip()
+                if sys.version_info >= (3, 0):
+                    version_str = version_str.decode("utf-8")
                 match = re.search("^\((\d+), (\d+), (\d+)\)$", version_str)
                 assert match, version_str
                 major = match.group(1)
@@ -288,6 +290,8 @@ def search_for_pythons(search_arch):
                              "print(str(platform.architecture()[0]));")
                 arch = subprocess.check_output([python, "-c", arch_code]).decode()
                 arch = arch.strip()
+                if sys.version_info >= (3, 0):
+                    arch = arch.decode("utf-8")
                 if version_tuple2 in SUPPORTED_PYTHON_VERSIONS \
                         and arch == search_arch:
                     name = ("Python {major}.{minor}.{micro} {arch}"
@@ -349,8 +353,14 @@ def install_upgrade_requirements(pythons):
               " for: {name}".format(name=python["name"]))
 
         # Upgrade pip
-        command = ("\"{python}\" -m pip install --upgrade pip"
-                   .format(python=python["executable"]))
+        pip_version = "pip"
+        # Old Python versions require specific versions of pip, latest versions are broken with these.
+        if python["version2"] == (2, 7):
+            pip_version = "pip==20.3.4"
+        elif python["version2"] == (3, 4):
+            pip_version = "pip==19.1.1"
+        command = ("\"{python}\" -m pip install --upgrade {pip_version}"
+                   .format(python=python["executable"], pip_version=pip_version))
         command = sudo_command(command, python=python["executable"])
         pcode = subprocess.call(command, shell=True)
         if pcode != 0:
@@ -518,39 +528,37 @@ def build_cefpython_modules(pythons, arch):
 
 
 def backup_subprocess_executable_issue342(python):
-    """Use subprocess executable build by Python 2.7 to avoid
-    false-positives by AVs when building subprocess with Python 3.
-    Windows-only issue."""
+    """Use subprocess executable built by Python 3.4 to have the least amount of
+    false-positives by AVs. Windows-only issue."""
     if not WINDOWS:
         return
     if python["version2"] == (2, 7):
         print("[build_distrib.py] Backup subprocess executable built"
-              " with Python 2.7 (Issue #342)")
+              " with Python 3.4 (Issue #342)")
         cefpython_binary_basename = get_cefpython_binary_basename(
                 get_os_postfix2_for_arch(python["arch"]))
         cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary_basename)
         assert os.path.isdir(cefpython_binary)
         src = os.path.join(cefpython_binary, "subprocess.exe")
         dst = os.path.join(BUILD_CEFPYTHON,
-                           "subprocess_py27_{arch}_issue342.exe"
+                           "subprocess_py34_{arch}_issue342.exe"
                            .format(arch=python["arch"]))
         shutil.copy(src, dst)
 
 
 def restore_subprocess_executable_issue342(arch):
-    """Use subprocess executable build by Python 2.7 to avoid
-    false-positives by AVs when building subprocess with Python 3.
-    Windows-only issue."""
+    """Use subprocess executable built by Python 3.4 to have the least amount of
+    false-positives by AVs. Windows-only issue."""
     if not WINDOWS:
         return
     print("[build_distrib.py] Restore subprocess executable built"
-          " with Python 2.7 (Issue #342)")
+          " with Python 3.4 (Issue #342)")
     cefpython_binary_basename = get_cefpython_binary_basename(
             get_os_postfix2_for_arch(arch))
     cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary_basename)
     assert os.path.isdir(cefpython_binary)
     src = os.path.join(BUILD_CEFPYTHON,
-                       "subprocess_py27_{arch}_issue342.exe"
+                       "subprocess_py34_{arch}_issue342.exe"
                        .format(arch=arch))
     assert os.path.isfile(src)
     dst = os.path.join(cefpython_binary, "subprocess.exe")

@@ -1,18 +1,25 @@
-# An example of embedding CEF browser in the Kivy framework.
-# The browser is embedded using off-screen rendering mode.
-
-# Tested using Kivy 1.7.2 stable, only on Linux.
+# An example of embedding CEF browser with the Kivy framework
+# by using off-screen rendering mode.
 
 # In this example kivy-lang is used to declare the layout which
 # contains two buttons (back, forward) and the browser view.
 
 from cefpython3 import cefpython as cef
 
-import pygtk
-import gtk
 import sys
 import os
 import time
+if sys.platform == 'linux':
+    import pygtk
+    import gtk
+    pygtk.require('2.0')
+elif sys.platform == 'darwin':
+    import gi
+    gi.require_version("Gtk", "3.0")
+    from gi.repository import Gtk
+elif sys.platform == 'win32':
+    # no gtk needed on Windows
+    pass
 
 from kivy.app import App
 from kivy.uix.button import Button
@@ -28,9 +35,6 @@ from kivy.base import EventLoop
 # Global variables
 g_switches = None
 
-# PyGTK required
-pygtk.require('2.0')
-
 
 class BrowserLayout(BoxLayout):
 
@@ -38,7 +42,7 @@ class BrowserLayout(BoxLayout):
         super(BrowserLayout, self).__init__(**kwargs)
         self.orientation = "vertical"
 
-        self.browser_widget = CefBrowser(id="browser")
+        self.browser_widget = CefBrowser()
 
         layout = BoxLayout()
         layout.size_hint_y = None
@@ -150,9 +154,6 @@ class CefBrowser(Widget):
 
         # Configure CEF
         settings = {
-            # This directories must be set on Linux
-            "locales_dir_path": cef.GetModuleDirectory()+"/locales",
-            "resources_dir_path": cef.GetModuleDirectory(),
             "browser_subprocess_path": "%s/%s" % (
                 cef.GetModuleDirectory(), "subprocess"),
             "windowless_rendering_enabled": True,
@@ -161,7 +162,15 @@ class CefBrowser(Widget):
                 "enabled": False,
             },
             "external_message_pump": False,  # See Issue #246
+            "multi_threaded_message_loop": False,
         }
+        if sys.platform == 'linux':
+            # This directories must be set on Linux
+            settings["locales_dir_path"] = cef.GetModuleDirectory() + "/locales"
+            settings["resources_dir_path"] = cef.GetModuleDirectory()
+        if sys.platform == 'darwin':
+            settings["external_message_pump"] = True  # Temporary fix for Issue #246
+
         switches = {
             # Tweaking OSR performance by setting the same Chromium flags
             # as in upstream cefclient (# Issue #240).
@@ -190,18 +199,21 @@ class CefBrowser(Widget):
         # Start idle - CEF message loop work.
         Clock.schedule_once(self._message_loop_work, 0)
 
+        windowInfo = cef.WindowInfo()
+
         # TODO: For printing to work in off-screen-rendering mode
         #       it is enough to call gtk_init(). It is not required
         #       to provide window handle when calling SetAsOffscreen().
         #       However it still needs to be tested whether providing
         #       window handle is required for mouse context menu and
         #       popup widgets to work.
-        gtkwin = gtk.Window()
-        gtkwin.realize()
-
         # WindowInfo offscreen flag
-        windowInfo = cef.WindowInfo()
-        windowInfo.SetAsOffscreen(gtkwin.window.xid)
+        if sys.platform == 'linux':
+            gtkwin = gtk.Window()
+            gtkwin.realize()
+            windowInfo.SetAsOffscreen(gtkwin.window.xid)
+        elif sys.platform == 'darwin' or sys.platform == 'win32':
+            windowInfo.SetAsOffscreen(0)
 
         # Create Broswer and naviagte to empty page <= OnPaint won't get
         # called yet
@@ -519,12 +531,12 @@ class CefBrowser(Widget):
 
     def go_forward(self, *_):
         """Going to forward in browser history."""
-        print "go forward"
+        print("go forward")
         self.browser.GoForward()
 
     def go_back(self, *_):
         """Going back in browser history."""
-        print "go back"
+        print("go back")
         self.browser.GoBack()
 
     def reload(self, *_):
@@ -864,7 +876,7 @@ class ClientHandler:
     def OnPaint(self, element_type, paint_buffer, **_):
         # print "OnPaint()"
         if element_type != cef.PET_VIEW:
-            print "Popups aren't implemented yet"
+            print("Popups aren't implemented yet")
             return
 
         # FPS meter ("fps" arg)

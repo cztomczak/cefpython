@@ -308,6 +308,7 @@ def get_include_dirs():
             '/usr/include/gtk-unix-print-2.0',
             '/usr/include/cairo',
             '/usr/include/pango-1.0',
+            '/usr/include/harfbuzz',
             '/usr/include/gdk-pixbuf-2.0',
             '/usr/include/atk-1.0',
             # Fedora
@@ -327,6 +328,7 @@ def get_include_dirs():
             '/usr/include/gtk-unix-print-2.0',
             '/usr/include/cairo',
             '/usr/include/pango-1.0',
+            '/usr/include/harfbuzz',
             '/usr/include/gdk-pixbuf-2.0',
             '/usr/include/atk-1.0',
             # Ubuntu

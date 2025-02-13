@@ -111,10 +111,6 @@ Description from upstream CEF:
 > information specific to the created popup browser that will be passed to
 > CefRenderProcessHandler::OnBrowserCreated() in the render process.
 
-Note that if you return True and create the popup window yourself, then
-the popup window and parent window will not be able to script each other.
-There will be no "window.opener" property available in the popup window.
-
 `WindowOpenDisposition` constants in the cefpython module:
 * CEF_WOD_UNKNOWN,
 * CEF_WOD_CURRENT_TAB,
@@ -128,3 +124,11 @@ There will be no "window.opener" property available in the popup window.
 * CEF_WOD_IGNORE_ACTION,
 * CEF_WOD_SWITCH_TO_TAB,
 * CEF_WOD_NEW_PICTURE_IN_PICTURE
+
+Note that if you return True and create the popup window yourself, then
+the popup window and parent window will not be able to script each other.
+There will be no "window.opener" property available in the popup window.
+To avoid this issue create a hidden window when your application starts.
+Parent the new popup browser to the hidden window in OnBeforePopup. After
+the browser exists (OnAfterCreated) create the desired target window
+and re-parent the browser to that target window.
