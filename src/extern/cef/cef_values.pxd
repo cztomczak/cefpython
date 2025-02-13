@@ -9,6 +9,7 @@ from libcpp.vector cimport vector
 from cef_types cimport cef_value_type_t
 
 cdef extern from "include/cef_values.h":
+    @staticmethod
     cdef CefRefPtr[CefBinaryValue] CefBinaryValue_Create \
         "CefBinaryValue::Create"(const void* data, size_t data_size)
 
@@ -31,7 +32,8 @@ cdef extern from "include/cef_values.h":
         CefRefPtr[CefBinaryValue] Copy()
         size_t GetSize()
         size_t GetData(void* buffer_, size_t buffer_size, size_t data_offset)
-        
+    
+    @staticmethod    
     cdef CefRefPtr[CefDictionaryValue] CefDictionaryValue_Create \
         "CefDictionaryValue::Create"()
 

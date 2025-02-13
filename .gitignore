@@ -1,6 +1,7 @@
 .idea/
 build/
 dist/
+venv/
 *.log
 __pycache__/
 *.pyc
@@ -16,3 +17,5 @@ unittests/GPUCache/
 unittests/blob_storage/
 unittests/webrtc_event_logs/
 .DS_Store
+MediaDeviceSalts
+MediaDeviceSalts-journal

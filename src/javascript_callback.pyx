@@ -6,16 +6,16 @@ include "cefpython.pyx"
 include "browser.pyx"
 
 cdef JavascriptCallback CreateJavascriptCallback(int callbackId,
-        CefRefPtr[CefBrowser] cefBrowser, object frameId,
+        CefRefPtr[CefBrowser] cefBrowser, py_string frameId,
         py_string functionName):
-    # frameId is int64
+    Debug("Created javascript callback, callbackId=%s, functionName=%s" % \
+            (callbackId, functionName))
     cdef JavascriptCallback jsCallback = JavascriptCallback()
     jsCallback.callbackId = callbackId
     cdef PyBrowser browser = GetPyBrowser(cefBrowser)
     jsCallback.frame = browser.GetFrameByIdentifier(frameId)
     jsCallback.functionName = functionName
-    Debug("Created javascript callback, callbackId=%s, functionName=%s" % \
-            (callbackId, functionName))
+
     return jsCallback
 
 cdef class JavascriptCallback:
@@ -30,7 +30,7 @@ cdef class JavascriptCallback:
         if self.frame:
             browser = self.frame.GetBrowser()
             if browser:
-                browser.SendProcessMessage(
+                browser.GetMainFrame().SendProcessMessage(
                         cef_types.PID_RENDERER,
                         self.frame.GetIdentifier(),
                         "ExecuteJavascriptCallback",

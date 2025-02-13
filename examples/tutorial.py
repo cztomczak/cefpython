@@ -6,6 +6,7 @@ import base64
 import platform
 import sys
 import threading
+from pkg_resources import parse_version
 
 # HTML code. Browser will navigate to a Data uri created
 # from this html code.
@@ -85,7 +86,7 @@ def check_versions():
     print("[tutorial.py] Python {ver} {arch}".format(
            ver=platform.python_version(),
            arch=platform.architecture()[0]))
-    assert cef.__version__ >= "57.0", "CEF Python v57.0+ required to run this"
+    assert parse_version(cef.__version__) >= parse_version("57.0"), "CEF Python v57.0+ required to run this"
 
 
 def html_to_data_uri(html, js_callback=None):
@@ -188,6 +189,7 @@ class External(object):
 
     def test_multiple_callbacks(self, js_callback):
         """Test both javascript and python callbacks."""
+        print('in test_multiple_callbacks')
         js_print(self.browser, "Python", "test_multiple_callbacks",
                  "Called from Javascript. Will call Javascript callback now.")
 

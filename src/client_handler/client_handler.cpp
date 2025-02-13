@@ -27,6 +27,7 @@
 
 bool ClientHandler::OnProcessMessageReceived(
                                         CefRefPtr<CefBrowser> browser,
+                                        CefRefPtr<CefFrame> frame,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message)
 {
@@ -34,16 +35,14 @@ bool ClientHandler::OnProcessMessageReceived(
     if (source_process != PID_RENDERER) {
         return false;
     }
-    std::string messageName = message->GetName().ToString();
+    const std::string& messageName = message->GetName();
     std::string logMessage = "[Browser process] OnProcessMessageReceived(): ";
     logMessage.append(messageName.c_str());
     LOG(INFO) << logMessage.c_str();
     if (messageName == "OnContextCreated") {
         CefRefPtr<CefListValue> arguments = message->GetArgumentList();
-        if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_INT) {
-            int64 frameId = arguments->GetInt(0);
-            CefRefPtr<CefFrame> frame = browser->GetFrame(frameId);
-            if (!frame.get()) {
+        if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_STRING) {
+           if (!frame.get()) {
                 // Frame was already destroyed while IPC messaging was
                 // executing. Issue #431. User callback will not be
                 // executed in such case.
@@ -60,9 +59,9 @@ bool ClientHandler::OnProcessMessageReceived(
         CefRefPtr<CefListValue> arguments = message->GetArgumentList();
         if (arguments->GetSize() == 2 \
                 && arguments->GetType(0) == VTYPE_INT \
-                && arguments->GetType(1) == VTYPE_INT) {
+                && arguments->GetType(1) == VTYPE_STRING) {
             int browserId = arguments->GetInt(0);
-            int64 frameId = arguments->GetInt(1);
+            CefString frameId = arguments->GetString(1);
             // Even if frame was alrady destroyed (Issue #431) you still
             // want to call V8ContextHandler_OnContextReleased as it releases
             // some resources. Thus passing IDs instead of actual
@@ -79,12 +78,12 @@ bool ClientHandler::OnProcessMessageReceived(
         CefRefPtr<CefListValue> arguments = message->GetArgumentList();
         if (arguments->GetSize() == 3
                     // frameId
-                    && arguments->GetType(0) == VTYPE_INT
+                    && arguments->GetType(0) == VTYPE_STRING
                     // functionName
                     && arguments->GetType(1) == VTYPE_STRING
                     // functionArguments
                     && arguments->GetType(2) == VTYPE_LIST) {
-            int64 frameId = arguments->GetInt(0);
+            CefString frameId = arguments->GetString(0);
             CefString functionName = arguments->GetString(1);
             CefRefPtr<CefListValue> functionArguments = arguments->GetList(2);
             // Even if frame was already destroyed (Issue #431) you still

@@ -80,7 +80,7 @@ NO_AUTOMATE = False
 ALLOW_PARTIAL = False
 
 # Python versions
-SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9)]
+SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11)]
 
 # Python search paths. It will use first Python found for specific version.
 # Supports replacement of one environment variable in path eg.: %ENV_KEY%.
@@ -275,7 +275,7 @@ def search_for_pythons(search_arch):
                           .format(executable=python))
                     sys.exit(1)
                 version_str = subprocess.check_output([python, "-c",
-                                                       version_code])
+                                                       version_code]).decode()
                 version_str = version_str.strip()
                 if sys.version_info >= (3, 0):
                     version_str = version_str.decode("utf-8")
@@ -288,7 +288,7 @@ def search_for_pythons(search_arch):
                 version_tuple3 = (int(major), int(minor), int(micro))
                 arch_code = ("import platform;"
                              "print(str(platform.architecture()[0]));")
-                arch = subprocess.check_output([python, "-c", arch_code])
+                arch = subprocess.check_output([python, "-c", arch_code]).decode()
                 arch = arch.strip()
                 if sys.version_info >= (3, 0):
                     arch = arch.decode("utf-8")
@@ -388,7 +388,7 @@ def uninstall_cefpython3_packages(pythons):
         command = ("\"{python}\" -m pip show cefpython3"
                    .format(python=python["executable"]))
         try:
-            output = subprocess.check_output(command, shell=True)
+            output = subprocess.check_output(command, shell=True).decode()
         except subprocess.CalledProcessError as exc:
             # pip show returns error code when package is not installed
             output = exc.output
@@ -623,7 +623,7 @@ def check_cpp_extension_dependencies_issue359(setup_dir, all_pythons):
         return
     checked_any = False
     for python in all_pythons:
-        if python["version2"] in ((3, 5), (3, 6), (3, 7), (3, 8), (3, 9)):
+        if python["version2"] in ((3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11)):
             checked_any = True
             if not os.path.exists(os.path.join(setup_dir, "cefpython3",
                                                "msvcp140.dll")):

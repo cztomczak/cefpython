@@ -11,6 +11,7 @@
 include "../cefpython.pyx"
 include "../browser.pyx"
 include "../frame.pyx"
+from libc.stdint cimport int64_t
 
 cdef public void V8ContextHandler_OnContextCreated(
         CefRefPtr[CefBrowser] cefBrowser,
@@ -20,7 +21,6 @@ cdef public void V8ContextHandler_OnContextCreated(
     cdef PyFrame pyFrame
     cdef object clientCallback
     try:
-        Debug("V8ContextHandler_OnContextCreated()")
         pyBrowser = GetPyBrowser(cefBrowser, "OnContextCreated")
         pyBrowser.SetUserData("__v8ContextCreated", True)
         pyFrame = GetPyFrame(cefFrame)
@@ -34,7 +34,7 @@ cdef public void V8ContextHandler_OnContextCreated(
 
 cdef public void V8ContextHandler_OnContextReleased(
         int browserId,
-        int64 frameId
+        CefString frameId
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
@@ -53,16 +53,16 @@ cdef public void V8ContextHandler_OnContextReleased(
         if not pyBrowser:
             Debug("OnContextReleased: Browser doesn't exist anymore, id={id}"
                   .format(id=str(browserId)))
-            RemovePyFrame(browserId, frameId)
+            RemovePyFrame(browserId, CefToPyString(frameId))
             return
-        pyFrame = GetPyFrameById(browserId, frameId)
+        pyFrame = GetPyFrameById(browserId, CefToPyString(frameId))
         # Frame may already be destroyed while IPC messaging was executing
         # (Issue #431).
         if pyFrame:
             clientCallback = pyBrowser.GetClientCallback("OnContextReleased")
             if clientCallback:
                 clientCallback(browser=pyBrowser, frame=pyFrame)
-        RemovePyFrame(browserId, frameId)
+        RemovePyFrame(browserId, CefToPyString(frameId))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

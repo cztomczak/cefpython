@@ -16,5 +16,5 @@ cdef extern from "include/cef_request_context.h":
         CefRefPtr[CefRequestContext] CreateContext(
                 CefRefPtr[CefRequestContext] other,
                 CefRefPtr[CefRequestContextHandler] handler)
-        CefRefPtr[CefCookieManager] GetDefaultCookieManager(
+        CefRefPtr[CefCookieManager] GetCookieManager(
                 CefRefPtr[CefCompletionCallback] callback)

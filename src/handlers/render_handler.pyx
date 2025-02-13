@@ -7,6 +7,7 @@ include "../browser.pyx"
 include "../string_utils.pyx"
 
 cimport cef_types
+from libc.stdint cimport uint32_t
 from cef_types cimport CefRange
 
 # cef_paint_element_type_t, PaintElementType
@@ -73,7 +74,13 @@ cdef public cpp_bool RenderHandler_GetViewRect(
             else:
                 return False
         else:
-            return False
+            # without a default cefRect, pysdl2 example will fail
+            # the value is inspired by https://github.com/obsproject/obs-browser/blob/master/browser-client.cpp#L280
+            cefRect.x = 0
+            cefRect.y = 0
+            cefRect.width = 16
+            cefRect.height = 16
+            return True
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -219,20 +226,6 @@ cdef public void RenderHandler_OnPaint(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public void RenderHandler_OnCursorChange(
-        CefRefPtr[CefBrowser] cefBrowser,
-        CefCursorHandle cursor
-        ) except * with gil:
-    cdef PyBrowser pyBrowser
-    try:
-        pyBrowser = GetPyBrowser(cefBrowser, "OnCursorChange")
-        callback = pyBrowser.GetClientCallback("OnCursorChange")
-        if callback:
-            callback(browser=pyBrowser, cursor=<uintptr_t>cursor)
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
 cdef public void RenderHandler_OnScrollOffsetChanged(
         CefRefPtr[CefBrowser] cefBrowser
         ) except * with gil:
@@ -249,7 +242,7 @@ cdef public void RenderHandler_OnScrollOffsetChanged(
 cdef public cpp_bool RenderHandler_StartDragging(
         CefRefPtr[CefBrowser] cef_browser,
         CefRefPtr[CefDragData] cef_drag_data,
-        uint32 allowed_ops,
+        uint32_t allowed_ops,
         int x, int y
         ) except * with gil:
     cdef PyBrowser browser
@@ -278,7 +271,7 @@ cdef public cpp_bool RenderHandler_StartDragging(
 
 cdef public void RenderHandler_UpdateDragCursor(
         CefRefPtr[CefBrowser] cef_browser,
-        uint32 operation,
+        uint32_t operation,
         ) except * with gil:
     cdef PyBrowser browser
     try:

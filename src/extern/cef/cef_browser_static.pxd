@@ -14,6 +14,7 @@ ELIF UNAME_SYSNAME == "Darwin":
 # noinspection PyUnresolvedReferences
 from cef_client cimport CefClient
 from cef_types cimport CefBrowserSettings
+from cef_values cimport CefDictionaryValue
 # noinspection PyUnresolvedReferences
 from cef_request_context cimport CefRequestContext
 # noinspection PyUnresolvedReferences
@@ -28,4 +29,5 @@ cdef extern from "include/cef_browser.h" namespace "CefBrowserHost":
         CefRefPtr[CefClient],
         CefString&,
         CefBrowserSettings&,
+        CefRefPtr[CefDictionaryValue],
         CefRefPtr[CefRequestContext]) nogil

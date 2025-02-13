@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Marshall A. Greenblatt. Portions copyright (c) 2012
+// Copyright (c) 2021 Marshall A. Greenblatt. Portions copyright (c) 2015
 // Google Inc. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,60 +28,35 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef CEF_INCLUDE_BASE_CEF_BASICTYPES_H_
-#define CEF_INCLUDE_BASE_CEF_BASICTYPES_H_
+#ifndef INCLUDE_BASE_CEF_PTR_UTIL_H_
+#define INCLUDE_BASE_CEF_PTR_UTIL_H_
 #pragma once
 
-#include <limits.h>  // For UINT_MAX
-#include <stddef.h>  // For size_t
+#if defined(USING_CHROMIUM_INCLUDES)
+// When building CEF include the Chromium header directly.
+#include "base/memory/ptr_util.h"
+#else  // !USING_CHROMIUM_INCLUDES
+// The following is substantially similar to the Chromium implementation.
+// If the Chromium implementation diverges the below implementation should be
+// updated to match.
 
-#include "include/base/cef_build.h"
+#include <memory>
+#include <utility>
 
-// The NSPR system headers define 64-bit as |long| when possible, except on
-// Mac OS X.  In order to not have typedef mismatches, we do the same on LP64.
-//
-// On Mac OS X, |long long| is used for 64-bit types for compatibility with
-// <inttypes.h> format macros even in the LP64 model.
-#if defined(__LP64__) && !defined(OS_MACOSX) && !defined(OS_OPENBSD)
-typedef long int64;
-typedef unsigned long uint64;
-#else
-typedef long long int64;
-typedef unsigned long long uint64;
 #endif
 
-// TODO: Remove these type guards.  These are to avoid conflicts with
-// obsolete/protypes.h in the Gecko SDK.
-#ifndef _INT32
-#define _INT32
-typedef int int32;
-#endif
+namespace base {
 
-// TODO: Remove these type guards.  These are to avoid conflicts with
-// obsolete/protypes.h in the Gecko SDK.
-#ifndef _UINT32
-#define _UINT32
-typedef unsigned int uint32;
-#endif
+///
+/// Helper to transfer ownership of a raw pointer to a std::unique_ptr<T>.
+/// Note that std::unique_ptr<T> has very different semantics from
+/// std::unique_ptr<T[]>: do not use this helper for array allocations.
+///
+template <typename T>
+std::unique_ptr<T> WrapUnique(T* ptr) {
+  return std::unique_ptr<T>(ptr);
+}
 
-#ifndef _INT16
-#define _INT16
-typedef short int16;
-#endif
+}  // namespace base
 
-#ifndef _UINT16
-#define _UINT16
-typedef unsigned short uint16;
-#endif
-
-// UTF-16 character type.
-// This should be kept synchronized with base/strings/string16.h
-#ifndef char16
-#if defined(WCHAR_T_IS_UTF16)
-typedef wchar_t char16;
-#elif defined(WCHAR_T_IS_UTF32)
-typedef unsigned short char16;
-#endif
-#endif
-
-#endif  // CEF_INCLUDE_BASE_CEF_BASICTYPES_H_
+#endif  // INCLUDE_BASE_CEF_PTR_UTIL_H_
