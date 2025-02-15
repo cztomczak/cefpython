@@ -72,9 +72,6 @@ cdef void SetApplicationSettings(
             cefAppSettings.log_severity = <cef_types.cef_log_severity_t><int>int(appSettings[key])
         elif key == "multi_threaded_message_loop":
             cefAppSettings.multi_threaded_message_loop = int(appSettings[key])
-        # elif key == "net_security_expiration_enabled":
-        #     cefAppSettings.enable_net_security_expiration =\
-        #             int(appSettings[key])
         elif key == "release_dcheck_enabled":
             # Keep for BC, just log info - no error
             Debug("DEPRECATED: 'release_dcheck_enabled' setting")
@@ -248,13 +245,6 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.databases = cef_types.STATE_DISABLED
             else:
                 cefBrowserSettings.databases = cef_types.STATE_ENABLED
-        # elif key == "application_cache_disabled":
-        #     if browserSettings[key]:
-        #         cefBrowserSettings.application_cache = (
-        #                 cef_types.STATE_DISABLED)
-        #     else:
-        #         cefBrowserSettings.application_cache = (
-        #                 cef_types.STATE_ENABLED)
         elif key == "webgl_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.webgl = cef_types.STATE_DISABLED
