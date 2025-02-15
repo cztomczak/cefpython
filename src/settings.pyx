@@ -56,10 +56,6 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.user_agent)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
-        # elif key == "product_version":
-        #     cefString = new CefString(&cefAppSettings.product_version)
-        #     PyToCefStringPointer(appSettings[key], cefString)
-        #     del cefString
         elif key == "log_file":
             cefString = new CefString(&cefAppSettings.log_file)
             PyToCefStringPointer(appSettings[key], cefString)
