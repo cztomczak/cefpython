@@ -48,9 +48,6 @@ def main():
         # the same time. This is an incorrect approach
         # and only a temporary fix.
         settings["external_message_pump"] = True
-    if WINDOWS:
-        # noinspection PyUnresolvedReferences, PyArgumentList
-        cef.DpiAware.EnableHighDpiSupport()
     cef.Initialize(settings=settings)
     app = CefApp(False)
     app.MainLoop()

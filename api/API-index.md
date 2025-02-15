@@ -211,7 +211,6 @@
 * [DownloadHandler](DownloadHandler.md#downloadhandler)
 * [DpiAware (class)](DpiAware.md#dpiaware-class)
   * [CalculateWindowSize](DpiAware.md#calculatewindowsize)
-  * [EnableHighDpiSupport](DpiAware.md#enablehighdpisupport)
   * [GetSystemDpi](DpiAware.md#getsystemdpi)
   * [IsProcessDpiAware](DpiAware.md#isprocessdpiaware)
   * [SetProcessDpiAware](DpiAware.md#setprocessdpiaware)
