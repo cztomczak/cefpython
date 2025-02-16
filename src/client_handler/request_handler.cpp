@@ -110,11 +110,3 @@ void RequestHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
     LOG(ERROR) << "[Browser process] OnRenderProcessTerminated()";
     RequestHandler_OnRendererProcessTerminated(browser, status);
 }
-
-
-void RequestHandler::OnPluginCrashed(CefRefPtr<CefBrowser> browser,
-                                     const CefString& plugin_path)
-{
-    REQUIRE_UI_THREAD();
-    RequestHandler_OnPluginCrashed(browser, plugin_path);
-}

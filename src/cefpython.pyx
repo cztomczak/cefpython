@@ -372,6 +372,7 @@ include "image.pyx"
 # Handlers
 include "handlers/accessibility_handler.pyx"
 include "handlers/browser_process_handler.pyx"
+include "handlers/cookie_access_filter.pyx"
 include "handlers/display_handler.pyx"
 include "handlers/focus_handler.pyx"
 include "handlers/javascript_dialog_handler.pyx"

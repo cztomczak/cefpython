@@ -5,11 +5,13 @@
 #include "common/cefpython_public_api.h"
 #include "include/cef_request_handler.h"
 #include "include/base/cef_callback.h"
+#include "cookie_access_filter.h"
 
 typedef cef_return_value_t ReturnValue;
 
 
-class RequestHandler : public CefRequestHandler
+class RequestHandler : public CefRequestHandler,
+                       public CookieAccessFilter
 {
 public:
     RequestHandler(){}
@@ -64,9 +66,6 @@ public:
 
     void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                    cef_termination_status_t status) override;
-
-    void OnPluginCrashed(CefRefPtr<CefBrowser> browser,
-                         const CefString& plugin_path) ;
 
 private:
     IMPLEMENT_REFCOUNTING(RequestHandler);

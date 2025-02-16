@@ -393,31 +393,3 @@ cdef public void RequestHandler_OnRendererProcessTerminated(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
-
-
-cdef public void RequestHandler_OnPluginCrashed(
-        CefRefPtr[CefBrowser] cefBrowser,
-        const CefString& cefPluginPath
-        ) except * with gil:
-    # TODO: plugin may crash during browser creation. Let this callback 
-    # to be set either through  cefpython.SetGlobalClientCallback()
-    # or PyBrowser.SetClientCallback(). Modify the 
-    # PyBrowser.GetClientCallback() implementation to return a global 
-    # callback first if set.
-    cdef PyBrowser pyBrowser
-    cdef object clientCallback
-    try:
-        # Issue #455: CefRequestHandler callbacks still executed after
-        # browser was closed.
-        if IsBrowserClosed(cefBrowser):
-            return
-
-        pyBrowser = GetPyBrowser(cefBrowser, "OnPluginCrashed")
-        clientCallback = pyBrowser.GetClientCallback("OnPluginCrashed")
-        if clientCallback:
-            clientCallback(
-                    browser=pyBrowser,
-                    plugin_path=CefToPyString(cefPluginPath))
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
