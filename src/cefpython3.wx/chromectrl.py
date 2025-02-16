@@ -160,9 +160,6 @@ class ChromeWindow(wx.Window):
         if not browserSettings:
             browserSettings = {}
 
-        # Disable plugins:
-        # | browserSettings["plugins_disabled"] = True
-
         self.browser = cefpython.CreateBrowserSync(windowInfo,
                 browserSettings=browserSettings, navigateUrl=url)
 

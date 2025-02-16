@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 from ctime cimport time_t
+from libc.stdint cimport int64_t
 
 cdef extern from "include/internal/cef_time.h":
     ctypedef struct cef_time_t:
@@ -14,6 +15,9 @@ cdef extern from "include/internal/cef_time.h":
         int minute
         int second
         int millisecond
+
+    ctypedef struct cef_basetime_t:
+        int64_t val
 
 cdef extern from "include/internal/cef_types.h":
     cdef cppclass CefTime:

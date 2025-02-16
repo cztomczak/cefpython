@@ -23,7 +23,7 @@ public:
                               CefRefPtr<CefCallback> callback) override;
 
   virtual void GetResponseHeaders(CefRefPtr<CefResponse> response,
-                                  int64& response_length,
+                                  int64_t& response_length,
                                   CefString& redirectUrl) override;
 
   virtual bool ReadResponse(void* data_out,
@@ -31,11 +31,7 @@ public:
                             int& bytes_read,
                             CefRefPtr<CefCallback> callback) override;
 
-  virtual bool CanGetCookie(const CefCookie& cookie) override;
-
-  virtual bool CanSetCookie(const CefCookie& cookie) override;
-
-  virtual void Cancel() OVERRIDE;
+  virtual void Cancel() override;
     
 private:
   IMPLEMENT_REFCOUNTING(ResourceHandler);

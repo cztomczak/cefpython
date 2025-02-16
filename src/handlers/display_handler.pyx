@@ -143,3 +143,23 @@ cdef public void DisplayHandler_OnLoadingProgressChange(
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public cpp_bool DisplayHandler_OnCursorChange(
+        CefRefPtr[CefBrowser] cefBrowser,
+        CefCursorHandle cursor
+        ) except * with gil:
+    cdef PyBrowser pyBrowser
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser, "OnCursorChange")
+        callback = pyBrowser.GetClientCallback("OnCursorChange")
+        if callback:
+            ret = callback(browser=pyBrowser, cursor=<uintptr_t>cursor)
+            if ret:
+                return True
+            else:
+                return False
+        else:
+            return False
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)

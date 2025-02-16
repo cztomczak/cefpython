@@ -149,7 +149,7 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             browser.SetClientHandler(handler)
 
         # Initiate OSR rendering
-        browser.SendFocusEvent(True)
+        browser.SetFocus(True)
         browser.WasResized()
 
         # Test selection
@@ -196,9 +196,12 @@ class AccessibilityHandler(object):
         self.loadComplete_True = False
         self.layoutComplete_True = False
 
+
+
     def _OnAccessibilityTreeChange(self, value):
+
         self._OnAccessibilityTreeChange_True = True
-        for event in value:
+        for event in value.get('events', []):
             if "event_type" in event:
                 if event["event_type"] == "loadComplete":
                     # LoadHandler.OnLoadEnd is called after this event

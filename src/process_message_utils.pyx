@@ -11,6 +11,7 @@
 
 include "cefpython.pyx"
 include "utils.pyx"
+from libc.stdint cimport int64_t, uint32_t
 
 # -----------------------------------------------------------------------------
 # CEF values to Python values
@@ -41,8 +42,8 @@ cdef object CefValueToPyValue(CefRefPtr[CefValue] cefValue):
     assert cefValue.get().IsValid(), "cefValue is invalid"
     cdef cef_types.cef_value_type_t valueType = cefValue.get().GetType()
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef uint32 uint32_value = 0
-    cdef int64 int64_value = 0
+    cdef uint32_t uint32_value = 0
+    cdef int64_t int64_value = 0
 
     if valueType == cef_types.VTYPE_NULL:
         return None
@@ -56,12 +57,12 @@ cdef object CefValueToPyValue(CefRefPtr[CefValue] cefValue):
         return CefToPyString(cefValue.get().GetString())
     elif valueType == cef_types.VTYPE_DICTIONARY:
         return CefDictionaryValueToPyDict(
-                <CefRefPtr[CefBrowser]>NULL,
+                <CefRefPtr[CefBrowser]>nullptr,
                 cefValue.get().GetDictionary(),
                 1)
     elif valueType == cef_types.VTYPE_LIST:
         return CefListValueToPyList(
-                <CefRefPtr[CefBrowser]>NULL,
+                <CefRefPtr[CefBrowser]>nullptr,
                 cefValue.get().GetList(),
                 1)
     elif valueType == cef_types.VTYPE_BINARY:
@@ -97,8 +98,8 @@ cdef list CefListValueToPyList(
     cdef cef_types.cef_value_type_t valueType
     cdef list ret = []
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef uint32 uint32_value = 0
-    cdef int64 int64_value = 0
+    cdef uint32_t uint32_value = 0
+    cdef int64_t int64_value = 0
     cdef object originallyString
     for index in range(0, size):
         valueType = cefListValue.get().GetType(index)
@@ -162,8 +163,8 @@ cdef dict CefDictionaryValueToPyDict(
     cdef CefString cefKey
     cdef py_string pyKey
     cdef CefRefPtr[CefBinaryValue] binaryValue
-    cdef uint32 uint32_value = 0
-    cdef int64 int64_value = 0
+    cdef uint32_t uint32_value = 0
+    cdef int64_t int64_value = 0
     cdef object originallyString
     while iterator != keyList.end():
         # noinspection PyUnresolvedReferences
@@ -238,9 +239,12 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
             ret.get().SetNull(index)
         elif valueType == bool:
             ret.get().SetBool(index, bool(value))
-        elif valueType == int or valueType == long:  # In Py3 int and long types are the same type.
-            # Int32 range is -2147483648..2147483647
-            if INT_MIN <= value <= INT_MAX:
+        elif valueType in (int, long):
+            # Int32 range is -2147483648..2147483647, we've increased the
+            # minimum size by one as Cython was throwing a warning:
+            # "unary minus operator applied to unsigned type, result still
+            # unsigned".
+            if -2147483647 <= value <= 2147483647:
                 ret.get().SetInt(index, int(value))
             else:
                 # Long values become strings.
@@ -292,9 +296,12 @@ cdef void PyListToExistingCefListValue(
             cefListValue.get().SetNull(index)
         elif valueType == bool:
             cefListValue.get().SetBool(index, bool(value))
-        elif valueType == int or valueType == long:  # In Py3 int and long types are the same type.
-            # Int32 range is -2147483648..2147483647
-            if INT_MIN <= value <= INT_MAX:
+        elif valueType in (int, long):
+            # Int32 range is -2147483648..2147483647, we've increased the
+            # minimum size by one as Cython was throwing a warning:
+            # "unary minus operator applied to unsigned type, result still
+            # unsigned".
+            if -2147483647 <= value <= 2147483647:
                 cefListValue.get().SetInt(index, int(value))
             else:
                 # Long values become strings.

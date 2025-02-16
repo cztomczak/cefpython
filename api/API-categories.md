@@ -30,7 +30,6 @@
  * [PaintBuffer](PaintBuffer.md#paintbuffer-object) object
  * [Request](Request.md#request-class) class
  * [Response](Response.md#response-object) object
- * [WebPluginInfo](WebPluginInfo.md#webplugininfo-object) object
  * [WebRequest](WebRequest.md#webrequest-class) class
  * [WindowInfo](WindowInfo.md#windowinfo-class) class
  * [WindowUtils](WindowUtils.md#windowutils-class) class

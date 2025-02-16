@@ -127,6 +127,11 @@ def main():
         dest='renderer',
         choices=['software', 'hardware']
     )
+    parser.add_argument(
+        '--debug',
+        help='debug app',
+        action='store_true'
+    )
     args = parser.parse_args()
     logLevel = logging.INFO
     if args.verbose:
@@ -135,7 +140,7 @@ def main():
         format='[%(filename)s %(levelname)s]: %(message)s',
         level=logLevel
     )
-    logging.info("Using PySDL2 %s" % sdl2.__version__)
+    logging.info("Using PySDL2 %s", sdl2.__version__)
     version = sdl2.SDL_version()
     sdl2.SDL_GetVersion(version)
     logging.info(
@@ -224,7 +229,7 @@ def main():
     browser.SetClientHandler(renderHandler)
     # Must call WasResized at least once to let know CEF that
     # viewport size is available and that OnPaint may be called.
-    browser.SendFocusEvent(True)
+    browser.SetFocus(True)
     browser.WasResized()
 
     # Begin the main rendering loop

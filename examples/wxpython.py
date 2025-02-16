@@ -12,6 +12,7 @@ from cefpython3 import cefpython as cef
 import platform
 import sys
 import os
+from pkg_resources import parse_version
 
 # Platforms
 WINDOWS = (platform.system() == "Windows")
@@ -47,9 +48,6 @@ def main():
         # the same time. This is an incorrect approach
         # and only a temporary fix.
         settings["external_message_pump"] = True
-    if WINDOWS:
-        # noinspection PyUnresolvedReferences, PyArgumentList
-        cef.DpiAware.EnableHighDpiSupport()
     cef.Initialize(settings=settings)
     app = CefApp(False)
     app.MainLoop()
@@ -65,7 +63,7 @@ def check_versions():
             ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[wxpython.py] wxPython {ver}".format(ver=wx.version()))
     # CEF Python version requirement
-    assert cef.__version__ >= "66.0", "CEF Python v66.0+ required to run this"
+    assert parse_version(cef.__version__) >= parse_version("66.0"), "CEF Python v66.0+ required to run this"
 
 
 def scale_window_size_for_high_dpi(width, height):

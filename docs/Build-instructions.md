@@ -281,7 +281,7 @@ mkdir build/
 cd build/
 ```
 
-2) Download CEF binaries from [Spotify Automated Builds](http://opensource.spotify.com/cefbuilds/index.html).
+2) Download CEF binaries from [Spotify Automated Builds](https://cef-builds.spotifycdn.com/index.html).
    The version of the binaries must match exactly the CEF version
    from the "cefpython/src/version/" directory (look for CEF_VERSION
    constant in .h file).

@@ -19,8 +19,9 @@ cdef void SetCefWindowInfo(
             pass
 
     IF UNAME_SYSNAME == "Windows":
-        cdef RECT windowRect
+        cdef CefRect windowRect
         cdef CefString windowName
+        cdef RECT rect
     ELIF UNAME_SYSNAME == "Linux":
         cdef CefRect windowRect
 
@@ -28,13 +29,14 @@ cdef void SetCefWindowInfo(
     if windowInfo.windowType == "child":
         IF UNAME_SYSNAME == "Windows":
             if windowInfo.windowRect:
-                windowRect.left = int(windowInfo.windowRect[0])
-                windowRect.top = int(windowInfo.windowRect[1])
-                windowRect.right = int(windowInfo.windowRect[2])
-                windowRect.bottom = int(windowInfo.windowRect[3])
+                rect.left = int(windowInfo.windowRect[0])
+                rect.top = int(windowInfo.windowRect[1])
+                rect.right = int(windowInfo.windowRect[2])
+                rect.bottom = int(windowInfo.windowRect[3])
             else:
                 GetClientRect(<CefWindowHandle>windowInfo.parentWindowHandle,
-                              &windowRect)
+                              &rect)
+            windowRect = CefRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top)
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)

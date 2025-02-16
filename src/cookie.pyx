@@ -167,16 +167,16 @@ cdef class Cookie:
         return self.cefCookie.httponly
 
     cpdef py_void SetCreation(self, object creation):
-        DatetimeToCefTimeT(creation, self.cefCookie.creation)
+        DatetimeToCefBasetimeT(creation, self.cefCookie.creation)
 
     cpdef object GetCreation(self):
-        return CefTimeTToDatetime(self.cefCookie.creation)
+        return CefBasetimeTToDatetime(self.cefCookie.creation)
 
     cpdef py_void SetLastAccess(self, object lastAccess):
-        DatetimeToCefTimeT(lastAccess, self.cefCookie.last_access)
+        DatetimeToCefBasetimeT(lastAccess, self.cefCookie.last_access)
 
     cpdef object GetLastAccess(self):
-        return CefTimeTToDatetime(self.cefCookie.last_access)
+        return CefBasetimeTToDatetime(self.cefCookie.last_access)
 
     cpdef py_void SetHasExpires(self, py_bool hasExpires):
         self.cefCookie.has_expires = bool(hasExpires)
@@ -185,10 +185,10 @@ cdef class Cookie:
         return self.cefCookie.has_expires
 
     cpdef py_void SetExpires(self, object expires):
-        DatetimeToCefTimeT(expires, self.cefCookie.expires)
+        DatetimeToCefBasetimeT(expires, self.cefCookie.expires)
 
     cpdef object GetExpires(self):
-        return CefTimeTToDatetime(self.cefCookie.expires)
+        return CefBasetimeTToDatetime(self.cefCookie.expires)
 
 # ------------------------------------------------------------------------------
 # CookieManager
@@ -204,36 +204,9 @@ class CookieManager(object):
         cdef CefRefPtr[CefCookieManager] cefCookieManager
         if not g_globalCookieManager:
             cefCookieManager = CefCookieManager_GetGlobalManager(
-                    <CefRefPtr[CefCompletionCallback]?>NULL)
+                    <CefRefPtr[CefCompletionCallback]?>nullptr)
             g_globalCookieManager = CreatePyCookieManager(cefCookieManager)
         return g_globalCookieManager
-
-    @classmethod
-    def GetBlockingManager(cls):
-        return CreatePyCookieManager(CefCookieManager_GetBlockingManager())
-
-    @classmethod
-    def CreateManager(cls, py_string path,
-                      py_bool persist_session_cookies=False):
-        """
-        Create a new cookie manager.
-        :param path:
-        :type path: str
-        :param persist_session_cookies:
-        :type path: bool
-        :return: CookieManager object
-        :rtype: CookieManager
-        """
-        # When PyCharm generates a stub for the cefpython module
-        # it doesn't use the above docstring for code inspections.
-        # No idea why.
-        cdef CefRefPtr[CefCookieManager] cefCookieManager
-        cefCookieManager = CefCookieManager_CreateManager(
-                PyToCefStringValue(path), bool(persist_session_cookies),
-                <CefRefPtr[CefCompletionCallback]?>NULL)
-        if <void*>cefCookieManager != NULL and cefCookieManager.get():
-            return CreatePyCookieManager(cefCookieManager)
-        return None
 
 # ------------------------------------------------------------------------------
 # PyCookieManager
@@ -247,13 +220,6 @@ cdef PyCookieManager CreatePyCookieManager(
 
 cdef class PyCookieManager:
     cdef CefRefPtr[CefCookieManager] cefCookieManager
-
-    cpdef py_void SetSupportedSchemes(self, list schemes):
-        cdef cpp_vector[CefString] schemesVector
-        for scheme in schemes:
-            schemesVector.push_back(PyToCefStringValue(scheme))
-        self.cefCookieManager.get().SetSupportedSchemes(schemesVector,
-                <CefRefPtr[CefCompletionCallback]?>NULL)
 
     cdef py_void ValidateUserCookieVisitor(self, object userCookieVisitor):
         if userCookieVisitor and hasattr(userCookieVisitor, "Visit") and (
@@ -287,23 +253,17 @@ cdef class PyCookieManager:
         CefPostTask(TID_IO, CreateTask_SetCookie(
                 self.cefCookieManager.get(),
                 PyToCefStringValue(url), cookie.cefCookie,
-                <CefRefPtr[CefSetCookieCallback]?>NULL))
+                <CefRefPtr[CefSetCookieCallback]?>nullptr))
 
     cpdef py_void DeleteCookies(self, py_string url, py_string cookie_name):
         CefPostTask(TID_IO, CreateTask_DeleteCookies(
                 self.cefCookieManager.get(),
                 PyToCefStringValue(url), PyToCefStringValue(cookie_name),
-                <CefRefPtr[CefDeleteCookiesCallback]?>NULL))
-
-    cpdef py_bool SetStoragePath(self, py_string path, 
-            py_bool persistSessionCookies=False):
-        return self.cefCookieManager.get().SetStoragePath(
-                PyToCefStringValue(path), bool(persistSessionCookies),
-                <CefRefPtr[CefCompletionCallback]?>NULL)
+                <CefRefPtr[CefDeleteCookiesCallback]?>nullptr))
 
     cpdef py_bool FlushStore(self, callback=None):
         return self.cefCookieManager.get().FlushStore(
-                <CefRefPtr[CefCompletionCallback]?>NULL)
+                <CefRefPtr[CefCompletionCallback]?>nullptr)
 
 
 # ------------------------------------------------------------------------------

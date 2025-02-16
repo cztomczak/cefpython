@@ -18,10 +18,12 @@ import ctypes
 import os
 import platform
 import sys
+from pkg_resources import parse_version
 
 # GLOBALS
 PYQT4 = False
 PYQT5 = False
+PYQT6 = False
 PYSIDE = False
 PYSIDE2 = False
 
@@ -39,6 +41,14 @@ elif "pyqt5" in sys.argv:
     from PyQt5.QtCore import *
     # noinspection PyUnresolvedReferences
     from PyQt5.QtWidgets import *
+elif "pyqt6" in sys.argv:
+    PYQT6 = True
+    # noinspection PyUnresolvedReferences
+    from PyQt6.QtGui import *
+    # noinspection PyUnresolvedReferences
+    from PyQt6.QtCore import *
+    # noinspection PyUnresolvedReferences
+    from PyQt6.QtWidgets import *
 elif "pyside" in sys.argv:
     PYSIDE = True
     # noinspection PyUnresolvedReferences
@@ -65,6 +75,7 @@ else:
     print("USAGE:")
     print("  qt.py pyqt4")
     print("  qt.py pyqt5")
+    print("  qt.py pyqt6")
     print("  qt.py pyside")
     print("  qt.py pyside2")
     sys.exit(1)
@@ -104,7 +115,10 @@ def main():
     main_window.show()
     main_window.activateWindow()
     main_window.raise_()
-    app.exec_()
+    if PYQT6:
+        app.exec()
+    else:
+        app.exec_()
     if not cef.GetAppSetting("external_message_pump"):
         app.stopTimer()
     del main_window  # Just to be safe, similarly to "del app"
@@ -116,7 +130,7 @@ def check_versions():
     print("[qt.py] CEF Python {ver}".format(ver=cef.__version__))
     print("[qt.py] Python {ver} {arch}".format(
             ver=platform.python_version(), arch=platform.architecture()[0]))
-    if PYQT4 or PYQT5:
+    if PYQT4 or PYQT5 or PYQT6:
         print("[qt.py] PyQt {v1} (qt {v2})".format(
               v1=PYQT_VERSION_STR, v2=qVersion()))
     elif PYSIDE:
@@ -126,7 +140,7 @@ def check_versions():
         print("[qt.py] PySide2 {v1} (qt {v2})".format(
               v1=PySide2.__version__, v2=QtCore.__version__))
     # CEF Python version requirement
-    assert cef.__version__ >= "55.4", "CEF Python v55.4+ required to run this"
+    assert parse_version(cef.__version__) >= parse_version("55.4"), "CEF Python v55.4+ required to run this"
 
 
 class MainWindow(QMainWindow):
@@ -142,11 +156,16 @@ class MainWindow(QMainWindow):
             self.setWindowTitle("PyQt4 example")
         elif PYQT5:
             self.setWindowTitle("PyQt5 example")
+        elif PYQT6:
+            self.setWindowTitle("PyQt6 example")
         elif PYSIDE:
             self.setWindowTitle("PySide example")
         elif PYSIDE2:
             self.setWindowTitle("PySide2 example")
-        self.setFocusPolicy(Qt.StrongFocus)
+        if PYQT6:
+            self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        else:
+            self.setFocusPolicy(Qt.StrongFocus)
         self.setupLayout()
 
     def setupLayout(self):
@@ -167,7 +186,7 @@ class MainWindow(QMainWindow):
         frame.setLayout(layout)
         self.setCentralWidget(frame)
 
-        if (PYSIDE2 or PYQT5) and WINDOWS:
+        if (PYSIDE2 or PYQT5 or PYQT6) and WINDOWS:
             # On Windows with PyQt5 main window must be shown first
             # before CEF browser is embedded, otherwise window is
             # not resized and application hangs during resize.

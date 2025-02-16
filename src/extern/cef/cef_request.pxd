@@ -53,6 +53,7 @@ cdef extern from "include/cef_request.h":
     # noinspection PyUnresolvedReferences
     ctypedef cef_postdataelement_type_t ElementType
 
+    @staticmethod
     cdef CefRefPtr[CefPostDataElement] CefPostDataElement_Create \
             "CefPostDataElement::Create"()
     cdef cppclass CefPostDataElement:
