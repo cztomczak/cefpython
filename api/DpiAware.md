@@ -12,7 +12,6 @@ Table of contents:
 * [Introduction](#introduction)
 * [Static methods](#static-methods)
   * [CalculateWindowSize](#calculatewindowsize)
-  * [EnableHighDpiSupport](#enablehighdpisupport)
   * [GetSystemDpi](#getsystemdpi)
   * [IsProcessDpiAware](#isprocessdpiaware)
   * [SetProcessDpiAware](#setprocessdpiaware)
@@ -44,21 +43,6 @@ non standard DPI settings such as '132%' on Windows 10.
 This utility function will adjust width/height using
 OS DPI settings. For 800/600 with Win7 DPI settings
 being set to "Larger 150%" will return 1200/900.
-
-
-### EnableHighDpiSupport
-
-| | |
-| --- | --- |
-| __Return__ | void |
-
-Calling this function will set current process and subprocesses
-to be DPI aware.
-
-Description from upstream CEF:
-> Call during process startup to enable High-DPI support on Windows 7 or newer.
-> Older versions of Windows should be left DPI-unaware because they do not
-> support DirectWrite and GDI fonts are kerned very badly.
 
 
 ### GetSystemDpi

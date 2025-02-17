@@ -16,7 +16,7 @@ cdef extern from "include/internal/cef_time.h":
         int second
         int millisecond
 
-ctypedef struct cef_basetime_t:
+    ctypedef struct cef_basetime_t:
         int64_t val
 
 cdef extern from "include/internal/cef_types.h":

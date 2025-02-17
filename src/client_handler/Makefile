@@ -23,7 +23,7 @@ SRC = client_handler.cpp cookie_visitor.cpp resource_handler.cpp \
 	download_handler.cpp focus_handler.cpp js_dialog_handler.cpp \
 	keyboard_handler.cpp lifespan_handler.cpp load_handler.cpp \
 	render_handler.cpp request_handler.cpp dialog_handler.cpp \
-	cef_log.cpp accessibility_handler.cpp \
+	cef_log.cpp accessibility_handler.cpp cookie_access_filter.cpp \
 	$(SRC_MORE)
 
 OBJ = $(filter %.o, $(SRC:.cpp=.o) $(SRC:.mm=.o))
@@ -37,6 +37,7 @@ INC = -I./../ -I./../common/ -I$(PYTHON_INCLUDE) \
 	-I/usr/include/glib-2.0 \
 	-I/usr/include/cairo \
 	-I/usr/include/pango-1.0 \
+	-I/usr/include/harfbuzz \
 	-I/usr/include/gdk-pixbuf-2.0 \
 	-I/usr/include/atk-1.0 \
 	-I/usr/lib/x86_64-linux-gnu/gtk-2.0/include \

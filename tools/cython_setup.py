@@ -145,21 +145,9 @@ def get_winsdk_lib():
     print("[cython_setup.py] Detect Windows SDK library directory")
     ret = ""
     if WINDOWS:
-        if ARCH32:
+        if ARCH32 or ARCH64:
             winsdk_libs = [
                 r"C:\Program Files (x86)\Microsoft SDKs\Windows Kits\10",
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib",
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib",
-                # Visual Studio 2008 installation
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Lib",
-            ]
-        elif ARCH64:
-            winsdk_libs = [
-                r"C:\Program Files (x86)\Microsoft SDKs\Windows Kits\10",
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib\\x64",
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib\\x64",
-                # Visual Studio 2008 installation
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Lib\\x64",
             ]
         else:
             raise Exception("Unknown architecture")
@@ -320,6 +308,7 @@ def get_include_dirs():
             '/usr/include/gtk-unix-print-2.0',
             '/usr/include/cairo',
             '/usr/include/pango-1.0',
+            '/usr/include/harfbuzz',
             '/usr/include/gdk-pixbuf-2.0',
             '/usr/include/atk-1.0',
             # Fedora
@@ -339,6 +328,7 @@ def get_include_dirs():
             '/usr/include/gtk-unix-print-2.0',
             '/usr/include/cairo',
             '/usr/include/pango-1.0',
+            '/usr/include/harfbuzz',
             '/usr/include/gdk-pixbuf-2.0',
             '/usr/include/atk-1.0',
             # Ubuntu
@@ -433,11 +423,11 @@ def get_ext_modules(options):
         # > Unknown Extension options: 'cython_directives' warnings.warn(msg)
         cython_directives={
             # Any conversion to unicode must be explicit using .decode().
+            "language_level": 2,  # Yes, Py2 for all python versions.
             "c_string_type": "bytes",
             "c_string_encoding": "utf-8",
             "profile": ENABLE_PROFILING,
             "linetrace": ENABLE_LINE_TRACING,
-            "language_level": "2",
         },
 
         language="c++",

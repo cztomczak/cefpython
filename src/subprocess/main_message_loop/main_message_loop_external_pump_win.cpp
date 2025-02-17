@@ -141,9 +141,7 @@ LRESULT CALLBACK MainMessageLoopExternalPumpWin::WndProc(
 } // namespace
 
 // static
-// TODO
-// std::unique_ptr<MainMessageLoopExternalPump>
-// MainMessageLoopExternalPump::Create() {
-//   // return std::make_unique<MainMessageLoopExternalPumpWin>();
-//   return nullptr;
-// }
+std::unique_ptr<MainMessageLoopExternalPump>
+MainMessageLoopExternalPump::Create() {
+  return std::unique_ptr<MainMessageLoopExternalPump>(new MainMessageLoopExternalPumpWin());
+}

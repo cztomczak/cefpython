@@ -12,6 +12,7 @@ Table of contents:
 * [API docs](#api-docs)
 * [Unit tests](#unit-tests)
 * [Platforms](#platforms)
+* [GIL](#gil)
 * [Authors](#authors)
 * [Updating CEF version](#updating-cef-version)
 
@@ -122,6 +123,24 @@ tests should have logic to initialize and shutdown CEF properly.
 In most cases new code should run fine on all platforms, but in
 some cases it might be required to test on all platforms before
 PR is merged.
+
+## GIL
+
+In the pxd file, functions should be defined as "nogil" to avoid
+deadlocks when calling CEF functions. In the pyx file the call must
+use the "with nogil" statement.
+
+From [Cython's documentation](http://docs.cython.org/src/userguide/external_C_code.html#acquiring-and-releasing-the-gil):
+
+> Note that acquiring the GIL is a blocking thread-synchronising operation,
+> and therefore potentially costly. It might not be worth releasing the GIL
+> for minor calculations. Usually, I/O operations and substantial computations
+> in parallel code will benefit from it.
+
+Revision [ec1ce78](https://github.com/cztomczak/cefpython/commit/ec1ce788373bb9e0fd2cedd71e900c3877e9185a) removes the GIL lock from the
+following calls: Initialize(), Shutdown(), CreateBrowserSync(),
+SetOsModalLoop(), QuitMessageLoop(), CefExecuteProcess(). There still
+might be some more functions from which the GIL lock should be removed.
 
 ## Authors
 

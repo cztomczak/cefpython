@@ -103,11 +103,17 @@ cdef void PyToCefString(
         CefString& cefString
         ) except *:
     if PY_MAJOR_VERSION < 3:
+        # Handle objects that may be converted to string e.g. QString
+        if not isinstance(pyString, str) and not isinstance(pyString, unicode):
+            pyString = str(pyString)
         if type(pyString) == unicode:
             pyString = <bytes>(pyString.encode(
                     g_applicationSettings["string_encoding"],
                     errors=UNICODE_ENCODE_ERRORS))
     else:
+        # Handle objects that may be converted to string e.g. QString
+        if not isinstance(pyString, str) and not isinstance(pyString, bytes):
+            pyString = str(pyString)
         # The unicode type is not defined in Python 3.
         if type(pyString) == str:
             pyString = <bytes>(pyString.encode(

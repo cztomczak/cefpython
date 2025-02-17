@@ -354,14 +354,9 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
             ret.get().SetNull(cefKey)
         elif valueType == bool:
             ret.get().SetBool(cefKey, bool(value))
-        elif valueType == int:
-            ret.get().SetInt(cefKey, int(value))
-        elif valueType == long:
-            # Int32 range is -2147483648..2147483647, we've increased the
-            # minimum size by one as Cython was throwing a warning:
-            # "unary minus operator applied to unsigned type, result still
-            # unsigned".
-            if -2147483647 <= value <= 2147483647:
+        elif valueType == int or valueType == long:  # In Py3 int and long types are the same type.
+            # Int32 range is -2147483648..2147483647
+            if INT_MIN <= value <= INT_MAX:
                 ret.get().SetInt(cefKey, int(value))
             else:
                 # Long values become strings.

@@ -104,8 +104,10 @@ cdef class JavascriptBindings:
                 for methodName in self.objects[objectName]:
                     methods[methodName] = None
                 objects[objectName] = methods
-            pyBrowser.GetMainFrame().SendProcessMessage(cef_types.PID_RENDERER,
-                    0, "DoJavascriptBindings", [{
+            mainFrame = pyBrowser.GetMainFrame()
+            if mainFrame.IsValid():
+                mainFrame.SendProcessMessage(cef_types.PID_RENDERER,
+                    mainFrame.frameId, "DoJavascriptBindings", [{
                             "functions": functions,
                             "properties": properties,
                             "objects": objects,
@@ -139,6 +141,8 @@ cdef class JavascriptBindings:
         elif valueType == float:
             return True
         elif valueType == int:
+            return True
+        elif valueType == long:
             return True
         elif valueType == type(None):
             return True

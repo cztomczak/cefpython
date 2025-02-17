@@ -42,10 +42,7 @@ bool ClientHandler::OnProcessMessageReceived(
     if (messageName == "OnContextCreated") {
         CefRefPtr<CefListValue> arguments = message->GetArgumentList();
         if (arguments->GetSize() == 1 && arguments->GetType(0) == VTYPE_STRING) {
-            CefString frameId = arguments->GetString(0);
-            LOG(INFO) << "[Browser process] frameId " << frameId.c_str();
-            CefRefPtr<CefFrame> frame = browser->GetFrameByIdentifier(frameId);
-            if (!frame.get()) {
+           if (!frame.get()) {
                 // Frame was already destroyed while IPC messaging was
                 // executing. Issue #431. User callback will not be
                 // executed in such case.

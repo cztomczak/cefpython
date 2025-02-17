@@ -31,8 +31,6 @@ public:
         browser_ = browser;
     }
 
-    // virtual CefRefPtr<CefCookieManager> GetCookieManager() override;
-
 private:
     IMPLEMENT_REFCOUNTING(RequestContextHandler);
 };
