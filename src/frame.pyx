@@ -15,7 +15,7 @@ cdef str GetUniqueFrameId(int browserId, py_string frameId):
     return str(browserId) +"#"+ frameId
 
 cdef PyFrame GetPyFrameById(int browserId, py_string frameId):
-    cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
+    cdef str uniqueFrameId = GetUniqueFrameId(browserId, frameId)
     if uniqueFrameId in g_pyFrames:
         return g_pyFrames[uniqueFrameId]
     return None
