@@ -732,6 +732,10 @@ cdef class PyBrowser:
         self.GetCefBrowserHost().get().SendMouseWheelEvent(mouseEvent,
                 deltaX, deltaY)
 
+    # for backward compatibility
+    cpdef py_void SendFocusEvent(self, py_bool setFocus):
+        self.GetCefBrowserHost().get().SetFocus(setFocus)
+
     cpdef py_void SendCaptureLostEvent(self):
         self.GetCefBrowserHost().get().SendCaptureLostEvent()
 
