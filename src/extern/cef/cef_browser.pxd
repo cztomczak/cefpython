@@ -111,5 +111,3 @@ cdef extern from "include/cef_browser.h":
         void StopLoad()
         cpp_bool IsLoading()
         int GetIdentifier()
-        # cpp_bool SendProcessMessage(CefProcessId target_process,
-        #                             CefRefPtr[CefProcessMessage] message)
