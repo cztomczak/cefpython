@@ -60,3 +60,12 @@ void DisplayHandler::OnLoadingProgressChange(CefRefPtr<CefBrowser> browser,
     REQUIRE_UI_THREAD();
     return DisplayHandler_OnLoadingProgressChange(browser, progress);
 }
+
+bool DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
+                                   CefCursorHandle cursor,
+                                   cef_cursor_type_t type,
+                                   const CefCursorInfo& custom_cursor_info)
+{
+    REQUIRE_UI_THREAD();
+    return DisplayHandler_OnCursorChange(browser, cursor);
+}

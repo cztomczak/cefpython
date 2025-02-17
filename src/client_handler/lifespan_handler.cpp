@@ -19,6 +19,7 @@ bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
                                     CefWindowInfo& windowInfo,
                                     CefRefPtr<CefClient>& client,
                                     CefBrowserSettings& settings,
+                                    CefRefPtr<CefDictionaryValue>& extra_info,
                                     bool* no_javascript_access)
 {
     REQUIRE_UI_THREAD();
@@ -27,7 +28,7 @@ bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
     return LifespanHandler_OnBeforePopup(browser, frame, target_url,
                         target_frame_name, target_disposition, user_gesture,
                         popupFeaturesNotImpl, windowInfo, client, settings,
-                        no_javascript_access);
+                        extra_info, no_javascript_access);
 }
 
 

@@ -10,12 +10,14 @@
 
 #include "common/cefpython_public_api.h"
 
+#include "include/cef_request_context_handler.h"
+#include "include/base/cef_callback.h"
+
 class RequestContextHandler :
         public CefRequestContextHandler
 {
 private:
     CefRefPtr<CefBrowser> browser_;
-    typedef cef_plugin_policy_t PluginPolicy;
 
 public:
     // Browser may be NULL when instantiated from cefpython.CreateBrowserSync.
@@ -28,14 +30,6 @@ public:
     void SetBrowser(CefRefPtr<CefBrowser> browser) {
         browser_ = browser;
     }
-
-    virtual CefRefPtr<CefCookieManager> GetCookieManager() OVERRIDE;
-    virtual bool OnBeforePluginLoad(const CefString& mime_type,
-                                  const CefString& plugin_url,
-                                  bool is_main_frame,
-                                  const CefString& top_origin_url,
-                                  CefRefPtr<CefWebPluginInfo> plugin_info,
-                                  PluginPolicy* plugin_policy) OVERRIDE;
 
 private:
     IMPLEMENT_REFCOUNTING(RequestContextHandler);

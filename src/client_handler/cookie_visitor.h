@@ -24,7 +24,7 @@ public:
             int count,
             int total,
             bool& deleteCookie
-            ) OVERRIDE;
+            ) override;
     
 protected:
   IMPLEMENT_REFCOUNTING(CookieVisitor);

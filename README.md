@@ -87,7 +87,7 @@ Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
   [Issues labelled Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
 - To search documentation use GitHub "This repository" search
   at the top. To narrow results to documentation only select
-  "Markdown" in the side pane.
+  "Markdown" in the right pane.
 
 ## Support development
 
@@ -195,7 +195,6 @@ at this moment.
  * [PaintBuffer](api/PaintBuffer.md#paintbuffer-object) object
  * [Request](api/Request.md#request-class) class
  * [Response](api/Response.md#response-object) object
- * [WebPluginInfo](api/WebPluginInfo.md#webplugininfo-object) object
  * [WebRequest](api/WebRequest.md#webrequest-class) class
  * [WindowInfo](api/WindowInfo.md#windowinfo-class) class
  * [WindowUtils](api/WindowUtils.md#windowutils-class) class
@@ -230,7 +229,6 @@ at this moment.
   * [_OnAccessibilityTreeChange](api/AccessibilityHandler.md#_onaccessibilitytreechange)
   * [_OnAccessibilityLocationChange](api/AccessibilityHandler.md#_onaccessibilitylocationchange)
 * [Application settings](api/ApplicationSettings.md#application-settings)
-  * [accept_language_list](api/ApplicationSettings.md#accept_language_list)
   * [app_user_model_id](api/ApplicationSettings.md#app_user_model_id)
   * [auto_zooming](api/ApplicationSettings.md#auto_zooming)
   * [background_color](api/ApplicationSettings.md#background_color)
@@ -241,7 +239,6 @@ at this moment.
   * [downloads_enabled](api/ApplicationSettings.md#downloads_enabled)
   * [external_message_pump](api/ApplicationSettings.md#external_message_pump)
   * [framework_dir_path](api/ApplicationSettings.md#framework_dir_path)
-  * [ignore_certificate_errors](api/ApplicationSettings.md#ignore_certificate_errors)
   * [javascript_flags](api/ApplicationSettings.md#javascript_flags)
   * [locale](api/ApplicationSettings.md#locale)
   * [locales_dir_path](api/ApplicationSettings.md#locales_dir_path)
@@ -261,7 +258,6 @@ at this moment.
   * [uncaught_exception_stack_size](api/ApplicationSettings.md#uncaught_exception_stack_size)
   * [unique_request_context_per_browser](api/ApplicationSettings.md#unique_request_context_per_browser)
   * [user_agent](api/ApplicationSettings.md#user_agent)
-  * [user_data_path](api/ApplicationSettings.md#user_data_path)
   * [windowless_rendering_enabled](api/ApplicationSettings.md#windowless_rendering_enabled)
 * [Browser (object)](api/Browser.md#browser-object)
   * [AddWordToDictionary](api/Browser.md#addwordtodictionary)
@@ -308,7 +304,6 @@ at this moment.
   * [Invalidate](api/Browser.md#invalidate)
   * [IsFullscreen](api/Browser.md#isfullscreen)
   * [IsLoading](api/Browser.md#isloading)
-  * [IsMouseCursorChangeDisabled](api/Browser.md#ismousecursorchangedisabled)
   * [IsPopup](api/Browser.md#ispopup)
   * [IsWindowRenderingDisabled](api/Browser.md#iswindowrenderingdisabled)
   * [LoadUrl](api/Browser.md#loadurl)
@@ -326,13 +321,11 @@ at this moment.
   * [SendMouseClickEvent](api/Browser.md#sendmouseclickevent)
   * [SendMouseMoveEvent](api/Browser.md#sendmousemoveevent)
   * [SendMouseWheelEvent](api/Browser.md#sendmousewheelevent)
-  * [SendFocusEvent](api/Browser.md#sendfocusevent)
   * [SendCaptureLostEvent](api/Browser.md#sendcapturelostevent)
   * [SetAccessibilityState](api/Browser.md#setaccessibilitystate)
   * [SetClientCallback](api/Browser.md#setclientcallback)
   * [SetClientHandler](api/Browser.md#setclienthandler)
   * [SetFocus](api/Browser.md#setfocus)
-  * [SetMouseCursorChangeDisabled](api/Browser.md#setmousecursorchangedisabled)
   * [SetJavascriptBindings](api/Browser.md#setjavascriptbindings)
   * [SetUserData](api/Browser.md#setuserdata)
   * [SetZoomLevel](api/Browser.md#setzoomlevel)
@@ -346,27 +339,22 @@ at this moment.
   * [WasHidden](api/Browser.md#washidden)
 * [Browser settings](api/BrowserSettings.md#browser-settings)
   * [Font settings](api/BrowserSettings.md#font-settings)
-  * [accept_language_list](api/BrowserSettings.md#accept_language_list)
   * [application_cache_disabled](api/BrowserSettings.md#application_cache_disabled)
   * [background_color](api/BrowserSettings.md#background_color)
   * [databases_disabled](api/BrowserSettings.md#databases_disabled)
   * [default_encoding](api/BrowserSettings.md#default_encoding)
   * [dom_paste_disabled](api/BrowserSettings.md#dom_paste_disabled)
-  * [file_access_from_file_urls_allowed](api/BrowserSettings.md#file_access_from_file_urls_allowed)
   * [inherit_client_handlers_for_popups](api/BrowserSettings.md#inherit_client_handlers_for_popups)
   * [image_load_disabled](api/BrowserSettings.md#image_load_disabled)
   * [javascript_disabled](api/BrowserSettings.md#javascript_disabled)
   * [javascript_close_windows_disallowed](api/BrowserSettings.md#javascript_close_windows_disallowed)
   * [javascript_access_clipboard_disallowed](api/BrowserSettings.md#javascript_access_clipboard_disallowed)
   * [local_storage_disabled](api/BrowserSettings.md#local_storage_disabled)
-  * [plugins_disabled](api/BrowserSettings.md#plugins_disabled)
   * [remote_fonts](api/BrowserSettings.md#remote_fonts)
   * [shrink_standalone_images_to_fit](api/BrowserSettings.md#shrink_standalone_images_to_fit)
   * [tab_to_links_disabled](api/BrowserSettings.md#tab_to_links_disabled)
   * [text_area_resize_disabled](api/BrowserSettings.md#text_area_resize_disabled)
-  * [universal_access_from_file_urls_allowed](api/BrowserSettings.md#universal_access_from_file_urls_allowed)
   * [user_style_sheet_location](api/BrowserSettings.md#user_style_sheet_location)
-  * [web_security_disabled](api/BrowserSettings.md#web_security_disabled)
   * [webgl_disabled](api/BrowserSettings.md#webgl_disabled)
   * [windowless_frame_rate](api/BrowserSettings.md#windowless_frame_rate)
 * [Callback (object)](api/Callback.md#callback-object)
@@ -427,9 +415,6 @@ at this moment.
   * [GetExpires](api/Cookie.md#getexpires)
 * [CookieManager (class)](api/CookieManager.md#cookiemanager-class)
   * [GetGlobalManager](api/CookieManager.md#getglobalmanager)
-  * [GetBlockingManager](api/CookieManager.md#getblockingmanager)
-  * [CreateManager](api/CookieManager.md#createmanager)
-  * [SetSupportedSchemes](api/CookieManager.md#setsupportedschemes)
   * [VisitAllCookies](api/CookieManager.md#visitallcookies)
   * [VisitUrlCookies](api/CookieManager.md#visiturlcookies)
   * [SetCookie](api/CookieManager.md#setcookie)
@@ -449,7 +434,6 @@ at this moment.
 * [DownloadHandler](api/DownloadHandler.md#downloadhandler)
 * [DpiAware (class)](api/DpiAware.md#dpiaware-class)
   * [CalculateWindowSize](api/DpiAware.md#calculatewindowsize)
-  * [EnableHighDpiSupport](api/DpiAware.md#enablehighdpisupport)
   * [GetSystemDpi](api/DpiAware.md#getsystemdpi)
   * [IsProcessDpiAware](api/DpiAware.md#isprocessdpiaware)
   * [SetProcessDpiAware](api/DpiAware.md#setprocessdpiaware)
@@ -616,10 +600,7 @@ at this moment.
   * [GetResourceType](api/Request.md#getresourcetype)
   * [GetTransitionType](api/Request.md#gettransitiontype)
 * [RequestHandler (interface)](api/RequestHandler.md#requesthandler-interface)
-  * [CanGetCookies](api/RequestHandler.md#cangetcookies)
-  * [CanSetCookie](api/RequestHandler.md#cansetcookie)
   * [GetAuthCredentials](api/RequestHandler.md#getauthcredentials)
-  * [GetCookieManager](api/RequestHandler.md#getcookiemanager)
   * [GetResourceHandler](api/RequestHandler.md#getresourcehandler)
   * [OnBeforeBrowse](api/RequestHandler.md#onbeforebrowse)
   * [_OnBeforePluginLoad](api/RequestHandler.md#_onbeforepluginload)
@@ -657,11 +638,6 @@ at this moment.
   * [OnContextCreated](api/V8ContextHandler.md#oncontextcreated)
   * [OnContextReleased](api/V8ContextHandler.md#oncontextreleased)
 * [Virtual Key codes](api/VirtualKey.md#virtual-key-codes)
-* [WebPluginInfo (object)](api/WebPluginInfo.md#webplugininfo-object)
-  * [GetName](api/WebPluginInfo.md#getname)
-  * [GetPath](api/WebPluginInfo.md#getpath)
-  * [GetVersion](api/WebPluginInfo.md#getversion)
-  * [GetDescription](api/WebPluginInfo.md#getdescription)
 * [WebRequest (class)](api/WebRequest.md#webrequest-class)
   * [Create](api/WebRequest.md#create)
   * [GetRequest](api/WebRequest.md#getrequest)

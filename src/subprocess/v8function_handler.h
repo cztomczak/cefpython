@@ -20,7 +20,7 @@ public:
                         CefRefPtr<CefV8Value> object,
                         const CefV8ValueList& arguments,
                         CefRefPtr<CefV8Value>& retval,
-                        CefString& exception) OVERRIDE;
+                        CefString& exception) override;
 protected:
     CefRefPtr<CefPythonApp> cefPythonApp_;
     int pythonCallbackId_;

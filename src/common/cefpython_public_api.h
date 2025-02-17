@@ -50,6 +50,10 @@
 #include "../../build/build_cefpython/cefpython_py38_fixed.h"
 #elif PY_MINOR_VERSION == 9
 #include "../../build/build_cefpython/cefpython_py39_fixed.h"
+#elif PY_MINOR_VERSION == 10
+#include "../../build/build_cefpython/cefpython_py310_fixed.h"
+#elif PY_MINOR_VERSION == 11
+#include "../../build/build_cefpython/cefpython_py311_fixed.h"
 #endif // PY_MINOR_VERSION
 #endif // PY_MAJOR_VERSION
 
