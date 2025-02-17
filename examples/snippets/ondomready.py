@@ -8,7 +8,7 @@ from cefpython3 import cefpython as cef
 
 def main():
     cef.Initialize()
-    browser = cef.CreateBrowserSync(url="https://www.google.com/",
+    browser = cef.CreateBrowserSync(url="https://example.com/",
                                     window_title="_OnDomReady event")
     load_handler = LoadHandler(browser)
     browser.SetClientHandler(load_handler)
