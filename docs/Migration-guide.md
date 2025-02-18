@@ -52,6 +52,14 @@ Table of contents:
 * [v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loop-qt-wxpython)
 * [v66.1+ Navigation urls passed to CreateBrowserSync or LoadUrl methods need to be encoded by app code](#v661-navigation-urls-passed-to-createbrowsersync-or-loadurl-methods-need-to-be-encoded-by-app-code)
 * [v67+ Do not call the 'WindowUtils.OnSize' function](#v67-do-not-call-the-windowutilsonsize-function)
+* [v123+ cef_types changed](#v123-cef_types-changed)
+* [v123+ Windows dpiaware change](#v123-windows-dpiaware-change)
+* [v123+ plugin support is removed](#v123-plugin-support-is-removed)
+* [v123+ cookie related code is changed](#v123-cookie-related-code-is-changed)
+* [v123+ LifeSpan Handler callback](#v123-lifespan-handler-callback)
+* [v123+ BrowserSettings options removed](#v123-browsersettings-options-removed)
+* [v123+ Browser's function `SendProcessMessage` is removed](#v123-browsers-function-sendprocessmessage-is-removed)
+* [v123+ Response's function `GetHeader` is renamed to `GetHeaderByName`](#v123-responses-function-getheader-is-renamed-to-getheaderbyname)
 
 
 ## v49+ Distribution packages
@@ -506,3 +514,73 @@ Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#upd
 function. Except when you use the `pywin32.py` example, in such case
 `WindowUtils.OnSize` must be called.
 See [Issue #464](../../../issues/464) for more details.
+
+## v123+ cef_types changed
+
+cef_types removed:
+- WOD_UNKNOWN,
+- WOD_CURRENT_TAB,
+- WOD_SINGLETON_TAB,
+- WOD_NEW_FOREGROUND_TAB,
+- WOD_NEW_BACKGROUND_TAB,
+- WOD_NEW_POPUP,
+- WOD_NEW_WINDOW,
+- WOD_SAVE_TO_DISK,
+- WOD_OFF_THE_RECORD,
+- WOD_IGNORE_ACTION
+- TID_FILE
+
+cef_types added:
+- CEF_WOD_UNKNOWN,
+- CEF_WOD_CURRENT_TAB,
+- CEF_WOD_SINGLETON_TAB,
+- CEF_WOD_NEW_FOREGROUND_TAB,
+- CEF_WOD_NEW_BACKGROUND_TAB,
+- CEF_WOD_NEW_POPUP,
+- CEF_WOD_NEW_WINDOW,
+- CEF_WOD_SAVE_TO_DISK,
+- CEF_WOD_OFF_THE_RECORD,
+- CEF_WOD_IGNORE_ACTION
+
+## v123+ Windows dpiaware change
+
+Per https://github.com/chromiumembedded/cef/issues/3452 windows high-dpi support is now enabled
+You shouldn't normally need to use DpiAware class 
+
+## v123+ plugin support is removed
+
+As cef has removed plugin support https://github.com/chromiumembedded/cef/commit/28c7f040016a0271ec2612cc5021599fb55a1054
+previous popular plugin such as flash, pdf would no longer work
+`OnBeforePluginLoad` handler is removed
+
+## v123+ cookie related code is changed
+
+- removed `CanGetCookies`
+- removed `CanSetCookie`
+- added `CanSendCookie`
+- added `CanSaveCookie`
+
+## v123+ LifeSpan Handler callback
+`OnBeforePopup` callback function params adds extra `extra_info`
+
+## v123+ BrowserSettings options removed
+
+The following options were removed from BrowserSettings:
+- accept_language_list
+- product_version
+- net_security_expiration_enabled
+- single_process
+- author_and_user_styles_disabled
+- ignore_certificate_errors
+- user_data_path
+- application_cache_disabled
+- plugins_disabled
+- universal_access_from_file_urls_allowed
+- file_access_from_file_urls_allowed
+- web_security_disabled
+
+## v123+ Browser's function `SendProcessMessage` is removed
+
+## v123+ Response's function `GetHeader` is renamed to `GetHeaderByName`
+
+## v123+ CookieManager's `GetBlockingManager`, `CreateManager` and `SetSupportedSchemes` functions are removed

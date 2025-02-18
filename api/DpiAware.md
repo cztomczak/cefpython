@@ -5,6 +5,8 @@
 
 Available only on Windows. All methods of this class are static, access them through [cefpython](cefpython.md).`WindowUtils`.
 
+Usage of this class is not encouraged, as upstream chromium is already support high-dpi by default
+
 Example usage of High DPI support is in the wxpython.py example.
 
 
@@ -20,9 +22,6 @@ Table of contents:
 
 
 ## Introduction
-
-By default if DPI awareness is not enabled in application, then OS performs display scaling. That causes text to look blurry on high DPI displays. To resolve this you have to
- call `cef.DpiAware.EnableHighDpiSupport` method. High DPI support is available only on Windows.
 
 Enabling High DPI support in app can be done by embedding a DPI awareness xml manifest in both main executable and subprocess executable (see [Issue #112](../issues/112) comment #2), or by calling the `cef.DpiAware.EnableHighDpiSupport` method.
 
@@ -95,11 +94,7 @@ On Win8 this will return True if DPI awareness is set to either "System DPI awar
 | --- | --- |
 | __Return__ | void |
 
-Calling this method is deprecated, call instead `EnableHighDpiSupport()`.
-See [Issue #358](../../../issues/358) for how the behavior changed in
-latest CEF. This method now internally calls `EnableHighDpiSupport()`.
-
-Enables DPI awareness for the running process. Embedding a DPI manifest in .exe is the prefered way, as it gives more reliable results, otherwise some display bugs may appear (discussed in the "Introduction" section on this page).
+Calling this method is deprecated, it is a dummy function now.
 
 
 ### Scale

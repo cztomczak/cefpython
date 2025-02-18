@@ -9,13 +9,12 @@ Table of contents:
   * [Linux](#linux)
   * [Mac](#mac)
   * [All platforms](#all-platforms)
-* [Build using prebuilt CEF binaries and libraries](#build-using-prebuilt-cef-binaries-and-libraries)
 * [Build using CEF binaries from Spotify Automated Builds](#build-using-cef-binaries-from-spotify-automated-builds)
 * [Build upstream CEF from sources](#build-upstream-cef-from-sources)
   * [Building old unsupported version of Chromium](#building-old-unsupported-version-of-chromium)
   * [Possible errors](#possible-errors)
 * [Build CEF manually](#build-cef-manually)
-* [CEF Automated Builds (Spotify and Adobe)](#cef-automated-builds-spotify-and-adobe)
+* [CEF Automated Builds (Spotify)](#cef-automated-builds-spotify)
 * [Notes](#notes)
 * [How to patch mini tutorial](#how-to-patch-mini-tutorial)
 
@@ -48,13 +47,13 @@ Before you can build CEF Python or CEF you must satisfy
 
 ## Quick build instructions for Windows
 
-Complete steps for building CEF Python v50+ with Python 2.7 using
+Complete steps for building CEF Python v123+ with Python 3.11 using
 prebuilt binaries and libraries from GitHub Releases.
 
 When cloning repository you should checkout a stable branch which
 are named "cefpythonXX" where XX is Chromium version number.
 
-1) Tested and works fine on Windows 7 64-bit
+1) Tested and works fine on Windows 11 64-bit
 
 2) Download [ninja](https://github.com/ninja-build/ninja) 1.7.2 or later
    and add it to PATH.
@@ -235,37 +234,6 @@ requirements common for all platforms.
   cefpython version to avoid issues.
 
 
-## Build using prebuilt CEF binaries and libraries
-
-When cloning repository you should checkout a stable branch which
-are named "cefpythonXX" where XX is Chromium version number.
-
-1) Clone cefpython, checkout for example "cefpython57" branch
-   that includes Chromium v57, then create a build/ directory and enter it:
-```
-git clone https://github.com/cztomczak/cefpython.git
-cd cefpython/
-git checkout cefpython57
-mkdir build/
-cd build/
-```
-
-2) Download binaries and libraries from
-   [GH releases](https://github.com/cztomczak/cefpython/tags)
-   tagged eg. 'v57-upstream' when building v57. The version
-   of the binaries must match exactly the CEF version from
-   the "cefpython/src/version/" directory (look for CEF_VERSION
-   constant in .h file).
-
-3) Extract the downloaded archive eg. "cef55_3.2883.1553.g80bd606_win32.zip"
-   in the "build/" directory (using "extract here" option)
-
-4) Run the build.py tool (xx.x is version number):
-```
-python ../tools/build.py xx.x
-```
-
-
 ## Build using CEF binaries from Spotify Automated Builds
 
 When cloning repository you should checkout a stable branch which
@@ -421,17 +389,14 @@ Note that CEF patches must be applied in the "download_dir/chromium/src/cef/"
 directory, not in the "download_dir/cef/" directory.
 
 
-## CEF Automated Builds (Spotify and Adobe)
+## CEF Automated Builds (Spotify)
 
 There are two sites that provide automated CEF builds:
-* Spotify - http://opensource.spotify.com/cefbuilds/index.html
+* Spotify - https://cef-builds.spotifycdn.com/index.html
   * This is the new build system
   * Since June 2016 all builds are without tcmalloc, see
     [cefpython/#73](https://github.com/cztomczak/cefpython/issues/73)
     and [cef/#1827](https://bitbucket.org/chromiumembedded/cef/issues/1827)
-* Adobe - https://cefbuilds.com/
-  * This is the old build system. Not tested whether it builds without
-    tcmalloc.
 
 
 ## Notes

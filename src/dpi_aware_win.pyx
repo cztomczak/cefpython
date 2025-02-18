@@ -61,5 +61,5 @@ class DpiAware:
     @classmethod
     def SetProcessDpiAware(cls):
         """Deprecated."""
-        DpiAware.EnableHighDpiSupport()
+        pass
 
