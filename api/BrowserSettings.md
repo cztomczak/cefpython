@@ -8,7 +8,6 @@ Table of contents:
 * [Introduction](#introduction)
 * [Settings](#settings)
   * [Font settings](#font-settings)
-  * [application_cache_disabled](#application_cache_disabled)
   * [background_color](#background_color)
   * [databases_disabled](#databases_disabled)
   * [default_encoding](#default_encoding)
@@ -53,11 +52,6 @@ In some cases, the default values of settings that are suggested by its name may
 * default_fixed_font_size (int)
 * minimum_font_size (int)
 * minimum_logical_font_size (int)
-
-
-### application_cache_disabled
-
-(bool) Controls whether the application cache can be used. Also configurable using the --disable-application-cache switch.
 
 
 ### background_color
