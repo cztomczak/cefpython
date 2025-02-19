@@ -5,8 +5,6 @@
 
 Available only on Windows. All methods of this class are static, access them through [cefpython](cefpython.md).`WindowUtils`.
 
-Usage of this class is not encouraged, as upstream chromium is already support high-dpi by default
-
 Example usage of High DPI support is in the wxpython.py example.
 
 
@@ -16,7 +14,6 @@ Table of contents:
   * [CalculateWindowSize](#calculatewindowsize)
   * [GetSystemDpi](#getsystemdpi)
   * [IsProcessDpiAware](#isprocessdpiaware)
-  * [SetProcessDpiAware](#setprocessdpiaware)
   * [Scale](#scale)
 
 
@@ -86,15 +83,6 @@ running process it will return the correct 144 DPI.
 To check whether OS display scaling on high DPI settings was disabled. DPI awareness may be enabled by calling `SetProcessDpiAware`. It may also be enabled manually by user by changing options in .exe properties > Compatibility tab.
 
 On Win8 this will return True if DPI awareness is set to either "System DPI aware" or "Per monitor DPI aware".
-
-
-### SetProcessDpiAware
-
-| | |
-| --- | --- |
-| __Return__ | void |
-
-Calling this method is deprecated, it is a dummy function now.
 
 
 ### Scale

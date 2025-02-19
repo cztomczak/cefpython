@@ -44,7 +44,7 @@ PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 Command to install with pip:
 
 ```
-pip install cefpython3==66.1
+pip install cefpython3==123.0
 ```
 
 Hosted at [pypi/cefpython3](https://pypi.python.org/pypi/cefpython3). On Linux pip 8.1+ is required.

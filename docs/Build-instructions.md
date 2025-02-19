@@ -47,7 +47,7 @@ Before you can build CEF Python or CEF you must satisfy
 
 ## Quick build instructions for Windows
 
-Complete steps for building CEF Python v123+ with Python 3.11 using
+Complete steps for building CEF Python v123+ with Python 3 using
 prebuilt binaries and libraries from GitHub Releases.
 
 When cloning repository you should checkout a stable branch which
