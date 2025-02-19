@@ -42,7 +42,6 @@ cdef extern from "include/internal/cef_types.h":
         int remote_debugging_port
         int uncaught_exception_stack_size
         int context_safety_implementation # Not exposed.
-        int ignore_certificate_errors
         cef_color_t background_color
         int persist_user_preferences
         int windowless_rendering_enabled
