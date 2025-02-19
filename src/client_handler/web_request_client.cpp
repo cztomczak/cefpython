@@ -9,14 +9,14 @@ void WebRequestClient::OnRequestComplete(CefRefPtr<CefURLRequest> request) {
 }
 
 void WebRequestClient::OnUploadProgress(CefRefPtr<CefURLRequest> request,
-                            int64 current,
-                            int64 total) {
+                            int64_t current,
+                            int64_t total) {
     WebRequestClient_OnUploadProgress(webRequestId_, request, current, total);
 }
 
 void WebRequestClient::OnDownloadProgress(CefRefPtr<CefURLRequest> request,
-                              int64 current,
-                              int64 total) {
+                              int64_t current,
+                              int64_t total) {
     WebRequestClient_OnDownloadProgress(webRequestId_, request, current,
             total);
 }

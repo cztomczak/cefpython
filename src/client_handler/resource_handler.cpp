@@ -12,7 +12,7 @@ bool ResourceHandler::ProcessRequest(CefRefPtr<CefRequest> request,
 }
 
 void ResourceHandler::GetResponseHeaders(CefRefPtr<CefResponse> response,
-                              int64& response_length,
+                              int64_t& response_length,
                               CefString& redirectUrl) {
     REQUIRE_IO_THREAD();
     ResourceHandler_GetResponseHeaders(resourceHandlerId_, response,
@@ -26,16 +26,6 @@ bool ResourceHandler::ReadResponse(void* data_out,
     REQUIRE_IO_THREAD();
     return ResourceHandler_ReadResponse(resourceHandlerId_, data_out,
             bytes_to_read, bytes_read, callback);
-}
-
-bool ResourceHandler::CanGetCookie(const CefCookie& cookie) {
-    REQUIRE_IO_THREAD();
-    return ResourceHandler_CanGetCookie(resourceHandlerId_, cookie);
-}
-
-bool ResourceHandler::CanSetCookie(const CefCookie& cookie) {
-    REQUIRE_IO_THREAD();
-    return ResourceHandler_CanSetCookie(resourceHandlerId_, cookie);
 }
 
 void ResourceHandler::Cancel() {

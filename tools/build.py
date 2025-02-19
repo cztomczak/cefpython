@@ -293,7 +293,10 @@ def setup_environ():
         print("[build.py] PYTHON_INCLUDE: {python_include}"
               .format(python_include=os.environ["PYTHON_INCLUDE"]))
 
-        os.environ["CEF_CCFLAGS"] = "-std=gnu++11 -DNDEBUG -Wall -Werror -Wno-deprecated-declarations"
+        os.environ["CEF_CCFLAGS"] = "-std=gnu++11 -DNDEBUG -Wall -Werror"
+        if LINUX:
+            # Don't warn about deprecated GDK/GTK functions.
+            os.environ["CEF_CCFLAGS"] += " -Wno-deprecated-declarations"
         if FAST_FLAG:
             os.environ["CEF_CCFLAGS"] += " -O0"
         else:
@@ -782,6 +785,7 @@ def build_cefpython_module():
                        enable_line_tracing=enable_line_tracing))
     if FAST_FLAG:
         command += " --fast"
+    print('cython:', command)
     ret = subprocess.call(command, shell=True)
 
     # if DEBUG_FLAG:

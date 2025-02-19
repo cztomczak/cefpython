@@ -1,6 +1,7 @@
 # Copyright (c) 2012 CEF Python, see the Authors file.
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
+from libcpp cimport nullptr_t, bool
 
 cdef extern from "include/internal/cef_ptr.h":
     cdef cppclass CefRefPtr[T]:
@@ -14,4 +15,7 @@ cdef extern from "include/internal/cef_ptr.h":
         # noinspection PyUnresolvedReferences
         void swap(CefRefPtr[T]& r)
         # noinspection PyUnresolvedReferences
+        CefRefPtr[T]& Assign "operator="(nullptr_t)
         CefRefPtr[T]& Assign "operator="(T* p)
+        bool operator bool()
+        bool operator!()

@@ -50,25 +50,19 @@ class CefPythonApp :
   void OnBeforeChildProcessLaunch(
       CefRefPtr<CefCommandLine> command_line) override;
 
-  void OnRenderProcessThreadCreated(
-      CefRefPtr<CefListValue> extra_info) override;
+  CefRefPtr<CefPrintHandler> GetPrintHandler();
 
-  CefRefPtr<CefPrintHandler> GetPrintHandler() override;
-
-  void OnScheduleMessagePumpWork(int64 delay_ms) override;
+  void OnScheduleMessagePumpWork(int64_t delay_ms) override;
 
 
   // ---------------------------------------------------------------------------
   // CefRenderProcessHandler
   // ---------------------------------------------------------------------------
 
-  void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info)
-        override;
-
   void OnWebKitInitialized()
         override;
 
-  void OnBrowserCreated(CefRefPtr<CefBrowser> browser)
+  void OnBrowserCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDictionaryValue> extra_info)
         override;
 
   void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
@@ -97,6 +91,7 @@ class CefPythonApp :
         override;
 
   bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                        CefRefPtr<CefFrame> frame,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message)
         override;

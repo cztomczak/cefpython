@@ -15,26 +15,15 @@ from libc.limits cimport UINT_MAX
 
 cdef extern from "include/internal/cef_types.h":
 
-    # noinspection PyUnresolvedReferences
-    ctypedef int32_t int32
-    # noinspection PyUnresolvedReferences
-    ctypedef uint32_t uint32
-    # noinspection PyUnresolvedReferences
-    ctypedef int64_t int64
-    # noinspection PyUnresolvedReferences
-    ctypedef uint64_t uint64
-
     IF UNAME_SYSNAME == "Windows":
         # noinspection PyUnresolvedReferences
-        ctypedef wchar_t char16
+        ctypedef wchar_t char16_t
     ELSE:
-        ctypedef unsigned short char16
+        ctypedef unsigned short char16_t
 
-    ctypedef uint32 cef_color_t
+    ctypedef uint32_t cef_color_t
 
     ctypedef struct CefSettings:
-        cef_string_t accept_language_list
-        int single_process
         cef_string_t browser_subprocess_path
         int command_line_args_disabled
         cef_string_t cache_path
@@ -53,17 +42,14 @@ cdef extern from "include/internal/cef_types.h":
         int remote_debugging_port
         int uncaught_exception_stack_size
         int context_safety_implementation # Not exposed.
-        int ignore_certificate_errors
         cef_color_t background_color
         int persist_user_preferences
-        cef_string_t user_data_path
         int windowless_rendering_enabled
         int no_sandbox
         int external_message_pump
         cef_string_t framework_dir_path
 
     ctypedef struct CefBrowserSettings:
-        cef_string_t accept_language_list
         cef_color_t background_color
         cef_string_t standard_font_family
         cef_string_t fixed_font_family
@@ -191,12 +177,12 @@ cdef extern from "include/internal/cef_types.h":
         KEYEVENT_CHAR
     ctypedef struct _cef_key_event_t:
         cef_key_event_type_t type
-        uint32 modifiers
+        uint32_t modifiers
         int windows_key_code
         int native_key_code
         int is_system_key
-        char16 character
-        char16 unmodified_character
+        char16_t character
+        char16_t unmodified_character
         cpp_bool focus_on_editable_field
     ctypedef _cef_key_event_t CefKeyEvent
     ctypedef enum cef_event_flags_t:
@@ -287,7 +273,7 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef struct cef_mouse_event_t:
         int x
         int y
-        uint32 modifiers
+        uint32_t modifiers
     ctypedef cef_mouse_event_t CefMouseEvent
 
     # RenderHandler > GetScreenInfo():
@@ -323,16 +309,18 @@ cdef extern from "include/internal/cef_types.h":
     # LifespanHandler and RequestHandler
 
     ctypedef enum cef_window_open_disposition_t:
-        WOD_UNKNOWN,
-        WOD_CURRENT_TAB,
-        WOD_SINGLETON_TAB,
-        WOD_NEW_FOREGROUND_TAB,
-        WOD_NEW_BACKGROUND_TAB,
-        WOD_NEW_POPUP,
-        WOD_NEW_WINDOW,
-        WOD_SAVE_TO_DISK,
-        WOD_OFF_THE_RECORD,
-        WOD_IGNORE_ACTION
+        CEF_WOD_UNKNOWN,
+        CEF_WOD_CURRENT_TAB,
+        CEF_WOD_SINGLETON_TAB,
+        CEF_WOD_NEW_FOREGROUND_TAB,
+        CEF_WOD_NEW_BACKGROUND_TAB,
+        CEF_WOD_NEW_POPUP,
+        CEF_WOD_NEW_WINDOW,
+        CEF_WOD_SAVE_TO_DISK,
+        CEF_WOD_OFF_THE_RECORD,
+        CEF_WOD_IGNORE_ACTION,
+        CEF_WOD_SWITCH_TO_TAB,
+        CEF_WOD_NEW_PICTURE_IN_PICTURE
     ctypedef cef_window_open_disposition_t WindowOpenDisposition
 
     ctypedef enum cef_path_key_t:
@@ -346,12 +334,6 @@ cdef extern from "include/internal/cef_types.h":
         PK_USER_DATA,
         PK_DIR_RESOURCES,
     ctypedef cef_path_key_t PathKey
-
-    ctypedef enum cef_plugin_policy_t:
-        PLUGIN_POLICY_ALLOW,
-        PLUGIN_POLICY_DETECT_IMPORTANT,
-        PLUGIN_POLICY_BLOCK,
-        PLUGIN_POLICY_DISABLE,
 
     # Drag & drop
 

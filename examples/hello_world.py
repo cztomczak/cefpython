@@ -11,6 +11,7 @@
 from cefpython3 import cefpython as cef
 import platform
 import sys
+from pkg_resources import parse_version
 
 
 def main():
@@ -31,7 +32,7 @@ def check_versions():
     print("[hello_world.py] Python {ver} {arch}".format(
            ver=platform.python_version(),
            arch=platform.architecture()[0]))
-    assert cef.__version__ >= "57.0", "CEF Python v57.0+ required to run this"
+    assert parse_version(cef.__version__) >= parse_version("57.0"), "CEF Python v57.0+ required to run this"
 
 
 if __name__ == '__main__':

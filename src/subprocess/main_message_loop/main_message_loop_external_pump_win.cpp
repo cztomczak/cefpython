@@ -24,17 +24,17 @@ class MainMessageLoopExternalPumpWin : public MainMessageLoopExternalPump {
   ~MainMessageLoopExternalPumpWin();
 
   // MainMessageLoopStd methods:
-  void Quit() OVERRIDE;
-  int Run() OVERRIDE;
+  void Quit() override;
+  int Run() override;
 
   // MainMessageLoopExternalPump methods:
-  void OnScheduleMessagePumpWork(int64 delay_ms) OVERRIDE;
+  void OnScheduleMessagePumpWork(int64_t delay_ms) override;
 
  protected:
   // MainMessageLoopExternalPump methods:
-  void SetTimer(int64 delay_ms) OVERRIDE;
-  void KillTimer() OVERRIDE;
-  bool IsTimerPending() OVERRIDE { return timer_pending_; }
+  void SetTimer(int64_t delay_ms) override;
+  void KillTimer() override;
+  bool IsTimerPending() override { return timer_pending_; }
 
  private:
   static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam,
@@ -49,8 +49,8 @@ class MainMessageLoopExternalPumpWin : public MainMessageLoopExternalPump {
 
 MainMessageLoopExternalPumpWin::MainMessageLoopExternalPumpWin()
   : timer_pending_(false),
-    main_thread_target_(NULL) {
-  HINSTANCE hInstance = GetModuleHandle(NULL);
+    main_thread_target_(nullptr) {
+  HINSTANCE hInstance = GetModuleHandle(nullptr);
   const char* const kClassName = "CEFMainTargetHWND";
 
   WNDCLASSEX wcex = {};
@@ -61,8 +61,8 @@ MainMessageLoopExternalPumpWin::MainMessageLoopExternalPumpWin()
   RegisterClassEx(&wcex);
 
   // Create the message handling window.
-  main_thread_target_ = CreateWindowA(kClassName, NULL, WS_OVERLAPPEDWINDOW,
-      0, 0, 0, 0, HWND_MESSAGE , NULL, hInstance, NULL);
+  main_thread_target_ = CreateWindowA(kClassName, nullptr, WS_OVERLAPPEDWINDOW,
+      0, 0, 0, 0, HWND_MESSAGE , nullptr, hInstance, nullptr);
   DCHECK(main_thread_target_);
   SetUserDataPtr(main_thread_target_, this);
 }
@@ -74,13 +74,13 @@ MainMessageLoopExternalPumpWin::~MainMessageLoopExternalPumpWin() {
 }
 
 void MainMessageLoopExternalPumpWin::Quit() {
-  PostMessage(NULL, WM_QUIT, 0, 0);
+  PostMessage(nullptr, WM_QUIT, 0, 0);
 }
 
 int MainMessageLoopExternalPumpWin::Run() {
   // Run the message loop.
   MSG msg;
-  while (GetMessage(&msg, NULL, 0, 0)) {
+  while (GetMessage(&msg, nullptr, 0, 0)) {
     TranslateMessage(&msg);
     DispatchMessage(&msg);
   }
@@ -100,17 +100,17 @@ int MainMessageLoopExternalPumpWin::Run() {
   return 0;
 }
 
-void MainMessageLoopExternalPumpWin::OnScheduleMessagePumpWork(int64 delay_ms) {
+void MainMessageLoopExternalPumpWin::OnScheduleMessagePumpWork(int64_t delay_ms) {
   // This method may be called on any thread.
   PostMessage(main_thread_target_, kMsgHaveWork, 0,
               static_cast<LPARAM>(delay_ms));
 }
 
-void MainMessageLoopExternalPumpWin::SetTimer(int64 delay_ms) {
+void MainMessageLoopExternalPumpWin::SetTimer(int64_t delay_ms) {
   DCHECK(!timer_pending_);
   DCHECK_GT(delay_ms, 0);
   timer_pending_ = true;
-  ::SetTimer(main_thread_target_, 1, static_cast<UINT>(delay_ms), NULL);
+  ::SetTimer(main_thread_target_, 1, static_cast<UINT>(delay_ms), nullptr);
 }
 
 void MainMessageLoopExternalPumpWin::KillTimer() {
@@ -128,7 +128,7 @@ LRESULT CALLBACK MainMessageLoopExternalPumpWin::WndProc(
         GetUserDataPtr<MainMessageLoopExternalPumpWin*>(hwnd);
     if (msg == kMsgHaveWork) {
       // OnScheduleMessagePumpWork() request.
-      const int64 delay_ms = static_cast<int64>(lparam);
+      const int64_t delay_ms = static_cast<int64_t>(lparam);
       message_loop->OnScheduleWork(delay_ms);
     } else {
       // Timer timed out.
@@ -141,8 +141,7 @@ LRESULT CALLBACK MainMessageLoopExternalPumpWin::WndProc(
 } // namespace
 
 // static
-scoped_ptr<MainMessageLoopExternalPump>
+std::unique_ptr<MainMessageLoopExternalPump>
 MainMessageLoopExternalPump::Create() {
-  return scoped_ptr<MainMessageLoopExternalPump>(
-      new MainMessageLoopExternalPumpWin());
+  return std::unique_ptr<MainMessageLoopExternalPump>(new MainMessageLoopExternalPumpWin());
 }
