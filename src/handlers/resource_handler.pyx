@@ -3,7 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "../cefpython.pyx"
-
+from libc.stdint cimport int64_t
 import weakref
 
 # -----------------------------------------------------------------------------
@@ -21,7 +21,7 @@ cdef int g_userResourceHandlerMaxId = 0
 
 cdef py_void ValidateUserResourceHandler(object userResourceHandler):
     cdef list methods = ["ProcessRequest", "GetResponseHeaders",
-            "ReadResponse", "CanGetCookie", "CanSetCookie", "Cancel"]
+            "ReadResponse", "Cancel"]
     for method in methods:
         if userResourceHandler and hasattr(userResourceHandler, method)\
                 and callable(getattr(userResourceHandler, method)):
@@ -102,7 +102,7 @@ cdef public cpp_bool ResourceHandler_ProcessRequest(
 cdef public void ResourceHandler_GetResponseHeaders(
         int resourceHandlerId,
         CefRefPtr[CefResponse] cefResponse,
-        int64& cefResponseLength,
+        int64_t& cefResponseLength,
         CefString& cefRedirectUrl
         ) except * with gil:
     cdef PyResourceHandler pyResourceHandler
@@ -122,7 +122,7 @@ cdef public void ResourceHandler_GetResponseHeaders(
             if userCallback:
                 returnValue = userCallback(pyResponse, responseLengthOut,
                         redirectUrlOut)
-                (&cefResponseLength)[0] = <int64>responseLengthOut[0]
+                (&cefResponseLength)[0] = <int64_t>responseLengthOut[0]
                 if redirectUrlOut[0]:
                     PyToCefString(redirectUrlOut[0], cefRedirectUrl)
                 return
@@ -176,50 +176,6 @@ cdef public cpp_bool ResourceHandler_ReadResponse(
                     # 1. True should be returned and callback.Continue()
                     #    called at a later time.
                     # 2. False returned to indicate response completion.
-                return bool(returnValue)
-        return False
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public cpp_bool ResourceHandler_CanGetCookie(
-        int resourceHandlerId,
-        const CefCookie& cefCookie
-        ) except * with gil:
-    cdef PyResourceHandler pyResourceHandler
-    cdef object userCallback
-    cdef py_bool returnValue
-    cdef PyCookie pyCookie
-    try:
-        assert IsThread(TID_IO), "Must be called on the IO thread"
-        pyResourceHandler = GetPyResourceHandler(resourceHandlerId)
-        pyCookie = CreatePyCookie(cefCookie)
-        if pyResourceHandler:
-            userCallback = pyResourceHandler.GetCallback("CanGetCookie")
-            if userCallback:
-                returnValue = userCallback(cookie=pyCookie)
-                return bool(returnValue)
-        return False
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public cpp_bool ResourceHandler_CanSetCookie(
-        int resourceHandlerId,
-        const CefCookie& cefCookie
-        ) except * with gil:
-    cdef PyResourceHandler pyResourceHandler
-    cdef object userCallback
-    cdef py_bool returnValue
-    cdef PyCookie pyCookie
-    try:
-        assert IsThread(TID_IO), "Must be called on the IO thread"
-        pyResourceHandler = GetPyResourceHandler(resourceHandlerId)
-        pyCookie = CreatePyCookie(cefCookie)
-        if pyResourceHandler:
-            userCallback = pyResourceHandler.GetCallback("CanSetCookie")
-            if userCallback:
-                returnValue = userCallback(cookie=pyCookie)
                 return bool(returnValue)
         return False
     except:

@@ -126,7 +126,7 @@ def close_popup(global_handler, browser):
     # Test developer tools popup
     main_browser = cef.GetBrowserByIdentifier(MAIN_BROWSER_ID)
     main_browser.ShowDevTools()
-    cef.PostDelayedTask(cef.TID_UI, 1500, close_devtools, global_handler)
+    cef.PostDelayedTask(cef.TID_UI, 800, close_devtools, global_handler)
     cef.PostDelayedTask(cef.TID_UI, 500, main_browser.SetFocus, True)
 
 

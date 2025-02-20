@@ -32,12 +32,7 @@
 #define CEF_INCLUDE_BASE_CEF_LOCK_H_
 #pragma once
 
-#if defined(BASE_SYNCHRONIZATION_LOCK_H_)
-// Do nothing if the Chromium header has already been included.
-// This can happen in cases where Chromium code is used directly by the
-// client application. When using Chromium code directly always include
-// the Chromium header first to avoid type conflicts.
-#elif defined(USING_CHROMIUM_INCLUDES)
+#if defined(USING_CHROMIUM_INCLUDES)
 // When building CEF include the Chromium header directly.
 #include "base/synchronization/lock.h"
 #else  // !USING_CHROMIUM_INCLUDES
@@ -46,28 +41,35 @@
 // updated to match.
 
 #include "include/base/cef_logging.h"
-#include "include/base/cef_macros.h"
 #include "include/base/cef_platform_thread.h"
 #include "include/base/internal/cef_lock_impl.h"
 
 namespace base {
 namespace cef_internal {
 
-// A convenient wrapper for an OS specific critical section.  The only real
-// intelligence in this class is in debug mode for the support for the
-// AssertAcquired() method.
+///
+/// A convenient wrapper for an OS specific critical section.  The only real
+/// intelligence in this class is in debug mode for the support for the
+/// AssertAcquired() method.
+///
 class Lock {
  public:
 #if !DCHECK_IS_ON()  // Optimized wrapper implementation
   Lock() : lock_() {}
+
+  Lock(const Lock&) = delete;
+  Lock& operator=(const Lock&) = delete;
+
   ~Lock() {}
   void Acquire() { lock_.Lock(); }
   void Release() { lock_.Unlock(); }
 
-  // If the lock is not held, take it and return true. If the lock is already
-  // held by another thread, immediately return false. This must not be called
-  // by a thread already holding the lock (what happens is undefined and an
-  // assertion may fail).
+  ///
+  /// If the lock is not held, take it and return true. If the lock is already
+  /// held by another thread, immediately return false. This must not be called
+  /// by a thread already holding the lock (what happens is undefined and an
+  /// assertion may fail).
+  ///
   bool Try() { return lock_.Try(); }
 
   // Null implementation if not debug.
@@ -116,11 +118,11 @@ class Lock {
 
   // Platform specific underlying lock implementation.
   LockImpl lock_;
-
-  DISALLOW_COPY_AND_ASSIGN(Lock);
 };
 
-// A helper class that acquires the given Lock while the AutoLock is in scope.
+///
+/// A helper class that acquires the given Lock while the AutoLock is in scope.
+///
 class AutoLock {
  public:
   struct AlreadyAcquired {};
@@ -131,6 +133,9 @@ class AutoLock {
     lock_.AssertAcquired();
   }
 
+  AutoLock(const AutoLock&) = delete;
+  AutoLock& operator=(const AutoLock&) = delete;
+
   ~AutoLock() {
     lock_.AssertAcquired();
     lock_.Release();
@@ -138,11 +143,12 @@ class AutoLock {
 
  private:
   Lock& lock_;
-  DISALLOW_COPY_AND_ASSIGN(AutoLock);
 };
 
-// AutoUnlock is a helper that will Release() the |lock| argument in the
-// constructor, and re-Acquire() it in the destructor.
+///
+/// AutoUnlock is a helper that will Release() the |lock| argument in the
+/// constructor, and re-Acquire() it in the destructor.
+///
 class AutoUnlock {
  public:
   explicit AutoUnlock(Lock& lock) : lock_(lock) {
@@ -151,11 +157,13 @@ class AutoUnlock {
     lock_.Release();
   }
 
+  AutoUnlock(const AutoUnlock&) = delete;
+  AutoUnlock& operator=(const AutoUnlock&) = delete;
+
   ~AutoUnlock() { lock_.Acquire(); }
 
  private:
   Lock& lock_;
-  DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
 };
 
 }  // namespace cef_internal
@@ -163,9 +171,9 @@ class AutoUnlock {
 // Implement classes in the cef_internal namespace and then expose them to the
 // base namespace. This avoids conflicts with the base.lib implementation when
 // linking sandbox support on Windows.
-using cef_internal::Lock;
 using cef_internal::AutoLock;
 using cef_internal::AutoUnlock;
+using cef_internal::Lock;
 
 }  // namespace base
 

@@ -39,32 +39,15 @@
 #define CefEventHandle cef_event_handle_t
 #define CefWindowHandle cef_window_handle_t
 
-struct CefMainArgsTraits {
-  typedef cef_main_args_t struct_type;
-
-  static inline void init(struct_type* s) {}
-  static inline void clear(struct_type* s) {}
-
-  static inline void set(const struct_type* src,
-                         struct_type* target,
-                         bool copy) {
-    target->argc = src->argc;
-    target->argv = src->argv;
-  }
-};
-
-// Class representing CefExecuteProcess arguments.
-class CefMainArgs : public CefStructBase<CefMainArgsTraits> {
+///
+/// Class representing CefExecuteProcess arguments.
+///
+class CefMainArgs : public cef_main_args_t {
  public:
-  typedef CefStructBase<CefMainArgsTraits> parent;
-
-  CefMainArgs() : parent() {}
-  explicit CefMainArgs(const cef_main_args_t& r) : parent(r) {}
-  explicit CefMainArgs(const CefMainArgs& r) : parent(r) {}
-  CefMainArgs(int argc, char** argv) : parent() {
-    this->argc = argc;
-    this->argv = argv;
-  }
+  CefMainArgs() : cef_main_args_t{} {}
+  CefMainArgs(const cef_main_args_t& r) : cef_main_args_t(r) {}
+  CefMainArgs(int argc_arg, char** argv_arg)
+      : cef_main_args_t{argc_arg, argv_arg} {}
 };
 
 struct CefWindowInfoTraits {
@@ -81,18 +64,19 @@ struct CefWindowInfoTraits {
                          bool copy) {
     cef_string_set(src->window_name.str, src->window_name.length,
                    &target->window_name, copy);
-    target->x = src->x;
-    target->y = src->y;
-    target->width = src->width;
-    target->height = src->height;
+    target->bounds = src->bounds;
     target->hidden = src->hidden;
     target->parent_view = src->parent_view;
     target->windowless_rendering_enabled = src->windowless_rendering_enabled;
+    target->shared_texture_enabled = src->shared_texture_enabled;
+    target->external_begin_frame_enabled = src->external_begin_frame_enabled;
     target->view = src->view;
   }
 };
 
-// Class representing window information.
+///
+/// Class representing window information.
+///
 class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
  public:
   typedef CefStructBase<CefWindowInfoTraits> parent;
@@ -101,29 +85,29 @@ class CefWindowInfo : public CefStructBase<CefWindowInfoTraits> {
   explicit CefWindowInfo(const cef_window_info_t& r) : parent(r) {}
   explicit CefWindowInfo(const CefWindowInfo& r) : parent(r) {}
 
+  CefWindowInfo& operator=(const CefWindowInfo&) = default;
+  CefWindowInfo& operator=(CefWindowInfo&&) = default;
+
   ///
-  // Create the browser as a child view.
+  /// Create the browser as a child view.
   ///
-  void SetAsChild(CefWindowHandle parent, int x, int y, int width, int height) {
+  void SetAsChild(CefWindowHandle parent, const CefRect& bounds) {
     parent_view = parent;
-    this->x = x;
-    this->y = y;
-    this->width = width;
-    this->height = height;
+    this->bounds = bounds;
     hidden = false;
   }
 
   ///
-  // Create the browser using windowless (off-screen) rendering. No view
-  // will be created for the browser and all rendering will occur via the
-  // CefRenderHandler interface. The |parent| value will be used to identify
-  // monitor info and to act as the parent view for dialogs, context menus,
-  // etc. If |parent| is not provided then the main screen monitor will be used
-  // and some functionality that requires a parent view may not function
-  // correctly. In order to create windowless browsers the
-  // CefSettings.windowless_rendering_enabled value must be set to true.
-  // Transparent painting is enabled by default but can be disabled by setting
-  // CefBrowserSettings.background_color to an opaque value.
+  /// Create the browser using windowless (off-screen) rendering. No view
+  /// will be created for the browser and all rendering will occur via the
+  /// CefRenderHandler interface. The |parent| value will be used to identify
+  /// monitor info and to act as the parent view for dialogs, context menus,
+  /// etc. If |parent| is not provided then the main screen monitor will be used
+  /// and some functionality that requires a parent view may not function
+  /// correctly. In order to create windowless browsers the
+  /// CefSettings.windowless_rendering_enabled value must be set to true.
+  /// Transparent painting is enabled by default but can be disabled by setting
+  /// CefBrowserSettings.background_color to an opaque value.
   ///
   void SetAsWindowless(CefWindowHandle parent) {
     windowless_rendering_enabled = true;

@@ -23,8 +23,6 @@ cdef extern from "include/cef_app.h":
     cdef cppclass CefApp:
         pass
 
-    cdef void CefEnableHighDPISupport() nogil
-
     cdef int CefExecuteProcess(CefMainArgs& args,
                                CefRefPtr[CefApp] application,
                                void* windows_sandbox_info

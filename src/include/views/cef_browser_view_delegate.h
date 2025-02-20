@@ -45,41 +45,43 @@ class CefBrowser;
 class CefBrowserView;
 
 ///
-// Implement this interface to handle BrowserView events. The methods of this
-// class will be called on the browser process UI thread unless otherwise
-// indicated.
+/// Implement this interface to handle BrowserView events. The methods of this
+/// class will be called on the browser process UI thread unless otherwise
+/// indicated.
 ///
 /*--cef(source=client)--*/
 class CefBrowserViewDelegate : public CefViewDelegate {
  public:
+  typedef cef_chrome_toolbar_type_t ChromeToolbarType;
+
   ///
-  // Called when |browser| associated with |browser_view| is created. This
-  // method will be called after CefLifeSpanHandler::OnAfterCreated() is called
-  // for |browser| and before OnPopupBrowserViewCreated() is called for
-  // |browser|'s parent delegate if |browser| is a popup.
+  /// Called when |browser| associated with |browser_view| is created. This
+  /// method will be called after CefLifeSpanHandler::OnAfterCreated() is called
+  /// for |browser| and before OnPopupBrowserViewCreated() is called for
+  /// |browser|'s parent delegate if |browser| is a popup.
   ///
   /*--cef()--*/
   virtual void OnBrowserCreated(CefRefPtr<CefBrowserView> browser_view,
                                 CefRefPtr<CefBrowser> browser) {}
 
   ///
-  // Called when |browser| associated with |browser_view| is destroyed. Release
-  // all references to |browser| and do not attempt to execute any methods on
-  // |browser| after this callback returns. This method will be called before
-  // CefLifeSpanHandler::OnBeforeClose() is called for |browser|.
+  /// Called when |browser| associated with |browser_view| is destroyed. Release
+  /// all references to |browser| and do not attempt to execute any methods on
+  /// |browser| after this callback returns. This method will be called before
+  /// CefLifeSpanHandler::OnBeforeClose() is called for |browser|.
   ///
   /*--cef()--*/
   virtual void OnBrowserDestroyed(CefRefPtr<CefBrowserView> browser_view,
                                   CefRefPtr<CefBrowser> browser) {}
 
   ///
-  // Called before a new popup BrowserView is created. The popup originated
-  // from |browser_view|. |settings| and |client| are the values returned from
-  // CefLifeSpanHandler::OnBeforePopup(). |is_devtools| will be true if the
-  // popup will be a DevTools browser. Return the delegate that will be used for
-  // the new popup BrowserView.
+  /// Called before a new popup BrowserView is created. The popup originated
+  /// from |browser_view|. |settings| and |client| are the values returned from
+  /// CefLifeSpanHandler::OnBeforePopup(). |is_devtools| will be true if the
+  /// popup will be a DevTools browser. Return the delegate that will be used
+  /// for the new popup BrowserView.
   ///
-  /*--cef()--*/
+  /*--cef(optional_param=client)--*/
   virtual CefRefPtr<CefBrowserViewDelegate> GetDelegateForPopupBrowserView(
       CefRefPtr<CefBrowserView> browser_view,
       const CefBrowserSettings& settings,
@@ -89,19 +91,53 @@ class CefBrowserViewDelegate : public CefViewDelegate {
   }
 
   ///
-  // Called after |popup_browser_view| is created. This method will be called
-  // after CefLifeSpanHandler::OnAfterCreated() and OnBrowserCreated() are
-  // called for the new popup browser. The popup originated from |browser_view|.
-  // |is_devtools| will be true if the popup is a DevTools browser. Optionally
-  // add |popup_browser_view| to the views hierarchy yourself and return true.
-  // Otherwise return false and a default CefWindow will be created for the
-  // popup.
+  /// Called after |popup_browser_view| is created. This method will be called
+  /// after CefLifeSpanHandler::OnAfterCreated() and OnBrowserCreated() are
+  /// called for the new popup browser. The popup originated from
+  /// |browser_view|. |is_devtools| will be true if the popup is a DevTools
+  /// browser. Optionally add |popup_browser_view| to the views hierarchy
+  /// yourself and return true. Otherwise return false and a default CefWindow
+  /// will be created for the popup.
   ///
   /*--cef()--*/
   virtual bool OnPopupBrowserViewCreated(
       CefRefPtr<CefBrowserView> browser_view,
       CefRefPtr<CefBrowserView> popup_browser_view,
       bool is_devtools) {
+    return false;
+  }
+
+  ///
+  /// Returns the Chrome toolbar type that will be available via
+  /// CefBrowserView::GetChromeToolbar(). See that method for related
+  /// documentation.
+  ///
+  /*--cef(default_retval=CEF_CTT_NONE)--*/
+  virtual ChromeToolbarType GetChromeToolbarType(
+      CefRefPtr<CefBrowserView> browser_view) {
+    return CEF_CTT_NONE;
+  }
+
+  ///
+  /// Return true to create frameless windows for Document picture-in-picture
+  /// popups. Content in frameless windows should specify draggable regions
+  /// using "-webkit-app-region: drag" CSS.
+  ///
+  /*--cef()--*/
+  virtual bool UseFramelessWindowForPictureInPicture(
+      CefRefPtr<CefBrowserView> browser_view) {
+    return false;
+  }
+
+  ///
+  /// Called when |browser_view| receives a gesture command. Return true to
+  /// handle (or disable) a |gesture_command| or false to propagate the gesture
+  /// to the browser for default handling. With the Chrome runtime these
+  /// commands can also be handled via CefCommandHandler::OnChromeCommand.
+  ///
+  /*--cef()--*/
+  virtual bool OnGestureCommand(CefRefPtr<CefBrowserView> browser_view,
+                                cef_gesture_command_t gesture_command) {
     return false;
   }
 };

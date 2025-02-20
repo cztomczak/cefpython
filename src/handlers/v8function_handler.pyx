@@ -8,7 +8,7 @@ include "../frame.pyx"
 
 cdef public void V8FunctionHandler_Execute(
         CefRefPtr[CefBrowser] cefBrowser,
-        int64 frameId,
+        CefString& frameId,
         CefString& cefFuncName,
         CefRefPtr[CefListValue] cefFuncArgs
         ) except * with gil:
@@ -22,7 +22,7 @@ cdef public void V8FunctionHandler_Execute(
     cdef py_string errorMessage
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "V8FunctionHandler_Execute")
-        cefFrame = cefBrowser.get().GetFrame(frameId)
+        cefFrame = cefBrowser.get().GetFrameByName(frameId)
         if cefFrame.get():
             pyFrame = GetPyFrame(cefFrame)
         else:

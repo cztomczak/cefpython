@@ -4,6 +4,10 @@
 
 include "cefpython.pyx"
 
+cdef extern from "include/internal/cef_time.h":
+    cdef int cef_time_to_basetime(cef_time_t* _from, cef_basetime_t* _to)
+    cdef int cef_time_from_basetime(cef_basetime_t _from, cef_time_t* _to)
+
 cdef void DatetimeToCefTimeT(object pyDatetime, cef_time_t& timeT) except *:
     if not isinstance(pyDatetime, datetime.datetime):
         raise Exception("Expected object of type datetime.datetime")
@@ -36,3 +40,15 @@ cdef object CefTimeTToDatetime(cef_time_t timeT):
     # Milliseconds/microseconds are ignored.
     return datetime.datetime(year, month, day_of_month,
             timeT.hour, timeT.minute, second)
+
+cdef void DatetimeToCefBasetimeT(object pyDatetime, cef_basetime_t& timeT) except *:
+    if not isinstance(pyDatetime, datetime.datetime):
+        raise Exception("Expected object of type datetime.datetime")
+    cdef cef_time_t cefTime
+    DatetimeToCefTimeT(pyDatetime, cefTime)
+    cef_time_to_basetime(&cefTime, &timeT)
+
+cdef object CefBasetimeTToDatetime(cef_basetime_t timeT):
+    cdef cef_time_t cefTime
+    cef_time_from_basetime(timeT, &cefTime)
+    return CefTimeTToDatetime(cefTime)

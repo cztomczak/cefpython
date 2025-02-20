@@ -63,7 +63,6 @@ Table of contents:
   * [Invalidate](#invalidate)
   * [IsFullscreen](#isfullscreen)
   * [IsLoading](#isloading)
-  * [IsMouseCursorChangeDisabled](#ismousecursorchangedisabled)
   * [IsPopup](#ispopup)
   * [IsWindowRenderingDisabled](#iswindowrenderingdisabled)
   * [LoadUrl](#loadurl)
@@ -81,13 +80,11 @@ Table of contents:
   * [SendMouseClickEvent](#sendmouseclickevent)
   * [SendMouseMoveEvent](#sendmousemoveevent)
   * [SendMouseWheelEvent](#sendmousewheelevent)
-  * [SendFocusEvent](#sendfocusevent)
   * [SendCaptureLostEvent](#sendcapturelostevent)
   * [SetAccessibilityState](#setaccessibilitystate)
   * [SetClientCallback](#setclientcallback)
   * [SetClientHandler](#setclienthandler)
   * [SetFocus](#setfocus)
-  * [SetMouseCursorChangeDisabled](#setmousecursorchangedisabled)
   * [SetJavascriptBindings](#setjavascriptbindings)
   * [SetUserData](#setuserdata)
   * [SetZoomLevel](#setzoomlevel)
@@ -659,17 +656,6 @@ Available only in CEF 3. Not yet implemented.
 Returns true if the browser is currently loading.
 
 
-### IsMouseCursorChangeDisabled
-
-| | |
-| --- | --- |
-| __Return__ | bool |
-
-Available only in CEF 3.
-
-Returns true if mouse cursor change is disabled.
-
-
 ### IsPopup
 
 | | |
@@ -894,16 +880,6 @@ flags see SendMouseClickEvent().
 Send a mouse wheel event to the browser. The |x| and |y| coordinates are relative to the upper-left corner of the view. The |deltaX| and |deltaY| values represent the movement delta in the X and Y directions respectively. In order to scroll inside select popups with window rendering disabled [RenderHandler](RenderHandler.md).GetScreenPoint() should be implemented properly. For a list of modifiers flags see SendMouseClickEvent().
 
 
-### SendFocusEvent
-
-| Parameter | Type |
-| --- | --- |
-| setFocus | bool |
-| __Return__ | void |
-
-Send a focus event to the browser.
-
-
 ### SendCaptureLostEvent
 
 | | |
@@ -986,16 +962,6 @@ LifespanHandler etc.
 | __Return__ | void |
 
 Set whether the browser is focused.
-
-
-### SetMouseCursorChangeDisabled
-
-| Parameter | Type |
-| --- | --- |
-| disabled | bool |
-| __Return__ | void |
-
-Set whether mouse cursor change is disabled.
 
 
 ### SetJavascriptBindings

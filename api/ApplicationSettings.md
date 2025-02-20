@@ -7,7 +7,6 @@
 Table of contents:
 * [Introduction](#introduction)
 * [Settings](#settings)
-  * [accept_language_list](#accept_language_list)
   * [app_user_model_id](#app_user_model_id)
   * [auto_zooming](#auto_zooming)
   * [background_color](#background_color)
@@ -18,7 +17,6 @@ Table of contents:
   * [downloads_enabled](#downloads_enabled)
   * [external_message_pump](#external_message_pump)
   * [framework_dir_path](#framework_dir_path)
-  * [ignore_certificate_errors](#ignore_certificate_errors)
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
   * [locales_dir_path](#locales_dir_path)
@@ -26,19 +24,15 @@ Table of contents:
   * [log_file](#log_file)
   * [log_severity](#log_severity)
   * [multi_threaded_message_loop](#multi_threaded_message_loop)
-  * [net_security_expiration_enabled](#net_security_expiration_enabled)
   * [pack_loading_disabled](#pack_loading_disabled)
   * [persist_session_cookies](#persist_session_cookies)
   * [persist_user_preferences](#persist_user_preferences)
-  * [product_version](#product_version)
   * [remote_debugging_port](#remote_debugging_port)
   * [resources_dir_path](#resources_dir_path)
-  * [single_process](#single_process)
   * [string_encoding](#string_encoding)
   * [uncaught_exception_stack_size](#uncaught_exception_stack_size)
   * [unique_request_context_per_browser](#unique_request_context_per_browser)
   * [user_agent](#user_agent)
-  * [user_data_path](#user_data_path)
   * [windowless_rendering_enabled](#windowless_rendering_enabled)
 
 
@@ -55,18 +49,6 @@ to Chromium Preferences.
 
 
 ## Settings
-
-
-### accept_language_list
-
-(string)
-Comma delimited ordered list of language codes without any
-whitespace that
-will be used in the "Accept-Language" HTTP header. May be overridden on a
-per-browser basis using the CefBrowserSettings.accept_language_list value.
-If both values are empty then "en-US,en" will be used. Can be overridden
-for individual CefRequestContext instances via the
-CefRequestContextSettings.accept_language_list value.
 
 
 ### app_user_model_id
@@ -231,40 +213,6 @@ the "framework-dir-path" command-line switch.
 See also [Issue #304](../../../issues/304).
 
 
-### ignore_certificate_errors
-
-(bool)
-Set to true (1) to ignore errors related to invalid SSL certificates.  
-Enabling this setting can lead to potential security vulnerabilities like  
-"man in the middle" attacks. Applications that load content from the  
-internet should not enable this setting. Also configurable using the  
-"ignore-certificate-errors" [command-line switch](CommandLineSwitches.md).
-Can be overridden for individual CefRequestContext instances via the
-CefRequestContextSettings.ignore_certificate_errors value.
-
-__IMPORTANT__: This option not only ignores all certificate errors,
-but it also enables caching of content due to custom patch being
-applied (read more in "NOTE ON CACHING" further down). If you don't
-want this caching feature of insecure content then alternatively you
-can ignore certificate errors using the
-RequestHandler.[_OnCertificateError()](#_oncertificateerror)
-callback. Note that disk caching is enabled only when the "cache_path"
-option is set.
-
-__NOTE ON CACHING__: Chromium by default disallows caching of
-content when there is certificate error. There is a issue125.patch
-in the patches/ directory that can be enabled when doing a custom
-CEF build. This patch changes the caching behavior on sites with SSL
-certificate errors when used with this setting. This patch can be
-applied Chromium sources to allow for caching even when there is
-certificate error, but only when the "ignore_certificate_errors"
-option is set to True.
-When it's set to False then the Chromium's caching behavior does not
-change. Enabling caching with certificate errors is useful on local
-private networks that use self-signed SSL certificates. See the
-referenced CEF topic in [Issue #125](../../../issues/125) for more details.
-
-
 ### javascript_flags
 
 (string)
@@ -424,15 +372,6 @@ the module directory on Windows/Linux or the app bundle Resources directory
 on Mac OS X. Also configurable using the --resources-dir-path switch.
 
 
-### single_process
-
-(bool)
-Set to true (1) to use a single process for the browser and renderer. This  
-run mode is not officially supported by Chromium and is less stable than  
-the multi-process default. Also configurable using the "single-process"  
-[command-line switch](CommandLineSwitches.md).
-
-
 ### string_encoding
 
 (string)
@@ -473,8 +412,7 @@ set `unique_request_context_per_browser` to True.
 
 In upstream CEF each request context may have separate settings like
 cache_path, persist_session_cookies, persist_user_preferences,
-ignore_certificate_errors, enable_net_security_expiration,
-accept_language_list. Such functionality wasn't yet exposed in CEF Python.
+enable_net_security_expiration. Such functionality wasn't yet exposed in CEF Python.
 
 
 ### user_agent
@@ -483,17 +421,6 @@ accept_language_list. Such functionality wasn't yet exposed in CEF Python.
 Value that will be returned as the User-Agent HTTP header. If empty the
 default User-Agent string will be used. Also configurable using the
 "user-agent" [command-line switch](CommandLineSwitches.md).
-
-
-### user_data_path
-
-(string)
-The location where user data such as spell checking dictionary files will
-be stored on disk. If empty then the default platform-specific user data
-directory will be used (`"~/.cef_user_data"` directory on Linux,
-`"~/Library/Application Support/CEF/User Data"` directory on Mac OS X,
-`"Local Settings\Application Data\CEF\User Data"` directory under the user
-profile directory on Windows).
 
 
 ### windowless_rendering_enabled

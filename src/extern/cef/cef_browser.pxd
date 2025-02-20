@@ -9,9 +9,10 @@ from cef_string cimport CefString
 from cef_client cimport CefClient
 from libcpp cimport bool as cpp_bool
 from libcpp.vector cimport vector as cpp_vector
+from libc.stdint cimport int64_t
 from cef_frame cimport CefFrame
 cimport cef_types
-from cef_types cimport int64, cef_state_t, CefSize
+from cef_types cimport cef_state_t, CefSize
 from cef_types cimport CefBrowserSettings, CefPoint
 from cef_drag_data cimport CefDragData
 from cef_types cimport CefMouseEvent
@@ -38,8 +39,6 @@ cdef extern from "include/cef_browser.h":
         double GetZoomLevel()
         void SetZoomLevel(double zoomLevel)
         void StartDownload(const CefString& url)
-        void SetMouseCursorChangeDisabled(cpp_bool disabled)
-        cpp_bool IsMouseCursorChangeDisabled()
         cpp_bool IsWindowRenderingDisabled()
         void WasResized()
         void WasHidden(cpp_bool hidden)
@@ -54,7 +53,6 @@ cdef extern from "include/cef_browser.h":
                 cpp_bool mouseLeave)
         void SendMouseWheelEvent(cef_types.CefMouseEvent, int deltaX,
                 int deltaY)
-        void SendFocusEvent(cpp_bool setFocus)
         void SendCaptureLostEvent()
 
         void ShowDevTools(const CefWindowInfo& windowInfo,
@@ -66,7 +64,7 @@ cdef extern from "include/cef_browser.h":
 
         CefRefPtr[CefRequestContext] GetRequestContext()
 
-        void Find(int identifier, const CefString& searchText, cpp_bool forward,
+        void Find(const CefString& searchText, cpp_bool forward,
                 cpp_bool matchCase, cpp_bool findNext)
         void StopFinding(cpp_bool clearSelection)
         void Print()
@@ -100,8 +98,8 @@ cdef extern from "include/cef_browser.h":
         cpp_bool CanGoBack()
         cpp_bool CanGoForward()
         CefRefPtr[CefFrame] GetFocusedFrame()
-        CefRefPtr[CefFrame] GetFrame(CefString& name)
-        CefRefPtr[CefFrame] GetFrame(int64 identifier)
+        CefRefPtr[CefFrame] GetFrameByName(CefString& name)
+        CefRefPtr[CefFrame] GetFrameByIdentifier(CefString& identifier)
         void GetFrameNames(cpp_vector[CefString]& names)
         CefRefPtr[CefFrame] GetMainFrame()
         void GoBack()
@@ -113,5 +111,3 @@ cdef extern from "include/cef_browser.h":
         void StopLoad()
         cpp_bool IsLoading()
         int GetIdentifier()
-        cpp_bool SendProcessMessage(CefProcessId target_process,
-                                    CefRefPtr[CefProcessMessage] message)

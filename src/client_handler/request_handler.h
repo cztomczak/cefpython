@@ -4,11 +4,14 @@
 
 #include "common/cefpython_public_api.h"
 #include "include/cef_request_handler.h"
+#include "include/base/cef_callback.h"
+#include "cookie_access_filter.h"
 
 typedef cef_return_value_t ReturnValue;
 
 
-class RequestHandler : public CefRequestHandler
+class RequestHandler : public CefRequestHandler,
+                       public CookieAccessFilter
 {
 public:
     RequestHandler(){}
@@ -23,19 +26,19 @@ public:
     ReturnValue OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
                                      CefRefPtr<CefFrame> frame,
                                      CefRefPtr<CefRequest> request,
-                                     CefRefPtr<CefRequestCallback> callback
-                                     ) override;
+                                     CefRefPtr<CefCallback> callback
+                                     ) ;
 
     CefRefPtr<CefResourceHandler> GetResourceHandler(
                                       CefRefPtr<CefBrowser> browser,
                                       CefRefPtr<CefFrame> frame,
-                                      CefRefPtr<CefRequest> request) override;
+                                      CefRefPtr<CefRequest> request) ;
 
     void OnResourceRedirect(CefRefPtr<CefBrowser> browser,
                             CefRefPtr<CefFrame> frame,
                             CefRefPtr<CefRequest> request,
                             CefRefPtr<CefResponse> response,
-                            CefString& new_url) override;
+                            CefString& new_url) ;
 
     bool GetAuthCredentials(CefRefPtr<CefBrowser> browser,
                             CefRefPtr<CefFrame> frame,
@@ -44,37 +47,25 @@ public:
                             int port,
                             const CefString& realm,
                             const CefString& scheme,
-                            CefRefPtr<CefAuthCallback> callback) override;
+                            CefRefPtr<CefAuthCallback> callback) ;
 
     bool OnQuotaRequest(CefRefPtr<CefBrowser> browser,
                         const CefString& origin_url,
-                        int64 new_size,
-                        CefRefPtr<CefRequestCallback> callback) override;
+                        int64_t new_size,
+                        CefRefPtr<CefCallback> callback) ;
 
     void OnProtocolExecution(CefRefPtr<CefBrowser> browser,
                              const CefString& url,
-                             bool& allow_os_execution) override;
+                             bool& allow_os_execution) ;
 
     bool OnCertificateError(CefRefPtr<CefBrowser> browser,
                             cef_errorcode_t cert_error,
                             const CefString& request_url,
                             CefRefPtr<CefSSLInfo> ssl_info,
-                            CefRefPtr<CefRequestCallback> callback) override;
+                            CefRefPtr<CefCallback> callback) override;
 
     void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                    cef_termination_status_t status) override;
-
-    void OnPluginCrashed(CefRefPtr<CefBrowser> browser,
-                         const CefString& plugin_path) override;
-
-    bool CanGetCookies(CefRefPtr<CefBrowser> browser,
-                       CefRefPtr<CefFrame> frame,
-                       CefRefPtr<CefRequest> request) override;
-
-    bool CanSetCookie(CefRefPtr<CefBrowser> browser,
-                      CefRefPtr<CefFrame> frame,
-                      CefRefPtr<CefRequest> request,
-                      const CefCookie& cookie) override;
 
 private:
     IMPLEMENT_REFCOUNTING(RequestHandler);

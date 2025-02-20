@@ -82,42 +82,48 @@ additional usage information.
 | window_info_out | list[[WindowInfo](WindowInfo.md)] |
 | client | None |
 | browser_settings_out | list[[BrowserSettings](BrowserSettings.md)] |
+| extra_info_out | dict |
 | no_javascript_access_out | list[bool] |
 | __Return__ | bool |
 
 Description from upstream CEF:
 > Called on the UI thread before a new popup browser is created. The
-> |browser| and |frame| values represent the source of the popup request. The
-> |target_url| and |target_frame_name| values indicate where the popup
-> browser should navigate and may be empty if not specified with the request.
-> The |target_disposition| value indicates where the user intended to open
-> the popup (e.g. current tab, new tab, etc). The |user_gesture| value will
-> be true if the popup was opened via explicit user gesture (e.g. clicking a
-> link) or false if the popup opened automatically (e.g. via the
-> DomContentLoaded event). The |popup_features| structure contains additional
+> |browser| and |frame| values represent the source of the popup request.
+> The |target_url| and |target_frame_name| values indicate where the popup
+> browser should navigate and may be empty if not specified with the
+> request. The |target_disposition| value indicates where the user intended
+> to open the popup (e.g. current tab, new tab, etc). The |user_gesture|
+> value will be true if the popup was opened via explicit user gesture (e.g.
+> clicking a link) or false if the popup opened automatically (e.g. via the
+> DomContentLoaded event). The |popupFeatures| structure contains additional
 > information about the requested popup window. To allow creation of the
-> popup browser optionally modify |windowInfo|, |client|, |browserSettings| and
+> popup browser optionally modify |windowInfo|, |client|, |settings| and
 > |no_javascript_access| and return false. To cancel creation of the popup
-> browser return true. The |client| and |settings| values will default to the
-> source browser's values. If the |no_javascript_access| value is set to
+> browser return true. The |client| and |settings| values will default to
+> the source browser's values. If the |no_javascript_access| value is set to
 > false the new browser will not be scriptable and may not be hosted in the
 > same renderer process as the source browser. Any modifications to
-> |window_info| will be ignored if the parent browser is wrapped in a
+> |windowInfo| will be ignored if the parent browser is wrapped in a
 > CefBrowserView. Popup browser creation will be canceled if the parent
-> browser is destroyed before the popup browser creation completes (indicated
-> by a call to OnAfterCreated for the popup browser).
+> browser is destroyed before the popup browser creation completes
+> (indicated by a call to OnAfterCreated for the popup browser). The
+> |extra_info| parameter provides an opportunity to specify extra
+> information specific to the created popup browser that will be passed to
+> CefRenderProcessHandler::OnBrowserCreated() in the render process.
 
 `WindowOpenDisposition` constants in the cefpython module:
-* WOD_UNKNOWN,
-* WOD_CURRENT_TAB,
-* WOD_SINGLETON_TAB,
-* WOD_NEW_FOREGROUND_TAB,
-* WOD_NEW_BACKGROUND_TAB,
-* WOD_NEW_POPUP,
-* WOD_NEW_WINDOW,
-* WOD_SAVE_TO_DISK,
-* WOD_OFF_THE_RECORD,
-* WOD_IGNORE_ACTION
+* CEF_WOD_UNKNOWN,
+* CEF_WOD_CURRENT_TAB,
+* CEF_WOD_SINGLETON_TAB,
+* CEF_WOD_NEW_FOREGROUND_TAB,
+* CEF_WOD_NEW_BACKGROUND_TAB,
+* CEF_WOD_NEW_POPUP,
+* CEF_WOD_NEW_WINDOW,
+* CEF_WOD_SAVE_TO_DISK,
+* CEF_WOD_OFF_THE_RECORD,
+* CEF_WOD_IGNORE_ACTION,
+* CEF_WOD_SWITCH_TO_TAB,
+* CEF_WOD_NEW_PICTURE_IN_PICTURE
 
 Note that if you return True and create the popup window yourself, then
 the popup window and parent window will not be able to script each other.
