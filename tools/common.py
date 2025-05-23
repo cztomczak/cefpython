@@ -455,7 +455,7 @@ def get_cefpython_version():
 
 
 def get_version_from_file(header_file):
-    with open(header_file, "rU") as fp:
+    with open(header_file, "r") as fp:
         contents = fp.read()  # no need to decode() as "rU" specified
     ret = dict()
     matches = re.findall(r'^#define (\w+) "?([^\s"]+)"?', contents,
