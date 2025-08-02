@@ -372,7 +372,9 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py38.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py39.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py310.pyd")) \
-            or os.path.exists(os.path.join(pkg_dir, "cefpython_py311.pyd")):
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py311.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py312.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py313.pyd")):
         search_paths = [
             # This is where Microsoft Visual C++ 2015 Update 3 installs
             # (14.00.24212).

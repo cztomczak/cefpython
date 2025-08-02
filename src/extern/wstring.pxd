@@ -12,12 +12,12 @@ cdef extern from "<string>" namespace "std":
     size_t npos = -1
 
     cdef cppclass wstring:
-        wstring() nogil except +
-        wstring(wchar_t *) nogil except +
-        wstring(wchar_t *, size_t) nogil except +
-        wstring(string&) nogil except +
+        wstring() except + nogil
+        wstring(wchar_t *) except + nogil
+        wstring(wchar_t *, size_t) except + nogil
+        wstring(string&) except + nogil
         # as a string formed by a repetition of character c, n times.
-        wstring(size_t, char) nogil except +
+        wstring(size_t, char) except + nogil
 
         const_wchar_t* c_str() nogil
         const_wchar_t* data() nogil
