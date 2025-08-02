@@ -5,6 +5,8 @@
 include "cefpython.pyx"
 
 # noinspection PyUnresolvedReferences
+from cef_types cimport ReferrerPolicy
+# noinspection PyUnresolvedReferences
 cimport cef_types
 
 # cef_urlrequest_flags_t
@@ -17,6 +19,17 @@ UR_FLAG_NO_DOWNLOAD_DATA = cef_types.UR_FLAG_NO_DOWNLOAD_DATA
 UR_FLAG_NO_RETRY_ON_5XX = cef_types.UR_FLAG_NO_RETRY_ON_5XX
 UR_FLAG_STOP_ON_REDIRECT = cef_types.UR_FLAG_STOP_ON_REDIRECT
 
+# cef_referrer_policy_t
+REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_FROM_SECURE_TO_INSECURE = cef_types.REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_FROM_SECURE_TO_INSECURE
+REFERRER_POLICY_DEFAULT = cef_types.REFERRER_POLICY_DEFAULT
+REFERRER_POLICY_REDUCE_REFERRER_GRANULARITY_ON_TRANSITION_CROSS_ORIGIN = cef_types.REFERRER_POLICY_REDUCE_REFERRER_GRANULARITY_ON_TRANSITION_CROSS_ORIGIN
+REFERRER_POLICY_ORIGIN_ONLY_ON_TRANSITION_CROSS_ORIGIN = cef_types.REFERRER_POLICY_ORIGIN_ONLY_ON_TRANSITION_CROSS_ORIGIN
+REFERRER_POLICY_NEVER_CLEAR_REFERRER = cef_types.REFERRER_POLICY_NEVER_CLEAR_REFERRER
+REFERRER_POLICY_ORIGIN = cef_types.REFERRER_POLICY_ORIGIN
+REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_CROSS_ORIGIN = cef_types.REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_CROSS_ORIGIN
+REFERRER_POLICY_ORIGIN_CLEAR_ON_TRANSITION_FROM_SECURE_TO_INSECURE = cef_types.REFERRER_POLICY_ORIGIN_CLEAR_ON_TRANSITION_FROM_SECURE_TO_INSECURE
+REFERRER_POLICY_NO_REFERRER = cef_types.REFERRER_POLICY_NO_REFERRER
+REFERRER_POLICY_LAST_VALUE = cef_types.REFERRER_POLICY_LAST_VALUE
 
 class Request:
     # TODO: autocomplete in PyCharm doesn't work for these flags
@@ -79,6 +92,19 @@ cdef class PyRequest:
         cdef CefString cefMethod
         PyToCefString(method, cefMethod)
         self.GetCefRequest().get().SetMethod(cefMethod)
+
+    cpdef py_void SetReferrer(self, py_string referrer_url, cef_types.cef_referrer_policy_t policy):
+        cdef CefString cefReferrerUrl
+        PyToCefString(referrer_url, cefReferrerUrl)
+        self.GetCefRequest().get().SetReferrer(cefReferrerUrl, policy)
+
+    cpdef str GetReferrerURL(self):
+        return CefToPyString(self.GetCefRequest().get().GetReferrerURL())
+
+    cpdef cef_types.cef_referrer_policy_t GetReferrerPolicy(self):
+        cdef cef_types.cef_referrer_policy_t rp
+        rp = <cef_types.cef_referrer_policy_t>self.GetCefRequest().get().GetReferrerPolicy()
+        return rp
 
     cpdef object GetPostData(self):
         if self.GetMethod() != "POST":
