@@ -221,22 +221,6 @@ VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 
 VS2015_VCVARS = (r"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat")
 
-# Required for building old CEF branches < 2704
-VS2013_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0"
-                 "\\VC\\vcvarsall.bat")
-
-# Python 3.4
-VS2010_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 10.0"
-                 "\\VC\\vcvarsall.bat")
-
-# Python 2.7
-VS2008_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 9.0"
-                 "\\VC\\vcvarsall.bat")
-
-if WINDOWS and not os.path.exists(VS2008_VCVARS):
-    VS2008_VCVARS = (os.environ["LOCALAPPDATA"]+"\\Programs\\Common\\Microsoft"
-                     "\\Visual C++ for Python\\9.0\\vcvarsall.bat")
-
 # -----------------------------------------------------------------------------
 
 

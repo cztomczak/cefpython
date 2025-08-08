@@ -281,16 +281,21 @@ mkdir build/
 cd build/
 ```
 
-2) Download CEF binaries from [Spotify Automated Builds](https://cef-builds.spotifycdn.com/index.html).
+2) Install python dependencies:
+```
+pip install --upgrade -r ../tools/requirements.txt
+````
+
+3) Download CEF binaries from [Spotify Automated Builds](https://cef-builds.spotifycdn.com/index.html).
    The version of the binaries must match exactly the CEF version
    from the "cefpython/src/version/" directory (look for CEF_VERSION
    constant in .h file).
 
-3) Extract the downloaded archive eg.
+4) Extract the downloaded archive eg.
    "cef_binary_3.2883.1553.g80bd606_windows32.tar.bz2"
    in the build/ directory (using "extract here" option)
 
-4) Run the automate.py tool. After it completes you should see a new
+5) Run the automate.py tool. After it completes you should see a new
    directory eg. "cef55_3.2883.1553.g80bd606_win32/".
 ```
 python ../tools/automate.py --prebuilt-cef

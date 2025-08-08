@@ -677,10 +677,6 @@ def prepare_build_command(build_lib=False, vcvars=None):
     command = list()
     if platform.system() == "Windows":
         if build_lib:
-            if vcvars == VS2010_VCVARS:
-                # When using WinSDK 7.1 vcvarsall.bat is broken. Instead
-                # env variables are queried using setuptools.msvc.
-                return command
             if vcvars:
                 command.append(vcvars)
             else:
@@ -689,8 +685,6 @@ def prepare_build_command(build_lib=False, vcvars=None):
         else:
             if int(Options.cef_branch) >= 2704:
                 command.append(VS2015_VCVARS)
-            else:
-                command.append(VS2013_VCVARS)
             command.append(VS_PLATFORM_ARG)
         command.append("&&")
     return command
@@ -867,8 +861,6 @@ def create_prebuilt_binaries():
 
 def get_available_python_compilers():
     all_python_compilers = OrderedDict([
-        ("2008", VS2008_VCVARS),
-        ("2010", VS2010_VCVARS),
         ("2015", VS2015_VCVARS),
     ])
     ret_compilers = OrderedDict()
