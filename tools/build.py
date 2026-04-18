@@ -18,12 +18,13 @@ Option 2: Use the automate.py tool. With this tool you can build CEF
 from sources or use ready binaries from Spotify Automated Builds.
 
 Usage:
-    build.py VERSION [--rebuild-cpp] [--unittests] [--fast] [--clean] [--kivy]
-                     [--hello-world] [--enable-profiling]
-                     [--enable-line-tracing]
+    build.py [VERSION] [--rebuild-cpp] [--unittests] [--fast] [--clean] [--kivy]
+                       [--hello-world] [--enable-profiling]
+                       [--enable-line-tracing]
 
 Options:
-    VERSION                Version number eg. 50.0
+    VERSION                Version number eg. 50.0. Optional: defaults to
+                           {CHROME_VERSION_MAJOR}.0 read from src/version/.
     --unittests            Run only unit tests. Do not run examples while
                            building cefpython modules. Examples require
                            interaction such as closing window before proceeding.
@@ -131,12 +132,14 @@ def command_line_args():
            REBUILD_CPP, VERSION, UNITTESTS
 
     VERSION = get_version_from_command_line_args(__file__)
-    # Other scripts called by this script expect that version number
-    # is available in sys.argv, so don't remove it like it's done
-    # for all other args starting with "--".
     if not VERSION:
-        print(__doc__)
-        sys.exit(1)
+        cef_ver = get_cefpython_version()
+        VERSION = "{major}.0".format(major=cef_ver["CHROME_VERSION_MAJOR"])
+        # Inject into sys.argv so child scripts that call
+        # get_version_from_command_line_args() can find it.
+        sys.argv.insert(1, VERSION)
+        print("[build.py] No version specified, defaulting to {v}"
+              .format(v=VERSION))
 
     print("[build.py] Parse command line arguments")
 
@@ -421,97 +424,6 @@ def compile_cpp_projects_with_setuptools():
     # Copy subprocess executable
     print("[build.py] Copy subprocess executable")
     shutil.copy(SUBPROCESS_EXE, CEFPYTHON_BINARY)
-
-
-def compile_cpp_projects_windows_DEPRECATED():
-    """DEPRECATED. Not used currently.
-    Build C++ projects using .vcproj files."""
-
-    # TODO: Remove code after setuptools compilation was tested for some time
-
-    print("[build.py] Compile C++ projects")
-
-    print("[build.py] ~~ Build CLIENT_HANDLER vcproj")
-    vcproj = ("client_handler_py{pyver}_{os}.vcproj"
-              .format(pyver=PYVERSION, os=OS_POSTFIX2))
-    vcproj = os.path.join(SRC_DIR, "client_handler", vcproj)
-    build_vcproj_DEPRECATED(vcproj)
-
-    print("[build.py] ~~ Build LIBCEFPYTHONAPP vcproj")
-    vcproj = ("libcefpythonapp_py{pyver}_{os}.vcproj"
-              .format(pyver=PYVERSION, os=OS_POSTFIX2))
-    vcproj = os.path.join(SRC_DIR, "subprocess", vcproj)
-    build_vcproj_DEPRECATED(vcproj)
-
-    print("[build.py] ~~ Build SUBPROCESS vcproj")
-    vcproj = ("subprocess_{os}.vcproj"
-              .format(os=OS_POSTFIX2))
-    vcproj = os.path.join(SRC_DIR, "subprocess", vcproj)
-    ret = build_vcproj_DEPRECATED(vcproj)
-
-    # Copy subprocess executable
-    subprocess_from = os.path.join(
-            SUBPROCESS_DIR,
-            "Release_{os}".format(os=OS_POSTFIX2),
-            "subprocess_{os}.exe".format(os=OS_POSTFIX2))
-    subprocess_to = os.path.join(CEFPYTHON_BINARY, "subprocess.exe")
-    if os.path.exists(subprocess_to):
-        os.remove(subprocess_to)
-    if ret == 0:
-        print("[build.py] Copy subprocess executable")
-        # shutil.copy() will also copy Permission bits
-        shutil.copy(subprocess_from, subprocess_to)
-
-    print("[build.py] ~~ Build CPP_UTILS vcproj")
-    vcproj = ("cpp_utils_{os}.vcproj"
-              .format(os=OS_POSTFIX2))
-    vcproj = os.path.join(SRC_DIR, "cpp_utils", vcproj)
-    build_vcproj_DEPRECATED(vcproj)
-
-
-def build_vcproj_DEPRECATED(vcproj):
-    """DEPRECATED. Not used currently."""
-
-    # TODO: Remove code after setuptools compilation was tested for some time
-
-    # In VS2010 vcbuild.exe was replaced by msbuild.exe.
-    # Ufortunately WinSDK 7.1 does not come with msbuild.exe,
-    # so it would be required to install Visual Studio 2010,
-    # and to support both 32-bit ad 64-bit compilations it
-    # a non-express version would have to be installed, which
-    # is not free. So to make it free open-source it was
-    # required migrate to a new compilation system that uses
-    # distutils/setuptools packages.
-
-    # msbuild.exe flags:
-    # /clp:disableconsolecolor
-    # msbuild /p:BuildProjectReferences=false project.proj
-    # MSBuild.exe MyProject.proj /t:build
-
-    VS2008_BUILD = ("%LocalAppData%\\Programs\\Common\\"
-                    "Microsoft\\Visual C++ for Python\\9.0\\"
-                    "VC\\bin\\amd64\\vcbuild.exe")
-    VS2008_BUILD = VS2008_BUILD.replace("%LocalAppData%",
-                                        os.environ["LOCALAPPDATA"])
-
-    if PYVERSION == "27":
-        args = list()
-        args.append(VS2008_VCVARS)
-        args.append(VS_PLATFORM_ARG)
-        args.append("&&")
-        args.append(VS2008_BUILD)
-        args.append("/nocolor")
-        args.append("/nologo")
-        args.append("/nohtmllog")
-        if REBUILD_CPP:
-            args.append("/rebuild")
-        args.append(vcproj)
-        ret = subprocess.call(args, shell=True)
-        if ret != 0:
-            compile_ask_to_continue()
-        return ret
-    else:
-        raise Exception("Only Python 2.7 32-bit is currently supported")
 
 
 def compile_ask_to_continue():

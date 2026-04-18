@@ -217,9 +217,42 @@ SUBPROCESS_EXE = os.path.join(BUILD_SUBPROCESS,
 # with setuptools/distutils in the build_cpp_projects.py tool.
 # -----------------------------------------------------------------------------
 
+def _find_vcvars():
+    """Locate vcvarsall.bat for VS2022+ using vswhere.exe,
+    falling back to known Community/Professional/Enterprise paths."""
+    import subprocess as _sp
+    vswhere = (r"C:\Program Files (x86)\Microsoft Visual Studio"
+               r"\Installer\vswhere.exe")
+    if os.path.isfile(vswhere):
+        try:
+            out = _sp.check_output(
+                [vswhere, "-latest",
+                 "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+                 "-property", "installationPath"],
+                stderr=_sp.DEVNULL).decode().strip()
+            if out:
+                candidate = os.path.join(
+                    out, r"VC\Auxiliary\Build\vcvarsall.bat")
+                if os.path.isfile(candidate):
+                    return candidate
+        except Exception:
+            pass
+    # Fallback: try known editions in preference order
+    for edition in ("Community", "Professional", "Enterprise", "BuildTools"):
+        for year in ("2022", "2019", "2017"):
+            candidate = (r"C:\Program Files\Microsoft Visual Studio"
+                         r"\{year}\{ed}\VC\Auxiliary\Build\vcvarsall.bat"
+                         .format(year=year, ed=edition))
+            if os.path.isfile(candidate):
+                return candidate
+    # Last resort: a guessed path so the string is never empty
+    return (r"C:\Program Files\Microsoft Visual Studio\2022\Community"
+            r"\VC\Auxiliary\Build\vcvarsall.bat")
+
+
 VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 
-VS2015_VCVARS = (r"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat")
+VCVARS = _find_vcvars()
 
 # -----------------------------------------------------------------------------
 
@@ -413,6 +446,8 @@ def _detect_distrib_dir():
 
 
 def get_version_from_command_line_args(caller_script, ignore_error=False):
+    """Parse version number from sys.argv. Returns None (or "" when
+    ignore_error=True) if not found; callers may supply a default."""
     args = " ".join(sys.argv)
     match = re.search(r"\b(\d+)\.\d+\b", args)
     if match:
@@ -448,32 +483,13 @@ def get_version_from_file(header_file):
 
 
 def get_msvs_for_python(vs_prefix=False):
-    """Get MSVS version (eg 2008) for current python running."""
-    if sys.version_info[:2] == (2, 7):
-        return "VS2008" if vs_prefix else "2008"
-    elif sys.version_info[:2] == (3, 4):
-        return "VS2010" if vs_prefix else "2010"
-    elif sys.version_info[:2] == (3, 5):
+    """Return the VS lib subdirectory label used in CEF prebuilt binaries.
+    The label 'VS2015' is a historical artifact from the CEF binary layout;
+    it does not indicate the actual VS version used to compile."""
+    if sys.version_info >= (3, 5):
         return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 6):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 7):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 8):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 9):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 10):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 11):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 12):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 13):
-        return "VS2015" if vs_prefix else "2015"
-    else:
-        print("ERROR: This version of Python is not supported")
-        sys.exit(1)
+    print("ERROR: Python 3.5 or later is required")
+    sys.exit(1)
 
 
 _detect_cef_binaries_libraries_dir()

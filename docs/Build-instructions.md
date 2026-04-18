@@ -94,9 +94,9 @@ pip install --upgrade -r ../tools/requirements.txt
 
 8) Extract the archive in the "build/" directory.
 
-9) Build cefpython and run examples (xx.x is version number):
+9) Build cefpython and run examples:
 ```
-python ../tools/build.py xx.x
+python ../tools/build.py
 ```
 
 
@@ -143,9 +143,9 @@ sudo pip install --upgrade -r ../tools/requirements.txt
 
 7) Extract the archive in the "build/" directory.
 
-8) Build cefpython and run examples (xx.x is version number):
+8) Build cefpython and run examples:
 ```
-python ../tools/build.py xx.x
+python ../tools/build.py
 ```
 
 
@@ -260,9 +260,9 @@ cd build/
 3) Extract the downloaded archive eg. "cef55_3.2883.1553.g80bd606_win32.zip"
    in the "build/" directory (using "extract here" option)
 
-4) Run the build.py tool (xx.x is version number):
+4) Run the build.py tool:
 ```
-python ../tools/build.py xx.x
+python ../tools/build.py
 ```
 
 
@@ -281,27 +281,36 @@ mkdir build/
 cd build/
 ```
 
-2) Install python dependencies:
+2) Download and extract CEF binaries automatically using the
+   download_cef.py tool. It reads the required CEF version from
+   "cefpython/src/version/", queries the Spotify CDN index, downloads
+   the standard distribution, verifies the SHA1 checksum, and extracts
+   it to the build/ directory:
 ```
-pip install --upgrade -r ../tools/requirements.txt
-````
+python ../tools/download_cef.py
+```
 
-3) Download CEF binaries from [Spotify Automated Builds](https://cef-builds.spotifycdn.com/index.html).
-   The version of the binaries must match exactly the CEF version
-   from the "cefpython/src/version/" directory (look for CEF_VERSION
-   constant in .h file).
+   Alternatively, download manually from
+   [Spotify Automated Builds](https://cef-builds.spotifycdn.com/index.html).
+   The version must match exactly the CEF version from
+   "cefpython/src/version/" (look for CEF_VERSION constant in .h file).
+   Extract the archive eg. "cef_binary_3.2883.1553.g80bd606_windows32.tar.bz2"
+   in the build/ directory (using "extract here" option).
 
-4) Extract the downloaded archive eg.
-   "cef_binary_3.2883.1553.g80bd606_windows32.tar.bz2"
-   in the build/ directory (using "extract here" option)
-
-5) Run the automate.py tool. After it completes you should see a new
-   directory eg. "cef55_3.2883.1553.g80bd606_win32/".
+3) Build libcef_dll_wrapper and prepare the CEF binaries directory using
+   the automate.py tool. This processes the downloaded "cef_binary_*"
+   directory and creates a new directory eg. "cef55_3.2883.1553.g80bd606_win32/"
+   that build.py requires. Note: this step requires cmake and ninja on PATH.
 ```
 python ../tools/automate.py --prebuilt-cef
 ```
 
-5) Run the build.py tool (xx.x is version number):
+4) Run the build.py tool. The version number is optional and defaults to
+   {CHROME_VERSION_MAJOR}.0 read from "cefpython/src/version/":
+```
+python ../tools/build.py
+```
+   To override the patch version (eg. for a second release off the same CEF):
 ```
 python ../tools/build.py xx.x
 ```

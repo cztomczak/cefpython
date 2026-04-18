@@ -110,8 +110,6 @@ def print_compiler_options():
 
 
 def get_compiler(static=False):
-    # NOTES:
-    # - VS2008 and VS2010 are both using distutils/msvc9compiler.py
     compiler = new_compiler()
     # Must initialize so that "compile_options" and others are available
     compiler.initialize()
