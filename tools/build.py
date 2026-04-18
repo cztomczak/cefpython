@@ -698,9 +698,13 @@ def build_cefpython_module():
     if ENABLE_LINE_TRACING:
         enable_line_tracing = "--enable-line-tracing"
 
+    plat_name = ""
+    if WINDOWS:
+        plat_name = "--plat-name win-amd64" if ARCH64 else "--plat-name win32"
     command = ("\"{python}\" {tools_dir}/cython_setup.py build_ext"
-               " {enable_profiling} {enable_line_tracing}"
+               " {plat_name} {enable_profiling} {enable_line_tracing}"
                .format(python=sys.executable, tools_dir=TOOLS_DIR,
+                       plat_name=plat_name,
                        enable_profiling=enable_profiling,
                        enable_line_tracing=enable_line_tracing))
     if FAST_FLAG:

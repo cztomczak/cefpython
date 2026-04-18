@@ -111,8 +111,14 @@ def print_compiler_options():
 
 def get_compiler(static=False):
     compiler = new_compiler()
-    # Must initialize so that "compile_options" and others are available
-    compiler.initialize()
+    # Must initialize so that "compile_options" and others are available.
+    # Pass plat_name explicitly: without it distutils may default to win32
+    # (32-bit) even on 64-bit Python, causing linker failures against x64
+    # CEF libraries.
+    if WINDOWS:
+        compiler.initialize(plat_name="win-amd64" if ARCH64 else "win32")
+    else:
+        compiler.initialize()
     if static:
         compiler.compile_options.remove("/MD")
         # Overwrite function that adds /MANIFESTFILE, as for subprocess
