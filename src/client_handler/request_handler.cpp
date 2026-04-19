@@ -104,7 +104,9 @@ bool RequestHandler::OnCertificateError(
 
 
 void RequestHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
-                                               cef_termination_status_t status)
+                                               cef_termination_status_t status,
+                                               int error_code,
+                                               const CefString& error_string)
 {
     REQUIRE_UI_THREAD();
     LOG(ERROR) << "[Browser process] OnRenderProcessTerminated()";

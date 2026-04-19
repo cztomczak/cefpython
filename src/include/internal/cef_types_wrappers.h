@@ -31,6 +31,7 @@
 #define CEF_INCLUDE_INTERNAL_CEF_TYPES_WRAPPERS_H_
 #pragma once
 
+#include <algorithm>
 #include <limits>
 
 #include "include/internal/cef_string.h"
@@ -38,17 +39,17 @@
 #include "include/internal/cef_types.h"
 
 ///
-/// Template class that provides common functionality for CEF structure
-/// wrapping. Use only with non-POD types that benefit from referencing unowned
-/// members.
+/// Template class that provides common functionality for complex CEF structure
+/// wrapping. Use only with non-POD types that begin with a `size_t size` member
+/// and can benefit from referencing unowned members.
 ///
 template <class traits>
 class CefStructBase : public traits::struct_type {
  public:
   using struct_type = typename traits::struct_type;
 
-  CefStructBase() : attached_to_(NULL) { Init(); }
-  virtual ~CefStructBase() {
+  CefStructBase() { Init(); }
+  ~CefStructBase() {
     // Only clear this object's data if it isn't currently attached to a
     // structure.
     if (!attached_to_) {
@@ -79,8 +80,12 @@ class CefStructBase : public traits::struct_type {
     // This object is now attached to the new structure.
     attached_to_ = &source;
 
-    // Transfer ownership of the values from the source structure.
-    memcpy(static_cast<struct_type*>(this), &source, sizeof(struct_type));
+    // Source structure may be smaller size.
+    const size_t source_size = std::min(source.size, sizeof(struct_type));
+
+    // Reference values from the source structure, and keep the same size.
+    memcpy(static_cast<struct_type*>(this), &source, source_size);
+    this->size = source_size;
   }
 
   ///
@@ -93,10 +98,20 @@ class CefStructBase : public traits::struct_type {
       Clear(&target);
     }
 
-    // Transfer ownership of the values to the target structure.
-    memcpy(&target, static_cast<struct_type*>(this), sizeof(struct_type));
+    // Target structure may be smaller size.
+    const size_t target_size = std::min(target.size, sizeof(struct_type));
 
-    // Remove the references from this object.
+    // Transfer ownership of the values to the target structure.
+    memcpy(&target, static_cast<struct_type*>(this), target_size);
+
+    if (target_size < sizeof(struct_type)) {
+      // Zero the transferred portion and clear the remainder.
+      memset(static_cast<struct_type*>(this), 0, target_size);
+      this->size = sizeof(struct_type);
+      Clear(this);
+    }
+
+    // Zero everything. We return to the default size.
     Init();
   }
 
@@ -105,6 +120,10 @@ class CefStructBase : public traits::struct_type {
   /// will be copied instead of referenced.
   ///
   void Set(const struct_type& source, bool copy) {
+    if (source.size < sizeof(struct_type)) {
+      // Clear newer members that won't be set.
+      Clear(this);
+    }
     traits::set(&source, this, copy);
   }
 
@@ -126,7 +145,25 @@ class CefStructBase : public traits::struct_type {
 
   static void Clear(struct_type* s) { traits::clear(s); }
 
-  struct_type* attached_to_;
+  struct_type* attached_to_ = nullptr;
+};
+
+///
+/// Template class that provides common functionality for simple CEF structure
+/// wrapping. Use only with POD types that begin with a `size_t size` member.
+///
+template <class struct_type>
+class CefStructBaseSimple : public struct_type {
+ public:
+  CefStructBaseSimple() : struct_type{sizeof(struct_type)} {}
+  CefStructBaseSimple(const struct_type& r) { *this = r; }
+
+  CefStructBaseSimple& operator=(const struct_type& r) {
+    memcpy(static_cast<struct_type*>(this), &r,
+           std::min(r.size, sizeof(struct_type)));
+    this->size = sizeof(struct_type);
+    return *this;
+  }
 };
 
 ///
@@ -289,18 +326,21 @@ inline bool operator!=(const CefDraggableRegion& a,
 /// Class representing the virtual screen information for use when window
 /// rendering is disabled.
 ///
-class CefScreenInfo : public cef_screen_info_t {
+class CefScreenInfo : public CefStructBaseSimple<cef_screen_info_t> {
  public:
-  CefScreenInfo() : cef_screen_info_t{} {}
-  CefScreenInfo(const cef_screen_info_t& r) : cef_screen_info_t(r) {}
+  using base_type = CefStructBaseSimple<cef_screen_info_t>;
+  using base_type::CefStructBaseSimple;
+  using base_type::operator=;
+
   CefScreenInfo(float device_scale_factor,
                 int depth,
                 int depth_per_component,
                 bool is_monochrome,
                 const cef_rect_t& rect,
-                const cef_rect_t& available_rect)
-      : cef_screen_info_t{device_scale_factor, depth, depth_per_component,
-                          is_monochrome,       rect,  available_rect} {}
+                const cef_rect_t& available_rect) {
+    Set(device_scale_factor, depth, depth_per_component, is_monochrome, rect,
+        available_rect);
+  }
 
   void Set(float device_scale_factor_val,
            int depth_val,
@@ -320,11 +360,7 @@ class CefScreenInfo : public cef_screen_info_t {
 ///
 /// Class representing a a keyboard event.
 ///
-class CefKeyEvent : public cef_key_event_t {
- public:
-  CefKeyEvent() : cef_key_event_t{} {}
-  CefKeyEvent(const cef_key_event_t& r) : cef_key_event_t(r) {}
-};
+using CefKeyEvent = CefStructBaseSimple<cef_key_event_t>;
 
 ///
 /// Class representing a mouse event.
@@ -347,11 +383,7 @@ class CefTouchEvent : public cef_touch_event_t {
 ///
 /// Class representing popup window features.
 ///
-class CefPopupFeatures : public cef_popup_features_t {
- public:
-  CefPopupFeatures() : cef_popup_features_t{} {}
-  CefPopupFeatures(const cef_popup_features_t& r) : cef_popup_features_t(r) {}
-};
+using CefPopupFeatures = CefStructBaseSimple<cef_popup_features_t>;
 
 struct CefSettingsTraits {
   using struct_type = cef_settings_t;
@@ -387,7 +419,6 @@ struct CefSettingsTraits {
                    &target->framework_dir_path, copy);
     cef_string_set(src->main_bundle_path.str, src->main_bundle_path.length,
                    &target->main_bundle_path, copy);
-    target->chrome_runtime = src->chrome_runtime;
     target->multi_threaded_message_loop = src->multi_threaded_message_loop;
     target->external_message_pump = src->external_message_pump;
     target->windowless_rendering_enabled = src->windowless_rendering_enabled;
@@ -398,7 +429,6 @@ struct CefSettingsTraits {
     cef_string_set(src->root_cache_path.str, src->root_cache_path.length,
                    &target->root_cache_path, copy);
     target->persist_session_cookies = src->persist_session_cookies;
-    target->persist_user_preferences = src->persist_user_preferences;
 
     cef_string_set(src->user_agent.str, src->user_agent.length,
                    &target->user_agent, copy);
@@ -417,7 +447,6 @@ struct CefSettingsTraits {
                    &target->resources_dir_path, copy);
     cef_string_set(src->locales_dir_path.str, src->locales_dir_path.length,
                    &target->locales_dir_path, copy);
-    target->pack_loading_disabled = src->pack_loading_disabled;
     target->remote_debugging_port = src->remote_debugging_port;
     target->uncaught_exception_stack_size = src->uncaught_exception_stack_size;
     target->background_color = src->background_color;
@@ -435,6 +464,16 @@ struct CefSettingsTraits {
     cef_string_set(src->chrome_policy_id.str, src->chrome_policy_id.length,
                    &target->chrome_policy_id, copy);
     target->chrome_app_icon_id = src->chrome_app_icon_id;
+
+#if defined(OS_POSIX) && !defined(OS_ANDROID)
+    target->disable_signal_handlers = src->disable_signal_handlers;
+#endif
+
+#if CEF_API_ADDED(14600)
+    if (CEF_MEMBER_EXISTS(src, use_views_default_popup)) {
+      target->use_views_default_popup = src->use_views_default_popup;
+    }
+#endif
   }
 };
 
@@ -460,7 +499,6 @@ struct CefRequestContextSettingsTraits {
     cef_string_set(src->cache_path.str, src->cache_path.length,
                    &target->cache_path, copy);
     target->persist_session_cookies = src->persist_session_cookies;
-    target->persist_user_preferences = src->persist_user_preferences;
     cef_string_set(src->accept_language_list.str,
                    src->accept_language_list.length,
                    &target->accept_language_list, copy);
@@ -535,13 +573,20 @@ struct CefBrowserSettingsTraits {
     target->text_area_resize = src->text_area_resize;
     target->tab_to_links = src->tab_to_links;
     target->local_storage = src->local_storage;
+#if !CEF_API_ADDED(13800)
     target->databases = src->databases;
+#endif
     target->webgl = src->webgl;
 
     target->background_color = src->background_color;
 
     target->chrome_status_bubble = src->chrome_status_bubble;
     target->chrome_zoom_bubble = src->chrome_zoom_bubble;
+#if CEF_API_ADDED(CEF_EXPERIMENTAL)
+    if (CEF_MEMBER_EXISTS(src, ax_viewport_collapse)) {
+      target->ax_viewport_collapse = src->ax_viewport_collapse;
+    }
+#endif
   }
 };
 
@@ -553,7 +598,7 @@ using CefBrowserSettings = CefStructBase<CefBrowserSettingsTraits>;
 struct CefURLPartsTraits {
   using struct_type = cef_urlparts_t;
 
-  static inline void init(struct_type* s) {}
+  static inline void init(struct_type* s) { s->size = sizeof(struct_type); }
 
   static inline void clear(struct_type* s) {
     cef_string_clear(&s->spec);
@@ -595,17 +640,12 @@ using CefURLParts = CefStructBase<CefURLPartsTraits>;
 ///
 /// Class representing the state of a touch handle.
 ///
-class CefTouchHandleState : public cef_touch_handle_state_t {
- public:
-  CefTouchHandleState() : cef_touch_handle_state_t{} {}
-  CefTouchHandleState(const cef_touch_handle_state_t& r)
-      : cef_touch_handle_state_t(r) {}
-};
+using CefTouchHandleState = CefStructBaseSimple<cef_touch_handle_state_t>;
 
 struct CefCookieTraits {
   using struct_type = cef_cookie_t;
 
-  static inline void init(struct_type* s) {}
+  static inline void init(struct_type* s) { s->size = sizeof(struct_type); }
 
   static inline void clear(struct_type* s) {
     cef_string_clear(&s->name);
@@ -649,7 +689,7 @@ class CefCursorInfo : public cef_cursor_info_t {
 struct CefPdfPrintSettingsTraits {
   using struct_type = cef_pdf_print_settings_t;
 
-  static inline void init(struct_type* s) {}
+  static inline void init(struct_type* s) { s->size = sizeof(struct_type); }
 
   static inline void clear(struct_type* s) {
     cef_string_clear(&s->page_ranges);
@@ -695,37 +735,31 @@ using CefPdfPrintSettings = CefStructBase<CefPdfPrintSettingsTraits>;
 ///
 /// Class representing CefBoxLayout settings.
 ///
-class CefBoxLayoutSettings : public cef_box_layout_settings_t {
+class CefBoxLayoutSettings
+    : public CefStructBaseSimple<cef_box_layout_settings_t> {
  public:
-  CefBoxLayoutSettings() : cef_box_layout_settings_t{} {}
-  CefBoxLayoutSettings(const cef_box_layout_settings_t& r)
-      : cef_box_layout_settings_t(r) {}
+  using base_type = CefStructBaseSimple<cef_box_layout_settings_t>;
+  using base_type::CefStructBaseSimple;
+  using base_type::operator=;
+
+  CefBoxLayoutSettings() { cross_axis_alignment = CEF_AXIS_ALIGNMENT_STRETCH; }
 };
 
 ///
 /// Class representing IME composition underline.
 ///
-class CefCompositionUnderline : public cef_composition_underline_t {
- public:
-  CefCompositionUnderline() : cef_composition_underline_t{} {}
-  CefCompositionUnderline(const cef_composition_underline_t& r)
-      : cef_composition_underline_t(r) {}
-};
+using CefCompositionUnderline =
+    CefStructBaseSimple<cef_composition_underline_t>;
 
 ///
 /// Class representing CefAudioParameters settings
 ///
-class CefAudioParameters : public cef_audio_parameters_t {
- public:
-  CefAudioParameters() : cef_audio_parameters_t{} {}
-  CefAudioParameters(const cef_audio_parameters_t& r)
-      : cef_audio_parameters_t(r) {}
-};
+using CefAudioParameters = CefStructBaseSimple<cef_audio_parameters_t>;
 
 struct CefMediaSinkDeviceInfoTraits {
   using struct_type = cef_media_sink_device_info_t;
 
-  static inline void init(struct_type* s) {}
+  static inline void init(struct_type* s) { s->size = sizeof(struct_type); }
 
   static inline void clear(struct_type* s) {
     cef_string_clear(&s->ip_address);
@@ -747,5 +781,70 @@ struct CefMediaSinkDeviceInfoTraits {
 /// Class representing MediaSink device info.
 ///
 using CefMediaSinkDeviceInfo = CefStructBase<CefMediaSinkDeviceInfoTraits>;
+
+///
+/// Class representing accelerated paint info.
+///
+using CefAcceleratedPaintInfo =
+    CefStructBaseSimple<cef_accelerated_paint_info_t>;
+
+struct CefTaskInfoTraits {
+  using struct_type = cef_task_info_t;
+
+  static inline void init(struct_type* s) { s->size = sizeof(struct_type); }
+
+  static inline void clear(struct_type* s) { cef_string_clear(&s->title); }
+
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
+    target->id = src->id;
+    target->type = src->type;
+    target->is_killable = src->is_killable;
+    cef_string_set(src->title.str, src->title.length, &target->title, copy);
+    target->cpu_usage = src->cpu_usage;
+    target->number_of_processors = src->number_of_processors;
+    target->memory = src->memory;
+    target->gpu_memory = src->gpu_memory;
+    target->is_gpu_memory_inflated = src->is_gpu_memory_inflated;
+  }
+};
+
+///
+/// Class representing task information.
+///
+using CefTaskInfo = CefStructBase<CefTaskInfoTraits>;
+
+struct CefLinuxWindowPropertiesTraits {
+  using struct_type = cef_linux_window_properties_t;
+
+  static inline void init(struct_type* s) { s->size = sizeof(struct_type); }
+
+  static inline void clear(struct_type* s) {
+    cef_string_clear(&s->wayland_app_id);
+    cef_string_clear(&s->wm_class_class);
+    cef_string_clear(&s->wm_class_name);
+    cef_string_clear(&s->wm_role_name);
+  }
+
+  static inline void set(const struct_type* src,
+                         struct_type* target,
+                         bool copy) {
+    cef_string_set(src->wayland_app_id.str, src->wayland_app_id.length,
+                   &target->wayland_app_id, copy);
+    cef_string_set(src->wm_class_class.str, src->wm_class_class.length,
+                   &target->wm_class_class, copy);
+    cef_string_set(src->wm_class_name.str, src->wm_class_name.length,
+                   &target->wm_class_name, copy);
+    cef_string_set(src->wm_role_name.str, src->wm_role_name.length,
+                   &target->wm_role_name, copy);
+  }
+};
+
+///
+/// Class representing the Linux-specific window properties required
+/// for the window managers to correct group and display the window.
+///
+using CefLinuxWindowProperties = CefStructBase<CefLinuxWindowPropertiesTraits>;
 
 #endif  // CEF_INCLUDE_INTERNAL_CEF_TYPES_WRAPPERS_H_

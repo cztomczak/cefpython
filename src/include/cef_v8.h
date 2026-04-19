@@ -39,11 +39,13 @@
 #pragma once
 
 #include <vector>
+
 #include "include/cef_base.h"
 #include "include/cef_browser.h"
 #include "include/cef_frame.h"
 #include "include/cef_task.h"
 
+class CefV8BackingStore;
 class CefV8Exception;
 class CefV8Handler;
 class CefV8StackFrame;
@@ -424,6 +426,59 @@ class CefV8ArrayBufferReleaseCallback : public virtual CefBaseRefCounted {
   virtual void ReleaseBuffer(void* buffer) = 0;
 };
 
+#if CEF_API_ADDED(14600)
+///
+/// Class representing a V8 ArrayBuffer backing store. The backing store holds
+/// the memory that backs an ArrayBuffer. It must be created on a thread with a
+/// valid V8 isolate (renderer main thread or WebWorker thread). Once created,
+/// the Data() pointer can be safely read/written from any thread. This allows
+/// expensive operations like memcpy to be performed on a background thread
+/// before creating the ArrayBuffer on the V8 thread.
+///
+/// The backing store is consumed when passed to
+/// CefV8Value::CreateArrayBufferFromBackingStore(), after which IsValid()
+/// returns false.
+///
+/*--cef(source=library,no_debugct_check,added=14600)--*/
+class CefV8BackingStore : public virtual CefBaseRefCounted {
+ public:
+  ///
+  /// Create a new backing store with allocated memory of |byte_length| bytes.
+  /// The memory is uninitialized. This method must be called on a thread with a
+  /// valid V8 isolate. The returned object can safely be passed to other
+  /// threads. Returns nullptr on failure.
+  ///
+  /*--cef()--*/
+  static CefRefPtr<CefV8BackingStore> Create(size_t byte_length);
+
+  ///
+  /// Returns a pointer to the allocated memory, or nullptr if the backing
+  /// store has been consumed or is otherwise invalid. The pointer is safe to
+  /// read/write from any thread. The caller must ensure all writes are complete
+  /// before passing this object to CreateArrayBufferFromBackingStore().
+  /// Pointers obtained from this method should not be retained after calling
+  /// CreateArrayBufferFromBackingStore(), as the memory will then be owned by
+  /// the ArrayBuffer and subject to V8 garbage collection.
+  ///
+  /*--cef()--*/
+  virtual void* Data() = 0;
+
+  ///
+  /// Returns the size of the allocated memory in bytes, or 0 if the backing
+  /// store has been consumed.
+  ///
+  /*--cef()--*/
+  virtual size_t ByteLength() = 0;
+
+  ///
+  /// Returns true if this backing store has not yet been consumed by
+  /// CreateArrayBufferFromBackingStore().
+  ///
+  /*--cef()--*/
+  virtual bool IsValid() = 0;
+};
+#endif
+
 ///
 /// Class representing a V8 value handle. V8 handles can only be accessed from
 /// the thread on which they are created. Valid threads for creating a V8 handle
@@ -434,7 +489,6 @@ class CefV8ArrayBufferReleaseCallback : public virtual CefBaseRefCounted {
 /*--cef(source=library,no_debugct_check)--*/
 class CefV8Value : public virtual CefBaseRefCounted {
  public:
-  typedef cef_v8_accesscontrol_t AccessControl;
   typedef cef_v8_propertyattribute_t PropertyAttribute;
 
   ///
@@ -520,11 +574,41 @@ class CefV8Value : public virtual CefBaseRefCounted {
   /// or CefV8Accessor callback, or in combination with calling Enter() and
   /// Exit() on a stored CefV8Context reference.
   ///
+  /// NOTE: Always returns nullptr when V8 sandbox is enabled.
+  ///
   /*--cef(optional_param=buffer)--*/
   static CefRefPtr<CefV8Value> CreateArrayBuffer(
       void* buffer,
       size_t length,
       CefRefPtr<CefV8ArrayBufferReleaseCallback> release_callback);
+
+  ///
+  /// Create a new CefV8Value object of type ArrayBuffer which copies the
+  /// provided |buffer| of size |length| bytes.
+  /// This method should only be called from within the scope of a
+  /// CefRenderProcessHandler, CefV8Handler or CefV8Accessor callback, or in
+  /// combination with calling Enter() and Exit() on a stored CefV8Context
+  /// reference.
+  ///
+  /*--cef(optional_param=buffer)--*/
+  static CefRefPtr<CefV8Value> CreateArrayBufferWithCopy(void* buffer,
+                                                         size_t length);
+
+#if CEF_API_ADDED(14600)
+  ///
+  /// Create a new CefV8Value object of type ArrayBuffer from a backing store
+  /// previously created with CefV8BackingStore::Create(). This is a zero-copy
+  /// operation — the ArrayBuffer uses the memory already allocated by the
+  /// backing store. The backing store is consumed and becomes invalid after
+  /// this call. This method should only be called from within the scope of a
+  /// CefRenderProcessHandler, CefV8Handler or CefV8Accessor callback, or in
+  /// combination with calling Enter() and Exit() on a stored CefV8Context
+  /// reference.
+  ///
+  /*--cef(added=14600)--*/
+  static CefRefPtr<CefV8Value> CreateArrayBufferFromBackingStore(
+      CefRefPtr<CefV8BackingStore> backing_store);
+#endif
 
   ///
   /// Create a new CefV8Value object of type function. This method should only
@@ -793,9 +877,7 @@ class CefV8Value : public virtual CefBaseRefCounted {
   /// will return true even though assignment failed.
   ///
   /*--cef(capi_name=set_value_byaccessor,optional_param=key)--*/
-  virtual bool SetValue(const CefString& key,
-                        AccessControl settings,
-                        PropertyAttribute attribute) = 0;
+  virtual bool SetValue(const CefString& key, PropertyAttribute attribute) = 0;
 
   ///
   /// Read the keys for the object's values into the specified vector. Integer-

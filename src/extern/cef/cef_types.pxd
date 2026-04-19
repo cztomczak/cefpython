@@ -67,17 +67,12 @@ cdef extern from "include/internal/cef_types.h":
         cef_state_t javascript_close_windows
         cef_state_t javascript_access_clipboard
         cef_state_t javascript_dom_paste
-        cef_state_t plugins
-        cef_state_t universal_access_from_file_urls
-        cef_state_t file_access_from_file_urls
-        cef_state_t web_security
         cef_state_t image_loading
         cef_state_t image_shrink_standalone_to_fit
         cef_state_t text_area_resize
         cef_state_t tab_to_links
         cef_state_t local_storage
-        cef_state_t databases
-        cef_state_t application_cache
+        cef_state_t databases_deprecated
         cef_state_t webgl
         int windowless_frame_rate
 
@@ -231,7 +226,6 @@ cdef extern from "include/internal/cef_types.h":
         ERR_ADDRESS_UNREACHABLE = -109,
         ERR_SSL_CLIENT_AUTH_CERT_NEEDED = -110,
         ERR_TUNNEL_CONNECTION_FAILED = -111,
-        ERR_NO_SSL_VERSIONS_ENABLED = -112,
         ERR_SSL_VERSION_OR_CIPHER_MISMATCH = -113,
         ERR_SSL_RENEGOTIATION_REQUESTED = -114,
         ERR_CERT_COMMON_NAME_INVALID = -200,

@@ -59,7 +59,7 @@ class CefApp;
 /// |windows_sandbox_info| parameter is only used on Windows and may be NULL
 /// (see cef_sandbox_win.h for details).
 ///
-/*--cef(api_hash_check,optional_param=application,
+/*--cef(api_hash_check,no_stack_protector,optional_param=application,
         optional_param=windows_sandbox_info)--*/
 int CefExecuteProcess(const CefMainArgs& args,
                       CefRefPtr<CefApp> application,
@@ -71,9 +71,9 @@ int CefExecuteProcess(const CefMainArgs& args,
 /// true if initialization succeeds. Returns false if initialization fails or if
 /// early exit is desired (for example, due to process singleton relaunch
 /// behavior). If this function returns false then the application should exit
-/// immediately without calling any other CEF functions. The
-/// |windows_sandbox_info| parameter is only used on Windows and may be NULL
-/// (see cef_sandbox_win.h for details).
+/// immediately without calling any other CEF functions except, optionally,
+/// CefGetExitCode. The |windows_sandbox_info| parameter is only used on Windows
+/// and may be NULL (see cef_sandbox_win.h for details).
 ///
 /*--cef(api_hash_check,optional_param=application,
         optional_param=windows_sandbox_info)--*/
@@ -81,6 +81,18 @@ bool CefInitialize(const CefMainArgs& args,
                    const CefSettings& settings,
                    CefRefPtr<CefApp> application,
                    void* windows_sandbox_info);
+
+///
+/// This function can optionally be called on the main application thread after
+/// CefInitialize to retrieve the initialization exit code. When CefInitialize
+/// returns true the exit code will be 0 (CEF_RESULT_CODE_NORMAL_EXIT).
+/// Otherwise, see cef_resultcode_t for possible exit code values including
+/// browser process initialization errors and normal early exit conditions (such
+/// as CEF_RESULT_CODE_NORMAL_EXIT_PROCESS_NOTIFIED for process singleton
+/// relaunch behavior).
+///
+/*--cef()--*/
+int CefGetExitCode();
 
 ///
 /// This function should be called on the main application thread to shut down
@@ -127,6 +139,52 @@ void CefRunMessageLoop();
 /*--cef()--*/
 void CefQuitMessageLoop();
 
+#if CEF_API_ADDED(14100)
+///
+/// Set to true before calling OS APIs on the CEF UI thread that will enter a
+/// native message loop (see usage restrictions below). Set to false after
+/// exiting the native message loop. On Windows, use the CefSetOSModalLoop
+/// function instead in cases like native top menus where resize of the browser
+/// content is not required, or in cases like printer APIs where reentrancy
+/// safety cannot be guaranteed.
+///
+/// Nested processing of Chromium tasks is disabled by default because common
+/// controls and/or printer functions may use nested native message loops that
+/// lead to unplanned reentrancy. This function re-enables nested processing in
+/// the scope of an upcoming native message loop. It must only be used in cases
+/// where the stack is reentrancy safe and processing nestable tasks is
+/// explicitly safe. Do not use in cases (like the printer example) where an OS
+/// API may experience unplanned reentrancy as a result of a new task executing
+/// immediately.
+///
+/// For instance,
+/// - The UI thread is running a message loop.
+/// - It receives a task #1 and executes it.
+/// - The task #1 implicitly starts a nested message loop. For example, via
+///   Windows APIs such as MessageBox or GetSaveFileName, or default handling
+///   of a user-initiated drag/resize operation (e.g. DefWindowProc handling of
+///   WM_SYSCOMMAND for SC_MOVE/SC_SIZE).
+/// - The UI thread receives a task #2 before or while in this second message
+///   loop.
+/// - With NestableTasksAllowed set to true, the task #2 will run right away.
+///   Otherwise, it will be executed right after task #1 completes at "thread
+///   message loop level".
+///
+/*--cef(added=14100)--*/
+void CefSetNestableTasksAllowed(bool allowed);
+
+#ifdef __cplusplus
+///
+/// Scoped helper for calling CefSetNestableTasksAllowed.
+///
+class CefScopedSetNestableTasksAllowed final {
+ public:
+  CefScopedSetNestableTasksAllowed() { CefSetNestableTasksAllowed(true); }
+  ~CefScopedSetNestableTasksAllowed() { CefSetNestableTasksAllowed(false); }
+};
+#endif  // __cplusplus
+#endif
+
 ///
 /// Implement this interface to provide handler implementations. Methods will be
 /// called by the process and/or thread indicated.
@@ -162,10 +220,9 @@ class CefApp : public virtual CefBaseRefCounted {
       CefRawPtr<CefSchemeRegistrar> registrar) {}
 
   ///
-  /// Return the handler for resource bundle events. If
-  /// cef_settings_t.pack_loading_disabled is true a handler must be returned.
-  /// If no handler is returned resources will be loaded from pack files. This
-  /// method is called by the browser and render processes on multiple threads.
+  /// Return the handler for resource bundle events. If no handler is returned
+  /// resources will be loaded from pack files. This method is called by the
+  /// browser and render processes on multiple threads.
   ///
   /*--cef()--*/
   virtual CefRefPtr<CefResourceBundleHandler> GetResourceBundleHandler() {

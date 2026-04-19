@@ -6,7 +6,7 @@
 #include "include/base/cef_logging.h"
 
 
-void DownloadHandler::OnBeforeDownload(
+bool DownloadHandler::OnBeforeDownload(
                             CefRefPtr<CefBrowser> browser,
                             CefRefPtr<CefDownloadItem> download_item,
                             const CefString& suggested_name,
@@ -23,6 +23,7 @@ void DownloadHandler::OnBeforeDownload(
         LOG(INFO) << "[Browser process] Tried to download file,"
                      " but downloads are disabled";
     }
+    return false;
 }
 
 

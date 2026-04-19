@@ -31,8 +31,11 @@
 #define CEF_INCLUDE_CEF_BASE_H_
 #pragma once
 
-#include "include/base/cef_atomic_ref_count.h"
+#if !defined(GENERATING_CEF_API_HASH)
 #include "include/base/cef_build.h"
+#endif
+
+#include "include/base/cef_atomic_ref_count.h"
 #include "include/base/cef_macros.h"
 
 // Bring in common C++ type definitions used by CEF consumers.
@@ -115,6 +118,14 @@ class CefRefCount {
   /// Returns true if the reference count is at least 1.
   ///
   bool HasAtLeastOneRef() const { return !ref_count_.IsZero(); }
+
+  ///
+  /// Returns the current reference count (with no barriers). This is subtle,
+  /// and should be used only for debugging.
+  ///
+  int SubtleRefCountForDebug() const {
+    return ref_count_.SubtleRefCountForDebug();
+  }
 
  private:
   mutable base::AtomicRefCount ref_count_{0};

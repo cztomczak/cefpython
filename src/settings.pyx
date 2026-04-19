@@ -84,7 +84,7 @@ cdef void SetApplicationSettings(
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
         elif key == "pack_loading_disabled":
-            cefAppSettings.pack_loading_disabled = int(appSettings[key])
+            pass  # Removed in CEF 146
         elif key == "uncaught_exception_stack_size":
             cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
         elif key == "browser_subprocess_path":
@@ -99,8 +99,7 @@ cdef void SetApplicationSettings(
             cefAppSettings.background_color = \
                     <uint32_t>int(appSettings[key])
         elif key == "persist_user_preferences":
-            cefAppSettings.persist_user_preferences = \
-                    int(appSettings[key])
+            pass  # Removed in CEF 146
         elif key == "windowless_rendering_enabled":
             cefAppSettings.windowless_rendering_enabled = \
                     int(appSettings[key])
@@ -238,9 +237,9 @@ cdef void SetBrowserSettings(
                 cefBrowserSettings.local_storage = cef_types.STATE_ENABLED
         elif key == "databases_disabled":
             if browserSettings[key]:
-                cefBrowserSettings.databases = cef_types.STATE_DISABLED
+                cefBrowserSettings.databases_deprecated = cef_types.STATE_DISABLED
             else:
-                cefBrowserSettings.databases = cef_types.STATE_ENABLED
+                cefBrowserSettings.databases_deprecated = cef_types.STATE_ENABLED
         elif key == "webgl_disabled":
             if browserSettings[key]:
                 cefBrowserSettings.webgl = cef_types.STATE_DISABLED

@@ -192,7 +192,7 @@ def set_compiler_options(options):
         #
         # The above warning LNK4217 is caused by the warning below which occurs
         # when building the client_handler.lib static library:
-        extra_compile_args.extend(["/EHsc", "/wd4305", "/std:c++17"])
+        extra_compile_args.extend(["/EHsc", "/wd4305", "/std:c++20", "/DNOMINMAX"])
         extra_link_args.extend(["/ignore:4217"])
 
     if LINUX or MAC:

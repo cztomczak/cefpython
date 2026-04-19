@@ -38,6 +38,7 @@
 #define CEF_INCLUDE_CEF_DISPLAY_HANDLER_H_
 #pragma once
 
+#include "include/cef_api_hash.h"
 #include "include/cef_base.h"
 #include "include/cef_browser.h"
 #include "include/cef_frame.h"
@@ -75,12 +76,12 @@ class CefDisplayHandler : public virtual CefBaseRefCounted {
   /// Called when web content in the page has toggled fullscreen mode. If
   /// |fullscreen| is true the content will automatically be sized to fill the
   /// browser content area. If |fullscreen| is false the content will
-  /// automatically return to its original size and position. With the Alloy
-  /// runtime the client is responsible for triggering the fullscreen transition
-  /// (for example, by calling CefWindow::SetFullscreen when using Views). With
-  /// the Chrome runtime the fullscreen transition will be triggered
-  /// automatically. The CefWindowDelegate::OnWindowFullscreenTransition method
-  /// will be called during the fullscreen transition for notification purposes.
+  /// automatically return to its original size and position. With Alloy style
+  /// the client is responsible for triggering the fullscreen transition (for
+  /// example, by calling CefWindow::SetFullscreen when using Views). With
+  /// Chrome style the fullscreen transition will be triggered automatically.
+  /// The CefWindowDelegate::OnWindowFullscreenTransition method will be called
+  /// during the fullscreen transition for notification purposes.
   ///
   /*--cef()--*/
   virtual void OnFullscreenModeChange(CefRefPtr<CefBrowser> browser,
@@ -123,7 +124,7 @@ class CefDisplayHandler : public virtual CefBaseRefCounted {
   ///
   /// Called when auto-resize is enabled via
   /// CefBrowserHost::SetAutoResizeEnabled and the contents have auto-resized.
-  /// |new_size| will be the desired size in view coordinates. Return true if
+  /// |new_size| will be the desired size in DIP coordinates. Return true if
   /// the resize was handled or false for default handling.
   ///
   /*--cef()--*/
@@ -162,6 +163,46 @@ class CefDisplayHandler : public virtual CefBaseRefCounted {
   virtual void OnMediaAccessChange(CefRefPtr<CefBrowser> browser,
                                    bool has_video_access,
                                    bool has_audio_access) {}
+
+#if CEF_API_ADDED(13700)
+  ///
+  /// Called when JavaScript is requesting new bounds via window.moveTo/By() or
+  /// window.resizeTo/By(). |new_bounds| are in DIP screen coordinates.
+  ///
+  /// With Views-hosted browsers |new_bounds| are the desired bounds for
+  /// the containing CefWindow and may be passed directly to
+  /// CefWindow::SetBounds. With external (client-provided) parent on macOS and
+  /// Windows |new_bounds| are the desired frame bounds for the containing root
+  /// window. With other non-Views browsers |new_bounds| are the desired bounds
+  /// for the browser content only unless the client implements either
+  /// CefDisplayHandler::GetRootWindowScreenRect for windowed browsers or
+  /// CefRenderHandler::GetWindowScreenRect for windowless browsers. Clients may
+  /// expand browser content bounds to window bounds using OS-specific or
+  /// CefDisplay methods.
+  ///
+  /// Return true if this method was handled or false for default handling.
+  /// Default move/resize behavior is only provided with Views-hosted Chrome
+  /// style browsers.
+  ///
+  /*--cef(added=13700)--*/
+  virtual bool OnContentsBoundsChange(CefRefPtr<CefBrowser> browser,
+                                      const CefRect& new_bounds) {
+    return false;
+  }
+
+  ///
+  /// Called to retrieve the external (client-provided) root window rectangle in
+  /// screen DIP coordinates. Only called for windowed browsers on Windows and
+  /// Linux. Return true if the rectangle was provided. Return false to use the
+  /// root window bounds on Windows or the browser content bounds on Linux. For
+  /// additional usage details see CefBrowserHost::NotifyScreenInfoChanged.
+  ///
+  /*--cef(added=13700)--*/
+  virtual bool GetRootWindowScreenRect(CefRefPtr<CefBrowser> browser,
+                                       CefRect& rect) {
+    return false;
+  }
+#endif
 };
 
 #endif  // CEF_INCLUDE_CEF_DISPLAY_HANDLER_H_

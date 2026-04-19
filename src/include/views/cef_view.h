@@ -350,23 +350,47 @@ class CefView : public CefBaseRefCounted {
   virtual bool IsAccessibilityFocusable() = 0;
 
   ///
-  /// Request keyboard focus. If this View is focusable it will become the
-  /// focused View.
+  /// Returns true if this View has focus in the context of the containing
+  /// Window. Check both this method and CefWindow::IsActive to determine global
+  /// keyboard focus.
+  ///
+  /*--cef()--*/
+  virtual bool HasFocus() = 0;
+
+  ///
+  /// Request focus for this View in the context of the containing Window. If
+  /// this View is focusable it will become the focused View. Any focus changes
+  /// while a Window is not active may be applied after that Window next becomes
+  /// active.
   ///
   /*--cef()--*/
   virtual void RequestFocus() = 0;
 
   ///
-  /// Sets the background color for this View.
+  /// Sets the background color for this View. The background color will be
+  /// automatically reset when CefViewDelegate::OnThemeChanged is called.
   ///
   /*--cef()--*/
   virtual void SetBackgroundColor(cef_color_t color) = 0;
 
   ///
-  /// Returns the background color for this View.
+  /// Returns the background color for this View. If the background color is
+  /// unset then the current `GetThemeColor(CEF_ColorPrimaryBackground)` value
+  /// will be returned. If this View belongs to an overlay (created with
+  /// CefWindow::AddOverlayView), and the background color is unset, then a
+  /// value of transparent (0) will be returned.
   ///
   /*--cef()--*/
   virtual cef_color_t GetBackgroundColor() = 0;
+
+  ///
+  /// Returns the current theme color associated with |color_id|, or the
+  /// placeholder color (red) if unset. See cef_color_ids.h for standard ID
+  /// values. Standard colors can be overridden and custom colors can be added
+  /// using CefWindow::SetThemeColor.
+  ///
+  /*--cef()--*/
+  virtual cef_color_t GetThemeColor(int color_id) = 0;
 
   ///
   /// Convert |point| from this View's coordinate system to DIP screen

@@ -48,6 +48,7 @@
 #include "include/cef_request.h"
 #include "include/cef_resource_request_handler.h"
 #include "include/cef_ssl_info.h"
+#include "include/cef_unresponsive_process_callback.h"
 #include "include/cef_x509_certificate.h"
 
 ///
@@ -191,8 +192,11 @@ class CefRequestHandler : public virtual CefBaseRefCounted {
 
   ///
   /// Called on the UI thread when a client certificate is being requested for
-  /// authentication. Return false to use the default behavior and automatically
-  /// select the first certificate available. Return true and call
+  /// authentication. Return false to use the default behavior.  If the
+  /// |certificates| list is not empty the default behavior will be to display a
+  /// dialog for certificate selection. If the |certificates| list is empty then
+  /// the default behavior will be not to show a dialog and it will continue
+  /// without using any certificate. Return true and call
   /// CefSelectClientCertificateCallback::Select either in this method or at a
   /// later time to select a certificate. Do not call Select or call it with
   /// NULL to continue without using any certificate. |isProxy| indicates
@@ -222,13 +226,51 @@ class CefRequestHandler : public virtual CefBaseRefCounted {
   virtual void OnRenderViewReady(CefRefPtr<CefBrowser> browser) {}
 
   ///
+  /// Called on the browser process UI thread when the render process is
+  /// unresponsive as indicated by a lack of input event processing for at
+  /// least 15 seconds. Return false for the default behavior which is to
+  /// continue waiting with Alloy style or display of the "Page
+  /// unresponsive" dialog with Chrome style. Return true and don't
+  /// execute the callback to continue waiting without display of the Chrome
+  /// style dialog. Return true and call CefUnresponsiveProcessCallback::Wait
+  /// either in this method or at a later time to reset the wait timer.
+  /// In cases where you continue waiting there may be another call to this
+  /// method if the process remains unresponsive. Return true and call
+  /// CefUnresponsiveProcessCallback::Terminate either in this method or at a
+  /// later time to terminate the unresponsive process, resulting in a call to
+  /// OnRenderProcessTerminated. OnRenderProcessResponsive will be called if the
+  /// process becomes responsive after this method is called. This functionality
+  /// depends on the hang monitor which can be disabled by passing the
+  /// `--disable-hang-monitor` command-line flag.
+  ///
+  /*--cef()--*/
+  virtual bool OnRenderProcessUnresponsive(
+      CefRefPtr<CefBrowser> browser,
+      CefRefPtr<CefUnresponsiveProcessCallback> callback) {
+    return false;
+  }
+
+  ///
+  /// Called on the browser process UI thread when the render process becomes
+  /// responsive after previously being unresponsive. See documentation on
+  /// OnRenderProcessUnresponsive.
+  ///
+  /*--cef()--*/
+  virtual void OnRenderProcessResponsive(CefRefPtr<CefBrowser> browser) {}
+
+  ///
   /// Called on the browser process UI thread when the render process
-  /// terminates unexpectedly. |status| indicates how the process
-  /// terminated.
+  /// terminates unexpectedly. |status| indicates how the process terminated.
+  /// |error_code| and |error_string| represent the error that would be
+  /// displayed in Chrome's "Aw, Snap!" view. Possible |error_code| values
+  /// include cef_resultcode_t non-normal exit values and platform-specific
+  /// crash values (for example, a Posix signal or Windows hardware exception).
   ///
   /*--cef()--*/
   virtual void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
-                                         TerminationStatus status) {}
+                                         TerminationStatus status,
+                                         int error_code,
+                                         const CefString& error_string) {}
 
   ///
   /// Called on the browser process UI thread when the window.document object of

@@ -32,6 +32,7 @@ MACROS = [
     ("_WIN32_WINNT", "0x0601"),
     "NDEBUG", "_NDEBUG",
     "_CRT_SECURE_NO_WARNINGS",
+    "NOMINMAX",
 ]
 cefpython_app_MACROS = MACROS + [
     "BROWSER_PROCESS",
@@ -47,11 +48,11 @@ subprocess_MACROS = MACROS + [
 # Compiler args
 COMPILER_ARGS = [
     "/EHsc",
-    "/std:c++17",
+    "/std:c++20",
 ]
 subprocess_COMPILER_ARGS = [
     "/MT",
-    "/std:c++17",
+    "/std:c++20",
 ]
 
 # Linker args

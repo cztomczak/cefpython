@@ -77,6 +77,14 @@ class CefDownloadItem : public virtual CefBaseRefCounted {
   /*--cef()--*/
   virtual bool IsInterrupted() = 0;
 
+#if CEF_API_ADDED(14400)
+  ///
+  /// Returns true if the download has been paused.
+  ///
+  /*--cef(added=14400)--*/
+  virtual bool IsPaused() = 0;
+#endif
+
   ///
   /// Returns the most recent interrupt reason.
   ///

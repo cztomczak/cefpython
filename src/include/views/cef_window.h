@@ -46,6 +46,7 @@
 #include "include/views/cef_window_delegate.h"
 
 class CefBrowserView;
+class CefView;
 
 ///
 /// A Window is a top-level Window/widget in the Views hierarchy. By default it
@@ -189,6 +190,15 @@ class CefWindow : public CefPanel {
   ///
   /*--cef()--*/
   virtual bool IsFullscreen() = 0;
+
+  ///
+  /// Returns the View that currently has focus in this Window, or nullptr if no
+  /// View currently has focus. A Window may have a focused View even if it is
+  /// not currently active. Any focus changes while a Window is not active may
+  /// be applied after that Window next becomes active.
+  ///
+  /*--cef()--*/
+  virtual CefRefPtr<CefView> GetFocusedView() = 0;
 
   ///
   /// Set the Window title.
@@ -377,6 +387,50 @@ class CefWindow : public CefPanel {
   ///
   /*--cef()--*/
   virtual void RemoveAllAccelerators() = 0;
+
+  ///
+  /// Override a standard theme color or add a custom color associated with
+  /// |color_id|. See cef_color_ids.h for standard ID values. Recommended usage
+  /// is as follows:
+  ///
+  /// 1. Customize the default native/OS theme by calling SetThemeColor before
+  ///    showing the first Window. When done setting colors call
+  ///    CefWindow::ThemeChanged to trigger CefViewDelegate::OnThemeChanged
+  ///    notifications.
+  /// 2. Customize the current native/OS or Chrome theme after it changes by
+  ///    calling SetThemeColor from the CefWindowDelegate::OnThemeColorsChanged
+  ///    callback. CefViewDelegate::OnThemeChanged notifications will then be
+  ///    triggered automatically.
+  ///
+  /// The configured color will be available immediately via
+  /// CefView::GetThemeColor and will be applied to each View in this Window's
+  /// component hierarchy when CefViewDelegate::OnThemeChanged is called. See
+  /// OnThemeColorsChanged documentation for additional details.
+  ///
+  /// Clients wishing to add custom colors should use |color_id| values >=
+  /// CEF_ChromeColorsEnd.
+  ///
+  /*--cef()--*/
+  virtual void SetThemeColor(int color_id, cef_color_t color) = 0;
+
+  ///
+  /// Trigger CefViewDelegate::OnThemeChanged callbacks for each View in this
+  /// Window's component hierarchy. Unlike a native/OS or Chrome theme change
+  /// this method does not reset theme colors to standard values and does not
+  /// result in a call to CefWindowDelegate::OnThemeColorsChanged.
+  ///
+  /// Do not call this method from CefWindowDelegate::OnThemeColorsChanged or
+  /// CefViewDelegate::OnThemeChanged.
+  ///
+  /*--cef()--*/
+  virtual void ThemeChanged() = 0;
+
+  ///
+  /// Returns the runtime style for this Window (ALLOY or CHROME). See
+  /// cef_runtime_style_t documentation for details.
+  ///
+  /*--cef(default_retval=CEF_RUNTIME_STYLE_DEFAULT)--*/
+  virtual cef_runtime_style_t GetRuntimeStyle() = 0;
 };
 
 #endif  // CEF_INCLUDE_VIEWS_CEF_WINDOW_H_

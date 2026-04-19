@@ -31,13 +31,17 @@
 #define CEF_INCLUDE_INTERNAL_CEF_APP_WIN_H_
 #pragma once
 
+#if !defined(GENERATING_CEF_API_HASH)
 #include "include/base/cef_build.h"
+#endif
 
 #if defined(OS_WIN)
 
 #if defined(ARCH_CPU_32_BITS)
 #include <windows.h>
 #endif
+
+#include "include/internal/cef_export.h"
 
 #ifdef __cplusplus
 extern "C" {

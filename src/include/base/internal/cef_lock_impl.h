@@ -1,4 +1,5 @@
-// Copyright (c) 2011 Google Inc. All rights reserved.
+// Copyright (c) 2025 Marshall A. Greenblatt. Portions copyright (c) 2011
+// Google Inc. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -31,6 +32,7 @@
 
 #ifndef CEF_INCLUDE_BASE_INTERNAL_CEF_LOCK_IMPL_H_
 #define CEF_INCLUDE_BASE_INTERNAL_CEF_LOCK_IMPL_H_
+#pragma once
 
 #include "include/base/cef_build.h"
 
