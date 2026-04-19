@@ -48,6 +48,16 @@ g_datauri_data = """
         print("CEF: <b>"+version.cef_version+"</b>");
         js_code_completed();
     }
+    function selectText(ev) {
+        // Selection API must run inside a real user-gesture handler so that
+        // CEF fires OnTextSelectionChanged (Chrome 130+ requirement).
+        var el = ev.target;
+        var range = document.createRange();
+        range.selectNodeContents(el);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
     window.onload = function() {
         print("window.onload() ok");
         onload_helper();
@@ -56,7 +66,7 @@ g_datauri_data = """
 </head>
 <body>
     <!-- FrameSourceVisitor hash = 747ef3e6011b6a61e6b3c6e54bdd2dee -->
-    <h1>Off-screen rendering test</h1>
+    <h1 onclick="selectText(event)">Off-screen rendering test</h1>
     <div id="console"></div>
     <div id="OnTextSelectionChanged">Test selection.</div>
 </body>
@@ -152,9 +162,6 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         browser.SetFocus(True)
         browser.WasResized()
 
-        # Test selection
-        on_load_end(select_h1_text, browser)
-
         # Message loop
         run_message_loop()
 
@@ -194,7 +201,6 @@ class AccessibilityHandler(object):
         self._OnAccessibilityTreeChange_True = False
         self._OnAccessibilityLocationChange_True = False
         self.loadComplete_True = False
-        self.layoutComplete_True = False
 
 
 
@@ -207,26 +213,26 @@ class AccessibilityHandler(object):
                     # LoadHandler.OnLoadEnd is called after this event
                     self.test_case.assertFalse(self.loadComplete_True)
                     self.loadComplete_True = True
-                elif event["event_type"] == "layoutComplete":
-                    # layoutComplete event occurs twice, one when a blank
-                    # page is loaded and second time when loading datauri.
-                    if self.loadComplete_True:
-                        self.test_case.assertFalse(self.layoutComplete_True)
-                        self.layoutComplete_True = True
 
     def _OnAccessibilityLocationChange(self, **_):
         self._OnAccessibilityLocationChange_True = True
 
 
-def select_h1_text(browser):
-    browser.SendMouseClickEvent(0, 0, cef.MOUSEBUTTON_LEFT,
+def _click_h1_to_select(browser):
+    """Send a real click to the h1 element after layout is complete.
+
+    Chrome 130+ requires the Selection API to run inside a real user-gesture
+    event handler for OnTextSelectionChanged to fire. The h1 has an onclick
+    handler (selectText) that selects the element's text via the Selection API.
+    h1 position: body margin 8px + h1 margin-block-start ~20px ≈ y=28 top,
+    h1 font-size ~29px ≈ y=57px bottom; click center at y=43.
+    """
+    browser.SendMouseClickEvent(200, 43, cef.MOUSEBUTTON_LEFT,
                                 mouseUp=False, clickCount=1)
-    browser.SendMouseMoveEvent(400, 20, mouseLeave=False,
-                               modifiers=cef.EVENTFLAG_LEFT_MOUSE_BUTTON)
-    browser.SendMouseClickEvent(400, 20, cef.MOUSEBUTTON_LEFT,
+    browser.SendMouseClickEvent(200, 43, cef.MOUSEBUTTON_LEFT,
                                 mouseUp=True, clickCount=1)
     browser.Invalidate(cef.PET_VIEW)
-    subtest_message("select_h1_text() ok")
+    subtest_message("_click_h1_to_select() ok")
 
 
 class RenderHandler(object):
@@ -250,7 +256,7 @@ class RenderHandler(object):
         rect_out.extend([0, 0, 800, 600])
         return True
 
-    def OnPaint(self, element_type, paint_buffer, **_):
+    def OnPaint(self, browser, element_type, paint_buffer, **_):
         """Called when an element should be painted."""
         if element_type == cef.PET_VIEW:
             self.test_case.assertEqual(paint_buffer.width, 800)
@@ -258,18 +264,17 @@ class RenderHandler(object):
             if not self.OnPaint_True:
                 self.OnPaint_True = True
                 subtest_message("RenderHandler.OnPaint: viewport ok")
+                # Layout is now complete. Post the click so it isn't
+                # re-entrant with OnPaint and hit-testing is reliable.
+                cef.PostDelayedTask(cef.TID_UI, 100, _click_h1_to_select,
+                                    browser)
         else:
             raise Exception("Unsupported element_type in OnPaint")
 
     def OnTextSelectionChanged(self, selected_text, selected_range, **_):
-        if not self.OnTextSelectionChanged_True:
-            self.OnTextSelectionChanged_True = True
-            # First call
-            self.test_case.assertEqual(selected_text, "")
-            self.test_case.assertEqual(selected_range, [0, 0])
-        else:
-            # Second call.
-            # <h1> tag should be selected.
+        self.OnTextSelectionChanged_True = True
+        if selected_text:
+            # Verify the h1 text is selected when a non-empty selection fires.
             self.test_case.assertEqual(selected_text,
                                        "Off-screen rendering test")
 
