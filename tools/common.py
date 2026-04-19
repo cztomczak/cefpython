@@ -404,13 +404,17 @@ def get_setup_installer_basename(version, postfix2):
 def _detect_cefpython_binary_dir():
     """Detect cefpython binary directory where cefpython modules
     will be put. Eg. build/cefpython_56.0_win32/."""
-    # Check cef version from header file and check cefpython version
-    # that was passed as command line argument to either build.py
-    # or make-installer.py. The CEFPYTHON_BINARY constant should
-    # only be used in those two scripts, so version number in sys.argv
-    # is expected. If not found then keep the default
-    # "CEFPYTHON_BINARY_NOTSET" value intact.
     dirname = get_cefpython_binary_basename(OS_POSTFIX2, ignore_error=True)
+    if not dirname:
+        # sys.argv has no version yet (e.g. build.py injects the default
+        # version after importing common). Fall back to the version from
+        # the CEF header file so CEFPYTHON_BINARY is set correctly even
+        # when no explicit version argument was supplied on the command line.
+        cef_ver = get_cefpython_version()
+        if cef_ver:
+            version = "{major}.0".format(major=cef_ver["CHROME_VERSION_MAJOR"])
+            dirname = "cefpython_binary_{version}_{os}".format(
+                    version=version, os=OS_POSTFIX2)
     if not dirname:
         return
     binary_dir = os.path.join(BUILD_DIR, dirname)
