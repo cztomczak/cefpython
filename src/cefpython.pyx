@@ -637,6 +637,23 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if not ret:
         Debug("CefInitialize() failed")
 
+    # Pump the message loop until OnContextInitialized fires. This
+    # guarantees that CreateBrowserSync() can be called immediately after
+    # Initialize() without hitting the deferred-creation path or getting
+    # a null browser from CefBrowserHost::CreateBrowserSync().
+    # 200 * 10ms = 2 seconds max; OnContextInitialized typically fires
+    # within the first few iterations.
+    if ret:
+        for _ in range(200):
+            with nogil:
+                CefDoMessageLoopWork()
+            if g_context_initialized:
+                break
+            time.sleep(0.01)
+        if not g_context_initialized:
+            Debug("CefInitialize() WARNING: OnContextInitialized not received"
+                  " within 2 seconds")
+
     IF UNAME_SYSNAME == "Linux":
         # Install by default.
         WindowUtils.InstallX11ErrorHandlers()
@@ -671,8 +688,10 @@ def CreateBrowserSync(windowInfo=None,
     # so skip the assert here and let CEF's own internal checks handle it.
 
     # Defer browser creation until OnContextInitialized fires inside MessageLoop.
-    # In CEF 123+, windowed browser creation before OnContextInitialized causes
+    # In CEF 123+, browser creation before OnContextInitialized causes
     # blink.mojom.WidgetHost rejection and renderer shows no content.
+    # Initialize() pumps the loop until OnContextInitialized fires, so this
+    # path is only taken if CreateBrowserSync() is called before Initialize().
     if not g_context_initialized:
         Debug("CreateBrowserSync() deferred until OnContextInitialized")
         g_pending_browsers.append({

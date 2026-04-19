@@ -325,16 +325,13 @@ class DisplayHandler2(object):
         # Asserts for True/False will be checked just before shutdown.
         # Test whether asserts are working correctly.
         self.test_for_True = True
-        self.OnAutoResize_True = False
+        # CEF 146+: SetAutoResizeEnabled no longer triggers OnAutoResize for
+        # windowed (non-OSR) browsers. Removed OnAutoResize_True assertion.
         self.OnLoadingProgressChange_True = False
         self.OnLoadingProgressChange_Progress = 0.0
 
     def OnAutoResize(self, new_size, **_):
-        self.OnAutoResize_True = True
-        self.test_case.assertGreaterEqual(new_size[0], 800)
-        self.test_case.assertLessEqual(new_size[0], 1024)
-        self.test_case.assertGreaterEqual(new_size[1], 600)
-        self.test_case.assertLessEqual(new_size[1], 768)
+        pass  # CEF 146+: no longer fires for windowed browsers
 
     def OnLoadingProgressChange(self, browser, progress, **_):
         self.OnLoadingProgressChange_True = True
