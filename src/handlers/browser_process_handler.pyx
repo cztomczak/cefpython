@@ -4,6 +4,29 @@
 
 include "../cefpython.pyx"
 
+cdef public void BrowserProcessHandler_OnContextInitialized() except * with gil:
+    try:
+        global g_context_initialized
+        Debug("BrowserProcessHandler_OnContextInitialized()")
+        g_context_initialized = True
+        # Browser creation is handled by BrowserProcessHandler_CreatePendingBrowsers,
+        # posted as a separate task in C++ so it runs at the outer message-loop level.
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
+cdef public void BrowserProcessHandler_CreatePendingBrowsers() except * with gil:
+    try:
+        Debug("BrowserProcessHandler_CreatePendingBrowsers()")
+        if g_pending_browsers:
+            pending = list(g_pending_browsers)
+            del g_pending_browsers[:]
+            for params in pending:
+                CreateBrowserSync(**params)
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
+
 cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
         CefRefPtr[CefListValue] extra_info
         ) except * with gil:

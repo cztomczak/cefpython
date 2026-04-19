@@ -323,6 +323,8 @@ cdef unique_ptr[MainMessageLoopExternalPump] g_external_message_pump
 cdef py_bool g_MessageLoop_called = False
 cdef py_bool g_MessageLoopWork_called = False
 cdef py_bool g_cef_initialized = False
+cdef py_bool g_context_initialized = False
+cdef list g_pending_browsers = []
 
 cdef dict g_globalClientCallbacks = {}
 
@@ -639,6 +641,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         # Install by default.
         WindowUtils.InstallX11ErrorHandlers()
 
+
     return ret
 
 def CreateBrowser(**kwargs):
@@ -664,8 +667,21 @@ def CreateBrowserSync(windowInfo=None,
         raise Exception("Invalid argument: "+kwarg)
 
     Debug("CreateBrowserSync() called")
-    assert IsThread(TID_UI), (
-            "cefpython.CreateBrowserSync() may only be called on the UI thread")
+    # CEF 146+: CefCurrentlyOn(TID_UI) returns false before MessageLoop starts,
+    # so skip the assert here and let CEF's own internal checks handle it.
+
+    # Defer browser creation until OnContextInitialized fires inside MessageLoop.
+    # In CEF 123+, windowed browser creation before OnContextInitialized causes
+    # blink.mojom.WidgetHost rejection and renderer shows no content.
+    if not g_context_initialized:
+        Debug("CreateBrowserSync() deferred until OnContextInitialized")
+        g_pending_browsers.append({
+            "windowInfo": windowInfo,
+            "browserSettings": browserSettings,
+            "navigateUrl": navigateUrl,
+            "window_title": window_title,
+        })
+        return None
 
     """
     # CEF views

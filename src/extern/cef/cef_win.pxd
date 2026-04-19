@@ -17,7 +17,13 @@ cdef extern from "include/internal/cef_win.h":
     # noinspection PyUnresolvedReferences
     ctypedef HCURSOR CefCursorHandle
 
+    ctypedef enum cef_runtime_style_t:
+        CEF_RUNTIME_STYLE_DEFAULT
+        CEF_RUNTIME_STYLE_CHROME
+        CEF_RUNTIME_STYLE_ALLOY
+
     cdef cppclass CefWindowInfo:
+        cef_runtime_style_t runtime_style
         void SetAsChild(CefWindowHandle parent,
                         const CefRect windowRect)
         void SetAsPopup(CefWindowHandle parent,

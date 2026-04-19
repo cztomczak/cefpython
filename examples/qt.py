@@ -257,6 +257,11 @@ class CefWidget(CefWidgetParent):
                                              url="https://www.google.com/")
         self.browser.SetClientHandler(LoadHandler(self.parent.navigation_bar))
         self.browser.SetClientHandler(FocusHandler(self))
+        if WINDOWS:
+            # Sync browser size to actual HWND client rect using device pixels.
+            # PyQt6 high-DPI scaling means self.width()/height() may be smaller
+            # than the real client rect, leaving content in a smaller area.
+            WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
 
     def getHandle(self):
         if self.hidden_window:

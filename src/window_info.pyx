@@ -40,6 +40,8 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)
+            # CEF 123+: must request Alloy runtime for native windowed rendering.
+            cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
         ELIF UNAME_SYSNAME == "Darwin":
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
@@ -64,6 +66,8 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsPopup(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowName)
+            # CEF 123+: must request Alloy runtime for native windowed rendering.
+            cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
 
     if windowInfo.windowType == "offscreen":
         cefWindowInfo.SetAsWindowless(

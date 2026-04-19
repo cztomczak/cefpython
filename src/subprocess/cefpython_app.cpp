@@ -7,6 +7,10 @@
 
 #ifdef BROWSER_PROCESS
 #include "common/cefpython_public_api.h"
+// Forward declaration for the Cython public function (generated in cefpython_fixed.h
+// after Cython runs; declared here so the C++ build does not depend on build order).
+extern "C" void BrowserProcessHandler_OnContextInitialized();
+extern "C" void BrowserProcessHandler_CreatePendingBrowsers();
 #endif
 
 #if defined(OS_WIN)
@@ -168,6 +172,13 @@ CefRefPtr<CefRenderProcessHandler> CefPythonApp::GetRenderProcessHandler() {
 void CefPythonApp::OnContextInitialized() {
 #ifdef BROWSER_PROCESS
     REQUIRE_UI_THREAD();
+    BrowserProcessHandler_OnContextInitialized();
+    // Post browser creation as a separate task so it runs at the outer
+    // message-loop level, after OnContextInitialized returns. This avoids
+    // the nested RunLoop that CreateBrowserSync() would otherwise create
+    // while still inside this callback.
+    CefPostTask(TID_UI, CefCreateClosureTask(
+        base::BindOnce(&BrowserProcessHandler_CreatePendingBrowsers)));
 #if defined(OS_LINUX)
     print_handler_ = new ClientPrintHandlerGtk();
 #endif // OS_LINUX
