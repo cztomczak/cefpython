@@ -125,8 +125,11 @@ cdef class Cookie:
             assert isinstance(domain, bytes), "domain type is not bytes"
             domain = domain.decode(g_applicationSettings["string_encoding"],
                                    errors=BYTES_DECODE_ERRORS)
+        # Strip leading dot before validation; RFC 2109 allows .example.com to
+        # mean "all subdomains", but IDNA encoding rejects empty labels.
+        validate_domain = domain.lstrip(".")
         try:
-            if not pattern.match(domain.encode("idna").decode("ascii")):
+            if not pattern.match(validate_domain.encode("idna").decode("ascii")):
                 raise Exception("Cookie.SetDomain() failed, invalid domain: {0}"
                                 .format(domain))
         except UnicodeError:
