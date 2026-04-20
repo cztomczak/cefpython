@@ -38,16 +38,6 @@ bool V8FunctionHandler::Execute(const CefString& functionName,
     } else {
         LOG(INFO) << "[Renderer process] V8FunctionHandler::Execute():"
                      " js binding";
-        if (!(cefPythonApp_.get() \
-                && cefPythonApp_->BindedFunctionExists( \
-                        browser, functionName))) {
-            exception = std::string("[CEF Python] " \
-                    "V8FunctionHandler::Execute() FAILED: " \
-                    "function does not exist: ").append(functionName) \
-                    .append("()");
-            // Must return true for the exception to be thrown.
-            return true;
-        }
         CefRefPtr<CefListValue> functionArguments = V8ValueListToCefListValue(
                 v8Arguments);
         CefString frameId = frame->GetIdentifier();

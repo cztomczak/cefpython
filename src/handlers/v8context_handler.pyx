@@ -20,10 +20,18 @@ cdef public void V8ContextHandler_OnContextCreated(
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
+    cdef JavascriptBindings jsBindings
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnContextCreated")
         pyBrowser.SetUserData("__v8ContextCreated", True)
         pyFrame = GetPyFrame(cefFrame)
+        # Re-send bindings before user callback so that any ExecuteJavascript
+        # the user sends from OnContextCreated has globals already registered
+        # when it arrives at the renderer (both travel the same IPC channel).
+        if pyFrame.IsMain():
+            jsBindings = pyBrowser.GetJavascriptBindings()
+            if jsBindings:
+                jsBindings.Rebind()
         # User defined callback
         clientCallback = pyBrowser.GetClientCallback("OnContextCreated")
         if clientCallback:

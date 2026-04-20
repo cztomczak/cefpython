@@ -507,12 +507,27 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
             continue;
         }
         CefRefPtr<CefV8Context> context = frame->GetV8Context();
-        CefRefPtr<CefTaskRunner> taskRunner = context->GetTaskRunner();
-        taskRunner->PostTask(
-            CefCreateClosureTask(
-                base::BindOnce(
-                    &CefPythonApp::DoJavascriptBindingsForFrame, this,
-                    browser, frame, context)));
+        if (!context.get() || !context->IsValid()) {
+            // No valid context yet; OnContextCreated will register globals
+            // directly once the context exists and bindings are set.
+            continue;
+        }
+        if (!CefV8Context::InContext()) {
+            // We are on the renderer thread but outside any V8 execution.
+            // Register globals synchronously so they are available before
+            // any queued ExecuteJavascript IPC messages run their JS.
+            DoJavascriptBindingsForFrame(browser, frame, context);
+        } else {
+            // Already inside a V8 execution (nested pump); post a task.
+            CefRefPtr<CefTaskRunner> taskRunner = context->GetTaskRunner();
+            if (taskRunner.get()) {
+                taskRunner->PostTask(
+                    CefCreateClosureTask(
+                        base::BindOnce(
+                            &CefPythonApp::DoJavascriptBindingsForFrame, this,
+                            browser, frame, context)));
+            }
+        }
     }
 }
 
