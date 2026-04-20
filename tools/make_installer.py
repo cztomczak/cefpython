@@ -338,7 +338,7 @@ def create_empty_log_file(log_file):
 
 def copy_cpp_extension_dependencies_issue359(pkg_dir):
     """CEF Python module is written in Cython and is a Python C++
-    extension and depends on msvcpXX.dll. For Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 / 3.11
+    extension and depends on msvcpXX.dll. For Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 / 3.11 / 3.12 / 3.13 / 3.14
     msvcp140.dll is required. See Issue #359. For Python 2.7
     msvcp90.dll is required. Etc. These dependencies are not included
     with Python binaries from Python.org."""
@@ -365,7 +365,7 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
     # in the package. Thus if included, msvcpxx.dll dependency is
     # required as well.
 
-    # Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 / 3.11
+    # Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9 / 3.10 / 3.11 / 3.12 / 3.13 / 3.14
     if os.path.exists(os.path.join(pkg_dir, "cefpython_py35.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py36.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py37.pyd")) \
@@ -374,7 +374,8 @@ def copy_cpp_extension_dependencies_issue359(pkg_dir):
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py310.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py311.pyd")) \
             or os.path.exists(os.path.join(pkg_dir, "cefpython_py312.pyd")) \
-            or os.path.exists(os.path.join(pkg_dir, "cefpython_py313.pyd")):
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py313.pyd")) \
+            or os.path.exists(os.path.join(pkg_dir, "cefpython_py314.pyd")):
         search_paths = [
             # This is where Microsoft Visual C++ 2015 Update 3 installs
             # (14.00.24212).
