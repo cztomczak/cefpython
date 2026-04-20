@@ -425,6 +425,11 @@ def build_cef_projects():
         command.append("-DCMAKE_BUILD_TYPE="+Options.build_type)
         if MAC:
             command.append("-DPROJECT_ARCH=x86_64")
+        if LINUX:
+            # GCC 13+ added -Wself-move; suppress it so the CEF binary
+            # distribution (built for an older toolchain) compiles on Ubuntu 24.04.
+            # Safe on older GCC: unrecognised -Wno-xxx flags are ignored.
+            command.append("-DCMAKE_CXX_FLAGS=-Wno-self-move")
         command.append("..")
         run_command(command, build_cefclient_dir)
         print("[automate.py] OK")
