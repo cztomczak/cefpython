@@ -31,6 +31,8 @@ import sys
 BUILD_DIR = os.path.join("build", "_cmake_build")
 PKG_DIR = "cefpython3"
 
+WINDOWS = sys.platform == "win32"
+
 
 def run(cmd, **kwargs):
     print("[build.py]", " ".join(str(a) for a in cmd))
@@ -45,34 +47,55 @@ def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
         shutil.rmtree(BUILD_DIR)
     cache = os.path.join(BUILD_DIR, "CMakeCache.txt")
     if not os.path.exists(cache):
-        cmake_args = ["cmake", "-S", ".", "-B", BUILD_DIR, "-A", "x64"]
+        cmake_args = ["cmake", "-S", ".", "-B", BUILD_DIR]
+        if WINDOWS:
+            cmake_args += ["-A", "x64"]
+        else:
+            cmake_args += ["-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release"]
         if profiling:
             cmake_args.append("-DENABLE_PROFILING=ON")
         if line_tracing:
             cmake_args.append("-DENABLE_LINE_TRACING=ON")
         run(cmake_args)
-    run(["cmake", "--build", BUILD_DIR, "--config", "Release", "--parallel"])
 
-    # Copy .pyd to cefpython3/
-    pyds = glob.glob(os.path.join(BUILD_DIR, "Release", "cefpython_py*.pyd"))
-    if not pyds:
-        print("[build.py] ERROR: no .pyd found after build")
+    build_args = ["cmake", "--build", BUILD_DIR, "--parallel"]
+    if WINDOWS:
+        build_args += ["--config", "Release"]
+    run(build_args)
+
+    # Copy extension module to cefpython3/
+    if WINDOWS:
+        pattern = os.path.join(BUILD_DIR, "Release", "cefpython_py*.pyd")
+    else:
+        pattern = os.path.join(BUILD_DIR, "cefpython_py*.so")
+    modules = glob.glob(pattern)
+    if not modules:
+        print("[build.py] ERROR: no extension module found after build")
         sys.exit(1)
-    for pyd in pyds:
-        dst = os.path.join(PKG_DIR, os.path.basename(pyd))
-        shutil.copy2(pyd, dst)
+    for mod in modules:
+        dst = os.path.join(PKG_DIR, os.path.basename(mod))
+        shutil.copy2(mod, dst)
         print("[build.py] ->", dst)
 
-    # Copy subprocess.exe to cefpython3/
-    exe = os.path.join(BUILD_DIR, "subprocess_build", "Release", "subprocess.exe")
+    # Copy subprocess executable to cefpython3/
+    if WINDOWS:
+        exe = os.path.join(BUILD_DIR, "subprocess_build", "Release", "subprocess.exe")
+    else:
+        exe = os.path.join(BUILD_DIR, "subprocess_build", "subprocess")
     if os.path.exists(exe):
-        dst = os.path.join(PKG_DIR, "subprocess.exe")
+        dst = os.path.join(PKG_DIR, os.path.basename(exe))
         shutil.copy2(exe, dst)
         print("[build.py] ->", dst)
 
-    # One-time: copy CEF runtime files (DLLs, .pak, locales/) into cefpython3/
-    if not glob.glob(os.path.join(PKG_DIR, "*.dll")):
-        cef_dirs = sorted(glob.glob(os.path.join("build", "cef*_win64")))
+    # One-time: copy CEF runtime files (DLLs/SOs, .pak, locales/) into cefpython3/
+    if WINDOWS:
+        already_copied = bool(glob.glob(os.path.join(PKG_DIR, "*.dll")))
+        cef_glob = os.path.join("build", "cef*_win64")
+    else:
+        already_copied = os.path.exists(os.path.join(PKG_DIR, "libcef.so"))
+        cef_glob = os.path.join("build", "cef*_linux64")
+    if not already_copied:
+        cef_dirs = sorted(glob.glob(cef_glob))
         if cef_dirs:
             cef_bin = os.path.join(cef_dirs[-1], "bin")
             print("[build.py] One-time: copying CEF runtime files to", PKG_DIR)
