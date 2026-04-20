@@ -129,6 +129,8 @@ jobs:
 
       - name: Run unit tests
         run: python unittests/_test_runner.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
 
   wheel:
     needs: test
