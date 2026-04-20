@@ -137,21 +137,11 @@ import struct
 # noinspection PyUnresolvedReferences
 import base64
 
-# Must use compile-time condition instead of checking sys.version_info.major
-# otherwise results in "ImportError: cannot import name urlencode" strange
-# error in Python 3.6.
-IF PY_MAJOR_VERSION == 2:
-    # noinspection PyUnresolvedReferences
-    import urlparse
-    # noinspection PyUnresolvedReferences
-    from urllib import urlencode as urllib_urlencode
-    from urllib import quote as urlparse_quote
-ELSE:
-    # noinspection PyUnresolvedReferences
-    from urllib import parse as urlparse
-    from urllib.parse import quote as urlparse_quote
-    # noinspection PyUnresolvedReferences
-    from urllib.parse import urlencode as urllib_urlencode
+# noinspection PyUnresolvedReferences
+from urllib import parse as urlparse
+from urllib.parse import quote as urlparse_quote
+# noinspection PyUnresolvedReferences
+from urllib.parse import urlencode as urllib_urlencode
 
 # noinspection PyUnresolvedReferences
 from cpython.version cimport PY_MAJOR_VERSION
@@ -227,19 +217,10 @@ ctypedef uintptr_t WindowHandle
 # noinspection PyUnresolvedReferences
 cimport ctime
 
-IF UNAME_SYSNAME == "Windows":
-    from windows cimport *
-    from dpi_aware_win cimport *
-ELIF UNAME_SYSNAME == "Linux":
-    from linux cimport *
-ELIF UNAME_SYSNAME == "Darwin":
-    from mac cimport *
+include "platform_cimports.pxi"
 
 from cpp_utils cimport *
 from task cimport *
-
-IF UNAME_SYSNAME == "Linux":
-    cimport x11
 
 from cef_string cimport *
 cdef extern from *:
@@ -392,7 +373,7 @@ include "handlers/v8function_handler.pyx"
 
 cdef public void cefpython_GetDebugOptions(
         cpp_bool* debug
-        ) except * with gil:
+        ) noexcept with gil:
     # Called from subprocess/cefpython_app.cpp -> CefPythonApp constructor.
     try:
         debug[0] = <cpp_bool>bool(g_debug)
@@ -590,7 +571,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if not application_settings["cache_path"]:
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
 
-    IF UNAME_SYSNAME == "Windows":
+    if sys.platform == "win32":
         # CEF 146 / Chrome 130+ ANGLE D3D11 backend crashes with a CHECK
         # failure (STATUS_BREAKPOINT / exit_code=-2147483645) during GPU
         # process init, falling back to software rendering after 3 crashes.
@@ -664,7 +645,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
             Debug("CefInitialize() WARNING: OnContextInitialized not received"
                   " within 2 seconds")
 
-    IF UNAME_SYSNAME == "Linux":
+    if sys.platform.startswith("linux"):
         # Install by default.
         WindowUtils.InstallX11ErrorHandlers()
 

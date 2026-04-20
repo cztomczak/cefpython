@@ -88,7 +88,7 @@ cdef class WindowInfo:
                              list windowRect=None):
         # Allow parent window handle to be 0, in such case CEF will
         # create top window automatically as in hello_world.py example.
-        IF UNAME_SYSNAME == "Windows":
+        if sys.platform == "win32":
             # On Windows when parent window handle is 0 then SetAsPopup()
             # must be called instead.
             if parentWindowHandle == 0:
@@ -100,7 +100,7 @@ cdef class WindowInfo:
                     % parentWindowHandle)
         self.windowType = "child"
         self.parentWindowHandle = parentWindowHandle
-        IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
+        if sys.platform != "win32":
             if not windowRect:
                 windowRect = [0,0,0,0]
         if windowRect:
@@ -111,19 +111,18 @@ cdef class WindowInfo:
                 raise Exception("WindowInfo.SetAsChild() failed: "
                         "windowRect: invalid value")
 
-    IF UNAME_SYSNAME == "Windows":
-        cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle,
-                                 object windowName):
-            # Allow parent window handle to be 0, in such case CEF will
-            # create top window automatically as in hello_world.py example.
-            if parentWindowHandle != 0\
-                    and not WindowUtils.IsWindowHandle(parentWindowHandle):
-                raise Exception("Invalid parentWindowHandle: %s"\
-                        % parentWindowHandle)
-            self.parentWindowHandle = parentWindowHandle
-            self.windowType = "popup"
-            if windowName:
-                self.windowName = str(windowName)
+    cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle,
+                             object windowName):
+        # Allow parent window handle to be 0, in such case CEF will
+        # create top window automatically as in hello_world.py example.
+        if parentWindowHandle != 0\
+                and not WindowUtils.IsWindowHandle(parentWindowHandle):
+            raise Exception("Invalid parentWindowHandle: %s"\
+                    % parentWindowHandle)
+        self.parentWindowHandle = parentWindowHandle
+        self.windowType = "popup"
+        if windowName:
+            self.windowName = str(windowName)
 
     cpdef py_void SetAsOffscreen(self,
             WindowHandle parentWindowHandle):

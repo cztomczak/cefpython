@@ -15,7 +15,7 @@ FOCUS_SOURCE_SYSTEM = cef_types.FOCUS_SOURCE_SYSTEM
 cdef public void FocusHandler_OnTakeFocus(
         CefRefPtr[CefBrowser] cef_browser,
         cpp_bool next_
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     try:
         assert IsThread(TID_UI), "Must be called on the UI thread"
@@ -50,7 +50,7 @@ cdef public cpp_bool FocusHandler_OnSetFocus(
 
 cdef public void FocusHandler_OnGotFocus(
         CefRefPtr[CefBrowser] cef_browser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     try:
         assert IsThread(TID_UI), "Must be called on the UI thread"

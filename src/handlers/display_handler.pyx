@@ -9,7 +9,7 @@ cdef public void DisplayHandler_OnAddressChange(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         const CefString& cefUrl
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object pyUrl
@@ -47,7 +47,7 @@ cdef public cpp_bool DisplayHandler_OnAutoResize(
 cdef public void DisplayHandler_OnTitleChange(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& cefTitle
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object pyTitle
     cdef object callback
@@ -88,7 +88,7 @@ cdef public cpp_bool DisplayHandler_OnTooltip(
 cdef public void DisplayHandler_OnStatusMessage(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& cefValue
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object pyValue
     cdef object callback
@@ -132,7 +132,7 @@ cdef public cpp_bool DisplayHandler_OnConsoleMessage(
 cdef public void DisplayHandler_OnLoadingProgressChange(
         CefRefPtr[CefBrowser] cefBrowser,
         double progress
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object callback
     try:

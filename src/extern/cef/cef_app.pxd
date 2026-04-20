@@ -5,18 +5,11 @@
 # Circular imports are allowed in form "cimport ...",
 # but won't work if you do "from ... cimport *".
 
-include "compile_time_constants.pxi"
+include "platform_cimports.pxi"
 
 from cef_types cimport CefSettings
 from cef_ptr cimport CefRefPtr
 from libcpp cimport bool as cpp_bool
-
-IF UNAME_SYSNAME == "Windows":
-    from cef_win cimport CefMainArgs
-ELIF UNAME_SYSNAME == "Linux":
-    from cef_linux cimport CefMainArgs
-ELIF UNAME_SYSNAME == "Darwin":
-    from cef_mac cimport CefMainArgs
 
 cdef extern from "include/cef_app.h":
 

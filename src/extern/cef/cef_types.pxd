@@ -2,8 +2,6 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
-include "compile_time_constants.pxi"
-
 from libcpp cimport bool as cpp_bool
 # noinspection PyUnresolvedReferences
 from libc.stddef cimport wchar_t
@@ -13,13 +11,19 @@ from cef_string cimport cef_string_t
 # noinspection PyUnresolvedReferences
 from libc.limits cimport UINT_MAX
 
-cdef extern from "include/internal/cef_types.h":
+# char16_t is wchar_t on Windows and unsigned short elsewhere in CEF.
+# Using a C macro avoids the deprecated Cython IF statement.
+cdef extern from *:
+    """
+    #ifdef _WIN32
+    typedef wchar_t cef_cython_char16_t;
+    #else
+    typedef unsigned short cef_cython_char16_t;
+    #endif
+    """
+    ctypedef unsigned short char16_t "cef_cython_char16_t"
 
-    IF UNAME_SYSNAME == "Windows":
-        # noinspection PyUnresolvedReferences
-        ctypedef wchar_t char16_t
-    ELSE:
-        ctypedef unsigned short char16_t
+cdef extern from "include/internal/cef_types.h":
 
     ctypedef uint32_t cef_color_t
 

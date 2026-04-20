@@ -82,7 +82,7 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
 
 cdef public void LifespanHandler_OnAfterCreated(
         CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnAfterCreated")
@@ -109,7 +109,7 @@ cdef public cpp_bool LifespanHandler_DoClose(
 
 cdef public void LifespanHandler_OnBeforeClose(
         CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef int browserId
     cdef object callback

@@ -153,7 +153,7 @@ cdef public cpp_bool RenderHandler_GetScreenInfo(
 cdef public void RenderHandler_OnPopupShow(
         CefRefPtr[CefBrowser] cefBrowser,
         cpp_bool show
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnPopupShow")
@@ -167,7 +167,7 @@ cdef public void RenderHandler_OnPopupShow(
 cdef public void RenderHandler_OnPopupSize(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefRect& cefRect
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list pyRect
     try:
@@ -187,7 +187,7 @@ cdef public void RenderHandler_OnPaint(
         const void* cefBuffer,
         int width,
         int height
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list pyDirtyRects = []
     cdef list pyRect
@@ -228,7 +228,7 @@ cdef public void RenderHandler_OnPaint(
 
 cdef public void RenderHandler_OnScrollOffsetChanged(
         CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnScrollOffsetChanged")
@@ -272,7 +272,7 @@ cdef public cpp_bool RenderHandler_StartDragging(
 cdef public void RenderHandler_UpdateDragCursor(
         CefRefPtr[CefBrowser] cef_browser,
         uint32_t operation,
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     try:
         browser = GetPyBrowser(cef_browser, "UpdateDragCursor")
@@ -287,7 +287,7 @@ cdef public void RenderHandler_OnTextSelectionChanged(
         CefRefPtr[CefBrowser] cef_browser,
         const CefString& selected_text,
         const CefRange& selected_range
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     try:
         browser = GetPyBrowser(cef_browser, "OnTextSelectionChanged")

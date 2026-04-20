@@ -16,7 +16,7 @@ from libc.stdint cimport int64_t
 cdef public void V8ContextHandler_OnContextCreated(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
@@ -43,7 +43,7 @@ cdef public void V8ContextHandler_OnContextCreated(
 cdef public void V8ContextHandler_OnContextReleased(
         int browserId,
         CefString frameId
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback

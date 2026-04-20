@@ -36,7 +36,7 @@ cdef CefRefPtr[CefBinaryValue] PutPythonCallback(
 
 cdef public void RemovePythonCallbacksForFrame(
         object frameId
-        ) except * with gil:
+        ) noexcept with gil:
     # Cannot remove elements from g_pythonCallbacks (dict) while iterating.
     cdef list toRemove = []
     try:

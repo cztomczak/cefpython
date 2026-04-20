@@ -131,7 +131,7 @@ cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         CefRefPtr[CefRequest] cefRequest
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef PyRequest pyRequest
@@ -170,7 +170,7 @@ cdef public void RequestHandler_OnResourceRedirect(
         CefString& cefNewUrl,
         CefRefPtr[CefRequest] cefRequest,
         CefRefPtr[CefResponse] cefResponse
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef str pyOldUrl
@@ -314,7 +314,7 @@ cdef public void RequestHandler_OnProtocolExecution(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& cefUrl,
         cpp_bool& cefAllowOSExecution
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef str pyUrl
     cdef list pyAllowOSExecutionOut
@@ -371,7 +371,7 @@ cdef public cpp_bool RequestHandler_OnCertificateError(
 cdef public void RequestHandler_OnRendererProcessTerminated(
         CefRefPtr[CefBrowser] cefBrowser,
         cef_types.cef_termination_status_t cefStatus
-        ) except * with gil:
+        ) noexcept with gil:
     # TODO: proccess may crash during browser creation. Let this callback 
     # to be set either through  cefpython.SetGlobalClientCallback() 
     # or PyBrowser.SetClientCallback(). Modify the 

@@ -2,15 +2,9 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
-include "compile_time_constants.pxi"
+include "platform_cimports.pxi"
 
 from cef_ptr cimport CefRefPtr
-IF UNAME_SYSNAME == "Windows":
-    from cef_win cimport CefWindowInfo
-ELIF UNAME_SYSNAME == "Linux":
-    from cef_linux cimport CefWindowInfo
-ELIF UNAME_SYSNAME == "Darwin":
-    from cef_mac cimport CefWindowInfo
 # noinspection PyUnresolvedReferences
 from cef_client cimport CefClient
 from cef_types cimport CefBrowserSettings

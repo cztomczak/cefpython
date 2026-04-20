@@ -8,8 +8,6 @@ cimport cef_types
 from libc.stdint cimport uint32_t, int64_t
 from libcpp cimport nullptr
 from cef_types cimport cef_state_t
-IF UNAME_SYSNAME == "Linux":
-    cimport x11
 
 # cef_mouse_button_type_t, SendMouseClickEvent().
 MOUSEBUTTON_LEFT = cef_types.MBT_LEFT
@@ -178,7 +176,7 @@ cpdef PyBrowser GetBrowserByIdentifier(int identifier):
     return None
 
 cdef public void PyBrowser_ShowDevTools(CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     # Called from ClientHandler::OnContextMenuCommand
     cdef PyBrowser pyBrowser
     try:

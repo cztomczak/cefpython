@@ -4,7 +4,7 @@
 
 include "../cefpython.pyx"
 
-cdef public void BrowserProcessHandler_OnContextInitialized() except * with gil:
+cdef public void BrowserProcessHandler_OnContextInitialized() noexcept with gil:
     try:
         global g_context_initialized
         Debug("BrowserProcessHandler_OnContextInitialized()")
@@ -15,7 +15,7 @@ cdef public void BrowserProcessHandler_OnContextInitialized() except * with gil:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public void BrowserProcessHandler_CreatePendingBrowsers() except * with gil:
+cdef public void BrowserProcessHandler_CreatePendingBrowsers() noexcept with gil:
     try:
         Debug("BrowserProcessHandler_CreatePendingBrowsers()")
         if g_pending_browsers:
@@ -29,7 +29,7 @@ cdef public void BrowserProcessHandler_CreatePendingBrowsers() except * with gil
 
 cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
         CefRefPtr[CefListValue] extra_info
-        ) except * with gil:
+        ) noexcept with gil:
     try:
         pass
     except:
@@ -38,7 +38,7 @@ cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
 
 cdef public void BrowserProcessHandler_OnBeforeChildProcessLaunch(
         CefRefPtr[CefCommandLine] cefCommandLine
-        ) except * with gil:
+        ) noexcept with gil:
     try:
         AppendSwitchesToCommandLine(cefCommandLine, g_commandLineSwitches)
     except:

@@ -10,7 +10,7 @@ cdef public void LoadHandler_OnLoadingStateChange(
         cpp_bool isLoading,
         cpp_bool canGoBack,
         cpp_bool canGoForward
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object callback
     try:
@@ -28,7 +28,7 @@ cdef public void LoadHandler_OnLoadingStateChange(
 cdef public void LoadHandler_OnLoadStart(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
@@ -46,7 +46,7 @@ cdef public void LoadHandler_OnLoadEnd(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         int httpStatusCode
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
@@ -68,7 +68,7 @@ cdef public void LoadHandler_OnLoadError(
         cef_types.cef_errorcode_t cefErrorCode,
         const CefString& cefErrorText,
         const CefString& cefFailedUrl
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef list errorTextOut

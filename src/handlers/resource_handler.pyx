@@ -104,7 +104,7 @@ cdef public void ResourceHandler_GetResponseHeaders(
         CefRefPtr[CefResponse] cefResponse,
         int64_t& cefResponseLength,
         CefString& cefRedirectUrl
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyResourceHandler pyResourceHandler
     cdef object userCallback
     cdef py_bool returnValue
@@ -184,7 +184,7 @@ cdef public cpp_bool ResourceHandler_ReadResponse(
 
 cdef public void ResourceHandler_Cancel(
         int resourceHandlerId
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyResourceHandler pyResourceHandler
     cdef object userCallback
     try:

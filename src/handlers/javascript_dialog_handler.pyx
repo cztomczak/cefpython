@@ -109,7 +109,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(
 
 cdef public void JavascriptDialogHandler_OnResetJavascriptDialogState(
         CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser,
@@ -124,7 +124,7 @@ cdef public void JavascriptDialogHandler_OnResetJavascriptDialogState(
 
 cdef public void JavascriptDialogHandler_OnJavascriptDialogClosed(
         CefRefPtr[CefBrowser] cefBrowser,
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser,
