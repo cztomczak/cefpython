@@ -44,14 +44,14 @@ jobs:
           path: build/cef_binary_*
           key: cef-windows64-${{ steps.cef-version.outputs.value }}
 
+      - name: Install build tools
+        run: python tools/requirements.py
+
       - name: Download CEF binaries
         run: python tools/download_cef.py
 
       - name: Prepare prebuilt CEF
         run: python tools/automate.py --prebuilt-cef
-
-      - name: Install build tools
-        run: python tools/requirements.py
 
       - name: Configure CMake
         run: cmake -S . -B build/_cmake_build -A x64
@@ -162,14 +162,14 @@ jobs:
           path: build/cef_binary_*
           key: cef-windows64-${{ steps.cef-version.outputs.value }}
 
+      - name: Install build tools
+        run: python tools/requirements.py
+
       - name: Download CEF binaries
         run: python tools/download_cef.py
 
       - name: Prepare prebuilt CEF
         run: python tools/automate.py --prebuilt-cef
-
-      - name: Install build tools
-        run: python tools/requirements.py
 
       - name: Build wheel
         run: pip wheel --no-build-isolation -w build/dist .
