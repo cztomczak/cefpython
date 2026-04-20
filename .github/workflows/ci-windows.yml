@@ -5,6 +5,12 @@ on:
     branches: [ "github-actions-ci", "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
+    inputs:
+      bypass_cache:
+        description: "Bypass all caches for a clean run"
+        type: boolean
+        default: false
 
 jobs:
   build-and-test:
@@ -36,6 +42,7 @@ jobs:
 
       - name: Cache CEF binaries
         uses: actions/cache@v4
+        if: ${{ inputs.bypass_cache != true }}
         with:
           path: build/cef_binary_*
           key: cef-windows64-${{ steps.cef-version.outputs.value }}
