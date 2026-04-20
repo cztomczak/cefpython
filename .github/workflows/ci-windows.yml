@@ -104,6 +104,9 @@ jobs:
           path: build/cef_binary_*
           key: cef-windows64-${{ steps.cef-version.outputs.value }}
 
+      - name: Install build tools
+        run: python tools/requirements.py
+
       - name: Download CEF binaries
         run: python tools/download_cef.py
 
