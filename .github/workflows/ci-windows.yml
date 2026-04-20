@@ -1,0 +1,50 @@
+name: CI Windows
+
+on:
+  push:
+    branches: [ "github-actions-ci", "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python dependencies
+        run: pip install -r tools/requirements.txt
+
+      - name: Read CEF version
+        id: cef-version
+        run: |
+          $ver = (Select-String -Path src/version/cef_version_win.h `
+                  -Pattern '#define CEF_VERSION "([^"]+)"').Matches[0].Groups[1].Value
+          echo "value=$ver" >> $env:GITHUB_OUTPUT
+
+      - name: Cache CEF binaries
+        uses: actions/cache@v4
+        with:
+          path: build/cef_binary_*
+          key: cef-windows64-${{ steps.cef-version.outputs.value }}
+
+      - name: Download CEF binaries
+        run: python tools/download_cef.py
+
+      - name: Prepare prebuilt CEF
+        run: python tools/automate.py --prebuilt-cef
+
+      - name: Build and run unit tests
+        run: python tools/build.py --unittests
