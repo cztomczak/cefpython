@@ -9,7 +9,7 @@ from cefpython3 import cefpython as cef
 def main():
     cef.Initialize()
     browser = cef.CreateBrowserSync(
-        url="http://www.html-kit.com/tools/cookietester/",
+        url="https://www.google.com/",
         window_title="Cookies")
     browser.SetClientHandler(LoadHandler())
     cef.MessageLoop()
@@ -19,7 +19,7 @@ def main():
 
 class LoadHandler(object):
     def OnLoadingStateChange(self, browser, is_loading, **_):
-        if is_loading:
+        if not is_loading:
             print("Page loading complete - start visiting cookies")
             manager = cef.CookieManager.GetGlobalManager()
             # Must keep a strong reference to the CookieVisitor object
@@ -32,7 +32,7 @@ class LoadHandler(object):
             # To visit cookies only for a given url uncomment the
             # code below.
             """
-            url = "http://www.html-kit.com/tools/cookietester/"
+            url = "https://www.google.com/"
             http_only_cookies = False
             result = manager.VisitUrlCookies(url, http_only_cookies,
                                              self.cookie_visitor)
