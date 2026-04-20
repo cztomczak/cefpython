@@ -91,10 +91,27 @@ if LINUX:
 FAST_FLAG = False
 ENABLE_PROFILING = False
 ENABLE_LINE_TRACING = False
+CYTHON_ONLY = False
 
 # Cython options. Stop on first error, otherwise hundreds
 # of errors appear in the console.
 Options.fast_fail = True
+
+
+def cython_transpile_only():
+    """Transpile pyx->cpp+h without C++ compilation to generate the public API header."""
+    from Cython.Build import cythonize as _cythonize
+    pyx = "cefpython_py{pyver}.pyx".format(pyver=PYVERSION)
+    print("[cython_setup.py] Transpile-only: %s" % pyx)
+    _cythonize(
+        [Extension(
+            name="cefpython_py{pyver}".format(pyver=PYVERSION),
+            sources=[pyx],
+            language="c++",
+        )],
+        include_path=get_include_dirs(),
+        compiler_directives={"language_level": "3str"},
+    )
 
 
 def main():
@@ -102,6 +119,16 @@ def main():
           .format(ver=platform.python_version(), arch=ARCH_STR))
     print("[cython_setup.py] Python executable: %s" % sys.executable)
     print("[cython_setup.py] Cython version: %s" % Cython.__version__)
+
+    global CYTHON_ONLY
+    if "--cython-only" in sys.argv:
+        CYTHON_ONLY = True
+        sys.argv.remove("--cython-only")
+
+    if CYTHON_ONLY:
+        compile_time_constants()
+        cython_transpile_only()
+        return
 
     global FAST_FLAG
     if "--fast" in sys.argv:

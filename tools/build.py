@@ -93,10 +93,6 @@ REBUILD_CPP = False
 ENABLE_PROFILING = False
 ENABLE_LINE_TRACING = False
 
-# First run
-FIRST_RUN = False
-
-
 def main():
     command_line_args()
     print("[build.py] Python version: {ver} {arch}"
@@ -107,21 +103,15 @@ def main():
     check_cython_version()
     check_directories()
     setup_environ()
-    if os.path.exists(CEFPYTHON_API_HFILE):
-        fix_cefpython_api_header_file()
-        if WINDOWS:
-            compile_cpp_projects_with_setuptools()
-        elif MAC or LINUX:
-            compile_cpp_projects_unix()
-    else:
-        print("[build.py] INFO: Looks like first run, as"
-              " cefpython_py{pyver}.h is missing. Skip building"
-              " C++ projects."
-              .format(pyver=PYVERSION))
-        global FIRST_RUN
-        FIRST_RUN = True
     clear_cache()
     copy_and_fix_pyx_files()
+    if not os.path.exists(CEFPYTHON_API_HFILE):
+        cythonize_pyx_to_generate_header()
+    fix_cefpython_api_header_file()
+    if WINDOWS:
+        compile_cpp_projects_with_setuptools()
+    elif MAC or LINUX:
+        compile_cpp_projects_unix()
     build_cefpython_module()
     fix_cefpython_api_header_file()
     install_and_run()
@@ -443,13 +433,6 @@ def compile_cpp_projects_unix():
         print("[build.py] Clean C++ projects (--clean flag passed)")
         clean_cpp_projects_unix()
 
-    # Need to allow continuing even when make fails, as it may
-    # fail because the "public" function declaration is not yet
-    # in cefpython API header file, but for it to be generated we need
-    # to run cython compiling, so in this case you continue even when
-    # make fails and then run the compile.py script again and this time
-    # make should succeed.
-
     # -- CLIENT_HANDLER
     print("[build.py] ~~ Build CLIENT_HANDLER project")
 
@@ -672,6 +655,19 @@ def except_all_missing(content):
         return lineNumber
 
 
+def cythonize_pyx_to_generate_header():
+    """On first run, transpile the pyx file via cython_setup.py --cython-only
+    to generate the Cython public API header before C++ compilation."""
+    print("[build.py] First run: generating Cython API header via transpilation")
+    os.chdir(BUILD_CEFPYTHON)
+    command = ("\"{python}\" {tools_dir}/cython_setup.py --cython-only"
+               .format(python=sys.executable, tools_dir=TOOLS_DIR))
+    ret = subprocess.call(command, shell=True)
+    if ret != 0:
+        print("[build.py] ERROR: Failed to generate Cython API header")
+        sys.exit(1)
+
+
 def build_cefpython_module():
     # if DEBUG_FLAG:
     #     ret = subprocess.call("python-dbg setup.py build_ext --inplace"
@@ -719,26 +715,7 @@ def build_cefpython_module():
 
     # Check if built succeeded after pyx files were removed
     if ret != 0:
-        if FIRST_RUN and os.path.exists(CEFPYTHON_API_HFILE):
-            print("[build.py] INFO: looks like this was first run and"
-                  " building the cefpython module is expected to fail"
-                  " in such case due to cefpython API header file not"
-                  " being generated yet. Will re-run the build.py script"
-                  " programmatically now.")
-            args = list()
-            args.append("\"{python}\"".format(python=sys.executable))
-            args.append(os.path.join(TOOLS_DIR, os.path.basename(__file__)))
-            assert os.path.basename(__file__) in sys.argv[0]
-            args.extend(SYS_ARGV_ORIGINAL[1:])
-            command = " ".join(args)
-            print("[build.py] Running command: %s" % command)
-            ret = subprocess.call(command, shell=True)
-            # Always pass fixed value to sys.exit, read note at
-            # the top of the script about os.system and sys.exit
-            # issue.
-            sys.exit(0 if ret == 0 else 1)
-        else:
-            print("[build.py] ERROR: failed to build the cefpython module")
+        print("[build.py] ERROR: failed to build the cefpython module")
         sys.exit(1)
 
     # Move the cefpython module
