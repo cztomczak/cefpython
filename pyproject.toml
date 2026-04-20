@@ -1,0 +1,18 @@
+[build-system]
+requires = [
+    "scikit-build-core>=0.9",
+    "cython>=3.2",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "cefpython3"
+dynamic = ["version"]
+requires-python = ">=3.10"
+license = { text = "BSD-3-Clause" }
+description = "Python bindings for the Chromium Embedded Framework"
+
+[tool.scikit-build]
+cmake.build-type = "Release"
+cmake.args = ["-A", "x64"]
+wheel.packages = ["cefpython3"]

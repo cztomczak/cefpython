@@ -1,6 +1,8 @@
 .idea/
 build/
 dist/
+_cmake_test/
+_skbuild/
 venv/
 *.log
 __pycache__/
