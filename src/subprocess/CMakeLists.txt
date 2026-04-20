@@ -50,6 +50,11 @@ foreach(_f IN LISTS _filtered_all)
 endforeach()
 list(APPEND _app_sources ${_filtered_mml})
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+endif()
+
 add_library(cefpython_app STATIC ${_app_sources})
 add_dependencies(cefpython_app cefpython_headers)
 
@@ -59,6 +64,10 @@ target_include_directories(cefpython_app PRIVATE
     "${CEFPYTHON_PYX_STAGE_DIR}"
     ${Python_INCLUDE_DIRS}
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_include_directories(cefpython_app PRIVATE ${GTK3_INCLUDE_DIRS})
+endif()
 
 if(WIN32)
     target_compile_options(cefpython_app PRIVATE /EHsc /wd4190)
