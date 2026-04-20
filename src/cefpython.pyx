@@ -403,15 +403,15 @@ cdef public void cefpython_GetDebugOptions(
 cdef public cpp_bool ApplicationSettings_GetBool(const char* key
         ) except * with gil:
     # Called from client_handler/client_handler.cpp for example
-    cdef py_string pyKey = CharToPyString(key)
+    cdef object pyKey = CharToPyString(key)
     if pyKey in g_applicationSettings:
         return bool(g_applicationSettings[pyKey])
     return False
 
 cdef public cpp_bool ApplicationSettings_GetBoolFromDict(const char* key1,
         const char* key2) except * with gil:
-    cdef py_string pyKey1 = CharToPyString(key1)
-    cdef py_string pyKey2 = CharToPyString(key2)
+    cdef object pyKey1 = CharToPyString(key1)
+    cdef object pyKey2 = CharToPyString(key2)
     cdef object dictValue # Yet to be checked whether it is `dict`
     if pyKey1 in g_applicationSettings:
         dictValue = g_applicationSettings[pyKey1]
@@ -423,14 +423,14 @@ cdef public cpp_bool ApplicationSettings_GetBoolFromDict(const char* key1,
 
 cdef public cpp_string ApplicationSettings_GetString(const char* key
         ) except * with gil:
-    cdef py_string pyKey = CharToPyString(key)
+    cdef object pyKey = CharToPyString(key)
     cdef cpp_string cppString
     if pyKey in g_applicationSettings:
         cppString = PyStringToChar(AnyToPyString(g_applicationSettings[pyKey]))
     return cppString
 
 cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
-    cdef py_string pyKey = CharToPyString(key)
+    cdef object pyKey = CharToPyString(key)
     if pyKey in g_commandLineSwitches:
         return int(g_commandLineSwitches[pyKey])
     return 0
@@ -1006,7 +1006,7 @@ def SetOsModalLoop(py_bool modalLoop):
     with nogil:
         CefSetOSModalLoop(cefModalLoop)
 
-cpdef py_void SetGlobalClientCallback(py_string name, object callback):
+cpdef py_void SetGlobalClientCallback(object name, object callback):
     global g_globalClientCallbacks
     # Global callbacks are prefixed with "_" in documentation.
     # Accept both with and without a prefix.
@@ -1024,7 +1024,7 @@ cpdef py_void SetGlobalClientHandler(object clientHandler):
         raise Exception("SetGlobalClientHandler() failed: __class__ "
                         "attribute missing")
     cdef dict methods = {}
-    cdef py_string key
+    cdef object key
     cdef object method
     cdef tuple value
     for value in inspect.getmembers(clientHandler,
@@ -1034,14 +1034,14 @@ cpdef py_void SetGlobalClientHandler(object clientHandler):
         if key and key[0:2] != '__':
             SetGlobalClientCallback(key, method)
 
-cpdef object GetGlobalClientCallback(py_string name):
+cpdef object GetGlobalClientCallback(object name):
     global g_globalClientCallbacks
     if name in g_globalClientCallbacks:
         return g_globalClientCallbacks[name]
     else:
         return None
 
-cpdef object GetAppSetting(py_string key):
+cpdef object GetAppSetting(object key):
     global g_applicationSettings
     if key in g_applicationSettings:
         return g_applicationSettings[key]
@@ -1060,7 +1060,7 @@ cpdef dict GetVersion():
         cef_commit_number=__cef_commit_number__,
     )
 
-cpdef LoadCrlSetsFile(py_string path):
+cpdef LoadCrlSetsFile(object path):
     CefLoadCRLSetsFile(PyToCefStringValue(path))
 
 cpdef GetDataUrl(data, mediatype="html"):

@@ -7,10 +7,6 @@
 
 #ifdef BROWSER_PROCESS
 #include "common/cefpython_public_api.h"
-// Forward declaration for the Cython public function (generated in cefpython_fixed.h
-// after Cython runs; declared here so the C++ build does not depend on build order).
-extern "C" void BrowserProcessHandler_OnContextInitialized();
-extern "C" void BrowserProcessHandler_CreatePendingBrowsers();
 #endif
 
 #if defined(OS_WIN)

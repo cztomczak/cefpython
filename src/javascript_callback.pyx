@@ -6,8 +6,8 @@ include "cefpython.pyx"
 include "browser.pyx"
 
 cdef JavascriptCallback CreateJavascriptCallback(int callbackId,
-        CefRefPtr[CefBrowser] cefBrowser, py_string frameId,
-        py_string functionName):
+        CefRefPtr[CefBrowser] cefBrowser, object frameId,
+        object functionName):
     Debug("Created javascript callback, callbackId=%s, functionName=%s" % \
             (callbackId, functionName))
     cdef JavascriptCallback jsCallback = JavascriptCallback()
@@ -23,7 +23,7 @@ cdef class JavascriptCallback:
     are destroyed. Always check frame/browser for None value."""
     cdef int callbackId
     cdef PyFrame frame
-    cdef py_string functionName
+    cdef object functionName
 
     def Call(self, *args):
         # Send process message "ExecuteJavascriptCallback".

@@ -23,7 +23,7 @@ cdef PyJavascriptDialogCallback CreatePyJavascriptDialogCallback(
 cdef class PyJavascriptDialogCallback:
     cdef CefRefPtr[CefJSDialogCallback] cefCallback
 
-    cpdef py_void Continue(self, py_bool allow, py_string user_input):
+    cpdef py_void Continue(self, py_bool allow, object user_input):
         self.cefCallback.get().Continue(bool(allow),
                                         PyToCefStringValue(user_input))
 # -----------------------------------------------------------------------------
@@ -40,9 +40,9 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
         cpp_bool& suppress_message
         ) except * with gil:
     cdef PyBrowser pyBrowser
-    cdef py_string pyOriginUrl
-    cdef py_string pyMessageText
-    cdef py_string pyDefaultPromptText
+    cdef object pyOriginUrl
+    cdef object pyMessageText
+    cdef object pyDefaultPromptText
     cdef PyJavascriptDialogCallback pyCallback
     cdef list pySuppressMessage = []
     
@@ -80,7 +80,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(
         CefRefPtr[CefJSDialogCallback] callback
         ) except * with gil:
     cdef PyBrowser pyBrowser
-    cdef py_string pyMessageText
+    cdef object pyMessageText
     cdef py_bool pyIsReload
     cdef PyJavascriptDialogCallback pyCallback
 

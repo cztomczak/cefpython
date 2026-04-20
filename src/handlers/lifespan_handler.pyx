@@ -40,8 +40,8 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
     # Empty place-holders: popupFeatures, client.
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame,
-    cdef py_string pyTargetUrl
-    cdef py_string pyTargetFrameName
+    cdef object pyTargetUrl
+    cdef object pyTargetFrameName
     cdef list pyNoJavascriptAccess # out bool pyNoJavascriptAccess[0]
     cdef list pyWindowInfo
     cdef list pyBrowserSettings

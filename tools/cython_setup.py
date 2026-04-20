@@ -422,10 +422,12 @@ def get_ext_modules(options):
         # > C:\Python27\lib\distutils\extension.py:133: UserWarning:
         # > Unknown Extension options: 'cython_directives' warnings.warn(msg)
         cython_directives={
-            # Any conversion to unicode must be explicit using .decode().
-            "language_level": 2,  # Yes, Py2 for all python versions.
-            "c_string_type": "bytes",
-            "c_string_encoding": "utf-8",
+            # "3str" is Cython 3's recommended Python 3 migration mode.
+            # c_string_type is omitted: in Cython 3.x it makes ctypedef
+            # object typedefs behave as C string types, breaking Python
+            # object defaults in cpdef signatures. All CEF string coercions
+            # are done explicitly in string_utils.pyx, not via this directive.
+            "language_level": "3str",
             "profile": ENABLE_PROFILING,
             "linetrace": ENABLE_LINE_TRACING,
             "show_performance_hints": False,  # default directive would produce 

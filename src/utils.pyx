@@ -39,7 +39,7 @@ cpdef py_bool IsThread(int threadID):
 #       unicode strings and writing them to file (codecs.open).
 #       This change is required to work with Cython 0.20.
 
-cpdef object Debug(py_string msg):
+cpdef object Debug(object msg):
     """Print debug message. Will be shown only when settings.debug=True."""
     # In Python 3 str or bytes may be passed
     if type(msg) != str and type(msg) == bytes:
@@ -53,7 +53,7 @@ cpdef object Debug(py_string msg):
     if g_cef_initialized or g_debug:
         cef_log_info(PyStringToChar(msg))
 
-cdef void NonCriticalError(py_string msg) except *:
+cdef void NonCriticalError(object msg) except *:
     """Notify about error gently. Does not terminate application."""
     # In Python 3 str or bytes may be passed
     if type(msg) != str and type(msg) == bytes:

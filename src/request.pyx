@@ -80,7 +80,7 @@ cdef class PyRequest:
     cpdef str GetUrl(self):
         return CefToPyString(self.GetCefRequest().get().GetURL())
 
-    cpdef py_void SetUrl(self, py_string url):
+    cpdef py_void SetUrl(self, object url):
         cdef CefString cefUrl
         PyToCefString(url, cefUrl)
         self.GetCefRequest().get().SetURL(cefUrl)
@@ -88,7 +88,7 @@ cdef class PyRequest:
     cpdef str GetMethod(self):
         return CefToPyString(self.GetCefRequest().get().GetMethod())
 
-    cpdef py_void SetMethod(self, py_string method):
+    cpdef py_void SetMethod(self, object method):
         cdef CefString cefMethod
         PyToCefString(method, cefMethod)
         self.GetCefRequest().get().SetMethod(cefMethod)
@@ -259,6 +259,6 @@ cdef class PyRequest:
         return CefToPyString(
                 self.GetCefRequest().get().GetFirstPartyForCookies())
 
-    cpdef py_void SetFirstPartyForCookies(self, py_string url):
+    cpdef py_void SetFirstPartyForCookies(self, object url):
         self.GetCefRequest().get().SetFirstPartyForCookies(
                 PyToCefStringValue(url))

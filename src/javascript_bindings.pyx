@@ -26,15 +26,15 @@ cdef class JavascriptBindings:
     cpdef py_bool GetBindToPopups(self):
         return bool(self.bindToPopups)
 
-    cpdef py_void SetFunction(self, py_string name, object func):
+    cpdef py_void SetFunction(self, object name, object func):
         self.SetProperty(name, func)
 
-    cpdef py_void SetObject(self, py_string name, object obj):
+    cpdef py_void SetObject(self, object name, object obj):
         if not hasattr(obj, "__class__"):
             raise Exception("JavascriptBindings.SetObject() failed: name=%s, "
                             "__class__ attribute missing, this is not an object" % name)
         cdef dict methods = {}
-        cdef py_string key
+        cdef object key
         cdef object method
         cdef object predicate = inspect.ismethod
         if isinstance(obj, (PyBrowser, PyFrame)):
@@ -45,7 +45,7 @@ cdef class JavascriptBindings:
             methods[key] = method
         self.objects[name] = methods
 
-    cpdef object GetFunction(self, py_string name):
+    cpdef object GetFunction(self, object name):
         if name in self.functions:
             return self.functions[name]
 
@@ -55,12 +55,12 @@ cdef class JavascriptBindings:
     cpdef dict GetObjects(self):
         return self.objects
 
-    cpdef object GetObjectMethod(self, py_string objectName, py_string methodName):
+    cpdef object GetObjectMethod(self, object objectName, object methodName):
         if objectName in self.objects:
             if methodName in self.objects[objectName]:
                 return self.objects[objectName][methodName]
 
-    cpdef object GetFunctionOrMethod(self, py_string name):
+    cpdef object GetFunctionOrMethod(self, object name):
         # Name can be "someFunc" or "object.someMethod".
         cdef list words
         if "." in name:
@@ -69,7 +69,7 @@ cdef class JavascriptBindings:
         else:
             return self.GetFunction(name)
 
-    cpdef py_void SetProperty(self, py_string name, object value):
+    cpdef py_void SetProperty(self, object name, object value):
         cdef object allowed = self.IsValueAllowedRecursively(value) # returns True or string.
         if allowed is not True:
             raise Exception("JavascriptBindings.SetProperty() failed: name=%s, "
@@ -89,7 +89,7 @@ cdef class JavascriptBindings:
         cdef dict properties
         cdef dict objects
         cdef dict methods
-        for browserId, pyBrowser in g_pyBrowsers.iteritems():
+        for browserId, pyBrowser in g_pyBrowsers.items():
             if pyBrowser.GetJavascriptBindings() != self:
                 continue
             # Send to the Renderer process: functions, properties,
@@ -142,7 +142,7 @@ cdef class JavascriptBindings:
             return True
         elif valueType == int:
             return True
-        elif valueType == long:
+        elif valueType == int:
             return True
         elif valueType == type(None):
             return True

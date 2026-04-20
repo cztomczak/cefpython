@@ -18,14 +18,14 @@ from libc.stdint cimport int64_t, uint32_t
 # -----------------------------------------------------------------------------
 
 cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
-        py_string pyString):
+        object pyString):
     # A javascript callback from the Renderer process is sent as a string.
     # TODO: this could be sent using CefBinaryNamedString in the future,
     #       see this topic "Sending custom data types using process messaging":
     #       http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10881
-    cdef py_string cefPythonMessageHash = "####cefpython####"
+    cdef object cefPythonMessageHash = "####cefpython####"
     cdef JavascriptCallback jsCallback
-    cdef py_string jsonData
+    cdef object jsonData
     cdef object message
     if pyString.startswith(cefPythonMessageHash):
         jsonData = pyString[len(cefPythonMessageHash):]
@@ -161,7 +161,7 @@ cdef dict CefDictionaryValueToPyDict(
     # noinspection PyUnresolvedReferences
     cdef cpp_vector[CefString].iterator iterator = keyList.begin()
     cdef CefString cefKey
-    cdef py_string pyKey
+    cdef object pyKey
     cdef CefRefPtr[CefBinaryValue] binaryValue
     cdef uint32_t uint32_value = 0
     cdef int64_t int64_value = 0
@@ -239,7 +239,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
             ret.get().SetNull(index)
         elif valueType == bool:
             ret.get().SetBool(index, bool(value))
-        elif valueType in (int, long):
+        elif valueType == int:
             # Int32 range is -2147483648..2147483647, we've increased the
             # minimum size by one as Cython was throwing a warning:
             # "unary minus operator applied to unsigned type, result still
@@ -296,7 +296,7 @@ cdef void PyListToExistingCefListValue(
             cefListValue.get().SetNull(index)
         elif valueType == bool:
             cefListValue.get().SetBool(index, bool(value))
-        elif valueType in (int, long):
+        elif valueType == int:
             # Int32 range is -2147483648..2147483647, we've increased the
             # minimum size by one as Cython was throwing a warning:
             # "unary minus operator applied to unsigned type, result still
@@ -354,7 +354,7 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
             ret.get().SetNull(cefKey)
         elif valueType == bool:
             ret.get().SetBool(cefKey, bool(value))
-        elif valueType == int or valueType == long:  # In Py3 int and long types are the same type.
+        elif valueType == int:
             # Int32 range is -2147483648..2147483647
             if INT_MIN <= value <= INT_MAX:
                 ret.get().SetInt(cefKey, int(value))

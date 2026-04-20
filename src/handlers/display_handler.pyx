@@ -12,7 +12,7 @@ cdef public void DisplayHandler_OnAddressChange(
         ) except * with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
-    cdef py_string pyUrl
+    cdef object pyUrl
     cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnAddressChange")
@@ -49,7 +49,7 @@ cdef public void DisplayHandler_OnTitleChange(
         const CefString& cefTitle
         ) except * with gil:
     cdef PyBrowser pyBrowser
-    cdef py_string pyTitle
+    cdef object pyTitle
     cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnTitleChange")
@@ -66,7 +66,7 @@ cdef public cpp_bool DisplayHandler_OnTooltip(
         CefString& cefText
         ) except * with gil:
     cdef PyBrowser pyBrowser
-    cdef py_string pyText
+    cdef object pyText
     cdef list pyTextOut
     cdef object callback
     cdef py_bool returnValue
@@ -90,7 +90,7 @@ cdef public void DisplayHandler_OnStatusMessage(
         const CefString& cefValue
         ) except * with gil:
     cdef PyBrowser pyBrowser
-    cdef py_string pyValue
+    cdef object pyValue
     cdef object callback
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnStatusMessage")
@@ -110,8 +110,8 @@ cdef public cpp_bool DisplayHandler_OnConsoleMessage(
         int line
         ) except * with gil:
     cdef PyBrowser pyBrowser
-    cdef py_string pyMessage
-    cdef py_string pySource
+    cdef object pyMessage
+    cdef object pySource
     cdef py_bool returnValue
     cdef object callback
     try:
