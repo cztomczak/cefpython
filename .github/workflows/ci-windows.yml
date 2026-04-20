@@ -64,6 +64,9 @@ jobs:
           New-Item -ItemType Directory -Force build/artifacts
           Copy-Item build/_cmake_build/Release/cefpython_py*.pyd build/artifacts/
           Copy-Item build/_cmake_build/subprocess_build/Release/subprocess.exe build/artifacts/
+          $cefBin = (Get-ChildItem build/cef*_win64 -Directory | Select-Object -First 1).FullName + "/bin"
+          Get-ChildItem $cefBin | Where-Object { $_.Name -notmatch '^(cefclient|cefsimple|ceftests)' } |
+            ForEach-Object { Copy-Item $_.FullName build/artifacts/ -Recurse -Force }
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -90,29 +93,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Read CEF version
-        id: cef-version
-        run: |
-          $ver = (Select-String -Path src/version/cef_version_win.h `
-                  -Pattern '#define CEF_VERSION "([^"]+)"').Matches[0].Groups[1].Value
-          echo "value=$ver" >> $env:GITHUB_OUTPUT
-
-      - name: Cache CEF binaries
-        uses: actions/cache@v4
-        if: ${{ inputs.bypass_cache != true }}
-        with:
-          path: build/cef_binary_*
-          key: cef-windows64-${{ steps.cef-version.outputs.value }}
-
-      - name: Install build tools
-        run: python tools/requirements.py
-
-      - name: Download CEF binaries
-        run: python tools/download_cef.py
-
-      - name: Prepare prebuilt CEF
-        run: python tools/automate.py --prebuilt-cef
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -121,11 +101,9 @@ jobs:
 
       - name: Set up cefpython3 package for testing
         run: |
-          Copy-Item build/artifacts/cefpython_py*.pyd cefpython3/
-          Copy-Item build/artifacts/subprocess.exe cefpython3/
-          $cefBin = (Get-ChildItem build/cef*_win64 -Directory | Select-Object -First 1).FullName + "/bin"
-          Get-ChildItem $cefBin | Where-Object { $_.Name -notmatch '^(cefclient|cefsimple|ceftests)' } |
-            ForEach-Object { Copy-Item $_.FullName cefpython3/ -Recurse -Force }
+          Get-ChildItem build/artifacts/ | ForEach-Object {
+            Copy-Item $_.FullName cefpython3/ -Recurse -Force
+          }
 
       - name: Run unit tests
         run: python unittests/_test_runner.py
@@ -149,6 +127,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
 
       - name: Read CEF version
         id: cef-version
