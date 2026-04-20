@@ -65,25 +65,6 @@ message(STATUS "CEF_ROOT: ${CEF_ROOT}")
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 set(PYX_STAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/pyx_stage")
 
-# ---- Generate .pxi files ----------------------------------------------------
-# These write into the source tree (matching the legacy behaviour so that IDE
-# tooling keeps working).
-set(PXI_OUTPUTS
-    "${SRC_DIR}/compile_time_constants.pxi"
-    "${SRC_DIR}/platform_cimports.pxi"
-    "${SRC_DIR}/extern/cef/platform_cimports.pxi"
-)
-add_custom_command(
-    OUTPUT ${PXI_OUTPUTS}
-    COMMAND "${Python_EXECUTABLE}"
-            "${CMAKE_SOURCE_DIR}/tools/cmake_generate_pxi.py"
-            "${SRC_DIR}"
-    DEPENDS "${CMAKE_SOURCE_DIR}/tools/cmake_generate_pxi.py"
-    COMMENT "Generating Cython .pxi files"
-    VERBATIM
-)
-add_custom_target(cefpython_pxi DEPENDS ${PXI_OUTPUTS})
-
 # ---- Prepare .pyx files -----------------------------------------------------
 # Copies src/*.pyx + src/handlers/*.pyx to PYX_STAGE_DIR, flattening the
 # include paths and injecting version variables into the main file.
@@ -111,7 +92,6 @@ add_custom_command(
             --cef-version-header "${_cef_ver_header}"
     DEPENDS
         ${_pyx_src_files}
-        ${PXI_OUTPUTS}
         "${CMAKE_SOURCE_DIR}/tools/cmake_prepare_pyx.py"
     COMMENT "Preparing .pyx files -> ${PYX_STAGE_DIR}"
     VERBATIM
