@@ -48,7 +48,7 @@ jobs:
           path: |
             build/cef_binary_*
             build/cef*_macarm64
-          key: cef-macosarm64-v2-${{ steps.cef-version.outputs.value }}
+          key: cef-macosarm64-v3-${{ steps.cef-version.outputs.value }}
 
       - name: Install build tools
         run: python tools/requirements.py
@@ -65,7 +65,7 @@ jobs:
           if [ -z "$wrapper" ]; then echo "libcef_dll_wrapper.a not found"; exit 1; fi
           archs=$(lipo -info "$wrapper" 2>&1)
           echo "$archs"
-          echo "$archs" | grep -q arm64 || (echo "ERROR: libcef_dll_wrapper.a is not arm64"; exit 1)
+          echo "$archs" | grep -q arm64 || { echo "ERROR: libcef_dll_wrapper.a is not arm64"; exit 1; }
 
       - name: Configure CMake
         run: cmake -S . -B build/_cmake_build -G Ninja -DCMAKE_BUILD_TYPE=Release

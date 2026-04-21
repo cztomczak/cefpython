@@ -621,9 +621,10 @@ def build_wrapper_library_mac():
     # On Mac it is required to link libcef_dll_wrapper against
     # libc++ library, so must build this library separately
     # from cefclient.
+    mac_arch = platform.machine()  # "arm64" or "x86_64"
     cmake_wrapper = prepare_build_command()
     cmake_wrapper.extend(["cmake", "-G", "Ninja",
-                          "-DPROJECT_ARCH=x86_64",
+                          "-DPROJECT_ARCH=" + mac_arch,
                           "-DCMAKE_CXX_FLAGS=-stdlib=libc++",
                           "-DCMAKE_BUILD_TYPE=" + Options.build_type,
                           ".."])
