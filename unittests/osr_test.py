@@ -117,18 +117,19 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         if LINUX:
             # Sandbox setup fails on CI runners.
             switches["no-sandbox"] = ""
-            # /dev/shm is too small in CI containers; renderer subprocess
-            # fails shared-memory descriptor lookup (global descriptor 7).
+            # /dev/shm is too small in CI containers.
             switches["disable-dev-shm-usage"] = ""
-            # Run GPU process inside the browser process so the GPU
-            # subprocess is not spawned during CefInitialize() and does
-            # not fail the global descriptor lookup that blocks
-            # OnContextInitialized from firing.
+            # Run GPU process inside the browser process so it is not
+            # spawned during CefInitialize() where it would fail the
+            # global descriptor lookup (key 7) and block OnContextInitialized.
             switches["in-process-gpu"] = ""
+            # Run the renderer inside the browser process. Without this,
+            # the renderer subprocess fails the global descriptor lookup
+            # (key 7, the Mojo IPC bootstrap fd) because CEF 146 does not
+            # pass it in --no-sandbox mode; CEF then waits ~60s before
+            # CreateBrowserSync() returns None.
+            switches["single-process"] = ""
             switches["no-zygote"] = ""
-            # Run the storage service in-process so it doesn't need the
-            # Mojo bootstrap FD (global descriptor 7) that fails in CI.
-            switches["disable-features"] = "StorageServiceOutOfProcess"
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
