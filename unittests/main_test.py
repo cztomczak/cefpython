@@ -158,20 +158,9 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # OnContextInitialized from firing and browser creation fails.
             switches["in-process-gpu"] = ""
             switches["no-zygote"] = ""
-        if MAC:
-            # macOS CI runners run in a background bootstrap domain where
-            # MachPortRendezvousServer lookups fail for child processes.
-            # The CI workflow runs tests via "launchctl asuser" to place the
-            # browser process in the user's login session bootstrap domain.
-            # These switches add further subprocess-spawn reduction as guards.
-            switches["no-sandbox"] = ""
-            switches["disable-gpu"] = ""
-            switches["disable-gpu-compositing"] = ""
-            switches["in-process-gpu"] = ""
-            switches["single-process"] = ""
-            # Prevent macOS keychain authorization prompts during init
-            # (matches CEF's own test infrastructure on macOS).
-            switches["use-mock-keychain"] = ""
+            # Run the storage service in-process so it doesn't need the
+            # Mojo bootstrap FD (global descriptor 7) that fails in CI.
+            switches["disable-features"] = "StorageServiceOutOfProcess"
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 

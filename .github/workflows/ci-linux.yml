@@ -126,6 +126,9 @@ jobs:
           cp -r build/artifacts/. cefpython3/
           chmod +x cefpython3/subprocess
 
+      - name: Resize /dev/shm for Chromium shared memory
+        run: sudo mount -o remount,size=512m /dev/shm
+
       - name: Run unit tests
         run: xvfb-run python unittests/_test_runner.py
         env:
