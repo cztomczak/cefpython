@@ -116,6 +116,9 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # Sandbox setup fails on CI runners; subprocess won't launch
             # without this under xvfb even with --disable-gpu.
             switches["no-sandbox"] = ""
+            # /dev/shm is too small in CI containers; renderer subprocess
+            # fails shared-memory descriptor lookup (global descriptor 7).
+            switches["disable-dev-shm-usage"] = ""
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30

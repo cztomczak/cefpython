@@ -147,6 +147,9 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # Sandbox setup (user-namespace) fails on CI runners; GPU process
             # also needs --no-sandbox to launch successfully under xvfb.
             switches["no-sandbox"] = ""
+            # /dev/shm is too small in CI containers; renderer subprocess
+            # fails shared-memory descriptor lookup (global descriptor 7).
+            switches["disable-dev-shm-usage"] = ""
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 
