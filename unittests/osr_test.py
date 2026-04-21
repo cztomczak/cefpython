@@ -130,6 +130,11 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # CreateBrowserSync() returns None.
             switches["single-process"] = ""
             switches["no-zygote"] = ""
+            # Run utility services in-process so they don't need the Mojo
+            # bootstrap fd (global descriptor 7) that CEF 146 does not pass
+            # to subprocesses in --no-sandbox mode on Linux CI.
+            switches["disable-features"] = "StorageServiceOutOfProcess"
+            switches["enable-features"] = "NetworkServiceInProcess"
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30

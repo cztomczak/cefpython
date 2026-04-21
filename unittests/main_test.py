@@ -162,6 +162,11 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # CreateBrowserSync() returns None.
             switches["single-process"] = ""
             switches["no-zygote"] = ""
+            # Run utility services in-process so they don't need the Mojo
+            # bootstrap fd (global descriptor 7) that CEF 146 does not pass
+            # to subprocesses in --no-sandbox mode on Linux CI.
+            switches["disable-features"] = "StorageServiceOutOfProcess"
+            switches["enable-features"] = "NetworkServiceInProcess"
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 
