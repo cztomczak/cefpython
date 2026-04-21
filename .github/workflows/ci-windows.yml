@@ -2,7 +2,7 @@ name: CI Windows
 
 on:
   push:
-    branches: [ "github-actions-ci", "master", "scikit-build-core" ]
+    branches: [ "github-actions-ci", "master", "146-linux" ]
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
@@ -41,7 +41,9 @@ jobs:
         uses: actions/cache@v4
         if: ${{ inputs.bypass_cache != true }}
         with:
-          path: build/cef_binary_*
+          path: |
+            build/cef_binary_*
+            build/cef*_win64
           key: cef-windows64-${{ steps.cef-version.outputs.value }}
 
       - name: Install build tools
