@@ -144,27 +144,20 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Chrome 130+ blocks window.open() called without a user gesture.
         switches = {"disable-popup-blocking": ""}
         if LINUX:
-            # Sandbox setup (user-namespace) fails on CI runners.
-            switches["no-sandbox"] = ""
+            # Disable the setuid sandbox helper (not shipped in our package)
+            # so that Chrome falls back to the user-namespace sandbox, which
+            # correctly passes the Mojo IPC bootstrap fd to subprocesses.
+            switches["disable-setuid-sandbox"] = ""
             # /dev/shm is too small in CI containers.
             switches["disable-dev-shm-usage"] = ""
             # GPU acceleration is not available under xvfb.
             switches["disable-gpu"] = ""
             switches["disable-gpu-compositing"] = ""
             # Run GPU process inside the browser process so it is not
-            # spawned during CefInitialize() where it would fail the
-            # global descriptor lookup (key 7) and block OnContextInitialized.
+            # spawned during CefInitialize() where it would fail.
             switches["in-process-gpu"] = ""
-            # Run the renderer inside the browser process. Without this,
-            # the renderer subprocess fails the global descriptor lookup
-            # (key 7, the Mojo IPC bootstrap fd) because CEF 146 does not
-            # pass it in --no-sandbox mode; CEF then waits ~60s before
-            # CreateBrowserSync() returns None.
-            switches["single-process"] = ""
-            switches["no-zygote"] = ""
-            # Run utility services in-process so they don't need the Mojo
-            # bootstrap fd (global descriptor 7) that CEF 146 does not pass
-            # to subprocesses in --no-sandbox mode on Linux CI.
+            # Run utility services in-process so they don't each need a
+            # separate subprocess (reduces spawn overhead on CI).
             switches["disable-features"] = "StorageServiceOutOfProcess"
             switches["enable-features"] = "NetworkServiceInProcess"
         cef.Initialize(settings, switches=switches)
