@@ -53,6 +53,7 @@ list(APPEND _app_sources ${_filtered_mml})
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+    pkg_check_modules(GTK3_UNIXPRINT REQUIRED gtk+-unix-print-3.0)
 endif()
 
 add_library(cefpython_app STATIC ${_app_sources})
@@ -66,7 +67,10 @@ target_include_directories(cefpython_app PRIVATE
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_include_directories(cefpython_app PRIVATE ${GTK3_INCLUDE_DIRS})
+    target_include_directories(cefpython_app PRIVATE
+        ${GTK3_INCLUDE_DIRS}
+        ${GTK3_UNIXPRINT_INCLUDE_DIRS}
+    )
 endif()
 
 if(WIN32)

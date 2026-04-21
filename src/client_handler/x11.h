@@ -6,6 +6,7 @@
 
 #include <X11/Xlib.h>
 #include <gtk/gtk.h>
+#include <gtk/gtkx.h>
 #include <gdk/gdkx.h>
 
 #include "include/cef_browser.h"

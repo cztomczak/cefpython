@@ -37,4 +37,9 @@
 
 #define CEF_V8_ENABLE_SANDBOX 1
 
+// X11 windowing support (Linux only; required for cef_get_xdisplay and GtkPlug).
+#if defined(__linux__) && !defined(OS_CHROMEOS)
+#define CEF_X11 1
+#endif
+
 #endif  // CEF_INCLUDE_CEF_CONFIG_H_
