@@ -159,8 +159,11 @@ class MainTest_IsolatedTest(unittest.TestCase):
             switches["in-process-gpu"] = ""
             switches["no-zygote"] = ""
         if MAC:
-            # Mach port rendezvous (IPC) fails for child processes on CI
-            # runners because the macOS sandbox blocks bootstrap_look_up.
+            # Mach port rendezvous (bootstrap_look_up) fails for child
+            # processes on macOS CI runners regardless of --no-sandbox.
+            # Single-process mode runs renderer/network/GPU in-process,
+            # eliminating all subprocess spawning and bootstrap IPC.
+            switches["single-process"] = ""
             switches["no-sandbox"] = ""
             switches["disable-gpu"] = ""
             switches["disable-gpu-compositing"] = ""
