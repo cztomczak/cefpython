@@ -1,0 +1,158 @@
+name: CI macOS ARM
+
+on:
+  push:
+    branches: ["github-actions-ci", "master", "146-macos"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+    inputs:
+      bypass_cache:
+        description: "Bypass all caches for a clean run"
+        type: boolean
+        default: false
+
+jobs:
+  compile:
+    runs-on: macos-14
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Read CEF version
+        id: cef-version
+        run: |
+          ver=$(python3 -c "
+          import re, sys
+          h = open('src/version/cef_version_macarm64.h').read()
+          m = re.search(r'#define CEF_VERSION \"([^\"]+)\"', h)
+          print(m.group(1))
+          ")
+          echo "value=$ver" >> $GITHUB_OUTPUT
+
+      - name: Cache CEF binaries
+        uses: actions/cache@v4
+        if: ${{ inputs.bypass_cache != true }}
+        with:
+          path: |
+            build/cef_binary_*
+            build/cef*_macarm64
+          key: cef-macosarm64-${{ steps.cef-version.outputs.value }}
+
+      - name: Install build tools
+        run: python tools/requirements.py
+
+      - name: Download CEF binaries
+        run: python tools/download_cef.py
+
+      - name: Update version header from downloaded CEF
+        run: |
+          cef_dir=$(ls -d build/cef_binary_*_macosarm64 2>/dev/null | head -1)
+          cp "$cef_dir/include/cef_version.h" src/version/cef_version_macarm64.h
+
+      - name: Prepare prebuilt CEF
+        run: python tools/automate.py --prebuilt-cef
+
+      - name: Configure CMake
+        run: cmake -S . -B build/_cmake_build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build/_cmake_build --parallel
+
+      - name: Stage build outputs
+        run: |
+          mkdir -p build/artifacts
+          cp build/_cmake_build/cefpython_py*.so build/artifacts/
+          cp build/_cmake_build/subprocess_build/subprocess build/artifacts/
+          cef_dir=$(ls -d build/cef*_macarm64 2>/dev/null | head -1)
+          find "$cef_dir/bin" -maxdepth 1 -mindepth 1 \
+            ! -name 'cefclient*' ! -name 'cefsimple*' ! -name 'ceftests*' \
+            -exec cp -r {} build/artifacts/ \;
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-py${{ matrix.python-version }}-macosarm64
+          path: build/artifacts/
+          retention-days: 1
+
+  test:
+    needs: compile
+    runs-on: macos-14
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-py${{ matrix.python-version }}-macosarm64
+          path: build/artifacts/
+
+      - name: Set up cefpython3 package for testing
+        run: |
+          cp -r build/artifacts/. cefpython3/
+          chmod +x cefpython3/subprocess
+
+      - name: Run unit tests
+        run: python unittests/_test_runner.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+  wheel:
+    needs: test
+    runs-on: macos-14
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-py${{ matrix.python-version }}-macosarm64
+          path: build/artifacts/
+
+      - name: Set up cefpython3 package
+        run: cp -r build/artifacts/. cefpython3/
+
+      - name: Build wheel
+        run: python tools/build_distrib.py
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cefpython3-py${{ matrix.python-version }}-macosarm64
+          path: build/dist/*.whl
