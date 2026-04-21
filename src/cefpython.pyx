@@ -577,13 +577,29 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         cdef HINSTANCE hInstance = GetModuleHandle(NULL)
         cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
     ELIF UNAME_SYSNAME == "Linux":
-        # Pass argv[0] = Python executable so Chromium's CommandLine is
-        # initialized with a valid program name. CEF 146 relies on this for
-        # correct IPC channel bootstrap in subprocesses (global descriptor 7).
-        cdef bytes _cefMainArgv0 = sys.executable.encode('utf-8')
-        cdef char* _cefMainArgv0Ptr = _cefMainArgv0
-        cdef char** _cefMainArgv = &_cefMainArgv0Ptr
-        cdef CefMainArgs cefMainArgs = CefMainArgs(1, _cefMainArgv)
+        # Build a complete argv so the browser process sees all switches.
+        # OnBeforeChildProcessLaunch only reaches child processes; switches
+        # like --in-process-gpu and --single-process must be in the browser
+        # process's own command line to take effect.
+        _cefMainArgvPyList = [sys.executable.encode('utf-8')]
+        for _cefArgK, _cefArgV in g_commandLineSwitches.items():
+            if _cefArgV:
+                _cefMainArgvPyList.append(
+                    ("--{}={}".format(_cefArgK, _cefArgV)).encode('utf-8'))
+            else:
+                _cefMainArgvPyList.append(
+                    ("--{}".format(_cefArgK)).encode('utf-8'))
+        cdef int _cefMainArgc = len(_cefMainArgvPyList)
+        cdef char** _cefMainArgvC = \
+                <char**>malloc(_cefMainArgc * sizeof(char*))
+        cdef bytes _cefMainArgvItem
+        cdef int _cefMainArgvI
+        for _cefMainArgvI in range(_cefMainArgc):
+            _cefMainArgvItem = _cefMainArgvPyList[_cefMainArgvI]
+            _cefMainArgvC[_cefMainArgvI] = _cefMainArgvItem
+        cdef CefMainArgs cefMainArgs = CefMainArgs(_cefMainArgc, _cefMainArgvC)
+        # _cefMainArgvPyList keeps the bytes alive; freed below after
+        # CefInitialize() has processed the command line.
     ELIF UNAME_SYSNAME == "Darwin":
         # TODO: use the CefMainArgs(int argc, char** argv) constructor.
         cdef CefMainArgs cefMainArgs
@@ -616,6 +632,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     cdef cpp_bool ret
     with nogil:
         ret = CefInitialize(cefMainArgs, cefApplicationSettings, cefApp, NULL)
+    IF UNAME_SYSNAME == "Linux":
+        free(_cefMainArgvC)
 
     global g_cef_initialized
     g_cef_initialized = True
