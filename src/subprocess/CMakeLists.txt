@@ -145,8 +145,10 @@ elseif(APPLE)
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
     target_link_options(cefpython_subprocess PRIVATE
         -mmacosx-version-min=${_macos_ver_min}
+        -Wl,-search_paths_first
         "-F${CEFPYTHON_CEF_ROOT}/bin"
         "-framework" "Chromium Embedded Framework"
+        "-Wl,-rpath,@loader_path/"
     )
     target_link_libraries(cefpython_subprocess PRIVATE
         "${CEFPYTHON_CEF_ROOT}/lib/libcef_dll_wrapper.a"
