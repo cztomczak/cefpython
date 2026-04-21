@@ -204,7 +204,7 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
     logMessage.append("OnBeforeChildProcessLaunch() command line: ");
     std::string clString = command_line->GetCommandLineString().ToString();
     logMessage.append(clString.c_str());
-    LOG(ERROR) << logMessage.c_str();
+    LOG(INFO) << logMessage.c_str();
 }
 
 CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
