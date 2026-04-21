@@ -124,6 +124,11 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # OnContextInitialized from firing.
             switches["in-process-gpu"] = ""
             switches["no-zygote"] = ""
+        if MAC:
+            # Mach port rendezvous (IPC) fails for child processes on CI
+            # runners because the macOS sandbox blocks bootstrap_look_up.
+            switches["no-sandbox"] = ""
+            switches["in-process-gpu"] = ""
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30

@@ -158,6 +158,13 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # OnContextInitialized from firing and browser creation fails.
             switches["in-process-gpu"] = ""
             switches["no-zygote"] = ""
+        if MAC:
+            # Mach port rendezvous (IPC) fails for child processes on CI
+            # runners because the macOS sandbox blocks bootstrap_look_up.
+            switches["no-sandbox"] = ""
+            switches["disable-gpu"] = ""
+            switches["disable-gpu-compositing"] = ""
+            switches["in-process-gpu"] = ""
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 
