@@ -2,7 +2,7 @@ name: CI Windows
 
 on:
   push:
-    branches: [ "github-actions-ci", "master", "146-linux" ]
+    branches: [ "github-actions-ci", "master" ]
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
