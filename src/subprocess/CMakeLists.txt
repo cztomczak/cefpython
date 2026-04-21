@@ -152,5 +152,6 @@ else()
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
     target_link_libraries(cefpython_subprocess PRIVATE
         "${CEFPYTHON_CEF_ROOT}/lib/libcef_dll_wrapper.a"
+        "${CEFPYTHON_CEF_ROOT}/bin/libcef.so"
     )
 endif()

@@ -223,7 +223,7 @@ elseif(APPLE)
     )
 else()
     target_compile_options(${MODULE_NAME} PRIVATE
-        -std=gnu++11 -DNDEBUG -O3
+        -DNDEBUG -O3
         -flto -fdata-sections -ffunction-sections
     )
     target_compile_definitions(${MODULE_NAME} PRIVATE
