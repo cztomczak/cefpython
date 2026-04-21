@@ -135,11 +135,16 @@ if(WIN32)
         /MANIFEST:NO /LARGEADDRESSAWARE /SUBSYSTEM:WINDOWS
     )
 elseif(APPLE)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+        set(_macos_ver_min 11.0)
+    else()
+        set(_macos_ver_min 10.9)
+    endif()
     target_compile_options(cefpython_subprocess PRIVATE -DNDEBUG -O3)
     target_compile_definitions(cefpython_subprocess PRIVATE
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
     target_link_options(cefpython_subprocess PRIVATE
-        -mmacosx-version-min=10.9
+        -mmacosx-version-min=${_macos_ver_min}
         "-F${CEFPYTHON_CEF_ROOT}/bin"
         "-framework" "Chromium Embedded Framework"
     )

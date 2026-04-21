@@ -218,8 +218,13 @@ elseif(APPLE)
         BROWSER_PROCESS
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h"
     )
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+        set(_macos_ver_min 11.0)
+    else()
+        set(_macos_ver_min 10.9)
+    endif()
     target_link_options(${MODULE_NAME} PRIVATE
-        -mmacosx-version-min=10.9
+        -mmacosx-version-min=${_macos_ver_min}
         -Wl,-search_paths_first -Wl,-dead_strip
         "-F${CEF_ROOT}/bin" "-framework" "Chromium Embedded Framework"
         "-Wl,-rpath,@loader_path/"
