@@ -144,18 +144,19 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Chrome 130+ blocks window.open() called without a user gesture.
         switches = {"disable-popup-blocking": ""}
         if LINUX:
-            # Sandbox setup (user-namespace) fails on CI runners; GPU process
-            # also needs --no-sandbox to launch successfully under xvfb.
+            # Sandbox setup (user-namespace) fails on CI runners.
             switches["no-sandbox"] = ""
             # /dev/shm is too small in CI containers; renderer subprocess
             # fails shared-memory descriptor lookup (global descriptor 7).
             switches["disable-dev-shm-usage"] = ""
-            # GPU acceleration is not available under xvfb; disabling it
-            # reduces startup time and avoids GPU process launch failures.
+            # GPU acceleration is not available under xvfb.
             switches["disable-gpu"] = ""
             switches["disable-gpu-compositing"] = ""
-            # Zygote FD-passing fails in CI containers; launch renderers
-            # directly from the browser process instead.
+            # Run GPU process inside the browser process. Without this,
+            # the GPU subprocess is spawned during CefInitialize() and
+            # fails the global descriptor lookup (key 7), which prevents
+            # OnContextInitialized from firing and browser creation fails.
+            switches["in-process-gpu"] = ""
             switches["no-zygote"] = ""
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")

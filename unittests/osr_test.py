@@ -113,14 +113,16 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             "disable-surfaces": "",  # This is required for PDF ext to work
         }
         if LINUX:
-            # Sandbox setup fails on CI runners; subprocess won't launch
-            # without this under xvfb even with --disable-gpu.
+            # Sandbox setup fails on CI runners.
             switches["no-sandbox"] = ""
             # /dev/shm is too small in CI containers; renderer subprocess
             # fails shared-memory descriptor lookup (global descriptor 7).
             switches["disable-dev-shm-usage"] = ""
-            # Zygote FD-passing fails in CI containers; launch renderers
-            # directly from the browser process instead.
+            # Run GPU process inside the browser process so the GPU
+            # subprocess is not spawned during CefInitialize() and does
+            # not fail the global descriptor lookup that blocks
+            # OnContextInitialized from firing.
+            switches["in-process-gpu"] = ""
             switches["no-zygote"] = ""
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
