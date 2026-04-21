@@ -127,13 +127,17 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             switches["in-process-gpu"] = ""
             switches["no-zygote"] = ""
         if MAC:
-            # Mach port rendezvous (bootstrap_look_up) fails for child
-            # processes on macOS CI runners regardless of --no-sandbox.
-            # Single-process mode runs renderer/network/GPU in-process,
-            # eliminating all subprocess spawning and bootstrap IPC.
-            switches["single-process"] = ""
+            # macOS CI runners run in a background bootstrap domain where
+            # MachPortRendezvousServer lookups fail for child processes.
+            # The CI workflow runs tests via "launchctl asuser" to place the
+            # browser process in the user's login session bootstrap domain.
+            # These switches add further subprocess-spawn reduction as guards.
             switches["no-sandbox"] = ""
             switches["in-process-gpu"] = ""
+            switches["single-process"] = ""
+            # Prevent macOS keychain authorization prompts during init
+            # (matches CEF's own test infrastructure on macOS).
+            switches["use-mock-keychain"] = ""
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30

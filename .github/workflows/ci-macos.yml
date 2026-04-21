@@ -120,9 +120,11 @@ jobs:
           chmod +x cefpython3/subprocess
 
       - name: Run unit tests
-        run: python unittests/_test_runner.py
-        env:
-          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python_bin="$(which python)"
+          sudo launchctl asuser "$(id -u)" \
+            /usr/bin/env PYTHONPATH="${{ github.workspace }}" \
+            "$python_bin" unittests/_test_runner.py
 
   wheel:
     needs: test
