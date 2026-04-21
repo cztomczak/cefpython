@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
+#include <memory>
 
 #include <glib.h>
 
@@ -55,11 +56,11 @@ class MainMessageLoopExternalPumpLinux : public MainMessageLoopExternalPump {
   ~MainMessageLoopExternalPumpLinux();
 
   // MainMessageLoopStd methods:
-  void Quit() OVERRIDE;
-  int Run() OVERRIDE;
+  void Quit() override;
+  int Run() override;
 
   // MainMessageLoopExternalPump methods:
-  void OnScheduleMessagePumpWork(int64 delay_ms) OVERRIDE;
+  void OnScheduleMessagePumpWork(int64_t delay_ms) override;
 
   // Internal methods used for processing the pump callbacks. They are public
   // for simplicity but should not be used directly. HandlePrepare is called
@@ -73,9 +74,9 @@ class MainMessageLoopExternalPumpLinux : public MainMessageLoopExternalPump {
 
  protected:
   // MainMessageLoopExternalPump methods:
-  void SetTimer(int64 delay_ms) OVERRIDE;
-  void KillTimer() OVERRIDE;
-  bool IsTimerPending() OVERRIDE;
+  void SetTimer(int64_t delay_ms) override;
+  void KillTimer() override;
+  bool IsTimerPending() override;
 
  private:
   // Used to flag that the Run() invocation should return ASAP.
@@ -98,8 +99,8 @@ class MainMessageLoopExternalPumpLinux : public MainMessageLoopExternalPump {
   int wakeup_pipe_read_;
   int wakeup_pipe_write_;
 
-  // Use a scoped_ptr to avoid needing the definition of GPollFD in the header.
-  scoped_ptr<GPollFD> wakeup_gpollfd_;
+  // Use a std::unique_ptr to avoid needing the definition of GPollFD in the header.
+  std::unique_ptr<GPollFD> wakeup_gpollfd_;
 };
 
 // Return a timeout suitable for the glib loop, -1 to block forever,
@@ -226,12 +227,12 @@ int MainMessageLoopExternalPumpLinux::Run() {
 }
 
 void MainMessageLoopExternalPumpLinux::OnScheduleMessagePumpWork(
-    int64 delay_ms) {
+    int64_t delay_ms) {
   // This can be called on any thread, so we don't want to touch any state
   // variables as we would then need locks all over. This ensures that if we
   // are sleeping in a poll that we will wake up.
-  if (HANDLE_EINTR(write(wakeup_pipe_write_, &delay_ms, sizeof(int64))) !=
-                   sizeof(int64)) {
+  if (HANDLE_EINTR(write(wakeup_pipe_write_, &delay_ms, sizeof(int64_t))) !=
+                   sizeof(int64_t)) {
     NOTREACHED() << "Could not write to the UI message loop wakeup pipe!";
   }
 }
@@ -250,15 +251,15 @@ bool MainMessageLoopExternalPumpLinux::HandleCheck() {
   // The glib poll will tell us whether there was data, so this read shouldn't
   // block.
   if (wakeup_gpollfd_->revents & G_IO_IN) {
-    int64 delay_ms[2];
+    int64_t delay_ms[2];
     const size_t num_bytes =
-        HANDLE_EINTR(read(wakeup_pipe_read_, delay_ms, sizeof(int64) * 2));
-    if (num_bytes < sizeof(int64)) {
+        HANDLE_EINTR(read(wakeup_pipe_read_, delay_ms, sizeof(int64_t) * 2));
+    if (num_bytes < sizeof(int64_t)) {
       NOTREACHED() << "Error reading from the wakeup pipe.";
     }
-    if (num_bytes == sizeof(int64))
+    if (num_bytes == sizeof(int64_t))
       OnScheduleWork(delay_ms[0]);
-    if (num_bytes == sizeof(int64) * 2)
+    if (num_bytes == sizeof(int64_t) * 2)
       OnScheduleWork(delay_ms[1]);
   }
 
@@ -275,7 +276,7 @@ void MainMessageLoopExternalPumpLinux::HandleDispatch() {
   OnTimerTimeout();
 }
 
-void MainMessageLoopExternalPumpLinux::SetTimer(int64 delay_ms) {
+void MainMessageLoopExternalPumpLinux::SetTimer(int64_t delay_ms) {
   DCHECK_GT(delay_ms, 0);
 
   CefTime now;
@@ -296,8 +297,8 @@ bool MainMessageLoopExternalPumpLinux::IsTimerPending() {
 } // namespace
 
 // static
-scoped_ptr<MainMessageLoopExternalPump>
+std::unique_ptr<MainMessageLoopExternalPump>
 MainMessageLoopExternalPump::Create() {
-  return scoped_ptr<MainMessageLoopExternalPump>(
+  return std::unique_ptr<MainMessageLoopExternalPump>(
       new MainMessageLoopExternalPumpLinux());
 }

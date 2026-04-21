@@ -13,6 +13,7 @@
 #include <gtk/gtk.h>
 #include <gtk/gtkunixprint.h>
 
+#include "include/base/cef_callback.h"
 #include "include/base/cef_bind.h"
 #include "include/base/cef_logging.h"
 #include "include/base/cef_macros.h"
