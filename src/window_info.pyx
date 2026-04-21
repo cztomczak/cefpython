@@ -22,6 +22,8 @@ cdef void SetCefWindowInfo(
         cdef CefRect windowRect
         cdef CefString windowName
         cdef RECT rect
+    ELIF UNAME_SYSNAME == "Darwin":
+        cdef CefRect windowRect
     ELIF UNAME_SYSNAME == "Linux":
         cdef CefRect windowRect
 
@@ -43,12 +45,15 @@ cdef void SetCefWindowInfo(
             # CEF 123+: must request Alloy runtime for native windowed rendering.
             cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
         ELIF UNAME_SYSNAME == "Darwin":
+            x = int(windowInfo.windowRect[0])
+            y = int(windowInfo.windowRect[1])
+            width = int(windowInfo.windowRect[2] - windowInfo.windowRect[0])
+            height = int(windowInfo.windowRect[3] - windowInfo.windowRect[1])
+            windowRect = CefRect(x, y, width, height)
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
-                    int(windowInfo.windowRect[0]),
-                    int(windowInfo.windowRect[1]),
-                    int(windowInfo.windowRect[2]),
-                    int(windowInfo.windowRect[3]))
+                    windowRect)
+            cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
         ELIF UNAME_SYSNAME == "Linux":
             x = int(windowInfo.windowRect[0])
             y = int(windowInfo.windowRect[1])
