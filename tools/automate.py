@@ -678,7 +678,9 @@ def create_prebuilt_binaries():
     version_header = os.path.join(src, "include", "cef_version.h")
     dst = get_prebuilt_name(version_header)
     dst = os.path.join(Options.build_dir, dst)
-    rmdir(dst)
+    if os.path.exists(dst):
+        print("[automate.py] Already exists: %s" % dst)
+        return
     os.makedirs(dst)
     bindir = os.path.join(dst, "bin")
     libdir = os.path.join(dst, "lib")

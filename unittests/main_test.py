@@ -150,6 +150,10 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # /dev/shm is too small in CI containers; renderer subprocess
             # fails shared-memory descriptor lookup (global descriptor 7).
             switches["disable-dev-shm-usage"] = ""
+            # GPU acceleration is not available under xvfb; disabling it
+            # reduces startup time and avoids GPU process launch failures.
+            switches["disable-gpu"] = ""
+            switches["disable-gpu-compositing"] = ""
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 

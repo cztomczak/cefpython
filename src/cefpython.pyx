@@ -625,7 +625,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # 200 * 10ms = 2 seconds max; OnContextInitialized typically fires
     # within the first few iterations.
     if ret:
-        for _ in range(200):
+        for _ in range(600):
             with nogil:
                 CefDoMessageLoopWork()
             if g_context_initialized:
@@ -633,7 +633,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
             time.sleep(0.01)
         if not g_context_initialized:
             Debug("CefInitialize() WARNING: OnContextInitialized not received"
-                  " within 2 seconds")
+                  " within 6 seconds")
 
     if sys.platform.startswith("linux"):
         # Install by default.

@@ -58,6 +58,8 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)
+            # CEF 123+: must request Alloy runtime for native windowed rendering.
+            cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
 
     # POPUP WINDOW - Windows only
     IF UNAME_SYSNAME == "Windows":
