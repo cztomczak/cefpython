@@ -56,11 +56,6 @@ jobs:
       - name: Download CEF binaries
         run: python tools/download_cef.py
 
-      - name: Update version header from downloaded CEF
-        run: |
-          cef_dir=$(ls -d build/cef_binary_*_macosarm64 2>/dev/null | head -1)
-          cp "$cef_dir/include/cef_version.h" src/version/cef_version_macarm64.h
-
       - name: Prepare prebuilt CEF
         run: python tools/automate.py --prebuilt-cef
 
