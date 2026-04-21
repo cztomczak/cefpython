@@ -158,6 +158,11 @@ add_subdirectory("${SRC_DIR}/subprocess"
 add_subdirectory("${SRC_DIR}/cpp_utils"
                  "${CMAKE_CURRENT_BINARY_DIR}/cpp_utils")
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+endif()
+
 # ---- Python extension -------------------------------------------------------
 Python_add_library(${MODULE_NAME} MODULE "${CEFPYTHON_CPP}")
 add_dependencies(${MODULE_NAME} cefpython_headers)
@@ -225,11 +230,14 @@ else()
         BROWSER_PROCESS
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h"
     )
+    target_include_directories(${MODULE_NAME} PRIVATE
+        ${GTK3_INCLUDE_DIRS}
+    )
     target_link_options(${MODULE_NAME} PRIVATE
         -flto -Wl,--gc-sections
     )
     target_link_libraries(${MODULE_NAME} PRIVATE
-        X11 gobject-2.0 glib-2.0 gtk-x11-2.0 gdk-x11-2.0
+        X11 ${GTK3_LIBRARIES}
         cefpython_app client_handler cpp_utils
         "${CEF_ROOT}/lib/libcef_dll_wrapper.a"
     )
