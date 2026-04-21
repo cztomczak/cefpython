@@ -491,13 +491,13 @@ struct ClientPrintHandlerGtk::PrintHandler {
         settings->SetSelectionOnly(print_selection_only);
         InitPrintSettings(gtk_settings_, page_setup_, settings);
         dialog_callback_->Continue(settings);
-        dialog_callback_ = NULL;
+        dialog_callback_ = nullptr;
         return;
       }
       case GTK_RESPONSE_DELETE_EVENT:  // Fall through.
       case GTK_RESPONSE_CANCEL: {
         dialog_callback_->Cancel();
-        dialog_callback_ = NULL;
+        dialog_callback_ = nullptr;
         return;
       }
       case GTK_RESPONSE_APPLY:
@@ -505,13 +505,13 @@ struct ClientPrintHandlerGtk::PrintHandler {
     }
   }
 
-  void OnJobCompleted(GtkPrintJob* print_job, GError* error) {
+  void OnJobCompleted(GtkPrintJob* print_job, const GError* error) {
     // Continue() will result in a call to ClientPrintHandlerGtk::OnPrintReset
     // which deletes |this|. Execute it asnychronously so the call stack has a
     // chance to unwind.
-    CefPostTask(TID_UI, base::Bind(&CefPrintJobCallback::Continue,
-                                   job_callback_.get()));
-    job_callback_ = NULL;
+    CefPostTask(TID_UI, CefCreateClosureTask(
+        base::BindOnce(&CefPrintJobCallback::Continue, job_callback_)));
+    job_callback_ = nullptr;
   }
 
   static void OnDialogResponseThunk(GtkDialog* dialog,
@@ -522,7 +522,7 @@ struct ClientPrintHandlerGtk::PrintHandler {
 
   static void OnJobCompletedThunk(GtkPrintJob* print_job,
                                   void* handler,
-                                  GError* error) {
+                                  const GError* error) {
     static_cast<PrintHandler*>(handler)->OnJobCompleted(print_job, error);
   }
 
