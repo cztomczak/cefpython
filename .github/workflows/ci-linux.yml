@@ -40,7 +40,9 @@ jobs:
         uses: actions/cache@v4
         if: ${{ inputs.bypass_cache != true }}
         with:
-          path: build/cef_binary_*
+          path: |
+            build/cef_binary_*
+            build/cef*_linux64
           key: cef-linux64-${{ steps.cef-version.outputs.value }}
 
       - name: Install system dependencies
@@ -120,7 +122,9 @@ jobs:
           path: build/artifacts/
 
       - name: Set up cefpython3 package for testing
-        run: cp -r build/artifacts/. cefpython3/
+        run: |
+          cp -r build/artifacts/. cefpython3/
+          chmod +x cefpython3/subprocess
 
       - name: Run unit tests
         run: xvfb-run python unittests/_test_runner.py

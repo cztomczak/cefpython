@@ -112,6 +112,10 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             "enable-begin-frame-scheduling": "",
             "disable-surfaces": "",  # This is required for PDF ext to work
         }
+        if LINUX:
+            # Sandbox setup fails on CI runners; subprocess won't launch
+            # without this under xvfb even with --disable-gpu.
+            switches["no-sandbox"] = ""
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30

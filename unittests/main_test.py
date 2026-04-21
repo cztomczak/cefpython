@@ -143,6 +143,10 @@ class MainTest_IsolatedTest(unittest.TestCase):
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
         # Chrome 130+ blocks window.open() called without a user gesture.
         switches = {"disable-popup-blocking": ""}
+        if LINUX:
+            # Sandbox setup (user-namespace) fails on CI runners; GPU process
+            # also needs --no-sandbox to launch successfully under xvfb.
+            switches["no-sandbox"] = ""
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 
