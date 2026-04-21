@@ -195,41 +195,60 @@ def find_in_index(cef_version, cef_postfix2):
     sys.exit(1)
 
 
-def download(url, dest_path, expected_size=0):
-    """Download url to dest_path with a progress bar."""
+def download(url, dest_path, expected_size=0, max_retries=3):
+    """Download url to dest_path with a progress bar, retrying on failure."""
     try:
         from urllib.request import urlopen
     except ImportError:
         from urllib2 import urlopen
 
     log("Downloading: {}".format(url))
-    try:
-        response = urlopen(url, timeout=120)
-    except Exception as exc:
-        log("ERROR: Download failed: {}".format(exc))
-        sys.exit(1)
+    for attempt in range(1, max_retries + 1):
+        if attempt > 1:
+            log("Retry {}/{}: {}".format(attempt, max_retries, url))
+        try:
+            response = urlopen(url, timeout=120)
+        except Exception as exc:
+            if attempt == max_retries:
+                log("ERROR: Download failed: {}".format(exc))
+                sys.exit(1)
+            log("WARNING: Connection error (attempt {}): {}".format(attempt, exc))
+            continue
 
-    total = int(response.headers.get("Content-Length") or expected_size or 0)
-    downloaded = 0
-    chunk_size = 1024 * 1024  # 1 MB
+        total = int(response.headers.get("Content-Length") or expected_size or 0)
+        downloaded = 0
+        chunk_size = 1024 * 1024  # 1 MB
+        error = None
 
-    try:
-        with open(dest_path, "wb") as fp:
-            while True:
-                chunk = response.read(chunk_size)
-                if not chunk:
-                    break
-                fp.write(chunk)
-                downloaded += len(chunk)
-                _print_progress(downloaded, total)
-    except Exception as exc:
-        if os.path.isfile(dest_path):
-            os.remove(dest_path)
-        log("\nERROR: Download failed: {}".format(exc))
-        sys.exit(1)
+        try:
+            with open(dest_path, "wb") as fp:
+                while True:
+                    chunk = response.read(chunk_size)
+                    if not chunk:
+                        break
+                    fp.write(chunk)
+                    downloaded += len(chunk)
+                    _print_progress(downloaded, total)
+        except Exception as exc:
+            error = exc
 
-    print()  # end progress line
-    log("Saved: {}".format(os.path.basename(dest_path)))
+        print()  # end progress line
+
+        if error is None and total and downloaded < total:
+            error = "short read: got {:.1f} MB of {:.1f} MB".format(
+                downloaded / (1024 * 1024), total / (1024 * 1024))
+
+        if error is not None:
+            if os.path.isfile(dest_path):
+                os.remove(dest_path)
+            if attempt == max_retries:
+                log("ERROR: Download failed: {}".format(error))
+                sys.exit(1)
+            log("WARNING: Download incomplete (attempt {}): {}".format(attempt, error))
+            continue
+
+        log("Saved: {}".format(os.path.basename(dest_path)))
+        return
 
 
 def _print_progress(downloaded, total):
