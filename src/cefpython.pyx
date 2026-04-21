@@ -806,11 +806,36 @@ def CreateBrowserSync(windowInfo=None,
     cdef CefRefPtr[CefDictionaryValue] extra_info
 
     # CEF browser creation.
-    with nogil:
-        cefBrowser = cef_browser_static.CreateBrowserSync(
+    IF UNAME_SYSNAME == "Linux":
+        # CefBrowserHost::CreateBrowserSync() deadlocks when combined with
+        # --single-process + external pump mode (CefDoMessageLoopWork). The
+        # nested RunLoop it creates cannot drive the in-process renderer
+        # thread initialisation. Use async CreateBrowser() and keep pumping
+        # the message loop until OnAfterCreated fires and populates
+        # g_pyBrowsers, then retrieve the CefBrowser ref from there.
+        cdef set _before_browser_ids = set(g_pyBrowsers.keys())
+        cef_browser_static.CreateBrowser(
                 cefWindowInfo, <CefRefPtr[CefClient]?>clientHandler,
                 cefNavigateUrl, cefBrowserSettings, extra_info,
                 cefRequestContext)
+        cdef PyBrowser _linux_pyBrowser = None
+        cdef int _i
+        for _i in range(6000):  # up to 60 s at 0.01 s/iter
+            with nogil:
+                CefDoMessageLoopWork()
+            _new_browser_ids = set(g_pyBrowsers.keys()) - _before_browser_ids
+            if _new_browser_ids:
+                _linux_pyBrowser = GetPyBrowserById(min(_new_browser_ids))
+                if _linux_pyBrowser is not None:
+                    cefBrowser = _linux_pyBrowser.cefBrowser
+                break
+            time.sleep(0.01)
+    ELSE:
+        with nogil:
+            cefBrowser = cef_browser_static.CreateBrowserSync(
+                    cefWindowInfo, <CefRefPtr[CefClient]?>clientHandler,
+                    cefNavigateUrl, cefBrowserSettings, extra_info,
+                    cefRequestContext)
 
     if not cefBrowser or not cefBrowser.get():
         Debug("CefBrowser::CreateBrowserSync() failed")

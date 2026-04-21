@@ -4,6 +4,7 @@
 
 include "platform_cimports.pxi"
 
+from libcpp cimport bool as cpp_bool
 from cef_ptr cimport CefRefPtr
 # noinspection PyUnresolvedReferences
 from cef_client cimport CefClient
@@ -17,6 +18,14 @@ from cef_string cimport CefString
 
 # Specifying namespace allows to import a static method.
 cdef extern from "include/cef_browser.h" namespace "CefBrowserHost":
+
+    cdef cpp_bool CreateBrowser(
+        CefWindowInfo&,
+        CefRefPtr[CefClient],
+        CefString&,
+        CefBrowserSettings&,
+        CefRefPtr[CefDictionaryValue],
+        CefRefPtr[CefRequestContext]) nogil
 
     cdef CefRefPtr[CefBrowser] CreateBrowserSync(
         CefWindowInfo&,
