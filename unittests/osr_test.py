@@ -107,11 +107,13 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # it using these Chromium switches (Issue #240 and #463)
             "disable-gpu": "",
             "disable-gpu-compositing": "",
-            # Tweaking OSR performance by setting the same Chromium flags
-            # as in upstream cefclient (Issue #240).
-            "enable-begin-frame-scheduling": "",
-            "disable-surfaces": "",  # This is required for PDF ext to work
         }
+        if not MAC:
+            # Tweaking OSR performance (Issue #240). On macOS ARM the viz
+            # Surfaces API is required for OSR browser creation, so these
+            # switches (which disable it) must not be passed there.
+            switches["enable-begin-frame-scheduling"] = ""
+            switches["disable-surfaces"] = ""  # Required for PDF ext to work
         if LINUX:
             # Sandbox setup fails on CI runners.
             switches["no-sandbox"] = ""

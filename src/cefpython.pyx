@@ -622,10 +622,10 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # guarantees that CreateBrowserSync() can be called immediately after
     # Initialize() without hitting the deferred-creation path or getting
     # a null browser from CefBrowserHost::CreateBrowserSync().
-    # 200 * 10ms = 2 seconds max; OnContextInitialized typically fires
-    # within the first few iterations.
+    # OnContextInitialized typically fires within the first few iterations;
+    # allow up to 30 seconds for slow CI environments.
     if ret:
-        for _ in range(600):
+        for _ in range(3000):
             with nogil:
                 CefDoMessageLoopWork()
             if g_context_initialized:
@@ -633,7 +633,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
             time.sleep(0.01)
         if not g_context_initialized:
             Debug("CefInitialize() WARNING: OnContextInitialized not received"
-                  " within 6 seconds")
+                  " within 30 seconds")
 
     if sys.platform.startswith("linux"):
         # Install by default.
