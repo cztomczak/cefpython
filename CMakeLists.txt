@@ -208,7 +208,7 @@ if(WIN32)
     target_link_options(${MODULE_NAME} PRIVATE /ignore:4217)
 elseif(APPLE)
     target_compile_options(${MODULE_NAME} PRIVATE
-        -std=gnu++11 -DNDEBUG -O3
+        -DNDEBUG -O3
         -Wno-return-type-c-linkage -Wno-constant-logical-operand
         -stdlib=libc++ -fno-strict-aliasing -fno-rtti
         -fno-threadsafe-statics -fobjc-call-cxx-cdtors
