@@ -6,7 +6,7 @@ import base64
 import platform
 import sys
 import threading
-from pkg_resources import parse_version
+from packaging.version import Version as parse_version
 
 # HTML code. Browser will navigate to a Data uri created
 # from this html code.

@@ -36,7 +36,7 @@ NOTE: There are limits in Chromium on viewport size. For some
 """
 
 from cefpython3 import cefpython as cef
-from pkg_resources import parse_version
+from packaging.version import Version as parse_version
 import os
 import platform
 import subprocess

@@ -16,7 +16,7 @@
 from cefpython3 import cefpython as cef
 
 import distutils.sysconfig
-from pkg_resources import parse_version
+from packaging.version import Version as parse_version
 import math
 import os
 import platform

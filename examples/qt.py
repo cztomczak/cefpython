@@ -18,7 +18,7 @@ import ctypes
 import os
 import platform
 import sys
-from pkg_resources import parse_version
+from packaging.version import Version as parse_version
 
 # GLOBALS
 PYQT4 = False

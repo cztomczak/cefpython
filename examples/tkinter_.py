@@ -26,7 +26,7 @@ import sys
 import os
 import platform
 import logging as _logging
-from pkg_resources import parse_version
+from packaging.version import Version as parse_version
 
 # Fix for PyCharm hints warnings
 WindowUtils = cef.WindowUtils()
