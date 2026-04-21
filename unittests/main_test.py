@@ -154,6 +154,9 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # reduces startup time and avoids GPU process launch failures.
             switches["disable-gpu"] = ""
             switches["disable-gpu-compositing"] = ""
+            # Zygote FD-passing fails in CI containers; launch renderers
+            # directly from the browser process instead.
+            switches["no-zygote"] = ""
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 

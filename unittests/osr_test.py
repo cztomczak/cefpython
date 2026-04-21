@@ -119,6 +119,9 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # /dev/shm is too small in CI containers; renderer subprocess
             # fails shared-memory descriptor lookup (global descriptor 7).
             switches["disable-dev-shm-usage"] = ""
+            # Zygote FD-passing fails in CI containers; launch renderers
+            # directly from the browser process instead.
+            switches["no-zygote"] = ""
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
