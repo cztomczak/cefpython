@@ -577,8 +577,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         cdef HINSTANCE hInstance = GetModuleHandle(NULL)
         cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
     ELIF UNAME_SYSNAME == "Linux":
-        # TODO: use the CefMainArgs(int argc, char** argv) constructor.
-        cdef CefMainArgs cefMainArgs
+        # Pass argv[0] = Python executable so Chromium's CommandLine is
+        # initialized with a valid program name. CEF 146 relies on this for
+        # correct IPC channel bootstrap in subprocesses (global descriptor 7).
+        cdef bytes _cefMainArgv0 = sys.executable.encode('utf-8')
+        cdef char* _cefMainArgv0Ptr = _cefMainArgv0
+        cdef char** _cefMainArgv = &_cefMainArgv0Ptr
+        cdef CefMainArgs cefMainArgs = CefMainArgs(1, _cefMainArgv)
     ELIF UNAME_SYSNAME == "Darwin":
         # TODO: use the CefMainArgs(int argc, char** argv) constructor.
         cdef CefMainArgs cefMainArgs
