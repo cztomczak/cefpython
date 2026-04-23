@@ -144,10 +144,13 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # Chrome 130+ blocks window.open() called without a user gesture.
         switches = {"disable-popup-blocking": ""}
         if LINUX:
-            # Disable the setuid sandbox helper (not shipped in our package)
-            # so that Chrome falls back to the user-namespace sandbox, which
-            # correctly passes the Mojo IPC bootstrap fd to subprocesses.
+            # cefpython does not ship a chrome-sandbox (setuid) binary.
+            # Disable both the setuid and namespace sandboxes so Chrome runs
+            # subprocesses without sandboxing. Unlike --no-sandbox, these two
+            # flags do NOT suppress the Mojo IPC bootstrap fd registration
+            # (GlobalDescriptors key 7), so subprocesses can still communicate.
             switches["disable-setuid-sandbox"] = ""
+            switches["disable-namespace-sandbox"] = ""
             # /dev/shm is too small in CI containers.
             switches["disable-dev-shm-usage"] = ""
             # GPU acceleration is not available under xvfb.
@@ -160,6 +163,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # separate subprocess (reduces spawn overhead on CI).
             switches["disable-features"] = "StorageServiceOutOfProcess"
             switches["enable-features"] = "NetworkServiceInProcess"
+            # Suppress the GNOME Keyring unlock prompt on desktop sessions.
+            switches["password-store"] = "basic"
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 

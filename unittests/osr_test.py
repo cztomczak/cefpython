@@ -115,10 +115,13 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             switches["enable-begin-frame-scheduling"] = ""
             switches["disable-surfaces"] = ""  # Required for PDF ext to work
         if LINUX:
-            # Disable the setuid sandbox helper (not shipped in our package)
-            # so that Chrome falls back to the user-namespace sandbox, which
-            # correctly passes the Mojo IPC bootstrap fd to subprocesses.
+            # cefpython does not ship a chrome-sandbox (setuid) binary.
+            # Disable both the setuid and namespace sandboxes so Chrome runs
+            # subprocesses without sandboxing. Unlike --no-sandbox, these two
+            # flags do NOT suppress the Mojo IPC bootstrap fd registration
+            # (GlobalDescriptors key 7), so subprocesses can still communicate.
             switches["disable-setuid-sandbox"] = ""
+            switches["disable-namespace-sandbox"] = ""
             # /dev/shm is too small in CI containers.
             switches["disable-dev-shm-usage"] = ""
             # Run GPU process inside the browser process so it is not

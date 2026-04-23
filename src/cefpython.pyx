@@ -615,8 +615,19 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_applicationSettings[key] = copy.deepcopy(application_settings[key])
 
     cdef CefSettings cefApplicationSettings
-    # No sandboxing for the subprocesses
-    cefApplicationSettings.no_sandbox = 1
+    IF UNAME_SYSNAME == "Linux":
+        # On Linux, leave no_sandbox=0 so Chrome's startup code registers the
+        # Mojo IPC bootstrap fd (GlobalDescriptors key 7) for every subprocess.
+        # Setting no_sandbox=1 would cause BasicStartupComplete() to append
+        # --no-sandbox before fd registration, causing all subprocesses to crash
+        # with "Failed global descriptor lookup: 7". Sandbox behaviour is instead
+        # controlled via --disable-setuid-sandbox / --disable-namespace-sandbox
+        # command-line switches passed by the caller.
+        pass
+    ELSE:
+        # On Windows/macOS the sandbox helper binary is not shipped with
+        # cefpython, so disable sandboxing entirely.
+        cefApplicationSettings.no_sandbox = 1
     SetApplicationSettings(application_settings, &cefApplicationSettings)
 
     # External message pump
