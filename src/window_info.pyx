@@ -85,11 +85,17 @@ cdef class WindowInfo:
     cdef public WindowHandle parentWindowHandle
     cdef public list windowRect # [left, top, right, bottom]
     cdef public object windowName
+    # Linux Xwayland embedding: when SetAsChild() substitutes the root window
+    # as CEF's parent, this dict holds the real parent XID and embed size so
+    # BrowserProcessHandler_CreatePendingBrowsers can schedule the deferred
+    # XReparentWindow after browser creation.  None on all other platforms.
+    cdef public object _linux_embed_info
 
     def __init__(self, title=""):
         self.windowName = ""
         if title:
             self.windowName = title
+        self._linux_embed_info = None
 
     cpdef py_void SetAsChild(self, WindowHandle parentWindowHandle,
                              list windowRect=None):
@@ -106,6 +112,22 @@ cdef class WindowInfo:
             raise Exception("Invalid parentWindowHandle: %s"\
                     % parentWindowHandle)
         self.windowType = "child"
+        IF UNAME_SYSNAME == "Linux":
+            if parentWindowHandle != 0:
+                # Xwayland cross-client restriction: Chrome's internal XCB
+                # connection cannot create a child window under a window owned
+                # by GDK's separate Xlib connection — the server returns
+                # MatchError(bad_value=parent_XID).  Workaround: tell CEF to
+                # use the X11 root window (accessible from any client) as its
+                # parent, then XReparentWindow into the real parent after the
+                # browser is created.  See _linux_schedule_xembed().
+                _wr = windowRect if windowRect else [0, 0, 800, 600]
+                self._linux_embed_info = {
+                    'real_parent': parentWindowHandle,
+                    'width':  int(_wr[2]) - int(_wr[0]),
+                    'height': int(_wr[3]) - int(_wr[1]),
+                }
+                parentWindowHandle = _linux_get_root_xid()
         self.parentWindowHandle = parentWindowHandle
         if sys.platform != "win32":
             if not windowRect:

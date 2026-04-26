@@ -24,6 +24,7 @@ CI / release workflow (builds a .whl):
 """
 import glob
 import os
+import site
 import shutil
 import subprocess
 import sys
@@ -64,6 +65,7 @@ def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
     run(build_args)
 
     # Copy extension module to cefpython3/
+    os.makedirs(PKG_DIR, exist_ok=True)
     if WINDOWS:
         pattern = os.path.join(BUILD_DIR, "Release", "cefpython_py*.pyd")
     else:
@@ -93,13 +95,23 @@ def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
         cef_glob = os.path.join("build", "cef*_win64")
     else:
         already_copied = os.path.exists(os.path.join(PKG_DIR, "libcef.so"))
-        cef_glob = os.path.join("build", "cef*_linux64")
+        cef_glob = os.path.join("build", "cef[0-9]*_linux64")
     if not already_copied:
         cef_dirs = sorted(glob.glob(cef_glob))
         if cef_dirs:
             cef_bin = os.path.join(cef_dirs[-1], "bin")
             print("[build.py] One-time: copying CEF runtime files to", PKG_DIR)
             _copy_cef_runtime(cef_bin, PKG_DIR)
+
+    # Write a .pth file so the repo root is on sys.path and
+    # `import cefpython3` works in any script without setting PYTHONPATH.
+    site_dir = site.getsitepackages()[0]
+    pth = os.path.join(site_dir, "cefpython3-dev.pth")
+    repo_root = os.getcwd()
+    if not os.path.exists(pth) or open(pth).read().strip() != repo_root:
+        with open(pth, "w") as f:
+            f.write(repo_root + "\n")
+        print("[build.py] Dev install: wrote", pth)
 
 
 def _copy_cef_runtime(src_bin, dst_dir):
@@ -145,7 +157,9 @@ def main():
         cmake_dev_build(clean=clean, profiling=profiling, line_tracing=line_tracing)
 
     if unittests:
-        run([sys.executable, "unittests/_test_runner.py"])
+        env = os.environ.copy()
+        env["PYTHONPATH"] = os.getcwd()
+        run([sys.executable, "unittests/_test_runner.py"], env=env)
 
 
 if __name__ == "__main__":

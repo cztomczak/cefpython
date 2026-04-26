@@ -85,10 +85,12 @@ if(WIN32)
 elseif(APPLE)
     target_compile_options(cefpython_app PRIVATE -DNDEBUG -O3)
     target_compile_definitions(cefpython_app PRIVATE
+        BROWSER_PROCESS
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
 else()
     target_compile_options(cefpython_app PRIVATE -DNDEBUG -O3)
     target_compile_definitions(cefpython_app PRIVATE
+        BROWSER_PROCESS
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
 endif()
 
@@ -160,5 +162,13 @@ else()
     target_link_libraries(cefpython_subprocess PRIVATE
         "${CEFPYTHON_CEF_ROOT}/lib/libcef_dll_wrapper.a"
         "${CEFPYTHON_CEF_ROOT}/bin/libcef.so"
+    )
+    # Use $ORIGIN so the installed subprocess finds libcef.so from its own
+    # directory (cefpython3/) instead of the build-time CEF path which
+    # contains chrome-sandbox — a setuid binary that can't work on nosuid
+    # filesystems (e.g. VMware HGFS).
+    set_target_properties(cefpython_subprocess PROPERTIES
+        BUILD_RPATH "$ORIGIN"
+        INSTALL_RPATH "$ORIGIN"
     )
 endif()

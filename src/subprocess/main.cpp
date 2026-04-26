@@ -26,8 +26,30 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 
 #else // defined(OS_WIN)
 
+#include <string.h>
+
 int main(int argc, char **argv)
 {
+#if defined(OS_LINUX)
+	// Chrome 130+ passes --pseudonymization-salt-handle to directly-launched
+	// (non-zygote) subprocesses, expecting GlobalDescriptors[key] to be
+	// pre-populated before InitializePseudonymizationSalt() runs.
+	// CEF 146 does not perform this initialization for the non-zygote path.
+	// Strip the switch here so Chrome falls back to a per-process random salt.
+	// This switch is added by the browser process after OnBeforeChildProcessLaunch
+	// fires, so it cannot be stripped via that callback alone.
+	{
+		static const char kSaltSwitch[] = "--pseudonymization-salt-handle";
+		static const int kSaltSwitchLen = sizeof(kSaltSwitch) - 1;
+		int new_argc = 0;
+		for (int i = 0; i < argc; i++) {
+			if (strncmp(argv[i], kSaltSwitch, kSaltSwitchLen) != 0)
+				argv[new_argc++] = argv[i];
+		}
+		argc = new_argc;
+	}
+#endif
+
 	CefMainArgs mainArgs(argc, argv);
 
 #endif // Mac, Linux

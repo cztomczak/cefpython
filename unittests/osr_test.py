@@ -1,4 +1,4 @@
-# Copyright (c) 2018 CEF Python, see the Authors file.
+﻿# Copyright (c) 2018 CEF Python, see the Authors file.
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
@@ -115,18 +115,21 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             switches["enable-begin-frame-scheduling"] = ""
             switches["disable-surfaces"] = ""  # Required for PDF ext to work
         if LINUX:
+            # Open a GDK/X11 display connection before CEF initialises.
+            init_gtk()
             # cefpython does not ship a chrome-sandbox (setuid) binary.
-            # Disable both the setuid and namespace sandboxes so Chrome runs
-            # subprocesses without sandboxing. Unlike --no-sandbox, these two
-            # flags do NOT suppress the Mojo IPC bootstrap fd registration
-            # (GlobalDescriptors key 7), so subprocesses can still communicate.
+            # Disable SUID/namespace sandboxes; Chrome falls back to seccomp-BPF
+            # which keeps GlobalDescriptors key 7 registered for subprocesses.
+            # Do NOT pass --no-sandbox: it skips key 7 registration but encodes
+            # it in --pseudonymization-salt-handle, causing a CHECK-crash.
             switches["disable-setuid-sandbox"] = ""
-            switches["disable-namespace-sandbox"] = ""
-            # /dev/shm is too small in CI containers.
+                    # /dev/shm is too small in CI containers.
             switches["disable-dev-shm-usage"] = ""
             # Run GPU process inside the browser process so it is not
             # spawned during CefInitialize() where it would fail.
             switches["in-process-gpu"] = ""
+            # Force X11 rendering via XWayland (see main_test.py for details).
+            switches["ozone-platform"] = "x11"
             # Run utility services in-process so they don't each need a
             # separate subprocess (reduces spawn overhead on CI).
             switches["disable-features"] = "StorageServiceOutOfProcess"

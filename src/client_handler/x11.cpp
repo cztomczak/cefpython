@@ -36,6 +36,7 @@ void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
                         int x, int y, int width, int height) {
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
     ::Display* xdisplay = cef_get_xdisplay();
+    if (!xdisplay || !xwindow) return;
     XWindowChanges changes = {0};
     changes.x = x;
     changes.y = y;
@@ -48,12 +49,21 @@ void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
 void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
     ::Display* xdisplay = cef_get_xdisplay();
+    if (!xdisplay || !xwindow) return;
     XStoreName(xdisplay, xwindow, title);
 }
 
 GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser) {
   // TODO: Should return NULL when using the Views framework
   // -- REWRITTEN FOR CEF PYTHON USE CASE --
+  //
+  // WARNING (CEF 146 Ozone X11): gtk_plug_new_for_display() below sends an
+  // XEMBED_EMBEDDED_NOTIFY to the browser's X11 window, which causes GTK to
+  // call XReparentWindow and move the browser window into a new GtkSocket.
+  // This breaks embedded-window positioning.  Only call this function when
+  // showing a transient dialog (file chooser, print dialog) where the browser
+  // window displacement is acceptable or the dialog is temporary.
+  //
   // X11 window handle
   ::Window xwindow = browser->GetHost()->GetWindowHandle();
   // X11 display
@@ -99,7 +109,7 @@ GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser) {
 XImage* CefBrowser_GetImage(CefRefPtr<CefBrowser> browser) {
     ::Display* display = cef_get_xdisplay();
     if (!display) {
-        LOG(ERROR) << "XOpenDisplay failed in CefBrowser_GetImage";
+        LOG(ERROR) << "cef_get_xdisplay() returned NULL in CefBrowser_GetImage";
         return NULL;
     }
     ::Window browser_window = browser->GetHost()->GetWindowHandle();
