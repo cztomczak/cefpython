@@ -22,6 +22,7 @@ import hashlib
 import os
 import re
 import sys
+import sysconfig
 import zipfile
 
 
@@ -37,7 +38,7 @@ def main():
     version = _read_version()
     vi = sys.version_info
     cp = "cp{0}{1}".format(vi.major, vi.minor)
-    platform = "win_amd64"
+    platform = sysconfig.get_platform().replace("-", "_").replace(".", "_")
 
     wheel_name = "cefpython3-{v}-{cp}-{cp}-{p}.whl".format(
         v=version, cp=cp, p=platform)
@@ -49,9 +50,10 @@ def main():
         print("[build_distrib.py] ERROR: {pkg_dir}/ not found".format(
             pkg_dir=pkg_dir))
         sys.exit(1)
-    if not glob.glob(os.path.join(pkg_dir, "cefpython_py*.pyd")):
-        print("[build_distrib.py] ERROR: no cefpython_py*.pyd in {pkg_dir}/,"
-              " run compile step first".format(pkg_dir=pkg_dir))
+    ext = ".pyd" if sys.platform == "win32" else ".so"
+    if not glob.glob(os.path.join(pkg_dir, "cefpython_py*" + ext)):
+        print("[build_distrib.py] ERROR: no cefpython_py*{ext} in {pkg_dir}/,"
+              " run compile step first".format(ext=ext, pkg_dir=pkg_dir))
         sys.exit(1)
 
     records = []
@@ -111,7 +113,13 @@ def main():
 
 
 def _read_version():
-    header = os.path.join("src", "version", "cef_version_win.h")
+    if sys.platform == "win32":
+        name = "cef_version_win.h"
+    elif sys.platform == "darwin":
+        name = "cef_version_mac.h"
+    else:
+        name = "cef_version_linux.h"
+    header = os.path.join("src", "version", name)
     with open(header) as f:
         for line in f:
             m = re.match(r"#define CHROME_VERSION_MAJOR\s+(\d+)", line)
