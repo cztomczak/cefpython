@@ -134,6 +134,17 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # separate subprocess (reduces spawn overhead on CI).
             switches["disable-features"] = "StorageServiceOutOfProcess"
             switches["enable-features"] = "NetworkServiceInProcess"
+        if MAC:
+            # The CI workflow runs tests via "launchctl asuser" so the browser
+            # process lives in the user login session bootstrap domain and child
+            # processes can look up MachPortRendezvousServer.
+            # cefpython does not ship a chrome-sandbox binary.
+            switches["no-sandbox"] = ""
+            # No real GPU available on macOS CI runners.
+            switches["in-process-gpu"] = ""
+            # Prevent macOS keychain authorization prompts during init
+            # (matches CEF's own test infrastructure on macOS).
+            switches["use-mock-keychain"] = ""
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30

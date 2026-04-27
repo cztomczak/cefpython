@@ -174,6 +174,19 @@ class MainTest_IsolatedTest(unittest.TestCase):
             switches["enable-features"] = "NetworkServiceInProcess"
             # Suppress the GNOME Keyring unlock prompt on desktop sessions.
             switches["password-store"] = "basic"
+        if MAC:
+            # The CI workflow runs tests via "launchctl asuser" so the browser
+            # process lives in the user login session bootstrap domain and child
+            # processes can look up MachPortRendezvousServer.
+            # cefpython does not ship a chrome-sandbox binary.
+            switches["no-sandbox"] = ""
+            # No real GPU available on macOS CI runners.
+            switches["disable-gpu"] = ""
+            switches["disable-gpu-compositing"] = ""
+            switches["in-process-gpu"] = ""
+            # Prevent macOS keychain authorization prompts during init
+            # (matches CEF's own test infrastructure on macOS).
+            switches["use-mock-keychain"] = ""
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 
