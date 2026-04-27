@@ -187,6 +187,12 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         # Message loop
         run_message_loop()
 
+        # OnAccessibilityLocationChange arrives via a separate renderer IPC and
+        # can lag behind OnAccessibilityTreeChange on slow CI runners.  Give it
+        # up to 1 extra second before closing the browser.
+        if not accessibility_handler._OnAccessibilityLocationChange_True:
+            do_message_loop_work(100)
+
         # Close browser and clean reference
         browser.CloseBrowser(True)
         del browser
