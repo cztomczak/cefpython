@@ -4,6 +4,9 @@ dist/
 cefpython3/*.pyd
 cefpython3/*.dll
 cefpython3/*.exe
+cefpython3/*.so
+cefpython3/*.so.*
+cefpython3/subprocess
 cefpython3/*.pak
 cefpython3/*.dat
 cefpython3/*.bin
