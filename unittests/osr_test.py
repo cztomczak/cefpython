@@ -145,6 +145,10 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # Prevent macOS keychain authorization prompts during init
             # (matches CEF's own test infrastructure on macOS).
             switches["use-mock-keychain"] = ""
+            # Run network service in-process to avoid Mach port rendezvous
+            # failures for utility subprocesses on macOS CI runners.
+            switches["disable-features"] = "StorageServiceOutOfProcess"
+            switches["enable-features"] = "NetworkServiceInProcess"
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
