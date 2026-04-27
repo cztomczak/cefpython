@@ -29,6 +29,21 @@ g_js_code_completed = False
 g_on_load_end_callbacks = []
 
 
+if LINUX:
+    # Ensure windowless_rendering_enabled=True on Linux so that JS-created
+    # popup browsers can be configured as off-screen (see LoadHandler.
+    # OnBeforePopup).  Off-screen browsers are destroyed immediately when
+    # DoClose returns False — no X11/GLib delete_event dispatch is needed,
+    # avoiding the main browser's GTK window receiving the close notification.
+    _orig_cef_initialize = cef.Initialize
+    def _cef_initialize_linux(settings=None, switches=None, **kw):
+        if settings is None:
+            settings = {}
+        settings.setdefault("windowless_rendering_enabled", True)
+        return _orig_cef_initialize(settings, switches=switches, **kw)
+    cef.Initialize = _cef_initialize_linux
+
+
 def init_gtk():
     """Open a GDK/X11 display connection before CEF initialises.
 
@@ -170,7 +185,10 @@ class DisplayHandler(object):
 
 
 def close_popup(global_handler, browser):
-    browser.CloseBrowser()
+    # The popup was created as off-screen on Linux (see LoadHandler.OnBeforePopup).
+    # For off-screen browsers DoClose returning False causes immediate destruction
+    # without any GLib/X11 event dispatch, so CloseBrowser(False) works cleanly.
+    browser.CloseBrowser(False)
     global_handler.PopupClosed_True = True
 
     # Test developer tools popup
@@ -242,6 +260,20 @@ class LoadHandler(object):
         self.FrameSourceVisitor_True = False
         # self.OnLoadingStateChange_Start_True = False # FAILS
         self.OnLoadingStateChange_End_True = False
+
+    def OnBeforePopup(self, browser, frame, target_url, target_frame_name,
+                      target_disposition, user_gesture, popup_features,
+                      window_info_out, client, browser_settings_out,
+                      no_javascript_access_out, **_):
+        if LINUX:
+            # Configure JS-created popups as off-screen so they can be closed
+            # without GLib/X11 event dispatch.  For off-screen browsers CEF
+            # destroys the browser immediately when DoClose returns False,
+            # without sending delete_event to any parent GTK window.
+            winfo = cef.WindowInfo()
+            winfo.SetAsOffscreen(0)
+            window_info_out.append(winfo)
+        return False  # Allow the popup
 
     def OnLoadStart(self, browser, frame, **_):
         self.test_case.assertFalse(self.OnLoadStart_True)

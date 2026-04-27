@@ -113,6 +113,12 @@ def _linux_apply_initialize_defaults(app_settings, cmd_switches):
     # CefDoMessageLoopWork() as a GLib source.
     app_settings.setdefault("external_message_pump", True)
 
+    # Allow per-browser opt-in to off-screen rendering.  This is needed so
+    # that JS-created popup browsers (window.open) can be closed without
+    # dispatching GLib/X11 events: off-screen browsers are destroyed
+    # immediately when DoClose returns False (no delete_event to parent).
+    app_settings.setdefault("windowless_rendering_enabled", True)
+
     # Chromium switches required for stable embedded operation on CEF 146.
     sw = cmd_switches
     # Force X11 backend (not Wayland) — cefpython uses raw X11 window handles.
