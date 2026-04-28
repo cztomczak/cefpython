@@ -193,7 +193,9 @@ class MainFrame(wx.Frame):
         elif LINUX:
             (x, y) = (0, 0)
             (width, height) = self.browser_panel.GetSize().Get()
+            self.browser.NotifyMoveOrResizeStarted()
             self.browser.SetBounds(x, y, width, height)
+            return
         self.browser.NotifyMoveOrResizeStarted()
 
     def OnClose(self, event):

@@ -44,6 +44,7 @@ void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
     changes.height = static_cast<int>(height);
     XConfigureWindow(xdisplay, xwindow,
                      CWX | CWY | CWHeight | CWWidth, &changes);
+    XFlush(xdisplay);
 }
 
 void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
