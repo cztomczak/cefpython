@@ -62,8 +62,10 @@ IF UNAME_SYSNAME == "Linux":
 
         _x11.XGetWindowAttributes.restype = _ct.c_int
 
-        # XWindowAttributes struct — fields up to map_state (LP64 layout).
-        # ctypes.Structure handles natural alignment automatically.
+        # Full XWindowAttributes struct (LP64 layout, 136 bytes).
+        # All fields must be declared; omitting trailing fields truncates the
+        # buffer to 96 bytes and XGetWindowAttributes writes all_event_masks
+        # (offset 96) past the end, corrupting adjacent heap memory.
         class _XWA(_ct.Structure):
             _fields_ = [
                 ("x", _ct.c_int), ("y", _ct.c_int),
@@ -75,6 +77,11 @@ IF UNAME_SYSNAME == "Linux":
                 ("backing_planes", _ct.c_ulong), ("backing_pixel", _ct.c_ulong),
                 ("save_under", _ct.c_int), ("colormap", _ct.c_ulong),
                 ("map_installed", _ct.c_int), ("map_state", _ct.c_int),
+                ("all_event_masks", _ct.c_long),
+                ("your_event_mask", _ct.c_long),
+                ("do_not_propagate_mask", _ct.c_long),
+                ("override_redirect", _ct.c_int),
+                ("screen", _ct.c_void_p),
             ]
 
         _browser_ref = [browser]
