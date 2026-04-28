@@ -36,16 +36,13 @@ Table of contents:
   * [GetClientCallback](#getclientcallback)
   * [GetClientCallbacksDict](#getclientcallbacksdict)
   * [GetFocusedFrame](#getfocusedframe)
-  * [GetFrame](#getframe)
   * [GetFrameByIdentifier](#getframebyidentifier)
-  * [GetFrames](#getframes)
-  * [GetFrameCount](#getframecount)
-  * [GetFrameIdentifiers](#getframeidentifiers)
+  * [GetFrameByName](#getframebyname)
   * [GetFrameNames](#getframenames)
+  * [GetFrames](#getframes)
   * [GetImage](#getimage)
   * [GetJavascriptBindings](#getjavascriptbindings)
   * [GetMainFrame](#getmainframe)
-  * [GetNSTextInputContext](#getnstextinputcontext)
   * [GetOpenerWindowHandle](#getopenerwindowhandle)
   * [GetOuterWindowHandle](#getouterwindowhandle)
   * [GetSetting](#getsetting)
@@ -56,13 +53,10 @@ Table of contents:
   * [GetZoomLevel](#getzoomlevel)
   * [GoBack](#goback)
   * [GoForward](#goforward)
-  * [HandleKeyEventAfterTextInputClient](#handlekeyeventaftertextinputclient)
-  * [HandleKeyEventBeforeTextInputClient](#handlekeyeventbeforetextinputclient)
   * [HasDevTools](#hasdevtools)
   * [HasDocument](#hasdocument)
   * [Invalidate](#invalidate)
   * [IsFullscreen](#isfullscreen)
-  * [IsLoading](#isloading)
   * [IsPopup](#ispopup)
   * [IsWindowRenderingDisabled](#iswindowrenderingdisabled)
   * [LoadUrl](#loadurl)
@@ -107,6 +101,12 @@ Methods available in upstream CEF which were not yet exposed in CEF Python
 * ImeCommitText
 * ImeFinishComposingText
 * ImeCancelComposition
+* GetFrameCount
+* GetFrameIdentifiers
+* GetNSTextInputContext (Mac, OSR)
+* HandleKeyEventAfterTextInputClient (Mac, OSR)
+* HandleKeyEventBeforeTextInputClient (Mac, OSR)
+* IsLoading
 
 There are some edge cases when after the OnBeforeClose event browser objects
 are no more globally referenced thus a new instance is created that
@@ -169,7 +169,7 @@ information.
 
 | | |
 | --- | --- |
-| __Return__ | bool |
+| __Return__ | void |
 
 Explicitly close the associated DevTools browser, if any.
 
@@ -319,24 +319,17 @@ Calling javascript from native code synchronously is not possible in CEF 3. It i
 
 | Parameter | Type |
 | --- | --- |
-| searchId | int |
 | searchText | string |
 | forward | bool |
 | matchCase | bool |
 | findNext | bool |
 | __Return__ | void |
 
-Description from upstream CEF:
-
-> Search for |searchText|. |identifier| must be a unique ID and these IDs
-> must strictly increase so that newer requests always have greater IDs than
-> older requests. If |identifier| is zero or less than the previous ID value
-> then it will be automatically assigned a new valid ID. |forward| indicates
-> whether to search forward or backward within the page. |matchCase|
-> indicates whether the search should be case-sensitive. |findNext| indicates
-> whether this is the first request or a follow-up. The CefFindHandler
-> instance, if any, returned via CefClient::GetFindHandler will be called to
-> report find results.
+Search for |searchText|. |forward| indicates whether to search forward or
+backward within the page. |matchCase| indicates whether the search should be
+case-sensitive. |findNext| indicates whether this is the first request or a
+follow-up. The CefFindHandler instance, if any, returned via
+CefClient::GetFindHandler will be called to report find results.
 
 ### GetClientCallback
 
@@ -366,55 +359,25 @@ Get client callbacks as a dictionary.
 Returns the focused [Frame](Frame.md) for the browser window.
 
 
-### GetFrame
+### GetFrameByIdentifier
+
+| Parameter | Type |
+| --- | --- |
+| identifier | string |
+| __Return__ | Frame |
+
+Returns the [Frame](Frame.md) with the specified identifier, or None if not found.
+
+
+### GetFrameByName
 
 | Parameter | Type |
 | --- | --- |
 | name | string |
 | __Return__ | Frame |
 
-Returns the [Frame](Frame.md) with the specified name, or NULL if not found.
-
-
-### GetFrameByIdentifier
-
-| Parameter | Type |
-| --- | --- |
-| identifier | long |
-| __Return__ | Frame |
-
-Available only in CEF 3. Returns the [Frame](Frame.md) with the specified identifier, or None if not found.
-
-
-### GetFrames
-
-| | |
-| --- | --- |
-| __Return__ | list |
-
-Get all frames. This is an internal CEF Python implementation that uses GetFrameNames() and GetFrame() methods to list through all frames. The main frame is not included in that list.
-
-
-### GetFrameCount
-
-| | |
-| --- | --- |
-| __Return__ | int |
-
-Available only in CEF 3. Not yet implemented.
-
-Returns the number of frames that currently exist.
-
-
-### GetFrameIdentifiers
-
-| | |
-| --- | --- |
-| __Return__ | void |
-
-Available only in CEF 3. Not yet implemented.
-
-Returns the identifiers of all existing frames.
+Returns the [Frame](Frame.md) with the specified name, or None if not found.
+This method should only be called on the UI thread.
 
 
 ### GetFrameNames
@@ -424,6 +387,18 @@ Returns the identifiers of all existing frames.
 | __Return__ | string[] |
 
 Returns the names of all existing frames. This list does not include the main frame.
+This method should only be called on the UI thread.
+
+
+### GetFrames
+
+| | |
+| --- | --- |
+| __Return__ | list |
+
+Get all frames. This is a CEF Python helper that calls GetFrameNames() and
+GetFrameByName() to return a list of [Frame](Frame.md) objects. The main frame
+is not included in that list.
 
 
 ### GetImage
@@ -465,18 +440,6 @@ Returns the [JavascriptBindings](JavascriptBindings.md) object that was passed t
 | __Return__ | Frame |
 
 Returns the main (top-level) [Frame](Frame.md) for the browser window.
-
-
-### GetNSTextInputContext
-
-| | |
-| --- | --- |
-| __Return__ | TextInputContext |
-
-Not yet ported. Available only in CEF 3.
-
-Get the NSTextInputContext implementation for enabling IME on Mac when
-window rendering is disabled.
 
 
 ### GetOpenerWindowHandle
@@ -573,30 +536,6 @@ Navigate backwards.
 Navigate forwards.
 
 
-### HandleKeyEventAfterTextInputClient
-
-| Parameter | Type |
-| --- | --- |
-| keyEvent | eventHandle |
-| __Return__ | void |
-
-Available only in CEF 3. Not yet implemented.
-
-Performs any additional actions after NSTextInputClient handles the event.
-
-
-### HandleKeyEventBeforeTextInputClient
-
-| | |
-| --- | --- |
-| __Return__ | void |
-
-Available only in CEF 3. Not yet implemented.
-
-Handles a keyDown event prior to passing it through the NSTextInputClient
-machinery.
-
-
 ### HasDevTools
 
 | | |
@@ -638,22 +577,9 @@ Description from upstream CEF:
 
 | | |
 | --- | --- |
-| __Return__ | void |
-
-Whether in fullscreen mode, see ToggleFullscreen().
-
-This function is Windows-only.
-
-
-### IsLoading
-
-| | |
-| --- | --- |
 | __Return__ | bool |
 
-Available only in CEF 3. Not yet implemented.
-
-Returns true if the browser is currently loading.
+Whether in fullscreen mode, see ToggleFullscreen(). Windows-only.
 
 
 ### IsPopup
@@ -686,9 +612,8 @@ Load url in the main frame.
 If the url is a local path it needs to start with the `file://` prefix.
 If the url contains special characters it may need proper handling.
 Starting with v66.1+ it is required for the app code to encode the url
-properly. You can use the `pathlib.PurePath.as_uri` in Python 3
-or `urllib.pathname2url` in Python 2 (`urllib.request.pathname2url`
-in Python 3) depending on your case.
+properly. You can use `pathlib.PurePath.as_uri` or
+`urllib.request.pathname2url` depending on your case.
 
 
 ### Navigate
@@ -781,7 +706,7 @@ this method will replace it with the specified |word|.
 | --- | --- |
 | enabled | bool |
 | min_size | list[width, height] |
-| max_size | list[width, heifght] |
+| max_size | list[width, height] |
 | __Return__ | void |
 
 Description from upstream CEF:

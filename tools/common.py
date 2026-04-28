@@ -497,9 +497,9 @@ def get_msvs_for_python(vs_prefix=False):
     """Return the VS lib subdirectory label used in CEF prebuilt binaries.
     The label 'VS2015' is a historical artifact from the CEF binary layout;
     it does not indicate the actual VS version used to compile."""
-    if sys.version_info >= (3, 5):
+    if sys.version_info >= (3, 10):
         return "VS2015" if vs_prefix else "2015"
-    print("ERROR: Python 3.5 or later is required")
+    print("ERROR: Python 3.10 or later is required")
     sys.exit(1)
 
 

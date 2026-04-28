@@ -53,11 +53,11 @@ You can also download packages for offline installation available on the [GitHub
 
 Below is a table with supported platforms, python versions and architectures.
 
-OS | Py2 | Py3 | 32bit | 64bit | Requirements
---- | --- | --- | --- | --- | ---
-Windows | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 / 3.8 / 3.9 | Yes | Yes | Windows 7+ (Note that Python 3.9 supports Windows 8.1+)
-Linux | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | Yes | Yes | Debian 8+, Ubuntu 14.04+,<br> Fedora 24+, openSUSE 13.3+
-Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
+OS | Python | 32bit | 64bit | Requirements
+--- | --- | --- | --- | ---
+Windows | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | Windows 10+
+Linux | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | Ubuntu 20.04+, Debian 11+
+Mac | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | macOS 10.15+
 
 
 ## Examples

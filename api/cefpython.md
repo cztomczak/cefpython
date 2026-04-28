@@ -62,9 +62,8 @@ This function can only be called on the UI thread.
 If the url is a local path it needs to start with the `file://` prefix.
 If the url contains special characters it may need proper handling.
 Starting with v66.1+ it is required for the app code to encode the url
-properly. You can use the `pathlib.PurePath.as_uri` in Python 3
-or `urllib.pathname2url` in Python 2 (`urllib.request.pathname2url`
-in Python 3) depending on your case.
+properly. You can use `pathlib.PurePath.as_uri` or
+`urllib.request.pathname2url` depending on your case.
 
 The "window_title" parameter will be used only when parent
 window provided in window_info was set to 0. This is for use

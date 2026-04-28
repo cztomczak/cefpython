@@ -31,6 +31,10 @@ Table of contents:
   * [GetHasExpires](#gethasexpires)
   * [SetExpires](#setexpires)
   * [GetExpires](#getexpires)
+  * [SetSameSite](#setsamesite)
+  * [GetSameSite](#getsamesite)
+  * [SetPriority](#setpriority)
+  * [GetPriority](#getpriority)
 
 
 ## Methods
@@ -56,6 +60,8 @@ The cookie may have the following keys:
 - lastAccess (datetime.datetime)  
 - hasExpires (bool)  
 - expires (datetime.datetime)  
+- sameSite (int)  
+- priority (int)  
 
 
 ### Get
@@ -261,3 +267,48 @@ Set the cookie expiration date. You should also call SetHasExpires().
 | __Return__ | datetime.datetime |
 
 Get the expires property.
+
+
+### SetSameSite
+
+| Parameter | Type |
+| --- | --- |
+| sameSite | int |
+| __Return__ | void |
+
+Set the cookie SameSite attribute. Use the `CEF_COOKIE_SAME_SITE_*` constants:
+- `CEF_COOKIE_SAME_SITE_UNSPECIFIED` (0)
+- `CEF_COOKIE_SAME_SITE_NO_RESTRICTION` (1)
+- `CEF_COOKIE_SAME_SITE_LAX_MODE` (2)
+- `CEF_COOKIE_SAME_SITE_STRICT_MODE` (3)
+
+
+### GetSameSite
+
+| | |
+| --- | --- |
+| __Return__ | int |
+
+Get the cookie SameSite attribute. See SetSameSite() for possible values.
+
+
+### SetPriority
+
+| Parameter | Type |
+| --- | --- |
+| priority | int |
+| __Return__ | void |
+
+Set the cookie priority. Use the `CEF_COOKIE_PRIORITY_*` constants:
+- `CEF_COOKIE_PRIORITY_LOW` (-1)
+- `CEF_COOKIE_PRIORITY_MEDIUM` (0)
+- `CEF_COOKIE_PRIORITY_HIGH` (1)
+
+
+### GetPriority
+
+| | |
+| --- | --- |
+| __Return__ | int |
+
+Get the cookie priority. See SetPriority() for possible values.

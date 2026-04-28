@@ -149,14 +149,14 @@ a line that overwrites the default exception handler in Python:
 sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
 ```
 
-See Python docs for [sys.excepthook](https://docs.python.org/2/library/sys.html#sys.excepthook).
+See Python docs for [sys.excepthook](https://docs.python.org/3/library/sys.html#sys.excepthook).
 
 The cef.ExceptHook helper function does the following:
 1. Writes exception to "error.log" file
 2. Prints exception
 3. Calls cef.[QuitMessageLoop](../api/cefpython.md#quitmessageloop)
 4. Calls cef.[Shutdown](../api/cefpython.md#shutdown)
-5. Calls [os._exit(1)](https://docs.python.org/2/library/os.html#os._exit) -
+5. Calls [os._exit(1)](https://docs.python.org/3/library/os.html#os._exit) -
    which exits the process with status 1, without calling
    cleanup handlers, flushing stdio buffers, etc.
 
@@ -410,8 +410,8 @@ html_to_data_uri("test", js_callback_1);
 **Communication using http requests**
 
 Python and Javascript can also communicate using http requests
-by running an internal web-server. See for example [SimpleHTTPServer](https://docs.python.org/2/library/simplehttpserver.html)
-in Python docs. In upstream CEF there is available a fast built-in
+by running an internal web-server. See for example
+[http.server](https://docs.python.org/3/library/http.server.html) in Python docs. In upstream CEF there is available a fast built-in
 web server and [Issue #445](../../../issues/445) is to expose its API.
 
 With http requests it is possible for synchronous
@@ -612,8 +612,7 @@ In the OnPaint callback CEF provides a [PaintBufer](../api/PaintBuffer.md#paintb
 browser view. This object has [GetIntPointer](../api/PaintBuffer.md#getintpointer)
 and [GetString](../api/PaintBuffer.md#getstring) methods. In the
 example the latter method is used which returns bytes. The method
-name is a bit confusing for Python 3 users, but in Python 2 bytes
-were strings and thus the name. Here is the code:
+name is a bit confusing since it returns bytes, not a string. Here is the code:
 
 ```Python
 def OnPaint(self, browser, element_type, paint_buffer, **_):

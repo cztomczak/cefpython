@@ -7,14 +7,8 @@ cython_setup.py is for internal use only - called by build.py.
 This is Cython's setup for building the cefpython module
 """
 
-# Use setuptools so that "Visual C++ compiler for Python 2.7" tools
-# can be used. Otherwise "Unable to find vcvarsall.bat" error occurs.
-try:
-    from setuptools import setup
-    from setuptools import Extension
-except ImportError:
-    from distutils.core import setup
-    from distutils.extension import Extension
+from setuptools import setup
+from setuptools import Extension
 
 # Use "Extension" from Cython.Distutils so that "cython_directives" works
 from Cython.Distutils import build_ext, Extension
@@ -33,17 +27,9 @@ import os
 # > ImportError: dynamic module does not define init function
 # To get rid of CEF's undefined symbol error when importing module
 # it was required to pass "-fvisibility=hidden" and "-Wl,-dead_strip"
-# flags. However these flags cause the "initcefpython_py27" Python
-# Module Initialization function to be hidden as well. To workaround
-# this it is required to add default visibility attribute to the
-# signature of that init function.
-#
-# Original definition in Python 2.7:
-# | https://github.com/python/cpython/blob/2.7/Include/pyport.h
-# > define PyMODINIT_FUNC extern "C" __declspec(dllexport) void
-#
-# Original definition in Python 3.4 / 3.5 / 3.6:
-# > define PyMODINIT_FUNC extern "C" __declspec(dllexport) PyObject*
+# flags. However these flags cause the Python Module Initialization
+# function to be hidden as well. To workaround this it is required to
+# add default visibility attribute to the signature of that init function.
 
 if MAC:
     g_generate_extern_c_macro_definition_old = (
@@ -55,12 +41,8 @@ if MAC:
         g_generate_extern_c_macro_definition_old(self, code)
         code.putln("// Added by: cefpython/tools/cython_setup.py")
         code.putln("#undef PyMODINIT_FUNC")
-        if sys.version_info[:2] == (2, 7):
-            code.putln("#define PyMODINIT_FUNC extern \"C\""
-                       " __attribute__((visibility(\"default\"))) void")
-        else:
-            code.putln("#define PyMODINIT_FUNC extern \"C\""
-                       " __attribute__((visibility(\"default\"))) PyObject*")
+        code.putln("#define PyMODINIT_FUNC extern \"C\""
+                   " __attribute__((visibility(\"default\"))) PyObject*")
     # Overwrite Cython function
     ModuleNode.generate_extern_c_macro_definition = (
             generate_extern_c_macro_definition)
@@ -75,8 +57,6 @@ if LINUX:
         libpython = ('python' + str(sys.version_info.major) + '.'
                      + str(sys.version_info.minor))
         for lib in copy.copy(libraries):
-            # Library name for Python versions before 3.8 may have
-            # an 'm' at the end.
             if lib.startswith(libpython):
                 print("[cython_setup.py] Do not link against -l%s (Issue #554)"
                     % lib)

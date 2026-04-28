@@ -3,7 +3,6 @@
 Table of contents:
 * [Notifications about new releases / commits](#notifications-about-new-releases--commits)
 * [Changes in API after CEF updates](#changes-in-api-after-cef-updates)
-* [Differences between Python 2 and Python 3](#differences-between-python-2-and-python-3)
 * [How to enable debug information in examples?](#how-to-enable-debug-information-in-examples)
 * [Remote debugging with Google Chrome instance](#remote-debugging-with-google-chrome-instance)
 * [Debugging using various chrome:// protocol uris](#debugging-using-various-chrome-protocol-uris)
@@ -43,13 +42,6 @@ scripts, that for example use PIP to install the cefpython3 package,
 to hardcode the cefpython version string. If for example using PIP's
 `requirements.txt` file then include the cefpython3 package in the
 following format if using e.g. cefpython v57.0: `cefpython3 == 57.0`.
-
-
-## Differences between Python 2 and Python 3
-
-In Python 2 all cefpython strings are byte strings, but in Python 3
-they are all unicode strings. Be aware of this when porting cefpython
-based apps to Python 3, as it may cause issues.
 
 
 ## How to enable debug information in examples?
@@ -180,7 +172,7 @@ CEF framework and in the cefpython module. Here are the default
 settings:
 ```
 cefpython_package/
-    cefpython_py27.so
+    cefpython_py3XX.so
         rpath=@loader_path/
         load:@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework
     Chromium Embedded Framework.framework/

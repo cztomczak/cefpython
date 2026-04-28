@@ -48,8 +48,8 @@ Before you can build CEF Python or CEF you must satisfy
 
 ## Quick build instructions for Windows
 
-Complete steps for building CEF Python v50+ with Python 2.7 using
-prebuilt binaries and libraries from GitHub Releases.
+Complete steps for building CEF Python v50+ using prebuilt binaries
+and libraries from GitHub Releases.
 
 When cloning repository you should checkout a stable branch which
 are named "cefpythonXX" where XX is Chromium version number.
@@ -62,15 +62,7 @@ are named "cefpythonXX" where XX is Chromium version number.
 3) Download [cmake](https://cmake.org/download/) and add
    it to PATH.
 
-4) For Python 2.7 Install "Visual C++ Compiler for Python 2.7"
-  from [here](https://www.microsoft.com/en-us/download/details.aspx?id=44266)
-
-5) For Python 2.7 and when using using "Visual C++ compiler for Python 2.7"
-   you have to install "Visual C++ 2008 Redistributable Package"
-   from [here](https://www.microsoft.com/en-us/download/details.aspx?id=29)
-   and [here](https://www.microsoft.com/en-us/download/details.aspx?id=15336)
-
-6) Clone cefpython, checkout for example "cefpython57" branch
+4) Clone cefpython, checkout for example "cefpython57" branch
    that includes Chromium v57, then create a build/ directory and enter it:
 ```
 git clone https://github.com/cztomczak/cefpython.git
@@ -160,29 +152,13 @@ requirements common for all platforms.
 * Download [ninja](https://github.com/ninja-build/ninja) 1.7.2 or later
   and add it to PATH.
 * Download [cmake](https://cmake.org/download/) and add it to PATH.
-* Install an appropriate MS compiler for a specific Python version:
-  https://wiki.python.org/moin/WindowsCompilers
-    * For Python 2.7 install "Microsoft Visual C++ Compiler for Python 2.7"
-      from [here](https://www.microsoft.com/en-us/download/details.aspx?id=44266)
-    * When using "Visual C++ compiler for Python 2.7" you have to install
-      "Microsoft Visual C++ 2008 Redistributable Package" from
-      [here](https://www.microsoft.com/en-us/download/details.aspx?id=29) and
-      [here](https://www.microsoft.com/en-us/download/details.aspx?id=15336)
-    * For Python 2.7 copy "cefpython/src/windows/py27/stdint.h" to
-      "%LocalAppData%\Programs\Common\Microsoft\Visual C++ for Python\9.0\VC\include\"
-      if does not exist
-    * For Python 3.4 follow the instructions for installing Windows SDK 7.1.
-      If you encounter issue with .NET Framework 4 then make registry edits
-      as suggested here: [Windows SDK setup failure](http://stackoverflow.com/a/33260090/623622).
-    * For Python 3.4, if getting error:
-      `Cannot open include file 'ammintrin.h': No such file or directory`
-      then Copy that `ammitrin.h` file from for example VS 2015 installation
-      directory or find this file on the web. This is a Microsoft issue.
+* Install Visual Studio 2022 or later with C++ workload (required for
+  Python 3.10+). See https://wiki.python.org/moin/WindowsCompilers
 * To build CEF from sources:
     * Use Win7 x64 or later. 32-bit OS'es are not supported. For more details
      see [here](https://www.chromium.org/developers/how-tos/build-instructions-windows).
-    * For CEF branch >= 2704 install VS2015 Update 2 or later. Use the
-      Custom Install option, see details [here](https://chromium.googlesource.com/chromium/src/+/master/docs/windows_build_instructions.md#Open-source-contributors).
+    * Install Visual Studio 2022 with C++ workload. Use the Custom Install
+      option, see details [here](https://chromium.googlesource.com/chromium/src/+/master/docs/windows_build_instructions.md#Open-source-contributors).
     * Install [CMake](https://cmake.org/) 2.8.12.1 or newer and add cmake.exe
         to PATH
     * Install [ninja](http://martine.github.io/ninja/) and add ninja.exe
@@ -474,10 +450,8 @@ ls
 ```
 
 Additional flags when using --wheel flag:
-* `--python-tag cp27` to generate Python 2.7 only package
-* `--universal` to build package for multiple Python versions
-  (in such case you must first build multiple cefpython modules
-   for each Python version)
+* `--python-tag cp310` to generate a Python 3.10 only package
+  (replace `310` with the appropriate version tag, e.g. `cp311`, `cp312`)
 
 CEF Python binaries are build using similar configuration as described
 on the ["Automated Build Setup"](https://bitbucket.org/chromiumembedded/cef/wiki/AutomatedBuildSetup.md#markdown-header-platform-build-configurations) wiki page in upstream CEF. The automate.py tool incorporates most of

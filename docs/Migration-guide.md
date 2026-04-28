@@ -493,8 +493,7 @@ See Issue [#442](../../../issues/442) for more details on the issues.
 [Issue #384](../../../issues/384) fixes problems with browser failing to load
 urls containing certain characters by not encoding the url anymore. From now
 on it is required for the app code to encode the url properly. You can use
-the `pathlib.PurePath.as_uri` in Python 3 or `urllib.pathname2url` in
-Python 2 (`urllib.request.pathname2url` in Python 3) depending on your case.
+`pathlib.PurePath.as_uri` or `urllib.request.pathname2url` depending on your case.
 
 The `cef.GetNavigateUrl` function was removed from the cefpython3 module.
 
