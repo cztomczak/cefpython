@@ -2,6 +2,7 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
+from libc.stddef cimport size_t
 from cef_string cimport cef_string_t
 from libcpp cimport bool as cpp_bool
 from cef_time cimport cef_time_t
@@ -13,17 +14,32 @@ from cef_callback cimport CefCompletionCallback
 from cef_time cimport cef_basetime_t
 
 cdef extern from "include/internal/cef_types.h":
+    ctypedef enum cef_cookie_priority_t:
+        CEF_COOKIE_PRIORITY_LOW = -1
+        CEF_COOKIE_PRIORITY_MEDIUM = 0
+        CEF_COOKIE_PRIORITY_HIGH = 1
+
+    ctypedef enum cef_cookie_same_site_t:
+        CEF_COOKIE_SAME_SITE_UNSPECIFIED
+        CEF_COOKIE_SAME_SITE_NO_RESTRICTION
+        CEF_COOKIE_SAME_SITE_LAX_MODE
+        CEF_COOKIE_SAME_SITE_STRICT_MODE
+        CEF_COOKIE_SAME_SITE_NUM_VALUES
+
     ctypedef struct CefCookie:
+        size_t size
         cef_string_t name
         cef_string_t value
         cef_string_t domain
         cef_string_t path
-        cpp_bool secure
-        cpp_bool httponly
+        int secure
+        int httponly
         cef_basetime_t creation
         cef_basetime_t last_access
-        cpp_bool has_expires
+        int has_expires
         cef_basetime_t expires
+        cef_cookie_same_site_t same_site
+        cef_cookie_priority_t priority
 
 
 cdef extern from "include/cef_cookie.h":

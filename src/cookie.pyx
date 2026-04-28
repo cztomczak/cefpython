@@ -67,6 +67,10 @@ cdef class Cookie:
                     self.SetHasExpires(cookie[key])
             elif key == "expires":
                 self.SetExpires(cookie[key])
+            elif key == "sameSite":
+                self.SetSameSite(cookie[key])
+            elif key == "priority":
+                self.SetPriority(cookie[key])
             else:
                 raise Exception("Invalid key: %s" % key)
 
@@ -82,6 +86,8 @@ cdef class Cookie:
             "lastAccess": self.GetLastAccess(),
             "hasExpires": self.GetHasExpires(),
             "expires": self.GetExpires(),
+            "sameSite": self.GetSameSite(),
+            "priority": self.GetPriority(),
         }
 
     cpdef py_void SetName(self, object name):
@@ -119,22 +125,6 @@ cdef class Cookie:
         return CefToPyString(cefString)
 
     cpdef py_void SetDomain(self, object domain):
-        pattern = re.compile(r"^(?:[a-z0-9](?:[a-z0-9-_]{0,61}[a-z0-9])?\.)"
-                             r"+[a-z0-9][a-z0-9-_]{0,61}[a-z]$")
-        if PY_MAJOR_VERSION == 2:
-            assert isinstance(domain, bytes), "domain type is not bytes"
-            domain = domain.decode(g_applicationSettings["string_encoding"],
-                                   errors=BYTES_DECODE_ERRORS)
-        # Strip leading dot before validation; RFC 2109 allows .example.com to
-        # mean "all subdomains", but IDNA encoding rejects empty labels.
-        validate_domain = domain.lstrip(".")
-        try:
-            if not pattern.match(validate_domain.encode("idna").decode("ascii")):
-                raise Exception("Cookie.SetDomain() failed, invalid domain: {0}"
-                                .format(domain))
-        except UnicodeError:
-            raise Exception("Cookie.SetDomain() failed, invalid domain: {0}"
-                                .format(domain))
         cdef CefString cefString
         cefString.Attach(&self.cefCookie.domain, False)
         PyToCefString(domain, cefString)
@@ -155,19 +145,16 @@ cdef class Cookie:
         return CefToPyString(cefString)
 
     cpdef py_void SetSecure(self, py_bool secure):
-        # Need to wrap it with bool() to get rid of the C++ compiler
-        # warnings: "cefpython.cpp(24740) : warning C4800: 'int' : 
-        # forcing value to bool 'true' or 'false' (performance warning)".
-        self.cefCookie.secure = bool(secure)
+        self.cefCookie.secure = int(bool(secure))
 
     cpdef py_bool GetSecure(self):
-        return self.cefCookie.secure
+        return bool(self.cefCookie.secure)
 
     cpdef py_void SetHttpOnly(self, py_bool httpOnly):
-        self.cefCookie.httponly = bool(httpOnly)
+        self.cefCookie.httponly = int(bool(httpOnly))
 
     cpdef py_bool GetHttpOnly(self):
-        return self.cefCookie.httponly
+        return bool(self.cefCookie.httponly)
 
     cpdef py_void SetCreation(self, object creation):
         DatetimeToCefBasetimeT(creation, self.cefCookie.creation)
@@ -182,16 +169,28 @@ cdef class Cookie:
         return CefBasetimeTToDatetime(self.cefCookie.last_access)
 
     cpdef py_void SetHasExpires(self, py_bool hasExpires):
-        self.cefCookie.has_expires = bool(hasExpires)
+        self.cefCookie.has_expires = int(bool(hasExpires))
 
     cpdef py_bool GetHasExpires(self):
-        return self.cefCookie.has_expires
+        return bool(self.cefCookie.has_expires)
 
     cpdef py_void SetExpires(self, object expires):
         DatetimeToCefBasetimeT(expires, self.cefCookie.expires)
 
     cpdef object GetExpires(self):
         return CefBasetimeTToDatetime(self.cefCookie.expires)
+
+    cpdef int GetSameSite(self) except *:
+        return self.cefCookie.same_site
+
+    cpdef py_void SetSameSite(self, int sameSite):
+        self.cefCookie.same_site = <cef_cookie_same_site_t>sameSite
+
+    cpdef int GetPriority(self) except *:
+        return self.cefCookie.priority
+
+    cpdef py_void SetPriority(self, int priority):
+        self.cefCookie.priority = <cef_cookie_priority_t>priority
 
 # ------------------------------------------------------------------------------
 # CookieManager
