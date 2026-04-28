@@ -202,18 +202,6 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         # Message loop
         run_message_loop()
 
-        # OnAccessibilityLocationChange arrives via a separate renderer IPC and
-        # can lag behind OnAccessibilityTreeChange on slow CI runners.
-        # Poll in 100 ms batches, up to 6 extra seconds.  Every ~1 s also
-        # call WasResized() so that a stalled renderer IPC gets re-triggered
-        # rather than just waited out.  Fast runners exit immediately.
-        for i in range(60):
-            if accessibility_handler._OnAccessibilityLocationChange_True:
-                break
-            do_message_loop_work(10)
-            if i % 10 == 9:
-                browser.WasResized()
-
         # Close browser and clean reference
         browser.CloseBrowser(True)
         del browser
@@ -248,7 +236,6 @@ class AccessibilityHandler(object):
 
         self.javascript_errors_False = False
         self._OnAccessibilityTreeChange_True = False
-        self._OnAccessibilityLocationChange_True = False
         self.loadComplete_True = False
 
 
@@ -264,7 +251,9 @@ class AccessibilityHandler(object):
                     self.loadComplete_True = True
 
     def _OnAccessibilityLocationChange(self, **_):
-        self._OnAccessibilityLocationChange_True = True
+        # Not fired since Chrome M117 (CEF issue #3545); kept so the binding
+        # doesn't raise if somehow called.
+        pass
 
 
 def _click_h1_to_select(browser):
