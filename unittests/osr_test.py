@@ -203,14 +203,16 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         run_message_loop()
 
         # OnAccessibilityLocationChange arrives via a separate renderer IPC and
-        # can lag behind OnAccessibilityTreeChange on slow CI runners (e.g.
-        # Python 3.14 adds enough overhead that 1 s was insufficient).
-        # Poll in 100 ms batches, up to 3 extra seconds, and exit as soon as
-        # the flag is set so fast runners pay nothing extra.
-        for _ in range(30):
+        # can lag behind OnAccessibilityTreeChange on slow CI runners.
+        # Poll in 100 ms batches, up to 6 extra seconds.  Every ~1 s also
+        # call WasResized() so that a stalled renderer IPC gets re-triggered
+        # rather than just waited out.  Fast runners exit immediately.
+        for i in range(60):
             if accessibility_handler._OnAccessibilityLocationChange_True:
                 break
             do_message_loop_work(10)
+            if i % 10 == 9:
+                browser.WasResized()
 
         # Close browser and clean reference
         browser.CloseBrowser(True)
