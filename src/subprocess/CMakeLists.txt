@@ -151,10 +151,14 @@ elseif(APPLE)
         "-F${CEFPYTHON_CEF_ROOT}/bin"
         "-framework" "Chromium Embedded Framework"
         "-Wl,-rpath,@loader_path/"
+        # Embed Info.plist so CFBundleGetMainBundle() returns CFBundleIdentifier
+        # = "org.cefpython", matching the service name the browser process
+        # registers with MachPortRendezvousServer.
+        "-sectcreate" "__TEXT" "__info_plist"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
     )
     target_link_libraries(cefpython_subprocess PRIVATE
         "${CEFPYTHON_CEF_ROOT}/lib/libcef_dll_wrapper.a"
-        "-framework CoreFoundation"
     )
 else()
     target_compile_options(cefpython_subprocess PRIVATE -DNDEBUG -O3)
