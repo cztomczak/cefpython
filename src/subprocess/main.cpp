@@ -30,6 +30,18 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 
 int main(int argc, char **argv)
 {
+#if defined(OS_MAC)
+	// CEF 130+: MachPortRendezvousClientMac builds the service name as
+	//   CFBundleIdentifier + ".MachPortRendezvousServer." + parent_pid
+	// The browser process injects CFBundleIdentifier = "org.cefpython" in
+	// MacInitialize() before CefInitialize().  This subprocess binary is a flat
+	// binary (not an app bundle), so CFBundleGetMainBundle() returns no
+	// CFBundleIdentifier, producing a lookup name starting with "." that never
+	// matches the registered service.  Call SubprocessMacInit() to inject the
+	// same identifier so bootstrap_look_up finds the server.
+	extern "C" void SubprocessMacInit();
+	SubprocessMacInit();
+#endif
 #if defined(OS_LINUX)
 	// Chrome 130+ passes --pseudonymization-salt-handle to directly-launched
 	// (non-zygote) subprocesses, expecting GlobalDescriptors[key] to be
