@@ -128,6 +128,7 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # Run GPU process inside the browser process so it is not
             # spawned during CefInitialize() where it would fail.
             switches["in-process-gpu"] = ""
+            switches["no-zygote"] = ""
             # Force X11 rendering via XWayland (see main_test.py for details).
             switches["ozone-platform"] = "x11"
             # Run utility services in-process so they don't each need a
@@ -135,9 +136,6 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             switches["disable-features"] = "StorageServiceOutOfProcess"
             switches["enable-features"] = "NetworkServiceInProcess"
         if MAC:
-            # The CI workflow runs tests via "launchctl asuser" so the browser
-            # process lives in the user login session bootstrap domain and child
-            # processes can look up MachPortRendezvousServer.
             # cefpython does not ship a chrome-sandbox binary.
             switches["no-sandbox"] = ""
             # No real GPU available on macOS CI runners.

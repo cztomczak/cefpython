@@ -121,10 +121,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          python_bin="$(which python)"
-          sudo launchctl asuser "$(id -u)" \
-            /usr/bin/env PYTHONPATH="${{ github.workspace }}" \
-            "$python_bin" unittests/_test_runner.py
+          PYTHONPATH="${{ github.workspace }}" python unittests/_test_runner.py
 
   wheel:
     needs: test

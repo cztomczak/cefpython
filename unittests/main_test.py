@@ -163,6 +163,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # Run GPU process inside the browser process so it is not
             # spawned during CefInitialize() where it would fail.
             switches["in-process-gpu"] = ""
+            switches["no-zygote"] = ""
             # Force X11 rendering via XWayland.  On Ubuntu 24 GNOME/Wayland
             # Chrome 130+ defaults to the Wayland Ozone backend when
             # WAYLAND_DISPLAY is set; cefpython uses raw X11 APIs so the
@@ -175,9 +176,6 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # Suppress the GNOME Keyring unlock prompt on desktop sessions.
             switches["password-store"] = "basic"
         if MAC:
-            # The CI workflow runs tests via "launchctl asuser" so the browser
-            # process lives in the user login session bootstrap domain and child
-            # processes can look up MachPortRendezvousServer.
             # cefpython does not ship a chrome-sandbox binary.
             switches["no-sandbox"] = ""
             # No real GPU available on macOS CI runners.
