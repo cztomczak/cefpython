@@ -124,6 +124,11 @@ jobs:
           # bootstrap_look_up, causing all subprocesses to crash on startup.
           codesign --force --sign - cefpython3/subprocess
           for f in cefpython3/cefpython_py*.so; do codesign --force --sign - "$f"; done
+          # Also sign the Python interpreter (the browser process). Without this,
+          # process_requirement.cc fails with -67030 (errSecCSUnsigned) and Chrome
+          # launches subprocesses with a restricted bootstrap namespace, preventing
+          # bootstrap_look_up from finding the MachPortRendezvousServer service.
+          codesign --force --sign - "$(python -c 'import sys; print(sys.executable)')"
 
       - name: Run unit tests
         run: |
