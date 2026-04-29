@@ -97,6 +97,16 @@ IF UNAME_SYSNAME == "Linux":
                           _xd=_xdisp):
             _cxid = _chrome_xid[0]
             try:
+                # width/height were captured at schedule time and may be 0
+                # if the parent window had not yet been laid out (e.g. the
+                # Qt container hadn't been sized by the layout manager yet).
+                # Query the parent's current size so the browser is resized
+                # to whatever the container actually is now.
+                _wa_p = _XWA()
+                if _x11.XGetWindowAttributes(_xd, _ct.c_ulong(_pxid),
+                                             _ct.byref(_wa_p)):
+                    if _wa_p.width > 0 and _wa_p.height > 0:
+                        _w, _h = _wa_p.width, _wa_p.height
                 _x11.XReparentWindow(_xd, _ct.c_ulong(_cxid),
                                      _ct.c_ulong(_pxid),
                                      _ct.c_int(0), _ct.c_int(0))

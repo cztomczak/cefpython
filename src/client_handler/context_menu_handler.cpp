@@ -75,6 +75,18 @@ void ContextMenuHandler::OnBeforeContextMenu(
 }
 
 
+bool ContextMenuHandler::RunContextMenu(
+                                        CefRefPtr<CefBrowser> browser,
+                                        CefRefPtr<CefFrame> frame,
+                                        CefRefPtr<CefContextMenuParams> params,
+                                        CefRefPtr<CefMenuModel> model,
+                                        CefRefPtr<CefRunContextMenuCallback> callback)
+{
+    REQUIRE_UI_THREAD();
+    return ContextMenuHandler_RunContextMenu(browser, model, callback) != 0;
+}
+
+
 bool ContextMenuHandler::OnContextMenuCommand(
                                         CefRefPtr<CefBrowser> browser,
                                         CefRefPtr<CefFrame> frame,
