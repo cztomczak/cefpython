@@ -154,6 +154,7 @@ elseif(APPLE)
     )
     target_link_libraries(cefpython_subprocess PRIVATE
         "${CEFPYTHON_CEF_ROOT}/lib/libcef_dll_wrapper.a"
+        "-framework CoreFoundation"
     )
 else()
     target_compile_options(cefpython_subprocess PRIVATE -DNDEBUG -O3)
