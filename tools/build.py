@@ -33,6 +33,8 @@ BUILD_DIR = os.path.join("build", "_cmake_build")
 PKG_DIR = "cefpython3"
 
 WINDOWS = sys.platform == "win32"
+LINUX = sys.platform.startswith("linux")
+MAC = sys.platform == "darwin"
 
 
 def run(cmd, **kwargs):
@@ -93,6 +95,10 @@ def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
     if WINDOWS:
         already_copied = bool(glob.glob(os.path.join(PKG_DIR, "*.dll")))
         cef_glob = os.path.join("build", "cef*_win64")
+    elif MAC:
+        already_copied = os.path.isdir(
+            os.path.join(PKG_DIR, "Chromium Embedded Framework.framework"))
+        cef_glob = os.path.join("build", "cef*_mac*")
     else:
         already_copied = os.path.exists(os.path.join(PKG_DIR, "libcef.so"))
         cef_glob = os.path.join("build", "cef[0-9]*_linux64")
@@ -102,6 +108,10 @@ def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
             cef_bin = os.path.join(cef_dirs[-1], "bin")
             print("[build.py] One-time: copying CEF runtime files to", PKG_DIR)
             _copy_cef_runtime(cef_bin, PKG_DIR)
+
+    # Ad-hoc sign compiled binaries so macOS allows them to run.
+    if MAC:
+        _codesign_macos(PKG_DIR)
 
     # Write a .pth file so the repo root is on sys.path and
     # `import cefpython3` works in any script without setting PYTHONPATH.
@@ -123,9 +133,27 @@ def _copy_cef_runtime(src_bin, dst_dir):
         dst = os.path.join(dst_dir, name)
         if os.path.isdir(src):
             if not os.path.exists(dst):
-                shutil.copytree(src, dst)
+                shutil.copytree(src, dst, symlinks=True)
         else:
             shutil.copy2(src, dst)
+
+
+def _codesign_macos(pkg_dir):
+    # Ad-hoc sign our compiled binaries; CEF framework already carries its own sig.
+    targets = []
+    exe = os.path.join(pkg_dir, "subprocess")
+    if os.path.exists(exe):
+        os.chmod(exe, 0o755)
+        targets.append(exe)
+    for so in glob.glob(os.path.join(pkg_dir, "cefpython_py*.so")):
+        targets.append(so)
+    for target in targets:
+        print("[build.py] codesign:", os.path.basename(target))
+        ret = subprocess.run(
+            ["codesign", "--force", "--sign", "-", target])
+        if ret.returncode != 0:
+            print("[build.py] WARNING: codesign failed for", target,
+                  "— continuing anyway")
 
 
 def pip_wheel_build():

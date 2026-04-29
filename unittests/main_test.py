@@ -185,6 +185,12 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # Prevent macOS keychain authorization prompts during init
             # (matches CEF's own test infrastructure on macOS).
             switches["use-mock-keychain"] = ""
+            # Chrome 130+ MachPortRendezvousServer uses bootstrap_check_in,
+            # which requires a pre-declared launchd service. Without an app
+            # bundle, CFBundleIdentifier is empty and registration fails —
+            # renderer subprocesses crash on startup. Run the renderer
+            # in-process to skip subprocess Mach port rendezvous entirely.
+            switches["in-process-renderer"] = ""
             # Run network service in-process to avoid Mach port rendezvous
             # failures for utility subprocesses on macOS CI runners.
             switches["disable-features"] = "StorageServiceOutOfProcess"

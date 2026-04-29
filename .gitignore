@@ -7,6 +7,8 @@ cefpython3/*.exe
 cefpython3/*.so
 cefpython3/*.so.*
 cefpython3/subprocess
+cefpython3/chrome_crashpad_handler
+cefpython3/Chromium Embedded Framework.framework/
 cefpython3/*.pak
 cefpython3/*.dat
 cefpython3/*.bin
