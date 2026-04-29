@@ -118,6 +118,12 @@ jobs:
         run: |
           cp -r build/artifacts/. cefpython3/
           chmod +x cefpython3/subprocess
+          # Ad-hoc sign binaries so macOS process_requirement.cc validation
+          # does not fail with -67030. That failure restricts the bootstrap
+          # namespace for child processes and breaks MachPortRendezvousClient
+          # bootstrap_look_up, causing all subprocesses to crash on startup.
+          codesign --force --sign - cefpython3/subprocess
+          for f in cefpython3/cefpython_py*.so; do codesign --force --sign - "$f"; done
 
       - name: Run unit tests
         run: |
