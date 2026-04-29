@@ -169,10 +169,10 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # WAYLAND_DISPLAY is set; cefpython uses raw X11 APIs so the
             # window would never appear.  On CI (xvfb) this is a no-op.
             switches["ozone-platform"] = "x11"
-            # Run utility services in-process so they don't each need a
-            # separate subprocess (reduces spawn overhead on CI).
-            switches["disable-features"] = "StorageServiceOutOfProcess"
-            switches["enable-features"] = "NetworkServiceInProcess"
+            # Run the network service in-process so no utility subprocess
+            # needs to be spawned (reduces spawn overhead on CI).
+            # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
+            switches["enable-features"] = "NetworkServiceInProcess2"
             # Suppress the GNOME Keyring unlock prompt on desktop sessions.
             switches["password-store"] = "basic"
         if MAC:
@@ -193,8 +193,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
             switches["in-process-renderer"] = ""
             # Run network service in-process to avoid Mach port rendezvous
             # failures for utility subprocesses on macOS CI runners.
-            switches["disable-features"] = "StorageServiceOutOfProcess"
-            switches["enable-features"] = "NetworkServiceInProcess"
+            # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
+            switches["enable-features"] = "NetworkServiceInProcess2"
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 
