@@ -77,6 +77,30 @@ void MacInitialize() {
     // OFF: it's causing a crash during shutdown release
     // g_autopool = [[NSAutoreleasePool alloc] init];
     [NSApplication sharedApplication];
+
+    // CEF 130+ builds the MachPortRendezvousServer bootstrap service name as
+    //   BaseBundleID() + ".MachPortRendezvousServer." + pid
+    // When the process has no app bundle (e.g. a bare Python script),
+    // BaseBundleID() returns "" and the name starts with ".", which
+    // bootstrap_register rejects as invalid.  All renderer subprocesses then
+    // crash with "Unknown service name" (1102) on bootstrap_look_up.
+    // Inject a synthetic CFBundleIdentifier before CefInitialize() so the
+    // service name becomes a valid reverse-DNS label ("org.cefpython...").
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+    if (mainBundle) {
+        CFStringRef bundleID = CFBundleGetIdentifier(mainBundle);
+        if (!bundleID || CFStringGetLength(bundleID) == 0) {
+            // CFBundleGetInfoDictionary returns the bundle's internal mutable
+            // dictionary; casting to CFMutableDictionaryRef is safe here.
+            CFMutableDictionaryRef infoDict =
+                (CFMutableDictionaryRef)CFBundleGetInfoDictionary(mainBundle);
+            if (infoDict) {
+                CFDictionarySetValue(infoDict,
+                                     CFSTR("CFBundleIdentifier"),
+                                     CFSTR("org.cefpython"));
+            }
+        }
+    }
 }
 
 void MacShutdown() {

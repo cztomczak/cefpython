@@ -121,7 +121,33 @@ jobs:
 
       - name: Run unit tests
         run: |
-          PYTHONPATH="${{ github.workspace }}" python unittests/_test_runner.py
+          # Create a minimal app bundle so Python has a CFBundleIdentifier.
+          # CEF 130+ forms the MachPortRendezvousServer bootstrap service name
+          # as BaseBundleID()+".MachPortRendezvousServer."+pid.  Without a
+          # bundle ID the name starts with "." which bootstrap_register rejects,
+          # causing renderer subprocesses to crash.  Setting CFProcessPath
+          # before Python starts makes CFBundleGetMainBundle() return this
+          # bundle, giving BaseBundleID() a valid value before CefInitialize().
+          BUNDLE_DIR="${{ github.workspace }}/CEFPython.app"
+          mkdir -p "$BUNDLE_DIR/Contents/MacOS"
+          ln -sf "$(which python)" "$BUNDLE_DIR/Contents/MacOS/python"
+          cat > "$BUNDLE_DIR/Contents/Info.plist" << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleIdentifier</key>
+            <string>org.cefpython</string>
+            <key>CFBundleName</key>
+            <string>CEFPython</string>
+            <key>CFBundleExecutable</key>
+            <string>python</string>
+          </dict>
+          </plist>
+          PLIST
+          PYTHONPATH="${{ github.workspace }}" \
+          CFProcessPath="$BUNDLE_DIR/Contents/MacOS/python" \
+            python unittests/_test_runner.py
 
   wheel:
     needs: test
