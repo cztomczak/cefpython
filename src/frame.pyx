@@ -29,7 +29,12 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     cdef PyFrame pyFrame
     cdef CefString frameId = cefFrame.get().GetIdentifier()
     cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
-    assert (not frameId.empty() and browserId), "frameId or browserId empty"
+    if not browserId:
+        raise Exception("GetPyFrame(): browserId is 0 (browser not yet initialised)")
+    # frameId may be empty for internal frames that CEF creates before the
+    # underlying renderer frame is ready (e.g. the PDF-viewer internal frame
+    # on the first OnLoadStart).  The code below already creates an incomplete
+    # PyFrame for this case, so do not assert here.
     cdef str uniqueFrameId = GetUniqueFrameId(browserId, CefToPyString(frameId))
 
     if frameId.empty():

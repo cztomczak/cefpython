@@ -956,7 +956,13 @@ def QuitMessageLoop():
     Debug("QuitMessageLoop()")
     IF UNAME_SYSNAME == "Linux":
         import ctypes as _ct
-        _ct.CDLL("libgtk-3.so.0").gtk_main_quit()
+        _gtk = _ct.CDLL("libgtk-3.so.0")
+        # Only call gtk_main_quit() when a GTK main loop is actually running.
+        # _on_delete() may have already called it (via gtk_main_quit directly),
+        # and calling it a second time during the drain would generate a
+        # spurious "assertion 'main_loops != NULL' failed" warning.
+        if _gtk.gtk_main_level() > 0:
+            _gtk.gtk_main_quit()
     with nogil:
         CefQuitMessageLoop()
 

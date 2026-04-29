@@ -258,6 +258,25 @@ def _linux_create_toplevel(title, width=800, height=600):
     }
 
 
+def _linux_close_popup_browsers(main_id):
+    """Queue CloseBrowser(True) for every tracked browser except main_id.
+
+    Called when the main GTK window delete-event fires so that popup browsers
+    are shut down in the same event-loop pass.  Without this, cef.Shutdown()
+    can be called while popups are still alive, hitting the emergency
+    force-close path in Shutdown() and producing a spurious gtk_main_quit()
+    assertion warning when QuitMessageLoop fires later.
+    """
+    for bid in list(g_pyBrowsers.keys()):
+        if bid != main_id:
+            pb = GetPyBrowserById(bid)
+            if pb:
+                try:
+                    pb.CloseBrowser(True)
+                except Exception:
+                    pass
+
+
 def _linux_register_window_callbacks(browser, ws):
     """Register resize and close callbacks for a standalone GTK toplevel.
 
@@ -285,9 +304,13 @@ def _linux_register_window_callbacks(browser, ws):
             if _b:
                 _chrome_xid = _b.GetWindowHandle()
                 if _chrome_xid:
-                    _x11.XResizeWindow(_xdisp, _ct.c_ulong(_chrome_xid),
-                                       _ct.c_uint(nw), _ct.c_uint(nh))
-                    _x11.XSync(_xdisp, _ct.c_int(0))
+                    # Notify CEF of the incoming resize before applying it so
+                    # the compositor can prepare (avoids blank frames).
+                    # SetBounds calls XConfigureWindow + XFlush internally;
+                    # the redundant XResizeWindow+XSync was removed because
+                    # XSync blocks the GIL and can make the WM consider the
+                    # window unresponsive (triggering spurious WM_DELETE_WINDOW).
+                    _b.NotifyMoveOrResizeStarted()
                     _b.SetBounds(0, 0, nw, nh)
         return False
     _conf_cb = _ConfigureCb(_on_configure)
@@ -301,7 +324,19 @@ def _linux_register_window_callbacks(browser, ws):
     def _on_delete(_w, _ev, _ud):
         _b = _browser_ref[0]
         if _b:
+            # Close any open popup browsers so the drain loop in
+            # _linux_message_loop() can clean them up without hitting the
+            # emergency force-close path in Shutdown().
+            _linux_close_popup_browsers(_b.GetIdentifier())
             _b.CloseBrowser(True)
+        # Always call gtk_main_quit() here.  When _on_delete returns False,
+        # GTK destroys the X11 parent window, which also destroys CEF's
+        # embedded child window via X11's parent-child relationship.  CEF
+        # does not fire OnBeforeClose through its normal path after the X11
+        # window is destroyed externally, so QuitMessageLoop() would never be
+        # called and the GTK main loop would spin at 100% CPU.  The drain
+        # loop in _linux_message_loop() handles remaining CEF cleanup after
+        # gtk_main() returns.
         _gtk.gtk_main_quit()
         return False
     _del_cb = _DeleteCb(_on_delete)
