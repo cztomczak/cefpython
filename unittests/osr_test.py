@@ -136,30 +136,26 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
             switches["enable-features"] = "NetworkServiceInProcess2"
         if MAC:
-            # cefpython does not ship a chrome-sandbox binary.
-            switches["no-sandbox"] = ""
-            # No real GPU available on macOS CI runners.
-            switches["in-process-gpu"] = ""
-            # Prevent macOS keychain authorization prompts during init
-            # (matches CEF's own test infrastructure on macOS).
+            # Prevent macOS keychain authorization prompts during init.
+            # CEF's own test infrastructure (client_app_browser.cc) does
+            # the same on macOS.
             switches["use-mock-keychain"] = ""
-            # Chrome 130+ MachPortRendezvousServer registers via
-            # bootstrap_check_in; renderer subprocesses look up the service
-            # via bootstrap_look_up, which fails on unsigned CI processes
-            # because Chrome gives them a restricted bootstrap namespace.
-            # --in-process-renderer was removed from Chrome 130+.
-            # --single-process runs the renderer in the browser process,
-            # eliminating renderer subprocess bootstrap_look_up failures.
+            # Chrome 130+ MachPortRendezvousServer registers its bootstrap
+            # service as BaseBundleID()+".MachPortRendezvousServer."+pid.
+            # Python processes with only ad-hoc code signing receive a
+            # restricted bootstrap namespace from macOS, so renderer
+            # subprocesses cannot bootstrap_look_up the service.
+            # --single-process runs the renderer inside the browser process,
+            # eliminating the subprocess bootstrap_look_up entirely.
+            # (--in-process-renderer was removed in Chrome 130+.)
             switches["single-process"] = ""
             # --single-process puts the renderer's V8 in the browser process,
             # which requires a large contiguous CodeRange for JIT code.
-            # On constrained CI runner images this reservation fails with an
-            # OOM error.  --jitless disables all V8 JIT compilers, eliminating
-            # the CodeRange requirement entirely.
+            # --jitless disables V8 JIT, removing that requirement.
             switches["js-flags"] = "--jitless"
-            # Run network service in-process to avoid Mach port rendezvous
-            # failures for utility subprocesses on macOS CI runners.
-            # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
+            # Run the network service in-process to avoid Mach port rendezvous
+            # failures for the network utility subprocess on macOS.
+            # (Feature name in Chrome 130+: "NetworkServiceInProcess2".)
             switches["enable-features"] = "NetworkServiceInProcess2"
         browser_settings = {
             # Tweaking OSR performance (Issue #240)

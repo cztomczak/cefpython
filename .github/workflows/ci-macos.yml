@@ -181,6 +181,16 @@ jobs:
       - name: Set up cefpython3 package
         run: cp -r build/artifacts/. cefpython3/
 
+      - name: Codesign binaries for distribution
+        run: |
+          # Ad-hoc sign the subprocess binary so macOS 14+ Gatekeeper allows
+          # it to execute when users install the wheel. Without signing,
+          # macOS blocks the unsigned binary and the GPU process (which uses
+          # the same binary with --type=gpu-process) exits with code 1003
+          # (GPU_DEAD_ON_ARRIVAL), causing a fatal crash.
+          codesign --force --sign - cefpython3/subprocess
+          for f in cefpython3/cefpython_py*.so; do codesign --force --sign - "$f"; done
+
       - name: Build wheel
         run: python tools/build_distrib.py
 
