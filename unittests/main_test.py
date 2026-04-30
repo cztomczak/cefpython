@@ -193,6 +193,12 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # --single-process runs the renderer in the browser process,
             # eliminating renderer subprocess bootstrap_look_up failures.
             switches["single-process"] = ""
+            # --single-process puts the renderer's V8 in the browser process,
+            # which requires a large contiguous CodeRange for JIT code.
+            # On constrained CI runner images this reservation fails with an
+            # OOM error.  --jitless disables all V8 JIT compilers, eliminating
+            # the CodeRange requirement entirely.
+            switches["js-flags"] = "--jitless"
             # Run network service in-process to avoid Mach port rendezvous
             # failures for utility subprocesses on macOS CI runners.
             # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
