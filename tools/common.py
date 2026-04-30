@@ -51,12 +51,8 @@ if OS_POSTFIX == "win":
     OS_POSTFIX2 = "win32" if ARCH32 else "win64"
     CEF_POSTFIX2 = "windows32" if ARCH32 else "windows64"
 elif OS_POSTFIX == "mac":
-    if platform.machine() == "arm64":
-        OS_POSTFIX2 = "macarm64"
-        CEF_POSTFIX2 = "macosarm64"
-    else:
-        OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
-        CEF_POSTFIX2 = "macosx32" if ARCH32 else "macosx64"
+    OS_POSTFIX2 = "macarm64"
+    CEF_POSTFIX2 = "macosarm64"
 elif OS_POSTFIX == "linux":
     OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
     CEF_POSTFIX2 = "linux32" if ARCH32 else "linux64"
@@ -474,7 +470,7 @@ def get_version_from_command_line_args(caller_script, ignore_error=False):
 
 def get_cefpython_version():
     """Get CEF version from the 'src/version/' directory."""
-    if OS_POSTFIX == "mac" and platform.machine() == "arm64":
+    if OS_POSTFIX == "mac":
         header_name = "cef_version_macarm64.h"
     else:
         header_name = "cef_version_" + OS_POSTFIX + ".h"

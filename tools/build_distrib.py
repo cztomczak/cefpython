@@ -116,7 +116,7 @@ def _read_version():
     if sys.platform == "win32":
         name = "cef_version_win.h"
     elif sys.platform == "darwin":
-        name = "cef_version_mac.h"
+        name = "cef_version_macarm64.h"
     else:
         name = "cef_version_linux.h"
     header = os.path.join("src", "version", name)

@@ -41,11 +41,7 @@ if(NOT CEF_ROOT)
     if(WIN32)
         set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef*_win64")
     elseif(APPLE)
-        if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-            set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef*_macarm64")
-        else()
-            set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef*_mac64")
-        endif()
+        set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef*_macarm64")
     else()
         set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef*_linux64")
     endif()
@@ -75,11 +71,7 @@ set(PYX_STAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/pyx_stage")
 if(WIN32)
     set(_cef_ver_header "${SRC_DIR}/version/cef_version_win.h")
 elseif(APPLE)
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-        set(_cef_ver_header "${SRC_DIR}/version/cef_version_macarm64.h")
-    else()
-        set(_cef_ver_header "${SRC_DIR}/version/cef_version_mac.h")
-    endif()
+    set(_cef_ver_header "${SRC_DIR}/version/cef_version_macarm64.h")
 else()
     set(_cef_ver_header "${SRC_DIR}/version/cef_version_linux.h")
 endif()
@@ -218,13 +210,8 @@ elseif(APPLE)
         BROWSER_PROCESS
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h"
     )
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-        set(_macos_ver_min 11.0)
-    else()
-        set(_macos_ver_min 10.9)
-    endif()
     target_link_options(${MODULE_NAME} PRIVATE
-        -mmacosx-version-min=${_macos_ver_min}
+        -mmacosx-version-min=11.0
         -Wl,-search_paths_first -Wl,-dead_strip
         "-F${CEF_ROOT}/bin" "-framework" "Chromium Embedded Framework"
         "-Wl,-rpath,@loader_path/"
