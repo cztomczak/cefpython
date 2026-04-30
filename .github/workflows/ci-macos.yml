@@ -118,17 +118,11 @@ jobs:
         run: |
           cp -r build/artifacts/. cefpython3/
           chmod +x cefpython3/subprocess
-          # Ad-hoc sign binaries so macOS process_requirement.cc validation
-          # does not fail with -67030. That failure restricts the bootstrap
-          # namespace for child processes and breaks MachPortRendezvousClient
-          # bootstrap_look_up, causing all subprocesses to crash on startup.
+          # Ad-hoc sign our compiled binaries so macOS allows them to run.
+          # (Our freshly built binaries have no signature; unsigned binaries
+          # are blocked on macOS 14+.)
           codesign --force --sign - cefpython3/subprocess
           for f in cefpython3/cefpython_py*.so; do codesign --force --sign - "$f"; done
-          # Also sign the Python interpreter (the browser process). Without this,
-          # process_requirement.cc fails with -67030 (errSecCSUnsigned) and Chrome
-          # launches subprocesses with a restricted bootstrap namespace, preventing
-          # bootstrap_look_up from finding the MachPortRendezvousServer service.
-          codesign --force --sign - "$(python -c 'import sys; print(sys.executable)')"
 
       - name: Run unit tests
         run: |

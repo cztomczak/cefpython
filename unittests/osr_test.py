@@ -143,12 +143,14 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # Prevent macOS keychain authorization prompts during init
             # (matches CEF's own test infrastructure on macOS).
             switches["use-mock-keychain"] = ""
-            # Chrome 130+ MachPortRendezvousServer uses bootstrap_check_in,
-            # which requires a pre-declared launchd service. Without an app
-            # bundle, CFBundleIdentifier is empty and registration fails —
-            # renderer subprocesses crash on startup. Run the renderer
-            # in-process to skip subprocess Mach port rendezvous entirely.
-            switches["in-process-renderer"] = ""
+            # Chrome 130+ MachPortRendezvousServer registers via
+            # bootstrap_check_in; renderer subprocesses look up the service
+            # via bootstrap_look_up, which fails on unsigned CI processes
+            # because Chrome gives them a restricted bootstrap namespace.
+            # --in-process-renderer was removed from Chrome 130+.
+            # --single-process runs the renderer in the browser process,
+            # eliminating renderer subprocess bootstrap_look_up failures.
+            switches["single-process"] = ""
             # Run network service in-process to avoid Mach port rendezvous
             # failures for utility subprocesses on macOS CI runners.
             # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
