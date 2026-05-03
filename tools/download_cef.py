@@ -37,6 +37,7 @@ import argparse
 import hashlib
 import json
 import os
+import time
 import sys
 import tarfile
 import zipfile
@@ -195,33 +196,70 @@ def find_in_index(cef_version, cef_postfix2):
     sys.exit(1)
 
 
-def download(url, dest_path, expected_size=0, max_retries=3):
-    """Download url to dest_path with a progress bar, retrying on failure."""
+def download(url, dest_path, expected_size=0, max_retries=50):
+    """Download url to dest_path with a progress bar and resume support."""
     try:
-        from urllib.request import urlopen
+        from urllib.request import Request, urlopen
     except ImportError:
-        from urllib2 import urlopen
+        from urllib2 import Request, urlopen
 
     log("Downloading: {}".format(url))
+
+    total = expected_size
+    downloaded = 0
+    chunk_size = 1024 * 1024  # 1 MB
+
+    # Resume from an existing partial file if present
+    if os.path.isfile(dest_path):
+        downloaded = os.path.getsize(dest_path)
+        if total and downloaded >= total:
+            log("Already fully downloaded: {}".format(os.path.basename(dest_path)))
+            return
+        if downloaded > 0:
+            log("Resuming from {:.1f} MB...".format(downloaded / (1024 * 1024)))
+
     for attempt in range(1, max_retries + 1):
         if attempt > 1:
-            log("Retry {}/{}: {}".format(attempt, max_retries, url))
+            # Re-check how much we have on disk after a failed attempt
+            if os.path.isfile(dest_path):
+                downloaded = os.path.getsize(dest_path)
+            log("Retry {}/{} (resuming from {:.1f} MB): {}".format(
+                attempt, max_retries, downloaded / (1024 * 1024), url))
+
+        req = Request(url)
+        if downloaded > 0:
+            req.add_header("Range", "bytes={}-".format(downloaded))
+
         try:
-            response = urlopen(url, timeout=120)
+            response = urlopen(req, timeout=120)
         except Exception as exc:
             if attempt == max_retries:
                 log("ERROR: Download failed: {}".format(exc))
                 sys.exit(1)
             log("WARNING: Connection error (attempt {}): {}".format(attempt, exc))
+            time.sleep(2)
             continue
 
-        total = int(response.headers.get("Content-Length") or expected_size or 0)
-        downloaded = 0
-        chunk_size = 1024 * 1024  # 1 MB
+        # Determine total size from response
+        content_range = response.headers.get("Content-Range")
+        if content_range:
+            # e.g. "bytes 100-200/614600000"
+            try:
+                total = int(content_range.rsplit("/", 1)[-1])
+            except (ValueError, IndexError):
+                pass
+        else:
+            total = int(response.headers.get("Content-Length") or total or 0)
+            if downloaded > 0:
+                # Server didn't honour Range; start over
+                log("WARNING: Server ignored Range header, restarting download.")
+                downloaded = 0
+
         error = None
 
         try:
-            with open(dest_path, "wb") as fp:
+            mode = "ab" if downloaded > 0 else "wb"
+            with open(dest_path, mode) as fp:
                 while True:
                     chunk = response.read(chunk_size)
                     if not chunk:
@@ -239,12 +277,11 @@ def download(url, dest_path, expected_size=0, max_retries=3):
                 downloaded / (1024 * 1024), total / (1024 * 1024))
 
         if error is not None:
-            if os.path.isfile(dest_path):
-                os.remove(dest_path)
             if attempt == max_retries:
                 log("ERROR: Download failed: {}".format(error))
                 sys.exit(1)
             log("WARNING: Download incomplete (attempt {}): {}".format(attempt, error))
+            time.sleep(2)
             continue
 
         log("Saved: {}".format(os.path.basename(dest_path)))
