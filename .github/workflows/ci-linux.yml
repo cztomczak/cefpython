@@ -13,9 +13,43 @@ on:
         default: false
 
 jobs:
-  compile:
+  download-cef:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Read CEF version
+        id: cef-version
+        run: |
+          ver=$(grep -oP '(?<=#define CEF_VERSION ")[^"]+' src/version/cef_version_linux.h)
+          echo "value=$ver" >> $GITHUB_OUTPUT
+
+      - name: Cache CEF binaries
+        uses: actions/cache@v4
+        if: ${{ inputs.bypass_cache != true }}
+        with:
+          path: |
+            build/cef_binary_*
+            build/cef*_linux64
+          key: cef-linux64-${{ steps.cef-version.outputs.value }}
+
+      - name: Install build tools
+        run: python tools/requirements.py
+
+      - name: Download CEF binaries
+        run: python tools/download_cef.py
+
+  wheel:
+    needs: download-cef
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
@@ -36,8 +70,8 @@ jobs:
           ver=$(grep -oP '(?<=#define CEF_VERSION ")[^"]+' src/version/cef_version_linux.h)
           echo "value=$ver" >> $GITHUB_OUTPUT
 
-      - name: Cache CEF binaries
-        uses: actions/cache@v4
+      - name: Restore CEF cache
+        uses: actions/cache/restore@v4
         if: ${{ inputs.bypass_cache != true }}
         with:
           path: |
@@ -59,9 +93,6 @@ jobs:
       - name: Install build tools
         run: python tools/requirements.py
 
-      - name: Download CEF binaries
-        run: python tools/download_cef.py
-
       - name: Prepare prebuilt CEF
         run: python tools/automate.py --prebuilt-cef
 
@@ -81,47 +112,15 @@ jobs:
             ! -name 'cefclient*' ! -name 'cefsimple*' ! -name 'ceftests*' ! -name 'chrome-sandbox' \
             -exec cp -r {} build/artifacts/ \;
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-py${{ matrix.python-version }}-linux64
-          path: build/artifacts/
-          retention-days: 1
-
-  test:
-    needs: compile
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Install runtime dependencies
         run: |
-          sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
             libnss3 libatk1.0-0 libatk-bridge2.0-0 \
             libx11-6 libxcomposite1 libxdamage1 libxext6 \
             libxfixes3 libxrandr2 libxrender1 \
             libgtk2.0-0 libglib2.0-0 xvfb
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-py${{ matrix.python-version }}-linux64
-          path: build/artifacts/
-
-      - name: Set up cefpython3 package for testing
+      - name: Set up cefpython3 package
         run: |
           cp -r build/artifacts/. cefpython3/
           chmod +x cefpython3/subprocess
@@ -133,35 +132,6 @@ jobs:
         run: xvfb-run python unittests/_test_runner.py
         env:
           PYTHONPATH: ${{ github.workspace }}
-
-  wheel:
-    needs: test
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-py${{ matrix.python-version }}-linux64
-          path: build/artifacts/
-
-      - name: Set up cefpython3 package
-        run: |
-          cp -r build/artifacts/. cefpython3/
-          chmod +x cefpython3/subprocess
 
       - name: Build wheel
         run: python tools/build_distrib.py
