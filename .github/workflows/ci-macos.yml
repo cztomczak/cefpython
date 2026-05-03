@@ -13,7 +13,46 @@ on:
         default: false
 
 jobs:
+  download-cef:
+    runs-on: macos-14
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Read CEF version
+        id: cef-version
+        run: |
+          ver=$(python3 -c "
+          import re, sys
+          h = open('src/version/cef_version_macarm64.h').read()
+          m = re.search(r'#define CEF_VERSION \"([^\"]+)\"', h)
+          print(m.group(1))
+          ")
+          echo "value=$ver" >> $GITHUB_OUTPUT
+
+      - name: Cache CEF binaries
+        uses: actions/cache@v4
+        if: ${{ inputs.bypass_cache != true }}
+        with:
+          path: |
+            build/cef_binary_*
+            build/cef*_macarm64
+          key: cef-macosarm64-v3-${{ steps.cef-version.outputs.value }}
+
+      - name: Install build tools
+        run: python tools/requirements.py
+
+      - name: Download CEF binaries
+        run: python tools/download_cef.py
+
   compile:
+    needs: download-cef
     runs-on: macos-14
     timeout-minutes: 90
     strategy:
@@ -41,8 +80,8 @@ jobs:
           ")
           echo "value=$ver" >> $GITHUB_OUTPUT
 
-      - name: Cache CEF binaries
-        uses: actions/cache@v4
+      - name: Restore CEF cache
+        uses: actions/cache/restore@v4
         if: ${{ inputs.bypass_cache != true }}
         with:
           path: |
@@ -52,9 +91,6 @@ jobs:
 
       - name: Install build tools
         run: python tools/requirements.py
-
-      - name: Download CEF binaries
-        run: python tools/download_cef.py
 
       - name: Prepare prebuilt CEF
         run: python tools/automate.py --prebuilt-cef
