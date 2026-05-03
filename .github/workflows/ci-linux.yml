@@ -159,7 +159,9 @@ jobs:
           path: build/artifacts/
 
       - name: Set up cefpython3 package
-        run: cp -r build/artifacts/. cefpython3/
+        run: |
+          cp -r build/artifacts/. cefpython3/
+          chmod +x cefpython3/subprocess
 
       - name: Build wheel
         run: python tools/build_distrib.py
