@@ -225,6 +225,7 @@ else()
     target_compile_options(${MODULE_NAME} PRIVATE
         -DNDEBUG -O3
         -flto -fdata-sections -ffunction-sections
+        -Wno-stringop-overflow
     )
     target_compile_definitions(${MODULE_NAME} PRIVATE
         BROWSER_PROCESS

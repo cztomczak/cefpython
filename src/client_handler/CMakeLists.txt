@@ -57,7 +57,7 @@ elseif(APPLE)
     target_compile_definitions(client_handler PRIVATE
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
 else()
-    target_compile_options(client_handler PRIVATE -DNDEBUG -O3)
+    target_compile_options(client_handler PRIVATE -DNDEBUG -O3 -Wno-stringop-overflow)
     target_compile_definitions(client_handler PRIVATE
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
 endif()

@@ -24,7 +24,7 @@ elseif(APPLE)
     target_compile_definitions(cpp_utils PRIVATE
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
 else()
-    target_compile_options(cpp_utils PRIVATE -DNDEBUG -O3)
+    target_compile_options(cpp_utils PRIVATE -DNDEBUG -O3 -Wno-stringop-overflow)
     target_compile_definitions(cpp_utils PRIVATE
         CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
 endif()
