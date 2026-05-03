@@ -269,7 +269,7 @@ class CefWidget(QWidget):
         # as a child of cef_widget.winId() — no hidden_window or deferred
         # reparent needed.
         window_info = cef.WindowInfo()
-        rect = [0, 0, self.width(), self.height()]
+        rect = [0, 0, self._phys(self.width()), self._phys(self.height())]
         window_info.SetAsChild(self.getHandle(), rect)
         if (PYQT6 or PYSIDE6) and LINUX:
             # SetAsChild() substituted root as CEF's parent (Xwayland workaround).
@@ -291,6 +291,15 @@ class CefWidget(QWidget):
             # than the real client rect, leaving content in a smaller area.
             WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
 
+    def _phys(self, n):
+        # Qt6 enables AA_EnableHighDpiScaling by default, so width()/height()
+        # return logical pixels.  CEF expects physical pixels.  Multiply by
+        # devicePixelRatio() for PyQt6/PySide6 on Linux; PyQt5 uses the
+        # hidden_window/XReparentWindow path where X11 geometry drives sizing.
+        if LINUX and (PYQT6 or PYSIDE6):
+            return int(n * self.devicePixelRatio())
+        return n
+
     def getHandle(self):
         if self.hidden_window:
             return int(self.hidden_window.winId())
@@ -304,7 +313,8 @@ class CefWidget(QWidget):
                 WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
             elif LINUX:
                 self.browser.SetBounds(self.x, self.y,
-                                       self.width(), self.height())
+                                       self._phys(self.width()),
+                                       self._phys(self.height()))
             self.browser.NotifyMoveOrResizeStarted()
 
     def resizeEvent(self, event):
@@ -314,7 +324,8 @@ class CefWidget(QWidget):
                 WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
             elif LINUX:
                 self.browser.SetBounds(self.x, self.y,
-                                       size.width(), size.height())
+                                       self._phys(size.width()),
+                                       self._phys(size.height()))
             self.browser.NotifyMoveOrResizeStarted()
 
 
