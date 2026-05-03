@@ -79,7 +79,8 @@ def main():
                 digest = base64.urlsafe_b64encode(
                     hashlib.sha256(data).digest()).rstrip(b"=").decode()
                 records.append((arcname, "sha256=" + digest, str(len(data))))
-                zf.write(filepath, arcname)
+                info = zipfile.ZipInfo.from_file(filepath, arcname)
+                zf.writestr(info, data)
 
         # dist-info/METADATA
         _add_bytes(dist_info + "/METADATA", (
