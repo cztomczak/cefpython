@@ -2,7 +2,7 @@ name: CI Windows
 
 on:
   push:
-    branches: [ "github-actions-ci", "master" ]
+    branches: [ "master", "cefpython147" ]
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
