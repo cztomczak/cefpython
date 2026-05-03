@@ -236,6 +236,7 @@ else()
     )
     target_link_options(${MODULE_NAME} PRIVATE
         -flto -Wl,--gc-sections
+        -Wno-stringop-overflow
     )
     target_link_libraries(${MODULE_NAME} PRIVATE
         X11 ${GTK3_LIBRARIES}
