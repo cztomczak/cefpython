@@ -16,7 +16,6 @@
 from cefpython3 import cefpython as cef
 
 import distutils.sysconfig
-from packaging.version import Version as parse_version
 import math
 import os
 import platform
@@ -109,7 +108,7 @@ def check_versions():
         pywin32_version = fp.read().strip()
     print("[pywin32.py] pywin32 {ver}".format(ver=pywin32_version))
 
-    assert parse_version(cef.__version__) >= parse_version("57.0"), "CEF Python v57.0+ required to run this"
+    assert tuple(int(x) for x in cef.__version__.split(".")) >= (57, 0), "CEF Python v57.0+ required to run this"
 
 
 def create_browser(window_info, settings, url):

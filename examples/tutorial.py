@@ -6,7 +6,6 @@ import base64
 import platform
 import sys
 import threading
-from packaging.version import Version as parse_version
 
 # HTML code. Browser will navigate to a Data uri created
 # from this html code.
@@ -86,7 +85,7 @@ def check_versions():
     print("[tutorial.py] Python {ver} {arch}".format(
            ver=platform.python_version(),
            arch=platform.architecture()[0]))
-    assert parse_version(cef.__version__) >= parse_version("57.0"), "CEF Python v57.0+ required to run this"
+    assert tuple(int(x) for x in cef.__version__.split(".")) >= (57, 0), "CEF Python v57.0+ required to run this"
 
 
 def html_to_data_uri(html, js_callback=None):

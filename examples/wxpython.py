@@ -12,7 +12,6 @@ from cefpython3 import cefpython as cef
 import platform
 import sys
 import os
-from packaging.version import Version as parse_version
 
 # Platforms
 WINDOWS = (platform.system() == "Windows")
@@ -63,7 +62,7 @@ def check_versions():
             ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[wxpython.py] wxPython {ver}".format(ver=wx.version()))
     # CEF Python version requirement
-    assert parse_version(cef.__version__) >= parse_version("66.0"), "CEF Python v66.0+ required to run this"
+    assert tuple(int(x) for x in cef.__version__.split(".")) >= (66, 0), "CEF Python v66.0+ required to run this"
 
 
 def scale_window_size_for_high_dpi(width, height):

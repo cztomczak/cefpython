@@ -36,7 +36,6 @@ NOTE: There are limits in Chromium on viewport size. For some
 """
 
 from cefpython3 import cefpython as cef
-from packaging.version import Version as parse_version
 import os
 import platform
 import subprocess
@@ -115,7 +114,7 @@ def check_versions():
            ver=platform.python_version(),
            arch=platform.architecture()[0]))
     print("[screenshot.py] Pillow {ver}".format(ver=PILLOW_VERSION))
-    assert parse_version(cef.__version__) >= parse_version("57.0"), "CEF Python v57.0+ required to run this"
+    assert tuple(int(x) for x in cef.__version__.split(".")) >= (57, 0), "CEF Python v57.0+ required to run this"
 
 
 def command_line_arguments():

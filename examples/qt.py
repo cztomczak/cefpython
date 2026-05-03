@@ -12,7 +12,6 @@ import os
 import platform
 import subprocess
 import sys
-from packaging.version import Version as parse_version
 
 # GLOBALS
 PYQT5 = False
@@ -140,7 +139,7 @@ def check_versions():
         print("[qt.py] PySide6 {v1} (qt {v2})".format(
               v1=PySide6.__version__, v2=QtCore.__version__))
     # CEF Python version requirement
-    assert parse_version(cef.__version__) >= parse_version("55.4"), "CEF Python v55.4+ required to run this"
+    assert tuple(int(x) for x in cef.__version__.split(".")) >= (55, 4), "CEF Python v55.4+ required to run this"
 
 
 class MainWindow(QMainWindow):

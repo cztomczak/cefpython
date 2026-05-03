@@ -26,7 +26,6 @@ import sys
 import os
 import platform
 import logging as _logging
-from packaging.version import Version as parse_version
 
 # Fix for PyCharm hints warnings
 WindowUtils = cef.WindowUtils()
@@ -54,7 +53,7 @@ def main():
     logger.info("Python {ver} {arch}".format(
             ver=platform.python_version(), arch=platform.architecture()[0]))
     logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
-    assert parse_version(cef.__version__) >= parse_version("55.3"), "CEF Python v55.3+ required to run this"
+    assert tuple(int(x) for x in cef.__version__.split(".")) >= (55, 3), "CEF Python v55.3+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     # Tk must be initialized before CEF otherwise fatal error (Issue #306)
     root = tk.Tk()
