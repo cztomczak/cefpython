@@ -29,26 +29,9 @@
 #define DL_EXPORT(RTYPE) RTYPE
 #endif
 
-// CMake builds define CEFPYTHON_API_H_FILE to "cefpython_api_fixed.h", a
-// generated stable-name wrapper in the pyx_stage/ build directory that is
-// resolved via the target's include path.
-// Legacy build.py builds fall back to the hardcoded version-specific paths.
-#ifdef CEFPYTHON_API_H_FILE
+// CMake sets CEFPYTHON_API_H_FILE to "cefpython_api_fixed.h", a generated
+// stable-name wrapper in the pyx_stage/ build directory resolved via the
+// target's include path.
 #include CEFPYTHON_API_H_FILE
-#else
-#if PY_MAJOR_VERSION == 3
-#if PY_MINOR_VERSION == 10
-#include "../../build/build_cefpython/cefpython_py310_fixed.h"
-#elif PY_MINOR_VERSION == 11
-#include "../../build/build_cefpython/cefpython_py311_fixed.h"
-#elif PY_MINOR_VERSION == 12
-#include "../../build/build_cefpython/cefpython_py312_fixed.h"
-#elif PY_MINOR_VERSION == 13
-#include "../../build/build_cefpython/cefpython_py313_fixed.h"
-#elif PY_MINOR_VERSION == 14
-#include "../../build/build_cefpython/cefpython_py314_fixed.h"
-#endif // PY_MINOR_VERSION
-#endif // PY_MAJOR_VERSION
-#endif // CEFPYTHON_API_H_FILE
 
 #endif // CEFPYTHON_PUBLIC_API_H
