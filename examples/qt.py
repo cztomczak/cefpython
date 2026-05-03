@@ -62,12 +62,14 @@ WINDOWS = (platform.system() == "Windows")
 LINUX = (platform.system() == "Linux")
 MAC = (platform.system() == "Darwin")
 
-# Qt6 (PyQt6/PySide6) defaults to the Wayland backend when the session is
-# Wayland.  CEF always uses X11 (ozone-platform=x11), so embedding requires
-# both sides to use X11.  Force Qt6 onto the xcb (X11) platform.
-# This must be set before creating QApplication.
-if LINUX and (PYQT6 or PYSIDE6):
-    os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
+# CEF only supports X11 on Linux.  Force Qt onto the xcb (X11/XWayland)
+# backend for all bindings so that winId() returns a real X11 window ID
+# that CEF can embed into.  Wayland desktops (e.g. KDE Plasma on Kubuntu)
+# often pre-set QT_QPA_PLATFORM=wayland in the session environment, so a
+# hard override is needed — setdefault would not override a pre-set value.
+# Must be set before creating QApplication.
+if LINUX:
+    os.environ["QT_QPA_PLATFORM"] = "xcb"
 
 # On Linux, query the X11 pointer button mask directly to detect outside-clicks
 # on the context menu.  XQueryPointer returns real button state even while CEF

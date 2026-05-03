@@ -113,6 +113,25 @@ cdef class WindowInfo:
                     % parentWindowHandle)
         self.windowType = "child"
         IF UNAME_SYSNAME == "Linux":
+            if parentWindowHandle == 0:
+                import os as _os
+                import warnings
+                if "WAYLAND_DISPLAY" in _os.environ:
+                    warnings.warn(
+                        "WindowInfo.SetAsChild: parentWindowHandle is 0 on Linux "
+                        "in a Wayland session. The GUI toolkit is likely using the "
+                        "native Wayland backend where winId()/GetHandle() returns 0 "
+                        "instead of an X11 window ID — CEF will open a detached "
+                        "window instead of embedding. Force X11 (XWayland) before "
+                        "initialising the toolkit:\n"
+                        "  Qt (PyQt5/PyQt6/PySide2/PySide6): "
+                        "os.environ[\"QT_QPA_PLATFORM\"] = \"xcb\"\n"
+                        "  GTK (wxPython/PyGTK): "
+                        "os.environ[\"GDK_BACKEND\"] = \"x11\"\n"
+                        "  SDL2 (pysdl2): "
+                        "os.environ[\"SDL_VIDEODRIVER\"] = \"x11\"",
+                        stacklevel=2,
+                    )
             if parentWindowHandle != 0:
                 # Xwayland cross-client restriction: Chrome's internal XCB
                 # connection cannot create a child window under a window owned
