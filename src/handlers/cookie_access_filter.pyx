@@ -25,6 +25,8 @@ cdef public cpp_bool CookieAccessFilter_CanSendCookie(
         # browser was closed.
         if IsBrowserClosed(cef_browser):
             return False
+        if not cef_frame.get().GetBrowser().get():
+            return True  # default: allow cookie
 
         browser = GetPyBrowser(cef_browser, "CanSendCookie")
         frame = GetPyFrame(cef_frame)
@@ -64,6 +66,8 @@ cdef public cpp_bool CookieAccessFilter_CanSaveCookie(
         # browser was closed.
         if IsBrowserClosed(cef_browser):
             return False
+        if not cef_frame.get().GetBrowser().get():
+            return True  # default: allow cookie
 
         browser = GetPyBrowser(cef_browser, "CanSaveCookie")
         frame = GetPyFrame(cef_frame)

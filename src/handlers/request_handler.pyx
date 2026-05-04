@@ -74,6 +74,8 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
             return False
+        if not cefFrame.get().GetBrowser().get():
+            return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeBrowse")
         pyFrame = GetPyFrame(cefFrame)
@@ -109,6 +111,8 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
             return False
+        if not cefFrame.get().GetBrowser().get():
+            return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeResourceLoad")
         pyFrame = GetPyFrame(cefFrame)
@@ -141,6 +145,8 @@ cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
+            return <CefRefPtr[CefResourceHandler]>nullptr
+        if not cefFrame.get().GetBrowser().get():
             return <CefRefPtr[CefResourceHandler]>nullptr
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetResourceHandler")
@@ -182,6 +188,8 @@ cdef public void RequestHandler_OnResourceRedirect(
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
+            return
+        if not cefFrame.get().GetBrowser().get():
             return
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnResourceRedirect")
@@ -232,6 +240,8 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
+            return False
+        if not cefFrame.get().GetBrowser().get():
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetAuthCredentials")

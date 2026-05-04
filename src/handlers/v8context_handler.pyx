@@ -22,6 +22,8 @@ cdef public void V8ContextHandler_OnContextCreated(
     cdef object clientCallback
     cdef JavascriptBindings jsBindings
     try:
+        if not cefFrame.get().GetBrowser().get():
+            return
         pyBrowser = GetPyBrowser(cefBrowser, "OnContextCreated")
         pyBrowser.SetUserData("__v8ContextCreated", True)
         pyFrame = GetPyFrame(cefFrame)

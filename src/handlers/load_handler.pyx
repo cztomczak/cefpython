@@ -33,6 +33,8 @@ cdef public void LoadHandler_OnLoadStart(
     cdef PyFrame pyFrame
     cdef object clientCallback
     try:
+        if not cefFrame.get().GetBrowser().get():
+            return
         pyBrowser = GetPyBrowser(cefBrowser, "OnLoadStart")
         pyFrame = GetPyFrame(cefFrame)
         clientCallback = pyBrowser.GetClientCallback("OnLoadStart")
@@ -51,6 +53,8 @@ cdef public void LoadHandler_OnLoadEnd(
     cdef PyFrame pyFrame
     cdef object clientCallback
     try:
+        if not cefFrame.get().GetBrowser().get():
+            return
         pyBrowser = GetPyBrowser(cefBrowser, "OnLoadEnd")
         pyFrame = GetPyFrame(cefFrame)
         clientCallback = pyBrowser.GetClientCallback("OnLoadEnd")
@@ -78,6 +82,8 @@ cdef public void LoadHandler_OnLoadError(
         # the error code will be ERR_ABORTED. In such cases calls
         # to OnLoadError should be ignored and not handled by user
         # scripts. The wxpython example implements such behavior.
+        if not cefFrame.get().GetBrowser().get():
+            return
         pyBrowser = GetPyBrowser(cefBrowser, "OnLoadError")
         pyFrame = GetPyFrame(cefFrame)
         errorTextOut = [CefToPyString(cefErrorText)]

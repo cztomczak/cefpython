@@ -28,7 +28,15 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 
     cdef PyFrame pyFrame
     cdef CefString frameId = cefFrame.get().GetIdentifier()
-    cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
+    cdef CefRefPtr[CefBrowser] cefBrowser = cefFrame.get().GetBrowser()
+    if not cefBrowser.get():
+        # GetBrowser() can return NULL when a frame is being created or
+        # destroyed during rapid navigation (e.g. iframes on heavy pages).
+        # Raising here prevents a SIGSEGV from the naked .get().GetIdentifier()
+        # chain that was here before this check.
+        raise Exception("GetPyFrame(): CefBrowser is NULL"
+                        " (frame lifecycle transition during navigation?)")
+    cdef int browserId = cefBrowser.get().GetIdentifier()
     if not browserId:
         raise Exception("GetPyFrame(): browserId is 0 (browser not yet initialised)")
     # frameId may be empty for internal frames that CEF creates before the

@@ -48,6 +48,8 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
     cdef object callback
     cdef py_bool returnValue
     try:
+        if not cefFrame.get().GetBrowser().get():
+            return False  # frame is being destroyed; cancel popup
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforePopup")
         pyFrame = GetPyFrame(cefFrame)
         pyTargetUrl = CefToPyString(targetUrl)
