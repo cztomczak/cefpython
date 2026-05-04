@@ -51,7 +51,8 @@ g_datauri_data = """
     function selectText(ev) {
         // Selection API must run inside a real user-gesture handler so that
         // CEF fires OnTextSelectionChanged (Chrome 130+ requirement).
-        var el = ev.target;
+        // Always target the h1 directly so any click on the page works.
+        var el = document.querySelector('h1');
         var range = document.createRange();
         range.selectNodeContents(el);
         var sel = window.getSelection();
@@ -64,9 +65,9 @@ g_datauri_data = """
     }
     </script>
 </head>
-<body>
+<body onclick="selectText(event)">
     <!-- FrameSourceVisitor hash = 747ef3e6011b6a61e6b3c6e54bdd2dee -->
-    <h1 onclick="selectText(event)">Off-screen rendering test</h1>
+    <h1>Off-screen rendering test</h1>
     <div id="console"></div>
     <div id="OnTextSelectionChanged">Test selection.</div>
 </body>
@@ -265,17 +266,17 @@ class AccessibilityHandler(object):
 
 
 def _click_h1_to_select(browser):
-    """Send a real click to the h1 element after layout is complete.
+    """Send a real click anywhere in the viewport after layout is complete.
 
     Chrome 130+ requires the Selection API to run inside a real user-gesture
-    event handler for OnTextSelectionChanged to fire. The h1 has an onclick
-    handler (selectText) that selects the element's text via the Selection API.
-    h1 position: body margin 8px + h1 margin-block-start ~20px ≈ y=28 top,
-    h1 font-size ~29px ≈ y=57px bottom; click center at y=43.
+    event handler for OnTextSelectionChanged to fire. The body has an onclick
+    handler (selectText) that selects the h1 text via the Selection API.
+    Click at the center of the 800x600 viewport — guaranteed to land on the
+    body regardless of font metrics or CI rendering differences.
     """
-    browser.SendMouseClickEvent(200, 43, cef.MOUSEBUTTON_LEFT,
+    browser.SendMouseClickEvent(400, 300, cef.MOUSEBUTTON_LEFT,
                                 mouseUp=False, clickCount=1)
-    browser.SendMouseClickEvent(200, 43, cef.MOUSEBUTTON_LEFT,
+    browser.SendMouseClickEvent(400, 300, cef.MOUSEBUTTON_LEFT,
                                 mouseUp=True, clickCount=1)
     browser.Invalidate(cef.PET_VIEW)
     subtest_message("_click_h1_to_select() ok")
