@@ -8,6 +8,26 @@ cdef void SetCefWindowInfo(
         CefWindowInfo& cefWindowInfo,
         WindowInfo windowInfo
         ) except *:
+    # Note on runtime_style = CEF_RUNTIME_STYLE_ALLOY (set below in every
+    # windowed branch):
+    #
+    # The cef_window_info_t.runtime_style field was added in CEF
+    # commit dca0435d2 "chrome: Add support for Alloy style browsers
+    # and windows" (issue #3681, 2024-04-17, first shipping in CEF
+    # branch 6422 / Chromium 125).  See the enum doc in
+    # include/internal/cef_types_runtime.h: Chrome style provides the
+    # full Chrome UI; Alloy style provides the content-layer view with
+    # additional client callbacks and supports windowless rendering.
+    #
+    # Since the chrome bootstrap (the default for CEF builds since
+    # branch 6478 / Chromium 125) makes windowed parent windows default
+    # to Chrome style, cefpython must opt back into Alloy style
+    # explicitly.  Without it, SetAsChild() would get a Chrome-style
+    # Views window that can't be parented into the host GTK/Qt window,
+    # and the LifeSpanHandler / RequestHandler / etc. callbacks
+    # cefpython exposes would not fire as expected.  Off-screen
+    # rendering is documented to always use Alloy style anyway, but the
+    # field is harmless to set there too.
     if not windowInfo.windowType:
         raise Exception("WindowInfo: windowType is not set")
 
@@ -42,7 +62,6 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)
-            # CEF 123+: must request Alloy runtime for native windowed rendering.
             cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
         ELIF UNAME_SYSNAME == "Darwin":
             x = int(windowInfo.windowRect[0])
@@ -63,7 +82,6 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)
-            # CEF 123+: must request Alloy runtime for native windowed rendering.
             cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
 
     # POPUP WINDOW - Windows only
@@ -73,7 +91,6 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsPopup(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowName)
-            # CEF 123+: must request Alloy runtime for native windowed rendering.
             cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
 
     if windowInfo.windowType == "offscreen":
@@ -116,7 +133,11 @@ cdef class WindowInfo:
             if parentWindowHandle == 0:
                 import os as _os
                 import warnings
-                if "WAYLAND_DISPLAY" in _os.environ:
+                # In native Wayland mode, parentWindowHandle=0 is correct and
+                # expected — CEF creates its own xdg_toplevel surface.  Only
+                # warn when the user is likely using an X11-incompatible toolkit
+                # without having opted into native Wayland.
+                if "WAYLAND_DISPLAY" in _os.environ and not _g_linux_wayland_mode:
                     warnings.warn(
                         "WindowInfo.SetAsChild: parentWindowHandle is 0 on Linux "
                         "in a Wayland session. The GUI toolkit is likely using the "

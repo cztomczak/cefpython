@@ -13,10 +13,12 @@ Table of contents:
 * [How to capture Audio and Video in HTML5?](#how-to-capture-audio-and-video-in-html5)
 * [Touch and multi-touch support](#touch-and-multi-touch-support)
 * [Black or white browser screen](#black-or-white-browser-screen)
+* ["kTransientFailure: Failed to send GpuControl.CreateCommandBuffer" on Linux](#ktransientfailure-failed-to-send-gpucontrolcreatecommandbuffer-on-linux)
 * [Python crashes with "Segmentation fault" - how to debug?](#python-crashes-with-segmentation-fault---how-to-debug)
 * [Windows XP support](#windows-xp-support)
 * [Mac 32-bit support](#mac-32-bit-support)
 * [Security](#security)
+  * [Linux: enabling the Chromium sandbox (advanced)](#linux-enabling-the-chromium-sandbox-advanced)
 
 
 ## Notifications about new releases / commits
@@ -264,6 +266,33 @@ appear even after disabling GPU hardware acceleration. This is normal
 because GPU was disabled so WebGL cannot work.
 
 
+## "kTransientFailure: Failed to send GpuControl.CreateCommandBuffer" on Linux
+
+You may see a log line like this during startup, especially on Linux
+VMs and other systems without a working GPU. On VMs the line appears in
+nearly every run; on bare metal with a real GPU it is rarer:
+
+```
+ERROR:gpu/ipc/client/command_buffer_proxy_impl.cc:285] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+```
+
+**This is a Chromium-recoverable transient and can be ignored.** It is
+emitted by the renderer process when it tries to create a GPU command
+buffer before the GPU process has finished binding its IPC endpoint —
+typically a millisecond-scale race during startup, more likely on slow
+disks or when Chromium falls back from real-GL to SwiftShader. The
+compositor retries automatically; pages still render and
+`OnContextInitialized` still fires. The `kTransientFailure` label is
+Chromium's own classification — Chromium expects callers to retry, and
+they do.
+
+If a clean log is more important than hardware acceleration in your
+deployment, you can opt in to disabling the GPU process by passing
+`switches={"disable-gpu": ""}` to `cef.Initialize()`. Do not enable
+`in-process-gpu` to silence this line — it is not stable across
+multiple browser windows.
+
+
 ## Python crashes with "Segmentation fault" - how to debug?
 
 Install gdb:
@@ -346,4 +375,60 @@ A quote by Marshall Greenblatt:
 
 Reference: [Question on browser security](http://magpcss.org/ceforum/viewtopic.php?f=10&t=10222)
 on the CEF Forum.
+
+
+### Linux: enabling the Chromium sandbox (advanced)
+
+cefpython on Linux passes `--no-sandbox` by default
+(`_linux_apply_initialize_defaults` in `src/window_utils_linux.pyx`).
+
+Reasons for the default:
+1. cefpython does not bundle the SUID-root `chrome-sandbox` helper that
+   Chromium's namespace sandbox needs to bypass AppArmor's
+   `apparmor_restrict_unprivileged_userns=1` (the default on Ubuntu
+   23.10+, Debian 12+, and other modern distros).
+2. Without the helper, Chromium aborts at startup with
+   `FATAL: No usable sandbox!` — every cefpython app would fail to
+   launch out of the box.
+3. The most common cefpython use case is rendering the application's
+   own trusted HTML/JS as a UI surface, where the sandbox provides
+   defense-in-depth rather than primary security.
+
+If your app loads untrusted web content and you want the Chromium
+sandbox enabled, three steps are required:
+
+**1. Install the SUID-root `chrome-sandbox` helper.**
+The binary ships in the CEF binary distribution under
+`Release/chrome-sandbox`. Copy it to a stable path and set it up:
+
+```bash
+sudo cp /path/to/cef_binary_<ver>_linux64/Release/chrome-sandbox \
+        /opt/cef/chrome-sandbox
+sudo chown root:root /opt/cef/chrome-sandbox
+sudo chmod 4755 /opt/cef/chrome-sandbox
+```
+
+**2. Tell Chromium where the helper lives.** Set the
+`CHROME_DEVEL_SANDBOX` environment variable before `cef.Initialize()`:
+
+```python
+import os
+os.environ["CHROME_DEVEL_SANDBOX"] = "/opt/cef/chrome-sandbox"
+```
+
+**3. Remove cefpython's `--no-sandbox` default.** Because
+`_linux_apply_initialize_defaults` sets it via `setdefault`, passing
+`switches={"no-sandbox": ""}` to `cef.Initialize()` does not override
+it. The default has to be deleted at the source (or pop the key from
+your switches dict after init detection). The simplest path is a small
+local patch in `src/window_utils_linux.pyx` that drops the
+`cmd_switches.setdefault("no-sandbox", "")` line.
+
+After all three steps, Chromium subprocesses should launch under the
+namespace sandbox (no `--no-sandbox` in their argv, no FATAL at
+startup). Verify via the GPU process command line:
+
+```bash
+ps -Af | grep "type=gpu" | grep -v "no-sandbox"
+```
 

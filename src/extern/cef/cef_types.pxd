@@ -46,6 +46,7 @@ cdef extern from "include/internal/cef_types.h":
         int remote_debugging_port
         int uncaught_exception_stack_size
         int context_safety_implementation # Not exposed.
+        int ignore_certificate_errors
         cef_color_t background_color
         int persist_user_preferences
         int windowless_rendering_enabled
@@ -343,7 +344,7 @@ cdef extern from "include/internal/cef_types.h":
         REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_CROSS_ORIGIN,
         REFERRER_POLICY_ORIGIN_CLEAR_ON_TRANSITION_FROM_SECURE_TO_INSECURE,
         REFERRER_POLICY_NO_REFERRER,
-        REFERRER_POLICY_LAST_VALUE
+        REFERRER_POLICY_NUM_VALUES
     ctypedef cef_referrer_policy_t ReferrerPolicy
 
     # Drag & drop

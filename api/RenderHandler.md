@@ -15,8 +15,8 @@ Table of contents:
 * [Callbacks](#callbacks)
   * [GetRootScreenRect](#getrootscreenrect)
   * [GetViewRect](#getviewrect)
-  * [GetScreenRect](#getscreenrect)
   * [GetScreenPoint](#getscreenpoint)
+  * [GetScreenInfo](#getscreeninfo)
   * [OnPopupShow](#onpopupshow)
   * [OnPopupSize](#onpopupsize)
   * [OnPaint](#onpaint)
@@ -43,7 +43,6 @@ Off-screen rendering examples:
 
 Callbacks available in upstream CEF, but not yet exposed in CEF Python
 (see src/include/cef_render_handler.h):
-* GetScreenInfo
 * OnImeCompositionRangeChanged
 
 
@@ -74,18 +73,6 @@ Called to retrieve the view rectangle which is relative to screen
 coordinates. Return true if the rectangle was provided.
 
 
-### GetScreenRect
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| rect_out | list[x,y,width,height] |
-| __Return__ | bool |
-
-Called to retrieve the simulated screen rectangle. Return true
-if the rectangle was provided.
-
-
 ### GetScreenPoint
 
 | Parameter | Type |
@@ -98,6 +85,46 @@ if the rectangle was provided.
 
 Called to retrieve the translation from view coordinates to actual
 screen coordinates. Return true if the screen coordinates were provided.
+
+
+### GetScreenInfo
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| screen_info_out | dict |
+| __Return__ | bool |
+
+Called to allow the client to fill in the screen info with appropriate
+values. Return true if `screen_info_out` was modified, false to let CEF
+use defaults.
+
+Fill `screen_info_out` with any of the following keys (all optional):
+
+| Key | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `device_scale_factor` | float | `1.0` | Ratio between physical and logical pixels. **Must be > 0.** |
+| `depth` | int | `24` | Screen depth in bits per pixel. |
+| `depth_per_component` | int | `8` | Bits per color component. |
+| `is_monochrome` | bool | `False` | True for black-and-white printers. |
+| `rect` | list[x,y,width,height] | unset | Display monitor rectangle in DIP. |
+| `available_rect` | list[x,y,width,height] | unset | Work-area rectangle in DIP (excludes taskbars). If only `rect` is supplied it is mirrored into `available_rect`. |
+
+If neither `rect` nor `available_rect` is supplied, CEF falls back to
+the rectangle returned by `GetViewRect` (popups may be misplaced if
+the rectangle ends up empty).
+
+**HiDPI handling:** set `device_scale_factor` to match the host
+display (e.g. `2.0` on a Retina/4K screen, `1.5` for 150% fractional
+scaling). The factor is applied to the OnPaint buffer: with a view
+rect of 800x600 and `device_scale_factor=2.0`, OnPaint receives a
+1600x1200 BGRA buffer while `width`/`height` arguments equal the
+buffer's pixel dimensions. Always upload the buffer at its actual
+pixel size and lay it out at the view's logical size to avoid
+blurry output. Call
+[Browser.NotifyScreenInfoChanged](Browser.md#notifyscreeninfochanged)
+when the device scale factor or display geometry changes (e.g. the
+window moved to a different monitor) so CEF re-queries this callback.
 
 
 ### OnPopupShow
@@ -173,6 +200,8 @@ Called when the browser's cursor has changed. If |type| is CT_CUSTOM then
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
+| x | float |
+| y | float |
 | __Return__ | void |
 
 Called when the scroll offset has changed.

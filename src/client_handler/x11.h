@@ -19,6 +19,7 @@ void InstallX11ErrorHandlers();
 void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
                         int x, int y, int width, int height);
 void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title);
+void HideX11ShellWindow(CefRefPtr<CefBrowser> browser);
 
 GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser);
 XImage* CefBrowser_GetImage(CefRefPtr<CefBrowser> browser);

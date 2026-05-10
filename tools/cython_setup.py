@@ -437,8 +437,6 @@ def get_ext_modules(options):
             "language_level": "3str",
             "profile": ENABLE_PROFILING,
             "linetrace": ENABLE_LINE_TRACING,
-            "show_performance_hints": False,  # default directive would produce 
-                                              # way too many warning
         },
 
         language="c++",
