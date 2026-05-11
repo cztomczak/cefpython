@@ -105,6 +105,31 @@ foreach(_f IN LISTS _filtered_all)
     endif()
 endforeach()
 
+if(WIN32)
+    # Locate CEF's stock compatibility.manifest from the unpacked binary
+    # distribution. `tools/download_cef.py` extracts the distrib to
+    # build/cef_binary_<full-version>_windows64/; this is always present
+    # when a from-source build runs (automate.py --prebuilt-cef requires
+    # the same directory).
+    file(GLOB _cef_binary_candidates LIST_DIRECTORIES true
+         "${CMAKE_SOURCE_DIR}/build/cef_binary_*_windows64")
+    set(_cef_binary_distrib "")
+    foreach(_d IN LISTS _cef_binary_candidates)
+        if(IS_DIRECTORY "${_d}")
+            set(_cef_binary_distrib "${_d}")
+            break()
+        endif()
+    endforeach()
+    set(_cef_compat_manifest
+        "${_cef_binary_distrib}/tests/cefsimple/win/compatibility.manifest")
+    if(NOT EXISTS "${_cef_compat_manifest}")
+        message(FATAL_ERROR
+            "compatibility.manifest not found under build/cef_binary_*_windows64/.\n"
+            "Run `python tools/download_cef.py` to extract the CEF distribution.")
+    endif()
+    message(STATUS "Subprocess manifest input: ${_cef_compat_manifest}")
+endif()
+
 add_executable(cefpython_subprocess ${_exe_sources})
 add_dependencies(cefpython_subprocess cefpython_headers)
 set_target_properties(cefpython_subprocess PROPERTIES OUTPUT_NAME "subprocess")
@@ -133,8 +158,15 @@ if(WIN32)
         "${CEFPYTHON_CEF_ROOT}/lib/libcef.lib"
         "${CEFPYTHON_CEF_ROOT}/lib/VS2015/libcef_dll_wrapper_MT.lib"
     )
+    # Embed CEF's compatibility.manifest as RT_MANIFEST so Chromium's
+    # ANGLE D3D11 GPU process init does not crash with STATUS_BREAKPOINT
+    # (exit_code=-2147483645). The linker merges /MANIFESTINPUT with its
+    # auto-generated trustInfo block and embeds the result as resource
+    # id 1, identical to a hand-written subprocess.rc but driven by CMake.
     target_link_options(cefpython_subprocess PRIVATE
-        /MANIFEST:NO /LARGEADDRESSAWARE /SUBSYSTEM:WINDOWS
+        /MANIFEST:EMBED
+        "/MANIFESTINPUT:${_cef_compat_manifest}"
+        /LARGEADDRESSAWARE /SUBSYSTEM:WINDOWS
     )
 elseif(APPLE)
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")

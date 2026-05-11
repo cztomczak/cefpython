@@ -567,16 +567,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if not application_settings["cache_path"]:
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
 
-    if sys.platform == "win32":
-        # CEF 146 / Chrome 130+ ANGLE D3D11 backend crashes with a CHECK
-        # failure (STATUS_BREAKPOINT / exit_code=-2147483645) during GPU
-        # process init, falling back to software rendering after 3 crashes.
-        # D3D9 avoids the crash but only supports ES 2.0 (ES 3.0 errors).
-        # OpenGL ANGLE supports ES 3.0 and has no crash. Users can override
-        # by passing {"use-angle": "d3d11"} in the switches dict.
-        if "use-angle" not in g_commandLineSwitches:
-            g_commandLineSwitches["use-angle"] = "gl"
-
     IF UNAME_SYSNAME == "Linux":
         # Detect Wayland/X11 mode and apply switches BEFORE gtk_init so we
         # know whether to open a GTK/X11 display connection at all.
