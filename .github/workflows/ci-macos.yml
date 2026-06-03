@@ -4,7 +4,7 @@ on:
   push:
     branches: ["master", "cefpython147"]
   pull_request:
-    branches: ["master"]
+    branches: ["master", "cefpython147"]
   workflow_dispatch:
     inputs:
       bypass_cache:
