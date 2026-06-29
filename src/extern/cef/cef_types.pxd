@@ -23,6 +23,7 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t main_bundle_path
         int command_line_args_disabled
         cef_string_t cache_path
+        cef_string_t root_cache_path
         int persist_session_cookies
         cef_string_t user_agent
         cef_string_t locale
