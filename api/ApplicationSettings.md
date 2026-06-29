@@ -32,6 +32,7 @@ Table of contents:
   * [product_version](#product_version)
   * [remote_debugging_port](#remote_debugging_port)
   * [resources_dir_path](#resources_dir_path)
+  * [root_cache_path](#root_cache_path)
   * [single_process](#single_process)
   * [string_encoding](#string_encoding)
   * [uncaught_exception_stack_size](#uncaught_exception_stack_size)
@@ -374,6 +375,27 @@ The fully qualified path for the resources directory. If this value is
 empty the cef.pak and/or devtools_resources.pak files must be located in  
 the module directory on Windows/Linux or the app bundle Resources directory  
 on Mac OS X. Also configurable using the --resources-dir-path switch.
+
+
+### root_cache_path
+
+(string)
+The root directory for installation-specific data and the parent directory
+for profile-specific data. All `cache_path` values must have this parent
+directory in common. If this value is empty and `cache_path` is non-empty
+then it will default to the `cache_path` value. Any non-empty value must be
+an absolute path.
+
+If both `root_cache_path` and `cache_path` are empty then a default
+platform-specific directory will be used ("~/.config/cef_user_data" on
+Linux, "~/Library/Application Support/CEF/User Data" on Mac, and
+"AppData\Local\CEF\User Data" on Windows). Use of the default directory is
+not recommended in production applications: recent CEF/Chromium versions use
+a process singleton lock based on the `root_cache_path` value to guard
+against multiple application instances writing to the same directory, and
+relying on the default value may lead to unintended process singleton
+behavior (CEF logs a warning in this case). You should customize
+`root_cache_path` for your application.
 
 
 ### single_process

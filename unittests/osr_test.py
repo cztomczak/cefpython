@@ -79,7 +79,8 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             "debug": False,
             "log_severity": cef.LOGSEVERITY_ERROR,
             "log_file": "",
-            "windowless_rendering_enabled": True
+            "windowless_rendering_enabled": True,
+            "root_cache_path": ROOT_CACHE_PATH,
         }
         if not LINUX:
             # On Linux you get a lot of "X error received" messages
