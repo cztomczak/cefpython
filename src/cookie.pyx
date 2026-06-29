@@ -315,7 +315,7 @@ cdef public cpp_bool CookieVisitor_Visit(
     cdef PyCookie pyCookie
     cdef list pyDeleteCookie = [False]
     try:
-        assert IsThread(TID_IO), "Must be called on the IO thread"
+        assert IsThread(TID_UI), "Must be called on the UI thread"
         pyCookieVisitor = GetPyCookieVisitor(cookieVisitorId)
         pyCookie = CreatePyCookie(cookie)
         if pyCookieVisitor:

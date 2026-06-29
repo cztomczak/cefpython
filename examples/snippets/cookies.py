@@ -43,7 +43,7 @@ class LoadHandler(object):
 
 class CookieVisitor(object):
     def Visit(self, cookie, count, total, delete_cookie_out):
-        """This callback is called on the IO thread."""
+        """This callback is called on the UI thread."""
         print("Cookie {count}/{total}: '{name}', '{value}'"
               .format(count=count+1, total=total, name=cookie.GetName(),
                       value=cookie.GetValue()))
