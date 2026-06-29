@@ -28,7 +28,8 @@ Table of contents:
 | delete_cookie_out | list[bool] |
 | __Return__ | bool |
 
-Method that will be called once for each cookie. |count| is the 0-based
+Method that will be called once for each cookie. This method is called on
+the UI thread. |count| is the 0-based
 index for the current cookie. |total| is the total number of cookies.
 Set |delete_cookie_out[0]| to True to delete the cookie currently being visited.
 Return False to stop visiting cookies, True to continue. This method may

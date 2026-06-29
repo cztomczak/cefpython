@@ -53,7 +53,7 @@ Description from upstream CEF:
 | object | [CookieVisitor](CookieVisitor.md) |
 | __Return__ | bool |
 
-Visit all cookies on the IO thread. The returned cookies are ordered by
+Visit all cookies on the UI thread. The returned cookies are ordered by
 longest path, then by earliest creation date. Returns false if cookies
 cannot be accessed.
 
@@ -72,7 +72,7 @@ destroyed and the `CookieVisitor` callbacks won't be called.
 | object | [CookieVisitor](CookieVisitor.md) |
 | __Return__ | bool |
 
-Visit a subset of cookies on the IO thread. The results are filtered by the
+Visit a subset of cookies on the UI thread. The results are filtered by the
 given url scheme, host, domain and path. If |includeHttpOnly| is true
 HTTP-only cookies will also be included in the results. The returned
 cookies are ordered by longest path, then by earliest creation date.
