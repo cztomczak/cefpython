@@ -6,6 +6,7 @@
 #include "include/cef_request_handler.h"
 #include "include/base/cef_callback.h"
 #include "cookie_access_filter.h"
+#include "resource_request_handler.h"
 
 typedef cef_return_value_t ReturnValue;
 
@@ -16,6 +17,15 @@ class RequestHandler : public CefRequestHandler,
 public:
     RequestHandler(){}
     virtual ~RequestHandler(){}
+
+    CefRefPtr<CefResourceRequestHandler> GetResourceRequestHandler(
+                        CefRefPtr<CefBrowser> browser,
+                        CefRefPtr<CefFrame> frame,
+                        CefRefPtr<CefRequest> request,
+                        bool is_navigation,
+                        bool is_download,
+                        const CefString& request_initiator,
+                        bool& disable_default_handling) override;
 
     bool OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
                         CefRefPtr<CefFrame> frame,

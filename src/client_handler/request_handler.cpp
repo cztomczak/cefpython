@@ -7,6 +7,20 @@
 #include "include/base/cef_callback.h"
 
 
+CefRefPtr<CefResourceRequestHandler> RequestHandler::GetResourceRequestHandler(
+        CefRefPtr<CefBrowser> browser,
+        CefRefPtr<CefFrame> frame,
+        CefRefPtr<CefRequest> request,
+        bool is_navigation,
+        bool is_download,
+        const CefString& request_initiator,
+        bool& disable_default_handling) {
+    // Returning a handler enables the CookieAccessFilter, which delivers the
+    // CanSendCookie/CanSaveCookie callbacks (issue #676).
+    return new ResourceRequestHandler();
+}
+
+
 bool RequestHandler::OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefRequest> request,
