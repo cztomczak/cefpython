@@ -8,6 +8,7 @@ import base64
 import os
 import platform
 import sys
+import tempfile
 import time
 
 # Platforms
@@ -17,6 +18,15 @@ if SYSTEM == "DARWIN":
 WINDOWS = SYSTEM if SYSTEM == "WINDOWS" else False
 LINUX = SYSTEM if SYSTEM == "LINUX" else False
 MAC = SYSTEM if SYSTEM == "MAC" else False
+
+# Issue #685: set ApplicationSettings.root_cache_path so that CEF does not
+# log a warning about using the default user-data directory which "may lead
+# to unintended process singleton behavior". A fixed directory in the
+# system temp folder is reused across runs (the tests run a single instance
+# at a time, so there is no singleton conflict).
+ROOT_CACHE_PATH = os.path.join(tempfile.gettempdir(), "cefpython_tests")
+if not os.path.isdir(ROOT_CACHE_PATH):
+    os.makedirs(ROOT_CACHE_PATH)
 
 # To show the window for an extended period of time increase this number.
 MESSAGE_LOOP_RANGE = 200  # each iteration is 0.01 sec
