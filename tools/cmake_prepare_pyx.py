@@ -28,8 +28,15 @@ def get_cefpython_version(header_file):
 
 
 def except_all_missing(content):
-    """Return the line number of a cdef/cpdef returning a C type without 'except *',
-    or None if all look fine."""
+    """Return the line number of a cdef/cpdef returning a C type (built-in,
+    pointer, template or reference) whose signature declares no exception
+    handling, or None if all look fine.
+
+    A signature is considered fine if it carries any exception specification
+    between ')' and ':' - 'except *', 'except? val', 'except +', 'except val'
+    or 'noexcept'. Bare 'gil'/'nogil' and 'with gil'/'with nogil' modifiers are
+    tolerated (they are not exception specs), so e.g. 'cdef int f() nogil:' is
+    flagged while 'cdef int f() noexcept nogil:' is not."""
     patterns = [
         (r"\bcp?def\s+"
          r"((int|short|long|double|char|unsigned|float|cpp_bool"
@@ -37,9 +44,9 @@ def except_all_missing(content):
          r"|int32|uint32|int64|uint64"
          r"|int32_t|uint32_t|int64_t|uint64_t"
          r"|CefString)\s+)+"
-         r"\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:"),
-        r"\bcp?def\s+[^\s]+[\]*]\s+\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:",
-        r"\bcp?def\s+[^\s]+&\s+\w+\([^)]*\)\s*(with\s+(gil|nogil))?\s*:",
+         r"\w+\([^)]*\)\s*((with\s+)?(gil|nogil)\s*)*:"),
+        r"\bcp?def\s+[^\s]+[\]*]\s+\w+\([^)]*\)\s*((with\s+)?(gil|nogil)\s*)*:",
+        r"\bcp?def\s+[^\s]+&\s+\w+\([^)]*\)\s*((with\s+)?(gil|nogil)\s*)*:",
     ]
     for pattern in patterns:
         match = re.search(pattern, content)

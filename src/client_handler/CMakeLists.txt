@@ -4,25 +4,9 @@ if(APPLE)
     list(APPEND _all_cpp ${_mm_files})
 endif()
 
-set(_sources "")
-foreach(_f IN LISTS _all_cpp)
-    get_filename_component(_name "${_f}" NAME)
-    set(_skip FALSE)
-    if(_name MATCHES "_win\\.cpp$" AND NOT WIN32)
-        set(_skip TRUE)
-    elseif(_name MATCHES "_linux\\.cpp$" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set(_skip TRUE)
-    elseif(_name MATCHES "_mac\\.(cpp|mm)$" AND NOT APPLE)
-        set(_skip TRUE)
-    elseif(_name MATCHES "^x11\\.cpp$" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set(_skip TRUE)
-    elseif(_name MATCHES "gtk" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set(_skip TRUE)
-    endif()
-    if(NOT _skip)
-        list(APPEND _sources "${_f}")
-    endif()
-endforeach()
+# filter_sources() is defined in the top-level CMakeLists and shared with the
+# subprocess CMakeLists so the platform skip rules live in one place.
+filter_sources(_all_cpp _sources)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(PkgConfig REQUIRED)
@@ -43,21 +27,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_include_directories(client_handler PRIVATE ${GTK3_INCLUDE_DIRS})
 endif()
 
-if(WIN32)
-    target_compile_options(client_handler PRIVATE /EHsc /wd4190)
-    target_compile_definitions(client_handler PRIVATE
-        WIN32 _WIN32 _WINDOWS
-        NTDDI_VERSION=0x06010000 WINVER=0x0601 _WIN32_WINNT=0x0601
-        NDEBUG _NDEBUG _CRT_SECURE_NO_WARNINGS NOMINMAX
-        BROWSER_PROCESS
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h"
-    )
-elseif(APPLE)
-    target_compile_options(client_handler PRIVATE -DNDEBUG -O3)
-    target_compile_definitions(client_handler PRIVATE
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
-else()
-    target_compile_options(client_handler PRIVATE -DNDEBUG -O3 -Wno-stringop-overflow)
-    target_compile_definitions(client_handler PRIVATE
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
+# Common browser-process flags (Windows def block, -DNDEBUG -O3, API header
+# define, etc.) come from cefpython_common_flags defined in the top-level
+# CMakeLists. Only the Linux-specific extra is listed here.
+target_link_libraries(client_handler PRIVATE cefpython_common_flags)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_options(client_handler PRIVATE -Wno-stringop-overflow)
 endif()

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright (c) 2017 CEF Python, see the Authors file.
+# All rights reserved. Licensed under BSD 3-clause license.
+# Project website: https://github.com/cztomczak/cefpython
+
 """Build cefpython3.
 
 Usage:
@@ -42,6 +46,22 @@ def run(cmd, **kwargs):
     ret = subprocess.run(cmd, **kwargs)
     if ret.returncode != 0:
         sys.exit(ret.returncode)
+
+
+def _read_cef_version():
+    """Full CEF version string from the per-platform version header,
+    e.g. "147.0.10+gd58e84d+chromium-147.0.7727.118"."""
+    if WINDOWS:
+        header = os.path.join("src", "version", "cef_version_win.h")
+    elif MAC:
+        header = os.path.join("src", "version", "cef_version_macarm64.h")
+    else:
+        header = os.path.join("src", "version", "cef_version_linux.h")
+    with open(header) as f:
+        for line in f:
+            if line.startswith("#define CEF_VERSION "):
+                return line.split('"')[1]
+    raise RuntimeError("CEF_VERSION not found in " + header)
 
 
 def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
@@ -103,11 +123,19 @@ def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
         already_copied = os.path.exists(os.path.join(PKG_DIR, "libcef.so"))
         cef_glob = os.path.join("build", "cef[0-9]*_linux64")
     if not already_copied:
-        cef_dirs = sorted(glob.glob(cef_glob))
+        # Select the dir matching the exact CEF version from src/version/ so a
+        # leftover dir for a different CEF version in build/ is never picked up.
+        cef_version = _read_cef_version()
+        cef_dirs = [d for d in sorted(glob.glob(cef_glob))
+                    if cef_version in os.path.basename(d)]
         if cef_dirs:
             cef_bin = os.path.join(cef_dirs[-1], "bin")
             print("[build.py] One-time: copying CEF runtime files to", PKG_DIR)
             _copy_cef_runtime(cef_bin, PKG_DIR)
+        else:
+            print("[build.py] ERROR: no CEF %s runtime dir found matching %s"
+                  % (cef_version, cef_glob))
+            sys.exit(1)
 
     # Ad-hoc sign compiled binaries so macOS allows them to run.
     if MAC:

@@ -15,13 +15,13 @@
 // Python.h must be included first (avoids _POSIX_C_SOURCE redefinition on Linux)
 #include "Python.h"
 
-// Includes required by the generated cefpython_*_fixed.h
+// Includes required by the Cython-generated public API header
 #include "include/cef_client.h"
 #include "include/cef_urlrequest.h"
 #include "include/cef_command_line.h"
 #include "util.h"
 
-// cefpython_fixed.h uses DL_IMPORT/DL_EXPORT which were removed in Python 3.
+// The generated header uses DL_IMPORT/DL_EXPORT which were removed in Python 3.
 #ifndef DL_IMPORT
 #define DL_IMPORT(RTYPE) RTYPE
 #endif
@@ -29,8 +29,8 @@
 #define DL_EXPORT(RTYPE) RTYPE
 #endif
 
-// CMake sets CEFPYTHON_API_H_FILE to "cefpython_api_fixed.h", a generated
-// stable-name wrapper in the pyx_stage/ build directory resolved via the
+// CMake sets CEFPYTHON_API_H_FILE to the Cython-generated header name
+// ("cefpython_pyXX.h"), found in the pyx_stage/ build directory via the
 // target's include path.
 #include CEFPYTHON_API_H_FILE
 

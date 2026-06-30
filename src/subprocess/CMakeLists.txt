@@ -7,35 +7,8 @@ if(APPLE)
     list(APPEND _mml_cpp ${_mml_mm})
 endif()
 
-# Helper: filter a list of source files for the current platform.
-# Sets the result in the variable named by OUT_VAR.
-function(filter_sources IN_LIST OUT_VAR)
-    set(_result "")
-    foreach(_f IN LISTS ${IN_LIST})
-        get_filename_component(_name "${_f}" NAME)
-        set(_skip FALSE)
-        if(_name MATCHES "_win\\.cpp$"   AND NOT WIN32)
-            set(_skip TRUE)
-        endif()
-        if(_name MATCHES "_linux\\.cpp$" AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-            set(_skip TRUE)
-        endif()
-        if(_name MATCHES "_mac\\.(cpp|mm)$" AND NOT APPLE)
-            set(_skip TRUE)
-        endif()
-        if(_name MATCHES "^x11\\.cpp$"   AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-            set(_skip TRUE)
-        endif()
-        if(_name MATCHES "gtk"           AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-            set(_skip TRUE)
-        endif()
-        if(NOT _skip)
-            list(APPEND _result "${_f}")
-        endif()
-    endforeach()
-    set(${OUT_VAR} "${_result}" PARENT_SCOPE)
-endfunction()
-
+# filter_sources() is defined in the top-level CMakeLists and shared with
+# client_handler so the platform skip rules live in one place.
 filter_sources(_all_cpp _filtered_all)
 filter_sources(_mml_cpp _filtered_mml)
 
@@ -73,26 +46,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     )
 endif()
 
-if(WIN32)
-    target_compile_options(cefpython_app PRIVATE /EHsc /wd4190)
-    target_compile_definitions(cefpython_app PRIVATE
-        WIN32 _WIN32 _WINDOWS
-        NTDDI_VERSION=0x06010000 WINVER=0x0601 _WIN32_WINNT=0x0601
-        NDEBUG _NDEBUG _CRT_SECURE_NO_WARNINGS NOMINMAX
-        BROWSER_PROCESS
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h"
-    )
-elseif(APPLE)
-    target_compile_options(cefpython_app PRIVATE -DNDEBUG -O3)
-    target_compile_definitions(cefpython_app PRIVATE
-        BROWSER_PROCESS
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
-else()
-    target_compile_options(cefpython_app PRIVATE -DNDEBUG -O3)
-    target_compile_definitions(cefpython_app PRIVATE
-        BROWSER_PROCESS
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
-endif()
+# Common browser-process flags (matches the other browser-process targets)
+# come from cefpython_common_flags defined in the top-level CMakeLists.
+target_link_libraries(cefpython_app PRIVATE cefpython_common_flags)
 
 # ---- subprocess executable (renderer-process) -------------------------------
 # All subprocess/*.cpp except print_handler_gtk.cpp (already filtered above on non-Linux).
@@ -113,18 +69,25 @@ if(WIN32)
     # the same directory).
     file(GLOB _cef_binary_candidates LIST_DIRECTORIES true
          "${CMAKE_SOURCE_DIR}/build/cef_binary_*_windows64")
+    # Select the distrib matching the exact CEF version (CEFPYTHON_CEF_VERSION is
+    # set by the top-level CMakeLists), so a leftover distrib for a different CEF
+    # version in build/ is never picked up by accident.
     set(_cef_binary_distrib "")
     foreach(_d IN LISTS _cef_binary_candidates)
         if(IS_DIRECTORY "${_d}")
-            set(_cef_binary_distrib "${_d}")
-            break()
+            string(FIND "${_d}" "${CEFPYTHON_CEF_VERSION}" _ver_match)
+            if(NOT _ver_match EQUAL -1)
+                set(_cef_binary_distrib "${_d}")
+                break()
+            endif()
         endif()
     endforeach()
     set(_cef_compat_manifest
         "${_cef_binary_distrib}/tests/cefsimple/win/compatibility.manifest")
     if(NOT EXISTS "${_cef_compat_manifest}")
         message(FATAL_ERROR
-            "compatibility.manifest not found under build/cef_binary_*_windows64/.\n"
+            "compatibility.manifest not found for CEF ${CEFPYTHON_CEF_VERSION} "
+            "under build/cef_binary_*_windows64/.\n"
             "Run `python tools/download_cef.py` to extract the CEF distribution.")
     endif()
     message(STATUS "Subprocess manifest input: ${_cef_compat_manifest}")
@@ -147,12 +110,12 @@ if(WIN32)
     target_compile_options(cefpython_subprocess PRIVATE /std:c++20)
     target_compile_definitions(cefpython_subprocess PRIVATE
         WIN32 _WIN32 _WINDOWS
-        NTDDI_VERSION=0x06010000 WINVER=0x0601 _WIN32_WINNT=0x0601
+        ${CEFPYTHON_WIN_TARGET_DEFS}
         NDEBUG _NDEBUG _CRT_SECURE_NO_WARNINGS
         NOMINMAX UNICODE _UNICODE WIN32_LEAN_AND_MEAN
         "_HAS_EXCEPTIONS=0"
         RENDERER_PROCESS
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h"
+        CEFPYTHON_API_H_FILE="${MODULE_NAME}.h"
     )
     target_link_libraries(cefpython_subprocess PRIVATE
         "${CEFPYTHON_CEF_ROOT}/lib/libcef.lib"
@@ -176,7 +139,7 @@ elseif(APPLE)
     endif()
     target_compile_options(cefpython_subprocess PRIVATE -DNDEBUG -O3)
     target_compile_definitions(cefpython_subprocess PRIVATE
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
+        CEFPYTHON_API_H_FILE="${MODULE_NAME}.h")
     target_link_options(cefpython_subprocess PRIVATE
         -mmacosx-version-min=${_macos_ver_min}
         -Wl,-search_paths_first
@@ -195,7 +158,7 @@ elseif(APPLE)
 else()
     target_compile_options(cefpython_subprocess PRIVATE -DNDEBUG -O3)
     target_compile_definitions(cefpython_subprocess PRIVATE
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
+        CEFPYTHON_API_H_FILE="${MODULE_NAME}.h")
     target_link_libraries(cefpython_subprocess PRIVATE
         "${CEFPYTHON_CEF_ROOT}/lib/libcef_dll_wrapper.a"
         "${CEFPYTHON_CEF_ROOT}/bin/libcef.so"

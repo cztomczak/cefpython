@@ -10,21 +10,9 @@ target_include_directories(cpp_utils PRIVATE
     ${Python_INCLUDE_DIRS}
 )
 
-if(WIN32)
-    target_compile_options(cpp_utils PRIVATE /EHsc /wd4190)
-    target_compile_definitions(cpp_utils PRIVATE
-        WIN32 _WIN32 _WINDOWS
-        NTDDI_VERSION=0x06010000 WINVER=0x0601 _WIN32_WINNT=0x0601
-        NDEBUG _NDEBUG _CRT_SECURE_NO_WARNINGS NOMINMAX
-        BROWSER_PROCESS
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h"
-    )
-elseif(APPLE)
-    target_compile_options(cpp_utils PRIVATE -DNDEBUG -O3)
-    target_compile_definitions(cpp_utils PRIVATE
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
-else()
-    target_compile_options(cpp_utils PRIVATE -DNDEBUG -O3 -Wno-stringop-overflow)
-    target_compile_definitions(cpp_utils PRIVATE
-        CEFPYTHON_API_H_FILE="cefpython_api_fixed.h")
+# Common browser-process flags come from cefpython_common_flags defined in the
+# top-level CMakeLists. Only the Linux-specific extra is listed here.
+target_link_libraries(cpp_utils PRIVATE cefpython_common_flags)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_options(cpp_utils PRIVATE -Wno-stringop-overflow)
 endif()
