@@ -331,7 +331,6 @@ if(WIN32)
         PATTERN "cefclient*"    EXCLUDE
         PATTERN "cefsimple*"    EXCLUDE
         PATTERN "ceftests*"     EXCLUDE
-        PATTERN "chrome-sandbox" EXCLUDE
     )
 elseif(APPLE)
     install(DIRECTORY "${CEF_ROOT}/bin/"
@@ -346,6 +345,11 @@ else()
         PATTERN "cefclient*"   EXCLUDE
         PATTERN "cefsimple*"   EXCLUDE
         PATTERN "ceftests*"    EXCLUDE
+        # chrome-sandbox is a Linux-only setuid sandbox helper. It is excluded
+        # here because a pip wheel cannot install a chown-root + chmod-4755
+        # binary; cefpython runs with --no-sandbox instead (see
+        # _linux_apply_initialize_defaults). On Windows/macOS CEF ships no such
+        # file, so the exclude is only needed on Linux.
         PATTERN "chrome-sandbox" EXCLUDE
     )
 endif()
