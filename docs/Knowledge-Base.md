@@ -18,7 +18,7 @@ Table of contents:
 * [Windows XP support](#windows-xp-support)
 * [Mac 32-bit support](#mac-32-bit-support)
 * [Security](#security)
-  * [Linux: enabling the Chromium sandbox (advanced)](#linux-enabling-the-chromium-sandbox-advanced)
+  * [Linux: the Chromium sandbox](#linux-the-chromium-sandbox)
 
 
 ## Notifications about new releases / commits
@@ -377,29 +377,42 @@ Reference: [Question on browser security](http://magpcss.org/ceforum/viewtopic.p
 on the CEF Forum.
 
 
-### Linux: enabling the Chromium sandbox (advanced)
+### Linux: the Chromium sandbox
 
-cefpython on Linux passes `--no-sandbox` by default
-(`_linux_apply_initialize_defaults` in `src/window_utils_linux.pyx`).
+cefpython keeps the Chromium sandbox **enabled** whenever the system can
+support it, and passes `--no-sandbox` only as a fallback when no usable
+sandbox is detected (`_linux_apply_initialize_defaults` /
+`_linux_sandbox_available` in `src/window_utils_linux.pyx`).
 
-Reasons for the default:
-1. cefpython does not bundle the SUID-root `chrome-sandbox` helper that
-   Chromium's namespace sandbox needs to bypass AppArmor's
-   `apparmor_restrict_unprivileged_userns=1` (the default on Ubuntu
-   23.10+, Debian 12+, and other modern distros).
-2. Without the helper, Chromium aborts at startup with
-   `FATAL: No usable sandbox!` — every cefpython app would fail to
-   launch out of the box.
-3. The most common cefpython use case is rendering the application's
-   own trusted HTML/JS as a UI surface, where the sandbox provides
-   defense-in-depth rather than primary security.
+At `cef.Initialize()` cefpython decides as follows:
+1. If `CHROME_DEVEL_SANDBOX` points to an existing SUID-root helper, the
+   sandbox is kept.
+2. Else, if a kernel switch disables unprivileged user namespaces
+   (`kernel.apparmor_restrict_unprivileged_userns=1` — the default on
+   Ubuntu 23.10+/Debian 12+; `kernel.unprivileged_userns_clone=0`;
+   `user.max_user_namespaces=0`), `--no-sandbox` is added.
+3. Else a real `unshare(CLONE_NEWUSER)` probe is run in a forked child (this
+   also catches container seccomp policies, e.g. Docker's default, that block
+   the syscall without setting any of the switches above). If it fails,
+   `--no-sandbox` is added.
 
-If your app loads untrusted web content and you want the Chromium
-sandbox enabled, three steps are required:
+When cefpython falls back to `--no-sandbox` it emits a `UserWarning` so the
+security downgrade is visible; renderer processes then run unsandboxed
+(seccomp-bpf still applies).
 
-**1. Install the SUID-root `chrome-sandbox` helper.**
-The binary ships in the CEF binary distribution under
-`Release/chrome-sandbox`. Copy it to a stable path and set it up:
+Why not just ship the sandbox: a pip wheel cannot install a
+chown-root + chmod-4755 `chrome-sandbox` helper (pip runs as the user and has
+no postinst hook), so on systems where unprivileged user namespaces are
+restricted the only out-of-box option is `--no-sandbox`.
+
+**Forcing the sandbox off.** Pass `switches={"no-sandbox": ""}` to
+`cef.Initialize()`; an explicit value is respected and the auto-detection is
+skipped.
+
+**Enabling the sandbox on a restricted system.** If your app loads untrusted
+web content on a distro where unprivileged user namespaces are disabled,
+install the SUID-root helper and point `CHROME_DEVEL_SANDBOX` at it — no
+source patch or extra switches needed, cefpython will then keep the sandbox:
 
 ```bash
 sudo cp /path/to/cef_binary_<ver>_linux64/Release/chrome-sandbox \
@@ -408,25 +421,13 @@ sudo chown root:root /opt/cef/chrome-sandbox
 sudo chmod 4755 /opt/cef/chrome-sandbox
 ```
 
-**2. Tell Chromium where the helper lives.** Set the
-`CHROME_DEVEL_SANDBOX` environment variable before `cef.Initialize()`:
-
 ```python
 import os
 os.environ["CHROME_DEVEL_SANDBOX"] = "/opt/cef/chrome-sandbox"
 ```
 
-**3. Remove cefpython's `--no-sandbox` default.** Because
-`_linux_apply_initialize_defaults` sets it via `setdefault`, passing
-`switches={"no-sandbox": ""}` to `cef.Initialize()` does not override
-it. The default has to be deleted at the source (or pop the key from
-your switches dict after init detection). The simplest path is a small
-local patch in `src/window_utils_linux.pyx` that drops the
-`cmd_switches.setdefault("no-sandbox", "")` line.
-
-After all three steps, Chromium subprocesses should launch under the
-namespace sandbox (no `--no-sandbox` in their argv, no FATAL at
-startup). Verify via the GPU process command line:
+Verify Chromium subprocesses launched under the sandbox (no `--no-sandbox`
+in their argv, no `FATAL: No usable sandbox!`):
 
 ```bash
 ps -Af | grep "type=gpu" | grep -v "no-sandbox"
