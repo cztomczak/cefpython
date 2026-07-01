@@ -149,5 +149,67 @@ to add your name and encoded email.
 
 ## Updating CEF version
 
-If you want to update CEF version then take a look at
-[Issue #264](../../../issues/264)("Workflow when updating CEF version").
+For the general workflow see
+[Issue #264](../../../issues/264) ("Workflow when updating CEF version").
+
+### Re-importing the CEF headers
+
+cefpython compiles against the CEF headers vendored in `src/include/` (the
+include path starts at `src/`, so `#include "include/cef_*.h"` resolves there).
+On every CEF upgrade these headers must be re-imported cleanly from the upstream
+**CEF source repository** — not copied from the binary distribution — so they
+stay byte-identical to upstream and don't accumulate stale/edited content.
+
+`src/include/` holds only the stable, hand-written public headers. The
+following **generated** headers are intentionally *not* vendored; they are
+produced during CEF release packaging (and differ per platform), and are
+resolved at build time from `CEF_ROOT/include` instead:
+
+- `cef_version.h`, `cef_config.h`, `cef_api_versions.h`
+- `cef_color_ids.h`, `cef_command_ids.h`
+- `cef_pack_resources.h`, `cef_pack_strings.h`
+- `base/internal/cef_net_error_list.h`
+
+`tools/automate.py --prebuilt-cef` copies the distribution's `include/` into the
+prebuilt `CEF_ROOT` directory so those generated headers are available, and the
+CMake include path lists `CEF_ROOT` *after* `src/` so the vendored source
+headers always take precedence. The `capi/` C API headers are not used by
+cefpython and are not vendored either.
+
+Steps:
+
+1. Bump the version/hashes in `src/version/cef_version_{win,linux,macarm64}.h`.
+
+2. Find the CEF source commit — it is the `g<hash>` in the `CEF_VERSION`
+   string. For `147.0.10+gd58e84d+chromium-147.0.7727.118` the commit is
+   `d58e84d`.
+
+3. Fetch that exact source tree and replace `src/include/`:
+
+   ```bash
+   commit=d58e84d   # from CEF_VERSION above
+   curl -sL "https://codeload.github.com/chromiumembedded/cef/tar.gz/$commit" \
+       | tar xz
+   rm -rf src/include
+   cp -r "cef-$commit/include" src/include
+   # capi/ and base/internal/cef_net_error_list.h are placeholder stubs in the
+   # source tree (the stub #includes a Chromium path and is replaced with the
+   # real content during CEF packaging). Remove them so the build resolves the
+   # real versions from CEF_ROOT/include.
+   rm -rf src/include/capi
+   rm -f  src/include/base/internal/cef_net_error_list.h
+   # Drop any non-header docs the source tree ships under include/ (e.g. *.md):
+   find src/include -type f ! -name '*.h' ! -name '*.inc' -delete
+   ```
+
+   The remaining generated headers (`cef_version.h`, `cef_config.h`,
+   `cef_api_versions.h`, `cef_color_ids.h`, `cef_command_ids.h`,
+   `cef_pack_resources.h`, `cef_pack_strings.h`) do **not** exist in the source
+   tree at all — they are created during CEF packaging — so a clean source
+   import already excludes them and there is nothing to delete. They are
+   resolved from `CEF_ROOT/include` at build time.
+
+4. Sanity check: the vendored headers should be byte-identical to the same
+   files in the downloaded CEF binary distribution's `include/` (ignoring the
+   Windows distribution's CRLF line endings). Then rebuild and run the unit
+   tests (`unittests/_test_runner.py`).

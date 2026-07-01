@@ -583,9 +583,7 @@ struct CefBrowserSettingsTraits {
     target->chrome_status_bubble = src->chrome_status_bubble;
     target->chrome_zoom_bubble = src->chrome_zoom_bubble;
 #if CEF_API_ADDED(CEF_EXPERIMENTAL)
-    if (CEF_MEMBER_EXISTS(src, ax_viewport_collapse)) {
-      target->ax_viewport_collapse = src->ax_viewport_collapse;
-    }
+    target->ax_viewport_collapse = src->ax_viewport_collapse;
 #endif
   }
 };

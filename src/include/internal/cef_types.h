@@ -731,7 +731,7 @@ typedef struct _cef_browser_settings_t {
   /// WARNING: This collapses the CDP accessibility tree and disables CDP
   /// dynamic tree updates (nodesUpdated events). The DevTools Accessibility
   /// panel will show an incomplete tree. Platform screen readers (NVDA, JAWS,
-  /// VoiceOver) are unaffected — they use a separate code path.
+  /// VoiceOver) are unaffected - they use a separate code path.
   /// Can also be configured at runtime using
   /// CefBrowserHost::SetAxViewportCollapse.
   ///
@@ -1139,7 +1139,15 @@ typedef enum {
   CEF_RESULT_CODE_TERMINATED_BY_OTHER_PROCESS_ON_COMMIT_FAILURE = 39,
 #endif
 
-#if CEF_API_ADDED(13900)
+#if CEF_API_ADDED(14700)
+  /// The isolated browser process launched but it was not possible to wait on
+  /// the exit of the process, so the browser must exit.
+  CEF_RESULT_CODE_INVALID_ISOLATED_BROWSER_PROCESS = 40,
+#endif
+
+#if CEF_API_ADDED(14700)
+  CEF_RESULT_CODE_CHROME_LAST = 41,
+#elif CEF_API_ADDED(13900)
   CEF_RESULT_CODE_CHROME_LAST = 40,
 #elif CEF_API_ADDED(13800)
   CEF_RESULT_CODE_CHROME_LAST = 39,
@@ -3644,7 +3652,11 @@ typedef enum {
 ///
 typedef enum {
   CEF_CPAIT_BOOKMARK_STAR,
+#if CEF_API_ADDED(CEF_EXPERIMENTAL)
+  CEF_CPAIT_CLICK_TO_CALL_DEPRECATED,
+#else
   CEF_CPAIT_CLICK_TO_CALL,
+#endif
   CEF_CPAIT_COOKIE_CONTROLS,
   CEF_CPAIT_FILE_SYSTEM_ACCESS,
   CEF_CPAIT_FIND,
@@ -3691,6 +3703,14 @@ typedef enum {
   CEF_CPAIT_READING_MODE,
   CEF_CPAIT_CONTEXTUAL_SIDE_PANEL,
   CEF_CPAIT_JS_OPTIMIZATIONS,
+#endif
+#if CEF_API_ADDED(14700)
+  CEF_CPAIT_RECORD_REPLAY,
+  CEF_CPAIT_INDIGO,
+#endif
+#if CEF_API_ADDED(CEF_EXPERIMENTAL)
+  CEF_CPAIT_FEDERATION_DEPRECATED,
+  CEF_CPAIT_GLIC,
 #endif
   CEF_CPAIT_NUM_VALUES,
 } cef_chrome_page_action_icon_type_t;
@@ -3878,6 +3898,9 @@ typedef enum {
 #if CEF_API_ADDED(14500)
   CEF_PERMISSION_TYPE_LOCAL_NETWORK = 1 << 26,
   CEF_PERMISSION_TYPE_LOOPBACK_NETWORK = 1 << 27,
+#endif
+#if CEF_API_ADDED(14700)
+  CEF_PERMISSION_TYPE_SENSORS = 1 << 28,
 #endif
 } cef_permission_request_types_t;
 

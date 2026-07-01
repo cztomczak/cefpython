@@ -252,6 +252,12 @@ target_include_directories(${MODULE_NAME} PRIVATE
     "${SRC_DIR}/extern"
     "${SRC_DIR}/extern/cef"
     "${PYX_STAGE_DIR}"
+    # After src/: resolves the platform-generated CEF headers that are not
+    # vendored in src/include (cef_version.h, cef_api_versions.h, cef_pack_*.h,
+    # cef_color_ids.h, cef_command_ids.h, cef_config.h,
+    # base/internal/cef_net_error_list.h). Vendored source headers in
+    # src/include take precedence because SRC_DIR is listed first.
+    "${CEF_ROOT}"
 )
 
 if(ENABLE_LINE_TRACING)

@@ -8,6 +8,8 @@ target_include_directories(cpp_utils PRIVATE
     "${CEFPYTHON_SRC_DIR}/common"
     "${CEFPYTHON_PYX_STAGE_DIR}"
     ${Python_INCLUDE_DIRS}
+    # After src/: platform-generated CEF headers not vendored in src/include.
+    "${CEFPYTHON_CEF_ROOT}"
 )
 
 # Common browser-process flags come from cefpython_common_flags defined in the
