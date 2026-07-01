@@ -54,20 +54,6 @@ void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
     XStoreName(xdisplay, xwindow, title);
 }
 
-void HideX11ShellWindow(CefRefPtr<CefBrowser> browser) {
-    // On native Wayland (ozone-platform=wayland) with SUPPORTS_OZONE_X11
-    // compiled in, CEF's CreateHostWindow() creates two separate windows:
-    //   1. An X11/XWayland top-level shell (CefWindowX11) — empty, visible
-    //   2. A Wayland xdg_toplevel (NativeWidgetDelegate) — holds the content
-    // Unmap the empty X11 shell so only the content-bearing Wayland window
-    // is visible to the user.
-    ::Window xwindow = browser->GetHost()->GetWindowHandle();
-    ::Display* xdisplay = cef_get_xdisplay();
-    if (!xdisplay || !xwindow) return;
-    XUnmapWindow(xdisplay, xwindow);
-    XFlush(xdisplay);
-}
-
 GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser) {
   // TODO: Should return NULL when using the Views framework
   // -- REWRITTEN FOR CEF PYTHON USE CASE --

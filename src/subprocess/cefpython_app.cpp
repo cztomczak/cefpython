@@ -169,12 +169,6 @@ void CefPythonApp::OnContextInitialized() {
 #ifdef BROWSER_PROCESS
     REQUIRE_UI_THREAD();
     BrowserProcessHandler_OnContextInitialized();
-    // Post browser creation as a separate task so it runs at the outer
-    // message-loop level, after OnContextInitialized returns. This avoids
-    // the nested RunLoop that CreateBrowserSync() would otherwise create
-    // while still inside this callback.
-    CefPostTask(TID_UI, CefCreateClosureTask(
-        base::BindOnce(&BrowserProcessHandler_CreatePendingBrowsers)));
 #if defined(OS_LINUX)
     print_handler_ = new ClientPrintHandlerGtk();
 #endif // OS_LINUX

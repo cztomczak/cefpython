@@ -74,14 +74,23 @@ cdef void SetCefWindowInfo(
                     windowRect)
             cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
         ELIF UNAME_SYSNAME == "Linux":
-            x = int(windowInfo.windowRect[0])
-            y = int(windowInfo.windowRect[1])
-            width = int(windowInfo.windowRect[2] - windowInfo.windowRect[0])
-            height = int(windowInfo.windowRect[3] - windowInfo.windowRect[1])
-            windowRect = CefRect(x, y, width, height)
-            cefWindowInfo.SetAsChild(
-                    <CefWindowHandle>windowInfo.parentWindowHandle,
-                    windowRect)
+            if windowInfo.parentWindowHandle:
+                # Embed into the host toolkit window (Qt/wx/GTK/tkinter):
+                # parent CEF directly into the caller's X11 window, exactly
+                # like upstream cefclient (browser_window_std_gtk.cc:
+                # window_info.SetAsChild(GDK_WINDOW_XID(...), rect)).
+                x = int(windowInfo.windowRect[0])
+                y = int(windowInfo.windowRect[1])
+                width = int(windowInfo.windowRect[2] - windowInfo.windowRect[0])
+                height = int(windowInfo.windowRect[3] - windowInfo.windowRect[1])
+                windowRect = CefRect(x, y, width, height)
+                cefWindowInfo.SetAsChild(
+                        <CefWindowHandle>windowInfo.parentWindowHandle,
+                        windowRect)
+            # else: no parent handle — leave cefWindowInfo as a default
+            # windowed info so CEF creates and owns its own top-level window
+            # (upstream cefsimple --use-native behaviour).  CEF handles the
+            # window frame, resize and close button itself.
             cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
 
     # POPUP WINDOW - Windows only
@@ -102,17 +111,11 @@ cdef class WindowInfo:
     cdef public WindowHandle parentWindowHandle
     cdef public list windowRect # [left, top, right, bottom]
     cdef public object windowName
-    # Linux Xwayland embedding: when SetAsChild() substitutes the root window
-    # as CEF's parent, this dict holds the real parent XID and embed size so
-    # BrowserProcessHandler_CreatePendingBrowsers can schedule the deferred
-    # XReparentWindow after browser creation.  None on all other platforms.
-    cdef public object _linux_embed_info
 
     def __init__(self, title=""):
         self.windowName = ""
         if title:
             self.windowName = title
-        self._linux_embed_info = None
 
     cpdef py_void SetAsChild(self, WindowHandle parentWindowHandle,
                              list windowRect=None):
@@ -133,11 +136,10 @@ cdef class WindowInfo:
             if parentWindowHandle == 0:
                 import os as _os
                 import warnings
-                # In native Wayland mode, parentWindowHandle=0 is correct and
-                # expected — CEF creates its own xdg_toplevel surface.  Only
-                # warn when the user is likely using an X11-incompatible toolkit
-                # without having opted into native Wayland.
-                if "WAYLAND_DISPLAY" in _os.environ and not _g_linux_wayland_mode:
+                # Warn when the user is likely using an X11-incompatible toolkit
+                # backend in a Wayland session: winId()/GetHandle() returns 0
+                # and CEF opens a detached window instead of embedding.
+                if "WAYLAND_DISPLAY" in _os.environ:
                     warnings.warn(
                         "WindowInfo.SetAsChild: parentWindowHandle is 0 on Linux "
                         "in a Wayland session. The GUI toolkit is likely using the "
@@ -153,21 +155,6 @@ cdef class WindowInfo:
                         "os.environ[\"SDL_VIDEODRIVER\"] = \"x11\"",
                         stacklevel=2,
                     )
-            if parentWindowHandle != 0:
-                # Xwayland cross-client restriction: Chrome's internal XCB
-                # connection cannot create a child window under a window owned
-                # by GDK's separate Xlib connection — the server returns
-                # MatchError(bad_value=parent_XID).  Workaround: tell CEF to
-                # use the X11 root window (accessible from any client) as its
-                # parent, then XReparentWindow into the real parent after the
-                # browser is created.  See _linux_schedule_xembed().
-                _wr = windowRect if windowRect else [0, 0, 800, 600]
-                self._linux_embed_info = {
-                    'real_parent': parentWindowHandle,
-                    'width':  int(_wr[2]) - int(_wr[0]),
-                    'height': int(_wr[3]) - int(_wr[1]),
-                }
-                parentWindowHandle = _linux_get_root_xid()
         self.parentWindowHandle = parentWindowHandle
         if sys.platform != "win32":
             if not windowRect:
