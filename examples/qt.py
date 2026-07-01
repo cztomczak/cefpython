@@ -148,6 +148,9 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(None)
         self.cef_widget = None
         self.navigation_bar = None
+        # True once CloseBrowser() has been requested; the window destruction
+        # is deferred until OnBeforeClose fires (see closeEvent / CloseHandler).
+        self._closing = False
         if PYQT5:
             self.setWindowTitle("PyQt5 example")
         elif PYQT6:
@@ -206,10 +209,23 @@ class MainWindow(QMainWindow):
         # is released before CEF destroys the browser's menu-manager state.
         if LINUX and ContextMenuHandler._active_menu is not None:
             ContextMenuHandler._active_menu.hide()
-        # Close browser (force=True) and free CEF reference
-        if self.cef_widget.browser:
+        # Defer window destruction until the browser has fully closed.
+        #
+        # CloseBrowser() is asynchronous: CEF tears the browser down and then
+        # fires OnBeforeClose.  If we let Qt destroy this window now, the X11
+        # window that CEF is embedded into is destroyed out from under the
+        # still-live browser, which on a real GPU crashes the GPU process
+        # mid-eglSwapBuffers ("Failed to retrieve the size of the parent
+        # window") and leaves CEF's observer list non-empty at shutdown
+        # ("Check failed: observers_.empty()").  Instead ignore this close,
+        # ask CEF to close the browser, and let CloseHandler.OnBeforeClose
+        # re-trigger the close once the browser is gone.
+        if self.cef_widget.browser and not self._closing:
+            self._closing = True
             self.cef_widget.browser.CloseBrowser(True)
-            self.clear_browser_references()
+            event.ignore()
+            return
+        event.accept()
 
     def clear_browser_references(self):
         # Clear browser references that you keep anywhere in your
@@ -256,32 +272,25 @@ class CefWidget(QWidget):
 
     def embedBrowser(self):
         if LINUX and PYQT5:
-            # PyQt5 uses GDK/Xlib while CEF uses XCB.  Creating an XCB child
-            # under a GDK/Xlib window triggers a cross-client MatchError on
-            # Xwayland.  The workaround is to create CEF under root first and
-            # then reparent into hidden_window via a GLib timer
-            # (_linux_schedule_xembed / _linux_embed_info mechanism).
+            # On Linux with PyQt5, QX11EmbedContainer is gone; the Qt-native
+            # equivalent is to host CEF in a QWindow (hidden_window) wrapped in
+            # a createWindowContainer widget (see setupLayout).  Qt reparents
+            # the QWindow into the container itself.
             # noinspection PyUnresolvedReferences
             self.hidden_window = QWindow()
-        # For PyQt6/PySide6 on Linux, cef_widget already has WA_PaintOnScreen
-        # which forces a real X11 native window.  CEF can be created directly
-        # as a child of cef_widget.winId() — no hidden_window or deferred
-        # reparent needed.
+        # On all bindings CEF is parented directly into the native X11 window
+        # via WindowInfo.SetAsChild(), exactly like upstream cefclient
+        # (browser_window_std_gtk.cc).  The Qt widget forces a real X11 native
+        # window (WA_PaintOnScreen / xcb backend); no deferred reparent needed.
         window_info = cef.WindowInfo()
         rect = [0, 0, self._phys(self.width()), self._phys(self.height())]
         window_info.SetAsChild(self.getHandle(), rect)
-        if (PYQT6 or PYSIDE6) and LINUX:
-            # SetAsChild() substituted root as CEF's parent (Xwayland workaround).
-            # Qt6 uses XCB (same as CEF) so a direct parent/child relationship
-            # works.  Restore cef_widget as the parent and disable the GLib-timer
-            # reparent by clearing _linux_embed_info.
-            window_info.parentWindowHandle = self.getHandle()
-            window_info._linux_embed_info = None
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         if self.browser:
             self.browser.SetClientHandler(LoadHandler(self.parent.navigation_bar))
             self.browser.SetClientHandler(FocusHandler(self))
+            self.browser.SetClientHandler(CloseHandler(self.parent))
             if LINUX:
                 self.browser.SetClientHandler(ContextMenuHandler(self))
         if WINDOWS:
@@ -354,6 +363,21 @@ class CefApplication(QApplication):
                                  "resources", "{0}.png".format(sys.argv[1]))
         if os.path.exists(icon_file):
             self.setWindowIcon(QIcon(icon_file))
+
+
+class CloseHandler(object):
+    # LifeSpanHandler: completes the deferred close started in
+    # MainWindow.closeEvent().  By the time OnBeforeClose fires the browser
+    # has been fully torn down by CEF, so it is now safe to destroy the Qt
+    # window (which owns the X11 window CEF was embedded into).
+    def __init__(self, main_window):
+        self.main_window = main_window
+
+    def OnBeforeClose(self, browser, **_):
+        self.main_window.clear_browser_references()
+        # Re-trigger the close; closeEvent now accepts it (browser is None),
+        # Qt destroys the window, and the app quits on last-window-closed.
+        self.main_window.close()
 
 
 class LoadHandler(object):
