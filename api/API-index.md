@@ -162,6 +162,7 @@
   * [SetGlobalClientHandler](cefpython.md#setglobalclienthandler)
   * [SetOsModalLoop](cefpython.md#setosmodalloop)
   * [Shutdown](cefpython.md#shutdown)
+  * [UnraisableHook](cefpython.md#unraisablehook)
 * [Command line switches](CommandLineSwitches.md#command-line-switches)
   * [enable-media-stream](CommandLineSwitches.md#enable-media-stream)
   * [proxy-server](CommandLineSwitches.md#proxy-server)

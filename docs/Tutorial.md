@@ -163,6 +163,28 @@ The cef.ExceptHook helper function does the following:
 If you would like to modify `ExceptHook` behavior, see its source code
 in src/[helpers.pyx](../src/helpers.pyx) file.
 
+There is a second, related case. CEF Python's callback handlers are
+compiled with Cython and declared as "noexcept", meaning an exception
+must not propagate out of a handler into CEF's C++ code. Handlers catch
+their own exceptions and forward them to `sys.excepthook`, but if an
+exception still escapes a handler (for example a handler that forgot to
+use try/except, or whose except block itself raises) then Python does
+not crash the process - it reports the exception through
+[sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook),
+which by default only prints to stderr and is easy to miss. To give
+these escaped exceptions the same treatment as any other error, examples
+also set:
+
+```python
+sys.unraisablehook = cef.UnraisableHook  # For exceptions that escape a handler
+```
+
+cef.[UnraisableHook](../api/cefpython.md#unraisablehook) forwards to
+cef.[ExceptHook](../api/cefpython.md#excepthook), so an escaped exception
+is written to "error.log", printed, and CEF is shut down cleanly instead
+of being silently logged. Reaching this code path indicates a bug in a
+handler that should be fixed.
+
 
 ## Settings
 

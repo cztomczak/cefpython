@@ -32,6 +32,7 @@ Table of contents:
   * [SetGlobalClientHandler](#setglobalclienthandler)
   * [SetOsModalLoop](#setosmodalloop)
   * [Shutdown](#shutdown)
+  * [UnraisableHook](#unraisablehook)
 
 
 ## Functions
@@ -92,6 +93,9 @@ process, Renderer process, GPU process, etc.) by calling Shutdown().
 This hook does the following: in case of exception write it to
 the "error.log" file, display it to the console, shutdown CEF
 and exit application immediately by ignoring "finally" (_exit()).
+
+See also [UnraisableHook](#unraisablehook) for exceptions that escape a
+callback handler.
 
 See also Tutorial: [Handling Python exceptions](../docs/Tutorial.md#handling-python-exceptions).
 
@@ -380,3 +384,31 @@ modal message loop. Set to false after exiting the modal message loop.
 This function should be called on the main application thread (UI thread) to shut down CEF before the application exits.
 
 You must call this function so that CEF shuts down cleanly. Remember also to delete all CEF browsers references for the browsers to shut down cleanly. For an example see the wxpython.py example MainFrame.OnClose().
+
+
+### UnraisableHook
+
+| Parameter | Type |
+| --- | --- |
+| unraisable | - |
+| __Return__ | void |
+
+Global unraisable hook, companion to [ExceptHook](#excepthook). Assign it
+with `sys.unraisablehook = cef.UnraisableHook`.
+
+CEF Python's callback handlers are compiled with Cython and declared as
+"noexcept", so an exception must not propagate out of a handler into CEF's
+C++ code. Handlers catch their own exceptions and forward them to
+`sys.excepthook`, but if an exception still escapes a handler (for example a
+handler not wrapped in try/except, or whose except block itself raises) then
+Python reports it through
+[sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook)
+rather than crashing the process. By default that only prints to stderr and
+is easy to miss.
+
+This hook forwards the escaped exception to [ExceptHook](#excepthook), so it
+is written to the "error.log" file, printed, and CEF is shut down cleanly -
+same as any other Python exception. Reaching this code path indicates a bug
+in a handler that should be fixed.
+
+See also Tutorial: [Handling Python exceptions](../docs/Tutorial.md#handling-python-exceptions).

@@ -47,6 +47,21 @@ def ExceptHook(exc_type, exc_value, exc_trace):
     os._exit(1)
 
 
+def UnraisableHook(unraisable):
+    """Global unraisable hook, companion to ExceptHook.
+
+    Cython callback handlers are declared "noexcept": an exception that
+    escapes a handler (one not wrapped in try/except, or whose except block
+    itself raises) does not propagate into CEF's C++ code. Python instead
+    reports it via sys.unraisablehook, which by default only prints to stderr
+    and is easy to miss. Assigning this hook routes such exceptions through
+    ExceptHook so they are written to "error.log", printed, and CEF is shut
+    down cleanly - same as any other Python exception.
+    """
+    ExceptHook(unraisable.exc_type, unraisable.exc_value,
+               unraisable.exc_traceback)
+
+
 cpdef str GetModuleDirectory():
     """Get path to the cefpython module (so/pyd)."""
     if platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):

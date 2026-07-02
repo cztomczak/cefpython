@@ -60,6 +60,8 @@ HTML_code = """
 def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
+    sys.unraisablehook = cef.UnraisableHook  # Same, for exceptions that
+    #                                          escape a callback handler
     # To change user agent use either "product_version"
     # or "user_agent" options. Explained in Tutorial in
     # "Change user agent string" section.
