@@ -4,29 +4,24 @@
 
 # IMPORTANT notes:
 #
-# - cdef/cpdef functions returning something other than a Python object
-#   should have in its declaration "except *", otherwise exceptions are
-#   ignored. Those cdef/cpdef that return "object" have "except *" by
-#   default. The setup/compile.py script will check for functions missing
-#   "except *" and will display an error message about that, but it's
-#   not perfect and won't detect all cases.
-#
-# - TODO: add checking for "except * with gil" in functions with the
-#   "public" keyword
+# - Exception handling (Cython 3): a cdef/cpdef function returning a
+#   non-Python type propagates exceptions by default. Functions called from
+#   C++ (the "public" callbacks that acquire the GIL, declared
+#   "noexcept with gil") must NOT propagate into C++ - they are declared
+#   "noexcept" so that an escaping exception is reported via
+#   sys.unraisablehook instead of unwinding into CEF's C++ code. Each such
+#   callback still wraps its body in try/except and forwards to
+#   sys.excepthook; sys.unraisablehook is only reached if an exception
+#   escapes that guard (a bug in the handler). See cef.UnraisableHook and
+#   the "Handling Python exceptions" section of docs/Tutorial.md.
+#   tools/cmake_prepare_pyx.py checks for cdef/cpdef functions that return a
+#   C type without any exception declaration.
 #
 # - about acquiring/releasing GIL lock, see discussion here:
 #   https://groups.google.com/forum/?fromgroups=#!topic/cython-users/jcvjpSOZPp0
 #
 # - <CefRefPtr[ClientHandler]?>new ClientHandler()
 #   <...?> means to throw an error if the cast is not allowed
-#
-# - in client handler callbacks (or others that are called from C++ and
-#   use "except * with gil") must embrace all code in try..except otherwise
-#   the error will  be ignored, only printed to the output console, this is the
-#   default behavior of Cython, to remedy this you are supposed to add "except *"
-#   in function declaration, unfortunately it does not work, some conflict with
-#   CEF threading, see topic at cython-users for more details:
-#   https://groups.google.com/d/msg/cython-users/CRxWoX57dnM/aufW3gXMhOUJ.
 #
 # -  Note that acquiring the GIL is a blocking thread-synchronising operation,
 #    and therefore potentially costly. It might not be worth releasing the GIL
@@ -382,7 +377,7 @@ cdef public void cefpython_GetDebugOptions(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public cpp_bool ApplicationSettings_GetBool(const char* key
-        ) except * with gil:
+        ) noexcept with gil:
     # Called from client_handler/client_handler.cpp for example
     cdef object pyKey = CharToPyString(key)
     if pyKey in g_applicationSettings:
@@ -390,7 +385,7 @@ cdef public cpp_bool ApplicationSettings_GetBool(const char* key
     return False
 
 cdef public cpp_bool ApplicationSettings_GetBoolFromDict(const char* key1,
-        const char* key2) except * with gil:
+        const char* key2) noexcept with gil:
     cdef object pyKey1 = CharToPyString(key1)
     cdef object pyKey2 = CharToPyString(key2)
     cdef object dictValue # Yet to be checked whether it is `dict`
@@ -403,14 +398,14 @@ cdef public cpp_bool ApplicationSettings_GetBoolFromDict(const char* key1,
     return False
 
 cdef public cpp_string ApplicationSettings_GetString(const char* key
-        ) except * with gil:
+        ) noexcept with gil:
     cdef object pyKey = CharToPyString(key)
     cdef cpp_string cppString
     if pyKey in g_applicationSettings:
         cppString = PyStringToChar(AnyToPyString(g_applicationSettings[pyKey]))
     return cppString
 
-cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
+cdef public int CommandLineSwitches_GetInt(const char* key) noexcept with gil:
     cdef object pyKey = CharToPyString(key)
     if pyKey in g_commandLineSwitches:
         return int(g_commandLineSwitches[pyKey])

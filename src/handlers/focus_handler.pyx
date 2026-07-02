@@ -31,7 +31,7 @@ cdef public void FocusHandler_OnTakeFocus(
 cdef public cpp_bool FocusHandler_OnSetFocus(
         CefRefPtr[CefBrowser] cef_browser,
         cef_types.cef_focus_source_t source
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     cdef py_bool ret
     try:

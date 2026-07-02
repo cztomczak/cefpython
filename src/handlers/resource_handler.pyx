@@ -76,7 +76,7 @@ cdef public cpp_bool ResourceHandler_ProcessRequest(
         int resourceHandlerId,
         CefRefPtr[CefRequest] cefRequest,
         CefRefPtr[CefCallback] cefCallback
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyResourceHandler pyResourceHandler
     cdef object userCallback
     cdef py_bool returnValue
@@ -137,7 +137,7 @@ cdef public cpp_bool ResourceHandler_ReadResponse(
         int bytesToRead,
         int& cefBytesRead,
         CefRefPtr[CefCallback] cefCallback
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyResourceHandler pyResourceHandler
     cdef object userCallback
     cdef py_bool returnValue

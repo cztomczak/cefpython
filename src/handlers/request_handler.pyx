@@ -63,7 +63,7 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
         CefRefPtr[CefRequest] cefRequest,
         cpp_bool user_gesture,
         cpp_bool is_redirect
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef PyRequest pyRequest
@@ -100,7 +100,7 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         CefRefPtr[CefRequest] cefRequest
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef PyRequest pyRequest
@@ -223,7 +223,7 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
         const CefString& cefRealm,
         const CefString& cefScheme,
         CefRefPtr[CefAuthCallback] cefAuthCallback
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef py_bool pyIsProxy
@@ -292,7 +292,7 @@ cdef public cpp_bool RequestHandler_OnQuotaRequest(
         const CefString& cefOriginUrl,
         int64_t newSize,
         CefRefPtr[CefCallback] cefCallback
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object pyOriginUrl
     cdef py_bool returnValue
@@ -360,7 +360,7 @@ cdef public cpp_bool RequestHandler_OnCertificateError(
         int certError,
         const CefString& cefRequestUrl,
         CefRefPtr[CefCallback] cefCertCallback
-        ) except * with gil:
+        ) noexcept with gil:
     cdef py_bool returnValue
     cdef object clientCallback
     try:

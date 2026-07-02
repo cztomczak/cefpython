@@ -31,7 +31,7 @@ cdef public void DisplayHandler_OnAddressChange(
 cdef public cpp_bool DisplayHandler_OnAutoResize(
         CefRefPtr[CefBrowser] cef_browser,
         const CefSize& new_size
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     cdef object callback
     try:
@@ -66,7 +66,7 @@ cdef public void DisplayHandler_OnTitleChange(
 cdef public cpp_bool DisplayHandler_OnTooltip(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& cefText
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object pyText
     cdef list pyTextOut
@@ -110,7 +110,7 @@ cdef public cpp_bool DisplayHandler_OnConsoleMessage(
         const CefString& cefMessage,
         const CefString& cefSource,
         int line
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object pyMessage
     cdef object pySource
@@ -149,7 +149,7 @@ cdef public void DisplayHandler_OnLoadingProgressChange(
 cdef public cpp_bool DisplayHandler_OnCursorChange(
         CefRefPtr[CefBrowser] cefBrowser,
         CefCursorHandle cursor
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnCursorChange")

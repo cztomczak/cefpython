@@ -70,7 +70,7 @@ cdef public cpp_bool ExecutePythonCallback(
         CefRefPtr[CefBrowser] cefBrowser,
         int callbackId, 
         CefRefPtr[CefListValue] cefFuncArgs,
-        ) except * with gil:
+        ) noexcept with gil:
     cdef object func
     cdef list funcArgs
     cdef object returnValue

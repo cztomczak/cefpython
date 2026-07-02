@@ -12,7 +12,7 @@ cdef public cpp_bool CookieAccessFilter_CanSendCookie(
             CefRefPtr[CefFrame] cef_frame,
             CefRefPtr[CefRequest] cef_request,
             const CefCookie& cef_cookie
-            ) except * with gil:
+            ) noexcept with gil:
     cdef PyBrowser browser
     cdef PyFrame frame
     cdef PyRequest request
@@ -53,7 +53,7 @@ cdef public cpp_bool CookieAccessFilter_CanSaveCookie(
             CefRefPtr[CefRequest] cef_request,
             CefRefPtr[CefResponse] cef_response,
             const CefCookie& cef_cookie
-            ) except * with gil:
+            ) noexcept with gil:
     cdef PyBrowser browser
     cdef PyFrame frame
     cdef PyRequest request

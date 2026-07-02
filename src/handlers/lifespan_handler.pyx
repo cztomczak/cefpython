@@ -36,7 +36,7 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
         CefBrowserSettings& settings,
         CefRefPtr[CefDictionaryValue]& extra_info,
         cpp_bool* noJavascriptAccess
-        ) except * with gil:
+        ) noexcept with gil:
     # Empty place-holders: popupFeatures, client.
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame,
@@ -97,7 +97,7 @@ cdef public void LifespanHandler_OnAfterCreated(
 
 cdef public cpp_bool LifespanHandler_DoClose(
         CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "DoClose")

@@ -28,7 +28,7 @@ DRAG_OPERATION_EVERY   = cef_types.DRAG_OPERATION_EVERY
 cdef public cpp_bool RenderHandler_GetRootScreenRect(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRect& cefRect
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list pyRect = []
     cdef py_bool ret
@@ -55,7 +55,7 @@ cdef public cpp_bool RenderHandler_GetRootScreenRect(
 cdef public cpp_bool RenderHandler_GetViewRect(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRect& cefRect
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list pyRect = []
     cdef py_bool ret
@@ -89,7 +89,7 @@ cdef public cpp_bool RenderHandler_GetScreenPoint(
         CefRefPtr[CefBrowser] cefBrowser,
         int viewX, int viewY,
         int& screenX, int& screenY
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list screenCoordinates = []
     cdef py_bool ret
@@ -118,7 +118,7 @@ cdef public cpp_bool RenderHandler_GetScreenPoint(
 cdef public cpp_bool RenderHandler_GetScreenInfo(
         CefRefPtr[CefBrowser] cefBrowser,
         CefScreenInfo& cefScreenInfo
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef dict pyScreenInfo = {}
     cdef py_bool ret
@@ -276,7 +276,7 @@ cdef public cpp_bool RenderHandler_StartDragging(
         CefRefPtr[CefDragData] cef_drag_data,
         uint32_t allowed_ops,
         int x, int y
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     cdef DragData drag_data
     cdef py_bool ret

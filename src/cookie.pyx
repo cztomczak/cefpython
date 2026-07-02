@@ -310,7 +310,7 @@ cdef public cpp_bool CookieVisitor_Visit(
         int count,
         int total,
         cpp_bool& deleteCookie
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyCookieVisitor pyCookieVisitor
     cdef object callback
     cdef py_bool ret

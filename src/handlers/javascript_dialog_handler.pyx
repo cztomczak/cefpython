@@ -38,7 +38,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
         const CefString& default_prompt_text,
         CefRefPtr[CefJSDialogCallback] callback,
         cpp_bool& suppress_message
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object pyOriginUrl
     cdef object pyMessageText
@@ -78,7 +78,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(
         const CefString& message_text,
         cpp_bool is_reload,
         CefRefPtr[CefJSDialogCallback] callback
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object pyMessageText
     cdef py_bool pyIsReload
