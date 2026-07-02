@@ -50,11 +50,6 @@
 
 #define CEF_SANDBOX_COMPAT_HASH ""
 
-// Experimental API hash for Linux (CEF_API_VERSION 999999).
-// Used by the cefpython build tools; sourced from cef_api_versions.h.
-#define CEF_API_HASH_PLATFORM "e1f04162d75f4f36056af4e4a02a4da0457451dd"
-#define CEF_API_HASH_UNIVERSAL "e1f04162d75f4f36056af4e4a02a4da0457451dd"
-
 #define DO_MAKE_STRING(p) #p
 #define MAKE_STRING(p) DO_MAKE_STRING(p)
 

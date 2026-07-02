@@ -50,12 +50,6 @@
 
 #define CEF_SANDBOX_COMPAT_HASH ""
 
-// Experimental API hash for macOS (CEF_API_VERSION 999999).
-// Used by the cefpython build tools; sourced from cef_api_versions.h
-// (OS_MAC platform guard) in the CEF binary distribution.
-#define CEF_API_HASH_PLATFORM "48dac8d7565e012841b9d3c3935776c1a7bff589"
-#define CEF_API_HASH_UNIVERSAL "48dac8d7565e012841b9d3c3935776c1a7bff589"
-
 #define DO_MAKE_STRING(p) #p
 #define MAKE_STRING(p) DO_MAKE_STRING(p)
 

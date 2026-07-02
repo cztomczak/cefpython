@@ -15,6 +15,7 @@ Table of contents:
 * [GIL](#gil)
 * [Authors](#authors)
 * [Updating CEF version](#updating-cef-version)
+  * [Re-importing the CEF headers](#re-importing-the-cef-headers)
 
 
 ## Pull requests
@@ -178,7 +179,11 @@ cefpython and are not vendored either.
 
 Steps:
 
-1. Bump the version/hashes in `src/version/cef_version_{win,linux,macarm64}.h`.
+1. Bump the version fields in `src/version/cef_version_{win,linux,macarm64}.h`
+   (`CEF_VERSION`, `CEF_COMMIT_*`, `CHROME_VERSION_*`, `CEF_SANDBOX_COMPAT_HASH`).
+   The CEF **API hash** is not stored here — it is read from CEF's generated
+   `cef_api_versions.h` (in `CEF_ROOT/include`) by `tools/cmake_prepare_pyx.py`,
+   so there is nothing to hand-edit for it.
 
 2. Find the CEF source commit — it is the `g<hash>` in the `CEF_VERSION`
    string. For `147.0.10+gd58e84d+chromium-147.0.7727.118` the commit is

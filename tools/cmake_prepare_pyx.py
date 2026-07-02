@@ -27,6 +27,53 @@ def get_cefpython_version(header_file):
     return ret
 
 
+# The build compiles with CEF's default API version, which cef_api_hash.h sets
+# to CEF_API_VERSION_EXPERIMENTAL (999999) when CEF_API_VERSION is not defined.
+CEF_API_VERSION_EXPERIMENTAL = 999999
+
+
+def get_host_os_macro():
+    """Return the CEF OS_* macro for the build host (builds are always native)."""
+    if sys.platform.startswith("win"):
+        return "OS_WIN"
+    if sys.platform == "darwin":
+        return "OS_MAC"
+    return "OS_LINUX"
+
+
+def get_cef_api_hash(api_versions_header, api_version, os_macro):
+    """Extract the CEF API hash for a version+platform from cef_api_versions.h.
+
+    That generated header defines the hash per platform, e.g.:
+        #if defined(OS_WIN)
+        #define CEF_API_HASH_999999 "..."
+        #elif defined(OS_MAC)
+        #define CEF_API_HASH_999999 "..."
+        #elif defined(OS_LINUX)
+        #define CEF_API_HASH_999999 "..."
+        #endif
+    Each hash define is immediately preceded by its platform guard, so pick the
+    one whose guard matches the build host.  This replaces hand-copying the hash
+    into src/version/cef_version_*.h (the hash is authoritative here).
+    """
+    define = "CEF_API_HASH_{}".format(api_version)
+    with open(api_versions_header, "r") as f:
+        lines = f.read().splitlines()
+    guard_re = re.compile(r"\s*#(?:if|elif)\s+defined\((OS_\w+)\)")
+    define_re = re.compile(
+        r'\s*#define\s+' + re.escape(define) + r'\s+"([0-9a-fA-F]+)"')
+    for i, line in enumerate(lines):
+        m = define_re.match(line)
+        if not m or i == 0:
+            continue
+        guard = guard_re.match(lines[i - 1])
+        if guard and guard.group(1) == os_macro:
+            return m.group(1)
+    raise RuntimeError(
+        "Could not find {define} for {os} in {path}".format(
+            define=define, os=os_macro, path=api_versions_header))
+
+
 def except_all_missing(content):
     """Return the line number of a cdef/cpdef returning a C type (built-in,
     pointer, template or reference) whose signature declares no exception
@@ -61,6 +108,9 @@ def main():
     parser.add_argument("--out", required=True, help="Stage output directory")
     parser.add_argument("--pyversion", required=True, help="e.g. 310")
     parser.add_argument("--cef-version-header", required=True)
+    parser.add_argument("--cef-api-versions-header", required=True,
+                        help="Path to CEF's generated cef_api_versions.h "
+                             "(in CEF_ROOT/include); source of the API hash.")
     args = parser.parse_args()
 
     src_dir = args.src
@@ -78,12 +128,18 @@ def main():
         build=ver["CHROME_VERSION_BUILD"],
         patch=ver["CHROME_VERSION_PATCH"],
     )
+    # API hash comes from CEF's generated cef_api_versions.h, not from a value
+    # hand-copied into cef_version_*.h. CEF_API_HASH_UNIVERSAL is deprecated and
+    # upstream defines it as the same value as the platform hash.
+    api_hash = get_cef_api_hash(args.cef_api_versions_header,
+                                CEF_API_VERSION_EXPERIMENTAL,
+                                get_host_os_macro())
     module_vars = (
         '__version__ = "{v}"\n'.format(v=version_str)
         + '__chrome_version__ = "{v}"\n'.format(v=chrome_ver)
         + '__cef_version__ = "{v}"\n'.format(v=ver["CEF_VERSION"])
-        + '__cef_api_hash_platform__ = "{v}"\n'.format(v=ver["CEF_API_HASH_PLATFORM"])
-        + '__cef_api_hash_universal__ = "{v}"\n'.format(v=ver["CEF_API_HASH_UNIVERSAL"])
+        + '__cef_api_hash_platform__ = "{v}"\n'.format(v=api_hash)
+        + '__cef_api_hash_universal__ = "{v}"\n'.format(v=api_hash)
         + '__cef_commit_hash__ = "{v}"\n'.format(v=ver["CEF_COMMIT_HASH"])
         + '__cef_commit_number__ = "{v}"\n'.format(v=ver["CEF_COMMIT_NUMBER"])
     )
