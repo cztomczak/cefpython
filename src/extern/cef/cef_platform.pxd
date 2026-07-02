@@ -2,4 +2,11 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
-include "platform_cimports.pxi"
+include "compile_time_constants.pxi"
+
+IF UNAME_SYSNAME == "Windows":
+    from cef_win cimport *
+ELIF UNAME_SYSNAME == "Darwin":
+    from cef_mac cimport *
+ELIF UNAME_SYSNAME == "Linux":
+    from cef_linux cimport *

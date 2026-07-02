@@ -212,10 +212,20 @@ ctypedef uintptr_t WindowHandle
 # noinspection PyUnresolvedReferences
 cimport ctime
 
-include "platform_cimports.pxi"
+IF UNAME_SYSNAME == "Windows":
+    from windows cimport *
+    from dpi_aware_win cimport *
+ELIF UNAME_SYSNAME == "Linux":
+    from linux cimport *
+ELIF UNAME_SYSNAME == "Darwin":
+    from mac cimport *
 
 from cpp_utils cimport *
 from task cimport *
+
+IF UNAME_SYSNAME == "Linux":
+    cimport x11
+    cimport sandbox_linux
 
 from cef_string cimport *
 cdef extern from *:

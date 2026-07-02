@@ -63,24 +63,12 @@ cdef void NonCriticalError(object msg) except *:
     msg = "[Browser process] " + msg
     cef_log_error(PyStringToChar(msg))
 
-cdef extern from *:
-    """
-    #ifdef _WIN32
-    #include <windows.h>
-    static int _cefpy_get_win32_last_error(void) { return (int)GetLastError(); }
-    static int _cefpy_is_windows(void) { return 1; }
-    #else
-    static int _cefpy_get_win32_last_error(void) { return 0; }
-    static int _cefpy_is_windows(void) { return 0; }
-    #endif
-    """
-    cdef int _cefpy_get_win32_last_error() noexcept nogil
-    cdef int _cefpy_is_windows() noexcept nogil
-
 cpdef str GetSystemError():
-    if _cefpy_is_windows():
-        return "Error Code = %d" % _cefpy_get_win32_last_error()
-    return ""
+    IF UNAME_SYSNAME == "Windows":
+        cdef DWORD errorCode = GetLastError()
+        return "Error Code = %d" % errorCode
+    ELSE:
+        return ""
 
 cpdef py_bool IsFunctionOrMethod(object valueType):
     if (valueType == types.FunctionType

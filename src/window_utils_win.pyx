@@ -143,7 +143,10 @@ class WindowUtils(object):
 
     @classmethod
     def IsWindowHandle(cls, WindowHandle windowHandle):
-        return bool(IsWindow(<HWND>windowHandle))
+        IF UNAME_SYSNAME == "Windows":
+            return bool(IsWindow(<HWND>windowHandle))
+        ELSE:
+            return False
 
     @classmethod
     def InstallX11ErrorHandlers(cls):
