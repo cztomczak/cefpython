@@ -25,8 +25,17 @@ cdef public cpp_bool CookieAccessFilter_CanSendCookie(
         # browser was closed.
         if IsBrowserClosed(cef_browser):
             return False
-        if not cef_frame.get().GetBrowser().get():
-            return True  # default: allow cookie
+        # Issue #676: This callback runs on the IO thread, where
+        # CefFrame::GetBrowser() may return NULL (observed for cross-origin
+        # subresource requests). CEF also documents browser/frame as optional
+        # ("may be NULL for requests originating from service workers or
+        # CefURLRequest", cef_resource_request_handler.h > CefCookieAccessFilter).
+        # Without a resolvable browser we cannot build a PyFrame to dispatch on,
+        # so log and allow the cookie by default (CEF's own default is true).
+        if not cef_frame.get() or not cef_frame.get().GetBrowser().get():
+            Debug("CanSendCookie: no resolvable browser for the request"
+                  " (IO-thread / service-worker request); allowing by default")
+            return True
 
         browser = GetPyBrowser(cef_browser, "CanSendCookie")
         frame = GetPyFrame(cef_frame)
@@ -66,8 +75,14 @@ cdef public cpp_bool CookieAccessFilter_CanSaveCookie(
         # browser was closed.
         if IsBrowserClosed(cef_browser):
             return False
-        if not cef_frame.get().GetBrowser().get():
-            return True  # default: allow cookie
+        # Issue #676: see CanSendCookie above. On the IO thread
+        # CefFrame::GetBrowser() may be NULL (and CEF documents browser/frame
+        # as optional). Without a resolvable browser we cannot build a PyFrame,
+        # so log and allow the cookie by default.
+        if not cef_frame.get() or not cef_frame.get().GetBrowser().get():
+            Debug("CanSaveCookie: no resolvable browser for the request"
+                  " (IO-thread / service-worker request); allowing by default")
+            return True
 
         browser = GetPyBrowser(cef_browser, "CanSaveCookie")
         frame = GetPyFrame(cef_frame)

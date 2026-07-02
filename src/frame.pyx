@@ -30,12 +30,15 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
     cdef CefString frameId = cefFrame.get().GetIdentifier()
     cdef CefRefPtr[CefBrowser] cefBrowser = cefFrame.get().GetBrowser()
     if not cefBrowser.get():
-        # GetBrowser() can return NULL when a frame is being created or
-        # destroyed during rapid navigation (e.g. iframes on heavy pages).
+        # Issue #676: CefFrame::GetBrowser() may return NULL when called off
+        # the UI thread -- e.g. from the IO-thread CanSendCookie/CanSaveCookie
+        # callbacks for cross-origin subresource requests, or for requests not
+        # associated with a live frame (service workers / CefURLRequest).
         # Raising here prevents a SIGSEGV from the naked .get().GetIdentifier()
-        # chain that was here before this check.
+        # chain that was previously here. Callers that can hit this (the cookie
+        # filter) guard for it and fall back before calling GetPyFrame.
         raise Exception("GetPyFrame(): CefBrowser is NULL"
-                        " (frame lifecycle transition during navigation?)")
+                        " (CefFrame.GetBrowser() unavailable off the UI thread?)")
     cdef int browserId = cefBrowser.get().GetIdentifier()
     if not browserId:
         raise Exception("GetPyFrame(): browserId is 0 (browser not yet initialised)")
