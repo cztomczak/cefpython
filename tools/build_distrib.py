@@ -45,11 +45,12 @@ import base64
 import glob
 import hashlib
 import os
-import re
 import subprocess
 import sys
 import sysconfig
 import zipfile
+
+import cef_version
 
 try:
     import tomllib  # Python 3.11+
@@ -206,20 +207,8 @@ def _dev_version(base):
 
 
 def _read_version():
-    if sys.platform == "win32":
-        name = "cef_version_win.h"
-    elif sys.platform == "darwin":
-        name = "cef_version_macarm64.h"
-    else:
-        name = "cef_version_linux.h"
-    header = os.path.join("src", "version", name)
-    with open(header) as f:
-        for line in f:
-            m = re.match(r"#define CHROME_VERSION_MAJOR\s+(\d+)", line)
-            if m:
-                return "{major}.0".format(major=m.group(1))
-    raise RuntimeError(
-        "CHROME_VERSION_MAJOR not found in " + header)
+    """Base wheel version <major>.0 from the CEF version header."""
+    return cef_version.read()["CHROME_VERSION_MAJOR"] + ".0"
 
 
 if __name__ == "__main__":

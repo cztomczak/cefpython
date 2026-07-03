@@ -17,14 +17,7 @@ import re
 import shutil
 import sys
 
-
-def get_cefpython_version(header_file):
-    ret = {}
-    with open(header_file, "r") as f:
-        contents = f.read()
-    for match in re.finditer(r'^#define (\w+) "?([^\s"]+)"?', contents, re.MULTILINE):
-        ret[match.group(1)] = match.group(2)
-    return ret
+import cef_version
 
 
 # The build compiles with CEF's default API version, which cef_api_hash.h sets
@@ -120,7 +113,7 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
 
     # Read version metadata
-    ver = get_cefpython_version(args.cef_version_header)
+    ver = cef_version.parse_header(args.cef_version_header)
     version_str = "{major}.0".format(major=ver["CHROME_VERSION_MAJOR"])
     chrome_ver = "{major}.{minor}.{build}.{patch}".format(
         major=ver["CHROME_VERSION_MAJOR"],

@@ -14,6 +14,8 @@ import struct
 import sys
 import tempfile
 
+import cef_version
+
 # These sample apps will be deleted when creating setup/wheel packages
 CEF_SAMPLE_APPS = ["cefclient", "cefsimple", "ceftests", "chrome-sandbox"]
 
@@ -470,23 +472,11 @@ def get_version_from_command_line_args(caller_script, ignore_error=False):
 
 def get_cefpython_version():
     """Get CEF version from the 'src/version/' directory."""
-    if OS_POSTFIX == "mac":
-        header_name = "cef_version_macarm64.h"
-    else:
-        header_name = "cef_version_" + OS_POSTFIX + ".h"
-    header_file = os.path.join(SRC_DIR, "version", header_name)
-    return get_version_from_file(header_file)
+    return cef_version.read()
 
 
 def get_version_from_file(header_file):
-    with open(header_file, "r") as fp:
-        contents = fp.read()
-    ret = dict()
-    matches = re.findall(r'^#define (\w+) "?([^\s"]+)"?', contents,
-                         re.MULTILINE)
-    for match in matches:
-        ret[match[0]] = match[1]
-    return ret
+    return cef_version.parse_header(header_file)
 
 
 def get_msvs_for_python(vs_prefix=False):

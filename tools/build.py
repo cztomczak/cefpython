@@ -33,6 +33,8 @@ import shutil
 import subprocess
 import sys
 
+import cef_version
+
 BUILD_DIR = os.path.join("build", "_cmake_build")
 PKG_DIR = "cefpython3"
 
@@ -51,17 +53,7 @@ def run(cmd, **kwargs):
 def _read_cef_version():
     """Full CEF version string from the per-platform version header,
     e.g. "147.0.10+gd58e84d+chromium-147.0.7727.118"."""
-    if WINDOWS:
-        header = os.path.join("src", "version", "cef_version_win.h")
-    elif MAC:
-        header = os.path.join("src", "version", "cef_version_macarm64.h")
-    else:
-        header = os.path.join("src", "version", "cef_version_linux.h")
-    with open(header) as f:
-        for line in f:
-            if line.startswith("#define CEF_VERSION "):
-                return line.split('"')[1]
-    raise RuntimeError("CEF_VERSION not found in " + header)
+    return cef_version.read()["CEF_VERSION"]
 
 
 def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
