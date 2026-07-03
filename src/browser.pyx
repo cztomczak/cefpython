@@ -279,8 +279,6 @@ cdef class PyBrowser:
             # FocusHandler
             self.allowedClientCallbacks += ["OnTakeFocus", "OnSetFocus",
                                             "OnGotFocus"]
-            # ContextMenuHandler
-            self.allowedClientCallbacks += ["RunContextMenu"]
 
         if name not in self.allowedClientCallbacks:
             raise Exception("Browser.SetClientCallback() failed: unknown "

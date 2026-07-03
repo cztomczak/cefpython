@@ -10,7 +10,6 @@
 from cefpython3 import cefpython as cef
 import os
 import platform
-import subprocess
 import sys
 
 # GLOBALS
@@ -69,24 +68,6 @@ MAC = (platform.system() == "Darwin")
 # Must be set before creating QApplication.
 if LINUX:
     os.environ["QT_QPA_PLATFORM"] = "xcb"
-
-# On Linux, query the X11 pointer button mask directly to detect outside-clicks
-# on the context menu.  XQueryPointer returns real button state even while CEF
-# holds an X11 grab (grabs only affect event *delivery*, not state queries).
-if LINUX:
-    try:
-        from Xlib import display as _xlib_display_mod
-        _XLIB_DPY = _xlib_display_mod.Display()
-        def _x11_button_state():
-            try:
-                r = _XLIB_DPY.screen().root.query_pointer()
-                return r.mask & 0x1F00  # Button1Mask(256)..Button5Mask(4096)
-            except Exception:
-                return 0
-    except ImportError:
-        _XLIB_DPY = None
-        def _x11_button_state():
-            return int(QApplication.mouseButtons())
 
 # Configuration
 WIDTH = 800
@@ -205,10 +186,6 @@ class MainWindow(QMainWindow):
             self.container.installEventFilter(self.cef_widget)
 
     def closeEvent(self, event):
-        # Dismiss any open context menu before CloseBrowser so the callback
-        # is released before CEF destroys the browser's menu-manager state.
-        if LINUX and ContextMenuHandler._active_menu is not None:
-            ContextMenuHandler._active_menu.hide()
         # Defer window destruction until the browser has fully closed.
         #
         # CloseBrowser() is asynchronous: CEF tears the browser down and then
@@ -291,8 +268,6 @@ class CefWidget(QWidget):
             self.browser.SetClientHandler(LoadHandler(self.parent.navigation_bar))
             self.browser.SetClientHandler(FocusHandler(self))
             self.browser.SetClientHandler(CloseHandler(self.parent))
-            if LINUX:
-                self.browser.SetClientHandler(ContextMenuHandler(self))
         if WINDOWS:
             # Sync browser size to actual HWND client rect using device pixels.
             # PyQt6 high-DPI scaling means self.width()/height() may be smaller
@@ -390,11 +365,6 @@ class LoadHandler(object):
 
     def OnLoadStart(self, browser, **_):
         self.navigation_bar.url.setText(browser.GetUrl())
-        # Dismiss any open context menu before CEF tears down its menu state
-        # during navigation — holding the callback alive past this point
-        # triggers an observers_.empty() assertion in base/observer_list.h.
-        if LINUX and ContextMenuHandler._active_menu is not None:
-            ContextMenuHandler._active_menu.hide()
         if self.initial_app_loading:
             self.navigation_bar.cef_widget.setFocus()
             # Temporary fix no. 2 for focus issue on Linux (Issue #284)
@@ -421,173 +391,8 @@ class FocusHandler(object):
         if cef.GetAppSetting("debug"):
             print("[qt.py] FocusHandler.OnGotFocus")
         self.cef_widget.setFocus()
-        # Temporary fix no. 1 for focus issues on Linux (Issue #284).
-        # Do NOT call browser.SetFocus(True) here on Linux: it calls
-        # XSetInputFocus which steals keyboard focus from any context-menu
-        # popup that is currently shown, causing the menu to close instantly.
-        if LINUX:
-            if ContextMenuHandler._active_menu is not None:
-                # Fast path: button still down when OnGotFocus fires.
-                if _x11_button_state():
-                    menu = ContextMenuHandler._active_menu
-                    if not menu.geometry().contains(QCursor.pos()):
-                        menu.hide()
-                        return
-                # Start (or restart) the poll.  Covers:
-                # - hover via focus-follows-mouse (button not pressed yet)
-                # - fast click where button was released before OnGotFocus fired
-                ContextMenuHandler._start_focus_poll()
-
-
-class ContextMenuHandler(object):
-    """Show a Qt context menu instead of CEF's native Aura/Ozone menu.
-
-    CEF's native context menu on Linux/Xwayland fails to display correctly
-    when the browser window has been reparented (embedded). Qt's own QMenu
-    always appears at the right position because it uses QCursor.pos().
-
-    In CEF Chrome style (116+), CefRunContextMenuCallback::Continue() does
-    not execute commands — it silently does nothing.  All commands must be
-    dispatched directly through Python browser APIs.
-    """
-    SEPARATOR = None
-    _active_menu = None
-    _focus_poll = None  # QTimer: polls for button press after hover-outside
-
-    # CEF standard menu command IDs (cef_types.h cef_menu_id_t)
-    _CMD_BACK            = 100
-    _CMD_FORWARD         = 101
-    _CMD_RELOAD          = 102
-    _CMD_RELOAD_NOCACHE  = 103
-    _CMD_STOPLOAD        = 104
-    _CMD_PRINT           = 131
-    _CMD_VIEW_SOURCE     = 132
-    # Custom IDs added by context_menu_handler.cpp (MENU_ID_USER_FIRST = 26500)
-    _CMD_DEVTOOLS        = 26501
-    _CMD_RELOAD_PAGE     = 26502
-    _CMD_OPEN_EXTERNAL   = 26503
-    _CMD_OPEN_FRAME      = 26504
-
-    def __init__(self, cef_widget=None):
-        self._cef_widget = cef_widget
-
-    @staticmethod
-    def _stop_focus_poll():
-        if ContextMenuHandler._focus_poll is not None:
-            ContextMenuHandler._focus_poll.stop()
-            ContextMenuHandler._focus_poll = None
-
-    @staticmethod
-    def _start_focus_poll():
-        """Start a 5ms poll that hides the menu on an outside click."""
-        ContextMenuHandler._stop_focus_poll()
-        timer = QTimer()
-        def _check():
-            if ContextMenuHandler._active_menu is None:
-                ContextMenuHandler._stop_focus_poll()
-                return
-            if _x11_button_state():
-                menu = ContextMenuHandler._active_menu
-                # Only dismiss if cursor is outside the menu.  A button press
-                # inside the menu means the user selected an item — exec_()
-                # handles that; don't interfere.
-                if not menu.geometry().contains(QCursor.pos()):
-                    menu.hide()
-                # Stop poll either way once a button press is detected.
-                ContextMenuHandler._stop_focus_poll()
-        timer.timeout.connect(_check)
-        timer.start(5)
-        ContextMenuHandler._focus_poll = timer
-
-    @staticmethod
-    def _exec_cmd(browser, cmd_id, page_url):
-        if cmd_id == ContextMenuHandler._CMD_BACK:
-            browser.GoBack()
-        elif cmd_id == ContextMenuHandler._CMD_FORWARD:
-            browser.GoForward()
-        elif cmd_id in (ContextMenuHandler._CMD_RELOAD,
-                        ContextMenuHandler._CMD_RELOAD_NOCACHE,
-                        ContextMenuHandler._CMD_RELOAD_PAGE):
-            browser.ReloadIgnoreCache()
-        elif cmd_id == ContextMenuHandler._CMD_STOPLOAD:
-            browser.StopLoad()
-        elif cmd_id == ContextMenuHandler._CMD_PRINT:
-            browser.Print()
-        elif cmd_id == ContextMenuHandler._CMD_VIEW_SOURCE:
-            browser.LoadUrl("view-source:" + page_url)
-        elif cmd_id == ContextMenuHandler._CMD_DEVTOOLS:
-            browser.ShowDevTools()
-        elif cmd_id in (ContextMenuHandler._CMD_OPEN_EXTERNAL,
-                        ContextMenuHandler._CMD_OPEN_FRAME):
-            if page_url:
-                subprocess.Popen(["xdg-open", page_url])
-        # Editing and spellcheck commands (cut/copy/paste/select-all/…)
-        # are not yet handled — they silently do nothing.
-
-    def RunContextMenu(self, browser, model, callback, **_):
-        if ContextMenuHandler.SEPARATOR is None:
-            ContextMenuHandler.SEPARATOR = cef.MENUITEMTYPE_SEPARATOR
-        sep_type = ContextMenuHandler.SEPARATOR
-
-        page_url = browser.GetUrl()
-        cef_widget = self._cef_widget
-
-        # Snapshot the model (valid only during this call).
-        items = []
-        for i in range(model.GetCount()):
-            if model.GetTypeAt(i) == sep_type:
-                items.append(None)
-            else:
-                items.append((model.GetLabelAt(i).replace("&", ""),
-                               model.GetCommandIdAt(i),
-                               model.IsEnabledAt(i)))
-
-        def show_menu():
-            # If a previous menu is still open (user right-clicked twice quickly
-            # before the first was dismissed), hide it now.  Without this the
-            # second exec_() runs inside the first's event loop and both menus
-            # appear on screen simultaneously.
-            if ContextMenuHandler._active_menu is not None:
-                ContextMenuHandler._active_menu.hide()
-                ContextMenuHandler._stop_focus_poll()
-
-            # Cancel CEF's native context menu before displaying ours.
-            callback.Cancel()
-
-            menu = QMenu()
-            text_to_cmd = {}
-            for item in items:
-                if item is None:
-                    menu.addSeparator()
-                else:
-                    label, cmd_id, enabled = item
-                    act = menu.addAction(label)
-                    act.setEnabled(enabled)
-                    text_to_cmd[label] = cmd_id
-
-            ContextMenuHandler._active_menu = menu
-            # Stop the focus-poll whenever the menu hides for any reason
-            # (item click, outside-click via poll, navigation, window close).
-            menu.aboutToHide.connect(ContextMenuHandler._stop_focus_poll)
-            # exec_() runs a nested event loop; CEF's 10ms timer keeps firing.
-            if PYQT6 or PYSIDE6:
-                act = menu.exec(QCursor.pos())
-            else:
-                act = menu.exec_(QCursor.pos())
-            ContextMenuHandler._active_menu = None
-            ContextMenuHandler._stop_focus_poll()
-
-            if act is not None:
-                cmd_id = text_to_cmd.get(act.text())
-                if cmd_id is not None:
-                    b = cef_widget.browser if cef_widget else None
-                    if b:
-                        ContextMenuHandler._exec_cmd(b, cmd_id, page_url)
-
-        # Defer the QMenu to the next event-loop tick so that this call
-        # returns to CEF before any Qt event-loop work runs.
-        QTimer.singleShot(0, show_menu)
-        return True
+        # Focus fix for Linux (Issue #284): rely on the widget setFocus above;
+        # do not call browser.SetFocus(True) here.
 
 
 class NavigationBar(QFrame):
