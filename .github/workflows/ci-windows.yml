@@ -63,6 +63,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for the --dev wheel version (git commit count)
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -111,7 +113,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
 
       - name: Build wheel
-        run: python tools/build_distrib.py
+        run: python tools/build_distrib.py --dev
 
       - name: Test the built wheel
         run: |

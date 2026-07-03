@@ -5,15 +5,21 @@
 """Create a distributable wheel from the pre-built cefpython3/ package directory.
 
 Usage:
-    build_distrib.py [--out-dir DIR]
+    build_distrib.py [--out-dir DIR] [--dev | --version VERSION]
 
 Options:
-    --out-dir DIR   Output directory for the .whl file (default: build/dist).
+    --out-dir DIR       Output directory for the .whl file (default: build/dist).
+    --dev               Produce a unique PEP 440 development version derived from
+                        git: <major>.0.dev<commit-count>+g<short-hash>
+                        (e.g. 147.0.dev5231+g98cd08e). Used by CI so every build
+                        has a distinct, commit-identifiable version. Requires the
+                        full git history (checkout with fetch-depth: 0).
+    --version VERSION   Use VERSION verbatim (overrides --dev and the header).
 
 The cefpython3/ directory must already contain the compiled outputs:
     cefpython_py<XY>.pyd, subprocess.exe, CEF runtime files, __init__.py
 
-Version is read automatically from src/version/cef_version_win.h.
+The base version is read automatically from src/version/cef_version_*.h.
 """
 
 import base64
@@ -21,6 +27,7 @@ import glob
 import hashlib
 import os
 import re
+import subprocess
 import sys
 import sysconfig
 import zipfile
@@ -35,7 +42,13 @@ def main():
     os.chdir(repo_root)
     os.makedirs(out_dir, exist_ok=True)
 
-    version = _read_version()
+    if "--version" in sys.argv:
+        version = sys.argv[sys.argv.index("--version") + 1]
+    elif "--dev" in sys.argv:
+        version = _dev_version(_read_version())
+    else:
+        version = _read_version()
+    print("[build_distrib.py] Version:", version)
     vi = sys.version_info
     cp = "cp{0}{1}".format(vi.major, vi.minor)
     platform = sysconfig.get_platform().replace("-", "_").replace(".", "_")
@@ -111,6 +124,25 @@ def main():
         zf.writestr(record_arcname, record_data)
 
     print("[build_distrib.py] Done:", wheel_path)
+
+
+def _dev_version(base):
+    """<base>.dev<commit-count>+g<short-hash> from git (PEP 440 dev version).
+
+    Gives every CI build a unique, commit-identifiable version, e.g.
+    147.0.dev5231+g98cd08e. Falls back to <base>.dev0 if git is unavailable.
+    """
+    try:
+        count = subprocess.check_output(
+            ["git", "rev-list", "--count", "HEAD"]).decode().strip()
+        short = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"]).decode().strip()
+        return "{base}.dev{count}+g{short}".format(
+            base=base, count=count, short=short)
+    except Exception as exc:
+        print("[build_distrib.py] WARNING: git version derivation failed"
+              " (%s); using %s.dev0" % (exc, base))
+        return base + ".dev0"
 
 
 def _read_version():
