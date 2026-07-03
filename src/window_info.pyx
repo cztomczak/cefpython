@@ -17,17 +17,27 @@ cdef void SetCefWindowInfo(
     # branch 6422 / Chromium 125).  See the enum doc in
     # include/internal/cef_types_runtime.h: Chrome style provides the
     # full Chrome UI; Alloy style provides the content-layer view with
-    # additional client callbacks and supports windowless rendering.
+    # additional client callbacks and windowless (OSR) rendering.
     #
-    # Since the chrome bootstrap (the default for CEF builds since
-    # branch 6478 / Chromium 125) makes windowed parent windows default
-    # to Chrome style, cefpython must opt back into Alloy style
-    # explicitly.  Without it, SetAsChild() would get a Chrome-style
-    # Views window that can't be parented into the host GTK/Qt window,
-    # and the LifeSpanHandler / RequestHandler / etc. callbacks
-    # cefpython exposes would not fire as expected.  Off-screen
-    # rendering is documented to always use Alloy style anyway, but the
-    # field is harmless to set there too.
+    # The chrome bootstrap (default since CEF branch 6478 / Chromium
+    # 125) makes a windowed parent window default to Chrome style, so
+    # cefpython opts back into Alloy explicitly.  Alloy is required (not
+    # just preferred) for cefpython's use case:
+    #   - Windowless / off-screen rendering is Alloy-only
+    #     (cef_types_runtime.h).
+    #   - cefpython's JavaScript bindings do not work under Chrome style:
+    #     verified on CEF 147 that window.<binding> is never injected for
+    #     a Chrome-style browser while Alloy injects it.  cefpython's JS
+    #     integration (bindings, Python callbacks, V8) rides on the Alloy
+    #     renderer path.
+    #   - On macOS an embedded (native-parent) browser cannot use Chrome
+    #     style at all (CEF issue #3294; see chrome_child_window.cc
+    #     GetParentWidget()).
+    # Note: embedding itself is NOT the blocker - a Chrome-style browser
+    # CAN be parented into a foreign host window on Linux/Windows via
+    # CefBrowserPlatformDelegateChromeChildWindow (verified: SetAsChild
+    # parents it correctly).  The blockers are the missing JS integration
+    # and OSR above.
     if not windowInfo.windowType:
         raise Exception("WindowInfo: windowType is not set")
 
