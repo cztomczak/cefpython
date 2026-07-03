@@ -11,16 +11,36 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 license = { text = "BSD-3-Clause" }
 description = "Python bindings for the Chromium Embedded Framework"
+authors = [
+    { name = "Czarek Tomczak", email = "czarek.tomczak@gmail.com" },
+]
+keywords = ["cef", "chromium", "browser", "embedded", "html5", "gui"]
 classifiers = [
+    "Development Status :: 6 - Mature",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "License :: OSI Approved :: BSD Software License",
-    "Operating System :: OS Independent",
+    "Topic :: Desktop Environment",
+    "Topic :: Internet",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Browsers",
+    "Topic :: Multimedia",
+    "Topic :: Software Development :: User Interfaces",
 ]
+
+[project.urls]
+Homepage = "https://github.com/cztomczak/cefpython"
+Repository = "https://github.com/cztomczak/cefpython"
+Download = "https://github.com/cztomczak/cefpython/releases"
 
 [tool.scikit-build]
 cmake.build-type = "Release"

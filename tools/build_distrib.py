@@ -36,6 +36,9 @@ The cefpython3/ directory must already contain the compiled outputs:
     cefpython_py<XY>.pyd, subprocess.exe, CEF runtime files, __init__.py
 
 The base version is read automatically from src/version/cef_version_*.h.
+Wheel metadata (name, summary, author, URLs, keywords, classifiers) is read
+from the [project] table in pyproject.toml, so the wheel and pyproject stay a
+single source of truth.
 """
 
 import base64
@@ -47,6 +50,11 @@ import subprocess
 import sys
 import sysconfig
 import zipfile
+
+try:
+    import tomllib  # Python 3.11+
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
 
 
 def main():
@@ -111,15 +119,10 @@ def main():
                 info = zipfile.ZipInfo.from_file(filepath, arcname)
                 zf.writestr(info, data)
 
-        # dist-info/METADATA
-        _add_bytes(dist_info + "/METADATA", (
-            "Metadata-Version: 2.1\n"
-            "Name: cefpython3\n"
-            "Version: {v}\n"
-            "Summary: Python bindings for the Chromium Embedded Framework\n"
-            "Requires-Python: >=3.10\n"
-            "License: BSD-3-Clause\n"
-        ).format(v=version).encode())
+        # dist-info/METADATA (all fields sourced from [project] in pyproject.toml
+        # so the wheel and pyproject stay a single source of truth)
+        _add_bytes(dist_info + "/METADATA",
+                   _core_metadata(version, _read_project_metadata()))
 
         # dist-info/WHEEL
         _add_bytes(dist_info + "/WHEEL", (
@@ -140,6 +143,47 @@ def main():
         zf.writestr(record_arcname, record_data)
 
     print("[build_distrib.py] Done:", wheel_path)
+
+
+def _read_project_metadata():
+    """Return the [project] table from pyproject.toml (CWD is the repo root)."""
+    with open("pyproject.toml", "rb") as f:
+        return tomllib.load(f).get("project", {})
+
+
+def _core_metadata(version, project):
+    """Build wheel core metadata (METADATA) from the [project] table.
+
+    Version is passed in (it is dynamic, computed from the CEF header / git);
+    everything else comes from pyproject.toml so there is a single source.
+    """
+    lines = [
+        "Metadata-Version: 2.1",
+        "Name: " + project.get("name", "cefpython3"),
+        "Version: " + version,
+    ]
+    if project.get("description"):
+        lines.append("Summary: " + project["description"])
+    for author in project.get("authors", []):
+        if author.get("name"):
+            lines.append("Author: " + author["name"])
+        if author.get("email"):
+            lines.append("Author-email: " + author["email"])
+    lic = project.get("license")
+    if isinstance(lic, dict) and lic.get("text"):
+        lines.append("License: " + lic["text"])
+    elif isinstance(lic, str):
+        lines.append("License: " + lic)
+    if project.get("requires-python"):
+        lines.append("Requires-Python: " + project["requires-python"])
+    if project.get("keywords"):
+        lines.append("Keywords: " + ",".join(project["keywords"]))
+    for label, url in project.get("urls", {}).items():
+        lines.append("Project-URL: {0}, {1}".format(label, url))
+    for classifier in project.get("classifiers", []):
+        lines.append("Classifier: " + classifier)
+
+    return ("\n".join(lines) + "\n").encode("utf-8")
 
 
 def _dev_version(base):
