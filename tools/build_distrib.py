@@ -4,6 +4,22 @@
 
 """Create a distributable wheel from the pre-built cefpython3/ package directory.
 
+Packaging workflow (current):
+    This script performs only the final packaging step. The full pipeline is
+    driven by the CI workflows (.github/workflows/ci-*.yml):
+      1. tools/download_cef.py            - fetch the CEF binary distribution.
+      2. tools/automate.py --prebuilt-cef - lay out CEF_ROOT for the build.
+      3. CMake build                      - compile cefpython_py<XY>.{so,pyd}
+                                            and the subprocess helper.
+      4. stage into cefpython3/           - copy the compiled module, the
+                                            subprocess binary and the CEF
+                                            runtime files next to __init__.py.
+      5. build_distrib.py (this script)   - zip cefpython3/ into a PEP 427 wheel
+                                            with a generated .dist-info
+                                            (METADATA, WHEEL, top_level.txt,
+                                            RECORD). No compilation happens here.
+      6. (CI) install the wheel and run the unit tests against it.
+
 Usage:
     build_distrib.py [--out-dir DIR] [--dev | --version VERSION]
 
