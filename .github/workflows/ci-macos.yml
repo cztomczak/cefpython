@@ -16,6 +16,8 @@ jobs:
   download-cef:
     runs-on: macos-14
     timeout-minutes: 15
+    outputs:
+      cef_version: ${{ steps.cef-version.outputs.value }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,12 +30,8 @@ jobs:
       - name: Read CEF version
         id: cef-version
         run: |
-          ver=$(python3 -c "
-          import re, sys
-          h = open('src/version/cef_version_macarm64.h').read()
-          m = re.search(r'#define CEF_VERSION \"([^\"]+)\"', h)
-          print(m.group(1))
-          ")
+          ver=$(sed -n 's/.*#define CEF_VERSION "\([^"]*\)".*/\1/p' \
+                src/version/cef_version_macarm64.h)
           echo "value=$ver" >> $GITHUB_OUTPUT
 
       - name: Cache CEF binaries
@@ -43,7 +41,9 @@ jobs:
           path: |
             build/cef_binary_*
             build/cef*_macarm64
-          key: cef-macosarm64-v3-${{ steps.cef-version.outputs.value }}
+          # Keyed on the CEF version (each version gets its own cache) and on the
+          # download/prepare scripts (invalidate when they change).
+          key: cef-macosarm64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ steps.cef-version.outputs.value }}
 
       - name: Install build tools
         run: python tools/requirements.py
@@ -51,7 +51,7 @@ jobs:
       - name: Download CEF binaries
         run: python tools/download_cef.py
 
-  compile:
+  build:
     needs: download-cef
     runs-on: macos-14
     timeout-minutes: 90
@@ -69,17 +69,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Read CEF version
-        id: cef-version
-        run: |
-          ver=$(python3 -c "
-          import re, sys
-          h = open('src/version/cef_version_macarm64.h').read()
-          m = re.search(r'#define CEF_VERSION \"([^\"]+)\"', h)
-          print(m.group(1))
-          ")
-          echo "value=$ver" >> $GITHUB_OUTPUT
-
       - name: Restore CEF cache
         uses: actions/cache/restore@v4
         if: ${{ inputs.bypass_cache != true }}
@@ -87,21 +76,13 @@ jobs:
           path: |
             build/cef_binary_*
             build/cef*_macarm64
-          key: cef-macosarm64-v3-${{ steps.cef-version.outputs.value }}
+          key: cef-macosarm64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ needs.download-cef.outputs.cef_version }}
 
       - name: Install build tools
         run: python tools/requirements.py
 
       - name: Prepare prebuilt CEF
         run: python tools/automate.py --prebuilt-cef
-
-      - name: Verify CEF architecture
-        run: |
-          wrapper=$(ls build/cef*_macarm64/lib/libcef_dll_wrapper.a 2>/dev/null | head -1)
-          if [ -z "$wrapper" ]; then echo "libcef_dll_wrapper.a not found"; exit 1; fi
-          archs=$(lipo -info "$wrapper" 2>&1)
-          echo "$archs"
-          echo "$archs" | grep -q arm64 || { echo "ERROR: libcef_dll_wrapper.a is not arm64"; exit 1; }
 
       - name: Configure CMake
         run: cmake -S . -B build/_cmake_build -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -119,56 +100,24 @@ jobs:
             ! -name 'cefclient*' ! -name 'cefsimple*' ! -name 'ceftests*' \
             -exec cp -r {} build/artifacts/ \;
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-py${{ matrix.python-version }}-macosarm64
-          path: build/artifacts/
-          retention-days: 1
+      - name: Set up cefpython3 package
+        run: cp -r build/artifacts/. cefpython3/
 
-  test:
-    needs: compile
-    runs-on: macos-14
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-py${{ matrix.python-version }}-macosarm64
-          path: build/artifacts/
-
-      - name: Set up cefpython3 package for testing
+      - name: Codesign binaries
         run: |
-          cp -r build/artifacts/. cefpython3/
-          chmod +x cefpython3/subprocess
-          # Ad-hoc sign our compiled binaries so macOS allows them to run.
-          # (Our freshly built binaries have no signature; unsigned binaries
-          # are blocked on macOS 14+.)
+          # Ad-hoc sign our freshly built binaries so macOS 14+ Gatekeeper
+          # allows them to run (unsigned binaries are blocked; the GPU process
+          # reuses subprocess with --type=gpu-process and would exit 1003).
           codesign --force --sign - cefpython3/subprocess
           for f in cefpython3/cefpython_py*.so; do codesign --force --sign - "$f"; done
 
-      - name: Run unit tests
+      - name: Create app bundle for tests
         run: |
-          # Create a minimal app bundle so Python has a CFBundleIdentifier.
-          # CEF 130+ forms the MachPortRendezvousServer bootstrap service name
-          # as BaseBundleID()+".MachPortRendezvousServer."+pid.  Without a
-          # bundle ID the name starts with "." which bootstrap_register rejects,
-          # causing renderer subprocesses to crash.  Setting CFProcessPath
-          # before Python starts makes CFBundleGetMainBundle() return this
-          # bundle, giving BaseBundleID() a valid value before CefInitialize().
+          # CEF 130+ forms the MachPortRendezvousServer bootstrap name from
+          # BaseBundleID(); without a CFBundleIdentifier it starts with "." and
+          # bootstrap_register rejects it, crashing renderer subprocesses.
+          # Setting CFProcessPath to a minimal app bundle gives a valid bundle
+          # ID before CefInitialize(). Reused by both test steps below.
           BUNDLE_DIR="${{ github.workspace }}/CEFPython.app"
           mkdir -p "$BUNDLE_DIR/Contents/MacOS"
           ln -sf "$(which python)" "$BUNDLE_DIR/Contents/MacOS/python"
@@ -186,49 +135,26 @@ jobs:
           </dict>
           </plist>
           PLIST
-          PYTHONPATH="${{ github.workspace }}" \
-          CFProcessPath="$BUNDLE_DIR/Contents/MacOS/python" \
-            python unittests/_test_runner.py
+          echo "CFProcessPath=$BUNDLE_DIR/Contents/MacOS/python" >> $GITHUB_ENV
 
-  wheel:
-    needs: test
-    runs-on: macos-14
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-py${{ matrix.python-version }}-macosarm64
-          path: build/artifacts/
-
-      - name: Set up cefpython3 package
-        run: cp -r build/artifacts/. cefpython3/
-
-      - name: Codesign binaries for distribution
-        run: |
-          # Ad-hoc sign the subprocess binary so macOS 14+ Gatekeeper allows
-          # it to execute when users install the wheel. Without signing,
-          # macOS blocks the unsigned binary and the GPU process (which uses
-          # the same binary with --type=gpu-process) exits with code 1003
-          # (GPU_DEAD_ON_ARRIVAL), causing a fatal crash.
-          codesign --force --sign - cefpython3/subprocess
-          for f in cefpython3/cefpython_py*.so; do codesign --force --sign - "$f"; done
+      - name: Run unit tests
+        run: python unittests/_test_runner.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
 
       - name: Build wheel
         run: python tools/build_distrib.py
+
+      - name: Test the built wheel
+        run: |
+          # Install the wheel and run the unit tests against the INSTALLED
+          # package (binaries were codesigned before build_distrib). No
+          # PYTHONPATH: _test_runner.py chdir's to unittests/, so the repo's
+          # cefpython3/ build dir is never on sys.path and import cefpython3
+          # resolves to the installed wheel. CFProcessPath is inherited from
+          # the app-bundle step.
+          pip install build/dist/*.whl
+          python unittests/_test_runner.py
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4

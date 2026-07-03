@@ -2,9 +2,9 @@ name: CI Windows
 
 on:
   push:
-    branches: [ "master", "cefpython147" ]
+    branches: ["master", "cefpython147"]
   pull_request:
-    branches: [ "master", "cefpython147" ]
+    branches: ["master", "cefpython147"]
   workflow_dispatch:
     inputs:
       bypass_cache:
@@ -16,6 +16,8 @@ jobs:
   download-cef:
     runs-on: windows-latest
     timeout-minutes: 15
+    outputs:
+      cef_version: ${{ steps.cef-version.outputs.value }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,7 +41,9 @@ jobs:
           path: |
             build/cef_binary_*
             build/cef*_win64
-          key: cef-windows64-${{ steps.cef-version.outputs.value }}
+          # Keyed on the CEF version (each version gets its own cache) and on the
+          # download/prepare scripts (invalidate when they change).
+          key: cef-windows64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ steps.cef-version.outputs.value }}
 
       - name: Install build tools
         run: python tools/requirements.py
@@ -47,7 +51,7 @@ jobs:
       - name: Download CEF binaries
         run: python tools/download_cef.py
 
-  wheel:
+  build:
     needs: download-cef
     runs-on: windows-latest
     timeout-minutes: 75
@@ -65,13 +69,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Read CEF version
-        id: cef-version
-        run: |
-          $ver = (Select-String -Path src/version/cef_version_win.h `
-                  -Pattern '#define CEF_VERSION "([^"]+)"').Matches[0].Groups[1].Value
-          echo "value=$ver" >> $env:GITHUB_OUTPUT
-
       - name: Restore CEF cache
         uses: actions/cache/restore@v4
         if: ${{ inputs.bypass_cache != true }}
@@ -79,7 +76,7 @@ jobs:
           path: |
             build/cef_binary_*
             build/cef*_win64
-          key: cef-windows64-${{ steps.cef-version.outputs.value }}
+          key: cef-windows64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ needs.download-cef.outputs.cef_version }}
 
       - name: Install build tools
         run: python tools/requirements.py
@@ -115,6 +112,15 @@ jobs:
 
       - name: Build wheel
         run: python tools/build_distrib.py
+
+      - name: Test the built wheel
+        run: |
+          # Install the wheel and run the unit tests against the INSTALLED
+          # package. No PYTHONPATH: _test_runner.py chdir's to unittests/, so
+          # the repo's cefpython3/ build dir is never on sys.path and
+          # import cefpython3 resolves to the installed wheel.
+          pip install (Get-ChildItem build/dist/*.whl | Select-Object -First 1).FullName
+          python unittests/_test_runner.py
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
