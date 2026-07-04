@@ -18,6 +18,9 @@ Packaging workflow (current):
                                             with a generated .dist-info
                                             (METADATA, WHEEL, top_level.txt,
                                             RECORD). No compilation happens here.
+                                            On Linux, libcef.so is stripped of
+                                            debug symbols first (Issue #262; it
+                                            ships ~1.3 GB with them).
       6. (CI) install the wheel and run the unit tests against it.
 
 Usage:
@@ -94,6 +97,8 @@ def main():
               " run compile step first".format(ext=ext, pkg_dir=pkg_dir))
         sys.exit(1)
 
+    _reduce_package_size_issue262(pkg_dir)
+
     records = []
 
     def _add_bytes(arcname, data):
@@ -118,6 +123,9 @@ def main():
                     hashlib.sha256(data).digest()).rstrip(b"=").decode()
                 records.append((arcname, "sha256=" + digest, str(len(data))))
                 info = zipfile.ZipInfo.from_file(filepath, arcname)
+                # ZipInfo.from_file() defaults to ZIP_STORED; deflate so the
+                # wheel is actually compressed (matches the ZipFile mode).
+                info.compress_type = zipfile.ZIP_DEFLATED
                 zf.writestr(info, data)
 
         # dist-info/METADATA (all fields sourced from [project] in pyproject.toml
@@ -185,6 +193,28 @@ def _core_metadata(version, project):
         lines.append("Classifier: " + classifier)
 
     return ("\n".join(lines) + "\n").encode("utf-8")
+
+
+def _reduce_package_size_issue262(pkg_dir):
+    """Linux only: strip debug symbols from libcef.so (Issue #262).
+
+    CEF ships libcef.so with embedded debug symbols (~1.3 GB), which otherwise
+    bloat the Linux wheel far beyond the other platforms. Ported from the
+    pre-CMake build_distrib.py. `strip` keeps the dynamic symbols needed for
+    linking and removes .symtab/.debug_*.
+    """
+    if not sys.platform.startswith("linux"):
+        return
+    libcef_so = os.path.join(pkg_dir, "libcef.so")
+    if not os.path.exists(libcef_so):
+        return
+    before = os.path.getsize(libcef_so)
+    print("[build_distrib.py] Strip {0} (Issue #262)".format(
+        os.path.basename(libcef_so)))
+    code = subprocess.call(["strip", libcef_so])
+    assert code == 0, "strip command failed"
+    print("[build_distrib.py] libcef.so: {0:.0f} MB -> {1:.0f} MB".format(
+        before / 1e6, os.path.getsize(libcef_so) / 1e6))
 
 
 def _dev_version(base):
