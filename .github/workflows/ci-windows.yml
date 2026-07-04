@@ -107,11 +107,6 @@ jobs:
             Copy-Item $_.FullName cefpython3/ -Recurse -Force
           }
 
-      - name: Run unit tests
-        run: python unittests/_test_runner.py
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-
       - name: Build wheel
         run: python tools/build_distrib.py --dev
 

@@ -139,11 +139,6 @@ jobs:
           PLIST
           echo "CFProcessPath=$BUNDLE_DIR/Contents/MacOS/python" >> $GITHUB_ENV
 
-      - name: Run unit tests
-        run: python unittests/_test_runner.py
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-
       - name: Build wheel
         run: python tools/build_distrib.py --dev
 

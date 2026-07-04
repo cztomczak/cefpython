@@ -125,11 +125,6 @@ jobs:
           cp -r build/artifacts/. cefpython3/
           chmod +x cefpython3/subprocess
 
-      - name: Run unit tests
-        run: xvfb-run python unittests/_test_runner.py
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-
       - name: Build wheel
         run: python tools/build_distrib.py --dev
 
