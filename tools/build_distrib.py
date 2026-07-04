@@ -20,7 +20,9 @@ Packaging workflow (current):
                                             RECORD). No compilation happens here.
                                             On Linux, libcef.so is stripped of
                                             debug symbols first (Issue #262; it
-                                            ships ~1.3 GB with them).
+                                            ships ~1.3 GB with them). On Windows,
+                                            msvcp140.dll is bundled next to the
+                                            extension (Issue #359).
       6. (CI) install the wheel and run the unit tests against it.
 
 Usage:
@@ -48,6 +50,7 @@ import base64
 import glob
 import hashlib
 import os
+import shutil
 import subprocess
 import sys
 import sysconfig
@@ -98,6 +101,7 @@ def main():
         sys.exit(1)
 
     _reduce_package_size_issue262(pkg_dir)
+    _bundle_msvcp140_issue359(pkg_dir)
 
     records = []
 
@@ -215,6 +219,28 @@ def _reduce_package_size_issue262(pkg_dir):
     assert code == 0, "strip command failed"
     print("[build_distrib.py] libcef.so: {0:.0f} MB -> {1:.0f} MB".format(
         before / 1e6, os.path.getsize(libcef_so) / 1e6))
+
+
+def _bundle_msvcp140_issue359(pkg_dir):
+    """CEF Python module is written in Cython and is a Python C++
+    extension and depends on msvcp140.dll. See Issue #359. These
+    dependencies are not included with Python binaries from Python.org.
+
+    Ported from make_installer.py (copy_cpp_extension_dependencies_issue359):
+    copy msvcp140.dll from %SYSTEMROOT%\\System32 next to the extension.
+    Python does ship vcruntime140.dll / vcruntime140_1.dll, so msvcp140.dll
+    is the only gap.
+    """
+    if sys.platform != "win32":
+        return
+    system32 = os.path.join(os.environ.get("SYSTEMROOT", r"C:\Windows"),
+                            "System32")
+    src = os.path.join(system32, "msvcp140.dll")
+    if not os.path.exists(src):
+        raise Exception("C++ extension dll dependency not found: {0}"
+                        " (Issue #359)".format(src))
+    shutil.copy2(src, os.path.join(pkg_dir, "msvcp140.dll"))
+    print("[build_distrib.py] Bundle msvcp140.dll (Issue #359)")
 
 
 def _dev_version(base):
