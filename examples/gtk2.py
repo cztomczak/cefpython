@@ -33,11 +33,28 @@ MESSAGE_LOOP_TIMER = 1
 MESSAGE_LOOP_CEF = 2  # Pass --message-loop-cef flag to script on Linux
 g_message_loop = None
 
+# Under CEF's Chrome runtime the browser context initializes asynchronously,
+# so a browser can only be created after OnContextInitialized has fired. These
+# module-level helpers coordinate that: embed_browser() defers itself until the
+# context is ready, and the callback below runs any deferred embed.
+g_context_initialized = False
+g_pending_embed = None
+
+
+def _on_context_initialized():
+    global g_context_initialized
+    g_context_initialized = True
+    if g_pending_embed is not None:
+        g_pending_embed()
+
 
 def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     configure_message_loop()
+    # Register before cef.Initialize(); OnContextInitialized may fire during it.
+    cef.SetGlobalClientCallback("OnContextInitialized",
+                                _on_context_initialized)
     cef.Initialize()
     gobject.threads_init()
     Gtk2Example()
@@ -108,6 +125,13 @@ class Gtk2Example:
             gobject.timeout_add(10, self.on_timer)
 
     def embed_browser(self):
+        global g_pending_embed
+        if not g_context_initialized:
+            # Chrome runtime initializes the browser context asynchronously;
+            # embed once OnContextInitialized fires (see main()).
+            g_pending_embed = self.embed_browser
+            return
+        g_pending_embed = None
         windowInfo = cef.WindowInfo()
         size = self.main_window.get_size()
         rect = [0, 0, size[0], size[1]]

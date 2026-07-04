@@ -38,16 +38,22 @@ g_htmlcode = """
 
 
 def main():
+    def on_context_initialized():
+        # Under CEF's Chrome runtime the browser context initializes
+        # asynchronously, so create the browser here rather than right after
+        # cef.Initialize().
+        browser = cef.CreateBrowserSync(url=cef.GetDataUrl(g_htmlcode),
+                                        window_title="Javascript Bindings")
+        browser.SetClientHandler(LoadHandler())
+        bindings = cef.JavascriptBindings()
+        bindings.SetFunction("py_function", py_function)
+        bindings.SetFunction("py_callback", py_callback)
+        browser.SetJavascriptBindings(bindings)
+
+    # Register before cef.Initialize(); OnContextInitialized may fire during it.
+    cef.SetGlobalClientCallback("OnContextInitialized", on_context_initialized)
     cef.Initialize()
-    browser = cef.CreateBrowserSync(url=cef.GetDataUrl(g_htmlcode),
-                                    window_title="Javascript Bindings")
-    browser.SetClientHandler(LoadHandler())
-    bindings = cef.JavascriptBindings()
-    bindings.SetFunction("py_function", py_function)
-    bindings.SetFunction("py_callback", py_callback)
-    browser.SetJavascriptBindings(bindings)
     cef.MessageLoop()
-    del browser
     cef.Shutdown()
 
 

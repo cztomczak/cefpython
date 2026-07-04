@@ -37,17 +37,24 @@ STATE_ON_TARGET_2 = "on_target_2"    # final example.com load complete
 
 def main():
     print(__doc__)
+
+    def on_context_initialized():
+        # Under CEF's Chrome runtime the browser context initializes
+        # asynchronously, so create the browser here rather than right after
+        # cef.Initialize().
+        browser = cef.CreateBrowserSync(
+            url=TARGET_URL,
+            window_title="Cross-domain JS binding test")
+        handler = CrossDomainHandler(browser)
+        browser.SetClientHandler(handler)
+        bindings = cef.JavascriptBindings()
+        bindings.SetFunction("OnTargetPageReady", handler["_OnTargetPageReady"])
+        browser.SetJavascriptBindings(bindings)
+
+    # Register before cef.Initialize(); OnContextInitialized may fire during it.
+    cef.SetGlobalClientCallback("OnContextInitialized", on_context_initialized)
     cef.Initialize()
-    browser = cef.CreateBrowserSync(url=TARGET_URL,
-                                    window_title="Cross-domain JS binding test")
-    handler = CrossDomainHandler(browser)
-    browser.SetClientHandler(handler)
-    bindings = cef.JavascriptBindings()
-    bindings.SetFunction("OnTargetPageReady", handler["_OnTargetPageReady"])
-    browser.SetJavascriptBindings(bindings)
     cef.MessageLoop()
-    del handler
-    del browser
     cef.Shutdown()
 
 

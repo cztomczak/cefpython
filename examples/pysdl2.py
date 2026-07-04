@@ -104,6 +104,18 @@ if sys.platform == 'darwin':
             "       To install type: pip install pyobjc")
 
 
+# Under CEF's Chrome runtime the browser context initializes asynchronously,
+# so the (off-screen) browser can only be created after OnContextInitialized
+# has fired. This flag is set by the callback registered before
+# cef.Initialize().
+g_context_initialized = False
+
+
+def _on_context_initialized():
+    global g_context_initialized
+    g_context_initialized = True
+
+
 def main():
     """
     Parses input, initializes everything and then runs the main loop of the
@@ -193,6 +205,9 @@ def main():
         # Tweaking OSR performance (Issue #240)
         "windowless_frame_rate": frameRate
     }
+    # Register before cef.Initialize(); OnContextInitialized may fire during it.
+    cef.SetGlobalClientCallback("OnContextInitialized",
+                                _on_context_initialized)
     cef.Initialize(settings={"windowless_rendering_enabled": True},
                    switches=switches)
 
@@ -296,6 +311,14 @@ def main():
     # RenderHandler instances, creating SDL windows for popups lazily.
     renderHandler = MetaRenderHandler(renderer, width, height - headerHeight,
                                       deviceScaleFactor, rendererFlags)
+    # Create the browser instance. Unlike the windowed examples (which embed
+    # the browser from an event callback), this linear off-screen example
+    # creates it inline, so ensure the CEF context has finished initializing
+    # first. On most platforms it already has by this point (it initializes
+    # during cef.Initialize()); otherwise let the message loop run until
+    # OnContextInitialized fires.
+    while not g_context_initialized:
+        cef.MessageLoopWork()
     # Create the browser instance
     browser = cef.CreateBrowserSync(window_info,
                                     url="https://www.google.com/",

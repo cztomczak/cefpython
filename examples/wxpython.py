@@ -37,6 +37,21 @@ HEIGHT = 640
 g_count_windows = 0
 
 
+# Under CEF's Chrome runtime the browser context initializes asynchronously,
+# so a browser can only be created after OnContextInitialized has fired. These
+# module-level helpers coordinate that: embed_browser() defers itself until the
+# context is ready, and the callback below runs any deferred embed.
+g_context_initialized = False
+g_pending_embed = None
+
+
+def _on_context_initialized():
+    global g_context_initialized
+    g_context_initialized = True
+    if g_pending_embed is not None:
+        g_pending_embed()
+
+
 def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
@@ -47,6 +62,9 @@ def main():
         # the same time. This is an incorrect approach
         # and only a temporary fix.
         settings["external_message_pump"] = True
+    # Register before cef.Initialize(); OnContextInitialized may fire during it.
+    cef.SetGlobalClientCallback("OnContextInitialized",
+                                _on_context_initialized)
     cef.Initialize(settings=settings)
     app = CefApp(False)
     app.MainLoop()
@@ -166,6 +184,13 @@ class MainFrame(wx.Frame):
         self.SetMenuBar(menubar)
 
     def embed_browser(self):
+        global g_pending_embed
+        if not g_context_initialized:
+            # Chrome runtime initializes the browser context asynchronously;
+            # embed once OnContextInitialized fires (see main()).
+            g_pending_embed = self.embed_browser
+            return
+        g_pending_embed = None
         window_info = cef.WindowInfo()
         (width, height) = self.browser_panel.GetClientSize().Get()
         assert self.browser_panel.GetHandle(), "Window handle not available"

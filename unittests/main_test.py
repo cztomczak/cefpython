@@ -203,6 +203,88 @@ class MainTest_IsolatedTest(unittest.TestCase):
             # failures for utility subprocesses on macOS CI runners.
             # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
             switches["enable-features"] = "NetworkServiceInProcess2"
+        # Register global callbacks BEFORE cef.Initialize(). Under CEF's Chrome
+        # runtime OnContextInitialized can fire during cef.Initialize() itself
+        # (the browser context initializes during startup), and the browser is
+        # created from that callback, so both callbacks must already be
+        # registered. This matches CEF's cefsimple sample, which installs its
+        # app/handler before CefInitialize().
+        global_handler = GlobalHandler(self)
+        cef.SetGlobalClientCallback("OnAfterCreated",
+                                    global_handler._OnAfterCreated)
+        subtest_message("cef.SetGlobalClientCallback() ok")
+
+        # Prepare client handlers, external object and bindings up front; the
+        # browser is created and configured from the OnContextInitialized
+        # callback below.
+        external = External(self)
+        display_handler2 = DisplayHandler2(self)
+        v8context_handler = V8ContextHandler(self)
+        client_handlers = [LoadHandler(self, g_datauri),
+                           DisplayHandler(self),
+                           display_handler2,
+                           v8context_handler]
+
+        # Holder so the browser created inside the callback is reachable after
+        # the message loop returns.
+        browser_holder = {}
+
+        def _on_context_initialized():
+            # The CEF context is ready — create and configure the browser here
+            # (see cefpython.pyx > CreateBrowserSync).
+            browser_settings = {
+                "inherit_client_handlers_for_popups": False,
+            }
+            browser = cef.CreateBrowserSync(url=g_datauri,
+                                            settings=browser_settings)
+            self.assertIsNotNone(browser, "Browser object")
+            browser.SetFocus(True)
+            subtest_message("cef.CreateBrowserSync() ok")
+
+            # Client handlers
+            for handler in client_handlers:
+                browser.SetClientHandler(handler)
+            subtest_message("browser.SetClientHandler() ok")
+
+            # Javascript bindings
+            bindings = cef.JavascriptBindings(
+                    bindToFrames=False, bindToPopups=False)
+            bindings.SetFunction("js_code_completed", js_code_completed)
+            bindings.SetFunction("test_function", external.test_function)
+            bindings.SetProperty("test_property1", external.test_property1)
+            bindings.SetProperty("test_property2", external.test_property2)
+            # Property with a function value can also be bound. CEF Python
+            # supports passing functions as callbacks when called from
+            # javascript, and as a side effect any value and in this case
+            # a property can also be a function.
+            bindings.SetProperty("test_property3_function",
+                                 external.test_property3_function)
+            bindings.SetProperty("cefpython_version", cef.GetVersion())
+            bindings.SetObject("external", external)
+            browser.SetJavascriptBindings(bindings)
+            subtest_message("browser.SetJavascriptBindings() ok")
+
+            # Set auto resize. Call it after js bindings were set.
+            browser.SetAutoResizeEnabled(enabled=True,
+                                         min_size=[800, 600],
+                                         max_size=[1024, 768])
+            subtest_message("browser.SetAutoResizeEnabled() ok")
+
+            # Cookie manager (requires the initialized context)
+            self.assertIsInstance(cef.CookieManager.GetGlobalManager(),
+                                  cef.PyCookieManager)
+            subtest_message("cef.CookieManager ok")
+
+            # Window Utils that require a live browser
+            if WINDOWS:
+                cef.WindowUtils.SetTitle(browser, "Main test")
+
+            browser_holder["browser"] = browser
+
+        cef.SetGlobalClientCallback("OnContextInitialized",
+                                    _on_context_initialized)
+        subtest_message("cef.SetGlobalClientCallback(OnContextInitialized) ok")
+
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 
@@ -246,59 +328,8 @@ class MainTest_IsolatedTest(unittest.TestCase):
             self.assertGreater(cef.DpiAware.Scale(800), 0)
             subtest_message("cef.DpiAware ok")
 
-        # Global handler
-        global_handler = GlobalHandler(self)
-        cef.SetGlobalClientCallback("OnAfterCreated",
-                                    global_handler._OnAfterCreated)
-        subtest_message("cef.SetGlobalClientCallback() ok")
-
-        # Create browser
-        browser_settings = {
-            "inherit_client_handlers_for_popups": False,
-        }
-        browser = cef.CreateBrowserSync(url=g_datauri,
-                                        settings=browser_settings)
-        self.assertIsNotNone(browser, "Browser object")
-        browser.SetFocus(True)
-        subtest_message("cef.CreateBrowserSync() ok")
-
-        # Client handlers
-        display_handler2 = DisplayHandler2(self)
-        v8context_handler = V8ContextHandler(self)
-        client_handlers = [LoadHandler(self, g_datauri),
-                           DisplayHandler(self),
-                           display_handler2,
-                           v8context_handler]
-        for handler in client_handlers:
-            browser.SetClientHandler(handler)
-        subtest_message("browser.SetClientHandler() ok")
-
-        # Javascript bindings
-        external = External(self)
-        bindings = cef.JavascriptBindings(
-                bindToFrames=False, bindToPopups=False)
-        bindings.SetFunction("js_code_completed", js_code_completed)
-        bindings.SetFunction("test_function", external.test_function)
-        bindings.SetProperty("test_property1", external.test_property1)
-        bindings.SetProperty("test_property2", external.test_property2)
-        # Property with a function value can also be bound. CEF Python
-        # supports passing functions as callbacks when called from
-        # javascript, and as a side effect any value and in this case
-        # a property can also be a function.
-        bindings.SetProperty("test_property3_function",
-                             external.test_property3_function)
-        bindings.SetProperty("cefpython_version", cef.GetVersion())
-        bindings.SetObject("external", external)
-        browser.SetJavascriptBindings(bindings)
-        subtest_message("browser.SetJavascriptBindings() ok")
-
-        # Set auto resize. Call it after js bindings were set.
-        browser.SetAutoResizeEnabled(enabled=True,
-                                     min_size=[800, 600],
-                                     max_size=[1024, 768])
-        subtest_message("browser.SetAutoResizeEnabled() ok")
-
-        # Test Request.SetPostData(list)
+        # Test Request.SetPostData(list). Does not require a browser or the
+        # initialized context, so it can run here in the main body.
         # noinspection PyArgumentList
         req = cef.Request.CreateRequest()
         req_file = os.path.dirname(os.path.abspath(__file__))
@@ -320,12 +351,7 @@ class MainTest_IsolatedTest(unittest.TestCase):
         self.assertEqual(req_data, req.GetPostData())
         subtest_message("cef.Request.SetPostData(dict) ok")
 
-        # Cookie manager
-        self.assertIsInstance(cef.CookieManager.GetGlobalManager(),
-                              cef.PyCookieManager)
-        subtest_message("cef.CookieManager ok")
-
-        # Window Utils
+        # Window Utils that do not require a live browser.
         if WINDOWS:
             hwnd = 1  # When using 0 getting issues with OnautoResize
             self.assertFalse(cef.WindowUtils.IsWindowHandle(hwnd))
@@ -333,7 +359,6 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.WindowUtils.OnSize(hwnd, 0, 0, 0)
             cef.WindowUtils.OnEraseBackground(hwnd, 0, 0, 0)
             cef.WindowUtils.GetParentHandle(hwnd)
-            cef.WindowUtils.SetTitle(browser, "Main test")
             subtest_message("cef.WindowUtils ok")
         elif LINUX:
             cef.WindowUtils.InstallX11ErrorHandlers()
@@ -344,8 +369,14 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.WindowUtils.IsWindowHandle(hwnd)
             subtest_message("cef.WindowUtils ok")
 
-        # Run message loop
+        # Run message loop. The browser was created from OnContextInitialized
+        # (during cef.Initialize above); the loop lets the page finish loading.
         run_message_loop()
+
+        # Browser must have been created from OnContextInitialized.
+        browser = browser_holder.get("browser")
+        self.assertIsNotNone(browser,
+                             "Browser created from OnContextInitialized")
 
         # Make sure popup browser was destroyed
         self.assertIsInstance(cef.GetBrowserByIdentifier(MAIN_BROWSER_ID),

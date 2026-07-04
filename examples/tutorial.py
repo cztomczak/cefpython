@@ -69,12 +69,22 @@ def main():
         # "product_version": "MyProduct/10.00",
         # "user_agent": "MyAgent/20.00 MyProduct/10.00",
     }
-    cef.Initialize(settings=settings)
+    def on_context_initialized():
+        # Under CEF's Chrome runtime the browser context initializes
+        # asynchronously, so the browser must be created from the
+        # OnContextInitialized callback rather than immediately after
+        # cef.Initialize() (matches CEF's cefsimple).
+        browser = cef.CreateBrowserSync(url=html_to_data_uri(HTML_code),
+                                        window_title="Tutorial")
+        set_client_handlers(browser)
+        set_javascript_bindings(browser)
+
+    # Global callbacks must be registered before cef.Initialize():
+    # OnContextInitialized can fire during cef.Initialize() itself.
     set_global_handler()
-    browser = cef.CreateBrowserSync(url=html_to_data_uri(HTML_code),
-                                    window_title="Tutorial")
-    set_client_handlers(browser)
-    set_javascript_bindings(browser)
+    cef.SetGlobalClientCallback("OnContextInitialized",
+                                on_context_initialized)
+    cef.Initialize(settings=settings)
     cef.MessageLoop()
     cef.Shutdown()
 

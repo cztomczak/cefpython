@@ -61,6 +61,12 @@ def main():
     settings = {}
     if MAC:
         settings["external_message_pump"] = True
+    # Under CEF's Chrome runtime the browser context initializes
+    # asynchronously, so the browser can only be created once
+    # OnContextInitialized has fired. Register the callback before
+    # cef.Initialize() (it may fire during that call).
+    cef.SetGlobalClientCallback("OnContextInitialized",
+                                app.browser_frame.on_context_initialized)
     cef.Initialize(settings=settings)
     app.mainloop()
     logger.debug("Main loop exited")
@@ -157,6 +163,10 @@ class BrowserFrame(tk.Frame):
         self.navigation_bar = navigation_bar
         self.closing = False
         self.browser = None
+        # Set once CEF's OnContextInitialized has fired. Under the Chrome
+        # runtime the browser context initializes asynchronously, so the
+        # browser may only be created after this is True.
+        self.context_initialized = False
         tk.Frame.__init__(self, mainframe)
         self.mainframe = mainframe
         self.bind("<FocusIn>", self.on_focus_in)
@@ -215,8 +225,17 @@ class BrowserFrame(tk.Frame):
         cef.MessageLoopWork()
         self.after(10, self.message_loop_work)
 
+    def on_context_initialized(self):
+        # The CEF context is ready. If the frame has already been realized
+        # (a <Configure> event fired and set a real size), embed the browser
+        # now; otherwise on_configure will embed once it is realized.
+        self.context_initialized = True
+        if not self.browser and self.winfo_width() > 1:
+            self.embed_browser()
+
     def on_configure(self, _):
-        if not self.browser:
+        # Embed the browser only after the CEF context is initialized.
+        if not self.browser and self.context_initialized:
             self.embed_browser()
 
     def on_root_configure(self):

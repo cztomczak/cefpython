@@ -97,8 +97,15 @@ def main():
         # Tweaking OSR performance (Issue #240)
         "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
     }
+    def on_context_initialized():
+        # Under CEF's Chrome runtime the browser context initializes
+        # asynchronously, so create the browser here rather than right after
+        # cef.Initialize().
+        create_browser(browser_settings)
+
+    # Register before cef.Initialize(); OnContextInitialized may fire during it.
+    cef.SetGlobalClientCallback("OnContextInitialized", on_context_initialized)
     cef.Initialize(settings=settings, switches=switches)
-    create_browser(browser_settings)
     cef.MessageLoop()
     cef.Shutdown()
     print("[screenshot.py] Opening screenshot with default application")

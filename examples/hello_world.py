@@ -18,9 +18,20 @@ def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # shut down all CEF processes on error
     settings = {}
+
+    def on_context_initialized():
+        # Under CEF's Chrome runtime the browser context initializes
+        # asynchronously, so the browser must be created from the
+        # OnContextInitialized callback rather than immediately after
+        # cef.Initialize(). This matches CEF's cefsimple sample.
+        cef.CreateBrowserSync(url="https://www.google.com/",
+                              window_title="Hello World!")
+
+    # Register the callback before cef.Initialize(): OnContextInitialized can
+    # fire during cef.Initialize() itself.
+    cef.SetGlobalClientCallback("OnContextInitialized",
+                                on_context_initialized)
     cef.Initialize(settings=settings)
-    cef.CreateBrowserSync(url="https://www.google.com/",
-                          window_title="Hello World!")
     cef.MessageLoop()
     cef.Shutdown()
 

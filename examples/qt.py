@@ -74,6 +74,21 @@ WIDTH = 800
 HEIGHT = 600
 
 
+# Under CEF's Chrome runtime the browser context initializes asynchronously,
+# so a browser can only be created after OnContextInitialized has fired. These
+# module-level helpers coordinate that: embedBrowser() defers itself until the
+# context is ready, and the callback below runs any deferred embed.
+g_context_initialized = False
+g_pending_embed = None
+
+
+def _on_context_initialized():
+    global g_context_initialized
+    g_context_initialized = True
+    if g_pending_embed is not None:
+        g_pending_embed()
+
+
 def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
@@ -92,6 +107,9 @@ def main():
         "devtools": True,
     }
 
+    # Register before cef.Initialize(); OnContextInitialized may fire during it.
+    cef.SetGlobalClientCallback("OnContextInitialized",
+                                _on_context_initialized)
     cef.Initialize(settings)
     app = CefApplication(sys.argv)
     main_window = MainWindow()
@@ -248,6 +266,13 @@ class CefWidget(QWidget):
             self.browser.SetFocus(False)
 
     def embedBrowser(self):
+        global g_pending_embed
+        if not g_context_initialized:
+            # Chrome runtime initializes the browser context asynchronously;
+            # embed once OnContextInitialized fires (see main()).
+            g_pending_embed = self.embedBrowser
+            return
+        g_pending_embed = None
         if LINUX and PYQT5:
             # On Linux with PyQt5, QX11EmbedContainer is gone; the Qt-native
             # equivalent is to host CEF in a QWindow (hidden_window) wrapped in

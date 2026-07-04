@@ -34,6 +34,21 @@ if LINUX:
     from gi.repository import GdkX11
 
 
+# Under CEF's Chrome runtime the browser context initializes asynchronously,
+# so a browser can only be created after OnContextInitialized has fired. These
+# module-level helpers coordinate that: embed_browser() defers itself until the
+# context is ready, and the callback below runs any deferred embed.
+g_context_initialized = False
+g_pending_embed = None
+
+
+def _on_context_initialized():
+    global g_context_initialized
+    g_context_initialized = True
+    if g_pending_embed is not None:
+        g_pending_embed()
+
+
 def main():
     print("[gkt3.py] CEF Python {ver}".format(ver=cef.__version__))
     print("[gkt3.py] Python {ver} {arch}".format(
@@ -47,6 +62,9 @@ def main():
         # > Python[57738:d07] _createMenuRef called with existing principal
         # > MenuRef already associated with menu
         sys.excepthook = cef.ExceptHook  # To shutdown CEF processes on error
+    # Register before cef.Initialize(); OnContextInitialized may fire during it.
+    cef.SetGlobalClientCallback("OnContextInitialized",
+                                _on_context_initialized)
     cef.Initialize()
     app = Gtk3Example()
     SystemExit(app.run(sys.argv))
@@ -112,6 +130,13 @@ class Gtk3Example(Gtk.Application):
         self.window.resize(*self.window.get_default_size())
 
     def embed_browser(self):
+        global g_pending_embed
+        if not g_context_initialized:
+            # Chrome runtime initializes the browser context asynchronously;
+            # embed once OnContextInitialized fires (see main()).
+            g_pending_embed = self.embed_browser
+            return
+        g_pending_embed = None
         window_info = cef.WindowInfo()
         # TODO: on Mac pass rect[x, y, width, height] to SetAsChild
         window_info.SetAsChild(self.get_handle())
