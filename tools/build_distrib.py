@@ -196,7 +196,29 @@ def _core_metadata(version, project):
     for classifier in project.get("classifiers", []):
         lines.append("Classifier: " + classifier)
 
-    return ("\n".join(lines) + "\n").encode("utf-8")
+    # Long description (Description body). PEP 621 readme: a table with an
+    # inline "text" (+ "content-type") or a "file", or a bare filename string.
+    body = ""
+    readme = project.get("readme")
+    if isinstance(readme, dict):
+        content_type = readme.get("content-type", "text/plain")
+        if readme.get("text"):
+            body = readme["text"]
+        elif readme.get("file"):
+            with open(readme["file"], encoding="utf-8") as f:
+                body = f.read()
+        if body:
+            lines.append("Description-Content-Type: " + content_type)
+    elif isinstance(readme, str):
+        with open(readme, encoding="utf-8") as f:
+            body = f.read()
+        lines.append("Description-Content-Type: text/markdown")
+
+    header = "\n".join(lines) + "\n"
+    # The description body follows the headers, separated by one blank line.
+    if body:
+        return (header + "\n" + body + "\n").encode("utf-8")
+    return header.encode("utf-8")
 
 
 def _reduce_package_size_issue262(pkg_dir):
