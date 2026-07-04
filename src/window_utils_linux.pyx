@@ -150,47 +150,10 @@ def _linux_apply_initialize_defaults(app_settings, cmd_switches):
     # False — no delete_event would be dispatched on a windowed popup.
     app_settings.setdefault("windowless_rendering_enabled", True)
 
-    # Chromium's Linux sandbox — keep it when possible, disable only if unusable.
-    #
-    # CEF Linux builds default sandbox-ON and refuse to start unless either a
-    # SUID-root chrome-sandbox helper is installed or --no-sandbox is passed.
-    # A pip wheel cannot install a chown-root + chmod-4755 helper, so cefpython
-    # relies on Chromium's unprivileged-user-namespace sandbox instead.  That
-    # path works on most systems, but modern distros (Ubuntu 23.10+, Debian 12+)
-    # set kernel.apparmor_restrict_unprivileged_userns=1 by default, and
-    # containers often block the unshare() syscall via seccomp — in those cases
-    # Chromium aborts with "FATAL: No usable sandbox!" unless --no-sandbox is
-    # passed.
-    #
-    # So probe for a usable sandbox and only fall back to --no-sandbox when none
-    # is available, keeping renderers confined wherever the namespace sandbox
-    # works.  Historically cefpython passed --no-sandbox unconditionally, which
-    # silently disabled the sandbox even on capable systems.  A user can force
-    # the sandbox off by passing switches={"no-sandbox": ""} explicitly, or
-    # enable it on a restricted system by installing the SUID helper and setting
-    # CHROME_DEVEL_SANDBOX (see docs/Knowledge-Base.md "Linux: enabling the
-    # Chromium sandbox").
+    # Chromium's Linux sandbox.  CEF Linux builds default sandbox-ON and refuse
+    # to start unless a SUID-root chrome-sandbox helper is installed or
+    # --no-sandbox is passed.  A pip wheel cannot install a chown-root helper,
+    # so cefpython disables the sandbox on Linux, as it always has.  Added only
+    # when the caller has not set the switch explicitly.
     if "no-sandbox" not in cmd_switches:
-        # Some switches turn off the zygote / multiprocess model, which
-        # Chromium requires for the sandbox — it refuses to start otherwise
-        # with "Zygote cannot be disabled if sandbox is enabled".  When the
-        # caller has opted into any of these, pair them with --no-sandbox.
-        _needs_no_sandbox = any(
-            _sw in cmd_switches
-            for _sw in ("no-zygote", "disable-zygote", "single-process"))
-        if _needs_no_sandbox:
-            cmd_switches["no-sandbox"] = ""
-        elif not sandbox_linux.LinuxSandboxAvailable():
-            cmd_switches["no-sandbox"] = ""
-            import warnings
-            warnings.warn(
-                "cefpython: Chromium sandbox disabled (--no-sandbox). No usable "
-                "sandbox was detected — unprivileged user namespaces appear to "
-                "be restricted (e.g. kernel.apparmor_restrict_unprivileged_userns"
-                "=1 on Ubuntu 23.10+/Debian 12+, or a container seccomp policy) "
-                "and no CHROME_DEVEL_SANDBOX helper is configured. Renderer "
-                "processes will run without the sandbox. See "
-                "docs/Knowledge-Base.md 'Linux: enabling the Chromium sandbox' "
-                "to enable it.",
-                stacklevel=2,
-            )
+        cmd_switches["no-sandbox"] = ""

@@ -225,7 +225,6 @@ from task cimport *
 
 IF UNAME_SYSNAME == "Linux":
     cimport x11
-    cimport sandbox_linux
 
 from cef_string cimport *
 cdef extern from *:
@@ -618,15 +617,12 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
 
     cdef CefSettings cefApplicationSettings
     IF UNAME_SYSNAME == "Linux":
-        # On Linux, leave no_sandbox=0 so Chrome's startup code registers the
-        # Mojo IPC bootstrap fd (GlobalDescriptors key 7) for every subprocess.
-        # Setting no_sandbox=1 would cause BasicStartupComplete() to append
-        # --no-sandbox before fd registration, causing all subprocesses to crash
-        # with "Failed global descriptor lookup: 7". Sandbox behaviour is instead
-        # controlled by the --no-sandbox command-line switch, which
-        # _linux_apply_initialize_defaults() adds only when no usable sandbox is
-        # detected (see the native LinuxSandboxAvailable() in
-        # src/client_handler/sandbox_linux.cpp).
+        # On Linux, leave no_sandbox=0 here. Setting no_sandbox=1 would cause
+        # BasicStartupComplete() to append --no-sandbox before Chrome's startup
+        # code registers the Mojo IPC bootstrap fd (GlobalDescriptors key 7),
+        # crashing every subprocess with "Failed global descriptor lookup: 7".
+        # The sandbox is instead disabled via the --no-sandbox command-line
+        # switch added in _linux_apply_initialize_defaults().
         pass
     ELSE:
         # On Windows/macOS the sandbox helper binary is not shipped with
