@@ -113,11 +113,9 @@ add_custom_command(
             --out "${PYX_STAGE_DIR}"
             --pyversion "${PYVERSION}"
             --cef-version-header "${_cef_ver_header}"
-            --cef-api-versions-header "${CEF_ROOT}/include/cef_api_versions.h"
     DEPENDS
         ${_pyx_src_files}
         "${CMAKE_SOURCE_DIR}/tools/cmake_prepare_pyx.py"
-        "${CEF_ROOT}/include/cef_api_versions.h"
     COMMENT "Preparing .pyx files -> ${PYX_STAGE_DIR}"
     VERBATIM
 )

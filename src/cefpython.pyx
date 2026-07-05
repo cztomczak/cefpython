@@ -227,6 +227,7 @@ IF UNAME_SYSNAME == "Linux":
     cimport x11
 
 from cef_string cimport *
+from cef_api_hash cimport *
 cdef extern from *:
     # noinspection PyUnresolvedReferences
     ctypedef CefString ConstCefString "const CefString"
@@ -1071,14 +1072,15 @@ cpdef object GetAppSetting(object key):
     return None
 
 cpdef dict GetVersion():
-    # These variable are set when building the module.
     # noinspection PyUnresolvedReferences
+    api_hash = (<bytes>CEF_API_HASH_PLATFORM).decode("utf-8")
     return dict(
         version=__version__,
         chrome_version=__chrome_version__,
         cef_version=__cef_version__,
-        cef_api_hash_platform=__cef_api_hash_platform__,
-        cef_api_hash_universal=__cef_api_hash_universal__,
+        cef_api_version=CEF_API_VERSION,
+        cef_api_hash_platform=api_hash,
+        cef_api_hash_universal=api_hash,
         cef_commit_hash=__cef_commit_hash__,
         cef_commit_number=__cef_commit_number__,
     )
