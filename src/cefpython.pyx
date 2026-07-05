@@ -309,7 +309,6 @@ cdef unique_ptr[MainMessageLoopExternalPump] g_external_message_pump
 cdef py_bool g_MessageLoop_called = False
 cdef py_bool g_MessageLoopWork_called = False
 cdef py_bool g_cef_initialized = False
-cdef py_bool g_context_initialized = False
 
 cdef dict g_globalClientCallbacks = {}
 
@@ -653,26 +652,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if not ret:
         Debug("CefInitialize() failed")
 
-    # Do NOT create a browser immediately after Initialize().  Under CEF's
-    # Chrome runtime the browser context initializes asynchronously:
-    # CefBrowserProcessHandler::OnContextInitialized() fires later, once the
-    # message loop runs, not when CefInitialize() returns (upstream CEF issue
-    # #2969).  Creating a browser before then lets the renderer come up before
-    # its host bindings are wired, the browser process rejects the renderer's
-    # first IPC, and the page renders blank.
-    #
-    # This async behavior is a property of the Chrome runtime, not of any
-    # particular CEF version.  The Chrome runtime became the only runtime when
-    # the legacy Alloy runtime/bootstrap was removed in CEF M128 (upstream
-    # #3685); cefpython's previous CEF 66 baseline used Alloy, where context
-    # initialization completed synchronously within CefInitialize().
-    #
-    # The supported pattern (matching CEF's own cefsimple sample) is to create
-    # the browser from an "OnContextInitialized" global client callback:
-    #     cef.SetGlobalClientCallback("OnContextInitialized", on_ready)
-    # and call cef.CreateBrowserSync(...) inside on_ready().  This is event
-    # driven — no polling loop, no timeout, no pending-browser queue.
-
     IF UNAME_SYSNAME == "Linux":
         WindowUtils.InstallX11ErrorHandlers()
 
@@ -701,39 +680,6 @@ def CreateBrowserSync(windowInfo=None,
         raise Exception("Invalid argument: "+kwarg)
 
     Debug("CreateBrowserSync() called")
-
-    # The browser context must be initialized before a browser is created.
-    #
-    # Under CEF's Chrome runtime context initialization is asynchronous and is
-    # NOT finished when CefInitialize() returns (upstream CEF issue #2969; the
-    # Chrome runtime is the only runtime since the Alloy runtime was removed in
-    # CEF M128 / upstream #3685):
-    # CefBrowserProcessHandler::OnContextInitialized() fires later, once the
-    # message loop has run.  Creating a browser before that lets the renderer
-    # come up before its host bindings are wired; the browser process then
-    # rejects the renderer's first IPC ("blink.mojom.WidgetHost" / "Message N
-    # rejected by interface") and the visible symptom is a blank page.
-    #
-    # Fail fast with an actionable message rather than deferring creation (a
-    # pending-browser queue) or pumping the message loop here (a polling loop) —
-    # both were rejected as unacceptable architecture.  The browser must be
-    # created from an OnContextInitialized callback, matching CEF's cefsimple.
-    if not g_context_initialized:
-        raise Exception(
-                "CreateBrowserSync() called before the CEF context was"
-                " initialized.\n"
-                "Under CEF's Chrome runtime the browser context initializes"
-                " asynchronously (OnContextInitialized fires after the message"
-                " loop starts), so a browser cannot be created immediately"
-                " after"
-                " cef.Initialize(). Create it from an OnContextInitialized"
-                " callback instead:\n"
-                "    def on_context_initialized():\n"
-                "        browser = cef.CreateBrowserSync(url=...)\n"
-                "    cef.SetGlobalClientCallback('OnContextInitialized',"
-                " on_context_initialized)\n"
-                "    cef.Initialize(settings)\n"
-                "    cef.MessageLoop()")
 
     """
     # CEF views
@@ -1036,7 +982,7 @@ cpdef py_void SetGlobalClientCallback(object name, object callback):
     # Accept both with and without a prefix.
     if name.startswith("_"):
         name = name[1:]
-    if name in ["OnCertificateError", "OnAfterCreated", "OnContextInitialized",
+    if name in ["OnCertificateError", "OnAfterCreated",
                 "OnAccessibilityTreeChange", "OnAccessibilityLocationChange"]:
         g_globalClientCallbacks[name] = callback
     else:

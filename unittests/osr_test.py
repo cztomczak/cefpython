@@ -163,11 +163,9 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
         }
 
-        # Register global callbacks and the OnContextInitialized browser-
-        # creation callback BEFORE cef.Initialize(). Under CEF's Chrome runtime
-        # OnContextInitialized can fire during cef.Initialize() itself, and the
-        # browser is created from that callback, so the callbacks must already
-        # be registered. Matches CEF's cefsimple sample.
+        # Initialize
+        cef.Initialize(settings=settings, switches=switches)
+        subtest_message("cef.Initialize() ok")
 
         # Accessibility handler
         accessibility_handler = AccessibilityHandler(self)
@@ -180,62 +178,38 @@ class OsrTest_IsolatedTest(unittest.TestCase):
                                     global_handler._OnAfterCreated)
         subtest_message("cef.SetGlobalClientCallback() ok")
 
-        # Client handlers (constructed up front; browser is created below in
-        # the OnContextInitialized callback).
+        # Create browser
+        window_info = cef.WindowInfo()
+        window_info.SetAsOffscreen(0)
+        browser = cef.CreateBrowserSync(window_info=window_info,
+                                        settings=browser_settings,
+                                        url=g_datauri)
+
+        # Javascript bindings
+        bindings = cef.JavascriptBindings(
+                bindToFrames=False, bindToPopups=False)
+        bindings.SetFunction("js_code_completed", js_code_completed)
+        bindings.SetProperty("cefpython_version", cef.GetVersion())
+        browser.SetJavascriptBindings(bindings)
+        subtest_message("browser.SetJavascriptBindings() ok")
+
+        # Enable accessibility
+        browser.SetAccessibilityState(cef.STATE_ENABLED)
+        subtest_message("cef.SetAccessibilityState(STATE_ENABLED) ok")
+
+        # Client handlers
         client_handlers = [LoadHandler(self, g_datauri),
                            DisplayHandler(self),
                            RenderHandler(self)]
+        for handler in client_handlers:
+            browser.SetClientHandler(handler)
 
-        # Holder so the browser created inside the callback is reachable after
-        # the message loop returns.
-        browser_holder = {}
+        # Initiate OSR rendering
+        browser.SetFocus(True)
+        browser.WasResized()
 
-        def _on_context_initialized():
-            # The CEF context is ready — create and configure the browser here
-            # (see cefpython.pyx > CreateBrowserSync).
-            window_info = cef.WindowInfo()
-            window_info.SetAsOffscreen(0)
-            browser = cef.CreateBrowserSync(window_info=window_info,
-                                            settings=browser_settings,
-                                            url=g_datauri)
-
-            # Javascript bindings
-            bindings = cef.JavascriptBindings(
-                    bindToFrames=False, bindToPopups=False)
-            bindings.SetFunction("js_code_completed", js_code_completed)
-            bindings.SetProperty("cefpython_version", cef.GetVersion())
-            browser.SetJavascriptBindings(bindings)
-            subtest_message("browser.SetJavascriptBindings() ok")
-
-            # Enable accessibility
-            browser.SetAccessibilityState(cef.STATE_ENABLED)
-            subtest_message("cef.SetAccessibilityState(STATE_ENABLED) ok")
-
-            # Client handlers
-            for handler in client_handlers:
-                browser.SetClientHandler(handler)
-
-            # Initiate OSR rendering
-            browser.SetFocus(True)
-            browser.WasResized()
-
-            browser_holder["browser"] = browser
-
-        cef.SetGlobalClientCallback("OnContextInitialized",
-                                    _on_context_initialized)
-        subtest_message("cef.SetGlobalClientCallback(OnContextInitialized) ok")
-
-        # Initialize. OnContextInitialized fires during / shortly after this,
-        # creating the browser and starting OSR rendering.
-        cef.Initialize(settings=settings, switches=switches)
-        subtest_message("cef.Initialize() ok")
-
-        # Message loop lets the page finish loading and rendering.
+        # Message loop
         run_message_loop()
-
-        browser = browser_holder.get("browser")
-        self.assertIsNotNone(browser,
-                             "Browser created from OnContextInitialized")
 
         # Close browser and clean reference
         browser.CloseBrowser(True)

@@ -31,21 +31,11 @@ class RequestHandler:
 
 def main():
     sys.excepthook = cef.ExceptHook
-    holder = {}
-
-    def on_context_initialized():
-        # Under CEF's Chrome runtime the browser context initializes
-        # asynchronously, so create the browser here rather than right after
-        # cef.Initialize().
-        browser = cef.CreateBrowserSync(url=cef.GetDataUrl(html))
-        browser.SetClientHandler(RequestHandler())
-        holder["browser"] = browser
-
-    cef.SetGlobalClientCallback("OnContextInitialized",
-                                on_context_initialized)
     cef.Initialize()
+    browser = cef.CreateBrowserSync(url=cef.GetDataUrl(html))
+    browser.SetClientHandler(RequestHandler())
     cef.MessageLoop()
-    holder.clear()
+    del browser
     cef.Shutdown()
 
 

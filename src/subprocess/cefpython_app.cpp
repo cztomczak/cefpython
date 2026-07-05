@@ -168,7 +168,6 @@ CefRefPtr<CefRenderProcessHandler> CefPythonApp::GetRenderProcessHandler() {
 void CefPythonApp::OnContextInitialized() {
 #ifdef BROWSER_PROCESS
     REQUIRE_UI_THREAD();
-    BrowserProcessHandler_OnContextInitialized();
 #if defined(OS_LINUX)
     print_handler_ = new ClientPrintHandlerGtk();
 #endif // OS_LINUX

@@ -4,21 +4,15 @@ from cefpython3 import cefpython as cef
 
 
 def main():
-    def on_context_initialized():
-        # Under CEF's Chrome runtime the browser context initializes
-        # asynchronously, so create the browser here rather than right after
-        # cef.Initialize().
-        browser = cef.CreateBrowserSync(
-            url="data:text/html,<h1>Mouse clicks snippet</h1>"
-                "This text will be selected after one second.<br>"
-                "This text will be selected after two seconds.",
-            window_title="Mouse clicks")
-        browser.SetClientHandler(LifespanHandler())
-
-    # Register before cef.Initialize(); OnContextInitialized may fire during it.
-    cef.SetGlobalClientCallback("OnContextInitialized", on_context_initialized)
     cef.Initialize()
+    browser = cef.CreateBrowserSync(
+        url="data:text/html,<h1>Mouse clicks snippet</h1>"
+            "This text will be selected after one second.<br>"
+            "This text will be selected after two seconds.",
+        window_title="Mouse clicks")
+    browser.SetClientHandler(LifespanHandler())
     cef.MessageLoop()
+    del browser
     cef.Shutdown()
 
 
