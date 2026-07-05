@@ -120,7 +120,7 @@ jobs:
           python unittests/_test_runner.py
 
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: cefpython3-py${{ matrix.python-version }}-win64
           path: build/dist/*.whl
+          archive: false
