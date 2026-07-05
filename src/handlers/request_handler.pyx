@@ -74,8 +74,6 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
             return False
-        if not cefFrame.get().GetBrowser().get():
-            return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeBrowse")
         pyFrame = GetPyFrame(cefFrame)
@@ -111,7 +109,15 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
             return False
-        if not cefFrame.get().GetBrowser().get():
+        # CEF documents browser/frame as optional for the ResourceRequestHandler
+        # callbacks -- they may be NULL for requests originating from service
+        # workers or CefURLRequest (cef_resource_request_handler.h:
+        # optional_param=browser,frame), and CefFrame::GetBrowser() may be NULL
+        # off the UI thread. Without a resolvable browser we cannot build a
+        # PyFrame, so log and fall back to CEF's default (continue the request).
+        if not cefFrame.get() or not cefFrame.get().GetBrowser().get():
+            Debug("OnBeforeResourceLoad: no resolvable browser for the request"
+                  " (IO-thread / service-worker request); continuing by default")
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeResourceLoad")
@@ -146,7 +152,13 @@ cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
             return <CefRefPtr[CefResourceHandler]>nullptr
-        if not cefFrame.get().GetBrowser().get():
+        # CEF documents browser/frame as optional for the ResourceRequestHandler
+        # callbacks (NULL for service-worker / CefURLRequest requests;
+        # cef_resource_request_handler.h). Without a resolvable browser, fall
+        # back to CEF's default resource handling.
+        if not cefFrame.get() or not cefFrame.get().GetBrowser().get():
+            Debug("GetResourceHandler: no resolvable browser for the request"
+                  " (IO-thread / service-worker request); using default handling")
             return <CefRefPtr[CefResourceHandler]>nullptr
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetResourceHandler")
@@ -189,7 +201,13 @@ cdef public void RequestHandler_OnResourceRedirect(
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
             return
-        if not cefFrame.get().GetBrowser().get():
+        # CEF documents browser/frame as optional for the ResourceRequestHandler
+        # callbacks (NULL for service-worker / CefURLRequest requests;
+        # cef_resource_request_handler.h). Without a resolvable browser, leave
+        # the redirect unchanged.
+        if not cefFrame.get() or not cefFrame.get().GetBrowser().get():
+            Debug("OnResourceRedirect: no resolvable browser for the request"
+                  " (IO-thread / service-worker request); leaving redirect unchanged")
             return
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnResourceRedirect")
@@ -240,8 +258,6 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
-            return False
-        if not cefFrame.get().GetBrowser().get():
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetAuthCredentials")
