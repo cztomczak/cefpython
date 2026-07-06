@@ -222,12 +222,16 @@ def _core_metadata(version, project):
 
 
 def _reduce_package_size_issue262(pkg_dir):
-    """Linux only: strip debug symbols from libcef.so (Issue #262).
+    """Linux only: strip DWARF debug info from libcef.so (Issue #262).
 
-    CEF ships libcef.so with embedded debug symbols (~1.3 GB), which otherwise
-    bloat the Linux wheel far beyond the other platforms. Ported from the
-    pre-CMake build_distrib.py. `strip` keeps the dynamic symbols needed for
-    linking and removes .symtab/.debug_*.
+    CEF ships libcef.so at ~1.3 GB, almost all of it DWARF debug info
+    (.debug_*), which would bloat the Linux wheel far beyond the other
+    platforms. `strip --strip-debug` removes the DWARF sections but KEEPS the
+    symbol table (.symtab), so CEF crash backtraces still symbolize to function
+    names when reporting issues upstream. A full `strip` would also drop
+    .symtab and leave crashes unsymbolized (only the ~1.6k exported .dynsym
+    names would resolve). Keeping .symtab costs ~25 MB compressed per wheel
+    (libcef.so ~252 MB -> ~428 MB uncompressed) but not the DWARF's ~1 GB.
     """
     if not sys.platform.startswith("linux"):
         return
@@ -237,7 +241,7 @@ def _reduce_package_size_issue262(pkg_dir):
     before = os.path.getsize(libcef_so)
     print("[build_distrib.py] Strip {0} (Issue #262)".format(
         os.path.basename(libcef_so)))
-    code = subprocess.call(["strip", libcef_so])
+    code = subprocess.call(["strip", "--strip-debug", libcef_so])
     assert code == 0, "strip command failed"
     print("[build_distrib.py] libcef.so: {0:.0f} MB -> {1:.0f} MB".format(
         before / 1e6, os.path.getsize(libcef_so) / 1e6))
