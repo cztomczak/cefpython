@@ -110,7 +110,7 @@ jobs:
       - name: Build wheel
         run: python tools/build_distrib.py --dev
 
-      - name: Test the built wheel
+      - name: Unit-test the built wheel
         run: |
           # Install the wheel and run the unit tests against the INSTALLED
           # package. No PYTHONPATH: _test_runner.py chdir's to unittests/, so
@@ -118,6 +118,10 @@ jobs:
           # import cefpython3 resolves to the installed wheel.
           pip install (Get-ChildItem build/dist/*.whl | Select-Object -First 1).FullName
           python unittests/_test_runner.py
+
+      - name: Smoke-test the built wheel
+        timeout-minutes: 5
+        run: python tools/smoke_test.py
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v7

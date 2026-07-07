@@ -142,7 +142,7 @@ jobs:
       - name: Build wheel
         run: python tools/build_distrib.py --dev
 
-      - name: Test the built wheel
+      - name: Unit-test the built wheel
         run: |
           # Install the wheel and run the unit tests against the INSTALLED
           # package (binaries were codesigned before build_distrib). No
@@ -152,6 +152,11 @@ jobs:
           # the app-bundle step.
           pip install build/dist/*.whl
           python unittests/_test_runner.py
+
+      - name: Smoke-test the built wheel
+        timeout-minutes: 5
+        # CFProcessPath is inherited from the app-bundle step above.
+        run: python tools/smoke_test.py
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v7
