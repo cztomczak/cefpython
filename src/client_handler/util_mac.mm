@@ -108,6 +108,24 @@ void MacShutdown() {
     // [g_autopool release];
 }
 
+std::string MacGetMainBundlePath() {
+    @autoreleasepool {
+        NSBundle* mainBundle = [NSBundle mainBundle];
+        if (!mainBundle) {
+            return std::string();
+        }
+
+        NSString* bundlePath = [mainBundle bundlePath];
+        if (!bundlePath || ![bundlePath isAbsolutePath] ||
+            ![bundlePath hasSuffix:@".app"]) {
+            return std::string();
+        }
+
+        const char* fileSystemPath = [bundlePath fileSystemRepresentation];
+        return fileSystemPath ? std::string(fileSystemPath) : std::string();
+    }
+}
+
 void MacSetWindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
     NSView* view = CAST_CEF_WINDOW_HANDLE_TO_NSVIEW(browser->GetHost()->GetWindowHandle());
     NSString* nstitle = [NSString stringWithFormat:@"%s" , title];

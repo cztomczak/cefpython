@@ -19,6 +19,7 @@
   * [javascript_flags](ApplicationSettings.md#javascript_flags)
   * [locale](ApplicationSettings.md#locale)
   * [locales_dir_path](ApplicationSettings.md#locales_dir_path)
+  * [main_bundle_path](ApplicationSettings.md#main_bundle_path)
   * [debug](ApplicationSettings.md#debug)
   * [log_file](ApplicationSettings.md#log_file)
   * [log_severity](ApplicationSettings.md#log_severity)

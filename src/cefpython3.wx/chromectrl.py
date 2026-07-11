@@ -397,7 +397,10 @@ def Initialize(settings=None, debug=False):
             del settings["locale_pak"]
         switches["locale_pak"] = locale_pak
 
-    if not "browser_subprocess_path" in settings:
+    # Core Initialize selects the packaged Helper.app on macOS. Keep this
+    # wrapper's legacy flat executable default only on Windows/Linux.
+    if (platform.system() != "Darwin" and
+            not "browser_subprocess_path" in settings):
         settings["browser_subprocess_path"] = \
             "%s/%s" % (cefpython.GetModuleDirectory(), "subprocess")
 

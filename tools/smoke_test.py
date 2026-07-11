@@ -8,10 +8,9 @@
 Runs each example in examples/ in its own subprocess (CEF cannot be
 re-initialized within a single process) and checks the exit code. The example
 files are run *unmodified*: a small bootstrap monkey-patches, before the example
-runs, cef.Initialize() to merge in the platform-specific switches the unit tests
-use (so it works headless under CI: Xvfb on Linux, single-process on macOS for
-unsigned CI processes, etc.) and cef.MessageLoop() to auto-close after a few
-seconds so the example exits on its own.
+runs, cef.Initialize() to merge in the Linux headless switches needed under
+Xvfb, and cef.MessageLoop() to auto-close after a few seconds so the example
+exits on its own. macOS and Windows exercise the default CEF configuration.
 
 This is separate from tools/run_examples.py, which stays for interactive use.
 
@@ -40,12 +39,10 @@ AUTO_CLOSE_MS = 5000
 PER_EXAMPLE_TIMEOUT_S = 90
 
 LINUX = sys.platform.startswith("linux")
-MAC = sys.platform == "darwin"
 
 
 def _ci_switches():
-    """Per-platform switches needed to run headless / unsigned under CI.
-    Mirrors the switches applied by unittests/main_test.py."""
+    """Return the switches needed for headless Linux CI."""
     if LINUX:
         return {
             "disable-setuid-sandbox": "",
@@ -58,20 +55,7 @@ def _ci_switches():
             "enable-features": "NetworkServiceInProcess2",
             "password-store": "basic",
         }
-    if MAC:
-        return {
-            "no-sandbox": "",
-            "disable-gpu": "",
-            "disable-gpu-compositing": "",
-            "in-process-gpu": "",
-            "use-mock-keychain": "",
-            # An unsigned CI process can't spawn the renderer subprocess (Mach
-            # port rendezvous fails), so run it in the browser process instead.
-            "single-process": "",
-            "js-flags": "--jitless",
-            "enable-features": "NetworkServiceInProcess2",
-        }
-    return {}  # Windows needs no special switches.
+    return {}  # macOS and Windows need no special switches.
 
 
 # Bootstrap run inside each example's subprocess. Patches the two entry points

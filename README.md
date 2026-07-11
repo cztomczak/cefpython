@@ -242,6 +242,7 @@ at this moment.
   * [javascript_flags](api/ApplicationSettings.md#javascript_flags)
   * [locale](api/ApplicationSettings.md#locale)
   * [locales_dir_path](api/ApplicationSettings.md#locales_dir_path)
+  * [main_bundle_path](api/ApplicationSettings.md#main_bundle_path)
   * [debug](api/ApplicationSettings.md#debug)
   * [log_file](api/ApplicationSettings.md#log_file)
   * [log_severity](api/ApplicationSettings.md#log_severity)

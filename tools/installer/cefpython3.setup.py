@@ -23,6 +23,7 @@ Options:
 import copy
 import os
 import platform
+import stat
 import subprocess
 import sys
 import sysconfig
@@ -56,6 +57,16 @@ EXECUTABLES_NOEXT = [
     "ceftests",
     "subprocess",
 ]
+if platform.system() == "Darwin":
+    EXECUTABLES_NOEXT.remove("subprocess")
+    for helper_name in [
+            "cefpython Helper",
+            "cefpython Helper (Alerts)",
+            "cefpython Helper (GPU)",
+            "cefpython Helper (Plugin)",
+            "cefpython Helper (Renderer)"]:
+        EXECUTABLES_NOEXT.append(os.path.join(
+            helper_name + ".app", "Contents", "MacOS", helper_name))
 
 
 class custom_install(install):
@@ -87,11 +98,14 @@ if "bdist_wheel" in sys.argv:
                 # "linux-x86_64" replace with "manylinux1_x86_64"
                 platform_tag = platform_tag.replace("linux", "manylinux1")
             elif platform.system() == "Darwin":
-                # For explanation of Mac platform tags, see:
-                # http://lepture.com/en/2014/python-on-a-hard-wheel
-                platform_tag = ("macosx_10_6_intel"
-                                ".macosx_10_9_intel.macosx_10_9_x86_64"
-                                ".macosx_10_10_intel.macosx_10_10_x86_64")
+                machine = platform.machine().lower()
+                if machine != "arm64":
+                    raise RuntimeError(
+                        "macOS CEF distribution requires native arm64 "
+                        "Python; got {0} ({1})".format(
+                            machine, platform_tag))
+                # CEF 147 targets macOS 12+ on Apple Silicon.
+                platform_tag = "macosx_12_0_arm64"
             tag = (tag[0], tag[1], platform_tag)
             return tag
 
@@ -237,9 +251,11 @@ def post_install_hook():
         executable = os.path.join(installed_package_dir, executable)
         if not os.path.exists(executable):
             continue
-        command = "chmod +x {executable}".format(executable=executable)
-        print("[setup.py] {command}".format(command=command))
-        subprocess.call(command, shell=True)
+        print("[setup.py] chmod +x {executable}".format(
+            executable=executable))
+        mode = os.stat(executable).st_mode
+        os.chmod(executable, mode | stat.S_IXUSR | stat.S_IXGRP |
+                 stat.S_IXOTH)
 
     # Set write permissions on log files
     print("[setup.py] Set write permissions on log files")

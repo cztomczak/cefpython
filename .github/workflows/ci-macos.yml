@@ -96,48 +96,49 @@ jobs:
         run: |
           mkdir -p build/artifacts
           cp build/_cmake_build/cefpython_py*.so build/artifacts/
-          cp build/_cmake_build/subprocess_build/subprocess build/artifacts/
+          helpers=(build/_cmake_build/subprocess_build/"cefpython Helper"*.app)
+          if [ "${#helpers[@]}" -ne 5 ]; then
+            echo "Expected 5 CEF helper app bundles, found ${#helpers[@]}" >&2
+            exit 1
+          fi
+          for app in "${helpers[@]}"; do
+            executable="$app/Contents/MacOS/$(basename "$app" .app)"
+            if [ ! -x "$executable" ]; then
+              echo "Missing helper executable: $executable" >&2
+              exit 1
+            fi
+            cp -R "$app" build/artifacts/
+          done
           cef_dir=$(ls -d build/cef*_macarm64 2>/dev/null | head -1)
           find "$cef_dir/bin" -maxdepth 1 -mindepth 1 \
             ! -name 'cefclient*' ! -name 'cefsimple*' ! -name 'ceftests*' \
-            -exec cp -r {} build/artifacts/ \;
+            -exec cp -R {} build/artifacts/ \;
 
       - name: Set up cefpython3 package
-        run: cp -r build/artifacts/. cefpython3/
+        run: cp -R build/artifacts/. cefpython3/
 
       - name: Codesign binaries
         run: |
-          # Ad-hoc sign our freshly built binaries so macOS 14+ Gatekeeper
-          # allows them to run (unsigned binaries are blocked; the GPU process
-          # reuses subprocess with --type=gpu-process and would exit 1003).
-          codesign --force --sign - cefpython3/subprocess
-          for f in cefpython3/cefpython_py*.so; do codesign --force --sign - "$f"; done
-
-      - name: Create app bundle for tests
-        run: |
-          # CEF 130+ forms the MachPortRendezvousServer bootstrap name from
-          # BaseBundleID(); without a CFBundleIdentifier it starts with "." and
-          # bootstrap_register rejects it, crashing renderer subprocesses.
-          # Setting CFProcessPath to a minimal app bundle gives a valid bundle
-          # ID before CefInitialize(). Reused by both test steps below.
-          BUNDLE_DIR="${{ github.workspace }}/CEFPython.app"
-          mkdir -p "$BUNDLE_DIR/Contents/MacOS"
-          ln -sf "$(which python)" "$BUNDLE_DIR/Contents/MacOS/python"
-          cat > "$BUNDLE_DIR/Contents/Info.plist" << 'PLIST'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>CFBundleIdentifier</key>
-            <string>org.cefpython</string>
-            <key>CFBundleName</key>
-            <string>CEFPython</string>
-            <key>CFBundleExecutable</key>
-            <string>python</string>
-          </dict>
-          </plist>
-          PLIST
-          echo "CFProcessPath=$BUNDLE_DIR/Contents/MacOS/python" >> $GITHUB_ENV
+          # automate.py changes the framework Mach-O install name, invalidating
+          # its upstream signature. Sign staged code inside-out, then verify
+          # every final bundle strictly before it is written to the wheel.
+          framework="cefpython3/Chromium Embedded Framework.framework"
+          codesign --force --deep --sign - "$framework"
+          codesign --verify --deep --strict --verbose=2 "$framework"
+          for module in cefpython3/cefpython_py*.so; do
+            codesign --force --sign - "$module"
+            codesign --verify --strict --verbose=2 "$module"
+          done
+          helpers=(cefpython3/"cefpython Helper"*.app)
+          if [ "${#helpers[@]}" -ne 5 ]; then
+            echo "Expected 5 staged CEF helper app bundles, found ${#helpers[@]}" >&2
+            exit 1
+          fi
+          for app in "${helpers[@]}"; do
+            chmod 755 "$app/Contents/MacOS/$(basename "$app" .app)"
+            codesign --force --deep --sign - "$app"
+            codesign --verify --deep --strict --verbose=2 "$app"
+          done
 
       - name: Build wheel
         run: python tools/build_distrib.py --dev
@@ -145,17 +146,15 @@ jobs:
       - name: Unit-test the built wheel
         run: |
           # Install the wheel and run the unit tests against the INSTALLED
-          # package (binaries were codesigned before build_distrib). No
+          # package (all native code was signed before build_distrib). No
           # PYTHONPATH: _test_runner.py chdir's to unittests/, so the repo's
           # cefpython3/ build dir is never on sys.path and import cefpython3
-          # resolves to the installed wheel. CFProcessPath is inherited from
-          # the app-bundle step.
+          # resolves to the installed wheel.
           pip install build/dist/*.whl
           python unittests/_test_runner.py
 
       - name: Smoke-test the built wheel
         timeout-minutes: 5
-        # CFProcessPath is inherited from the app-bundle step above.
         run: python tools/smoke_test.py
 
       - name: Upload wheel artifact

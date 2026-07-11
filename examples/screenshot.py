@@ -74,20 +74,7 @@ def main():
         "disable-gpu": "",
         "disable-gpu-compositing": "",
     }
-    if sys.platform.startswith("darwin"):
-        # Suppress macOS keychain authorization dialogs in headless use.
-        switches["use-mock-keychain"] = ""
-        # MachPortRendezvousServer bootstrap name requires a bundle ID.
-        # Without one, renderer subprocess bootstrap_look_up fails.
-        # --single-process runs the renderer in-process, avoiding the lookup.
-        switches["single-process"] = ""
-        # --single-process puts V8 in the browser process and requires a large
-        # contiguous CodeRange; --jitless disables JIT to remove that need.
-        switches["js-flags"] = "--jitless"
-        # Run network service in-process to avoid Mach port rendezvous
-        # failures for utility subprocesses on macOS.
-        switches["enable-features"] = "NetworkServiceInProcess2"
-    else:
+    if not sys.platform.startswith("darwin"):
         # Tweaking OSR performance (Issue #240). On macOS ARM the viz
         # Surfaces API is required for OSR browser creation, so these
         # switches must not be passed on macOS.

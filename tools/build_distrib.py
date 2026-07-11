@@ -10,10 +10,12 @@ Packaging workflow (current):
       1. tools/download_cef.py            - fetch the CEF binary distribution.
       2. tools/automate.py --prebuilt-cef - lay out CEF_ROOT for the build.
       3. CMake build                      - compile cefpython_py<XY>.{so,pyd}
-                                            and the subprocess helper.
+                                            and the subprocess helper(s).
       4. stage into cefpython3/           - copy the compiled module, the
-                                            subprocess binary and the CEF
-                                            runtime files next to __init__.py.
+                                            platform subprocess artifact(s)
+                                            and CEF runtime files next to
+                                            __init__.py. macOS uses five
+                                            process-specific Helper.app bundles.
       5. build_distrib.py (this script)   - zip cefpython3/ into a PEP 427 wheel
                                             with a generated .dist-info
                                             (METADATA, WHEEL, top_level.txt,
@@ -37,8 +39,9 @@ Options:
                         full git history (checkout with fetch-depth: 0).
     --version VERSION   Use VERSION verbatim (overrides --dev and the header).
 
-The cefpython3/ directory must already contain the compiled outputs:
-    cefpython_py<XY>.pyd, subprocess.exe, CEF runtime files, __init__.py
+The cefpython3/ directory must already contain the compiled outputs and CEF
+runtime. Windows/Linux use a flat subprocess executable; macOS uses five
+sibling ``cefpython Helper*.app`` bundles.
 
 The base version is read automatically from src/version/cef_version_*.h.
 Wheel metadata (name, summary, author, URLs, keywords, classifiers) is read
@@ -50,13 +53,24 @@ import base64
 import glob
 import hashlib
 import os
+import platform
 import shutil
+import stat
 import subprocess
 import sys
 import sysconfig
 import zipfile
 
 import cef_version
+
+
+MAC_HELPER_APP_NAMES = [
+    "cefpython Helper.app",
+    "cefpython Helper (Alerts).app",
+    "cefpython Helper (GPU).app",
+    "cefpython Helper (Plugin).app",
+    "cefpython Helper (Renderer).app",
+]
 
 try:
     import tomllib  # Python 3.11+
@@ -82,7 +96,7 @@ def main():
     print("[build_distrib.py] Version:", version)
     vi = sys.version_info
     cp = "cp{0}{1}".format(vi.major, vi.minor)
-    platform = sysconfig.get_platform().replace("-", "_").replace(".", "_")
+    platform = _wheel_platform_tag()
 
     wheel_name = "cefpython3-{v}-{cp}-{cp}-{p}.whl".format(
         v=version, cp=cp, p=platform)
@@ -100,6 +114,7 @@ def main():
               " run compile step first".format(ext=ext, pkg_dir=pkg_dir))
         sys.exit(1)
 
+    _validate_macos_helpers(pkg_dir)
     _reduce_package_size_issue262(pkg_dir)
     _bundle_msvcp140_issue359(pkg_dir)
 
@@ -156,6 +171,58 @@ def main():
         zf.writestr(record_arcname, record_data)
 
     print("[build_distrib.py] Done:", wheel_path)
+
+
+def _wheel_platform_tag():
+    platform_tag = (sysconfig.get_platform()
+                    .replace("-", "_").replace(".", "_"))
+    if sys.platform == "darwin":
+        # setup-python provides a universal2 interpreter whose sysconfig tag
+        # remains universal2 even while its native arm64 slice is executing.
+        # The packaged CEF framework and helpers are arm64-only, so tag the
+        # payload architecture instead of copying the interpreter's tag.
+        machine = platform.machine().lower()
+        if machine != "arm64":
+            raise RuntimeError(
+                "macOS CEF distribution requires native arm64 Python; "
+                "got {0} ({1})".format(machine, platform_tag))
+        return "macosx_12_0_arm64"
+    return platform_tag
+
+
+def _validate_macos_helpers(pkg_dir):
+    """Fail before packaging an incomplete or non-executable helper set."""
+    if sys.platform != "darwin":
+        return
+
+    expected = set(MAC_HELPER_APP_NAMES)
+    found = {
+        os.path.basename(path)
+        for path in glob.glob(os.path.join(pkg_dir, "cefpython Helper*.app"))
+        if os.path.isdir(path)
+    }
+    if found != expected:
+        missing = sorted(expected - found)
+        unexpected = sorted(found - expected)
+        details = []
+        if missing:
+            details.append("missing: " + ", ".join(missing))
+        if unexpected:
+            details.append("unexpected: " + ", ".join(unexpected))
+        raise RuntimeError("invalid macOS helper bundle set ({0})".format(
+            "; ".join(details)))
+
+    for name in MAC_HELPER_APP_NAMES:
+        app = os.path.join(pkg_dir, name)
+        executable = os.path.join(
+            app, "Contents", "MacOS", os.path.splitext(name)[0])
+        info_plist = os.path.join(app, "Contents", "Info.plist")
+        if not os.path.isfile(info_plist):
+            raise RuntimeError("missing helper Info.plist: " + info_plist)
+        if not os.path.isfile(executable):
+            raise RuntimeError("missing helper executable: " + executable)
+        if not os.stat(executable).st_mode & stat.S_IXUSR:
+            raise RuntimeError("helper is not executable: " + executable)
 
 
 def _read_project_metadata():

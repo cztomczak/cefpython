@@ -12,6 +12,7 @@
 
 void MacInitialize();
 void MacShutdown();
+std::string MacGetMainBundlePath();
 void MacSetWindowTitle(CefRefPtr<CefBrowser> browser, char* title);
 
 #endif  // CEFPYTHON_UTIL_MAC_H_

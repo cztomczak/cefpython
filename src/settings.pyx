@@ -91,6 +91,10 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.browser_subprocess_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
+        elif key == "main_bundle_path":
+            cefString = new CefString(&cefAppSettings.main_bundle_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
         elif key == "command_line_args_disabled":
             cefAppSettings.command_line_args_disabled = int(appSettings[key])
         elif key == "remote_debugging_port":

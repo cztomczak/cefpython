@@ -510,6 +510,23 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         if  "framework_dir_path" not in application_settings:
             application_settings["framework_dir_path"] = os.path.join(
                     module_dir, "Chromium Embedded Framework.framework")
+        IF UNAME_SYSNAME == "Darwin":
+            if "main_bundle_path" not in application_settings:
+                main_bundle_path = os.fsdecode(
+                        <bytes>MacGetMainBundlePath())
+                if main_bundle_path and os.path.isabs(main_bundle_path):
+                    application_settings["main_bundle_path"] = \
+                            main_bundle_path
+                else:
+                    # A non-framework CLI Python may not live in an app bundle.
+                    # Use the packaged generic helper as a real fallback bundle
+                    # so the browser and all specialized helpers share one CEF
+                    # BaseBundleID for Mach port rendezvous.
+                    helper_bundle_path = os.path.join(
+                            module_dir, "cefpython Helper.app")
+                    if os.path.isdir(helper_bundle_path):
+                        application_settings["main_bundle_path"] = \
+                                helper_bundle_path
     if "locales_dir_path" not in application_settings:
         if platform.system() != "Darwin":
             application_settings["locales_dir_path"] = os.path.join(
@@ -522,8 +539,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
                     application_settings["framework_dir_path"],
                     "Resources")
     if "browser_subprocess_path" not in application_settings:
-        application_settings["browser_subprocess_path"] = os.path.join(
-                module_dir, "subprocess")
+        if platform.system() == "Darwin":
+            application_settings["browser_subprocess_path"] = os.path.join(
+                    module_dir, "cefpython Helper.app", "Contents", "MacOS",
+                    "cefpython Helper")
+        else:
+            application_settings["browser_subprocess_path"] = os.path.join(
+                    module_dir, "subprocess")
 
     # ------------------------------------------------------------------------
     # Mouse context menu

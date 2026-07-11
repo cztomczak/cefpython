@@ -95,17 +95,44 @@ if(WIN32)
     message(STATUS "Subprocess manifest input: ${_cef_compat_manifest}")
 endif()
 
-add_executable(cefpython_subprocess ${_exe_sources})
-add_dependencies(cefpython_subprocess cefpython_headers)
-set_target_properties(cefpython_subprocess PROPERTIES OUTPUT_NAME "subprocess")
+if(APPLE)
+    # Chromium selects process-specific helpers by replacing " Helper" in the
+    # generic helper name with one of the suffixes below. All five bundles are
+    # therefore required even though browser_subprocess_path points only at the
+    # generic helper executable.
+    set(_cefpython_subprocess_targets
+        cefpython_subprocess
+        cefpython_subprocess_alerts
+        cefpython_subprocess_gpu
+        cefpython_subprocess_plugin
+        cefpython_subprocess_renderer
+    )
+    foreach(_target IN LISTS _cefpython_subprocess_targets)
+        add_executable(${_target} MACOSX_BUNDLE ${_exe_sources})
+    endforeach()
+else()
+    set(_cefpython_subprocess_targets cefpython_subprocess)
+    add_executable(cefpython_subprocess ${_exe_sources})
+    set_target_properties(cefpython_subprocess PROPERTIES OUTPUT_NAME "subprocess")
+endif()
 
-target_include_directories(cefpython_subprocess PRIVATE
-    "${CEFPYTHON_SRC_DIR}"
-    "${CEFPYTHON_SRC_DIR}/common"
-    "${CEFPYTHON_PYX_STAGE_DIR}"
-    ${Python_INCLUDE_DIRS}
-    # After src/: platform-generated CEF headers not vendored in src/include.
-    "${CEFPYTHON_CEF_ROOT}"
+foreach(_target IN LISTS _cefpython_subprocess_targets)
+    add_dependencies(${_target} cefpython_headers)
+    target_include_directories(${_target} PRIVATE
+        "${CEFPYTHON_SRC_DIR}"
+        "${CEFPYTHON_SRC_DIR}/common"
+        "${CEFPYTHON_PYX_STAGE_DIR}"
+        ${Python_INCLUDE_DIRS}
+        # After src/: platform-generated CEF headers not vendored in src/include.
+        "${CEFPYTHON_CEF_ROOT}"
+    )
+endforeach()
+
+# Export the complete target list so the top-level install rule includes every
+# macOS helper bundle while Windows and Linux keep their single flat executable.
+set(CEFPYTHON_SUBPROCESS_TARGETS
+    ${_cefpython_subprocess_targets}
+    PARENT_SCOPE
 )
 
 if(WIN32)
@@ -136,29 +163,55 @@ if(WIN32)
         /LARGEADDRESSAWARE /SUBSYSTEM:WINDOWS
     )
 elseif(APPLE)
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-        set(_macos_ver_min 11.0)
-    else()
-        set(_macos_ver_min 10.9)
-    endif()
-    target_compile_options(cefpython_subprocess PRIVATE -DNDEBUG -O3)
-    target_compile_definitions(cefpython_subprocess PRIVATE
-        CEFPYTHON_API_H_FILE="${MODULE_NAME}.h")
-    target_link_options(cefpython_subprocess PRIVATE
-        -mmacosx-version-min=${_macos_ver_min}
-        -Wl,-search_paths_first
-        "-F${CEFPYTHON_CEF_ROOT}/bin"
-        "-framework" "Chromium Embedded Framework"
-        "-Wl,-rpath,@loader_path/"
-        # Embed Info.plist so CFBundleGetMainBundle() returns CFBundleIdentifier
-        # = "org.cefpython", matching the service name the browser process
-        # registers with MachPortRendezvousServer.
-        "-sectcreate" "__TEXT" "__info_plist"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist"
-    )
-    target_link_libraries(cefpython_subprocess PRIVATE
-        "${CEFPYTHON_CEF_ROOT}/lib/libcef_dll_wrapper.a"
-    )
+    # Match CEF 147's declared CEF_TARGET_SDK and official helper plist.
+    set(_macos_ver_min 12.0)
+
+    function(_configure_cefpython_helper _target _output_name _bundle_id_suffix)
+        # Generate a concrete plist per target. Pointing
+        # MACOSX_BUNDLE_INFO_PLIST directly at a shared template would let
+        # target-agnostic CMake variables give all variants the same name.
+        set(CEFPYTHON_HELPER_EXECUTABLE "${_output_name}")
+        set(CEFPYTHON_HELPER_BUNDLE_ID_SUFFIX "${_bundle_id_suffix}")
+        set(CEFPYTHON_HELPER_MINIMUM_SYSTEM_VERSION "${_macos_ver_min}")
+        set(_helper_info_plist
+            "${CMAKE_CURRENT_BINARY_DIR}/${_target}-Info.plist")
+        configure_file(
+            "${CMAKE_CURRENT_SOURCE_DIR}/helper-Info.plist.in"
+            "${_helper_info_plist}"
+            @ONLY
+        )
+
+        set_target_properties(${_target} PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST "${_helper_info_plist}"
+            OUTPUT_NAME "${_output_name}"
+        )
+        target_compile_options(${_target} PRIVATE -DNDEBUG -O3)
+        target_compile_definitions(${_target} PRIVATE
+            CEFPYTHON_API_H_FILE="${MODULE_NAME}.h")
+        target_link_options(${_target} PRIVATE
+            -mmacosx-version-min=${_macos_ver_min}
+            -Wl,-search_paths_first
+            "-F${CEFPYTHON_CEF_ROOT}/bin"
+            "-framework" "Chromium Embedded Framework"
+            # Contents/MacOS -> bundle -> cefpython3 package root, where the
+            # Chromium Embedded Framework.framework directory is installed.
+            "-Wl,-rpath,@loader_path/../../../"
+        )
+        target_link_libraries(${_target} PRIVATE
+            "${CEFPYTHON_CEF_ROOT}/lib/libcef_dll_wrapper.a"
+        )
+    endfunction()
+
+    _configure_cefpython_helper(
+        cefpython_subprocess "cefpython Helper" "")
+    _configure_cefpython_helper(
+        cefpython_subprocess_alerts "cefpython Helper (Alerts)" ".alerts")
+    _configure_cefpython_helper(
+        cefpython_subprocess_gpu "cefpython Helper (GPU)" ".gpu")
+    _configure_cefpython_helper(
+        cefpython_subprocess_plugin "cefpython Helper (Plugin)" ".plugin")
+    _configure_cefpython_helper(
+        cefpython_subprocess_renderer "cefpython Helper (Renderer)" ".renderer")
 else()
     target_compile_options(cefpython_subprocess PRIVATE -DNDEBUG -O3)
     target_compile_definitions(cefpython_subprocess PRIVATE

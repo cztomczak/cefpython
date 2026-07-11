@@ -29,6 +29,7 @@ cdef extern from "include/internal/cef_types.h":
 
     ctypedef struct CefSettings:
         cef_string_t browser_subprocess_path
+        cef_string_t main_bundle_path
         int command_line_args_disabled
         cef_string_t cache_path
         int enable_net_security_expiration

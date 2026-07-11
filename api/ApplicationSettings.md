@@ -21,6 +21,7 @@ Table of contents:
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
   * [locales_dir_path](#locales_dir_path)
+  * [main_bundle_path](#main_bundle_path)
   * [debug](#debug)
   * [log_file](#log_file)
   * [log_severity](#log_severity)
@@ -245,6 +246,17 @@ the locales directory must be located in the module directory. This value
 is ignored on Mac OS X where pack files are always loaded from the app  
 bundle Resources directory. Also configurable using the "locales-dir-path"  
 [command-line switch](CommandLineSwitches.md).
+
+
+### main_bundle_path
+
+(string)
+The absolute path to the main `.app` bundle on macOS. By default CEF Python
+uses the path reported by the process's main `NSBundle` when it is a real app
+bundle. For an unbundled command-line Python it uses the packaged generic CEF
+helper bundle, ensuring all child processes share the same bundle identity. If
+this value is explicitly empty then CEF defaults to the top-level app bundle.
+Also configurable using the "main-bundle-path" command-line switch.
 
 
 ### debug

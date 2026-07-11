@@ -45,5 +45,4 @@ Download = "https://github.com/cztomczak/cefpython/releases"
 
 [tool.scikit-build]
 cmake.build-type = "Release"
-cmake.args = ["-A", "x64"]
 wheel.packages = ["cefpython3"]

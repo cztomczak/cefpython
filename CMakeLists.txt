@@ -288,7 +288,7 @@ elseif(APPLE)
         -fvisibility=hidden -fvisibility-inlines-hidden
     )
     target_link_options(${MODULE_NAME} PRIVATE
-        -mmacosx-version-min=11.0
+        -mmacosx-version-min=12.0
         -Wl,-search_paths_first -Wl,-dead_strip
         "-F${CEF_ROOT}/bin" "-framework" "Chromium Embedded Framework"
         "-Wl,-rpath,@loader_path/"
@@ -324,8 +324,10 @@ install(TARGETS ${MODULE_NAME}
     RUNTIME DESTINATION "cefpython3"
 )
 
-# subprocess executable (OUTPUT_NAME "subprocess" is set in src/subprocess/CMakeLists.txt)
-install(TARGETS cefpython_subprocess
+# Flat subprocess executable on Windows/Linux; all five Helper.app bundles on
+# macOS. The target list is exported by src/subprocess/CMakeLists.txt.
+install(TARGETS ${CEFPYTHON_SUBPROCESS_TARGETS}
+    BUNDLE DESTINATION "cefpython3"
     RUNTIME DESTINATION "cefpython3"
 )
 

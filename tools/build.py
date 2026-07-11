@@ -42,6 +42,14 @@ WINDOWS = sys.platform == "win32"
 LINUX = sys.platform.startswith("linux")
 MAC = sys.platform == "darwin"
 
+MAC_HELPER_APP_NAMES = [
+    "cefpython Helper.app",
+    "cefpython Helper (Alerts).app",
+    "cefpython Helper (GPU).app",
+    "cefpython Helper (Plugin).app",
+    "cefpython Helper (Renderer).app",
+]
+
 
 def run(cmd, **kwargs):
     print("[build.py]", " ".join(str(a) for a in cmd))
@@ -93,12 +101,31 @@ def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
         shutil.copy2(mod, dst)
         print("[build.py] ->", dst)
 
-    # Copy subprocess executable to cefpython3/
-    if WINDOWS:
+    # Copy the subprocess executable (Windows/Linux) or the complete set of
+    # process-specific helper app bundles (macOS) to cefpython3/.
+    if MAC:
+        helper_dir = os.path.join(BUILD_DIR, "subprocess_build")
+        missing = [name for name in MAC_HELPER_APP_NAMES
+                   if not os.path.isdir(os.path.join(helper_dir, name))]
+        if missing:
+            print("[build.py] ERROR: missing macOS helper bundles:",
+                  ", ".join(missing))
+            sys.exit(1)
+        for name in MAC_HELPER_APP_NAMES:
+            src = os.path.join(helper_dir, name)
+            dst = os.path.join(PKG_DIR, name)
+            if os.path.exists(dst):
+                shutil.rmtree(dst)
+            shutil.copytree(src, dst, symlinks=True)
+            print("[build.py] ->", dst)
+    elif WINDOWS:
         exe = os.path.join(BUILD_DIR, "subprocess_build", "Release", "subprocess.exe")
     else:
         exe = os.path.join(BUILD_DIR, "subprocess_build", "subprocess")
-    if os.path.exists(exe):
+    if not MAC:
+        if not os.path.exists(exe):
+            print("[build.py] ERROR: no subprocess executable found after build")
+            sys.exit(1)
         dst = os.path.join(PKG_DIR, os.path.basename(exe))
         shutil.copy2(exe, dst)
         print("[build.py] ->", dst)
@@ -110,7 +137,10 @@ def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
     elif MAC:
         already_copied = os.path.isdir(
             os.path.join(PKG_DIR, "Chromium Embedded Framework.framework"))
-        cef_glob = os.path.join("build", "cef*_mac*")
+        # Match only automate.py's prepared runtime directory. The unpacked
+        # cef_binary_*_macosarm64 distribution also matches a broad *mac* glob
+        # but has no bin/ directory.
+        cef_glob = os.path.join("build", "cef*_macarm64")
     else:
         already_copied = os.path.exists(os.path.join(PKG_DIR, "libcef.so"))
         cef_glob = os.path.join("build", "cef[0-9]*_linux64")
@@ -159,28 +189,56 @@ def _copy_cef_runtime(src_bin, dst_dir):
 
 
 def _codesign_macos(pkg_dir):
-    # Ad-hoc sign our compiled binaries; CEF framework already carries its own sig.
-    targets = []
-    exe = os.path.join(pkg_dir, "subprocess")
-    if os.path.exists(exe):
-        os.chmod(exe, 0o755)
-        targets.append(exe)
-    for so in glob.glob(os.path.join(pkg_dir, "cefpython_py*.so")):
-        targets.append(so)
-    for target in targets:
-        print("[build.py] codesign:", os.path.basename(target))
-        ret = subprocess.run(
-            ["codesign", "--force", "--sign", "-", target])
-        if ret.returncode != 0:
-            print("[build.py] WARNING: codesign failed for", target,
-                  "— continuing anyway")
+    # automate.py changes the framework install name, invalidating its upstream
+    # signature. Sign staged code inside-out and verify every final bundle.
+    framework = os.path.join(
+        pkg_dir, "Chromium Embedded Framework.framework")
+    if not os.path.isdir(framework):
+        print("[build.py] ERROR: CEF framework is missing:", framework)
+        sys.exit(1)
+    _codesign_and_verify(framework, deep=True)
+
+    modules = glob.glob(os.path.join(pkg_dir, "cefpython_py*.so"))
+    if not modules:
+        print("[build.py] ERROR: no extension module to codesign")
+        sys.exit(1)
+    for module in modules:
+        _codesign_and_verify(module)
+
+    for name in MAC_HELPER_APP_NAMES:
+        app = os.path.join(pkg_dir, name)
+        executable = os.path.join(
+            app, "Contents", "MacOS", os.path.splitext(name)[0])
+        if not os.path.isfile(executable):
+            print("[build.py] ERROR: helper executable is missing:", executable)
+            sys.exit(1)
+        os.chmod(executable, 0o755)
+        _codesign_and_verify(app, deep=True)
 
 
-def pip_wheel_build():
+def _codesign_and_verify(target, deep=False):
+    print("[build.py] codesign:", os.path.basename(target))
+    sign_cmd = ["codesign", "--force"]
+    if deep:
+        sign_cmd.append("--deep")
+    sign_cmd += ["--sign", "-", target]
+    run(sign_cmd)
+
+    verify_cmd = ["codesign", "--verify"]
+    if deep:
+        verify_cmd.append("--deep")
+    verify_cmd += ["--strict", "--verbose=2", target]
+    run(verify_cmd)
+
+
+def wheel_build():
     dist_dir = os.path.join("build", "dist")
     os.makedirs(dist_dir, exist_ok=True)
-    run([sys.executable, "-m", "pip", "wheel",
-         "--no-build-isolation", "-w", dist_dir, "."])
+    # Package the already staged (and, on macOS, signed) tree. Calling
+    # ``pip wheel .`` here would rebuild in an isolated CMake tree and bypass
+    # _codesign_macos(), producing helpers and a modified CEF framework with
+    # invalid or missing signatures.
+    run([sys.executable, "tools/build_distrib.py", "--out-dir", dist_dir])
     wheels = glob.glob(os.path.join(dist_dir, "cefpython3-*.whl"))
     if not wheels:
         print("[build.py] ERROR: no wheel found in", dist_dir)
@@ -199,10 +257,10 @@ def main():
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(repo_root)
 
+    cmake_dev_build(clean=clean, profiling=profiling,
+                    line_tracing=line_tracing)
     if wheel:
-        pip_wheel_build()
-    else:
-        cmake_dev_build(clean=clean, profiling=profiling, line_tracing=line_tracing)
+        wheel_build()
 
     if unittests:
         env = os.environ.copy()
