@@ -147,6 +147,19 @@ class MainTest_IsolatedTest(unittest.TestCase):
         # workaround), so it applies on every platform.
         switches = {"disable-popup-blocking": ""}
         cef.Initialize(settings, switches=switches)
+
+        # Ensure assertion and timeout failures still release CEF and its child
+        # processes. The explicit shutdown near the end uses this same helper,
+        # making the unittest cleanup a no-op on the success path.
+        cef_active = True
+
+        def shutdown_cef():
+            nonlocal cef_active
+            if cef_active:
+                cef_active = False
+                cef.Shutdown()
+
+        self.addCleanup(shutdown_cef)
         subtest_message("cef.Initialize() ok")
 
         # CRL set file
@@ -287,8 +300,21 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.WindowUtils.IsWindowHandle(hwnd)
             subtest_message("cef.WindowUtils ok")
 
-        # Run message loop
-        run_message_loop()
+        # Exercise the external-loop MessageLoopWork() API until the complete
+        # asynchronous flow finishes: JavaScript opens a popup, the popup is
+        # destroyed, and its follow-up DevTools test succeeds. Browser and
+        # renderer startup duration varies between systems, so completion must
+        # not depend on a fixed number of message-loop iterations.
+        async_objects = client_handlers + [global_handler, external]
+        async_completed = run_message_loop_until(
+            lambda: main_test_async_completed(
+                global_handler, async_objects,
+                display_handler2.OnLoadingProgressChange_Progress))
+        self.assertTrue(
+            async_completed,
+            "Timed out waiting for load/JavaScript callbacks, popup "
+            "destruction and DevTools closure")
+        subtest_message("cef.MessageLoopWork() ok")
 
         # Make sure popup browser was destroyed
         self.assertIsInstance(cef.GetBrowserByIdentifier(MAIN_BROWSER_ID),
@@ -301,20 +327,25 @@ class MainTest_IsolatedTest(unittest.TestCase):
         del browser
         subtest_message("browser.CloseBrowser() ok")
 
-        # Give it some time to close before checking asserts
-        # and calling shutdown.
+        # Browser destruction is asynchronous. Wait for the registry entry to
+        # disappear before checking callback assertions and shutting CEF down.
+        browser_closed = run_message_loop_until(
+            lambda: cef.GetBrowserByIdentifier(MAIN_BROWSER_ID) is None)
+        self.assertTrue(browser_closed,
+                        "Timed out waiting for the main browser to close")
+        # OnBeforeClose removes the Python registry entry before all native CEF
+        # teardown work has settled. Process a short grace period before
+        # Shutdown() to avoid racing those remaining tasks.
         do_message_loop_work(25)
 
         # Asserts before shutdown
         self.assertEqual(display_handler2.OnLoadingProgressChange_Progress,
                          1.0)
         # noinspection PyTypeChecker
-        check_auto_asserts(self, [] + client_handlers
-                                    + [global_handler,
-                                       external])
+        check_auto_asserts(self, async_objects)
 
         # Test shutdown of CEF
-        cef.Shutdown()
+        shutdown_cef()
         subtest_message("cef.Shutdown() ok")
 
         # Display summary

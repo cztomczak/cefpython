@@ -18,8 +18,11 @@ WINDOWS = SYSTEM if SYSTEM == "WINDOWS" else False
 LINUX = SYSTEM if SYSTEM == "LINUX" else False
 MAC = SYSTEM if SYSTEM == "MAC" else False
 
-# To show the window for an extended period of time increase this number.
-MESSAGE_LOOP_RANGE = 200  # each iteration is 0.01 sec
+# MessageLoopWork() performs one non-blocking iteration for applications that
+# integrate CEF into an external message loop. Exercise that API until the
+# expected browser work completes, without assuming a fixed iteration count.
+MESSAGE_LOOP_TIMEOUT = 15.0
+MESSAGE_LOOP_POLL_INTERVAL = 0.01
 
 MAIN_BROWSER_ID = 1
 POPUP_BROWSER_ID = 2
@@ -41,13 +44,17 @@ def show_test_summary(pyfile):
           + os.path.basename(pyfile))
 
 
-def run_message_loop():
-    # Run message loop for some time.
-    # noinspection PyTypeChecker
-    for i in range(MESSAGE_LOOP_RANGE):
+def run_message_loop_until(condition, timeout=MESSAGE_LOOP_TIMEOUT):
+    """Exercise MessageLoopWork until condition succeeds or timeout elapses."""
+    deadline = time.monotonic() + timeout
+    while True:
+        # noinspection PyTypeChecker
         cef.MessageLoopWork()
-        time.sleep(0.01)
-    subtest_message("cef.MessageLoopWork() ok")
+        if condition():
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(MESSAGE_LOOP_POLL_INTERVAL)
 
 
 def do_message_loop_work(work_loops):
@@ -71,6 +78,22 @@ def js_code_completed():
     assert not g_js_code_completed
     g_js_code_completed = True
     subtest_message("js_code_completed() ok")
+
+
+def main_test_async_completed(global_handler, objects, loading_progress):
+    """Return whether all browser work exercised by main_test has finished."""
+    main_browser = cef.GetBrowserByIdentifier(MAIN_BROWSER_ID)
+    if (not g_js_code_completed
+            or not global_handler.HasDevTools_True
+            or main_browser is None
+            or main_browser.HasDevTools()
+            or cef.GetBrowserByIdentifier(POPUP_BROWSER_ID) is not None
+            or loading_progress != 1.0):
+        return False
+    return all(value
+               for obj in objects
+               for key, value in obj.__dict__.items()
+               if "_True" in key)
 
 
 def check_auto_asserts(test_case, objects):
@@ -132,7 +155,14 @@ def close_popup(global_handler, browser):
 
 def close_devtools(global_handler):
     main_browser = cef.GetBrowserByIdentifier(MAIN_BROWSER_ID)
-    global_handler.HasDevTools_True = main_browser.HasDevTools()
+    if main_browser is None:
+        return
+    if not main_browser.HasDevTools():
+        # ShowDevTools() is asynchronous. Retry while the main test's bounded
+        # message loop is running instead of assuming 800 ms is always enough.
+        cef.PostDelayedTask(cef.TID_UI, 100, close_devtools, global_handler)
+        return
+    global_handler.HasDevTools_True = True
     main_browser.CloseDevTools()
     subtest_message("DevTools popup ok")
 
