@@ -4,7 +4,7 @@ on:
   push:
     branches: ["master", "cefpython147"]
   pull_request:
-    branches: ["master", "cefpython147"]
+    branches: ["master"]
   workflow_dispatch:
     inputs:
       bypass_cache:
@@ -20,10 +20,10 @@ jobs:
       cef_version: ${{ steps.cef-version.outputs.value }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
@@ -34,7 +34,7 @@ jobs:
           echo "value=$ver" >> $GITHUB_OUTPUT
 
       - name: Cache CEF binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         if: ${{ inputs.bypass_cache != true }}
         with:
           path: |
@@ -61,17 +61,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0  # full history for the --dev wheel version (git commit count)
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Restore CEF cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         if: ${{ inputs.bypass_cache != true }}
         with:
           path: |
