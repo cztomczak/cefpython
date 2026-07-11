@@ -1,4 +1,4 @@
-﻿# Copyright (c) 2016 CEF Python, see the Authors file.
+# Copyright (c) 2016 CEF Python, see the Authors file.
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
@@ -141,68 +141,11 @@ class MainTest_IsolatedTest(unittest.TestCase):
         if "--debug-warning" in sys.argv:
             settings["debug"] = True
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
-        # Chrome 130+ blocks window.open() called without a user gesture.
+        # The popup sub-test opens a window via window.open() during page
+        # load, i.e. without a user gesture, which Chrome blocks by default.
+        # This is a functional requirement of the test itself (not a CI
+        # workaround), so it applies on every platform.
         switches = {"disable-popup-blocking": ""}
-        if LINUX:
-            # Open a GDK/X11 display connection before CEF initialises so
-            # that gdk_display_get_default() returns a valid display.  On a
-            # desktop session this is required for the browser window to be
-            # visible; on xvfb (CI) it is a no-op.
-            init_gtk()
-            # cefpython does not ship a chrome-sandbox (setuid) binary.
-            # Disable SUID/namespace sandboxes; Chrome falls back to seccomp-BPF
-            # which keeps GlobalDescriptors key 7 registered for subprocesses.
-            # Do NOT pass --no-sandbox: it skips key 7 registration but encodes
-            # it in --pseudonymization-salt-handle, causing a CHECK-crash.
-            switches["disable-setuid-sandbox"] = ""
-                    # /dev/shm is too small in CI containers.
-            switches["disable-dev-shm-usage"] = ""
-            # GPU acceleration is not available under xvfb.
-            switches["disable-gpu"] = ""
-            switches["disable-gpu-compositing"] = ""
-            # Run GPU process inside the browser process so it is not
-            # spawned during CefInitialize() where it would fail.
-            switches["in-process-gpu"] = ""
-            switches["no-zygote"] = ""
-            # Force X11 rendering via XWayland.  On Ubuntu 24 GNOME/Wayland
-            # Chrome 130+ defaults to the Wayland Ozone backend when
-            # WAYLAND_DISPLAY is set; cefpython uses raw X11 APIs so the
-            # window would never appear.  On CI (xvfb) this is a no-op.
-            switches["ozone-platform"] = "x11"
-            # Run the network service in-process so no utility subprocess
-            # needs to be spawned (reduces spawn overhead on CI).
-            # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
-            switches["enable-features"] = "NetworkServiceInProcess2"
-            # Suppress the GNOME Keyring unlock prompt on desktop sessions.
-            switches["password-store"] = "basic"
-        if MAC:
-            # cefpython does not ship a chrome-sandbox binary.
-            switches["no-sandbox"] = ""
-            # No real GPU available on macOS CI runners.
-            switches["disable-gpu"] = ""
-            switches["disable-gpu-compositing"] = ""
-            switches["in-process-gpu"] = ""
-            # Prevent macOS keychain authorization prompts during init
-            # (matches CEF's own test infrastructure on macOS).
-            switches["use-mock-keychain"] = ""
-            # Chrome 130+ MachPortRendezvousServer registers via
-            # bootstrap_check_in; renderer subprocesses look up the service
-            # via bootstrap_look_up, which fails on unsigned CI processes
-            # because Chrome gives them a restricted bootstrap namespace.
-            # --in-process-renderer was removed from Chrome 130+.
-            # --single-process runs the renderer in the browser process,
-            # eliminating renderer subprocess bootstrap_look_up failures.
-            switches["single-process"] = ""
-            # --single-process puts the renderer's V8 in the browser process,
-            # which requires a large contiguous CodeRange for JIT code.
-            # On constrained CI runner images this reservation fails with an
-            # OOM error.  --jitless disables all V8 JIT compilers, eliminating
-            # the CodeRange requirement entirely.
-            switches["js-flags"] = "--jitless"
-            # Run network service in-process to avoid Mach port rendezvous
-            # failures for utility subprocesses on macOS CI runners.
-            # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
-            switches["enable-features"] = "NetworkServiceInProcess2"
         cef.Initialize(settings, switches=switches)
         subtest_message("cef.Initialize() ok")
 

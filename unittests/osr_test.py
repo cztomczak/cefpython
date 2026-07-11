@@ -1,4 +1,4 @@
-﻿# Copyright (c) 2018 CEF Python, see the Authors file.
+# Copyright (c) 2018 CEF Python, see the Authors file.
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
@@ -18,7 +18,11 @@ g_datauri_data = """
 <html>
 <head>
     <style type="text/css">
-    body,html {
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+    body {
         font-family: Arial;
         font-size: 11pt;
     }
@@ -115,49 +119,6 @@ class OsrTest_IsolatedTest(unittest.TestCase):
             # switches (which disable it) must not be passed there.
             switches["enable-begin-frame-scheduling"] = ""
             switches["disable-surfaces"] = ""  # Required for PDF ext to work
-        if LINUX:
-            # Open a GDK/X11 display connection before CEF initialises.
-            init_gtk()
-            # cefpython does not ship a chrome-sandbox (setuid) binary.
-            # Disable SUID/namespace sandboxes; Chrome falls back to seccomp-BPF
-            # which keeps GlobalDescriptors key 7 registered for subprocesses.
-            # Do NOT pass --no-sandbox: it skips key 7 registration but encodes
-            # it in --pseudonymization-salt-handle, causing a CHECK-crash.
-            switches["disable-setuid-sandbox"] = ""
-                    # /dev/shm is too small in CI containers.
-            switches["disable-dev-shm-usage"] = ""
-            # Run GPU process inside the browser process so it is not
-            # spawned during CefInitialize() where it would fail.
-            switches["in-process-gpu"] = ""
-            switches["no-zygote"] = ""
-            # Force X11 rendering via XWayland (see main_test.py for details).
-            switches["ozone-platform"] = "x11"
-            # Run the network service in-process so no utility subprocess
-            # needs to be spawned (reduces spawn overhead on CI).
-            # The feature string in Chrome 130+ is "NetworkServiceInProcess2".
-            switches["enable-features"] = "NetworkServiceInProcess2"
-        if MAC:
-            # Prevent macOS keychain authorization prompts during init.
-            # CEF's own test infrastructure (client_app_browser.cc) does
-            # the same on macOS.
-            switches["use-mock-keychain"] = ""
-            # Chrome 130+ MachPortRendezvousServer registers its bootstrap
-            # service as BaseBundleID()+".MachPortRendezvousServer."+pid.
-            # Python processes with only ad-hoc code signing receive a
-            # restricted bootstrap namespace from macOS, so renderer
-            # subprocesses cannot bootstrap_look_up the service.
-            # --single-process runs the renderer inside the browser process,
-            # eliminating the subprocess bootstrap_look_up entirely.
-            # (--in-process-renderer was removed in Chrome 130+.)
-            switches["single-process"] = ""
-            # --single-process puts the renderer's V8 in the browser process,
-            # which requires a large contiguous CodeRange for JIT code.
-            # --jitless disables V8 JIT, removing that requirement.
-            switches["js-flags"] = "--jitless"
-            # Run the network service in-process to avoid Mach port rendezvous
-            # failures for the network utility subprocess on macOS.
-            # (Feature name in Chrome 130+: "NetworkServiceInProcess2".)
-            switches["enable-features"] = "NetworkServiceInProcess2"
         browser_settings = {
             # Tweaking OSR performance (Issue #240)
             "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
@@ -208,8 +169,20 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         browser.SetFocus(True)
         browser.WasResized()
 
-        # Message loop
-        run_message_loop()
+        # Trigger the text-selection sub-test once the page has fully
+        # loaded (registered here, executed from LoadHandler.OnLoadEnd).
+        on_load_end(_select_h1_after_load, browser)
+
+        # Message loop.
+        # The test is event-driven: RenderHandler.OnTextSelectionChanged
+        # calls QuitMessageLoop() as soon as the <h1> selection is reported,
+        # so the loop ends exactly when the work is done rather than after a
+        # fixed delay (which raced the selection round-trip and made this
+        # test flaky on CI). The watchdog task quits the loop if that event
+        # never arrives, turning a would-be hang into a clean assert failure.
+        cef.PostDelayedTask(cef.TID_UI, 15000, cef.QuitMessageLoop)
+        cef.MessageLoop()
+        subtest_message("cef.MessageLoop() ok")
 
         # Close browser and clean reference
         browser.CloseBrowser(True)
@@ -265,8 +238,18 @@ class AccessibilityHandler(object):
         pass
 
 
+def _select_h1_after_load(browser):
+    """Register the selection click after the page has finished loading.
+
+    Runs from LoadHandler.OnLoadEnd, i.e. the document (and its onclick
+    handler) is ready. The click itself is posted with a small delay so
+    layout has been flushed to the compositor and hit-testing is reliable.
+    """
+    cef.PostDelayedTask(cef.TID_UI, 250, _click_h1_to_select, browser)
+
+
 def _click_h1_to_select(browser):
-    """Send a real click anywhere in the viewport after layout is complete.
+    """Send a real click at the center of the viewport.
 
     Chrome 130+ requires the Selection API to run inside a real user-gesture
     event handler for OnTextSelectionChanged to fire. The body has an onclick
@@ -293,6 +276,10 @@ class RenderHandler(object):
         self.GetViewRect_True = False
         self.OnPaint_True = False
         self.OnTextSelectionChanged_True = False
+        # Set once the non-empty <h1> selection has been reported. Used as
+        # the message-loop termination condition so the test does not rely
+        # on a fixed-duration loop (which was the source of CI flakiness).
+        self.OnTextSelectionChanged_h1_True = False
 
     def GetViewRect(self, rect_out, **_):
         """Called to retrieve the view rectangle which is relative
@@ -311,10 +298,6 @@ class RenderHandler(object):
             if not self.OnPaint_True:
                 self.OnPaint_True = True
                 subtest_message("RenderHandler.OnPaint: viewport ok")
-                # Layout is now complete. Post the click so it isn't
-                # re-entrant with OnPaint and hit-testing is reliable.
-                cef.PostDelayedTask(cef.TID_UI, 100, _click_h1_to_select,
-                                    browser)
         else:
             raise Exception("Unsupported element_type in OnPaint")
 
@@ -324,6 +307,11 @@ class RenderHandler(object):
             # Verify the h1 text is selected when a non-empty selection fires.
             self.test_case.assertEqual(selected_text,
                                        "Off-screen rendering test")
+            self.OnTextSelectionChanged_h1_True = True
+            # Selection round-trip complete — stop the message loop. Safe to
+            # call from this callback (unlike closing the browser, which must
+            # be deferred out of OnPaint/OnLoadingStateChange).
+            cef.QuitMessageLoop()
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-﻿# Copyright (c) 2018 CEF Python, see the Authors file.
+# Copyright (c) 2018 CEF Python, see the Authors file.
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
@@ -27,71 +27,6 @@ POPUP_BROWSER_ID = 2
 g_subtests_ran = 0
 g_js_code_completed = False
 g_on_load_end_callbacks = []
-
-
-if LINUX:
-    # Ensure windowless_rendering_enabled=True on Linux so that JS-created
-    # popup browsers can be configured as off-screen (see LoadHandler.
-    # OnBeforePopup).  Off-screen browsers are destroyed immediately when
-    # DoClose returns False — no X11/GLib delete_event dispatch is needed,
-    # avoiding the main browser's GTK window receiving the close notification.
-    _orig_cef_initialize = cef.Initialize
-    def _cef_initialize_linux(settings=None, switches=None, **kw):
-        if settings is None:
-            settings = {}
-        settings.setdefault("windowless_rendering_enabled", True)
-        return _orig_cef_initialize(settings, switches=switches, **kw)
-    cef.Initialize = _cef_initialize_linux
-
-
-def init_gtk():
-    """Open a GDK/X11 display connection before CEF initialises.
-
-    On a desktop GNOME/Wayland session gdk_display_get_default() returns NULL
-    unless a GTK application has already opened a display.  Calling
-    gtk_init(NULL, NULL) here ensures the display is available so that the
-    browser window becomes visible.  On CI (xvfb) this is a no-op.
-    GTK is safe to initialise multiple times.
-    """
-    if LINUX:
-        try:
-            import ctypes
-            gtk = ctypes.CDLL("libgtk-3.so.0")
-            gtk.gtk_init(None, None)
-        except Exception as e:
-            print("WARNING: gtk_init failed: %s" % e)
-
-
-def _linux_needs_no_sandbox():
-    """Return True if unprivileged user namespaces are not available.
-
-    Chrome's namespace sandbox requires clone(CLONE_NEWUSER).  Two sysctls
-    can block it:
-      * apparmor_restrict_unprivileged_userns=1  (Ubuntu 23.10+)
-      * unprivileged_userns_clone=0              (older Debian/Ubuntu)
-
-    When namespaces are unavailable and no SUID sandbox binary is present,
-    Chrome FATALs with "No usable sandbox!" unless --no-sandbox is passed.
-
-    Note: do NOT pass --no-sandbox at all. It causes Chrome to skip
-    GlobalDescriptors key 7 registration while still encoding it in
-    --pseudonymization-salt-handle, causing a CHECK-crash in subprocesses.
-    """
-    if not LINUX:
-        return False
-    try:
-        with open("/proc/sys/kernel/apparmor_restrict_unprivileged_userns") as f:
-            if f.read().strip() == "1":
-                return True
-    except OSError:
-        pass
-    try:
-        with open("/proc/sys/kernel/unprivileged_userns_clone") as f:
-            if f.read().strip() == "0":
-                return True
-    except OSError:
-        pass
-    return False
 
 
 def subtest_message(message):
@@ -185,10 +120,7 @@ class DisplayHandler(object):
 
 
 def close_popup(global_handler, browser):
-    # The popup was created as off-screen on Linux (see LoadHandler.OnBeforePopup).
-    # For off-screen browsers DoClose returning False causes immediate destruction
-    # without any GLib/X11 event dispatch, so CloseBrowser(False) works cleanly.
-    browser.CloseBrowser(False)
+    browser.CloseBrowser()
     global_handler.PopupClosed_True = True
 
     # Test developer tools popup
@@ -260,20 +192,6 @@ class LoadHandler(object):
         self.FrameSourceVisitor_True = False
         # self.OnLoadingStateChange_Start_True = False # FAILS
         self.OnLoadingStateChange_End_True = False
-
-    def OnBeforePopup(self, browser, frame, target_url, target_frame_name,
-                      target_disposition, user_gesture, popup_features,
-                      window_info_out, client, browser_settings_out,
-                      no_javascript_access_out, **_):
-        if LINUX:
-            # Configure JS-created popups as off-screen so they can be closed
-            # without GLib/X11 event dispatch.  For off-screen browsers CEF
-            # destroys the browser immediately when DoClose returns False,
-            # without sending delete_event to any parent GTK window.
-            winfo = cef.WindowInfo()
-            winfo.SetAsOffscreen(0)
-            window_info_out.append(winfo)
-        return False  # Allow the popup
 
     def OnLoadStart(self, browser, frame, **_):
         self.test_case.assertFalse(self.OnLoadStart_True)
