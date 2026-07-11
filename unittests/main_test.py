@@ -116,6 +116,22 @@ g_datauri_data = """
 g_datauri = cef.GetDataUrl(g_datauri_data)
 
 
+def main_test_async_completed(global_handler, objects, loading_progress):
+    """Return whether all asynchronous main-test work has finished."""
+    main_browser = cef.GetBrowserByIdentifier(MAIN_BROWSER_ID)
+    if (not is_js_code_completed()
+            or not global_handler.HasDevTools_True
+            or main_browser is None
+            or main_browser.HasDevTools()
+            or cef.GetBrowserByIdentifier(POPUP_BROWSER_ID) is not None
+            or loading_progress != 1.0):
+        return False
+    return all(value
+               for obj in objects
+               for key, value in obj.__dict__.items()
+               if "_True" in key)
+
+
 class MainTest_IsolatedTest(unittest.TestCase):
     def test_main(self):
         """Main entry point. All the code must run inside one

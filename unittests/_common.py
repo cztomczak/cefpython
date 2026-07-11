@@ -80,20 +80,8 @@ def js_code_completed():
     subtest_message("js_code_completed() ok")
 
 
-def main_test_async_completed(global_handler, objects, loading_progress):
-    """Return whether all browser work exercised by main_test has finished."""
-    main_browser = cef.GetBrowserByIdentifier(MAIN_BROWSER_ID)
-    if (not g_js_code_completed
-            or not global_handler.HasDevTools_True
-            or main_browser is None
-            or main_browser.HasDevTools()
-            or cef.GetBrowserByIdentifier(POPUP_BROWSER_ID) is not None
-            or loading_progress != 1.0):
-        return False
-    return all(value
-               for obj in objects
-               for key, value in obj.__dict__.items()
-               if "_True" in key)
+def is_js_code_completed():
+    return g_js_code_completed
 
 
 def check_auto_asserts(test_case, objects):
