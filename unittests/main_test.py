@@ -327,15 +327,10 @@ class MainTest_IsolatedTest(unittest.TestCase):
         del browser
         subtest_message("browser.CloseBrowser() ok")
 
-        # Browser destruction is asynchronous. Wait for the registry entry to
-        # disappear before checking callback assertions and shutting CEF down.
-        browser_closed = run_message_loop_until(
-            lambda: cef.GetBrowserByIdentifier(MAIN_BROWSER_ID) is None)
-        self.assertTrue(browser_closed,
-                        "Timed out waiting for the main browser to close")
-        # OnBeforeClose removes the Python registry entry before all native CEF
-        # teardown work has settled. Process a short grace period before
-        # Shutdown() to avoid racing those remaining tasks.
+        # CloseBrowser() is asynchronous. Process pending close work before
+        # checking callbacks and shutting CEF down. For synchronously created
+        # macOS browsers, OnBeforeClose may be deferred until Shutdown()
+        # (CEF issues #3469 and #3810).
         do_message_loop_work(25)
 
         # Asserts before shutdown
