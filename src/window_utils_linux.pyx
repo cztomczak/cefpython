@@ -59,27 +59,6 @@ class WindowUtils:
 # Linux platform helpers — called from Initialize().
 # ---------------------------------------------------------------------------
 
-def _linux_gtk_init():
-    """Initialize GTK so GDK has an open display connection before CEF.
-
-    cefpython provides GTK-based dialogs (file open/save, print) through the
-    native client-handler layer (dialog_handler_gtk.cpp).  Like upstream
-    cefclient, GTK must be initialised in the browser process before
-    CefInitialize().  GTK runs on Chromium's own GLib-based UI message loop
-    (base::MessagePumpGlib) once cef.MessageLoop() / CefRunMessageLoop()
-    starts, so no separate gtk_main() is needed.
-    """
-    try:
-        import os as _os, ctypes as _ct
-        # Must be set before gtk_init() so GDK opens an X11/Xwayland display.
-        _os.environ.setdefault("GDK_BACKEND", "x11")
-        _gtk = _ct.CDLL("libgtk-3.so.0")
-        _gtk.gtk_disable_setlocale()
-        _gtk.gtk_init(None, None)
-    except Exception as _e:
-        Debug("_linux_gtk_init() failed: " + str(_e))
-
-
 def _linux_apply_initialize_defaults(app_settings, cmd_switches):
     """Auto-apply Linux defaults that every cefpython app needs.
 
@@ -92,13 +71,10 @@ def _linux_apply_initialize_defaults(app_settings, cmd_switches):
     has been individually retested against current CEF/Chromium — anything
     that did not regress when removed has been dropped.
     """
-    import os as _os
-
     # Force Chrome's Ozone backend to X11.  This is the *only* thing keeping
     # Chromium off the Wayland display on a Wayland session — cefpython embeds
     # via X11 window handles (CefWindowInfo.SetAsChild) and drives X11 window
-    # geometry directly.  GDK_BACKEND=x11 is set separately in
-    # _linux_gtk_init() before gtk_init().
+    # geometry directly.
     #
     # Root cause (upstream CEF): native windowed embedding into a client
     # parent_window is implemented for X11 only — CreateHostWindow() in CEF's
@@ -112,48 +88,11 @@ def _linux_apply_initialize_defaults(app_settings, cmd_switches):
     # and the embedding path crashes.
     cmd_switches.setdefault("ozone-platform", "x11")
 
-    # Vulkan ICD fallback for systems with no system-installed driver.
-    #
-    # On systems with no Vulkan ICD (typical for VMs and minimal containers),
-    # Chromium's GPU process fails its Vulkan probe and the renderer logs a
-    # transient
-    #   ContextResult::kTransientFailure: Failed to send
-    #     GpuControl.CreateCommandBuffer
-    # before falling back to software rendering.  Pointing VK_ICD_FILENAMES
-    # at the SwiftShader manifest bundled with CEF makes the probe succeed
-    # immediately and silences the line.
-    #
-    # Only apply the fallback when no system ICD is present in the standard
-    # loader search paths — overriding a working Mesa/NVIDIA/AMD ICD with
-    # SwiftShader would force software rendering for no reason on real GPUs.
-    # Honors a pre-set VK_ICD_FILENAMES (setdefault) so users can override.
-    import glob as _glob
-    _system_icds = (_glob.glob("/usr/share/vulkan/icd.d/*.json") +
-                    _glob.glob("/etc/vulkan/icd.d/*.json") +
-                    _glob.glob("/usr/local/share/vulkan/icd.d/*.json"))
-    if not _system_icds:
-        import cefpython3 as _cef3_pkg
-        _cef3_dir = _os.path.dirname(_cef3_pkg.__file__)
-        _vk_icd = _os.path.join(_cef3_dir, "vk_swiftshader_icd.json")
-        if _os.path.exists(_vk_icd):
-            _os.environ.setdefault("VK_ICD_FILENAMES", _vk_icd)
-
-    # NOTE: external_message_pump is intentionally NOT forced here.  On Linux
-    # cef.MessageLoop() runs CefRunMessageLoop() (same as Windows/macOS and
-    # upstream cefsimple/cefclient), and Chromium's UI loop is GLib-based so
-    # GTK works without a separate pump.  Apps that integrate CEF into their
-    # own GUI loop via cef.MessageLoopWork() may still opt in explicitly.
-
-    # Allow per-browser opt-in to off-screen rendering.  Required by examples
-    # that pass WindowInfo.SetAsOffscreen() (e.g. pysdl2.py) and by JS-created
-    # popup browsers, which are destroyed immediately when DoClose returns
-    # False — no delete_event would be dispatched on a windowed popup.
-    app_settings.setdefault("windowless_rendering_enabled", True)
-
-    # Chromium's Linux sandbox.  CEF Linux builds default sandbox-ON and refuse
-    # to start unless a SUID-root chrome-sandbox helper is installed or
-    # --no-sandbox is passed.  A pip wheel cannot install a chown-root helper,
-    # so cefpython disables the sandbox on Linux, as it always has.  Added only
-    # when the caller has not set the switch explicitly.
-    if "no-sandbox" not in cmd_switches:
-        cmd_switches["no-sandbox"] = ""
+    # Disable Chromium's Linux sandbox.  It is on by default and needs either a
+    # SUID-root "chrome-sandbox" helper or an unprivileged user namespace to
+    # start; where neither is available CEF aborts during startup.  A pip wheel
+    # can guarantee neither — it cannot install a chown-root binary, and many
+    # distros and container runtimes block unprivileged user namespaces — so
+    # cefpython disables the sandbox on Linux, as it always has.  setdefault
+    # leaves an explicit caller-provided value untouched.
+    cmd_switches.setdefault("no-sandbox", "")

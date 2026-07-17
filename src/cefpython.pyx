@@ -587,12 +587,10 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
 
     IF UNAME_SYSNAME == "Linux":
-        # Apply Linux switches/settings BEFORE gtk_init.
+        # Apply Linux default command-line switches / settings. Must run before
+        # the browser-process argv is built from g_commandLineSwitches below.
         _linux_apply_initialize_defaults(application_settings,
                                          g_commandLineSwitches)
-        # Open a GDK display connection before CefInitialize so the Ozone X11
-        # backend can use it.
-        _linux_gtk_init()
 
     cdef CefRefPtr[CefApp] cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
 
