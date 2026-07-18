@@ -587,10 +587,35 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
 
     IF UNAME_SYSNAME == "Linux":
-        # Apply Linux default command-line switches / settings. Must run before
-        # the browser-process argv is built from g_commandLineSwitches below.
-        _linux_apply_initialize_defaults(application_settings,
-                                         g_commandLineSwitches)
+        # Apply Linux default command-line switches before the browser-process
+        # argv is built from g_commandLineSwitches below. setdefault lets an app
+        # override either by passing it explicitly to cef.Initialize(switches=).
+        #
+        # Force Chrome's Ozone backend to X11.  This is the *only* thing keeping
+        # Chromium off the Wayland display on a Wayland session — cefpython embeds
+        # via X11 window handles (CefWindowInfo.SetAsChild) and drives X11 window
+        # geometry directly.
+        #
+        # Root cause (upstream CEF): native windowed embedding into a client
+        # parent_window is implemented for X11 only — CreateHostWindow() in CEF's
+        # libcef/browser/native/browser_platform_delegate_native_linux.cc is wrapped
+        # entirely in `#if BUILDFLAG(SUPPORTS_OZONE_X11)` (creating a CefWindowX11)
+        # with no Wayland branch, and there is no window_wayland implementation.
+        # Wayland has no cross-process window embedding (no X11-style window IDs /
+        # XReparent), so CEF cannot parent the browser into a foreign Wayland
+        # surface; embedders must run under X11/XWayland.  Verified on CEF 147:
+        # without this switch, a Wayland session selects the Wayland Ozone backend
+        # and the embedding path crashes.
+        g_commandLineSwitches.setdefault("ozone-platform", "x11")
+
+        # Disable Chromium's Linux sandbox.  It is on by default and needs either a
+        # SUID-root "chrome-sandbox" helper or an unprivileged user namespace to
+        # start; where neither is available CEF aborts during startup.  A pip wheel
+        # can guarantee neither — it cannot install a chown-root binary, and many
+        # distros and container runtimes block unprivileged user namespaces — so
+        # cefpython disables the sandbox on Linux, as it always has.  setdefault
+        # leaves an explicit caller-provided value untouched.
+        g_commandLineSwitches.setdefault("no-sandbox", "")
 
     cdef CefRefPtr[CefApp] cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
 
@@ -636,17 +661,10 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_applicationSettings[key] = copy.deepcopy(application_settings[key])
 
     cdef CefSettings cefApplicationSettings
-    IF UNAME_SYSNAME == "Linux":
-        # On Linux, leave no_sandbox=0 here. Setting no_sandbox=1 would cause
-        # BasicStartupComplete() to append --no-sandbox before Chrome's startup
-        # code registers the Mojo IPC bootstrap fd (GlobalDescriptors key 7),
-        # crashing every subprocess with "Failed global descriptor lookup: 7".
-        # The sandbox is instead disabled via the --no-sandbox command-line
-        # switch added in _linux_apply_initialize_defaults().
-        pass
-    ELSE:
-        # On Windows/macOS the sandbox helper binary is not shipped with
-        # cefpython, so disable sandboxing entirely.
+    # No sandboxing for the subprocesses. On Linux this is done via the
+    # --no-sandbox switch above, not here — setting no_sandbox=1 crashes
+    # subprocesses with "Failed global descriptor lookup: 7".
+    IF UNAME_SYSNAME != "Linux":
         cefApplicationSettings.no_sandbox = 1
     SetApplicationSettings(application_settings, &cefApplicationSettings)
 
