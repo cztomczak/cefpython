@@ -26,15 +26,15 @@ cdef class JavascriptBindings:
     cpdef py_bool GetBindToPopups(self):
         return bool(self.bindToPopups)
 
-    cpdef py_void SetFunction(self, object name, object func):
+    cpdef py_void SetFunction(self, py_string name, object func):
         self.SetProperty(name, func)
 
-    cpdef py_void SetObject(self, object name, object obj):
+    cpdef py_void SetObject(self, py_string name, object obj):
         if not hasattr(obj, "__class__"):
             raise Exception("JavascriptBindings.SetObject() failed: name=%s, "
                             "__class__ attribute missing, this is not an object" % name)
         cdef dict methods = {}
-        cdef object key
+        cdef py_string key
         cdef object method
         cdef object predicate = inspect.ismethod
         if isinstance(obj, (PyBrowser, PyFrame)):
@@ -45,7 +45,7 @@ cdef class JavascriptBindings:
             methods[key] = method
         self.objects[name] = methods
 
-    cpdef object GetFunction(self, object name):
+    cpdef object GetFunction(self, py_string name):
         if name in self.functions:
             return self.functions[name]
 
@@ -55,12 +55,12 @@ cdef class JavascriptBindings:
     cpdef dict GetObjects(self):
         return self.objects
 
-    cpdef object GetObjectMethod(self, object objectName, object methodName):
+    cpdef object GetObjectMethod(self, py_string objectName, py_string methodName):
         if objectName in self.objects:
             if methodName in self.objects[objectName]:
                 return self.objects[objectName][methodName]
 
-    cpdef object GetFunctionOrMethod(self, object name):
+    cpdef object GetFunctionOrMethod(self, py_string name):
         # Name can be "someFunc" or "object.someMethod".
         cdef list words
         if "." in name:
@@ -69,7 +69,7 @@ cdef class JavascriptBindings:
         else:
             return self.GetFunction(name)
 
-    cpdef py_void SetProperty(self, object name, object value):
+    cpdef py_void SetProperty(self, py_string name, object value):
         cdef object allowed = self.IsValueAllowedRecursively(value) # returns True or string.
         if allowed is not True:
             raise Exception("JavascriptBindings.SetProperty() failed: name=%s, "

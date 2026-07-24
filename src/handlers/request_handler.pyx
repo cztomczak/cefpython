@@ -25,7 +25,7 @@ cdef PyAuthCallback CreatePyAuthCallback(
 cdef class PyAuthCallback:
     cdef CefRefPtr[CefAuthCallback] cefCallback
     
-    cpdef py_void Continue(self, object username, object password):
+    cpdef py_void Continue(self, py_string username, py_string password):
         self.cefCallback.get().Continue(
                 PyToCefStringValue(username),
                 PyToCefStringValue(password))
@@ -310,7 +310,7 @@ cdef public cpp_bool RequestHandler_OnQuotaRequest(
         CefRefPtr[CefCallback] cefCallback
         ) noexcept with gil:
     cdef PyBrowser pyBrowser
-    cdef object pyOriginUrl
+    cdef py_string pyOriginUrl
     cdef py_bool returnValue
     cdef object clientCallback
     try:

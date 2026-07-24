@@ -12,8 +12,8 @@ cdef void AppendSwitchesToCommandLine(
     # 1. App_OnBeforeCommandLineProcessing_BrowserProcess()
     # 2. BrowserProcessHandler_OnRenderProcessThreadCreated()
     cdef PyCommandLine pyCommandLine = CreatePyCommandLine(cefCommandLine)
-    cdef object switch
-    cdef object value
+    cdef py_string switch
+    cdef py_string value
     for switch, value in switches.items():
         if not isinstance(switch, (str, bytes)) or switch[0] == '-':
             Debug("Invalid command line switch: %s" % switch)
@@ -39,27 +39,27 @@ cdef PyCommandLine CreatePyCommandLine(
 cdef class PyCommandLine:
     cdef CefRefPtr[CefCommandLine] cefCommandLine
 
-    cdef py_void AppendSwitch(self, object switch):
+    cdef py_void AppendSwitch(self, py_string switch):
         cdef CefString cefSwitch
         cefSwitch = PyToCefStringValue(switch)
         self.cefCommandLine.get().AppendSwitch(cefSwitch)
 
-    cdef py_void AppendSwitchWithValue(self, object switch, object value):
+    cdef py_void AppendSwitchWithValue(self, py_string switch, py_string value):
         cdef CefString cefSwitch
         cdef CefString cefValue
         cefSwitch = PyToCefStringValue(switch)
         cefValue = PyToCefStringValue(value)
         self.cefCommandLine.get().AppendSwitchWithValue(cefSwitch, cefValue)
 
-    cdef object GetCommandLineString(self):
+    cdef py_string GetCommandLineString(self):
         return CefToPyString(self.cefCommandLine.get().GetCommandLineString())
 
-    cdef py_bool HasSwitch(self, object switch):
+    cdef py_bool HasSwitch(self, py_string switch):
         cdef CefString cefSwitch
         cefSwitch = PyToCefStringValue(switch)
         return self.cefCommandLine.get().HasSwitch(cefSwitch)
 
-    cdef object GetSwitchValue(self, object switch):
+    cdef py_string GetSwitchValue(self, py_string switch):
         cdef CefString cefValue
         cdef CefString cefSwitch
         cefSwitch = PyToCefStringValue(switch)

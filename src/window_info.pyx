@@ -120,7 +120,7 @@ cdef class WindowInfo:
     cdef public str windowType
     cdef public WindowHandle parentWindowHandle
     cdef public list windowRect # [left, top, right, bottom]
-    cdef public object windowName
+    cdef public py_string windowName
 
     def __init__(self, title=""):
         self.windowName = ""
@@ -178,7 +178,7 @@ cdef class WindowInfo:
                         "windowRect: invalid value")
 
     cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle,
-                             object windowName):
+                             py_string windowName):
         # Allow parent window handle to be 0, in such case CEF will
         # create top window automatically as in hello_world.py example.
         if parentWindowHandle != 0\

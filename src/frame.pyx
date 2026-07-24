@@ -11,10 +11,10 @@ cdef dict g_pyFrames = {}
 # it shouldn't be kept global anymore.
 cdef list g_unreferenced_frames = []  # [str unique identifier, ..]
 
-cdef str GetUniqueFrameId(int browserId, object frameId):
+cdef str GetUniqueFrameId(int browserId, py_string frameId):
     return str(browserId) +"#"+ frameId
 
-cdef PyFrame GetPyFrameById(int browserId, object frameId):
+cdef PyFrame GetPyFrameById(int browserId, py_string frameId):
     cdef str uniqueFrameId = GetUniqueFrameId(browserId, frameId)
     if uniqueFrameId in g_pyFrames:
         return g_pyFrames[uniqueFrameId]
@@ -146,7 +146,7 @@ cdef class PyFrame:
             return self.cefFrame
         raise Exception("PyFrame.GetCefFrame() failed: CefFrame was destroyed")
 
-    def __init__(self, int browserId, object frameId):
+    def __init__(self, int browserId, py_string frameId):
         self.browserId = browserId
         self.frameId = frameId
 
@@ -180,10 +180,8 @@ cdef class PyFrame:
         code += ")"
         self.ExecuteJavascript(code)
 
-    cpdef py_void ExecuteJavascript(self, object jsCode,
-            object scriptUrl=None, int startLine=1):
-        if scriptUrl is None:
-            scriptUrl = u""
+    cpdef py_void ExecuteJavascript(self, py_string jsCode,
+            py_string scriptUrl="", int startLine=1):
         self.GetCefFrame().get().ExecuteJavaScript(PyToCefStringValue(jsCode),
                 PyToCefStringValue(scriptUrl), startLine)
 
@@ -222,7 +220,7 @@ cdef class PyFrame:
     cpdef py_bool IsMain(self):
         return self.GetCefFrame().get().IsMain()
 
-    cpdef py_void LoadUrl(self, object url):
+    cpdef py_void LoadUrl(self, py_string url):
         cdef CefString cefUrl
         PyToCefString(url, cefUrl)
         self.GetCefFrame().get().LoadURL(cefUrl)
@@ -243,7 +241,7 @@ cdef class PyFrame:
         self.GetCefFrame().get().ViewSource()
 
     cpdef py_void SendProcessMessage(self, cef_process_id_t targetProcess,
-            object frameId, object messageName, list pyArguments
+            py_string frameId, py_string messageName, list pyArguments
             ) :
         cdef CefRefPtr[CefProcessMessage] message = \
                 CefProcessMessage_Create(PyToCefStringValue(messageName))

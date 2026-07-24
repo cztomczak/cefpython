@@ -24,16 +24,16 @@ cdef class DragData:
     cpdef py_bool IsFragment(self):
         return self.cef_drag_data.get().IsFragment()
 
-    cpdef object GetLinkUrl(self):
+    cpdef py_string GetLinkUrl(self):
         return CefToPyString(self.cef_drag_data.get().GetLinkURL())
 
-    cpdef object GetLinkTitle(self):
+    cpdef py_string GetLinkTitle(self):
         return CefToPyString(self.cef_drag_data.get().GetLinkTitle())
 
-    cpdef object GetFragmentText(self):
+    cpdef py_string GetFragmentText(self):
         return CefToPyString(self.cef_drag_data.get().GetFragmentText())
 
-    cpdef object GetFragmentHtml(self):
+    cpdef py_string GetFragmentHtml(self):
         return CefToPyString(self.cef_drag_data.get().GetFragmentHtml())
 
     cpdef PyImage GetImage(self):

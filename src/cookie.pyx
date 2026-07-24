@@ -90,7 +90,7 @@ cdef class Cookie:
             "priority": self.GetPriority(),
         }
 
-    cpdef py_void SetName(self, object name):
+    cpdef py_void SetName(self, py_string name):
         # This works:
         # | CefString(&self.cefCookie.name).FromString(name)
         # This does not work:
@@ -114,7 +114,7 @@ cdef class Cookie:
         cefString.Attach(&self.cefCookie.name, False)
         return CefToPyString(cefString)
 
-    cpdef py_void SetValue(self, object value):
+    cpdef py_void SetValue(self, py_string value):
         cdef CefString cefString
         cefString.Attach(&self.cefCookie.value, False)
         PyToCefString(value, cefString)
@@ -124,7 +124,7 @@ cdef class Cookie:
         cefString.Attach(&self.cefCookie.value, False)
         return CefToPyString(cefString)
 
-    cpdef py_void SetDomain(self, object domain):
+    cpdef py_void SetDomain(self, py_string domain):
         cdef CefString cefString
         cefString.Attach(&self.cefCookie.domain, False)
         PyToCefString(domain, cefString)
@@ -134,7 +134,7 @@ cdef class Cookie:
         cefString.Attach(&self.cefCookie.domain, False)
         return CefToPyString(cefString)
 
-    cpdef py_void SetPath(self, object path):
+    cpdef py_void SetPath(self, py_string path):
         cdef CefString cefString
         cefString.Attach(&self.cefCookie.path, False)
         PyToCefString(path, cefString)
@@ -239,7 +239,7 @@ cdef class PyCookieManager:
         return self.cefCookieManager.get().VisitAllCookies(
                 cefCookieVisitor)
 
-    cpdef py_bool VisitUrlCookies(self, object url, 
+    cpdef py_bool VisitUrlCookies(self, py_string url,
             py_bool includeHttpOnly, object userCookieVisitor):
         self.ValidateUserCookieVisitor(userCookieVisitor)
         cdef int cookieVisitorId = StoreUserCookieVisitor(userCookieVisitor)
@@ -250,14 +250,14 @@ cdef class PyCookieManager:
                 PyToCefStringValue(url), bool(includeHttpOnly), 
                 cefCookieVisitor)
 
-    cpdef py_void SetCookie(self, object url, PyCookie cookie):
+    cpdef py_void SetCookie(self, py_string url, PyCookie cookie):
         assert isinstance(cookie, Cookie), "cookie object is invalid"
         CefPostTask(TID_IO, CreateTask_SetCookie(
                 self.cefCookieManager.get(),
                 PyToCefStringValue(url), cookie.cefCookie,
                 <CefRefPtr[CefSetCookieCallback]?>nullptr))
 
-    cpdef py_void DeleteCookies(self, object url, object cookie_name):
+    cpdef py_void DeleteCookies(self, py_string url, py_string cookie_name):
         CefPostTask(TID_IO, CreateTask_DeleteCookies(
                 self.cefCookieManager.get(),
                 PyToCefStringValue(url), PyToCefStringValue(cookie_name),

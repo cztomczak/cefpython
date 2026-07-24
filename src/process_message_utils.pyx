@@ -18,14 +18,14 @@ from libc.stdint cimport int64_t, uint32_t
 # -----------------------------------------------------------------------------
 
 cdef object CheckForCefPythonMessageHash(CefRefPtr[CefBrowser] cefBrowser,
-        object pyString):
+        py_string pyString):
     # A javascript callback from the Renderer process is sent as a string.
     # TODO: this could be sent using CefBinaryNamedString in the future,
     #       see this topic "Sending custom data types using process messaging":
     #       http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10881
-    cdef object cefPythonMessageHash = "####cefpython####"
+    cdef py_string cefPythonMessageHash = "####cefpython####"
     cdef JavascriptCallback jsCallback
-    cdef object jsonData
+    cdef py_string jsonData
     cdef object message
     if pyString.startswith(cefPythonMessageHash):
         jsonData = pyString[len(cefPythonMessageHash):]
@@ -161,7 +161,7 @@ cdef dict CefDictionaryValueToPyDict(
     # noinspection PyUnresolvedReferences
     cdef cpp_vector[CefString].iterator iterator = keyList.begin()
     cdef CefString cefKey
-    cdef object pyKey
+    cdef py_string pyKey
     cdef CefRefPtr[CefBinaryValue] binaryValue
     cdef uint32_t uint32_value = 0
     cdef int64_t int64_value = 0

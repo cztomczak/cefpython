@@ -15,11 +15,11 @@ cdef public void V8FunctionHandler_Execute(
     cdef PyBrowser pyBrowser
     cdef CefRefPtr[CefFrame] cefFrame
     cdef PyFrame pyFrame  # may be None
-    cdef object funcName
+    cdef py_string funcName
     cdef object func
     cdef list funcArgs
     cdef object returnValue
-    cdef object errorMessage
+    cdef py_string errorMessage
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "V8FunctionHandler_Execute")
         cefFrame = cefBrowser.get().GetFrameByName(frameId)

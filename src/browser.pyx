@@ -232,7 +232,7 @@ cdef class PyBrowser:
         if self.imageBuffer:
             free(self.imageBuffer)
 
-    cpdef py_void SetClientCallback(self, object name, object callback):
+    cpdef py_void SetClientCallback(self, py_string name, object callback):
         if not self.allowedClientCallbacks:
             # DisplayHandler
             self.allowedClientCallbacks += [
@@ -290,7 +290,7 @@ cdef class PyBrowser:
             raise Exception("Browser.SetClientHandler() failed: __class__ "
                             "attribute missing")
         cdef dict methods = {}
-        cdef object key
+        cdef py_string key
         cdef object method
         cdef tuple value
         for value in inspect.getmembers(clientHandler,
@@ -300,7 +300,7 @@ cdef class PyBrowser:
             if key and key[0] != '_':
                 self.SetClientCallback(key, method)
 
-    cpdef object GetClientCallback(self, object name):
+    cpdef object GetClientCallback(self, py_string name):
         if name in self.clientCallbacks:
             return self.clientCallbacks[name]
 
@@ -346,7 +346,7 @@ cdef class PyBrowser:
             NonCriticalError("GetImage not implemented on this platform")
             return None
 
-    cpdef object GetSetting(self, object key):
+    cpdef object GetSetting(self, py_string key):
         cdef int browser_id = self.GetIdentifier()
         if browser_id in g_browser_settings:
             if key in g_browser_settings[browser_id]:
@@ -357,7 +357,7 @@ cdef class PyBrowser:
     # CEF API.
     # --------------
 
-    cpdef py_void AddWordToDictionary(self, object word):
+    cpdef py_void AddWordToDictionary(self, py_string word):
         cdef CefString cef_word
         PyToCefString(word, cef_word)
         self.GetCefBrowserHost().get().AddWordToDictionary(cef_word)
@@ -410,13 +410,11 @@ cdef class PyBrowser:
     def ExecuteFunction(self, *args):
         self.GetMainFrame().ExecuteFunction(*args)
 
-    cpdef py_void ExecuteJavascript(self, object jsCode,
-            object scriptUrl=None, int startLine=1):
-        if scriptUrl is None:
-            scriptUrl = u""
+    cpdef py_void ExecuteJavascript(self, py_string jsCode,
+            py_string scriptUrl="", int startLine=1):
         self.GetMainFrame().ExecuteJavascript(jsCode, scriptUrl, startLine)
 
-    cpdef py_void Find(self, object searchText,
+    cpdef py_void Find(self, py_string searchText,
                        py_bool forward, py_bool matchCase,
                        py_bool findNext):
         cdef CefString cefSearchText
@@ -429,14 +427,14 @@ cdef class PyBrowser:
                 "Browser.GetFocusedFrame() may only be called on UI thread")
         return GetPyFrame(self.GetCefBrowser().get().GetFocusedFrame())
 
-    cpdef PyFrame GetFrameByName(self, object name):
+    cpdef PyFrame GetFrameByName(self, py_string name):
         assert IsThread(TID_UI), (
                 "Browser.GetFrameByName() may only be called on the UI thread")
         cdef CefString cefName
         PyToCefString(name, cefName)
         return GetPyFrame(self.GetCefBrowser().get().GetFrameByName(cefName))
 
-    cpdef object GetFrameByIdentifier(self, object identifier):
+    cpdef object GetFrameByIdentifier(self, py_string identifier):
         cdef CefString cefIdentifier
         PyToCefString(identifier, cefIdentifier)
         return GetPyFrame(self.GetCefBrowser().get().GetFrameByIdentifier(
@@ -483,7 +481,7 @@ cdef class PyBrowser:
         else:
             return self.GetWindowHandle()
 
-    cpdef object GetUrl(self):
+    cpdef py_string GetUrl(self):
         return self.GetMainFrame().GetUrl()
 
     cpdef object GetUserData(self, object key):
@@ -526,10 +524,10 @@ cdef class PyBrowser:
     cpdef py_bool IsWindowRenderingDisabled(self):
         return self.GetCefBrowserHost().get().IsWindowRenderingDisabled()
 
-    cpdef object LoadUrl(self, object url):
+    cpdef py_string LoadUrl(self, py_string url):
         self.GetMainFrame().LoadUrl(url)
 
-    cpdef py_void Navigate(self, object url):
+    cpdef py_void Navigate(self, py_string url):
         self.LoadUrl(url)
 
     cpdef py_void NotifyMoveOrResizeStarted(self):
@@ -544,7 +542,7 @@ cdef class PyBrowser:
     cpdef py_void ReloadIgnoreCache(self):
         self.GetCefBrowser().get().ReloadIgnoreCache()
 
-    cpdef py_void ReplaceMisspelling(self, object word):
+    cpdef py_void ReplaceMisspelling(self, py_string word):
         cdef CefString cef_word
         PyToCefString(word, cef_word)
         self.GetCefBrowserHost().get().ReplaceMisspelling(cef_word)
@@ -740,7 +738,7 @@ cdef class PyBrowser:
     cpdef py_void SendCaptureLostEvent(self):
         self.GetCefBrowserHost().get().SendCaptureLostEvent()
 
-    cpdef py_void StartDownload(self, object url):
+    cpdef py_void StartDownload(self, py_string url):
         self.GetCefBrowserHost().get().StartDownload(PyToCefStringValue(
                 url))
 

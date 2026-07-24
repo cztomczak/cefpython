@@ -31,7 +31,7 @@ cdef class PyResponse:
     cpdef str GetStatusText(self):
         return CefToPyString(self.GetCefResponse().get().GetStatusText())
 
-    cpdef py_void SetStatusText(self, object statusText):
+    cpdef py_void SetStatusText(self, py_string statusText):
         assert type(statusText) in (str, unicode, bytes), (
                 "Response.SetStatusText() failed: statusText param is not a string")
         cdef CefString cefStatusText
@@ -41,14 +41,14 @@ cdef class PyResponse:
     cpdef str GetMimeType(self):
         return CefToPyString(self.GetCefResponse().get().GetMimeType())
 
-    cpdef py_void SetMimeType(self, object mimeType):
+    cpdef py_void SetMimeType(self, py_string mimeType):
         assert type(mimeType) in (str, unicode, bytes), (
                 "Response.SetMimeType() failed: mimeType param is not a string")
         cdef CefString cefMimeType
         PyToCefString(mimeType, cefMimeType)
         self.GetCefResponse().get().SetMimeType(cefMimeType)
 
-    cpdef str GetHeaderByName(self, object name):
+    cpdef str GetHeaderByName(self, py_string name):
         assert type(name) in (str, unicode, bytes), (
                 "Response.GetHeaderByName() failed: name param is not a string")
         cdef CefString cefName

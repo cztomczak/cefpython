@@ -25,7 +25,7 @@ UNICODE_ENCODE_ERRORS = "replace"
 BYTES_DECODE_ERRORS = "replace"
 
 
-cdef object AnyToPyString(object value):
+cdef py_string AnyToPyString(object value):
     cdef object valueType = type(value)
     if valueType == str or valueType == bytes:
         return value
@@ -35,7 +35,7 @@ cdef object AnyToPyString(object value):
     else:
         return ""
 
-cdef object CharToPyString(
+cdef py_string CharToPyString(
         const char* charString):
     if PY_MAJOR_VERSION < 3:
         return <bytes>charString
@@ -45,7 +45,7 @@ cdef object CharToPyString(
                 errors=BYTES_DECODE_ERRORS))
 
 
-cdef bytes PyStringToChar(object pyString):
+cdef bytes PyStringToChar(py_string pyString):
     if PY_MAJOR_VERSION < 3:
         return <bytes>pyString
     else:
@@ -59,7 +59,7 @@ cdef bytes PyStringToChar(object pyString):
 
 # Not used anywhere so commented out.
 # ---
-# cdef object CppToPyString(
+# cdef py_string CppToPyString(
 #         cpp_string cppString):
 #     if PY_MAJOR_VERSION < 3:
 #         return <bytes>cppString
@@ -72,12 +72,12 @@ cdef bytes PyStringToChar(object pyString):
 # No need for this function as you can do it in one line.
 # Stays here just for the info on how to do it.
 # ---
-# cdef cpp_string PyToCppString(object pyString) except *:
+# cdef cpp_string PyToCppString(py_string pyString) except *:
 #     cdef cpp_string cppString = pyString
 #     return cppString
 # ---
 
-cdef object CefToPyString(
+cdef py_string CefToPyString(
         ConstCefString& cefString):
     cdef cpp_string cppString
     if cefString.empty():
@@ -99,7 +99,7 @@ cdef bytes CefToPyBytes(
     return <bytes>cefString.ToString()
 
 cdef void PyToCefString(
-        object pyString,
+        py_string pyString,
         CefString& cefString
         ) except *:
     if PY_MAJOR_VERSION < 3:
@@ -125,14 +125,14 @@ cdef void PyToCefString(
     cefString.FromString(cppString)
 
 cdef CefString PyToCefStringValue(
-        object pyString
+        py_string pyString
         ) except *:
     cdef CefString cefString
     PyToCefString(pyString, cefString)
     return cefString
 
 cdef void PyToCefStringPointer(
-        object pyString,
+        py_string pyString,
         CefString* cefString
         ) except *:
     if PY_MAJOR_VERSION < 3:
@@ -151,7 +151,7 @@ cdef void PyToCefStringPointer(
     # when passed a unicode string.
     cefString.FromString(cppString)
 
-cdef object VoidPtrToString(const void* data, size_t dataLength):
+cdef py_string VoidPtrToString(const void* data, size_t dataLength):
     if PY_MAJOR_VERSION < 3:
         return <bytes>((<char*>data)[:dataLength])
     else:
