@@ -17,7 +17,6 @@ Table of contents:
   * [downloads_enabled](#downloads_enabled)
   * [external_message_pump](#external_message_pump)
   * [framework_dir_path](#framework_dir_path)
-  * [ignore_certificate_errors](#ignore_certificate_errors)
   * [javascript_flags](#javascript_flags)
   * [locale](#locale)
   * [locales_dir_path](#locales_dir_path)
@@ -27,9 +26,7 @@ Table of contents:
   * [log_severity](#log_severity)
   * [multi_threaded_message_loop](#multi_threaded_message_loop)
   * [net_security_expiration_enabled](#net_security_expiration_enabled)
-  * [pack_loading_disabled](#pack_loading_disabled)
   * [persist_session_cookies](#persist_session_cookies)
-  * [persist_user_preferences](#persist_user_preferences)
   * [product_version](#product_version)
   * [remote_debugging_port](#remote_debugging_port)
   * [resources_dir_path](#resources_dir_path)
@@ -325,15 +322,6 @@ CefSettings.enable_net_security_expiration value.
 
 
 
-### pack_loading_disabled
-
-(bool)
-Set to true (1) to disable loading of pack files for resources and locales.  
-A resource bundle handler must be provided for the browser and render  
-processes via `CefApp::GetResourceBundleHandler()` if loading of pack files  
-is disabled. Also configurable using the --disable-pack-loading switch.
-
-
 ### persist_session_cookies
 
 (bool)
@@ -343,17 +331,6 @@ true. Session cookies are generally intended to be transient and most Web
 browsers do not persist them. A |cache_path| value must also be specified to  
 enable this feature. Also configurable using the "persist-session-cookies"  
 [command-line switch](CommandLineSwitches.md).
-
-
-### persist_user_preferences
-
-(bool)
-To persist user preferences as a JSON file in the cache path directory set
-this value to true (1). A |cache_path| value must also be specified
-to enable this feature. Also configurable using the
-"persist-user-preferences" command-line switch. Can be overridden for
-individual CefRequestContext instances via the
-CefRequestContextSettings.persist_user_preferences value.
 
 
 ### product_version
@@ -431,14 +408,7 @@ indirectly via the JavaScript window.open function or targeted links will
 share the same render process and the same request context as the source  
 browser.
 
-To successfully implement separate cookie manager per browser session  
-with the use of the RequestHandler.`GetCookieManager` callback, you have to  
-set `unique_request_context_per_browser` to True.
-
-In upstream CEF each request context may have separate settings like
-cache_path, persist_session_cookies, persist_user_preferences,
-ignore_certificate_errors, enable_net_security_expiration,
-accept_language_list. Such functionality wasn't yet exposed in CEF Python.
+CEF Python does not currently expose per-context settings.
 
 
 ### user_agent

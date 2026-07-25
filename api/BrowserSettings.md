@@ -23,7 +23,6 @@ Table of contents:
   * [shrink_standalone_images_to_fit](#shrink_standalone_images_to_fit)
   * [tab_to_links_disabled](#tab_to_links_disabled)
   * [text_area_resize_disabled](#text_area_resize_disabled)
-  * [universal_access_from_file_urls_allowed](#universal_access_from_file_urls_allowed)
   * [user_style_sheet_location](#user_style_sheet_location)
   * [webgl_disabled](#webgl_disabled)
   * [windowless_frame_rate](#windowless_frame_rate)

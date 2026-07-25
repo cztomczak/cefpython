@@ -52,6 +52,12 @@ Table of contents:
 * [v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loop-qt-wxpython)
 * [v66.1+ Navigation urls passed to CreateBrowserSync or LoadUrl methods need to be encoded by app code](#v661-navigation-urls-passed-to-createbrowsersync-or-loadurl-methods-need-to-be-encoded-by-app-code)
 * [v67+ Do not call the 'WindowUtils.OnSize' function](#v67-do-not-call-the-windowutilsonsize-function)
+* [v147+ Python and platform requirements](#v147-python-and-platform-requirements)
+* [v147+ Build and packaging workflow rewritten](#v147-build-and-packaging-workflow-rewritten)
+* [v147+ Building CEF from sources is untested](#v147-building-cef-from-sources-is-untested)
+* [v147+ C++ to Python callbacks are now declared "noexcept"; add sys.unraisablehook](#v147-c-to-python-callbacks-are-now-declared-noexcept-add-sysunraisablehook)
+* [v147+ Cython 3 (language_level "3str") does not change any public string types](#v147-cython-3-language_level-3str-does-not-change-any-public-string-types)
+* [v147+ Removed and changed APIs](#v147-removed-and-changed-apis)
 
 
 ## v49+ Distribution packages
@@ -505,3 +511,127 @@ Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#upd
 function. Except when you use the `pywin32.py` example, in such case
 `WindowUtils.OnSize` must be called.
 See [Issue #464](../../../issues/464) for more details.
+
+
+## v147+ Python and platform requirements
+
+CEF Python v147 supports CPython 3.10 through 3.14. Python 2 and Python 3.9 or
+older are no longer supported. All supported builds are 64-bit:
+
+| Platform | Supported target |
+| --- | --- |
+| Windows | Windows 10 or later, x64 |
+| Linux | x64 (CI builds and tests on Ubuntu 24.04) |
+| macOS | macOS 12 or later, Apple Silicon/arm64 |
+
+Windows and Linux 32-bit builds and macOS Intel/x86_64 builds are no longer
+produced or tested. The Windows compile target was raised from Windows 7 to
+Windows 10 (`WINVER`, `_WIN32_WINNT`, and `NTDDI_VERSION`) because the
+underlying CEF/Chromium 147 binaries already require Windows 10 or later.
+
+
+## v147+ Build and packaging workflow rewritten
+
+Jumping from v66/v67 to v147 also means a full rewrite of the build and
+packaging workflow. The legacy Makefile/setup.py and
+`tools/make_installer.py` flow was replaced by:
+
+1. `tools/download_cef.py` to download and verify the CEF distribution.
+2. `tools/automate.py --prebuilt-cef` to prepare the downloaded SDK.
+3. `tools/build.py` to drive an incremental CMake build.
+4. `tools/build_distrib.py` to package the staged files as a wheel.
+
+The helper scripts `automate.py` and `build.py` are still part of the current
+workflow; they were rewritten rather than superseded. Although
+`pyproject.toml` declares scikit-build-core as its build backend, the supported
+workflow used by CI currently invokes CMake and `build_distrib.py` directly.
+See the rewritten [Build instructions](Build-instructions.md).
+
+This is a build-time-only change and does not by itself affect the runtime
+Python API.
+
+
+## v147+ Building CEF from sources is untested
+
+`tools/automate.py --build-cef`, which builds CEF/Chromium itself from
+sources, is not tested or supported as of v147 - it was last verified
+working with much older CEF versions (v56 on Linux, v50 on Windows). The
+supported path is downloading with `tools/download_cef.py` and then preparing
+the binaries with `tools/automate.py --prebuilt-cef` (see
+[Build instructions](Build-instructions.md)).
+
+
+## v147+ C++ to Python callbacks are now declared "noexcept"; add sys.unraisablehook
+
+CEF Python's C++ to Python callback bridges (compiled with Cython) are now
+declared `noexcept` instead of `except *`. This includes client handlers as
+well as task, visitor, and web-request callbacks. These callbacks already
+catch their own exceptions and forward them to `sys.excepthook`, so normal
+application code is unaffected. The difference only shows up when an
+exception escapes that guard (for example, a callback missing a try/except or
+whose except block itself raises): previously that left CPython's error
+indicator set with nothing to consume it, so the error could resurface later
+as an unrelated, confusing failure; now Python reports it once, immediately,
+through
+[sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook)
+- which by default only prints to stderr and is easy to miss.
+
+To give these exceptions the same treatment as any other CEF Python error
+(written to "error.log", printed, clean CEF shutdown), set the new hook
+alongside `sys.excepthook` during application startup:
+
+```python
+sys.excepthook = cef.ExceptHook
+sys.unraisablehook = cef.UnraisableHook
+```
+
+See cef.[UnraisableHook](../api/cefpython.md#unraisablehook) and
+[Tutorial > Handling Python exceptions](Tutorial.md#handling-python-exceptions)
+for details. Note that `sys.unraisablehook` is Python's own global hook and
+also fires for unrelated unraisable exceptions in your application (for
+example errors in `__del__` or garbage collection), not just for CEF Python
+callbacks.
+
+
+## v147+ Cython 3 (language_level "3str") does not change any public string types
+
+The CMake build explicitly invokes Cython with `--3str`, equivalent to
+`language_level="3str"`, instead of Cython 2.x's implicit
+`language_level=2`. This is a Cython *compile-time* setting that affects how
+string/bytes **literals inside `.pyx` source** are typed by the compiler - it
+does not change the type of any value returned by, or passed into, the public
+`cefpython3` Python API. Strings crossing the Python/CEF boundary still go
+through the same `PyToCefString`/`CefToPyString` conversions as before and are
+still plain Python `str` on the Python side.
+
+
+## v147+ Removed and changed APIs
+
+The CEF 66 to CEF 147 jump removed or changed a number of public APIs. The
+most important application-facing changes are:
+
+| v66 API | v147 replacement or status |
+| --- | --- |
+| `Browser.GetFrame(name)` | Renamed to `Browser.GetFrameByName(name)`. |
+| `Browser.GetFrameByIdentifier(int)` | Frame identifiers are now strings. |
+| `Browser.GetFrameCount()` / `GetFrameIdentifiers()` | Use `GetFrameNames()` or `GetFrames()`. |
+| `Browser.Find(search_id, search_text, ...)` | The `search_id` argument was removed. |
+| `Browser.IsLoading()` | Track `is_loading` in `LoadHandler.OnLoadingStateChange`. |
+| `Browser.SendFocusEvent(focus)` | Kept as a compatibility alias; new code should use `SetFocus(focus)`. |
+| `Browser.SetMouseCursorChangeDisabled()` / `IsMouseCursorChangeDisabled()` | Removed with no direct replacement. |
+| `Frame.LoadString(value, url)` | Use `Frame.LoadUrl()` with a `data:` URL. |
+| `Response.GetHeader(name)` | Renamed to `Response.GetHeaderByName(name)`. |
+| `RequestHandler.CanGetCookies` / `CanSetCookie` | Replaced by `CanSendCookie(browser, frame, request, cookie)` and `CanSaveCookie(browser, frame, request, response, cookie)`. |
+| `RequestHandler.GetCookieManager`, `OnBeforePluginLoad`, and `OnPluginCrashed` | Removed. |
+| `CookieManager.GetBlockingManager`, `CreateManager`, `SetSupportedSchemes`, and `SetStoragePath` | Removed; use `CookieManager.GetGlobalManager()` and configure persistence through application settings. |
+| `RenderHandler.GetScreenRect` | Removed. |
+| `ContextMenuHandler.RunContextMenu` | Removed. Customize the native menu with `OnBeforeContextMenu`; fully custom menu rendering is no longer exposed. |
+| `pack_loading_disabled` application setting | Removed with no replacement; pack loading can no longer be disabled. |
+| `persist_user_preferences` application setting | Removed; persistent Chrome profiles save preferences automatically. |
+| `WebPluginInfo` and the legacy plugin APIs | Removed along with Chromium's legacy plugin support. |
+
+The following application settings were also removed:
+`accept_language_list`, `ignore_certificate_errors`, and `user_data_path`.
+The following browser settings were removed: `accept_language_list`,
+`file_access_from_file_urls_allowed`, `plugins_disabled`,
+`universal_access_from_file_urls_allowed`, and `web_security_disabled`.

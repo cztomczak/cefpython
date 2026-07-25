@@ -11,7 +11,7 @@ Usage:
 
 Options:
     --clean                Delete the CMake build directory before building (full rebuild).
-    --wheel                Build installable wheel (used by CI and release).
+    --wheel                Build and install a wheel for local/release use.
                            Default: build directly with CMake for fast dev iteration.
     --unittests            Run unit tests after building.
     --enable-profiling     Cython: enable cProfile instrumentation (profile=True).
@@ -22,7 +22,7 @@ Dev workflow (fast, shows compiler output):
     python tools/build.py --clean
     python tools/build.py --unittests
 
-CI / release workflow (builds a .whl):
+Wheel / release workflow (builds a .whl):
     python tools/build.py --wheel
     python tools/build.py --wheel --unittests
 """

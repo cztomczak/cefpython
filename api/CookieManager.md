@@ -6,8 +6,7 @@
 Class used for managing cookies. The methods of this class may be called on
 any thread unless otherwise indicated.
 
-Use the `CookieManager.CreateManager` static method to instantiate
-this class.
+Use the `CookieManager.GetGlobalManager` static method to obtain an instance.
 
 TODO: in upstream CEF some methods here have a callback parameter
 that when non-NULL will execute asynchronously on the IO thread
@@ -22,7 +21,6 @@ Table of contents:
   * [VisitUrlCookies](#visiturlcookies)
   * [SetCookie](#setcookie)
   * [DeleteCookies](#deletecookies)
-  * [SetStoragePath](#setstoragepath)
   * [FlushStore](#flushstore)
 
 
@@ -127,22 +125,6 @@ will not yet be deleted.
 
 TODO: the CEF C++ function returns false if a non-empty invalid URL is
 specified or if cookies cannot be accessed.
-
-
-### SetStoragePath
-
-| Parameter | Type |
-| --- | --- |
-| path | string |
-| persist_session_cookies=False | bool |
-| __Return__ | bool |
-
-Sets the directory path that will be used for storing cookie data. If
-|path| is empty data will be stored in memory only. Otherwise, data will be
-stored at the specified |path|. To persist session cookies (cookies without
-an expiry date or validity interval) set |persist_session_cookies| to true.
-Session cookies are generally intended to be transient and most Web
-browsers do not persist them. Returns false if cookies cannot be accessed.
 
 
 ### FlushStore

@@ -16,6 +16,8 @@ Available in upstream CEF, but not yet exposed to CEF Python:
 
 Table of contents:
 * [Callbacks](#callbacks)
+  * [CanSendCookie](#cansendcookie)
+  * [CanSaveCookie](#cansavecookie)
   * [GetAuthCredentials](#getauthcredentials)
   * [GetResourceHandler](#getresourcehandler)
   * [OnBeforeBrowse](#onbeforebrowse)
@@ -24,12 +26,40 @@ Table of contents:
   * [OnQuotaRequest](#onquotarequest)
   * [OnResourceRedirect](#onresourceredirect)
   * [OnResourceResponse](#onresourceresponse)
-  * [OnPluginCrashed](#onplugincrashed)
   * [OnProtocolExecution](#onprotocolexecution)
   * [OnRendererProcessTerminated](#onrendererprocessterminated)
 
 
 ## Callbacks
+
+
+### CanSendCookie
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| frame | [Frame](Frame.md) |
+| request | [Request](Request.md) |
+| cookie | [Cookie](Cookie.md) |
+| __Return__ | bool |
+
+Called on the IO thread before a cookie is sent with a network request.
+Return `True` to allow the cookie or `False` to block it.
+
+
+### CanSaveCookie
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| frame | [Frame](Frame.md) |
+| request | [Request](Request.md) |
+| response | [Response](Response.md) |
+| cookie | [Cookie](Cookie.md) |
+| __Return__ | bool |
+
+Called on the IO thread before a cookie received from a network response is
+saved. Return `True` to allow the cookie or `False` to block it.
 
 
 ### GetAuthCredentials
@@ -212,18 +242,6 @@ You can implement this functionality by using
 / [WebRequestClient](WebRequestClient.md). For an example see the
 _OnResourceResponse() method in the old v31 [wxpython-response.py]
 example.
-
-
-### OnPluginCrashed
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| plugin_path | string |
-| __Return__ | void |
-
-Called when a plugin has crashed. |plugin_path| is the path of the plugin
-that crashed.
 
 
 ### OnProtocolExecution
