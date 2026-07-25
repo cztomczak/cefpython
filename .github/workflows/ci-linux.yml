@@ -83,7 +83,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends \
-            cmake ninja-build pkg-config \
+            pkg-config \
             libgtk2.0-dev libgtk-3-dev \
             libglib2.0-dev libx11-dev \
             libnss3-dev libatk1.0-dev \
