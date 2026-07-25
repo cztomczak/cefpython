@@ -43,13 +43,11 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t javascript_flags
         cef_string_t resources_dir_path
         cef_string_t locales_dir_path
-        int pack_loading_disabled
         int remote_debugging_port
         int uncaught_exception_stack_size
         int context_safety_implementation # Not exposed.
         int ignore_certificate_errors
         cef_color_t background_color
-        int persist_user_preferences
         int windowless_rendering_enabled
         int no_sandbox
         int external_message_pump

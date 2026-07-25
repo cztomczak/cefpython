@@ -83,8 +83,6 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.locales_dir_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
-        elif key == "pack_loading_disabled":
-            pass  # Removed in CEF 146
         elif key == "uncaught_exception_stack_size":
             cefAppSettings.uncaught_exception_stack_size = <int>int(appSettings[key])
         elif key == "browser_subprocess_path":
@@ -102,8 +100,6 @@ cdef void SetApplicationSettings(
         elif key == "background_color":
             cefAppSettings.background_color = \
                     <uint32_t>int(appSettings[key])
-        elif key == "persist_user_preferences":
-            pass  # Removed in CEF 146
         elif key == "windowless_rendering_enabled":
             cefAppSettings.windowless_rendering_enabled = \
                     int(appSettings[key])
