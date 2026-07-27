@@ -301,14 +301,12 @@ elseif(APPLE)
 else()
     target_compile_options(${MODULE_NAME} PRIVATE
         -flto -fdata-sections -ffunction-sections
-        -Wno-stringop-overflow
     )
     target_include_directories(${MODULE_NAME} PRIVATE
         ${GTK3_INCLUDE_DIRS}
     )
     target_link_options(${MODULE_NAME} PRIVATE
         -flto -Wl,--gc-sections
-        -Wno-stringop-overflow
     )
     target_link_libraries(${MODULE_NAME} PRIVATE
         X11 ${GTK3_LIBRARIES}

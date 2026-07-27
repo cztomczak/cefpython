@@ -31,8 +31,5 @@ endif()
 
 # Common browser-process flags (Windows def block, -DNDEBUG -O3, API header
 # define, etc.) come from cefpython_common_flags defined in the top-level
-# CMakeLists. Only the Linux-specific extra is listed here.
+# CMakeLists.
 target_link_libraries(client_handler PRIVATE cefpython_common_flags)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_options(client_handler PRIVATE -Wno-stringop-overflow)
-endif()

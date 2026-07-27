@@ -13,8 +13,5 @@ target_include_directories(cpp_utils PRIVATE
 )
 
 # Common browser-process flags come from cefpython_common_flags defined in the
-# top-level CMakeLists. Only the Linux-specific extra is listed here.
+# top-level CMakeLists.
 target_link_libraries(cpp_utils PRIVATE cefpython_common_flags)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_options(cpp_utils PRIVATE -Wno-stringop-overflow)
-endif()
