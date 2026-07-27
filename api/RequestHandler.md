@@ -46,6 +46,11 @@ Table of contents:
 Called on the IO thread before a cookie is sent with a network request.
 Return `True` to allow the cookie or `False` to block it.
 
+Limitation: requests with no associated browser/frame (e.g. service workers,
+`CefURLRequest`, and some cross-origin subresource requests on the IO thread)
+cannot be filtered. The callback is not called for them and the cookie is
+allowed by default, matching CEF's own default.
+
 
 ### CanSaveCookie
 
@@ -60,6 +65,11 @@ Return `True` to allow the cookie or `False` to block it.
 
 Called on the IO thread before a cookie received from a network response is
 saved. Return `True` to allow the cookie or `False` to block it.
+
+Limitation: requests with no associated browser/frame (e.g. service workers,
+`CefURLRequest`, and some cross-origin subresource requests on the IO thread)
+cannot be filtered. The callback is not called for them and the cookie is
+allowed by default, matching CEF's own default.
 
 
 ### GetAuthCredentials

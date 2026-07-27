@@ -33,7 +33,14 @@ cdef public void LoadHandler_OnLoadStart(
     cdef PyFrame pyFrame
     cdef object clientCallback
     try:
+        # A frame torn down mid-navigation (rapid create -> navigate -> destroy)
+        # can already be detached by the time this UI-thread callback runs, in
+        # which case CefFrame::GetBrowser() returns NULL. There is then no
+        # browser to resolve a PyBrowser/PyFrame from and the load event refers
+        # to a frame that no longer exists, so skipping is correct.
         if not cefFrame.get().GetBrowser().get():
+            Debug("OnLoadStart: frame has no browser (detached during"
+                  " lifecycle transition), skipping")
             return
         pyBrowser = GetPyBrowser(cefBrowser, "OnLoadStart")
         pyFrame = GetPyFrame(cefFrame)
@@ -53,7 +60,11 @@ cdef public void LoadHandler_OnLoadEnd(
     cdef PyFrame pyFrame
     cdef object clientCallback
     try:
+        # See OnLoadStart: a detached frame yields a NULL CefFrame::GetBrowser()
+        # on the UI thread; nothing to dispatch on, so skip.
         if not cefFrame.get().GetBrowser().get():
+            Debug("OnLoadEnd: frame has no browser (detached during"
+                  " lifecycle transition), skipping")
             return
         pyBrowser = GetPyBrowser(cefBrowser, "OnLoadEnd")
         pyFrame = GetPyFrame(cefFrame)
@@ -82,7 +93,11 @@ cdef public void LoadHandler_OnLoadError(
         # the error code will be ERR_ABORTED. In such cases calls
         # to OnLoadError should be ignored and not handled by user
         # scripts. The wxpython example implements such behavior.
+        # See OnLoadStart: a detached frame yields a NULL CefFrame::GetBrowser()
+        # on the UI thread; nothing to dispatch on, so skip.
         if not cefFrame.get().GetBrowser().get():
+            Debug("OnLoadError: frame has no browser (detached during"
+                  " lifecycle transition), skipping")
             return
         pyBrowser = GetPyBrowser(cefBrowser, "OnLoadError")
         pyFrame = GetPyFrame(cefFrame)
