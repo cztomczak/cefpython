@@ -11,17 +11,8 @@ from cef_string cimport cef_string_t
 # noinspection PyUnresolvedReferences
 from libc.limits cimport UINT_MAX
 
-# char16_t is wchar_t on Windows and unsigned short elsewhere in CEF.
-# Using a C macro avoids the deprecated Cython IF statement.
 cdef extern from *:
-    """
-    #ifdef _WIN32
-    typedef wchar_t cef_cython_char16_t;
-    #else
-    typedef unsigned short cef_cython_char16_t;
-    #endif
-    """
-    ctypedef unsigned short char16_t "cef_cython_char16_t"
+    ctypedef unsigned short char16_t
 
 cdef extern from "include/internal/cef_types.h":
 
