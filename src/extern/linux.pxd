@@ -6,8 +6,6 @@ cdef extern from "gtk/gtk.h" nogil:
     ctypedef void* GtkWidget
     cdef GtkWidget* gtk_plug_new(unsigned long socket_id)
     cdef void gtk_widget_show(GtkWidget* widget)
-    ctypedef void* GMainContext
-    int g_main_context_iteration(GMainContext* context, int may_block)
 
     ctypedef char* XPointer
     ctypedef struct XImage:
