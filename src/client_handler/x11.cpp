@@ -38,15 +38,17 @@ void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
     // need to touch X11 at all, so check this first.
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
     if (!xwindow) return;
-    // cefpython forces ozone-platform=x11 by default (window_utils_linux.pyx),
-    // so cef_get_xdisplay() is normally valid. It can be NULL when no X server
-    // is reachable (e.g. a pure-Wayland session with no XWayland) - without
-    // this guard XConfigureWindow(NULL, ...) segfaults (verified). This is an
-    // X11-only helper, so no-op there.
+    // cef_get_xdisplay() returns NULL unless called on the browser process UI
+    // thread (include/internal/cef_types_linux.h), so an app calling
+    // Browser.SetBounds() from a worker thread arrives here with a NULL
+    // display even on a healthy X11 session. It is also NULL when an app
+    // overrides the ozone-platform=x11 default (cefpython.pyx) to a backend
+    // that starts without X. XConfigureWindow(NULL, ...) segfaults (verified),
+    // so no-op instead.
     ::Display* xdisplay = cef_get_xdisplay();
     if (!xdisplay) {
         LOG(INFO) << "[Browser process] SetX11WindowBounds: no X11 display "
-                     "(non-X11 Ozone backend?), skipping";
+                     "(wrong thread or non-X11 backend), skipping";
         return;
     }
     XWindowChanges changes = {0};
@@ -63,12 +65,12 @@ void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
     // xwindow is 0 for windowless (OSR) browsers - no title bar to set.
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
     if (!xwindow) return;
-    // See SetX11WindowBounds: xdisplay can be NULL on a non-X11 Ozone backend
-    // (e.g. pure Wayland with no XWayland); XStoreName(NULL, ...) would segfault.
+    // See SetX11WindowBounds: NULL off the UI thread, or on a non-X11 Ozone
+    // backend with no X server; XStoreName(NULL, ...) would segfault.
     ::Display* xdisplay = cef_get_xdisplay();
     if (!xdisplay) {
         LOG(INFO) << "[Browser process] SetX11WindowTitle: no X11 display "
-                     "(non-X11 Ozone backend?), skipping";
+                     "(wrong thread or non-X11 backend), skipping";
         return;
     }
     XStoreName(xdisplay, xwindow, title);
