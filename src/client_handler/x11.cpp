@@ -6,6 +6,7 @@
 //       targets during build.
 
 #include "x11.h"
+#include "util.h"
 #include "include/base/cef_logging.h"
 
 int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
@@ -34,17 +35,15 @@ void InstallX11ErrorHandlers() {
 
 void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
                         int x, int y, int width, int height) {
+    REQUIRE_UI_THREAD();
     // xwindow is 0 for windowless (OSR) browsers - nothing to resize, and no
     // need to touch X11 at all, so check this first.
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
     if (!xwindow) return;
-    // cef_get_xdisplay() returns NULL unless called on the browser process UI
-    // thread (include/internal/cef_types_linux.h), so an app calling
-    // Browser.SetBounds() from a worker thread arrives here with a NULL
-    // display even on a healthy X11 session. It is also NULL when an app
-    // overrides the ozone-platform=x11 default (cefpython.pyx) to a backend
-    // that starts without X. XConfigureWindow(NULL, ...) segfaults (verified),
-    // so no-op instead.
+    // cef_get_xdisplay() is NULL off the UI thread (cef_types_linux.h; the
+    // assert above is compiled out in release builds) and on any thread when
+    // the app selects a non-X11 Ozone backend with no X server.
+    // XConfigureWindow(NULL, ...) segfaults (verified), so no-op instead.
     ::Display* xdisplay = cef_get_xdisplay();
     if (!xdisplay) {
         LOG(INFO) << "[Browser process] SetX11WindowBounds: no X11 display "
@@ -62,11 +61,12 @@ void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
 }
 
 void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
+    REQUIRE_UI_THREAD();
     // xwindow is 0 for windowless (OSR) browsers - no title bar to set.
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
     if (!xwindow) return;
-    // See SetX11WindowBounds: NULL off the UI thread, or on a non-X11 Ozone
-    // backend with no X server; XStoreName(NULL, ...) would segfault.
+    // See SetX11WindowBounds: NULL off the UI thread or on a non-X11 Ozone
+    // backend; XStoreName(NULL, ...) would segfault.
     ::Display* xdisplay = cef_get_xdisplay();
     if (!xdisplay) {
         LOG(INFO) << "[Browser process] SetX11WindowTitle: no X11 display "
@@ -139,9 +139,13 @@ GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser) {
 }
 
 XImage* CefBrowser_GetImage(CefRefPtr<CefBrowser> browser) {
+    REQUIRE_UI_THREAD();
+    // See SetX11WindowBounds: NULL off the UI thread or on a non-X11 Ozone
+    // backend.
     ::Display* display = cef_get_xdisplay();
     if (!display) {
-        LOG(ERROR) << "cef_get_xdisplay() returned NULL in CefBrowser_GetImage";
+        LOG(ERROR) << "cef_get_xdisplay() returned NULL in CefBrowser_GetImage"
+                      " (wrong thread or non-X11 backend)";
         return NULL;
     }
     ::Window browser_window = browser->GetHost()->GetWindowHandle();
