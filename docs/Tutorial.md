@@ -125,7 +125,7 @@ repository:
   - CEF Python provides cef.[PostTask](../api/cefpython.md#posttask)
     function for posting tasks between these various threads
   - The "UI" thread is application main thread unless you
-    use ApplicationSettings.[multi_threaded_message_loop](../api/ApplicationSettings.md#multi_threaded_messge_loop)
+    use ApplicationSettings.[multi_threaded_message_loop](../api/ApplicationSettings.md#multi_threaded_message_loop)
     option on Windows in which case the UI thread will no more
     be application main thread
   - Do not perform blocking operations on any CEF thread other
@@ -163,27 +163,19 @@ The cef.ExceptHook helper function does the following:
 If you would like to modify `ExceptHook` behavior, see its source code
 in src/[helpers.pyx](../src/helpers.pyx) file.
 
-There is a second, related case. CEF Python's callback handlers are
-compiled with Cython and declared as "noexcept", meaning an exception
-must not propagate out of a handler into CEF's C++ code. Handlers catch
-their own exceptions and forward them to `sys.excepthook`, but if an
-exception still escapes a handler (for example a handler that forgot to
-use try/except, or whose except block itself raises) then Python does
-not crash the process - it reports the exception through
+Python reports some exceptions through
 [sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook),
-which by default only prints to stderr and is easy to miss. To give
-these escaped exceptions the same treatment as any other error, examples
-also set:
+rather than `sys.excepthook`. By default these exceptions are printed only to
+stderr and are easy to miss. To give them the same treatment as other Python
+errors, examples also set:
 
 ```python
-sys.unraisablehook = cef.UnraisableHook  # For exceptions that escape a handler
+sys.unraisablehook = cef.UnraisableHook
 ```
 
 cef.[UnraisableHook](../api/cefpython.md#unraisablehook) forwards to
-cef.[ExceptHook](../api/cefpython.md#excepthook), so an escaped exception
-is written to "error.log", printed, and CEF is shut down cleanly instead
-of being silently logged. Reaching this code path indicates a bug in a
-handler that should be fixed.
+cef.[ExceptHook](../api/cefpython.md#excepthook), so the exception is written
+to "error.log", printed, and CEF is shut down cleanly.
 
 
 ## Settings
@@ -210,10 +202,6 @@ Here are some settings worth noting:
   customize context menu
 - [locale](../api/ApplicationSettings.md#locale) - set language
   for localized resources
-- [product_version](../api/ApplicationSettings.md#product_version) -
-  set the product portion of the default User-Agent string.
-  If user_agent option (below) is used then product_version will
-  be ignored.
 - [user_agent](../api/ApplicationSettings.md#user_agent) - set
   value that will be returned as the User-Agent HTTP header
   and js navigator.userAgent
@@ -268,23 +256,9 @@ for details.
 
 ## Change user agent string
 
-There are two options in [application settings](../api/ApplicationSettings.md#application-settings)
-for changing User-Agent string: [product_version](../api/ApplicationSettings.md#product_version)
-and [user_agent](../api/ApplicationSettings.md#user_agent).
-
-The "product_version" sets the product portion of the default
-User-Agent string. If "user_agent" option is used then
-"product_version" will be ignored. For example if you set
-"product_version" to "MyProduct/10.00" then User-Agent will
-be:
-
-```text
-Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)
-MyProduct/10.00 Safari/537.36
-```
-
-To change the whole user agent string use the "user_agent"
-option. For example set it to "MyAgent/20.00 MyProduct/10.00"
+Use the [user_agent](../api/ApplicationSettings.md#user_agent) application
+setting to change the whole User-Agent string. For example, set it to
+"MyAgent/20.00 MyProduct/10.00"
 and both User-Agent HTTP header and js navigator.userAgent will be:
 
 ```text
@@ -295,11 +269,8 @@ Uncomment appropriate lines in [tutorial.py](../examples/tutorial.py)
 example to see the effect:
 
 ```Python
-# To change user agent use either "product_version"
-# or "user_agent" options. Explained in Tutorial in
-# "Change user agent string" section.
+# To change the user agent use the "user_agent" option.
 settings = {
-    # "product_version": "MyProduct/10.00",
     # "user_agent": "MyAgent/20.00 MyProduct/10.00",
 }
 cef.Initialize(settings=settings)
@@ -630,7 +601,7 @@ is of type "list" and thus is passed by reference. Additionally
 a True value is returned by function to notify CEF that rectangle
 was provided.
 
-In the OnPaint callback CEF provides a [PaintBufer](../api/PaintBuffer.md#paintbuffer-object) object, which is a pixel buffer of the
+In the OnPaint callback CEF provides a [PaintBuffer](../api/PaintBuffer.md#paintbuffer-object) object, which is a pixel buffer of the
 browser view. This object has [GetIntPointer](../api/PaintBuffer.md#getintpointer)
 and [GetString](../api/PaintBuffer.md#getstring) methods. In the
 example the latter method is used which returns bytes. The method
@@ -654,7 +625,7 @@ callback and it is not yet known which call is the last when
 loading completes and thus image buffer is stored for later use.
 
 The screenshot example also implements another handler named
-[LoadHanadler](../api/LoadHandler.md#loadhandler-interface)
+[LoadHandler](../api/LoadHandler.md#loadhandler-interface)
 and two of its callbacks: [OnLoadingStateChange](../api/LoadHandler.md#onloadingstatechange)
 and [OnLoadError](../api/LoadHandler.md#onloaderror). The
 OnLoadingStateChange callbacks notifies when web page loading
@@ -667,7 +638,7 @@ it as a PNG image.
 The screenshot example could be further extended, so that it
 makes a screenshot of the whole page no matter how long it is.
 Detecting page length could be done in Javascript and then
-communicated back with Python using [Javascript bindings](#javscript-integration).
+communicated back with Python using [Javascript bindings](#javascript-integration).
 After whole page length is known a call to browser.WasResized()
 should be done so that GetViewRect and OnPaint are called again.
 

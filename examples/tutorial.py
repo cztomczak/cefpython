@@ -62,11 +62,8 @@ def main():
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     sys.unraisablehook = cef.UnraisableHook  # Same, for errors Python would
     #                                          otherwise just print and ignore
-    # To change user agent use either "product_version"
-    # or "user_agent" options. Explained in Tutorial in
-    # "Change user agent string" section.
+    # To change the user agent use the "user_agent" option.
     settings = {
-        # "product_version": "MyProduct/10.00",
         # "user_agent": "MyAgent/20.00 MyProduct/10.00",
     }
     cef.Initialize(settings=settings)

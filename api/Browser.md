@@ -94,20 +94,6 @@ Table of contents:
 
 ## Notes
 
-Methods available in upstream CEF which were not yet exposed in CEF Python
-(see src/include/cef_browser.h):
-
-* ImeSetComposition
-* ImeCommitText
-* ImeFinishComposingText
-* ImeCancelComposition
-* GetFrameCount
-* GetFrameIdentifiers
-* GetNSTextInputContext (Mac, OSR)
-* HandleKeyEventAfterTextInputClient (Mac, OSR)
-* HandleKeyEventBeforeTextInputClient (Mac, OSR)
-* IsLoading
-
 There are some edge cases when after the OnBeforeClose event browser objects
 are no more globally referenced thus a new instance is created that
 wraps upstream CefBrowser object. Browser objects that were globally

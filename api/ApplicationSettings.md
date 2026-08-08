@@ -25,12 +25,9 @@ Table of contents:
   * [log_file](#log_file)
   * [log_severity](#log_severity)
   * [multi_threaded_message_loop](#multi_threaded_message_loop)
-  * [net_security_expiration_enabled](#net_security_expiration_enabled)
   * [persist_session_cookies](#persist_session_cookies)
-  * [product_version](#product_version)
   * [remote_debugging_port](#remote_debugging_port)
   * [resources_dir_path](#resources_dir_path)
-  * [single_process](#single_process)
   * [string_encoding](#string_encoding)
   * [uncaught_exception_stack_size](#uncaught_exception_stack_size)
   * [unique_request_context_per_browser](#unique_request_context_per_browser)
@@ -309,19 +306,6 @@ your app's code can start executing on different threads.
 This option is not and cannot be supported on OS-X for architectural reasons.
 
 
-### net_security_expiration_enabled
-
-(bool)
-Set to true (1) to enable date-based expiration of built in network
-security information (i.e. certificate transparency logs, HSTS preloading
-and pinning information). Enabling this option improves network security
-but may cause HTTPS load failures when using CEF binaries built more than
-10 weeks in the past. See https://www.certificate-transparency.org/ and
-https://www.chromium.org/hsts for details. Can be set globally using the
-CefSettings.enable_net_security_expiration value.
-
-
-
 ### persist_session_cookies
 
 (bool)
@@ -331,15 +315,6 @@ true. Session cookies are generally intended to be transient and most Web
 browsers do not persist them. A |cache_path| value must also be specified to  
 enable this feature. Also configurable using the "persist-session-cookies"  
 [command-line switch](CommandLineSwitches.md).
-
-
-### product_version
-
-(string)
-Value that will be inserted as the product portion of the default  
-User-Agent string. If empty the Chromium product version will be used. If  
-|userAgent| is specified this value will be ignored. Also configurable  
-using the --product-version switch.
 
 
 ### remote_debugging_port
@@ -363,15 +338,6 @@ The fully qualified path for the resources directory. If this value is
 empty the cef.pak and/or devtools_resources.pak files must be located in  
 the module directory on Windows/Linux or the app bundle Resources directory  
 on Mac OS X. Also configurable using the --resources-dir-path switch.
-
-
-### single_process
-
-(bool)
-Set to true (1) to use a single process for the browser and renderer. This  
-run mode is not officially supported by Chromium and is less stable than  
-the multi-process default. Also configurable using the "single-process"  
-[command-line switch](CommandLineSwitches.md).
 
 
 ### string_encoding

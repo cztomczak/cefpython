@@ -15,7 +15,6 @@ Table of contents:
   * [GetAppPath](#getapppath)
   * [GetBrowserByIdentifier](#getbrowserbyidentifier)
   * [GetBrowserByWindowHandle](#getbrowserbywindowhandle)
-  * [GetCommandLineSwitch](#getcommandlineswitch)
   * [GetDataUrl](#getdataurl)
   * [GetGlobalClientCallback](#getglobalclientcallback)
   * [GetModuleDirectory](#getmoduledirectory)
@@ -140,16 +139,6 @@ calling `Browser.GetIdentifier`.
 | __Return__ | void |
 
 Get browser by outer or inner window handle. An outer window handle is the one that was passed to CreateBrowserSync(). An inner window handle is a CEF internal window handle.
-
-
-### GetCommandLineSwitch
-
-| Parameter | Type |
-| --- | --- |
-| key | string |
-| __Return__ | object |
-
-Returns the [CommandLineSwitches](CommandLineSwitches.md) switch that was passed to Initialize(). Returns None if key is not found.
 
 
 ### GetDataUrl
@@ -396,19 +385,12 @@ You must call this function so that CEF shuts down cleanly. Remember also to del
 Global unraisable hook, companion to [ExceptHook](#excepthook). Assign it
 with `sys.unraisablehook = cef.UnraisableHook`.
 
-CEF Python's callback handlers are compiled with Cython and declared as
-"noexcept", so an exception must not propagate out of a handler into CEF's
-C++ code. Handlers catch their own exceptions and forward them to
-`sys.excepthook`, but if an exception still escapes a handler (for example a
-handler not wrapped in try/except, or whose except block itself raises) then
-Python reports it through
+Python reports some exceptions through
 [sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook)
-rather than crashing the process. By default that only prints to stderr and
-is easy to miss.
+rather than `sys.excepthook`. By default these exceptions are printed only to
+stderr and are easy to miss.
 
-This hook forwards the escaped exception to [ExceptHook](#excepthook), so it
-is written to the "error.log" file, printed, and CEF is shut down cleanly -
-same as any other Python exception. Reaching this code path indicates a bug
-in a handler that should be fixed.
+This hook forwards the exception to [ExceptHook](#excepthook), so it is
+written to the "error.log" file, printed, and CEF is shut down cleanly.
 
 See also Tutorial: [Handling Python exceptions](../docs/Tutorial.md#handling-python-exceptions).
