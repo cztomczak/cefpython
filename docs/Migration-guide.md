@@ -52,7 +52,6 @@ Table of contents:
 * [v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loop-qt-wxpython)
 * [v66.1+ Navigation urls passed to CreateBrowserSync or LoadUrl methods need to be encoded by app code](#v661-navigation-urls-passed-to-createbrowsersync-or-loadurl-methods-need-to-be-encoded-by-app-code)
 * [v67+ Do not call the 'WindowUtils.OnSize' function](#v67-do-not-call-the-windowutilsonsize-function)
-* [v147+ Building CEF from sources is untested](#v147-building-cef-from-sources-is-untested)
 * [v147+ Register sys.unraisablehook](#v147-register-sysunraisablehook)
 * [v147+ Removed and changed APIs](#v147-removed-and-changed-apis)
 
@@ -508,16 +507,6 @@ integrations. Follow the resize handling in the current example for your GUI
 framework. Applications that handle `WM_SIZE` directly, such as
 `pywin32.py`, should continue forwarding that message to
 `WindowUtils.OnSize`. See [Issue #464](../../../issues/464) for details.
-
-
-## v147+ Building CEF from sources is untested
-
-`tools/automate.py --build-cef`, which builds CEF/Chromium itself from
-sources, is not tested or supported as of v147—it was last verified with much
-older CEF versions (v56 on Linux and v50 on Windows). The supported path is to
-download CEF with `tools/download_cef.py` and prepare the binaries with
-`tools/automate.py --prebuilt-cef`. See the
-[Build instructions](Build-instructions.md).
 
 
 ## v147+ Register sys.unraisablehook
