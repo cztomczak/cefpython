@@ -587,7 +587,6 @@ at this moment.
   * [OnBeforeBrowse](api/RequestHandler.md#onbeforebrowse)
   * [OnBeforeResourceLoad](api/RequestHandler.md#onbeforeresourceload)
   * [_OnCertificateError](api/RequestHandler.md#_oncertificateerror)
-  * [OnQuotaRequest](api/RequestHandler.md#onquotarequest)
   * [OnResourceRedirect](api/RequestHandler.md#onresourceredirect)
   * [OnResourceResponse](api/RequestHandler.md#onresourceresponse)
   * [OnProtocolExecution](api/RequestHandler.md#onprotocolexecution)

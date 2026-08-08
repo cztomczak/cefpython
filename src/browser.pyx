@@ -247,8 +247,8 @@ cdef class PyBrowser:
             #       cefpython.SetGlobalClientCallback().
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
-                    "OnQuotaRequest", "OnProtocolExecution",
-                    "GetResourceHandler", "OnBeforeBrowse", 
+                    "OnProtocolExecution", "GetResourceHandler",
+                    "OnBeforeBrowse",
                     "OnRendererProcessTerminated",
                     "CanSendCookie", "CanSaveCookie"]
             # RequestContextHandler

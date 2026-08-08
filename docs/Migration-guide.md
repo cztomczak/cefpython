@@ -539,8 +539,11 @@ most important application-facing changes are:
 | `Browser.SetMouseCursorChangeDisabled()` / `IsMouseCursorChangeDisabled()` | Removed with no direct replacement. |
 | `Frame.LoadString(value, url)` | Use `Frame.LoadUrl()` with a `data:` URL. |
 | `Response.GetHeader(name)` | Renamed to `Response.GetHeaderByName(name)`. |
+| `RequestHandler.GetAuthCredentials(browser, frame, ...)` | The `frame` argument was replaced by `origin_url`. |
 | `RequestHandler.CanGetCookies` / `CanSetCookie` | Replaced by `CanSendCookie(browser, frame, request, cookie)` and `CanSaveCookie(browser, frame, request, response, cookie)`. |
 | `RequestHandler.GetCookieManager`, `OnBeforePluginLoad`, and `OnPluginCrashed` | Removed. |
+| `RequestHandler.OnQuotaRequest` | Removed upstream with no direct replacement. |
+| `RequestHandler.OnProtocolExecution` | `allow_execution_out[0]` is now honored. Previously, OS execution was always allowed whenever the callback was invoked, regardless of this value. |
 | `CookieManager.GetBlockingManager`, `CreateManager`, `SetSupportedSchemes`, and `SetStoragePath` | Removed; use `CookieManager.GetGlobalManager()` and configure persistence through application settings. |
 | `RenderHandler.GetScreenRect` | Removed. |
 | `pack_loading_disabled` application setting | Removed with no replacement; pack loading can no longer be disabled. |

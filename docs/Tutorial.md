@@ -163,11 +163,12 @@ The cef.ExceptHook helper function does the following:
 If you would like to modify `ExceptHook` behavior, see its source code
 in src/[helpers.pyx](../src/helpers.pyx) file.
 
-Python reports some exceptions through
-[sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook),
-rather than `sys.excepthook`. By default these exceptions are printed only to
-stderr and are easy to miss. To give them the same treatment as other Python
-errors, examples also set:
+CEF Python may report an exception through
+[sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook)
+when it cannot propagate out of a native callback handler. Such exceptions do
+not reach `sys.excepthook`; by default they are printed only to stderr and are
+easy to miss. To give them the same treatment as other Python errors, examples
+also set:
 
 ```python
 sys.unraisablehook = cef.UnraisableHook

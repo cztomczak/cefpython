@@ -8,7 +8,6 @@ include "../cookie.pyx"
 
 # cef_termination_status_t
 cimport cef_types
-from libc.stdint cimport int64_t
 TS_ABNORMAL_TERMINATION = cef_types.TS_ABNORMAL_TERMINATION
 TS_PROCESS_WAS_KILLED = cef_types.TS_PROCESS_WAS_KILLED
 TS_PROCESS_CRASHED = cef_types.TS_PROCESS_CRASHED
@@ -234,7 +233,7 @@ cdef public void RequestHandler_OnResourceRedirect(
 
 cdef public cpp_bool RequestHandler_GetAuthCredentials(
         CefRefPtr[CefBrowser] cefBrowser,
-        CefRefPtr[CefFrame] cefFrame,
+        const CefString& cefOriginUrl,
         cpp_bool cefIsProxy,
         const CefString& cefHost,
         int cefPort,
@@ -243,7 +242,7 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
         CefRefPtr[CefAuthCallback] cefAuthCallback
         ) noexcept with gil:
     cdef PyBrowser pyBrowser
-    cdef PyFrame pyFrame
+    cdef str pyOriginUrl
     cdef py_bool pyIsProxy
     cdef str pyHost
     cdef int pyPort
@@ -261,7 +260,7 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetAuthCredentials")
-        pyFrame = GetPyFrame(cefFrame)
+        pyOriginUrl = CefToPyString(cefOriginUrl)
         pyIsProxy = bool(cefIsProxy)
         pyHost = CefToPyString(cefHost)
         pyPort = int(cefPort)
@@ -274,7 +273,7 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
         if clientCallback:
             returnValue = clientCallback(
                     browser=pyBrowser,
-                    frame=pyFrame,
+                    origin_url=pyOriginUrl,
                     is_proxy=pyIsProxy,
                     host=pyHost,
                     port=pyPort,
@@ -297,39 +296,6 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
             #     return False
             # ELSE:
             #     return False
-            return False
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-
-cdef public cpp_bool RequestHandler_OnQuotaRequest(
-        CefRefPtr[CefBrowser] cefBrowser,
-        const CefString& cefOriginUrl,
-        int64_t newSize,
-        CefRefPtr[CefCallback] cefCallback
-        ) noexcept with gil:
-    cdef PyBrowser pyBrowser
-    cdef py_string pyOriginUrl
-    cdef py_bool returnValue
-    cdef object clientCallback
-    try:
-        # Issue #455: CefRequestHandler callbacks still executed after
-        # browser was closed.
-        if IsBrowserClosed(cefBrowser):
-            return False
-
-        pyBrowser = GetPyBrowser(cefBrowser, "OnQuotaRequest")
-        pyOriginUrl = CefToPyString(cefOriginUrl)
-        clientCallback = pyBrowser.GetClientCallback("OnQuotaRequest")
-        if clientCallback:
-            returnValue = clientCallback(
-                    browser=pyBrowser,
-                    origin_url=pyOriginUrl,
-                    new_size=newSize,
-                    callback=CreatePyRequestCallback(cefCallback))
-            return bool(returnValue)
-        else:
             return False
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
@@ -360,13 +326,7 @@ cdef public void RequestHandler_OnProtocolExecution(
                     browser=pyBrowser,
                     url=pyUrl,
                     allow_execution_out=pyAllowOSExecutionOut)
-            # Since Cython 0.17.4 assigning a value to an argument
-            # passed by reference will throw an error, the fix is to
-            # to use "(&arg)[0] =" instead of "arg =", see this topic:
-            # https://groups.google.com/forum/#!msg/cython-users/j58Sp3QMrD4/y9vJy9YBi_kJ
-            # For CefRefPtr you should use swap() method instead.
-            (&cefAllowOSExecution)[0] = 1
-            #(&cefAllowOSExecution)[0] = <cpp_bool>bool(pyAllowOSExecutionOut[0])
+            cefAllowOSExecution = <cpp_bool>bool(pyAllowOSExecutionOut[0])
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

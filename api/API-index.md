@@ -371,7 +371,6 @@
   * [OnBeforeBrowse](RequestHandler.md#onbeforebrowse)
   * [OnBeforeResourceLoad](RequestHandler.md#onbeforeresourceload)
   * [_OnCertificateError](RequestHandler.md#_oncertificateerror)
-  * [OnQuotaRequest](RequestHandler.md#onquotarequest)
   * [OnResourceRedirect](RequestHandler.md#onresourceredirect)
   * [OnResourceResponse](RequestHandler.md#onresourceresponse)
   * [OnProtocolExecution](RequestHandler.md#onprotocolexecution)

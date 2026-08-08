@@ -8,9 +8,6 @@
 #include "cookie_access_filter.h"
 #include "resource_request_handler.h"
 
-typedef cef_return_value_t ReturnValue;
-
-
 class RequestHandler : public CefRequestHandler,
                        public CookieAccessFilter
 {
@@ -33,40 +30,14 @@ public:
                         bool user_gesture,
                         bool is_redirect) override;
 
-    ReturnValue OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
-                                     CefRefPtr<CefFrame> frame,
-                                     CefRefPtr<CefRequest> request,
-                                     CefRefPtr<CefCallback> callback
-                                     ) ;
-
-    CefRefPtr<CefResourceHandler> GetResourceHandler(
-                                      CefRefPtr<CefBrowser> browser,
-                                      CefRefPtr<CefFrame> frame,
-                                      CefRefPtr<CefRequest> request) ;
-
-    void OnResourceRedirect(CefRefPtr<CefBrowser> browser,
-                            CefRefPtr<CefFrame> frame,
-                            CefRefPtr<CefRequest> request,
-                            CefRefPtr<CefResponse> response,
-                            CefString& new_url) ;
-
     bool GetAuthCredentials(CefRefPtr<CefBrowser> browser,
-                            CefRefPtr<CefFrame> frame,
+                            const CefString& origin_url,
                             bool isProxy,
                             const CefString& host,
                             int port,
                             const CefString& realm,
                             const CefString& scheme,
-                            CefRefPtr<CefAuthCallback> callback) ;
-
-    bool OnQuotaRequest(CefRefPtr<CefBrowser> browser,
-                        const CefString& origin_url,
-                        int64_t new_size,
-                        CefRefPtr<CefCallback> callback) ;
-
-    void OnProtocolExecution(CefRefPtr<CefBrowser> browser,
-                             const CefString& url,
-                             bool& allow_os_execution) ;
+                            CefRefPtr<CefAuthCallback> callback) override;
 
     bool OnCertificateError(CefRefPtr<CefBrowser> browser,
                             cef_errorcode_t cert_error,

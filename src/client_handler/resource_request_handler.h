@@ -6,9 +6,7 @@
 #include "include/cef_resource_request_handler.h"
 #include "cookie_access_filter.h"
 
-// Minimal CefResourceRequestHandler that returns a CookieAccessFilter.
-// CEF 146 moved CanSendCookie/CanSaveCookie out of CefRequestHandler into
-// CefCookieAccessFilter, reachable only via this intermediate interface.
+// Forwards resource request callbacks to the CEF Python RequestHandler.
 class ResourceRequestHandler : public CefResourceRequestHandler {
 public:
     ResourceRequestHandler() {}
@@ -17,9 +15,28 @@ public:
     CefRefPtr<CefCookieAccessFilter> GetCookieAccessFilter(
             CefRefPtr<CefBrowser> browser,
             CefRefPtr<CefFrame> frame,
-            CefRefPtr<CefRequest> request) override {
-        return new CookieAccessFilter();
-    }
+            CefRefPtr<CefRequest> request) override;
+
+    ReturnValue OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
+                                     CefRefPtr<CefFrame> frame,
+                                     CefRefPtr<CefRequest> request,
+                                     CefRefPtr<CefCallback> callback) override;
+
+    CefRefPtr<CefResourceHandler> GetResourceHandler(
+            CefRefPtr<CefBrowser> browser,
+            CefRefPtr<CefFrame> frame,
+            CefRefPtr<CefRequest> request) override;
+
+    void OnResourceRedirect(CefRefPtr<CefBrowser> browser,
+                            CefRefPtr<CefFrame> frame,
+                            CefRefPtr<CefRequest> request,
+                            CefRefPtr<CefResponse> response,
+                            CefString& new_url) override;
+
+    void OnProtocolExecution(CefRefPtr<CefBrowser> browser,
+                             CefRefPtr<CefFrame> frame,
+                             CefRefPtr<CefRequest> request,
+                             bool& allow_os_execution) override;
 
 private:
     IMPLEMENT_REFCOUNTING(ResourceRequestHandler);
