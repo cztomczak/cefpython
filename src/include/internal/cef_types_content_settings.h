@@ -31,21 +31,24 @@
 #define CEF_INCLUDE_INTERNAL_CEF_TYPES_CONTENT_SETTINGS_H_
 #pragma once
 
+#include "include/cef_api_hash.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 ///
 /// Supported content setting types. Some types are platform-specific or only
-/// supported with the Chrome runtime. Should be kept in sync with Chromium's
+/// supported with Chrome style. Should be kept in sync with Chromium's
 /// ContentSettingsType type.
 ///
 typedef enum {
-  // This setting governs whether cookies are enabled by the user in the
+  /// This setting governs whether cookies are enabled by the user in the
   /// provided context. However, it may be overridden by other settings. This
   /// enum should NOT be read directly to determine whether cookies are enabled;
   /// the client should instead rely on the CookieSettings API.
-  CEF_CONTENT_SETTING_TYPE_COOKIES = 0,
+  CEF_CONTENT_SETTING_TYPE_COOKIES,
+
   CEF_CONTENT_SETTING_TYPE_IMAGES,
   CEF_CONTENT_SETTING_TYPE_JAVASCRIPT,
 
@@ -72,7 +75,11 @@ typedef enum {
   CEF_CONTENT_SETTING_TYPE_PROTECTED_MEDIA_IDENTIFIER,
   CEF_CONTENT_SETTING_TYPE_APP_BANNER,
   CEF_CONTENT_SETTING_TYPE_SITE_ENGAGEMENT,
+#if CEF_API_ADDED(14600)
+  CEF_CONTENT_SETTING_TYPE_PERSISTENT_STORAGE,
+#else
   CEF_CONTENT_SETTING_TYPE_DURABLE_STORAGE,
+#endif
   CEF_CONTENT_SETTING_TYPE_USB_CHOOSER_DATA,
   CEF_CONTENT_SETTING_TYPE_BLUETOOTH_GUARD,
   CEF_CONTENT_SETTING_TYPE_BACKGROUND_SYNC,
@@ -119,8 +126,8 @@ typedef enum {
   /// permission to respond to accessibility events, which can be used to
   /// provide a custom accessibility experience. Requires explicit user consent
   /// because some users may not want sites to know they're using assistive
-  /// technology.
-  CEF_CONTENT_SETTING_TYPE_ACCESSIBILITY_EVENTS,
+  /// technology. Deprecated in M131.
+  CEF_CONTENT_SETTING_TYPE_DEPRECATED_ACCESSIBILITY_EVENTS,
 
   /// Used to store whether to allow a website to install a payment handler.
   CEF_CONTENT_SETTING_TYPE_PAYMENT_HANDLER,
@@ -233,11 +240,15 @@ typedef enum {
   /// screens. See also: https://w3c.github.io/window-placement
   CEF_CONTENT_SETTING_TYPE_WINDOW_MANAGEMENT,
 
-  /// Stores whether to allow insecure websites to make private network
-  /// requests.
-  /// See also: https://wicg.github.io/cors-rfc1918
-  /// Set through enterprise policies only.
+/// Stores whether to allow insecure websites to make private network
+/// requests.
+/// See also: https://wicg.github.io/cors-rfc1918
+/// Set through enterprise policies only.
+#if CEF_API_ADDED(13800)
+  CEF_CONTENT_SETTING_TYPE_INSECURE_PRIVATE_NETWORK_DEPRECATED,
+#else
   CEF_CONTENT_SETTING_TYPE_INSECURE_PRIVATE_NETWORK,
+#endif
 
   /// Content setting which stores whether or not a site can access low-level
   /// locally installed font data using the Local Fonts Access API.
@@ -317,17 +328,22 @@ typedef enum {
   /// store origin blocklist from review notification permissions feature.
   CEF_CONTENT_SETTING_TYPE_NOTIFICATION_PERMISSION_REVIEW,
 
+#if CEF_API_ADDED(14000)
+  CEF_CONTENT_SETTING_TYPE_PRIVATE_NETWORK_GUARD_DEPRECATED,
+  CEF_CONTENT_SETTING_TYPE_PRIVATE_NETWORK_CHOOSER_DATA_DEPRECATED,
+#else
   /// Website setting to store permissions granted to access particular devices
   /// in private network.
   CEF_CONTENT_SETTING_TYPE_PRIVATE_NETWORK_GUARD,
   CEF_CONTENT_SETTING_TYPE_PRIVATE_NETWORK_CHOOSER_DATA,
+#endif
 
   /// Website setting which stores whether the browser has observed the user
   /// signing into an identity-provider based on observing the IdP-SignIn-Status
   /// HTTP header.
   CEF_CONTENT_SETTING_TYPE_FEDERATED_IDENTITY_IDENTITY_PROVIDER_SIGNIN_STATUS,
 
-  /// Website setting which is used for UnusedSitePermissionsService to
+  /// Website setting which is used for RevokedPermissionsService to
   /// store revoked permissions of unused sites from unused site permissions
   /// feature.
   CEF_CONTENT_SETTING_TYPE_REVOKED_UNUSED_SITE_PERMISSIONS,
@@ -348,9 +364,13 @@ typedef enum {
   /// should be enabled.
   CEF_CONTENT_SETTING_TYPE_ANTI_ABUSE,
 
+#if CEF_API_ADDED(14600)
+  CEF_CONTENT_SETTING_TYPE_THIRD_PARTY_STORAGE_PARTITIONING_DEPRECATED,
+#else
   /// Content setting used to indicate whether third-party storage partitioning
   /// should be enabled.
   CEF_CONTENT_SETTING_TYPE_THIRD_PARTY_STORAGE_PARTITIONING,
+#endif
 
   /// Used to indicate whether HTTPS-First Mode is enabled on the hostname.
   CEF_CONTENT_SETTING_TYPE_HTTPS_ENFORCED,
@@ -371,14 +391,35 @@ typedef enum {
   /// `net::features::kTpcdMetadataGrants` is enabled.
   CEF_CONTENT_SETTING_TYPE_TPCD_METADATA_GRANTS,
 
+#if CEF_API_ADDED(14400)
+  CEF_CONTENT_SETTING_TYPE_TPCD_TRIAL_DEPRECATED,
+#else
   /// Content Setting for 3PC accesses granted via 3PC deprecation trial.
   CEF_CONTENT_SETTING_TYPE_TPCD_TRIAL,
+#endif
 
+#if CEF_API_ADDED(14300)
+  CEF_CONTENT_SETTING_TYPE_TOP_LEVEL_TPCD_TRIAL_DEPRECATED,
+#else
   /// Content Setting for 3PC accesses granted via top-level 3PC deprecation
   /// trial. Similar to TPCD_TRIAL, but applicable at the page-level for the
   /// lifetime of the page that served the token, rather than being specific to
   /// a requesting-origin/top-level-site combination and persistent.
   CEF_CONTENT_SETTING_TYPE_TOP_LEVEL_TPCD_TRIAL,
+#endif
+
+#if CEF_API_ADDED(14300)
+  CEF_CONTENT_SETTING_TYPE_TOP_LEVEL_TPCD_ORIGIN_TRIAL_DEPRECATED,
+#elif CEF_API_ADDED(13601)
+  /// Content Setting for a first-party origin trial that allows websites to
+  /// enable third-party cookie deprecation.
+  /// ALLOW (default): no effect (e.g. third-party cookies allowed, if not
+  ///                  blocked otherwise).
+  /// BLOCK: third-party cookies blocked, but 3PCD mitigations enabled.
+  CEF_CONTENT_SETTING_TYPE_TOP_LEVEL_TPCD_ORIGIN_TRIAL,
+#else
+  CEF_CONTENT_SETTING_TOP_LEVEL_TPCD_ORIGIN_TRIAL,
+#endif
 
   /// Content setting used to indicate whether entering picture-in-picture
   /// automatically should be enabled.
@@ -418,7 +459,140 @@ typedef enum {
   /// Whether an application can enumerate audio output device.
   CEF_CONTENT_SETTING_TYPE_SPEAKER_SELECTION,
 
-  CEF_CONTENT_SETTING_TYPE_NUM_TYPES,
+  /// Content settings for access to the Direct Sockets API.
+  CEF_CONTENT_SETTING_TYPE_DIRECT_SOCKETS,
+
+  /// Keyboard Lock API allows a site to capture keyboard inputs that would
+  /// otherwise be handled by the OS or the browser.
+  CEF_CONTENT_SETTING_TYPE_KEYBOARD_LOCK,
+
+  /// Pointer Lock API allows a site to hide the cursor and have exclusive
+  /// access to mouse inputs.
+  CEF_CONTENT_SETTING_TYPE_POINTER_LOCK,
+
+  /// Website setting which is used for RevokedPermissionsService to store
+  /// auto-revoked notification permissions from abusive sites.
+  CEF_CONTENT_SETTING_TYPE_REVOKED_ABUSIVE_NOTIFICATION_PERMISSIONS,
+
+#if CEF_API_ADDED(14600)
+  CEF_CONTENT_SETTING_TYPE_TRACKING_PROTECTION_DEPRECATED,
+#else
+  /// Content setting that controls tracking protection status per site.
+  /// BLOCK: Protections enabled. This is the default state.
+  /// ALLOW: Protections disabled.
+  CEF_CONTENT_SETTING_TYPE_TRACKING_PROTECTION,
+#endif
+
+  /// With this permission, when the application calls `getDisplayMedia()`, a
+  /// system audio track can be returned without showing the display media
+  /// selection picker. The application can explicitly specify
+  /// `systemAudio: 'exclude'` or `video: true` to still show the display media
+  /// selection picker if needed. Please note that the setting only works for
+  /// WebUI.
+  CEF_CONTENT_SETTING_TYPE_DISPLAY_MEDIA_SYSTEM_AUDIO,
+
+  /// Whether to use the higher-tier v8 optimizers for running JavaScript on the
+  /// page.
+  CEF_CONTENT_SETTING_TYPE_JAVASCRIPT_OPTIMIZER,
+
+  /// Content Setting for the Storage Access Headers persistent origin trial
+  /// that allows origins to opt into the storage access header behavior. Should
+  /// be scoped to `REQUESTING_ORIGIN_AND_TOP_SCHEMEFUL_SITE_SCOPE` in order to
+  /// correspond to the design of persistent origin trials. See also:
+  /// https://github.com/cfredric/storage-access-headers
+  /// ALLOW: storage access request headers will be attached to cross-site
+  ///        requests, and url requests will look for response headers from
+  ///        origins to retry a request or load with storage access.
+  /// BLOCK (default): no effect.
+  CEF_CONTENT_SETTING_TYPE_STORAGE_ACCESS_HEADER_ORIGIN_TRIAL,
+
+  /// Whether or not sites can request Hand Tracking data within WebXR Sessions.
+  CEF_CONTENT_SETTING_TYPE_HAND_TRACKING,
+
+  /// Website setting to indicate whether user has opted in to allow web apps to
+  /// install other web apps.
+  CEF_CONTENT_SETTING_TYPE_WEB_APP_INSTALLATION,
+
+  /// Content settings for private network access in the context of the
+  /// Direct Sockets API.
+  CEF_CONTENT_SETTING_TYPE_DIRECT_SOCKETS_PRIVATE_NETWORK_ACCESS,
+
+  /// Content settings for legacy cookie scope.
+  /// Checks whether cookies scope is handled according to origin-bound cookies
+  /// or legacy behavior.
+  CEF_CONTENT_SETTING_TYPE_LEGACY_COOKIE_SCOPE,
+
+#if CEF_API_ADDED(13400)
+  /// Website setting to indicate whether the user has allowlisted suspicious
+  /// notifications for the origin.
+  CEF_CONTENT_SETTING_TYPE_ARE_SUSPICIOUS_NOTIFICATIONS_ALLOWLISTED_BY_USER,
+
+  /// Content settings for access to the Controlled Frame API.
+  CEF_CONTENT_SETTING_TYPE_CONTROLLED_FRAME,
+#endif
+
+#if CEF_API_ADDED(13500)
+  /// Website setting which is used for RevokedPermissionsService to
+  /// store revoked notification permissions of disruptive sites.
+  CEF_CONTENT_SETTING_TYPE_REVOKED_DISRUPTIVE_NOTIFICATION_PERMISSIONS,
+#endif
+
+#if CEF_API_ADDED(13600)
+  /// Content setting for whether the site is allowed to make local network
+  /// requests.
+  CEF_CONTENT_SETTING_TYPE_LOCAL_NETWORK_ACCESS,
+#endif
+
+#if CEF_API_ADDED(13800)
+  /// Stores information on-device language packs for which a site has
+  /// installed using the Web Speech API.
+  CEF_CONTENT_SETTING_TYPE_ON_DEVICE_SPEECH_RECOGNITION_LANGUAGES_DOWNLOADED,
+
+  /// Stores which Translator API language packs the site has initialized.
+  CEF_CONTENT_SETTING_TYPE_INITIALIZED_TRANSLATIONS,
+
+  /// Stores a list of notification ids where content detection found the
+  /// notification to be suspicious and a warning has already been shown for the
+  /// site. Used for recovering notification contents from the database if the
+  /// user decides they would like to see all of these notifications.
+  CEF_CONTENT_SETTING_TYPE_SUSPICIOUS_NOTIFICATION_IDS,
+#endif
+
+#if CEF_API_ADDED(14000)
+  /// To support approximate geolocation, the permission is migrating to use
+  /// permissions with options, which won't be stored as ContentSettings. Upon
+  /// launch of the feature, GEOLOCATION and GEOLOCATION_WITH_OPTIONS should be
+  /// merged.
+  CEF_CONTENT_SETTING_TYPE_GEOLOCATION_WITH_OPTIONS,
+
+  /// Setting for enabling the Device Attributes API. Spec link:
+  /// https://wicg.github.io/WebApiDevice/device_attributes/
+  CEF_CONTENT_SETTING_TYPE_DEVICE_ATTRIBUTES,
+#endif
+
+#if CEF_API_ADDED(14200)
+  /// Stores per-origin state for permission heuristics. Currently used for
+  /// auto-granting geolocation element permission request after repeated
+  /// temporary grants.
+  CEF_CONTENT_SETTING_TYPE_PERMISSION_ACTIONS_HISTORY,
+
+  /// Website setting to indicate whether the user has selected "show original"
+  /// when suspicious warning is shown. If the user has selected this, the
+  /// notification permission will not be revoked based on suspicious verdict.
+  CEF_CONTENT_SETTING_TYPE_SUSPICIOUS_NOTIFICATION_SHOW_ORIGINAL,
+#endif
+
+#if CEF_API_ADDED(14500)
+  /// Content setting for whether the site is allowed to make local network
+  /// requests. Split from LOCAL_NETWORK_ACCESS.
+  CEF_CONTENT_SETTING_TYPE_LOCAL_NETWORK,
+
+  /// Content setting for whether the site is allowed to make loopback network
+  /// requests. Split from LOCAL_NETWORK_ACCESS.
+  CEF_CONTENT_SETTING_TYPE_LOOPBACK_NETWORK,
+#endif
+
+  CEF_CONTENT_SETTING_TYPE_NUM_VALUES,
 } cef_content_setting_types_t;
 
 ///
@@ -426,14 +600,18 @@ typedef enum {
 /// ContentSetting type.
 ///
 typedef enum {
-  CEF_CONTENT_SETTING_VALUE_DEFAULT = 0,
+  CEF_CONTENT_SETTING_VALUE_DEFAULT,
   CEF_CONTENT_SETTING_VALUE_ALLOW,
   CEF_CONTENT_SETTING_VALUE_BLOCK,
   CEF_CONTENT_SETTING_VALUE_ASK,
   CEF_CONTENT_SETTING_VALUE_SESSION_ONLY,
+#if CEF_API_ADDED(14000)
+  CEF_CONTENT_SETTING_VALUE_DETECT_IMPORTANT_CONTENT_DEPRECATED,
+#else
   CEF_CONTENT_SETTING_VALUE_DETECT_IMPORTANT_CONTENT,
+#endif
 
-  CEF_CONTENT_SETTING_VALUE_NUM_VALUES
+  CEF_CONTENT_SETTING_VALUE_NUM_VALUES,
 } cef_content_setting_values_t;
 
 #ifdef __cplusplus

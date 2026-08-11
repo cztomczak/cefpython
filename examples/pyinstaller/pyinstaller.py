@@ -48,7 +48,7 @@ def main():
     #       runs. For example on Windows this will delete the
     #       "%appdata%/roaming/pyinstaller/bincache00_py27_32bit"
     #       directory.
-    env = os.environ
+    env = os.environ.copy()
     if "--debug" in sys.argv:
         env["CEFPYTHON_PYINSTALLER_DEBUG"] = "1"
     sub = Popen(["pyinstaller", "--clean", "pyinstaller.spec"], env=env)
@@ -63,8 +63,12 @@ def main():
 
     # Make sure everything went fine
     curdir = os.path.dirname(os.path.abspath(__file__))
-    cefapp_dir = os.path.join(curdir, "dist", "cefapp")
-    executable = os.path.join(cefapp_dir, "cefapp"+EXE_EXT)
+    if platform.system() == "Darwin":
+        cefapp_dir = os.path.join(curdir, "dist")
+        executable = os.path.join(cefapp_dir, "cefapp.app")
+    else:
+        cefapp_dir = os.path.join(curdir, "dist", "cefapp")
+        executable = os.path.join(cefapp_dir, "cefapp" + EXE_EXT)
     if not os.path.exists(executable):
         print("Error: PyInstaller failed, main executable is missing: %s"
               % executable)

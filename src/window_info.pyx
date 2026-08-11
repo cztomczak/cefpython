@@ -8,6 +8,36 @@ cdef void SetCefWindowInfo(
         CefWindowInfo& cefWindowInfo,
         WindowInfo windowInfo
         ) except *:
+    # Note on runtime_style = CEF_RUNTIME_STYLE_ALLOY (set below in every
+    # windowed branch):
+    #
+    # The cef_window_info_t.runtime_style field was added in CEF
+    # commit dca0435d2 "chrome: Add support for Alloy style browsers
+    # and windows" (issue #3681, 2024-04-17, first shipping in CEF
+    # branch 6422 / Chromium 125).  See the enum doc in
+    # include/internal/cef_types_runtime.h: Chrome style provides the
+    # full Chrome UI; Alloy style provides the content-layer view with
+    # additional client callbacks and windowless (OSR) rendering.
+    #
+    # The chrome bootstrap (default since CEF branch 6478 / Chromium
+    # 125) makes a windowed parent window default to Chrome style, so
+    # cefpython opts back into Alloy explicitly.  Alloy is required (not
+    # just preferred) for cefpython's use case:
+    #   - Windowless / off-screen rendering is Alloy-only
+    #     (cef_types_runtime.h).
+    #   - cefpython's JavaScript bindings do not work under Chrome style:
+    #     verified on CEF 147 that window.<binding> is never injected for
+    #     a Chrome-style browser while Alloy injects it.  cefpython's JS
+    #     integration (bindings, Python callbacks, V8) rides on the Alloy
+    #     renderer path.
+    #   - On macOS an embedded (native-parent) browser cannot use Chrome
+    #     style at all (CEF issue #3294; see chrome_child_window.cc
+    #     GetParentWidget()).
+    # Note: embedding itself is NOT the blocker - a Chrome-style browser
+    # CAN be parented into a foreign host window on Linux/Windows via
+    # CefBrowserPlatformDelegateChromeChildWindow (verified: SetAsChild
+    # parents it correctly).  The blockers are the missing JS integration
+    # and OSR above.
     if not windowInfo.windowType:
         raise Exception("WindowInfo: windowType is not set")
 
@@ -22,6 +52,8 @@ cdef void SetCefWindowInfo(
         cdef CefRect windowRect
         cdef CefString windowName
         cdef RECT rect
+    ELIF UNAME_SYSNAME == "Darwin":
+        cdef CefRect windowRect
     ELIF UNAME_SYSNAME == "Linux":
         cdef CefRect windowRect
 
@@ -40,14 +72,8 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)
+            cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
         ELIF UNAME_SYSNAME == "Darwin":
-            cefWindowInfo.SetAsChild(
-                    <CefWindowHandle>windowInfo.parentWindowHandle,
-                    int(windowInfo.windowRect[0]),
-                    int(windowInfo.windowRect[1]),
-                    int(windowInfo.windowRect[2]),
-                    int(windowInfo.windowRect[3]))
-        ELIF UNAME_SYSNAME == "Linux":
             x = int(windowInfo.windowRect[0])
             y = int(windowInfo.windowRect[1])
             width = int(windowInfo.windowRect[2] - windowInfo.windowRect[0])
@@ -56,6 +82,26 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsChild(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)
+            cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
+        ELIF UNAME_SYSNAME == "Linux":
+            if windowInfo.parentWindowHandle:
+                # Embed into the host toolkit window (Qt/wx/GTK/tkinter):
+                # parent CEF directly into the caller's X11 window, exactly
+                # like upstream cefclient (browser_window_std_gtk.cc:
+                # window_info.SetAsChild(GDK_WINDOW_XID(...), rect)).
+                x = int(windowInfo.windowRect[0])
+                y = int(windowInfo.windowRect[1])
+                width = int(windowInfo.windowRect[2] - windowInfo.windowRect[0])
+                height = int(windowInfo.windowRect[3] - windowInfo.windowRect[1])
+                windowRect = CefRect(x, y, width, height)
+                cefWindowInfo.SetAsChild(
+                        <CefWindowHandle>windowInfo.parentWindowHandle,
+                        windowRect)
+            # else: no parent handle — leave cefWindowInfo as a default
+            # windowed info so CEF creates and owns its own top-level window
+            # (upstream cefsimple --use-native behaviour).  CEF handles the
+            # window frame, resize and close button itself.
+            cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
 
     # POPUP WINDOW - Windows only
     IF UNAME_SYSNAME == "Windows":
@@ -64,6 +110,7 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsPopup(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowName)
+            cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
 
     if windowInfo.windowType == "offscreen":
         cefWindowInfo.SetAsWindowless(
@@ -84,7 +131,7 @@ cdef class WindowInfo:
                              list windowRect=None):
         # Allow parent window handle to be 0, in such case CEF will
         # create top window automatically as in hello_world.py example.
-        IF UNAME_SYSNAME == "Windows":
+        if sys.platform == "win32":
             # On Windows when parent window handle is 0 then SetAsPopup()
             # must be called instead.
             if parentWindowHandle == 0:
@@ -95,8 +142,31 @@ cdef class WindowInfo:
             raise Exception("Invalid parentWindowHandle: %s"\
                     % parentWindowHandle)
         self.windowType = "child"
+        IF UNAME_SYSNAME == "Linux":
+            if parentWindowHandle == 0:
+                import os as _os
+                import warnings
+                # Warn when the user is likely using an X11-incompatible toolkit
+                # backend in a Wayland session: winId()/GetHandle() returns 0
+                # and CEF opens a detached window instead of embedding.
+                if "WAYLAND_DISPLAY" in _os.environ:
+                    warnings.warn(
+                        "WindowInfo.SetAsChild: parentWindowHandle is 0 on Linux "
+                        "in a Wayland session. The GUI toolkit is likely using the "
+                        "native Wayland backend where winId()/GetHandle() returns 0 "
+                        "instead of an X11 window ID — CEF will open a detached "
+                        "window instead of embedding. Force X11 (XWayland) before "
+                        "initialising the toolkit:\n"
+                        "  Qt (PyQt5/PyQt6/PySide2/PySide6): "
+                        "os.environ[\"QT_QPA_PLATFORM\"] = \"xcb\"\n"
+                        "  GTK (wxPython/PyGTK): "
+                        "os.environ[\"GDK_BACKEND\"] = \"x11\"\n"
+                        "  SDL2 (pysdl2): "
+                        "os.environ[\"SDL_VIDEODRIVER\"] = \"x11\"",
+                        stacklevel=2,
+                    )
         self.parentWindowHandle = parentWindowHandle
-        IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
+        if sys.platform != "win32":
             if not windowRect:
                 windowRect = [0,0,0,0]
         if windowRect:
@@ -107,19 +177,18 @@ cdef class WindowInfo:
                 raise Exception("WindowInfo.SetAsChild() failed: "
                         "windowRect: invalid value")
 
-    IF UNAME_SYSNAME == "Windows":
-        cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle,
-                                 py_string windowName):
-            # Allow parent window handle to be 0, in such case CEF will
-            # create top window automatically as in hello_world.py example.
-            if parentWindowHandle != 0\
-                    and not WindowUtils.IsWindowHandle(parentWindowHandle):
-                raise Exception("Invalid parentWindowHandle: %s"\
-                        % parentWindowHandle)
-            self.parentWindowHandle = parentWindowHandle
-            self.windowType = "popup"
-            if windowName:
-                self.windowName = str(windowName)
+    cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle,
+                             py_string windowName):
+        # Allow parent window handle to be 0, in such case CEF will
+        # create top window automatically as in hello_world.py example.
+        if parentWindowHandle != 0\
+                and not WindowUtils.IsWindowHandle(parentWindowHandle):
+            raise Exception("Invalid parentWindowHandle: %s"\
+                    % parentWindowHandle)
+        self.parentWindowHandle = parentWindowHandle
+        self.windowType = "popup"
+        if windowName:
+            self.windowName = str(windowName)
 
     cpdef py_void SetAsOffscreen(self,
             WindowHandle parentWindowHandle):

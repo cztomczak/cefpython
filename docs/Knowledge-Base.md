@@ -3,7 +3,6 @@
 Table of contents:
 * [Notifications about new releases / commits](#notifications-about-new-releases--commits)
 * [Changes in API after CEF updates](#changes-in-api-after-cef-updates)
-* [Differences between Python 2 and Python 3](#differences-between-python-2-and-python-3)
 * [How to enable debug information in examples?](#how-to-enable-debug-information-in-examples)
 * [Remote debugging with Google Chrome instance](#remote-debugging-with-google-chrome-instance)
 * [Debugging using various chrome:// protocol uris](#debugging-using-various-chrome-protocol-uris)
@@ -14,6 +13,7 @@ Table of contents:
 * [How to capture Audio and Video in HTML5?](#how-to-capture-audio-and-video-in-html5)
 * [Touch and multi-touch support](#touch-and-multi-touch-support)
 * [Black or white browser screen](#black-or-white-browser-screen)
+* ["kTransientFailure: Failed to send GpuControl.CreateCommandBuffer" on Linux](#ktransientfailure-failed-to-send-gpucontrolcreatecommandbuffer-on-linux)
 * [Python crashes with "Segmentation fault" - how to debug?](#python-crashes-with-segmentation-fault---how-to-debug)
 * [Windows XP support](#windows-xp-support)
 * [Mac 32-bit support](#mac-32-bit-support)
@@ -43,13 +43,6 @@ scripts, that for example use PIP to install the cefpython3 package,
 to hardcode the cefpython version string. If for example using PIP's
 `requirements.txt` file then include the cefpython3 package in the
 following format if using e.g. cefpython v57.0: `cefpython3 == 57.0`.
-
-
-## Differences between Python 2 and Python 3
-
-In Python 2 all cefpython strings are byte strings, but in Python 3
-they are all unicode strings. Be aware of this when porting cefpython
-based apps to Python 3, as it may cause issues.
 
 
 ## How to enable debug information in examples?
@@ -180,7 +173,7 @@ CEF framework and in the cefpython module. Here are the default
 settings:
 ```
 cefpython_package/
-    cefpython_py27.so
+    cefpython_py3XX.so
         rpath=@loader_path/
         load:@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework
     Chromium Embedded Framework.framework/
@@ -270,6 +263,33 @@ It will affect 2D accelerated content as well.
 Note that when web page uses WebGL then the black screen may still
 appear even after disabling GPU hardware acceleration. This is normal
 because GPU was disabled so WebGL cannot work.
+
+
+## "kTransientFailure: Failed to send GpuControl.CreateCommandBuffer" on Linux
+
+You may see a log line like this during startup, especially on Linux
+VMs and other systems without a working GPU. On VMs the line appears in
+nearly every run; on bare metal with a real GPU it is rarer:
+
+```
+ERROR:gpu/ipc/client/command_buffer_proxy_impl.cc:285] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+```
+
+**This is a Chromium-recoverable transient and can be ignored.** It is
+emitted by the renderer process when it tries to create a GPU command
+buffer before the GPU process has finished binding its IPC endpoint —
+typically a millisecond-scale race during startup, more likely on slow
+disks or when Chromium falls back from real-GL to SwiftShader. The
+compositor retries automatically; pages still render and
+`OnContextInitialized` still fires. The `kTransientFailure` label is
+Chromium's own classification — Chromium expects callers to retry, and
+they do.
+
+If a clean log is more important than hardware acceleration in your
+deployment, you can opt in to disabling the GPU process by passing
+`switches={"disable-gpu": ""}` to `cef.Initialize()`. Do not enable
+`in-process-gpu` to silence this line — it is not stable across
+multiple browser windows.
 
 
 ## Python crashes with "Segmentation fault" - how to debug?

@@ -36,7 +36,7 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
         CefBrowserSettings& settings,
         CefRefPtr[CefDictionaryValue]& extra_info,
         cpp_bool* noJavascriptAccess
-        ) except * with gil:
+        ) noexcept with gil:
     # Empty place-holders: popupFeatures, client.
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame,
@@ -48,6 +48,17 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
     cdef object callback
     cdef py_bool returnValue
     try:
+        # CefFrame::GetBrowser() can be NULL when the opener frame is detached
+        # during a rapid lifecycle transition. Without a resolvable browser we
+        # cannot build a PyFrame to pass to the user callback, so fall back to
+        # CEF's default, consistent with the other NULL-browser guards. Note
+        # that returning false ALLOWS the popup (CEF: return true cancels,
+        # false allows - see cef_life_span_handler.h); this defers popup
+        # handling to CEF rather than silently suppressing it.
+        if not cefFrame.get().GetBrowser().get():
+            Debug("OnBeforePopup: frame has no browser (detached during"
+                  " lifecycle transition); deferring to CEF default")
+            return False
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforePopup")
         pyFrame = GetPyFrame(cefFrame)
         pyTargetUrl = CefToPyString(targetUrl)
@@ -82,7 +93,7 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
 
 cdef public void LifespanHandler_OnAfterCreated(
         CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnAfterCreated")
@@ -95,7 +106,7 @@ cdef public void LifespanHandler_OnAfterCreated(
 
 cdef public cpp_bool LifespanHandler_DoClose(
         CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "DoClose")
@@ -109,7 +120,7 @@ cdef public cpp_bool LifespanHandler_DoClose(
 
 cdef public void LifespanHandler_OnBeforeClose(
         CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef int browserId
     cdef object callback

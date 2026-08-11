@@ -1,5 +1,4 @@
-// Copyright (c) 2021 Marshall A. Greenblatt. Portions copyright (c) 2015
-// Google Inc. All rights reserved.
+// Copyright (c) 2025 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -27,36 +26,40 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// ---------------------------------------------------------------------------
+//
+// The contents of this file are only available to applications that link
+// against the libcef_dll_wrapper target.
+//
 
-#ifndef INCLUDE_BASE_CEF_PTR_UTIL_H_
-#define INCLUDE_BASE_CEF_PTR_UTIL_H_
+#ifndef CEF_INCLUDE_WRAPPER_CEF_UTIL_WIN_H_
+#define CEF_INCLUDE_WRAPPER_CEF_UTIL_WIN_H_
 #pragma once
 
-#if defined(USING_CHROMIUM_INCLUDES)
-// When building CEF include the Chromium header directly.
-#include "base/memory/ptr_util.h"
-#else  // !USING_CHROMIUM_INCLUDES
-// The following is substantially similar to the Chromium implementation.
-// If the Chromium implementation diverges the below implementation should be
-// updated to match.
+#include <windows.h>
 
-#include <memory>
-#include <utility>
+#include <string>
+#include <vector>
 
-#endif
+namespace cef_util {
 
-namespace base {
+// Returns the fully qualified file path for the executable module.
+std::wstring GetExePath();
 
-///
-/// Helper to transfer ownership of a raw pointer to a std::unique_ptr<T>.
-/// Note that std::unique_ptr<T> has very different semantics from
-/// std::unique_ptr<T[]>: do not use this helper for array allocations.
-///
-template <typename T>
-std::unique_ptr<T> WrapUnique(T* ptr) {
-  return std::unique_ptr<T>(ptr);
-}
+// Returns the fully qualified file path for |module|.
+std::wstring GetModulePath(HMODULE module);
 
-}  // namespace base
+// Returns the value of GetLastError() as a string.
+std::wstring GetLastErrorAsString();
 
-#endif  // INCLUDE_BASE_CEF_PTR_UTIL_H_
+// Parse command line arguments for |hInstance|.
+std::vector<std::wstring> ParseCommandLineArgs(const wchar_t* str);
+
+// Returns the value for |name| in |command_line|, if any.
+std::wstring GetCommandLineValue(const std::vector<std::wstring>& command_line,
+                                 const std::wstring& name);
+
+}  // namespace cef_util
+
+#endif  // CEF_INCLUDE_WRAPPER_CEF_UTIL_WIN_H_

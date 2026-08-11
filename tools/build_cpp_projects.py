@@ -32,6 +32,7 @@ MACROS = [
     ("_WIN32_WINNT", "0x0601"),
     "NDEBUG", "_NDEBUG",
     "_CRT_SECURE_NO_WARNINGS",
+    "NOMINMAX",
 ]
 cefpython_app_MACROS = MACROS + [
     "BROWSER_PROCESS",
@@ -47,11 +48,11 @@ subprocess_MACROS = MACROS + [
 # Compiler args
 COMPILER_ARGS = [
     "/EHsc",
-    "/std:c++17",
+    "/std:c++20",
 ]
 subprocess_COMPILER_ARGS = [
     "/MT",
-    "/std:c++17",
+    "/std:c++20",
 ]
 
 # Linker args
@@ -110,11 +111,15 @@ def print_compiler_options():
 
 
 def get_compiler(static=False):
-    # NOTES:
-    # - VS2008 and VS2010 are both using distutils/msvc9compiler.py
     compiler = new_compiler()
-    # Must initialize so that "compile_options" and others are available
-    compiler.initialize()
+    # Must initialize so that "compile_options" and others are available.
+    # Pass plat_name explicitly: without it distutils may default to win32
+    # (32-bit) even on 64-bit Python, causing linker failures against x64
+    # CEF libraries.
+    if WINDOWS:
+        compiler.initialize(plat_name="win-amd64" if ARCH64 else "win32")
+    else:
+        compiler.initialize()
     if static:
         compiler.compile_options.remove("/MD")
         # Overwrite function that adds /MANIFESTFILE, as for subprocess

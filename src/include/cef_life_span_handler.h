@@ -55,13 +55,15 @@ class CefLifeSpanHandler : public virtual CefBaseRefCounted {
 
   ///
   /// Called on the UI thread before a new popup browser is created. The
-  /// |browser| and |frame| values represent the source of the popup request.
-  /// The |target_url| and |target_frame_name| values indicate where the popup
-  /// browser should navigate and may be empty if not specified with the
-  /// request. The |target_disposition| value indicates where the user intended
-  /// to open the popup (e.g. current tab, new tab, etc). The |user_gesture|
-  /// value will be true if the popup was opened via explicit user gesture (e.g.
-  /// clicking a link) or false if the popup opened automatically (e.g. via the
+  /// |browser| and |frame| values represent the source of the popup request
+  /// (opener browser and frame). The |popup_id| value uniquely identifies the
+  /// popup in the context of the opener browser. The |target_url| and
+  /// |target_frame_name| values indicate where the popup browser should
+  /// navigate and may be empty if not specified with the request. The
+  /// |target_disposition| value indicates where the user intended to open the
+  /// popup (e.g. current tab, new tab, etc). The |user_gesture| value will be
+  /// true if the popup was opened via explicit user gesture (e.g. clicking a
+  /// link) or false if the popup opened automatically (e.g. via the
   /// DomContentLoaded event). The |popupFeatures| structure contains additional
   /// information about the requested popup window. To allow creation of the
   /// popup browser optionally modify |windowInfo|, |client|, |settings| and
@@ -71,16 +73,33 @@ class CefLifeSpanHandler : public virtual CefBaseRefCounted {
   /// false the new browser will not be scriptable and may not be hosted in the
   /// same renderer process as the source browser. Any modifications to
   /// |windowInfo| will be ignored if the parent browser is wrapped in a
-  /// CefBrowserView. Popup browser creation will be canceled if the parent
-  /// browser is destroyed before the popup browser creation completes
-  /// (indicated by a call to OnAfterCreated for the popup browser). The
-  /// |extra_info| parameter provides an opportunity to specify extra
-  /// information specific to the created popup browser that will be passed to
-  /// CefRenderProcessHandler::OnBrowserCreated() in the render process.
+  /// CefBrowserView. The |extra_info| parameter provides an opportunity to
+  /// specify extra information specific to the created popup browser that will
+  /// be passed to CefRenderProcessHandler::OnBrowserCreated() in the render
+  /// process.
+  ///
+  /// If popup browser creation succeeds then OnAfterCreated will be called for
+  /// the new popup browser. If popup browser creation fails, and if the opener
+  /// browser has not yet been destroyed, then OnBeforePopupAborted will be
+  /// called for the opener browser. See OnBeforePopupAborted documentation for
+  /// additional details.
+  ///
+  /// A default popup window is created if this method returns false without
+  /// setting a parent window handle via CefWindowInfo (for native-hosted
+  /// popups), or without implementing
+  /// CefBrowserViewDelegate::OnPopupBrowserViewCreated (for Views-hosted
+  /// popups). The default popup window type depends on the parent browser
+  /// configuration:
+  /// - Views-hosted parent: Creates a Views-hosted popup window.
+  /// - Native-hosted Alloy style parent: Creates a native popup window.
+  /// - Native-hosted Chrome style parent: Creates a Chrome UI popup window by
+  ///   default; set CefSettings.use_views_default_popup to true to instead
+  ///   create a Views-hosted popup window.
   ///
   /*--cef(optional_param=target_url,optional_param=target_frame_name)--*/
   virtual bool OnBeforePopup(CefRefPtr<CefBrowser> browser,
                              CefRefPtr<CefFrame> frame,
+                             int popup_id,
                              const CefString& target_url,
                              const CefString& target_frame_name,
                              WindowOpenDisposition target_disposition,
@@ -93,6 +112,25 @@ class CefLifeSpanHandler : public virtual CefBaseRefCounted {
                              bool* no_javascript_access) {
     return false;
   }
+
+  ///
+  /// Called on the UI thread if a new popup browser is aborted. This only
+  /// occurs if the popup is allowed in OnBeforePopup and creation fails before
+  /// OnAfterCreated is called for the new popup browser. The |browser| value is
+  /// the source of the popup request (opener browser). The |popup_id| value
+  /// uniquely identifies the popup in the context of the opener browser, and is
+  /// the same value that was passed to OnBeforePopup.
+  ///
+  /// Any client state associated with pending popups should be cleared in
+  /// OnBeforePopupAborted, OnAfterCreated of the popup browser, or
+  /// OnBeforeClose of the opener browser. OnBeforeClose of the opener browser
+  /// may be called before this method in cases where the opener is closing
+  /// during popup creation, in which case CefBrowserHost::IsValid will return
+  /// false in this method.
+  ///
+  /*--cef()--*/
+  virtual void OnBeforePopupAborted(CefRefPtr<CefBrowser> browser,
+                                    int popup_id) {}
 
   ///
   /// Called on the UI thread before a new DevTools popup browser is created.
@@ -111,7 +149,7 @@ class CefLifeSpanHandler : public virtual CefBaseRefCounted {
   /// Views-hosted source browsers will create Views-hosted DevTools popups
   /// unless |use_default_window| is set to to true. DevTools popups can be
   /// blocked by returning true from CefCommandHandler::OnChromeCommand for
-  /// IDC_DEV_TOOLS. Only used with the Chrome runtime.
+  /// IDC_DEV_TOOLS. Only used with Chrome style.
   ///
   /*--cef()--*/
   virtual void OnBeforeDevToolsPopup(CefRefPtr<CefBrowser> browser,
@@ -131,34 +169,44 @@ class CefLifeSpanHandler : public virtual CefBaseRefCounted {
   virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) {}
 
   ///
-  /// Called when a browser has received a request to close. This may result
-  /// directly from a call to CefBrowserHost::*CloseBrowser() or indirectly if
-  /// the browser is parented to a top-level window created by CEF and the user
-  /// attempts to close that window (by clicking the 'X', for example). The
-  /// DoClose() method will be called after the JavaScript 'onunload' event has
-  /// been fired.
+  /// Called when an Alloy style browser is ready to be closed, meaning that the
+  /// close has already been initiated and that JavaScript unload handlers have
+  /// already executed or should be ignored. This may result directly from a
+  /// call to CefBrowserHost::[Try]CloseBrowser() or indirectly if the browser's
+  /// top-level parent window was created by CEF and the user attempts to
+  /// close that window (by clicking the 'X', for example). DoClose() will not
+  /// be called if the browser's host window/view has already been destroyed
+  /// (via parent window/view hierarchy tear-down, for example), as it is no
+  /// longer possible to customize the close behavior at that point.
   ///
-  /// An application should handle top-level owner window close notifications by
-  /// calling CefBrowserHost::TryCloseBrowser() or
+  /// An application should handle top-level parent window close notifications
+  /// by calling CefBrowserHost::TryCloseBrowser() or
   /// CefBrowserHost::CloseBrowser(false) instead of allowing the window to
   /// close immediately (see the examples below). This gives CEF an opportunity
-  /// to process the 'onbeforeunload' event and optionally cancel the close
+  /// to process JavaScript unload handlers and optionally cancel the close
   /// before DoClose() is called.
   ///
-  /// When windowed rendering is enabled CEF will internally create a window or
-  /// view to host the browser. In that case returning false from DoClose() will
-  /// send the standard close notification to the browser's top-level owner
-  /// window (e.g. WM_CLOSE on Windows, performClose: on OS X, "delete_event" on
-  /// Linux or CefWindowDelegate::CanClose() callback from Views). If the
-  /// browser's host window/view has already been destroyed (via view hierarchy
-  /// tear-down, for example) then DoClose() will not be called for that browser
-  /// since is no longer possible to cancel the close.
+  /// When windowed rendering is enabled CEF will create an internal child
+  /// window/view to host the browser. In that case returning false from
+  /// DoClose() will send the standard close notification to the browser's
+  /// top-level parent window (e.g. WM_CLOSE on Windows, performClose: on OS X,
+  /// "delete_event" on Linux or CefWindowDelegate::CanClose() callback from
+  /// Views).
   ///
-  /// When windowed rendering is disabled returning false from DoClose() will
-  /// cause the browser object to be destroyed immediately.
+  /// When windowed rendering is disabled there is no internal window/view
+  /// and returning false from DoClose() will cause the browser object to be
+  /// destroyed immediately.
   ///
-  /// If the browser's top-level owner window requires a non-standard close
+  /// If the browser's top-level parent window requires a non-standard close
   /// notification then send that notification from DoClose() and return true.
+  /// You are still required to complete the browser close as soon as possible
+  /// (either by calling [Try]CloseBrowser() or by proceeding with window/view
+  /// hierarchy tear-down), otherwise the browser will be left in a partially
+  /// closed state that interferes with proper functioning. Top-level windows
+  /// created on the browser process UI thread can alternately call
+  /// CefBrowserHost::IsReadyToBeClosed() in the close handler to check close
+  /// status instead of relying on custom DoClose() handling. See documentation
+  /// on that method for additional details.
   ///
   /// The CefLifeSpanHandler::OnBeforeClose() method will be called after
   /// DoClose() (if DoClose() is called) and immediately before the browser
@@ -174,7 +222,7 @@ class CefLifeSpanHandler : public virtual CefBaseRefCounted {
   /// 1.  User clicks the window close button which sends a close notification
   ///     to the application's top-level window.
   /// 2.  Application's top-level window receives the close notification and
-  ///     calls TryCloseBrowser() (which internally calls CloseBrowser(false)).
+  ///     calls TryCloseBrowser() (similar to calling CloseBrowser(false)).
   ///     TryCloseBrowser() returns false so the client cancels the window
   ///     close.
   /// 3.  JavaScript 'onbeforeunload' handler executes and shows the close
@@ -182,15 +230,18 @@ class CefLifeSpanHandler : public virtual CefBaseRefCounted {
   ///     CefJSDialogHandler::OnBeforeUnloadDialog()).
   /// 4.  User approves the close.
   /// 5.  JavaScript 'onunload' handler executes.
-  /// 6.  CEF sends a close notification to the application's top-level window
-  ///     (because DoClose() returned false by default).
-  /// 7.  Application's top-level window receives the close notification and
+  /// 6.  Application's DoClose() handler is called and returns false by
+  ///     default.
+  /// 7.  CEF sends a close notification to the application's top-level window
+  ///     (because DoClose() returned false).
+  /// 8.  Application's top-level window receives the close notification and
   ///     calls TryCloseBrowser(). TryCloseBrowser() returns true so the client
   ///     allows the window close.
-  /// 8.  Application's top-level window is destroyed.
-  /// 9.  Application's OnBeforeClose() handler is called and the browser object
+  /// 9.  Application's top-level window is destroyed, triggering destruction
+  ///     of the child browser window.
+  /// 10. Application's OnBeforeClose() handler is called and the browser object
   ///     is destroyed.
-  /// 10. Application exits by calling CefQuitMessageLoop() if no other browsers
+  /// 11. Application exits by calling CefQuitMessageLoop() if no other browsers
   ///     exist.
   ///
   /// Example 2: Using CefBrowserHost::CloseBrowser(false) and implementing the
@@ -208,12 +259,15 @@ class CefLifeSpanHandler : public virtual CefBaseRefCounted {
   /// 4.  User approves the close.
   /// 5.  JavaScript 'onunload' handler executes.
   /// 6.  Application's DoClose() handler is called. Application will:
-  ///     A. Set a flag to indicate that the next close attempt will be allowed.
+  ///     A. Set a flag to indicate that the next top-level window close attempt
+  ///        will be allowed.
   ///     B. Return false.
-  /// 7.  CEF sends an close notification to the application's top-level window.
+  /// 7.  CEF sends a close notification to the application's top-level window
+  ///     (because DoClose() returned false).
   /// 8.  Application's top-level window receives the close notification and
-  ///     allows the window to close based on the flag from #6B.
-  /// 9.  Application's top-level window is destroyed.
+  ///     allows the window to close based on the flag from #6A.
+  /// 9.  Application's top-level window is destroyed, triggering destruction
+  ///     of the child browser window.
   /// 10. Application's OnBeforeClose() handler is called and the browser object
   ///     is destroyed.
   /// 11. Application exits by calling CefQuitMessageLoop() if no other browsers
@@ -226,7 +280,8 @@ class CefLifeSpanHandler : public virtual CefBaseRefCounted {
   /// Called just before a browser is destroyed. Release all references to the
   /// browser object and do not attempt to execute any methods on the browser
   /// object (other than IsValid, GetIdentifier or IsSame) after this callback
-  /// returns. CefFrameHandler callbacks related to final main frame destruction
+  /// returns. CefFrameHandler callbacks related to final main frame
+  /// destruction, and OnBeforePopupAborted callbacks for any pending popups,
   /// will arrive after this callback and CefBrowser::IsValid will return false
   /// at that time. Any in-progress network requests associated with |browser|
   /// will be aborted when the browser is destroyed, and

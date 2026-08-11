@@ -125,7 +125,7 @@ repository:
   - CEF Python provides cef.[PostTask](../api/cefpython.md#posttask)
     function for posting tasks between these various threads
   - The "UI" thread is application main thread unless you
-    use ApplicationSettings.[multi_threaded_message_loop](../api/ApplicationSettings.md#multi_threaded_messge_loop)
+    use ApplicationSettings.[multi_threaded_message_loop](../api/ApplicationSettings.md#multi_threaded_message_loop)
     option on Windows in which case the UI thread will no more
     be application main thread
   - Do not perform blocking operations on any CEF thread other
@@ -149,19 +149,34 @@ a line that overwrites the default exception handler in Python:
 sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
 ```
 
-See Python docs for [sys.excepthook](https://docs.python.org/2/library/sys.html#sys.excepthook).
+See Python docs for [sys.excepthook](https://docs.python.org/3/library/sys.html#sys.excepthook).
 
 The cef.ExceptHook helper function does the following:
 1. Writes exception to "error.log" file
 2. Prints exception
 3. Calls cef.[QuitMessageLoop](../api/cefpython.md#quitmessageloop)
 4. Calls cef.[Shutdown](../api/cefpython.md#shutdown)
-5. Calls [os._exit(1)](https://docs.python.org/2/library/os.html#os._exit) -
+5. Calls [os._exit(1)](https://docs.python.org/3/library/os.html#os._exit) -
    which exits the process with status 1, without calling
    cleanup handlers, flushing stdio buffers, etc.
 
 If you would like to modify `ExceptHook` behavior, see its source code
 in src/[helpers.pyx](../src/helpers.pyx) file.
+
+CEF Python may report an exception through
+[sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook)
+when it cannot propagate out of a native callback handler. Such exceptions do
+not reach `sys.excepthook`; by default they are printed only to stderr and are
+easy to miss. To give them the same treatment as other Python errors, examples
+also set:
+
+```python
+sys.unraisablehook = cef.UnraisableHook
+```
+
+cef.[UnraisableHook](../api/cefpython.md#unraisablehook) forwards to
+cef.[ExceptHook](../api/cefpython.md#excepthook), so the exception is written
+to "error.log", printed, and CEF is shut down cleanly.
 
 
 ## Settings
@@ -188,10 +203,6 @@ Here are some settings worth noting:
   customize context menu
 - [locale](../api/ApplicationSettings.md#locale) - set language
   for localized resources
-- [product_version](../api/ApplicationSettings.md#product_version) -
-  set the product portion of the default User-Agent string.
-  If user_agent option (below) is used then product_version will
-  be ignored.
 - [user_agent](../api/ApplicationSettings.md#user_agent) - set
   value that will be returned as the User-Agent HTTP header
   and js navigator.userAgent
@@ -246,23 +257,9 @@ for details.
 
 ## Change user agent string
 
-There are two options in [application settings](../api/ApplicationSettings.md#application-settings)
-for changing User-Agent string: [product_version](../api/ApplicationSettings.md#product_version)
-and [user_agent](../api/ApplicationSettings.md#user_agent).
-
-The "product_version" sets the product portion of the default
-User-Agent string. If "user_agent" option is used then
-"product_version" will be ignored. For example if you set
-"product_version" to "MyProduct/10.00" then User-Agent will
-be:
-
-```text
-Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)
-MyProduct/10.00 Safari/537.36
-```
-
-To change the whole user agent string use the "user_agent"
-option. For example set it to "MyAgent/20.00 MyProduct/10.00"
+Use the [user_agent](../api/ApplicationSettings.md#user_agent) application
+setting to change the whole User-Agent string. For example, set it to
+"MyAgent/20.00 MyProduct/10.00"
 and both User-Agent HTTP header and js navigator.userAgent will be:
 
 ```text
@@ -273,11 +270,8 @@ Uncomment appropriate lines in [tutorial.py](../examples/tutorial.py)
 example to see the effect:
 
 ```Python
-# To change user agent use either "product_version"
-# or "user_agent" options. Explained in Tutorial in
-# "Change user agent string" section.
+# To change the user agent use the "user_agent" option.
 settings = {
-    # "product_version": "MyProduct/10.00",
     # "user_agent": "MyAgent/20.00 MyProduct/10.00",
 }
 cef.Initialize(settings=settings)
@@ -410,8 +404,8 @@ html_to_data_uri("test", js_callback_1);
 **Communication using http requests**
 
 Python and Javascript can also communicate using http requests
-by running an internal web-server. See for example [SimpleHTTPServer](https://docs.python.org/2/library/simplehttpserver.html)
-in Python docs. In upstream CEF there is available a fast built-in
+by running an internal web-server. See for example
+[http.server](https://docs.python.org/3/library/http.server.html) in Python docs. In upstream CEF there is available a fast built-in
 web server and [Issue #445](../../../issues/445) is to expose its API.
 
 With http requests it is possible for synchronous
@@ -608,12 +602,11 @@ is of type "list" and thus is passed by reference. Additionally
 a True value is returned by function to notify CEF that rectangle
 was provided.
 
-In the OnPaint callback CEF provides a [PaintBufer](../api/PaintBuffer.md#paintbuffer-object) object, which is a pixel buffer of the
+In the OnPaint callback CEF provides a [PaintBuffer](../api/PaintBuffer.md#paintbuffer-object) object, which is a pixel buffer of the
 browser view. This object has [GetIntPointer](../api/PaintBuffer.md#getintpointer)
 and [GetString](../api/PaintBuffer.md#getstring) methods. In the
 example the latter method is used which returns bytes. The method
-name is a bit confusing for Python 3 users, but in Python 2 bytes
-were strings and thus the name. Here is the code:
+name is a bit confusing since it returns bytes, not a string. Here is the code:
 
 ```Python
 def OnPaint(self, browser, element_type, paint_buffer, **_):
@@ -633,7 +626,7 @@ callback and it is not yet known which call is the last when
 loading completes and thus image buffer is stored for later use.
 
 The screenshot example also implements another handler named
-[LoadHanadler](../api/LoadHandler.md#loadhandler-interface)
+[LoadHandler](../api/LoadHandler.md#loadhandler-interface)
 and two of its callbacks: [OnLoadingStateChange](../api/LoadHandler.md#onloadingstatechange)
 and [OnLoadError](../api/LoadHandler.md#onloaderror). The
 OnLoadingStateChange callbacks notifies when web page loading
@@ -646,7 +639,7 @@ it as a PNG image.
 The screenshot example could be further extended, so that it
 makes a screenshot of the whole page no matter how long it is.
 Detecting page length could be done in Javascript and then
-communicated back with Python using [Javascript bindings](#javscript-integration).
+communicated back with Python using [Javascript bindings](#javascript-integration).
 After whole page length is known a call to browser.WasResized()
 should be done so that GetViewRect and OnPaint are called again.
 

@@ -1,0 +1,164 @@
+name: CI macOS ARM
+
+on:
+  push:
+    branches: ["master", "cefpython147"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+    inputs:
+      bypass_cache:
+        description: "Bypass all caches for a clean run"
+        type: boolean
+        default: false
+
+jobs:
+  download-cef:
+    runs-on: macos-14
+    timeout-minutes: 15
+    outputs:
+      cef_version: ${{ steps.cef-version.outputs.value }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Read CEF version
+        id: cef-version
+        run: |
+          ver=$(sed -n 's/.*#define CEF_VERSION "\([^"]*\)".*/\1/p' \
+                src/version/cef_version_macarm64.h)
+          echo "value=$ver" >> $GITHUB_OUTPUT
+
+      - name: Cache CEF binaries
+        uses: actions/cache@v5
+        if: ${{ inputs.bypass_cache != true }}
+        with:
+          path: |
+            build/cef_binary_*
+            build/cef*_macarm64
+          # Keyed on the CEF version (each version gets its own cache) and on the
+          # download/prepare scripts (invalidate when they change).
+          key: cef-macosarm64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ steps.cef-version.outputs.value }}
+
+      - name: Install build tools
+        run: python tools/requirements.py
+
+      - name: Download CEF binaries
+        run: python tools/download_cef.py
+
+  build:
+    needs: download-cef
+    runs-on: macos-14
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # full history for the --dev wheel version (git commit count)
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Restore CEF cache
+        uses: actions/cache/restore@v5
+        if: ${{ inputs.bypass_cache != true }}
+        with:
+          path: |
+            build/cef_binary_*
+            build/cef*_macarm64
+          key: cef-macosarm64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ needs.download-cef.outputs.cef_version }}
+
+      - name: Install build tools
+        run: python tools/requirements.py
+
+      - name: Prepare prebuilt CEF
+        run: python tools/automate.py --prebuilt-cef
+
+      - name: Configure CMake
+        run: cmake -S . -B build/_cmake_build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build/_cmake_build --parallel
+
+      - name: Stage build outputs
+        run: |
+          mkdir -p build/artifacts
+          cp build/_cmake_build/cefpython_py*.so build/artifacts/
+          helpers=(build/_cmake_build/subprocess_build/"cefpython Helper"*.app)
+          if [ "${#helpers[@]}" -ne 5 ]; then
+            echo "Expected 5 CEF helper app bundles, found ${#helpers[@]}" >&2
+            exit 1
+          fi
+          for app in "${helpers[@]}"; do
+            executable="$app/Contents/MacOS/$(basename "$app" .app)"
+            if [ ! -x "$executable" ]; then
+              echo "Missing helper executable: $executable" >&2
+              exit 1
+            fi
+            cp -R "$app" build/artifacts/
+          done
+          cef_dir=$(ls -d build/cef*_macarm64 2>/dev/null | head -1)
+          find "$cef_dir/bin" -maxdepth 1 -mindepth 1 \
+            ! -name 'cefclient*' ! -name 'cefsimple*' ! -name 'ceftests*' \
+            -exec cp -R {} build/artifacts/ \;
+
+      - name: Set up cefpython3 package
+        run: cp -R build/artifacts/. cefpython3/
+
+      - name: Codesign binaries
+        run: |
+          # automate.py changes the framework Mach-O install name, invalidating
+          # its upstream signature. Sign staged code inside-out, then verify
+          # every final bundle strictly before it is written to the wheel.
+          framework="cefpython3/Chromium Embedded Framework.framework"
+          codesign --force --deep --sign - "$framework"
+          codesign --verify --deep --strict --verbose=2 "$framework"
+          for module in cefpython3/cefpython_py*.so; do
+            codesign --force --sign - "$module"
+            codesign --verify --strict --verbose=2 "$module"
+          done
+          helpers=(cefpython3/"cefpython Helper"*.app)
+          if [ "${#helpers[@]}" -ne 5 ]; then
+            echo "Expected 5 staged CEF helper app bundles, found ${#helpers[@]}" >&2
+            exit 1
+          fi
+          for app in "${helpers[@]}"; do
+            chmod 755 "$app/Contents/MacOS/$(basename "$app" .app)"
+            codesign --force --deep --sign - "$app"
+            codesign --verify --deep --strict --verbose=2 "$app"
+          done
+
+      - name: Build wheel
+        run: python tools/build_distrib.py --dev
+
+      - name: Unit-test the built wheel
+        run: |
+          # Install the wheel and run the unit tests against the INSTALLED
+          # package (all native code was signed before build_distrib). No
+          # PYTHONPATH: _test_runner.py chdir's to unittests/, so the repo's
+          # cefpython3/ build dir is never on sys.path and import cefpython3
+          # resolves to the installed wheel.
+          pip install build/dist/*.whl
+          python unittests/_test_runner.py
+
+      - name: Smoke-test the built wheel
+        timeout-minutes: 5
+        run: python tools/smoke_test.py
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/dist/*.whl
+          archive: false

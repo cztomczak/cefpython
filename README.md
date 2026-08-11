@@ -53,11 +53,11 @@ You can also download packages for offline installation available on the [GitHub
 
 Below is a table with supported platforms, python versions and architectures.
 
-OS | Py2 | Py3 | 32bit | 64bit | Requirements
---- | --- | --- | --- | --- | ---
-Windows | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 / 3.8 / 3.9 | Yes | Yes | Windows 7+ (Note that Python 3.9 supports Windows 8.1+)
-Linux | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | Yes | Yes | Debian 8+, Ubuntu 14.04+,<br> Fedora 24+, openSUSE 13.3+
-Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
+OS | Python | 32bit | 64bit | Requirements
+--- | --- | --- | --- | ---
+Windows | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | Windows 10+
+Linux | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | Ubuntu 20.04+, Debian 11+
+Mac | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | macOS 12+ (Apple Silicon/arm64 only)
 
 
 ## Examples
@@ -87,7 +87,7 @@ Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
   [Issues labelled Knowledge Base](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22Knowledge+Base%22)
 - To search documentation use GitHub "This repository" search
   at the top. To narrow results to documentation only select
-  "Markdown" in the right pane.
+  "Markdown" in the side pane
 
 ## Support development
 
@@ -242,18 +242,14 @@ at this moment.
   * [javascript_flags](api/ApplicationSettings.md#javascript_flags)
   * [locale](api/ApplicationSettings.md#locale)
   * [locales_dir_path](api/ApplicationSettings.md#locales_dir_path)
+  * [main_bundle_path](api/ApplicationSettings.md#main_bundle_path)
   * [debug](api/ApplicationSettings.md#debug)
   * [log_file](api/ApplicationSettings.md#log_file)
   * [log_severity](api/ApplicationSettings.md#log_severity)
   * [multi_threaded_message_loop](api/ApplicationSettings.md#multi_threaded_message_loop)
-  * [net_security_expiration_enabled](api/ApplicationSettings.md#net_security_expiration_enabled)
-  * [pack_loading_disabled](api/ApplicationSettings.md#pack_loading_disabled)
   * [persist_session_cookies](api/ApplicationSettings.md#persist_session_cookies)
-  * [persist_user_preferences](api/ApplicationSettings.md#persist_user_preferences)
-  * [product_version](api/ApplicationSettings.md#product_version)
   * [remote_debugging_port](api/ApplicationSettings.md#remote_debugging_port)
   * [resources_dir_path](api/ApplicationSettings.md#resources_dir_path)
-  * [single_process](api/ApplicationSettings.md#single_process)
   * [string_encoding](api/ApplicationSettings.md#string_encoding)
   * [uncaught_exception_stack_size](api/ApplicationSettings.md#uncaught_exception_stack_size)
   * [unique_request_context_per_browser](api/ApplicationSettings.md#unique_request_context_per_browser)
@@ -277,16 +273,13 @@ at this moment.
   * [GetClientCallback](api/Browser.md#getclientcallback)
   * [GetClientCallbacksDict](api/Browser.md#getclientcallbacksdict)
   * [GetFocusedFrame](api/Browser.md#getfocusedframe)
-  * [GetFrame](api/Browser.md#getframe)
   * [GetFrameByIdentifier](api/Browser.md#getframebyidentifier)
-  * [GetFrames](api/Browser.md#getframes)
-  * [GetFrameCount](api/Browser.md#getframecount)
-  * [GetFrameIdentifiers](api/Browser.md#getframeidentifiers)
+  * [GetFrameByName](api/Browser.md#getframebyname)
   * [GetFrameNames](api/Browser.md#getframenames)
+  * [GetFrames](api/Browser.md#getframes)
   * [GetImage](api/Browser.md#getimage)
   * [GetJavascriptBindings](api/Browser.md#getjavascriptbindings)
   * [GetMainFrame](api/Browser.md#getmainframe)
-  * [GetNSTextInputContext](api/Browser.md#getnstextinputcontext)
   * [GetOpenerWindowHandle](api/Browser.md#getopenerwindowhandle)
   * [GetOuterWindowHandle](api/Browser.md#getouterwindowhandle)
   * [GetSetting](api/Browser.md#getsetting)
@@ -297,13 +290,10 @@ at this moment.
   * [GetZoomLevel](api/Browser.md#getzoomlevel)
   * [GoBack](api/Browser.md#goback)
   * [GoForward](api/Browser.md#goforward)
-  * [HandleKeyEventAfterTextInputClient](api/Browser.md#handlekeyeventaftertextinputclient)
-  * [HandleKeyEventBeforeTextInputClient](api/Browser.md#handlekeyeventbeforetextinputclient)
   * [HasDevTools](api/Browser.md#hasdevtools)
   * [HasDocument](api/Browser.md#hasdocument)
   * [Invalidate](api/Browser.md#invalidate)
   * [IsFullscreen](api/Browser.md#isfullscreen)
-  * [IsLoading](api/Browser.md#isloading)
   * [IsPopup](api/Browser.md#ispopup)
   * [IsWindowRenderingDisabled](api/Browser.md#iswindowrenderingdisabled)
   * [LoadUrl](api/Browser.md#loadurl)
@@ -339,7 +329,6 @@ at this moment.
   * [WasHidden](api/Browser.md#washidden)
 * [Browser settings](api/BrowserSettings.md#browser-settings)
   * [Font settings](api/BrowserSettings.md#font-settings)
-  * [application_cache_disabled](api/BrowserSettings.md#application_cache_disabled)
   * [background_color](api/BrowserSettings.md#background_color)
   * [databases_disabled](api/BrowserSettings.md#databases_disabled)
   * [default_encoding](api/BrowserSettings.md#default_encoding)
@@ -350,7 +339,7 @@ at this moment.
   * [javascript_close_windows_disallowed](api/BrowserSettings.md#javascript_close_windows_disallowed)
   * [javascript_access_clipboard_disallowed](api/BrowserSettings.md#javascript_access_clipboard_disallowed)
   * [local_storage_disabled](api/BrowserSettings.md#local_storage_disabled)
-  * [remote_fonts](api/BrowserSettings.md#remote_fonts)
+  * [remote_fonts_disabled](api/BrowserSettings.md#remote_fonts_disabled)
   * [shrink_standalone_images_to_fit](api/BrowserSettings.md#shrink_standalone_images_to_fit)
   * [tab_to_links_disabled](api/BrowserSettings.md#tab_to_links_disabled)
   * [text_area_resize_disabled](api/BrowserSettings.md#text_area_resize_disabled)
@@ -368,7 +357,6 @@ at this moment.
   * [GetAppPath](api/cefpython.md#getapppath)
   * [GetBrowserByIdentifier](api/cefpython.md#getbrowserbyidentifier)
   * [GetBrowserByWindowHandle](api/cefpython.md#getbrowserbywindowhandle)
-  * [GetCommandLineSwitch](api/cefpython.md#getcommandlineswitch)
   * [GetDataUrl](api/cefpython.md#getdataurl)
   * [GetGlobalClientCallback](api/cefpython.md#getglobalclientcallback)
   * [GetModuleDirectory](api/cefpython.md#getmoduledirectory)
@@ -419,7 +407,6 @@ at this moment.
   * [VisitUrlCookies](api/CookieManager.md#visiturlcookies)
   * [SetCookie](api/CookieManager.md#setcookie)
   * [DeleteCookies](api/CookieManager.md#deletecookies)
-  * [SetStoragePath](api/CookieManager.md#setstoragepath)
   * [FlushStore](api/CookieManager.md#flushstore)
 * [CookieVisitor (interface)](api/CookieVisitor.md#cookievisitor-interface)
   * [Visit](api/CookieVisitor.md#visit)
@@ -470,7 +457,6 @@ at this moment.
   * [IsFocused](api/Frame.md#isfocused)
   * [IsMain](api/Frame.md#ismain)
   * [IsValid](api/Frame.md#isvalid)
-  * [LoadString](api/Frame.md#loadstring)
   * [LoadUrl](api/Frame.md#loadurl)
   * [Paste](api/Frame.md#paste)
   * [Redo](api/Frame.md#redo)
@@ -570,7 +556,6 @@ at this moment.
 * [RenderHandler (interface)](api/RenderHandler.md#renderhandler-interface)
   * [GetRootScreenRect](api/RenderHandler.md#getrootscreenrect)
   * [GetViewRect](api/RenderHandler.md#getviewrect)
-  * [GetScreenRect](api/RenderHandler.md#getscreenrect)
   * [GetScreenPoint](api/RenderHandler.md#getscreenpoint)
   * [OnPopupShow](api/RenderHandler.md#onpopupshow)
   * [OnPopupSize](api/RenderHandler.md#onpopupsize)
@@ -582,7 +567,6 @@ at this moment.
   * [UpdateDragCursor](api/RenderHandler.md#updatedragcursor)
 * [Request (class)](api/Request.md#request-class)
   * [CreateRequest](api/Request.md#createrequest)
-  * [IsReadOnly](api/Request.md#isreadonly)
   * [GetUrl](api/Request.md#geturl)
   * [SetUrl](api/Request.md#seturl)
   * [GetMethod](api/Request.md#getmethod)
@@ -600,27 +584,20 @@ at this moment.
   * [SetFlags](api/Request.md#setflags)
   * [GetFirstPartyForCookies](api/Request.md#getfirstpartyforcookies)
   * [SetFirstPartyForCookies](api/Request.md#setfirstpartyforcookies)
-  * [GetResourceType](api/Request.md#getresourcetype)
-  * [GetTransitionType](api/Request.md#gettransitiontype)
 * [RequestHandler (interface)](api/RequestHandler.md#requesthandler-interface)
   * [GetAuthCredentials](api/RequestHandler.md#getauthcredentials)
   * [GetResourceHandler](api/RequestHandler.md#getresourcehandler)
   * [OnBeforeBrowse](api/RequestHandler.md#onbeforebrowse)
-  * [_OnBeforePluginLoad](api/RequestHandler.md#_onbeforepluginload)
   * [OnBeforeResourceLoad](api/RequestHandler.md#onbeforeresourceload)
   * [_OnCertificateError](api/RequestHandler.md#_oncertificateerror)
-  * [OnQuotaRequest](api/RequestHandler.md#onquotarequest)
   * [OnResourceRedirect](api/RequestHandler.md#onresourceredirect)
   * [OnResourceResponse](api/RequestHandler.md#onresourceresponse)
-  * [OnPluginCrashed](api/RequestHandler.md#onplugincrashed)
   * [OnProtocolExecution](api/RequestHandler.md#onprotocolexecution)
   * [OnRendererProcessTerminated](api/RequestHandler.md#onrendererprocessterminated)
 * [ResourceHandler (interface)](api/ResourceHandler.md#resourcehandler-interface)
   * [ProcessRequest](api/ResourceHandler.md#processrequest)
   * [GetResponseHeaders](api/ResourceHandler.md#getresponseheaders)
   * [ReadResponse](api/ResourceHandler.md#readresponse)
-  * [CanGetCookie](api/ResourceHandler.md#cangetcookie)
-  * [CanSetCookie](api/ResourceHandler.md#cansetcookie)
   * [Cancel](api/ResourceHandler.md#cancel)
 * [Response (object)](api/Response.md#response-object)
   * [IsReadOnly](api/Response.md#isreadonly)
@@ -630,7 +607,7 @@ at this moment.
   * [SetStatusText](api/Response.md#setstatustext)
   * [GetMimeType](api/Response.md#getmimetype)
   * [SetMimeType](api/Response.md#setmimetype)
-  * [GetHeader](api/Response.md#getheader)
+  * [GetHeaderByName](api/Response.md#getheaderbyname)
   * [GetHeaderMap](api/Response.md#getheadermap)
   * [GetHeaderMultimap](api/Response.md#getheadermultimap)
   * [SetHeaderMap](api/Response.md#setheadermap)

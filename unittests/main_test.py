@@ -116,6 +116,22 @@ g_datauri_data = """
 g_datauri = cef.GetDataUrl(g_datauri_data)
 
 
+def main_test_async_completed(global_handler, objects, loading_progress):
+    """Return whether all asynchronous main-test work has finished."""
+    main_browser = cef.GetBrowserByIdentifier(MAIN_BROWSER_ID)
+    if (not is_js_code_completed()
+            or not global_handler.HasDevTools_True
+            or main_browser is None
+            or main_browser.HasDevTools()
+            or cef.GetBrowserByIdentifier(POPUP_BROWSER_ID) is not None
+            or loading_progress != 1.0):
+        return False
+    return all(value
+               for obj in objects
+               for key, value in obj.__dict__.items()
+               if "_True" in key)
+
+
 class MainTest_IsolatedTest(unittest.TestCase):
     def test_main(self):
         """Main entry point. All the code must run inside one
@@ -141,7 +157,25 @@ class MainTest_IsolatedTest(unittest.TestCase):
         if "--debug-warning" in sys.argv:
             settings["debug"] = True
             settings["log_severity"] = cef.LOGSEVERITY_WARNING
-        cef.Initialize(settings)
+        # The popup sub-test opens a window via window.open() during page
+        # load, i.e. without a user gesture, which Chrome blocks by default.
+        # This is a functional requirement of the test itself (not a CI
+        # workaround), so it applies on every platform.
+        switches = {"disable-popup-blocking": ""}
+        cef.Initialize(settings, switches=switches)
+
+        # Ensure assertion and timeout failures still release CEF and its child
+        # processes. The explicit shutdown near the end uses this same helper,
+        # making the unittest cleanup a no-op on the success path.
+        cef_active = True
+
+        def shutdown_cef():
+            nonlocal cef_active
+            if cef_active:
+                cef_active = False
+                cef.Shutdown()
+
+        self.addCleanup(shutdown_cef)
         subtest_message("cef.Initialize() ok")
 
         # CRL set file
@@ -282,8 +316,21 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.WindowUtils.IsWindowHandle(hwnd)
             subtest_message("cef.WindowUtils ok")
 
-        # Run message loop
-        run_message_loop()
+        # Exercise the external-loop MessageLoopWork() API until the complete
+        # asynchronous flow finishes: JavaScript opens a popup, the popup is
+        # destroyed, and its follow-up DevTools test succeeds. Browser and
+        # renderer startup duration varies between systems, so completion must
+        # not depend on a fixed number of message-loop iterations.
+        async_objects = client_handlers + [global_handler, external]
+        async_completed = run_message_loop_until(
+            lambda: main_test_async_completed(
+                global_handler, async_objects,
+                display_handler2.OnLoadingProgressChange_Progress))
+        self.assertTrue(
+            async_completed,
+            "Timed out waiting for load/JavaScript callbacks, popup "
+            "destruction and DevTools closure")
+        subtest_message("cef.MessageLoopWork() ok")
 
         # Make sure popup browser was destroyed
         self.assertIsInstance(cef.GetBrowserByIdentifier(MAIN_BROWSER_ID),
@@ -296,20 +343,20 @@ class MainTest_IsolatedTest(unittest.TestCase):
         del browser
         subtest_message("browser.CloseBrowser() ok")
 
-        # Give it some time to close before checking asserts
-        # and calling shutdown.
+        # CloseBrowser() is asynchronous. Process pending close work before
+        # checking callbacks and shutting CEF down. For synchronously created
+        # macOS browsers, OnBeforeClose may be deferred until Shutdown()
+        # (CEF issues #3469 and #3810).
         do_message_loop_work(25)
 
         # Asserts before shutdown
         self.assertEqual(display_handler2.OnLoadingProgressChange_Progress,
                          1.0)
         # noinspection PyTypeChecker
-        check_auto_asserts(self, [] + client_handlers
-                                    + [global_handler,
-                                       external])
+        check_auto_asserts(self, async_objects)
 
         # Test shutdown of CEF
-        cef.Shutdown()
+        shutdown_cef()
         subtest_message("cef.Shutdown() ok")
 
         # Display summary
@@ -323,16 +370,13 @@ class DisplayHandler2(object):
         # Asserts for True/False will be checked just before shutdown.
         # Test whether asserts are working correctly.
         self.test_for_True = True
-        self.OnAutoResize_True = False
+        # CEF 146+: SetAutoResizeEnabled no longer triggers OnAutoResize for
+        # windowed (non-OSR) browsers. Removed OnAutoResize_True assertion.
         self.OnLoadingProgressChange_True = False
         self.OnLoadingProgressChange_Progress = 0.0
 
     def OnAutoResize(self, new_size, **_):
-        self.OnAutoResize_True = True
-        self.test_case.assertGreaterEqual(new_size[0], 800)
-        self.test_case.assertLessEqual(new_size[0], 1024)
-        self.test_case.assertGreaterEqual(new_size[1], 600)
-        self.test_case.assertLessEqual(new_size[1], 768)
+        pass  # CEF 146+: no longer fires for windowed browsers
 
     def OnLoadingProgressChange(self, browser, progress, **_):
         self.OnLoadingProgressChange_True = True
@@ -342,29 +386,19 @@ class DisplayHandler2(object):
 class V8ContextHandler(object):
     def __init__(self, test_case):
         self.test_case = test_case
+        # CEF 146+: only one V8 context is created per navigation.
+        # The initial empty-document context that existed in older CEF
+        # versions (and was released immediately) is no longer created.
         self.OnContextCreatedFirstCall_True = False
-        self.OnContextCreatedSecondCall_True = False
-        self.OnContextReleased_True = False
 
     def OnContextCreated(self, browser, frame):
-        """CEF creates one context when creating browser and this one is
-           released immediately. Then when it loads url another context is
-           created."""
-        if not self.OnContextCreatedFirstCall_True:
-            self.OnContextCreatedFirstCall_True = True
-        else:
-            self.test_case.assertFalse(self.OnContextCreatedSecondCall_True)
-            self.OnContextCreatedSecondCall_True = True
+        self.OnContextCreatedFirstCall_True = True
         self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
         self.test_case.assertTrue(frame.GetIdentifier())
 
     def OnContextReleased(self, browser, frame):
-        """This gets called only for the initial empty context, see comment
-           in OnContextCreated. This should never get called for the main frame
-           of the main browser, because it happens during app exit and there
-           isn't enough time for the IPC messages to go through."""
-        self.test_case.assertFalse(self.OnContextReleased_True)
-        self.OnContextReleased_True = True
+        # CEF 146+: no longer called for the initial empty-document context
+        # (which no longer exists). May still be called in other scenarios.
         self.test_case.assertEqual(browser.GetIdentifier(), MAIN_BROWSER_ID)
         self.test_case.assertTrue(frame.GetIdentifier())
 

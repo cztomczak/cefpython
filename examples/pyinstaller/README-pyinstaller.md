@@ -17,12 +17,11 @@ on Windows, Linux and Darwin but was mainly tested on Windows platform.
 
 To install required packages type:
 ```
-pip install --upgrade pyinstaller==3.2.1 pycrypto
+pip install --upgrade "pyinstaller>=6"
 ```
 
-Note that the above command installs an old version of Pyinstaller 3.2.1
-and this is intentional as this version has the least issues with Anti-virus
-software, see further on this page for more details.
+PyInstaller 6 or newer is required for supported Python versions and for its
+modern macOS app-bundle layout and signing support.
 
 To package the example go to the [examples/pyinstaller/](./) directory
 and type:
@@ -30,23 +29,11 @@ and type:
 python pyinstaller.py
 ```
 
-**Note on PyInstaller's bootloader (3.3/3.4) being flagged by Anti-virus software**
-
-PyInstaller's bootloader for Windows (runw.exe as of version 3.3 and 3.4) has [12/67 false-positives](https://www.virustotal.com/#/file/798b3c1cd233c4c025af7445718176bdb46014e3ceb25ef12df41a6a25af2fc5/detection)
-reported by Anti-virus software when scanning with virustotal.com and the maintainers of
-PyInstaller have no plans to fix that, see [PyInstaller Issue #2501](https://github.com/pyinstaller/pyinstaller/issues/2501)
-for details. It is advised that you install PyInstaller version 3.2.1 which has the least amount
-of false positives, only [4/67](https://www.virustotal.com/#/file/153dd99a09d0821b99afbda63551e1c679d127fa82d8d3db8fd14cebdce953a3/detection)
-by some unpopular AVs. You might also consider using py2exe or cx_Freeze
-packagers instead and test whether these have less issues with Anti-virus software, however there
-are no official examples for these available.
-
-
 ## When it succeeds
 
 If packaging succeeds you should see "dist/cefapp/" directory open
 in explorer on Windows. In there you will find "cefapp.exe" executable
-that you can launch.
+that you can launch. On macOS the signed bundle is `dist/cefapp.app`.
 
 ![cefapp directory](screenshots/cefapp_directory.jpg)
 

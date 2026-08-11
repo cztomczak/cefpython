@@ -16,14 +16,38 @@ from libc.stdint cimport int64_t
 cdef public void V8ContextHandler_OnContextCreated(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
+    cdef JavascriptBindings jsBindings
     try:
+        # These V8 events are reconstructed in the browser process from
+        # asynchronous IPC messages sent by the renderer (see note at the top
+        # of this file), so a frame from a rapid create -> navigate -> destroy
+        # sequence can already be detached by the time we run here, in which
+        # case CefFrame::GetBrowser() returns NULL. There is then no browser to
+        # bind to or dispatch a callback for, so skipping is the correct thing
+        # to do.
+        if not cefFrame.get().GetBrowser().get():
+            Debug("OnContextCreated: frame has no browser (detached during"
+                  " lifecycle transition), skipping")
+            return
         pyBrowser = GetPyBrowser(cefBrowser, "OnContextCreated")
         pyBrowser.SetUserData("__v8ContextCreated", True)
         pyFrame = GetPyFrame(cefFrame)
+        # Re-send the JS bindings to the renderer. OnContextCreated fires for
+        # each new V8 context (page load, navigation, cross-origin navigation
+        # under site isolation); a fresh context has none of the previously
+        # injected globals, so they must be resent or bindings would be lost
+        # after navigation. Do this before the user callback so that any
+        # ExecuteJavascript the user issues from OnContextCreated finds its
+        # globals already registered when it reaches the renderer (both travel
+        # the same IPC channel).
+        if pyFrame.IsMain():
+            jsBindings = pyBrowser.GetJavascriptBindings()
+            if jsBindings:
+                jsBindings.Rebind()
         # User defined callback
         clientCallback = pyBrowser.GetClientCallback("OnContextCreated")
         if clientCallback:
@@ -35,7 +59,7 @@ cdef public void V8ContextHandler_OnContextCreated(
 cdef public void V8ContextHandler_OnContextReleased(
         int browserId,
         CefString frameId
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback

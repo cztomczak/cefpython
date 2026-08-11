@@ -1,0 +1,148 @@
+name: CI Linux
+
+on:
+  push:
+    branches: ["master", "cefpython147"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+    inputs:
+      bypass_cache:
+        description: "Bypass all caches for a clean run"
+        type: boolean
+        default: false
+
+jobs:
+  download-cef:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      cef_version: ${{ steps.cef-version.outputs.value }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Read CEF version
+        id: cef-version
+        run: |
+          ver=$(grep -oP '(?<=#define CEF_VERSION ")[^"]+' src/version/cef_version_linux.h)
+          echo "value=$ver" >> $GITHUB_OUTPUT
+
+      - name: Cache CEF binaries
+        uses: actions/cache@v5
+        if: ${{ inputs.bypass_cache != true }}
+        with:
+          path: |
+            build/cef_binary_*
+            build/cef*_linux64
+          # Keyed on the CEF version (each version gets its own cache) and on the
+          # download/prepare scripts (invalidate when they change).
+          key: cef-linux64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ steps.cef-version.outputs.value }}
+
+      - name: Install build tools
+        run: python tools/requirements.py
+
+      - name: Download CEF binaries
+        run: python tools/download_cef.py
+
+  build:
+    needs: download-cef
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # full history for the --dev wheel version (git commit count)
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Restore CEF cache
+        uses: actions/cache/restore@v5
+        if: ${{ inputs.bypass_cache != true }}
+        with:
+          path: |
+            build/cef_binary_*
+            build/cef*_linux64
+          key: cef-linux64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ needs.download-cef.outputs.cef_version }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config \
+            libgtk2.0-dev libgtk-3-dev \
+            libglib2.0-dev libx11-dev \
+            libnss3-dev libatk1.0-dev \
+            libxcomposite-dev libxdamage-dev libxext-dev \
+            libxfixes-dev libxrandr-dev libxrender-dev
+
+      - name: Install build tools
+        run: python tools/requirements.py
+
+      - name: Prepare prebuilt CEF
+        run: python tools/automate.py --prebuilt-cef
+
+      - name: Configure CMake
+        run: cmake -S . -B build/_cmake_build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build/_cmake_build --parallel
+
+      - name: Stage build outputs
+        run: |
+          mkdir -p build/artifacts
+          cp build/_cmake_build/cefpython_py*.so build/artifacts/
+          cp build/_cmake_build/subprocess_build/subprocess build/artifacts/
+          cef_dir=$(ls -d build/cef*_linux64 2>/dev/null | head -1)
+          find "$cef_dir/bin" -maxdepth 1 -mindepth 1 \
+            ! -name 'cefclient*' ! -name 'cefsimple*' ! -name 'ceftests*' ! -name 'chrome-sandbox' \
+            -exec cp -r {} build/artifacts/ \;
+
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+            libx11-6 libxcomposite1 libxdamage1 libxext6 \
+            libxfixes3 libxrandr2 libxrender1 \
+            libgtk2.0-0 libglib2.0-0 xvfb
+
+      - name: Set up cefpython3 package
+        run: |
+          cp -r build/artifacts/. cefpython3/
+          chmod +x cefpython3/subprocess
+
+      - name: Build wheel
+        run: python tools/build_distrib.py --dev
+
+      - name: Unit-test the built wheel
+        run: |
+          # Install the wheel and run the unit tests against the INSTALLED
+          # package. No PYTHONPATH: _test_runner.py chdir's to unittests/, so
+          # the repo's cefpython3/ build dir is never on sys.path and
+          # import cefpython3 resolves to the installed wheel.
+          pip install build/dist/*.whl
+          xvfb-run python unittests/_test_runner.py
+
+      - name: Smoke-test the built wheel
+        timeout-minutes: 5
+        run: xvfb-run python tools/smoke_test.py
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/dist/*.whl
+          archive: false

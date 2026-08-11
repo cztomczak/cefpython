@@ -36,7 +36,7 @@ Description from upstream CEF:
 | origin="top-left" | string |
 | __Return__ | object |
 
-Converts the `void*` buffer to string. In Py2 returns 'str' type, in Py3 returns 'bytes' type.
+Converts the `void*` buffer to bytes.
 
 `origin` may be one of: "top-left", "bottom-left".
 

@@ -59,7 +59,7 @@ cdef CefRefPtr[CefStringVisitor] CreateStringVisitor(
 cdef public void StringVisitor_Visit(
         int stringVisitorId,
         const CefString& string
-        ) except * with gil:
+        ) noexcept with gil:
     cdef str pyString
     cdef PyStringVisitor userStringVisitor
     cdef object callback

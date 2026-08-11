@@ -1,4 +1,5 @@
-// Copyright (c) 2011 Marshall A. Greenblatt. All rights reserved.
+// Copyright (c) 2011 Marshall A. Greenblatt. Portions copyright (c) 2012
+// Google Inc. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -69,7 +70,27 @@
 #if defined(USING_CHROMIUM_INCLUDES)
 // When building CEF include the Chromium header directly.
 #include "build/build_config.h"
+#include "cef/libcef/features/features.h"
+
+// The following #defines are used in cef/include/ headers and CEF client-side
+// code. CEF library-side code should use BUILDFLAG checks directly instead of
+// these #defines. CEF client-side code will get these #defines from
+// cef_config.h so any changes must also be reflected in
+// tools/make_config_header.py.
+
+#if BUILDFLAG(IS_LINUX)
+#include "ui/base/ozone_buildflags.h"
+#if BUILDFLAG(SUPPORTS_OZONE_X11)
+#define CEF_X11 1
+#endif
+#endif
+
 #else  // !USING_CHROMIUM_INCLUDES
+
+#if !defined(GENERATING_CEF_API_HASH)
+#include "include/cef_config.h"
+#endif
+
 // The following is substantially similar to the Chromium implementation.
 // If the Chromium implementation diverges the below implementation should be
 // updated to match.

@@ -38,6 +38,7 @@
 #define CEF_INCLUDE_VIEWS_CEF_BROWSER_VIEW_DELEGATE_H_
 #pragma once
 
+#include "include/cef_api_hash.h"
 #include "include/cef_client.h"
 #include "include/views/cef_view_delegate.h"
 
@@ -129,16 +130,49 @@ class CefBrowserViewDelegate : public CefViewDelegate {
     return false;
   }
 
+#if CEF_API_ADDED(13601)
+  ///
+  /// Return true to allow the use of JavaScript moveTo/By() and resizeTo/By()
+  /// (without user activation) with Document picture-in-picture popups.
+  ///
+  /*--cef(added=13601)--*/
+  virtual bool AllowMoveForPictureInPicture(
+      CefRefPtr<CefBrowserView> browser_view) {
+    return false;
+  }
+#endif
+
+#if CEF_API_ADDED(14400)
+  ///
+  /// Return true to allow opening Document picture-in-picture without
+  /// user activation. Default is false (user activation required).
+  ///
+  /*--cef(added=14400)--*/
+  virtual bool AllowPictureInPictureWithoutUserActivation(
+      CefRefPtr<CefBrowserView> browser_view) {
+    return false;
+  }
+#endif
+
   ///
   /// Called when |browser_view| receives a gesture command. Return true to
   /// handle (or disable) a |gesture_command| or false to propagate the gesture
-  /// to the browser for default handling. With the Chrome runtime these
-  /// commands can also be handled via CefCommandHandler::OnChromeCommand.
+  /// to the browser for default handling. With Chrome style these commands can
+  /// also be handled via CefCommandHandler::OnChromeCommand.
   ///
   /*--cef()--*/
   virtual bool OnGestureCommand(CefRefPtr<CefBrowserView> browser_view,
                                 cef_gesture_command_t gesture_command) {
     return false;
+  }
+
+  ///
+  /// Optionally change the runtime style for this BrowserView. See
+  /// cef_runtime_style_t documentation for details.
+  ///
+  /*--cef(default_retval=CEF_RUNTIME_STYLE_DEFAULT)--*/
+  virtual cef_runtime_style_t GetBrowserRuntimeStyle() {
+    return CEF_RUNTIME_STYLE_DEFAULT;
   }
 };
 

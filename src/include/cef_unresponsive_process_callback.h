@@ -1,4 +1,4 @@
-// Copyright (c) 2012 Google Inc. All rights reserved.
+// Copyright (c) 2024 Marshall A. Greenblatt. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -26,28 +26,37 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// ---------------------------------------------------------------------------
+//
+// The contents of this file must follow a specific format in order to
+// support the CEF translator tool. See the translator.README.txt file in the
+// tools directory for more information.
+//
 
-// Do not include this header file directly. Use base/memory/scoped_policy.h
-// instead.
+#ifndef CEF_INCLUDE_CEF_UNRESPONSIVE_PROCESS_CALLBACK_H_
+#define CEF_INCLUDE_CEF_UNRESPONSIVE_PROCESS_CALLBACK_H_
+#pragma once
 
-#ifndef CEF_INCLUDE_BASE_INTERNAL_CEF_SCOPED_POLICY_H_
-#define CEF_INCLUDE_BASE_INTERNAL_CEF_SCOPED_POLICY_H_
+#include "include/cef_base.h"
 
-namespace base {
-namespace scoped_policy {
+///
+/// Callback interface for asynchronous handling of an unresponsive process.
+///
+/*--cef(source=library)--*/
+class CefUnresponsiveProcessCallback : public virtual CefBaseRefCounted {
+ public:
+  ///
+  /// Reset the timeout for the unresponsive process.
+  ///
+  /*--cef()--*/
+  virtual void Wait() = 0;
 
-// Defines the ownership policy for a scoped object.
-enum OwnershipPolicy {
-  // The scoped object takes ownership of an object by taking over an existing
-  // ownership claim.
-  ASSUME,
-
-  // The scoped object will retain the object and any initial ownership is
-  // not changed.
-  RETAIN
+  ///
+  /// Terminate the unresponsive process.
+  ///
+  /*--cef()--*/
+  virtual void Terminate() = 0;
 };
 
-}  // namespace scoped_policy
-}  // namespace base
-
-#endif  // CEF_INCLUDE_BASE_INTERNAL_CEF_SCOPED_POLICY_H_
+#endif  // CEF_INCLUDE_CEF_UNRESPONSIVE_PROCESS_CALLBACK_H_

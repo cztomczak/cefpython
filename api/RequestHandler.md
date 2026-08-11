@@ -16,15 +16,15 @@ Available in upstream CEF, but not yet exposed to CEF Python:
 
 Table of contents:
 * [Callbacks](#callbacks)
+  * [CanSendCookie](#cansendcookie)
+  * [CanSaveCookie](#cansavecookie)
   * [GetAuthCredentials](#getauthcredentials)
   * [GetResourceHandler](#getresourcehandler)
   * [OnBeforeBrowse](#onbeforebrowse)
   * [OnBeforeResourceLoad](#onbeforeresourceload)
   * [_OnCertificateError](#_oncertificateerror)
-  * [OnQuotaRequest](#onquotarequest)
   * [OnResourceRedirect](#onresourceredirect)
   * [OnResourceResponse](#onresourceresponse)
-  * [OnPluginCrashed](#onplugincrashed)
   * [OnProtocolExecution](#onprotocolexecution)
   * [OnRendererProcessTerminated](#onrendererprocessterminated)
 
@@ -32,29 +32,72 @@ Table of contents:
 ## Callbacks
 
 
-### GetAuthCredentials
+### CanSendCookie
 
 | Parameter | Type |
 | --- | --- |
 | browser | [Browser](Browser.md) |
 | frame | [Frame](Frame.md) |
+| request | [Request](Request.md) |
+| cookie | [Cookie](Cookie.md) |
+| __Return__ | bool |
+
+Called on the IO thread before a cookie is sent with a network request.
+Return `True` to allow the cookie or `False` to block it.
+
+Limitation: requests with no associated browser/frame (e.g. service workers,
+`CefURLRequest`, and some cross-origin subresource requests on the IO thread)
+cannot be filtered. The callback is not called for them and the cookie is
+allowed by default, matching CEF's own default.
+
+
+### CanSaveCookie
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| frame | [Frame](Frame.md) |
+| request | [Request](Request.md) |
+| response | [Response](Response.md) |
+| cookie | [Cookie](Cookie.md) |
+| __Return__ | bool |
+
+Called on the IO thread before a cookie received from a network response is
+saved. Return `True` to allow the cookie or `False` to block it.
+
+Limitation: requests with no associated browser/frame (e.g. service workers,
+`CefURLRequest`, and some cross-origin subresource requests on the IO thread)
+cannot be filtered. The callback is not called for them and the cookie is
+allowed by default, matching CEF's own default.
+
+
+### GetAuthCredentials
+
+| Parameter | Type |
+| --- | --- |
+| browser | [Browser](Browser.md) |
+| origin_url | string |
 | is_proxy | bool |
 | host | string |
 | port | int |
 | realm | string |
 | scheme | string |
 | callback | AuthCallback |
-| __Return__ | bool |{
+| __Return__ | bool |
 
 Called on the IO thread when the browser needs credentials from the user.
-|is_proxy| indicates whether the host is a proxy server. |host| contains the
-hostname and |port| contains the port number. |realm| is the realm of the
-challenge and may be empty. |scheme| is the authentication scheme used,
-such as "basic" or "digest", and will be empty if the source of the request
-is an FTP server. Return true to continue the request and call
-CefAuthCallback::Continue() either in this method or at a later time when
-the authentication information is available. Return false to cancel the
-request immediately.
+|origin_url| is the origin making the authentication request. |is_proxy|
+indicates whether the host is a proxy server. |host| contains the hostname and
+|port| contains the port number. |realm| is the realm of the challenge and may
+be empty. |scheme| is the authentication scheme used, such as "basic" or
+"digest". Return true to continue the request and call
+CefAuthCallback::Continue() either in this method or at a later time when the
+authentication information is available. Return false to cancel the request
+immediately.
+
+Pass `disable-chrome-login-prompt` in the `switches` dictionary to
+`cef.Initialize()` to route authentication challenges to this callback instead
+of Chromium's built-in login prompt.
 
 The `AuthCallback` object methods:
 * void Continue(string username, string password)
@@ -155,28 +198,6 @@ The `RequestCallback` object methods:
   * void Cancel()
 
 
-### OnQuotaRequest
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| origin_url | string |
-| new_size | long |
-| callback | RequestCallback |
-| __Return__ | bool |
-
-Called on the IO thread when javascript requests a specific storage quota
-size via the `webkitStorageInfo.requestQuota` function. |origin_url| is the
-origin of the page making the request. |new_size| is the requested quota
-size in bytes. Return true to continue the request and call
-CefRequestCallback::Continue() either in this method or at a later time to
-grant or deny the request. Return false to cancel the request immediately.
-
-The `RequestCallback` object methods:
-* void Continue(bool allow)
-* void Cancel()
-
-
 ### OnResourceRedirect
 
 | Parameter | Type |
@@ -214,18 +235,6 @@ _OnResourceResponse() method in the old v31 [wxpython-response.py]
 example.
 
 
-### OnPluginCrashed
-
-| Parameter | Type |
-| --- | --- |
-| browser | [Browser](Browser.md) |
-| plugin_path | string |
-| __Return__ | void |
-
-Called when a plugin has crashed. |plugin_path| is the path of the plugin
-that crashed.
-
-
 ### OnProtocolExecution
 
 | Parameter | Type |
@@ -235,7 +244,7 @@ that crashed.
 | allow_execution_out | list[bool] |
 | __Return__ | void |
 
-Called on the UI thread to handle requests for URLs with an unknown
+Called on the IO thread to handle requests for URLs with an unknown
 protocol component. Set |allow_execution_out[0]| to True to attempt
 execution via the registered OS protocol handler, if any.
 

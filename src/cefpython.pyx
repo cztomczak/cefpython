@@ -4,29 +4,24 @@
 
 # IMPORTANT notes:
 #
-# - cdef/cpdef functions returning something other than a Python object
-#   should have in its declaration "except *", otherwise exceptions are
-#   ignored. Those cdef/cpdef that return "object" have "except *" by
-#   default. The setup/compile.py script will check for functions missing
-#   "except *" and will display an error message about that, but it's
-#   not perfect and won't detect all cases.
-#
-# - TODO: add checking for "except * with gil" in functions with the
-#   "public" keyword
+# - Exception handling (Cython 3): a cdef/cpdef function returning a
+#   non-Python type propagates exceptions by default. Functions called from
+#   C++ (the "public" callbacks that acquire the GIL, declared
+#   "noexcept with gil") must NOT propagate into C++ - they are declared
+#   "noexcept" so that an escaping exception is reported via
+#   sys.unraisablehook instead of unwinding into CEF's C++ code. Each such
+#   callback still wraps its body in try/except and forwards to
+#   sys.excepthook; sys.unraisablehook is only reached if an exception
+#   escapes that guard (a bug in the handler). See cef.UnraisableHook and
+#   the "Handling Python exceptions" section of docs/Tutorial.md.
+#   tools/cmake_prepare_pyx.py checks for cdef/cpdef functions that return a
+#   C type without any exception declaration.
 #
 # - about acquiring/releasing GIL lock, see discussion here:
 #   https://groups.google.com/forum/?fromgroups=#!topic/cython-users/jcvjpSOZPp0
 #
 # - <CefRefPtr[ClientHandler]?>new ClientHandler()
 #   <...?> means to throw an error if the cast is not allowed
-#
-# - in client handler callbacks (or others that are called from C++ and
-#   use "except * with gil") must embrace all code in try..except otherwise
-#   the error will  be ignored, only printed to the output console, this is the
-#   default behavior of Cython, to remedy this you are supposed to add "except *"
-#   in function declaration, unfortunately it does not work, some conflict with
-#   CEF threading, see topic at cython-users for more details:
-#   https://groups.google.com/d/msg/cython-users/CRxWoX57dnM/aufW3gXMhOUJ.
 #
 # -  Note that acquiring the GIL is a blocking thread-synchronising operation,
 #    and therefore potentially costly. It might not be worth releasing the GIL
@@ -137,21 +132,11 @@ import struct
 # noinspection PyUnresolvedReferences
 import base64
 
-# Must use compile-time condition instead of checking sys.version_info.major
-# otherwise results in "ImportError: cannot import name urlencode" strange
-# error in Python 3.6.
-IF PY_MAJOR_VERSION == 2:
-    # noinspection PyUnresolvedReferences
-    import urlparse
-    # noinspection PyUnresolvedReferences
-    from urllib import urlencode as urllib_urlencode
-    from urllib import quote as urlparse_quote
-ELSE:
-    # noinspection PyUnresolvedReferences
-    from urllib import parse as urlparse
-    from urllib.parse import quote as urlparse_quote
-    # noinspection PyUnresolvedReferences
-    from urllib.parse import urlencode as urllib_urlencode
+# noinspection PyUnresolvedReferences
+from urllib import parse as urlparse
+from urllib.parse import quote as urlparse_quote
+# noinspection PyUnresolvedReferences
+from urllib.parse import urlencode as urllib_urlencode
 
 # noinspection PyUnresolvedReferences
 from cpython.version cimport PY_MAJOR_VERSION
@@ -242,6 +227,7 @@ IF UNAME_SYSNAME == "Linux":
     cimport x11
 
 from cef_string cimport *
+from cef_api_hash cimport *
 cdef extern from *:
     # noinspection PyUnresolvedReferences
     ctypedef CefString ConstCefString "const CefString"
@@ -390,7 +376,7 @@ include "handlers/v8function_handler.pyx"
 
 cdef public void cefpython_GetDebugOptions(
         cpp_bool* debug
-        ) except * with gil:
+        ) noexcept with gil:
     # Called from subprocess/cefpython_app.cpp -> CefPythonApp constructor.
     try:
         debug[0] = <cpp_bool>bool(g_debug)
@@ -399,7 +385,7 @@ cdef public void cefpython_GetDebugOptions(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public cpp_bool ApplicationSettings_GetBool(const char* key
-        ) except * with gil:
+        ) noexcept with gil:
     # Called from client_handler/client_handler.cpp for example
     cdef py_string pyKey = CharToPyString(key)
     if pyKey in g_applicationSettings:
@@ -407,7 +393,7 @@ cdef public cpp_bool ApplicationSettings_GetBool(const char* key
     return False
 
 cdef public cpp_bool ApplicationSettings_GetBoolFromDict(const char* key1,
-        const char* key2) except * with gil:
+        const char* key2) noexcept with gil:
     cdef py_string pyKey1 = CharToPyString(key1)
     cdef py_string pyKey2 = CharToPyString(key2)
     cdef object dictValue # Yet to be checked whether it is `dict`
@@ -420,14 +406,14 @@ cdef public cpp_bool ApplicationSettings_GetBoolFromDict(const char* key1,
     return False
 
 cdef public cpp_string ApplicationSettings_GetString(const char* key
-        ) except * with gil:
+        ) noexcept with gil:
     cdef py_string pyKey = CharToPyString(key)
     cdef cpp_string cppString
     if pyKey in g_applicationSettings:
         cppString = PyStringToChar(AnyToPyString(g_applicationSettings[pyKey]))
     return cppString
 
-cdef public int CommandLineSwitches_GetInt(const char* key) except * with gil:
+cdef public int CommandLineSwitches_GetInt(const char* key) noexcept with gil:
     cdef py_string pyKey = CharToPyString(key)
     if pyKey in g_commandLineSwitches:
         return int(g_commandLineSwitches[pyKey])
@@ -469,16 +455,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     del command_line_switches
     del commandLineSwitches
 
-    IF UNAME_SYSNAME == "Linux":
-        # Fix Issue #231 - Discovery of the "icudtl.dat" file fails on Linux.
-        cdef str py_module_dir = GetModuleDirectory()
-        cdef CefString cef_module_dir
-        PyToCefString(py_module_dir, cef_module_dir)
-        CefOverridePath(PK_DIR_EXE, cef_module_dir)\
-                or Debug("ERROR: CefOverridePath failed")
-        CefOverridePath(PK_DIR_MODULE, cef_module_dir)\
-                or Debug("ERROR: CefOverridePath failed")
-    # END IF UNAME_SYSNAME == "Linux":
 
     if not application_settings:
         application_settings = {}
@@ -534,6 +510,23 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         if  "framework_dir_path" not in application_settings:
             application_settings["framework_dir_path"] = os.path.join(
                     module_dir, "Chromium Embedded Framework.framework")
+        IF UNAME_SYSNAME == "Darwin":
+            if "main_bundle_path" not in application_settings:
+                main_bundle_path = os.fsdecode(
+                        <bytes>MacGetMainBundlePath())
+                if main_bundle_path and os.path.isabs(main_bundle_path):
+                    application_settings["main_bundle_path"] = \
+                            main_bundle_path
+                else:
+                    # A non-framework CLI Python may not live in an app bundle.
+                    # Use the packaged generic helper as a real fallback bundle
+                    # so the browser and all specialized helpers share one CEF
+                    # BaseBundleID for Mach port rendezvous.
+                    helper_bundle_path = os.path.join(
+                            module_dir, "cefpython Helper.app")
+                    if os.path.isdir(helper_bundle_path):
+                        application_settings["main_bundle_path"] = \
+                                helper_bundle_path
     if "locales_dir_path" not in application_settings:
         if platform.system() != "Darwin":
             application_settings["locales_dir_path"] = os.path.join(
@@ -546,8 +539,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
                     application_settings["framework_dir_path"],
                     "Resources")
     if "browser_subprocess_path" not in application_settings:
-        application_settings["browser_subprocess_path"] = os.path.join(
-                module_dir, "subprocess")
+        if platform.system() == "Darwin":
+            application_settings["browser_subprocess_path"] = os.path.join(
+                    module_dir, "cefpython Helper.app", "Contents", "MacOS",
+                    "cefpython Helper")
+        else:
+            application_settings["browser_subprocess_path"] = os.path.join(
+                    module_dir, "subprocess")
 
     # ------------------------------------------------------------------------
     # Mouse context menu
@@ -588,14 +586,66 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if not application_settings["cache_path"]:
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
 
+    IF UNAME_SYSNAME == "Linux":
+        # Apply Linux default command-line switches before the browser-process
+        # argv is built from g_commandLineSwitches below. setdefault lets an app
+        # override either by passing it explicitly to cef.Initialize(switches=).
+        #
+        # Force Chrome's Ozone backend to X11.  This is the *only* thing keeping
+        # Chromium off the Wayland display on a Wayland session — cefpython embeds
+        # via X11 window handles (CefWindowInfo.SetAsChild) and drives X11 window
+        # geometry directly.
+        #
+        # Root cause (upstream CEF): native windowed embedding into a client
+        # parent_window is implemented for X11 only — CreateHostWindow() in CEF's
+        # libcef/browser/native/browser_platform_delegate_native_linux.cc is wrapped
+        # entirely in `#if BUILDFLAG(SUPPORTS_OZONE_X11)` (creating a CefWindowX11)
+        # with no Wayland branch, and there is no window_wayland implementation.
+        # Wayland has no cross-process window embedding (no X11-style window IDs /
+        # XReparent), so CEF cannot parent the browser into a foreign Wayland
+        # surface; embedders must run under X11/XWayland.  Verified on CEF 147:
+        # without this switch, a Wayland session selects the Wayland Ozone backend
+        # and the embedding path crashes.
+        g_commandLineSwitches.setdefault("ozone-platform", "x11")
+
+        # Disable Chromium's Linux sandbox.  It is on by default and needs either a
+        # SUID-root "chrome-sandbox" helper or an unprivileged user namespace to
+        # start; where neither is available CEF aborts during startup.  A pip wheel
+        # can guarantee neither — it cannot install a chown-root binary, and many
+        # distros and container runtimes block unprivileged user namespaces — so
+        # cefpython disables the sandbox on Linux, as it always has.  setdefault
+        # leaves an explicit caller-provided value untouched.
+        g_commandLineSwitches.setdefault("no-sandbox", "")
+
     cdef CefRefPtr[CefApp] cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
 
     IF UNAME_SYSNAME == "Windows":
         cdef HINSTANCE hInstance = GetModuleHandle(NULL)
         cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
     ELIF UNAME_SYSNAME == "Linux":
-        # TODO: use the CefMainArgs(int argc, char** argv) constructor.
-        cdef CefMainArgs cefMainArgs
+        # Build a complete argv so the browser process sees all switches.
+        # OnBeforeChildProcessLaunch only reaches child processes; switches
+        # like --in-process-gpu and --single-process must be in the browser
+        # process's own command line to take effect.
+        _cefMainArgvPyList = [sys.executable.encode('utf-8')]
+        for _cefArgK, _cefArgV in g_commandLineSwitches.items():
+            if _cefArgV:
+                _cefMainArgvPyList.append(
+                    ("--{}={}".format(_cefArgK, _cefArgV)).encode('utf-8'))
+            else:
+                _cefMainArgvPyList.append(
+                    ("--{}".format(_cefArgK)).encode('utf-8'))
+        cdef int _cefMainArgc = len(_cefMainArgvPyList)
+        cdef char** _cefMainArgvC = \
+                <char**>malloc(_cefMainArgc * sizeof(char*))
+        cdef bytes _cefMainArgvItem
+        cdef int _cefMainArgvI
+        for _cefMainArgvI in range(_cefMainArgc):
+            _cefMainArgvItem = _cefMainArgvPyList[_cefMainArgvI]
+            _cefMainArgvC[_cefMainArgvI] = _cefMainArgvItem
+        cdef CefMainArgs cefMainArgs = CefMainArgs(_cefMainArgc, _cefMainArgvC)
+        # _cefMainArgvPyList keeps the bytes alive; freed below after
+        # CefInitialize() has processed the command line.
     ELIF UNAME_SYSNAME == "Darwin":
         # TODO: use the CefMainArgs(int argc, char** argv) constructor.
         cdef CefMainArgs cefMainArgs
@@ -611,8 +661,11 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_applicationSettings[key] = copy.deepcopy(application_settings[key])
 
     cdef CefSettings cefApplicationSettings
-    # No sandboxing for the subprocesses
-    cefApplicationSettings.no_sandbox = 1
+    # No sandboxing for the subprocesses. On Linux this is done via the
+    # --no-sandbox switch above, not here — setting no_sandbox=1 crashes
+    # subprocesses with "Failed global descriptor lookup: 7".
+    IF UNAME_SYSNAME != "Linux":
+        cefApplicationSettings.no_sandbox = 1
     SetApplicationSettings(application_settings, &cefApplicationSettings)
 
     # External message pump
@@ -628,6 +681,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     cdef cpp_bool ret
     with nogil:
         ret = CefInitialize(cefMainArgs, cefApplicationSettings, cefApp, NULL)
+    IF UNAME_SYSNAME == "Linux":
+        free(_cefMainArgvC)
 
     global g_cef_initialized
     g_cef_initialized = True
@@ -636,7 +691,6 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         Debug("CefInitialize() failed")
 
     IF UNAME_SYSNAME == "Linux":
-        # Install by default.
         WindowUtils.InstallX11ErrorHandlers()
 
     return ret
@@ -664,8 +718,6 @@ def CreateBrowserSync(windowInfo=None,
         raise Exception("Invalid argument: "+kwarg)
 
     Debug("CreateBrowserSync() called")
-    assert IsThread(TID_UI), (
-            "cefpython.CreateBrowserSync() may only be called on the UI thread")
 
     """
     # CEF views
@@ -957,9 +1009,10 @@ def Shutdown():
         MacShutdown()
 
 def SetOsModalLoop(py_bool modalLoop):
-    cdef cpp_bool cefModalLoop = bool(modalLoop)
-    with nogil:
-        CefSetOSModalLoop(cefModalLoop)
+    IF UNAME_SYSNAME == "Windows":
+        cdef cpp_bool cefModalLoop = bool(modalLoop)
+        with nogil:
+            CefSetOSModalLoop(cefModalLoop)
 
 cpdef py_void SetGlobalClientCallback(py_string name, object callback):
     global g_globalClientCallbacks
@@ -1003,14 +1056,15 @@ cpdef object GetAppSetting(py_string key):
     return None
 
 cpdef dict GetVersion():
-    # These variable are set when building the module.
     # noinspection PyUnresolvedReferences
+    api_hash = (<bytes>CEF_API_HASH_PLATFORM).decode("utf-8")
     return dict(
         version=__version__,
         chrome_version=__chrome_version__,
         cef_version=__cef_version__,
-        cef_api_hash_platform=__cef_api_hash_platform__,
-        cef_api_hash_universal=__cef_api_hash_universal__,
+        cef_api_version=CEF_API_VERSION,
+        cef_api_hash_platform=api_hash,
+        cef_api_hash_universal=api_hash,
         cef_commit_hash=__cef_commit_hash__,
         cef_commit_number=__cef_commit_number__,
     )

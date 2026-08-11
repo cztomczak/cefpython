@@ -6,7 +6,6 @@ import base64
 import platform
 import sys
 import threading
-from pkg_resources import parse_version
 
 # HTML code. Browser will navigate to a Data uri created
 # from this html code.
@@ -61,11 +60,10 @@ HTML_code = """
 def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-    # To change user agent use either "product_version"
-    # or "user_agent" options. Explained in Tutorial in
-    # "Change user agent string" section.
+    sys.unraisablehook = cef.UnraisableHook  # Same, for errors Python would
+    #                                          otherwise just print and ignore
+    # To change the user agent use the "user_agent" option.
     settings = {
-        # "product_version": "MyProduct/10.00",
         # "user_agent": "MyAgent/20.00 MyProduct/10.00",
     }
     cef.Initialize(settings=settings)
@@ -86,7 +84,7 @@ def check_versions():
     print("[tutorial.py] Python {ver} {arch}".format(
            ver=platform.python_version(),
            arch=platform.architecture()[0]))
-    assert parse_version(cef.__version__) >= parse_version("57.0"), "CEF Python v57.0+ required to run this"
+    assert tuple(int(x) for x in cef.__version__.split(".")) >= (57, 0), "CEF Python v57.0+ required to run this"
 
 
 def html_to_data_uri(html, js_callback=None):

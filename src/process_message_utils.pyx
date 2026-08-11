@@ -239,7 +239,7 @@ cdef CefRefPtr[CefListValue] PyListToCefListValue(
             ret.get().SetNull(index)
         elif valueType == bool:
             ret.get().SetBool(index, bool(value))
-        elif valueType in (int, long):
+        elif valueType == int:
             # Int32 range is -2147483648..2147483647, we've increased the
             # minimum size by one as Cython was throwing a warning:
             # "unary minus operator applied to unsigned type, result still
@@ -296,7 +296,7 @@ cdef void PyListToExistingCefListValue(
             cefListValue.get().SetNull(index)
         elif valueType == bool:
             cefListValue.get().SetBool(index, bool(value))
-        elif valueType in (int, long):
+        elif valueType == int:
             # Int32 range is -2147483648..2147483647, we've increased the
             # minimum size by one as Cython was throwing a warning:
             # "unary minus operator applied to unsigned type, result still
@@ -354,7 +354,7 @@ cdef CefRefPtr[CefDictionaryValue] PyDictToCefDictionaryValue(
             ret.get().SetNull(cefKey)
         elif valueType == bool:
             ret.get().SetBool(cefKey, bool(value))
-        elif valueType == int or valueType == long:  # In Py3 int and long types are the same type.
+        elif valueType == int:
             # Int32 range is -2147483648..2147483647
             if INT_MIN <= value <= INT_MAX:
                 ret.get().SetInt(cefKey, int(value))

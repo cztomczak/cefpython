@@ -7,15 +7,15 @@ include "cefpython.pyx"
 cdef void AppendSwitchesToCommandLine(
         CefRefPtr[CefCommandLine] cefCommandLine,
         dict switches
-        ) except * with gil:
+        ) noexcept with gil:
     # Called from:
     # 1. App_OnBeforeCommandLineProcessing_BrowserProcess()
     # 2. BrowserProcessHandler_OnRenderProcessThreadCreated()
     cdef PyCommandLine pyCommandLine = CreatePyCommandLine(cefCommandLine)
     cdef py_string switch
     cdef py_string value
-    for switch, value in switches.iteritems():
-        if not isinstance(switch, basestring) or switch[0] == '-':
+    for switch, value in switches.items():
+        if not isinstance(switch, (str, bytes)) or switch[0] == '-':
             Debug("Invalid command line switch: %s" % switch)
             continue
         if value:

@@ -31,30 +31,18 @@
 #define CEF_INCLUDE_INTERNAL_CEF_TYPES_LINUX_H_
 #pragma once
 
+#if !defined(GENERATING_CEF_API_HASH)
 #include "include/base/cef_build.h"
-#include "include/cef_config.h"
+#endif
 
 #if defined(OS_LINUX)
 
-#if defined(CEF_X11)
-typedef union _XEvent XEvent;
-typedef struct _XDisplay XDisplay;
-#endif
-
 #include "include/internal/cef_export.h"
 #include "include/internal/cef_string.h"
+#include "include/internal/cef_types_color.h"
 #include "include/internal/cef_types_geometry.h"
-
-// Handle types.
-#if defined(CEF_X11)
-#define cef_cursor_handle_t unsigned long
-#define cef_event_handle_t XEvent*
-#else
-#define cef_cursor_handle_t void*
-#define cef_event_handle_t void*
-#endif
-
-#define cef_window_handle_t unsigned long
+#include "include/internal/cef_types_osr.h"
+#include "include/internal/cef_types_runtime.h"
 
 #define kNullCursorHandle 0
 #define kNullEventHandle NULL
@@ -63,6 +51,20 @@ typedef struct _XDisplay XDisplay;
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if defined(CEF_X11)
+typedef union _XEvent XEvent;
+typedef struct _XDisplay XDisplay;
+
+// Handle types.
+typedef unsigned long cef_cursor_handle_t;
+typedef XEvent* cef_event_handle_t;
+#else
+typedef void* cef_cursor_handle_t;
+typedef void* cef_event_handle_t;
+#endif
+
+typedef unsigned long cef_window_handle_t;
 
 ///
 /// Return the singleton X11 display shared with Chromium. The display is not
@@ -84,6 +86,11 @@ typedef struct _cef_main_args_t {
 /// Class representing window information.
 ///
 typedef struct _cef_window_info_t {
+  ///
+  /// Size of this structure.
+  ///
+  size_t size;
+
   ///
   /// The initial title of the window, to be set when the window is created.
   /// Some layout managers (e.g., Compiz) can look at the window title
@@ -135,7 +142,74 @@ typedef struct _cef_window_info_t {
   /// Pointer for the new browser window. Only used with windowed rendering.
   ///
   cef_window_handle_t window;
+
+  ///
+  /// Optionally change the runtime style. Alloy style will always be used if
+  /// |windowless_rendering_enabled| is true. See cef_runtime_style_t
+  /// documentation for details.
+  ///
+  cef_runtime_style_t runtime_style;
 } cef_window_info_t;
+
+///
+/// Structure containing the plane information of the shared texture.
+/// Sync with native_pixmap_handle.h
+///
+typedef struct _cef_accelerated_paint_native_pixmap_plane_info_t {
+  ///
+  /// The strides and offsets in bytes to be used when accessing the buffers via
+  /// a memory mapping. One per plane per entry. Size in bytes of the plane is
+  /// necessary to map the buffers.
+  ///
+  uint32_t stride;
+  uint64_t offset;
+  uint64_t size;
+
+  ///
+  /// File descriptor for the underlying memory object (usually dmabuf).
+  ///
+  int fd;
+} cef_accelerated_paint_native_pixmap_plane_t;
+
+#define kAcceleratedPaintMaxPlanes 4
+
+///
+/// Structure containing shared texture information for the OnAcceleratedPaint
+/// callback. Resources will be released to the underlying pool for reuse when
+/// the callback returns from client code.
+///
+typedef struct _cef_accelerated_paint_info_t {
+  ///
+  /// Size of this structure.
+  ///
+  size_t size;
+
+  ///
+  /// Planes of the shared texture, usually file descriptors of dmabufs.
+  ///
+  cef_accelerated_paint_native_pixmap_plane_t
+      planes[kAcceleratedPaintMaxPlanes];
+
+  ///
+  /// Plane count.
+  ///
+  int plane_count;
+
+  ///
+  /// Modifier could be used with EGL driver.
+  ///
+  uint64_t modifier;
+
+  ///
+  /// The pixel format of the texture.
+  ///
+  cef_color_type_t format;
+
+  ///
+  /// The extra common info.
+  ///
+  cef_accelerated_paint_info_common_t extra;
+} cef_accelerated_paint_info_t;
 
 #ifdef __cplusplus
 }

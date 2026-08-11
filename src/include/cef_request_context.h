@@ -42,10 +42,9 @@
 
 #include "include/cef_callback.h"
 #include "include/cef_cookie.h"
-#include "include/cef_extension.h"
-#include "include/cef_extension_handler.h"
 #include "include/cef_media_router.h"
 #include "include/cef_preference.h"
+#include "include/cef_registration.h"
 #include "include/cef_values.h"
 
 class CefRequestContextHandler;
@@ -67,6 +66,27 @@ class CefResolveCallback : public virtual CefBaseRefCounted {
       cef_errorcode_t result,
       const std::vector<CefString>& resolved_ips) = 0;
 };
+
+#if CEF_API_ADDED(13401)
+///
+/// Implemented by the client to observe content and website setting changes and
+/// registered via CefRequestContext::AddSettingObserver. The methods of this
+/// class will be called on the browser process UI thread.
+///
+/*--cef(source=client,added=13401)--*/
+class CefSettingObserver : public virtual CefBaseRefCounted {
+ public:
+  ///
+  /// Called when a content or website setting has changed. The new value can be
+  /// retrieved using CefRequestContext::GetContentSetting or
+  /// CefRequestContext::GetWebsiteSetting.
+  ///
+  /*--cef(optional_param=requesting_url,optional_param=top_level_url)--*/
+  virtual void OnSettingChanged(const CefString& requesting_url,
+                                const CefString& top_level_url,
+                                cef_content_setting_types_t content_type) = 0;
+};
+#endif
 
 ///
 /// A request context provides request handling for a set of related browser
@@ -192,6 +212,15 @@ class CefRequestContext : public CefPreferenceManager {
   virtual void ClearCertificateExceptions(
       CefRefPtr<CefCompletionCallback> callback) = 0;
 
+#if CEF_API_ADDED(14400)
+  ///
+  /// Clears the HTTP cache. If |callback| is non-NULL it will be executed on
+  /// the UI thread after completion.
+  ///
+  /*--cef(added=14400,optional_param=callback)--*/
+  virtual void ClearHttpCache(CefRefPtr<CefCompletionCallback> callback) = 0;
+#endif
+
   ///
   /// Clears all HTTP authentication credentials that were added as part of
   /// handling GetAuthCredentials. If |callback| is non-NULL it will be executed
@@ -218,94 +247,6 @@ class CefRequestContext : public CefPreferenceManager {
   /*--cef()--*/
   virtual void ResolveHost(const CefString& origin,
                            CefRefPtr<CefResolveCallback> callback) = 0;
-
-  ///
-  /// Load an extension.
-  ///
-  /// If extension resources will be read from disk using the default load
-  /// implementation then |root_directory| should be the absolute path to the
-  /// extension resources directory and |manifest| should be NULL. If extension
-  /// resources will be provided by the client (e.g. via CefRequestHandler
-  /// and/or CefExtensionHandler) then |root_directory| should be a path
-  /// component unique to the extension (if not absolute this will be internally
-  /// prefixed with the PK_DIR_RESOURCES path) and |manifest| should contain the
-  /// contents that would otherwise be read from the "manifest.json" file on
-  /// disk.
-  ///
-  /// The loaded extension will be accessible in all contexts sharing the same
-  /// storage (HasExtension returns true). However, only the context on which
-  /// this method was called is considered the loader (DidLoadExtension returns
-  /// true) and only the loader will receive CefRequestContextHandler callbacks
-  /// for the extension.
-  ///
-  /// CefExtensionHandler::OnExtensionLoaded will be called on load success or
-  /// CefExtensionHandler::OnExtensionLoadFailed will be called on load failure.
-  ///
-  /// If the extension specifies a background script via the "background"
-  /// manifest key then CefExtensionHandler::OnBeforeBackgroundBrowser will be
-  /// called to create the background browser. See that method for additional
-  /// information about background scripts.
-  ///
-  /// For visible extension views the client application should evaluate the
-  /// manifest to determine the correct extension URL to load and then pass that
-  /// URL to the CefBrowserHost::CreateBrowser* function after the extension has
-  /// loaded. For example, the client can look for the "browser_action" manifest
-  /// key as documented at
-  /// https://developer.chrome.com/extensions/browserAction. Extension URLs take
-  /// the form "chrome-extension://<extension_id>/<path>".
-  ///
-  /// Browsers that host extensions differ from normal browsers as follows:
-  ///  - Can access chrome.* JavaScript APIs if allowed by the manifest. Visit
-  ///    chrome://extensions-support for the list of extension APIs currently
-  ///    supported by CEF.
-  ///  - Main frame navigation to non-extension content is blocked.
-  ///  - Pinch-zooming is disabled.
-  ///  - CefBrowserHost::GetExtension returns the hosted extension.
-  ///  - CefBrowserHost::IsBackgroundHost returns true for background hosts.
-  ///
-  /// See https://developer.chrome.com/extensions for extension implementation
-  /// and usage documentation.
-  ///
-  /*--cef(optional_param=manifest,optional_param=handler)--*/
-  virtual void LoadExtension(const CefString& root_directory,
-                             CefRefPtr<CefDictionaryValue> manifest,
-                             CefRefPtr<CefExtensionHandler> handler) = 0;
-
-  ///
-  /// Returns true if this context was used to load the extension identified by
-  /// |extension_id|. Other contexts sharing the same storage will also have
-  /// access to the extension (see HasExtension). This method must be called on
-  /// the browser process UI thread.
-  ///
-  /*--cef()--*/
-  virtual bool DidLoadExtension(const CefString& extension_id) = 0;
-
-  ///
-  /// Returns true if this context has access to the extension identified by
-  /// |extension_id|. This may not be the context that was used to load the
-  /// extension (see DidLoadExtension). This method must be called on the
-  /// browser process UI thread.
-  ///
-  /*--cef()--*/
-  virtual bool HasExtension(const CefString& extension_id) = 0;
-
-  ///
-  /// Retrieve the list of all extensions that this context has access to (see
-  /// HasExtension). |extension_ids| will be populated with the list of
-  /// extension ID values. Returns true on success. This method must be called
-  /// on the browser process UI thread.
-  ///
-  /*--cef()--*/
-  virtual bool GetExtensions(std::vector<CefString>& extension_ids) = 0;
-
-  ///
-  /// Returns the extension matching |extension_id| or NULL if no matching
-  /// extension is accessible in this context (see HasExtension). This method
-  /// must be called on the browser process UI thread.
-  ///
-  /*--cef()--*/
-  virtual CefRefPtr<CefExtension> GetExtension(
-      const CefString& extension_id) = 0;
 
   ///
   /// Returns the MediaRouter object associated with this context.  If
@@ -381,6 +322,49 @@ class CefRequestContext : public CefPreferenceManager {
                                  const CefString& top_level_url,
                                  cef_content_setting_types_t content_type,
                                  cef_content_setting_values_t value) = 0;
+
+#if CEF_API_ADDED(13401)
+  ///
+  /// Add an observer for content and website setting changes. The observer will
+  /// remain registered until the returned Registration object is destroyed.
+  /// This method must be called on the browser process UI thread.
+  ///
+  /*--cef(added=13401)--*/
+  virtual CefRefPtr<CefRegistration> AddSettingObserver(
+      CefRefPtr<CefSettingObserver> observer) = 0;
+#endif
+
+  ///
+  /// Sets the Chrome color scheme for all browsers that share this request
+  /// context. |variant| values of SYSTEM, LIGHT and DARK change the underlying
+  /// color mode (e.g. light vs dark). Other |variant| values determine how
+  /// |user_color| will be applied in the current color mode. If |user_color| is
+  /// transparent (0) the default color will be used.
+  ///
+  /*--cef()--*/
+  virtual void SetChromeColorScheme(cef_color_variant_t variant,
+                                    cef_color_t user_color) = 0;
+
+  ///
+  /// Returns the current Chrome color scheme mode (SYSTEM, LIGHT or DARK). Must
+  /// be called on the browser process UI thread.
+  ///
+  /*--cef(default_retval=CEF_COLOR_VARIANT_SYSTEM)--*/
+  virtual cef_color_variant_t GetChromeColorSchemeMode() = 0;
+
+  ///
+  /// Returns the current Chrome color scheme color, or transparent (0) for the
+  /// default color. Must be called on the browser process UI thread.
+  ///
+  /*--cef(default_retval=0)--*/
+  virtual cef_color_t GetChromeColorSchemeColor() = 0;
+
+  ///
+  /// Returns the current Chrome color scheme variant. Must be called on the
+  /// browser process UI thread.
+  ///
+  /*--cef(default_retval=CEF_COLOR_VARIANT_SYSTEM)--*/
+  virtual cef_color_variant_t GetChromeColorSchemeVariant() = 0;
 };
 
 #endif  // CEF_INCLUDE_CEF_REQUEST_CONTEXT_H_

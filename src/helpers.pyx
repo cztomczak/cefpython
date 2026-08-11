@@ -47,15 +47,37 @@ def ExceptHook(exc_type, exc_value, exc_trace):
     os._exit(1)
 
 
+def UnraisableHook(unraisable):
+    """Global unraisable hook, companion to ExceptHook.
+
+    sys.unraisablehook is Python's global hook for exceptions that cannot be
+    propagated to a caller. cefpython's public callbacks are called from CEF's
+    C++ and declared "noexcept with gil", so an exception escaping one is
+    reported here instead of unwinding into C++; the same applies to Python's
+    own unraisable cases (e.g. errors in __del__ or during garbage collection).
+    Each callback normally forwards exceptions to sys.excepthook itself, so
+    this hook is the backstop for the ones that escape that guard. By default
+    sys.unraisablehook only prints to stderr and is easy to miss; assigning
+    this hook routes such exceptions through ExceptHook so they are written to
+    "error.log", printed, and CEF is shut down cleanly.
+    """
+    ExceptHook(unraisable.exc_type, unraisable.exc_value,
+               unraisable.exc_traceback)
+
+
 cpdef str GetModuleDirectory():
     """Get path to the cefpython module (so/pyd)."""
-    if platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):
+    if hasattr(sys, "frozen"):
+        # PyInstaller stores collected binaries/data under _MEIPASS (for
+        # example Contents/Frameworks in a macOS app), which is not always the
+        # directory containing the frozen executable. Other freezers that do
+        # not expose _MEIPASS retain the legacy executable-directory layout.
+        path = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+    elif platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):
         # cefpython3 package __init__.py sets CEFPYTHON3_PATH.
         # When cefpython3 is installed as debian package, this
         # env variable is the only way of getting valid path.
         return os.getenv("CEFPYTHON3_PATH")
-    if hasattr(sys, "frozen"):
-        path = os.path.dirname(sys.executable)
     elif "__file__" in globals():
         path = os.path.dirname(os.path.realpath(__file__))
     else:

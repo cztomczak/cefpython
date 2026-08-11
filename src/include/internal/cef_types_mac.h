@@ -31,19 +31,16 @@
 #define CEF_INCLUDE_INTERNAL_CEF_TYPES_MAC_H_
 #pragma once
 
+#if !defined(GENERATING_CEF_API_HASH)
 #include "include/base/cef_build.h"
+#endif
 
 #if defined(OS_MAC)
 #include "include/internal/cef_string.h"
+#include "include/internal/cef_types_color.h"
 #include "include/internal/cef_types_geometry.h"
-
-// Handle types.
-// Actually NSCursor*
-#define cef_cursor_handle_t void*
-// Acutally NSEvent*
-#define cef_event_handle_t void*
-// Actually NSView*
-#define cef_window_handle_t void*
+#include "include/internal/cef_types_osr.h"
+#include "include/internal/cef_types_runtime.h"
 
 #define kNullCursorHandle NULL
 #define kNullEventHandle NULL
@@ -73,6 +70,16 @@
 extern "C" {
 #endif
 
+// Handle types.
+// Actually NSCursor*
+typedef void* cef_cursor_handle_t;
+// Actually NSEvent*
+typedef void* cef_event_handle_t;
+// Actually NSView*
+typedef void* cef_window_handle_t;
+// Actually IOSurface*
+typedef void* cef_shared_texture_handle_t;
+
 ///
 /// Structure representing CefExecuteProcess arguments.
 ///
@@ -85,6 +92,11 @@ typedef struct _cef_main_args_t {
 /// Class representing window information.
 ///
 typedef struct _cef_window_info_t {
+  ///
+  /// Size of this structure.
+  ///
+  size_t size;
+
   cef_string_t window_name;
 
   ///
@@ -134,7 +146,41 @@ typedef struct _cef_window_info_t {
   /// rendering.
   ///
   cef_window_handle_t view;
+
+  ///
+  /// Optionally change the runtime style. Alloy style will always be used if
+  /// |windowless_rendering_enabled| is true or if |parent_view| is provided.
+  /// See cef_runtime_style_t documentation for details.
+  ///
+  cef_runtime_style_t runtime_style;
 } cef_window_info_t;
+
+///
+/// Structure containing shared texture information for the OnAcceleratedPaint
+/// callback. Resources will be released to the underlying pool for reuse when
+/// the callback returns from client code.
+///
+typedef struct _cef_accelerated_paint_info_t {
+  ///
+  /// Size of this structure.
+  ///
+  size_t size;
+
+  ///
+  /// Handle for the shared texture IOSurface.
+  ///
+  cef_shared_texture_handle_t shared_texture_io_surface;
+
+  ///
+  /// The pixel format of the texture.
+  ///
+  cef_color_type_t format;
+
+  ///
+  /// The extra common info.
+  ///
+  cef_accelerated_paint_info_common_t extra;
+} cef_accelerated_paint_info_t;
 
 #ifdef __cplusplus
 }

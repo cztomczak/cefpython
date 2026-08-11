@@ -28,6 +28,10 @@ directory. If looking for non-trivial examples then see the
 
 - [cookies.py](cookies.py) - Shows how to fetch all cookies,
     all cookies for a given url and how to delete a specific cookie.
+- [crossdomain_bindings.py](crossdomain_bindings.py) - Test Javascript
+    bindings across a cross-domain navigation flow. Simulates an SSO/auth
+    redirect (app page → auth domain → back to app) and demonstrates that
+    bindings only fire for the intended target domain.
 - [javascript_bindings.py](javascript_bindings.py) - Communicate
     between Python and Javascript asynchronously using
     inter-process messaging with the use of Javascript Bindings.
@@ -41,8 +45,9 @@ directory. If looking for non-trivial examples then see the
     to execute custom code before browser window closes.
 - [ondomready.py](ondomready.py) - Execute custom Python code
     on a web page as soon as DOM is ready.
-- [onpagecomplete.py](onpagecomplete.py) - Execute custom
-    Python code on a web page when page loading is complete.
+- [onpagecomplete.py](onpagecomplete.py) - Execute custom Python
+    code on a web page after all visible content is loaded and painted,
+    using window.load and requestAnimationFrame.
 - [setcookie.py](setcookie.py) - Shows how to set a cookie
 - [window_size.py](window_size.py) - Set initial window size
     without use of any third party GUI framework.

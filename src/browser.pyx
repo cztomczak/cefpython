@@ -178,7 +178,7 @@ cpdef PyBrowser GetBrowserByIdentifier(int identifier):
     return None
 
 cdef public void PyBrowser_ShowDevTools(CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     # Called from ClientHandler::OnContextMenuCommand
     cdef PyBrowser pyBrowser
     try:
@@ -247,8 +247,8 @@ cdef class PyBrowser:
             #       cefpython.SetGlobalClientCallback().
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
-                    "OnQuotaRequest", "OnProtocolExecution",
-                    "GetResourceHandler", "OnBeforeBrowse", 
+                    "OnProtocolExecution", "GetResourceHandler",
+                    "OnBeforeBrowse",
                     "OnRendererProcessTerminated",
                     "CanSendCookie", "CanSaveCookie"]
             # RequestContextHandler
@@ -264,7 +264,6 @@ cdef class PyBrowser:
             # RenderHandler
             self.allowedClientCallbacks += ["GetRootScreenRect",
                     "GetViewRect", "GetScreenPoint", "GetScreenInfo",
-                    "GetScreenRect",
                     "OnPopupShow", "OnPopupSize", "OnPaint", "OnCursorChange",
                     "OnScrollOffsetChanged",
                     "StartDragging", "UpdateDragCursor",

@@ -36,7 +36,6 @@ NOTE: There are limits in Chromium on viewport size. For some
 """
 
 from cefpython3 import cefpython as cef
-from pkg_resources import parse_version
 import os
 import platform
 import subprocess
@@ -74,11 +73,13 @@ def main():
         # it using these Chromium switches (Issue #240 and #463)
         "disable-gpu": "",
         "disable-gpu-compositing": "",
-        # Tweaking OSR performance by setting the same Chromium flags
-        # as in upstream cefclient (Issue #240).
-        "enable-begin-frame-scheduling": "",
-        "disable-surfaces": "",  # This is required for PDF ext to work
     }
+    if not sys.platform.startswith("darwin"):
+        # Tweaking OSR performance (Issue #240). On macOS ARM the viz
+        # Surfaces API is required for OSR browser creation, so these
+        # switches must not be passed on macOS.
+        switches["enable-begin-frame-scheduling"] = ""
+        switches["disable-surfaces"] = ""  # This is required for PDF ext to work
     browser_settings = {
         # Tweaking OSR performance (Issue #240)
         "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
@@ -100,7 +101,7 @@ def check_versions():
            ver=platform.python_version(),
            arch=platform.architecture()[0]))
     print("[screenshot.py] Pillow {ver}".format(ver=PILLOW_VERSION))
-    assert parse_version(cef.__version__) >= parse_version("57.0"), "CEF Python v57.0+ required to run this"
+    assert tuple(int(x) for x in cef.__version__.split(".")) >= (57, 0), "CEF Python v57.0+ required to run this"
 
 
 def command_line_arguments():

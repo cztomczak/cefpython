@@ -89,7 +89,7 @@ cdef class JavascriptBindings:
         cdef dict properties
         cdef dict objects
         cdef dict methods
-        for browserId, pyBrowser in g_pyBrowsers.iteritems():
+        for browserId, pyBrowser in g_pyBrowsers.items():
             if pyBrowser.GetJavascriptBindings() != self:
                 continue
             # Send to the Renderer process: functions, properties,
@@ -142,7 +142,7 @@ cdef class JavascriptBindings:
             return True
         elif valueType == int:
             return True
-        elif valueType == long:
+        elif valueType == int:
             return True
         elif valueType == type(None):
             return True

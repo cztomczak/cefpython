@@ -38,7 +38,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnJavascriptDialog(
         const CefString& default_prompt_text,
         CefRefPtr[CefJSDialogCallback] callback,
         cpp_bool& suppress_message
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef py_string pyOriginUrl
     cdef py_string pyMessageText
@@ -78,7 +78,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(
         const CefString& message_text,
         cpp_bool is_reload,
         CefRefPtr[CefJSDialogCallback] callback
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef py_string pyMessageText
     cdef py_bool pyIsReload
@@ -109,7 +109,7 @@ cdef public cpp_bool JavascriptDialogHandler_OnBeforeUnloadJavascriptDialog(
 
 cdef public void JavascriptDialogHandler_OnResetJavascriptDialogState(
         CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser,
@@ -124,7 +124,7 @@ cdef public void JavascriptDialogHandler_OnResetJavascriptDialogState(
 
 cdef public void JavascriptDialogHandler_OnJavascriptDialogClosed(
         CefRefPtr[CefBrowser] cefBrowser,
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser,

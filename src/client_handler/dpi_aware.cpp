@@ -4,6 +4,8 @@
 
 // Windows only
 
+#ifdef _WIN32
+
 #pragma comment(lib, "Gdi32.lib")
 #include <math.h>
 
@@ -227,3 +229,4 @@ void SetBrowserDpiSettings(CefRefPtr<CefBrowser> cefBrowser,
     );
 }
 
+#endif  // _WIN32

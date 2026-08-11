@@ -4,8 +4,10 @@
 
 from cef_ptr cimport CefRefPtr
 from cef_browser cimport CefBrowser
+from libcpp.string cimport string as cpp_string
 
 cdef extern from "client_handler/util_mac.h":
     void MacInitialize()
     void MacShutdown()
+    cpp_string MacGetMainBundlePath()
     void MacSetWindowTitle(CefRefPtr[CefBrowser] browser, char* title)

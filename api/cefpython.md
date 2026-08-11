@@ -15,7 +15,6 @@ Table of contents:
   * [GetAppPath](#getapppath)
   * [GetBrowserByIdentifier](#getbrowserbyidentifier)
   * [GetBrowserByWindowHandle](#getbrowserbywindowhandle)
-  * [GetCommandLineSwitch](#getcommandlineswitch)
   * [GetDataUrl](#getdataurl)
   * [GetGlobalClientCallback](#getglobalclientcallback)
   * [GetModuleDirectory](#getmoduledirectory)
@@ -32,6 +31,7 @@ Table of contents:
   * [SetGlobalClientHandler](#setglobalclienthandler)
   * [SetOsModalLoop](#setosmodalloop)
   * [Shutdown](#shutdown)
+  * [UnraisableHook](#unraisablehook)
 
 
 ## Functions
@@ -62,9 +62,8 @@ This function can only be called on the UI thread.
 If the url is a local path it needs to start with the `file://` prefix.
 If the url contains special characters it may need proper handling.
 Starting with v66.1+ it is required for the app code to encode the url
-properly. You can use the `pathlib.PurePath.as_uri` in Python 3
-or `urllib.pathname2url` in Python 2 (`urllib.request.pathname2url`
-in Python 3) depending on your case.
+properly. You can use `pathlib.PurePath.as_uri` or
+`urllib.request.pathname2url` depending on your case.
 
 The "window_title" parameter will be used only when parent
 window provided in window_info was set to 0. This is for use
@@ -93,6 +92,9 @@ process, Renderer process, GPU process, etc.) by calling Shutdown().
 This hook does the following: in case of exception write it to
 the "error.log" file, display it to the console, shutdown CEF
 and exit application immediately by ignoring "finally" (_exit()).
+
+See also [UnraisableHook](#unraisablehook) for exceptions that escape a
+callback handler.
 
 See also Tutorial: [Handling Python exceptions](../docs/Tutorial.md#handling-python-exceptions).
 
@@ -137,16 +139,6 @@ calling `Browser.GetIdentifier`.
 | __Return__ | void |
 
 Get browser by outer or inner window handle. An outer window handle is the one that was passed to CreateBrowserSync(). An inner window handle is a CEF internal window handle.
-
-
-### GetCommandLineSwitch
-
-| Parameter | Type |
-| --- | --- |
-| key | string |
-| __Return__ | object |
-
-Returns the [CommandLineSwitches](CommandLineSwitches.md) switch that was passed to Initialize(). Returns None if key is not found.
 
 
 ### GetDataUrl
@@ -381,3 +373,24 @@ modal message loop. Set to false after exiting the modal message loop.
 This function should be called on the main application thread (UI thread) to shut down CEF before the application exits.
 
 You must call this function so that CEF shuts down cleanly. Remember also to delete all CEF browsers references for the browsers to shut down cleanly. For an example see the wxpython.py example MainFrame.OnClose().
+
+
+### UnraisableHook
+
+| Parameter | Type |
+| --- | --- |
+| unraisable | - |
+| __Return__ | void |
+
+Global unraisable hook, companion to [ExceptHook](#excepthook). Assign it
+with `sys.unraisablehook = cef.UnraisableHook`.
+
+Python reports some exceptions through
+[sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook)
+rather than `sys.excepthook`. By default these exceptions are printed only to
+stderr and are easy to miss.
+
+This hook forwards the exception to [ExceptHook](#excepthook), so it is
+written to the "error.log" file, printed, and CEF is shut down cleanly.
+
+See also Tutorial: [Handling Python exceptions](../docs/Tutorial.md#handling-python-exceptions).

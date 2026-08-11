@@ -9,12 +9,14 @@ cdef public void DisplayHandler_OnAddressChange(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         const CefString& cefUrl
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef py_string pyUrl
     cdef object callback
     try:
+        if not cefFrame.get().GetBrowser().get():
+            return
         pyBrowser = GetPyBrowser(cefBrowser, "OnAddressChange")
         pyFrame = GetPyFrame(cefFrame)
         pyUrl = CefToPyString(cefUrl)
@@ -29,7 +31,7 @@ cdef public void DisplayHandler_OnAddressChange(
 cdef public cpp_bool DisplayHandler_OnAutoResize(
         CefRefPtr[CefBrowser] cef_browser,
         const CefSize& new_size
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     cdef object callback
     try:
@@ -47,7 +49,7 @@ cdef public cpp_bool DisplayHandler_OnAutoResize(
 cdef public void DisplayHandler_OnTitleChange(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& cefTitle
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef py_string pyTitle
     cdef object callback
@@ -64,7 +66,7 @@ cdef public void DisplayHandler_OnTitleChange(
 cdef public cpp_bool DisplayHandler_OnTooltip(
         CefRefPtr[CefBrowser] cefBrowser,
         CefString& cefText
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef py_string pyText
     cdef list pyTextOut
@@ -88,7 +90,7 @@ cdef public cpp_bool DisplayHandler_OnTooltip(
 cdef public void DisplayHandler_OnStatusMessage(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& cefValue
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef py_string pyValue
     cdef object callback
@@ -108,7 +110,7 @@ cdef public cpp_bool DisplayHandler_OnConsoleMessage(
         const CefString& cefMessage,
         const CefString& cefSource,
         int line
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef py_string pyMessage
     cdef py_string pySource
@@ -132,7 +134,7 @@ cdef public cpp_bool DisplayHandler_OnConsoleMessage(
 cdef public void DisplayHandler_OnLoadingProgressChange(
         CefRefPtr[CefBrowser] cefBrowser,
         double progress
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef object callback
     try:
@@ -147,7 +149,7 @@ cdef public void DisplayHandler_OnLoadingProgressChange(
 cdef public cpp_bool DisplayHandler_OnCursorChange(
         CefRefPtr[CefBrowser] cefBrowser,
         CefCursorHandle cursor
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnCursorChange")

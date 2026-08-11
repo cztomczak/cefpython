@@ -1,0 +1,48 @@
+[build-system]
+requires = [
+    "scikit-build-core>=0.9",
+    "cython==3.2.9",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "cefpython3"
+dynamic = ["version"]
+requires-python = ">=3.10"
+license = { text = "BSD-3-Clause" }
+description = "Python bindings for the Chromium Embedded Framework"
+readme = { text = "CEF Python is an open source project founded by Czarek Tomczak in 2012 to provide python bindings for the Chromium Embedded Framework. Examples of embedding CEF browser are available for many popular GUI toolkits including: wxPython, PyQt, PySide, Kivy, Panda3D, PyGTK, PyGObject, PyGame/PyOpenGL and PyWin32.\n\nThere are many use cases for CEF. You can embed a web browser control based on Chromium with great HTML 5 support. You can use it to create a HTML 5 based GUI in an application, this can act as a replacement for standard GUI toolkits like wxWidgets, Qt or GTK. You can render web content off-screen in application that use custom drawing frameworks. You can use it for automated testing of existing applications. You can use it for web scraping or as a web crawler, or other kind of internet bots.\n\nProject website:\nhttps://github.com/cztomczak/cefpython", content-type = "text/plain" }
+authors = [
+    { name = "Czarek Tomczak", email = "czarek.tomczak@gmail.com" },
+]
+keywords = ["cef", "chromium", "browser", "embedded", "html5", "gui"]
+classifiers = [
+    "Development Status :: 6 - Mature",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Desktop Environment",
+    "Topic :: Internet",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Browsers",
+    "Topic :: Multimedia",
+    "Topic :: Software Development :: User Interfaces",
+]
+
+[project.urls]
+Homepage = "https://github.com/cztomczak/cefpython"
+Repository = "https://github.com/cztomczak/cefpython"
+Download = "https://github.com/cztomczak/cefpython/releases"
+
+[tool.scikit-build]
+cmake.build-type = "Release"
+wheel.packages = ["cefpython3"]

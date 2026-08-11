@@ -2,696 +2,362 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
-"""
-Build distribution packages for all architectures and all supported
-python versions.
+"""Create a distributable wheel from the pre-built cefpython3/ package directory.
+
+Packaging workflow (current):
+    This script performs only the final packaging step. The full pipeline is
+    driven by the CI workflows (.github/workflows/ci-*.yml):
+      1. tools/download_cef.py            - fetch the CEF binary distribution.
+      2. tools/automate.py --prebuilt-cef - lay out CEF_ROOT for the build.
+      3. CMake build                      - compile cefpython_py<XY>.{so,pyd}
+                                            and the subprocess helper(s).
+      4. stage into cefpython3/           - copy the compiled module, the
+                                            platform subprocess artifact(s)
+                                            and CEF runtime files next to
+                                            __init__.py. macOS uses five
+                                            process-specific Helper.app bundles.
+      5. build_distrib.py (this script)   - zip cefpython3/ into a PEP 427 wheel
+                                            with a generated .dist-info
+                                            (METADATA, WHEEL, top_level.txt,
+                                            RECORD). No compilation happens here.
+                                            On Linux, libcef.so is stripped of
+                                            debug symbols first (Issue #262; it
+                                            ships ~1.3 GB with them). On Windows,
+                                            msvcp140.dll is bundled next to the
+                                            extension (Issue #359).
+      6. (CI) install the wheel and run the unit tests against it.
 
 Usage:
-    build_distrib.py VERSION [--unittests] [--no-rebuild] [--no-automate]
-                             [--allow-partial]
+    build_distrib.py [--out-dir DIR] [--dev | --version VERSION]
 
 Options:
-    VERSION            Version number eg. 50.0
-    --unittests        Run only unit tests. Do not run examples while building
-                       cefpython modules. Examples require interaction such as
-                       closing window before proceeding.
-    --no-rebuild       Do not rebuild cefpython modules. For internal use
-                       so that changes to packaging can be quickly tested.
-    --no-automate      Do not run automate.py --prebuilt-cef. This flag
-                       allows to use CEF prebuilt binaries and libraries
-                       downloaded from CEF Python's Github releases to
-                       build distribution pacakges.
-    --allow-partial    Do not require all supported Python versions to
-                       be installed. If some are missing they just won't
-                       be included in distribution.
+    --out-dir DIR       Output directory for the .whl file (default: build/dist).
+    --dev               Produce a unique PEP 440 development version derived from
+                        git: <major>.0.dev<commit-count>+g<short-hash>
+                        (e.g. 147.0.dev5231+g98cd08e). Used by CI so every build
+                        has a distinct, commit-identifiable version. Requires the
+                        full git history (checkout with fetch-depth: 0).
+    --version VERSION   Use VERSION verbatim (overrides --dev and the header).
 
+The cefpython3/ directory must already contain the compiled outputs and CEF
+runtime. Windows/Linux use a flat subprocess executable; macOS uses five
+sibling ``cefpython Helper*.app`` bundles.
 
-This script does the following:
-1. Expects that all supported python versions are installed
-   a) On Windows search for Pythons in the multiple default install
-      locations
-   b) On Linux use only Pythons from ~/.pyenv/versions/
-      directory
-   c) On Mac use Pythons from ~/.pyenv/versions/ and /usr/local/bin/python
-      For example will use Python 2.7.13 from /usr/local/bin/ only
-      when 2.7 was not found in ~/.pyenv/versions/.
-2. Expects that all python compilers for supported python versions
-   are installed. See docs/Build-instructions.md > Requirements.
-3. Expects cef_binary*/ directories from Spotify Automated Builds
-   to be in the build/ directory. It does not rebuild cefclient
-   nor libcef_dll_wrapper libraries in these directories. If you
-   would like to rebuild everything from scratch then delete subdirs
-   manually (build_cefclient/, build_wrapper*/).
-   When building CEF from sources copy build/chromium/src/cef/binary_distrib
-   /cef_binary_*/ to the build/ directory.
-4. Install and/or upgrade tools/requirements.txt and uninstall
-   cefpython3 packages for all python versions
-5. Run automate.py --prebuilt-cef using both Python 32-bit and Python 64-bit
-6. Pack the prebuilt biaries using zip on Win/Mac and .tar.gz on Linux
-   and move to build/distrib/
-7. Reduce packages size (Issue #321). After packing prebuilt binaries,
-   reduce its size so that packages will use the reduced prebuilt binaries.
-8. Build cefpython modules for all supported Python versions on both
-   32-bit and 64-bit. Backup and restore subprocess executable on Windows
-   built with Python 2.7 (Issue #342).
-9. Make setup installers and pack them to zip (Win/Mac) or .tar.gz (Linux)
-10. Make wheel packages
-11. Move setup and wheel packages to the build/distrib/ directory
-12. Test wheel packages installation and run unit tests using the
-    installed wheel package.
-13. Show summary
+The base version is read automatically from src/version/cef_version_*.h.
+Wheel metadata (name, summary, author, URLs, keywords, classifiers) is read
+from the [project] table in pyproject.toml, so the wheel and pyproject stay a
+single source of truth.
 """
 
-from common import *
+import base64
 import glob
+import hashlib
 import os
-import pprint
-import re
+import platform
 import shutil
+import stat
 import subprocess
-# import tarfile  # Currently using zip on all platforms
+import sys
+import sysconfig
 import zipfile
 
-# Command line args
-VERSION = ""
-UNITTESTS = False
-NO_REBUILD = False
-NO_AUTOMATE = False
-ALLOW_PARTIAL = False
+import cef_version
 
-# Python versions
-SUPPORTED_PYTHON_VERSIONS = [(2, 7), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13)]
 
-# Python search paths. It will use first Python found for specific version.
-# Supports replacement of one environment variable in path eg.: %ENV_KEY%.
-PYTHON_SEARCH_PATHS = dict(
-    WINDOWS=[
-        "C:\\Python??*\\",
-        "C:\\Pythons\\Python*\\",
-        "%LOCALAPPDATA%\\Programs\\Python\\Python*\\",
-        "C:\\Program Files\\Python*\\",
-        "C:\\Program Files (x86)\\Python*\\",
-    ],
-    LINUX=[
-        "%PYENV_ROOT%/versions/*/bin",
-    ],
-    MAC=[
-        "%PYENV_ROOT%/versions/*/bin",
-        "/usr/local/bin",
-    ],
-)
+MAC_HELPER_APP_NAMES = [
+    "cefpython Helper.app",
+    "cefpython Helper (Alerts).app",
+    "cefpython Helper (GPU).app",
+    "cefpython Helper (Plugin).app",
+    "cefpython Helper (Renderer).app",
+]
+
+try:
+    import tomllib  # Python 3.11+
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
 
 
 def main():
-    command_line_args()
-    supported = list()
-    for version in SUPPORTED_PYTHON_VERSIONS:
-        supported.append("{major}.{minor}".format(major=version[0],
-                                                  minor=version[1]))
-    print("[build_distrib.py] Supported python versions: {supported}"
-          .format(supported=" / ".join(supported)))
-    clean_build_directories()
-    if WINDOWS:
-        pythons_32bit = search_for_pythons("32bit")
-        pythons_64bit = search_for_pythons("64bit")
-    elif LINUX:
-        pythons_32bit = search_for_pythons("32bit") if ARCH32 else list()
-        pythons_64bit = search_for_pythons("64bit") if ARCH64 else list()
-    elif MAC:
-        pythons_32bit = list()
-        pythons_64bit = search_for_pythons("64bit")
+    out_dir = "build/dist"
+    if "--out-dir" in sys.argv:
+        out_dir = sys.argv[sys.argv.index("--out-dir") + 1]
+
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(repo_root)
+    os.makedirs(out_dir, exist_ok=True)
+
+    if "--version" in sys.argv:
+        version = sys.argv[sys.argv.index("--version") + 1]
+    elif "--dev" in sys.argv:
+        version = _dev_version(_read_version())
     else:
-        print("ERROR: Unsupported OS")
-        sys.exit(1)
-    check_pythons(pythons_32bit, pythons_64bit)
-    install_upgrade_requirements(pythons_32bit + pythons_64bit)
-    uninstall_cefpython3_packages(pythons_32bit + pythons_64bit)
-    if not os.path.exists(DISTRIB_DIR):
-        os.makedirs(DISTRIB_DIR)
-    if pythons_32bit:
-        if not NO_AUTOMATE:
-            run_automate_prebuilt_cef(pythons_32bit[0])
-        pack_prebuilt_cef("32bit")
-        if LINUX:
-            reduce_package_size_issue262("32bit")
-        remove_unnecessary_package_files("32bit")
-    if pythons_64bit:
-        if not NO_AUTOMATE:
-            run_automate_prebuilt_cef(pythons_64bit[0])
-        pack_prebuilt_cef("64bit")
-        if LINUX:
-            reduce_package_size_issue262("64bit")
-        remove_unnecessary_package_files("64bit")
-    if not NO_REBUILD:
-        build_cefpython_modules(pythons_32bit, "32bit")
-        build_cefpython_modules(pythons_64bit, "64bit")
-    if pythons_32bit:
-        make_packages(pythons_32bit[0], "32bit", pythons_32bit)
-    if pythons_64bit:
-        make_packages(pythons_64bit[0], "64bit", pythons_64bit)
-    test_wheel_packages(pythons_32bit + pythons_64bit)
-    show_summary(pythons_32bit, pythons_64bit)
+        version = _read_version()
+    print("[build_distrib.py] Version:", version)
+    vi = sys.version_info
+    cp = "cp{0}{1}".format(vi.major, vi.minor)
+    platform = _wheel_platform_tag()
 
+    wheel_name = "cefpython3-{v}-{cp}-{cp}-{p}.whl".format(
+        v=version, cp=cp, p=platform)
+    wheel_path = os.path.join(out_dir, wheel_name)
+    dist_info = "cefpython3-{v}.dist-info".format(v=version)
 
-def command_line_args():
-    global VERSION, UNITTESTS, NO_REBUILD, NO_AUTOMATE, ALLOW_PARTIAL
-    version = get_version_from_command_line_args(__file__)
-    if not version or "--help" in sys.argv:
-        print(__doc__)
+    pkg_dir = "cefpython3"
+    if not os.path.isdir(pkg_dir):
+        print("[build_distrib.py] ERROR: {pkg_dir}/ not found".format(
+            pkg_dir=pkg_dir))
         sys.exit(1)
-    VERSION = version
-    if "--unittests" in sys.argv:
-        UNITTESTS = True
-        sys.argv.remove("--unittests")
-    if "--no-rebuild" in sys.argv:
-        NO_REBUILD = True
-        sys.argv.remove("--no-rebuild")
-    if "--no-automate" in sys.argv:
-        NO_AUTOMATE = True
-        sys.argv.remove("--no-automate")
-    if "--allow-partial" in sys.argv:
-        ALLOW_PARTIAL = True
-        sys.argv.remove("--allow-partial")
-    args = sys.argv[1:]
-    for arg in args:
-        if arg == version:
-            continue
-        print("[build_distrib.py] Invalid argument: {arg}".format(arg=arg))
+    ext = ".pyd" if sys.platform == "win32" else ".so"
+    if not glob.glob(os.path.join(pkg_dir, "cefpython_py*" + ext)):
+        print("[build_distrib.py] ERROR: no cefpython_py*{ext} in {pkg_dir}/,"
+              " run compile step first".format(ext=ext, pkg_dir=pkg_dir))
         sys.exit(1)
 
+    _validate_macos_helpers(pkg_dir)
+    _reduce_package_size_issue262(pkg_dir)
+    _bundle_msvcp140_issue359(pkg_dir)
 
-def clean_build_directories():
-    print("[build_distrib.py] Clean build directories")
+    records = []
 
-    # Delete distrib dir
-    if os.path.exists(DISTRIB_DIR):
-        print("[build_distrib.py] Delete directory: {distrib_dir}/"
-              .format(distrib_dir=os.path.basename(DISTRIB_DIR)))
-        shutil.rmtree(DISTRIB_DIR)
+    def _add_bytes(arcname, data):
+        digest = base64.urlsafe_b64encode(
+            hashlib.sha256(data).digest()).rstrip(b"=").decode()
+        records.append((arcname, "sha256=" + digest, str(len(data))))
+        zf.writestr(arcname, data)
 
-    if not NO_REBUILD:
-        # Delete build_cefpython/ dir
-        if os.path.exists(BUILD_CEFPYTHON):
-            print("[build_distirb.py] Delete directory: {dir}/"
-                  .format(dir=os.path.basename(BUILD_CEFPYTHON)))
-            shutil.rmtree(BUILD_CEFPYTHON)
-        # Delete cefpython_binary_*/ dirs
-        delete_cefpython_binary_dir("32bit")
-        delete_cefpython_binary_dir("64bit")
+    print("[build_distrib.py] Creating:", wheel_path)
 
-    # Delete cef binaries and libraries dirs
-    if not NO_AUTOMATE:
-        # Delete cef binlib dir only if cef_binary dir exists,
-        # otherwise you will end up with cef binlib directory
-        # deleted and script failing further when calling
-        # automate.py --prebuilt-cef.
-        version = get_cefpython_version()
-        # 32-bit
-        if not MAC:
-            postfix2 = get_cef_postfix2_for_arch("32bit")
-            cef_binary_dir = "cef_binary_{cef_version}_{postfix2}"\
-                             .format(cef_version=version["CEF_VERSION"],
-                                     postfix2=postfix2)
-            if len(glob.glob(cef_binary_dir)) != 1:
-                raise Exception("Directory not found: "+cef_binary_dir)
-        # 64-bit
-        postfix2 = get_cef_postfix2_for_arch("64bit")
-        cef_binary_dir = "cef_binary_{cef_version}_windows64"\
-                         .format(cef_version=version["CEF_VERSION"],
-                                 postfix2=postfix2)
-        if len(glob.glob(cef_binary_dir)) != 1:
-            raise Exception("Directory not found: "+cef_binary_dir)
+    with zipfile.ZipFile(wheel_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        # Package files
+        for root, dirs, files in os.walk(pkg_dir):
+            dirs[:] = sorted(d for d in dirs if d != "__pycache__")
+            for filename in sorted(files):
+                if filename.endswith(".pyc"):
+                    continue
+                filepath = os.path.join(root, filename)
+                arcname = filepath.replace(os.sep, "/")
+                data = open(filepath, "rb").read()
+                digest = base64.urlsafe_b64encode(
+                    hashlib.sha256(data).digest()).rstrip(b"=").decode()
+                records.append((arcname, "sha256=" + digest, str(len(data))))
+                info = zipfile.ZipInfo.from_file(filepath, arcname)
+                # ZipInfo.from_file() defaults to ZIP_STORED; deflate so the
+                # wheel is actually compressed (matches the ZipFile mode).
+                info.compress_type = zipfile.ZIP_DEFLATED
+                zf.writestr(info, data)
 
-        # Delete
-        delete_cef_binaries_libraries_dir("32bit")
-        delete_cef_binaries_libraries_dir("64bit")
+        # dist-info/METADATA (all fields sourced from [project] in pyproject.toml
+        # so the wheel and pyproject stay a single source of truth)
+        _add_bytes(dist_info + "/METADATA",
+                   _core_metadata(version, _read_project_metadata()))
 
+        # dist-info/WHEEL
+        _add_bytes(dist_info + "/WHEEL", (
+            "Wheel-Version: 1.0\n"
+            "Generator: cefpython-build_distrib\n"
+            "Root-Is-Purelib: False\n"
+            "Tag: {cp}-{cp}-{p}\n"
+        ).format(cp=cp, p=platform).encode())
 
-def delete_cefpython_binary_dir(arch):
-    cefpython_binary = get_cefpython_binary_basename(
-            postfix2=get_os_postfix2_for_arch(arch))
-    assert cefpython_binary, cefpython_binary
-    cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary)
-    if os.path.exists(cefpython_binary):
-        print("[build_distrib.py] Delete directory: {dir}/"
-              .format(dir=os.path.basename(cefpython_binary)))
-        shutil.rmtree(cefpython_binary)
+        # dist-info/top_level.txt
+        _add_bytes(dist_info + "/top_level.txt", b"cefpython3\n")
 
+        # dist-info/RECORD (no hash for RECORD itself per wheel spec)
+        record_arcname = dist_info + "/RECORD"
+        records.append((record_arcname, "", ""))
+        record_data = "\n".join(
+            "{r},{h},{s}".format(r=r, h=h, s=s) for r, h, s in records) + "\n"
+        zf.writestr(record_arcname, record_data)
 
-def delete_cef_binaries_libraries_dir(arch):
-    cef_binlib = get_cef_binaries_libraries_basename(
-            postfix2=get_os_postfix2_for_arch(arch))
-    assert cef_binlib, cef_binlib
-    cef_binlib = os.path.join(BUILD_DIR, cef_binlib)
-    if os.path.exists(cef_binlib):
-        print("[build_distrib.py] Delete directory: {dir}/"
-              .format(dir=os.path.basename(cef_binlib)))
-        shutil.rmtree(cef_binlib)
+    print("[build_distrib.py] Done:", wheel_path)
 
 
-def search_for_pythons(search_arch):
-    """Returns pythons ordered by version from lowest to highest."""
-    pythons_found = list()
-    for pattern in PYTHON_SEARCH_PATHS[SYSTEM]:
-        # Replace env variable in path
-        match = re.search(r"%(\w+)%", pattern)
-        if match:
-            env_key = match.group(1)
-            if env_key in os.environ:
-                pattern = pattern.replace(match.group(0), os.environ[env_key])
-            else:
-                print("ERROR: Env variable not found: {env_key}"
-                      .format(env_key=env_key))
-                sys.exit(1)
-        results = glob.glob(pattern)
-        for path in results:
-            if os.path.isdir(path):
-                python = os.path.join(path,
-                                      "python{ext}".format(ext=EXECUTABLE_EXT))
-                version_code = ("import sys;"
-                                "print(str(sys.version_info[:3]));")
-                if not os.path.isfile(python):
-                    print("ERROR: Python executable not found: {executable}"
-                          .format(executable=python))
-                    sys.exit(1)
-                version_str = subprocess.check_output([python, "-c",
-                                                       version_code]).decode()
-                version_str = version_str.strip()
-                if sys.version_info >= (3, 0):
-                    version_str = version_str.decode("utf-8")
-                match = re.search("^\((\d+), (\d+), (\d+)\)$", version_str)
-                assert match, version_str
-                major = match.group(1)
-                minor = match.group(2)
-                micro = match.group(3)
-                version_tuple2 = (int(major), int(minor))
-                version_tuple3 = (int(major), int(minor), int(micro))
-                arch_code = ("import platform;"
-                             "print(str(platform.architecture()[0]));")
-                arch = subprocess.check_output([python, "-c", arch_code]).decode()
-                arch = arch.strip()
-                if sys.version_info >= (3, 0):
-                    arch = arch.decode("utf-8")
-                if version_tuple2 in SUPPORTED_PYTHON_VERSIONS \
-                        and arch == search_arch:
-                    name = ("Python {major}.{minor}.{micro} {arch}"
-                            .format(major=major, minor=minor, micro=micro,
-                                    arch=arch))
-                    pythons_found.append(dict(
-                        version2=version_tuple2,
-                        version3=version_tuple3,
-                        arch=arch,
-                        executable=python,
-                        name=name))
-    ret_pythons = list()
-    for version_tuple in SUPPORTED_PYTHON_VERSIONS:
-        supported_python = None
-        for python in pythons_found:
-            if python["version2"] == version_tuple:
-                supported_python = python
-                break
-        if supported_python:
-            ret_pythons.append(supported_python)
-    return ret_pythons
+def _wheel_platform_tag():
+    platform_tag = (sysconfig.get_platform()
+                    .replace("-", "_").replace(".", "_"))
+    if sys.platform == "darwin":
+        # setup-python provides a universal2 interpreter whose sysconfig tag
+        # remains universal2 even while its native arm64 slice is executing.
+        # The packaged CEF framework and helpers are arm64-only, so tag the
+        # payload architecture instead of copying the interpreter's tag.
+        machine = platform.machine().lower()
+        if machine != "arm64":
+            raise RuntimeError(
+                "macOS CEF distribution requires native arm64 Python; "
+                "got {0} ({1})".format(machine, platform_tag))
+        return "macosx_12_0_arm64"
+    return platform_tag
 
 
-def check_pythons(pythons_32bit, pythons_64bit):
-    check_32bit = True
-    check_64bit = True
-    if MAC:
-        check_32bit = False
-    elif LINUX:
-        if pythons_64bit:
-            check_32bit = False
-        elif pythons_32bit:
-            check_64bit = False
-
-    pp = pprint.PrettyPrinter(indent=4)
-    if pythons_32bit:
-        print("[build_distrib.py] Pythons 32-bit found:")
-        pp.pprint(pythons_32bit)
-    if check_32bit and len(pythons_32bit) != len(SUPPORTED_PYTHON_VERSIONS) \
-            and not ALLOW_PARTIAL:
-        print("[build_distrib.py] ERROR: Couldn't find all supported"
-              " python 32-bit installations. Found: {found}."
-              .format(found=len(pythons_32bit)))
-        sys.exit(1)
-    if pythons_64bit:
-        print("[build_distrib.py] Pythons 64-bit found:")
-        pp.pprint(pythons_64bit)
-    if check_64bit and len(pythons_64bit) != len(SUPPORTED_PYTHON_VERSIONS) \
-            and not ALLOW_PARTIAL:
-        print("[build_distrib.py] ERROR: Couldn't find all supported"
-              " python 64-bit installations. Found: {found}."
-              .format(found=len(pythons_64bit)))
-        sys.exit(1)
-
-
-def install_upgrade_requirements(pythons):
-    for python in pythons:
-        print("[build_distrib.py] pip install/upgrade requirements.txt"
-              " for: {name}".format(name=python["name"]))
-
-        # Upgrade pip
-        pip_version = "pip"
-        # Old Python versions require specific versions of pip, latest versions are broken with these.
-        if python["version2"] == (2, 7):
-            pip_version = "pip==20.3.4"
-        elif python["version2"] == (3, 4):
-            pip_version = "pip==19.1.1"
-        command = ("\"{python}\" -m pip install --upgrade {pip_version}"
-                   .format(python=python["executable"], pip_version=pip_version))
-        command = sudo_command(command, python=python["executable"])
-        pcode = subprocess.call(command, shell=True)
-        if pcode != 0:
-            print("[build_distrib.py] ERROR while upgrading pip")
-            sys.exit(1)
-
-        # Install/upgrade requirements.txt
-        requirements = os.path.join(TOOLS_DIR, "requirements.txt")
-        command = ("\"{python}\" -m pip install --upgrade -r {requirements}"
-                   .format(python=python["executable"],
-                           requirements=requirements))
-        command = sudo_command(command, python=python["executable"])
-        pcode = subprocess.call(command, shell=True)
-        if pcode != 0:
-            print("[build_distrib.py] ERROR while running pip install/upgrade")
-            sys.exit(1)
-
-
-def uninstall_cefpython3_packages(pythons):
-    for python in pythons:
-        print("[build_distrib.py] Uninstall cefpython3 package"
-              " for: {name}".format(name=python["name"]))
-
-        # Check if package is installed
-        command = ("\"{python}\" -m pip show cefpython3"
-                   .format(python=python["executable"]))
-        try:
-            output = subprocess.check_output(command, shell=True).decode()
-        except subprocess.CalledProcessError as exc:
-            # pip show returns error code when package is not installed
-            output = exc.output
-        if not len(output.strip()):
-            # Package is not installed - info is an empty string
-            print("[build_distrib.py] Not installed")
-            continue
-
-        # Uninstall package. Only uninstall if package is installed,
-        # otherwise error code is returned.
-        command = ("\"{python}\" -m pip uninstall -y cefpython3"
-                   .format(python=python["executable"]))
-        command = sudo_command(command, python=python["executable"])
-        pcode = subprocess.call(command, shell=True)
-        if pcode != 0:
-            print("[build_distrib.py] ERROR while uninstall cefpython3"
-                  " package using pip")
-            sys.exit(1)
-
-
-def run_automate_prebuilt_cef(python):
-    print("[build_distrib.py] Run automate.py --prebuilt-cef for {arch}"
-          .format(arch=python["arch"]))
-    automate = os.path.join(TOOLS_DIR, "automate.py")
-    command = ("\"{python}\" {automate} --prebuilt-cef"
-               .format(python=python["executable"], automate=automate))
-    code = subprocess.call(command, shell=True)
-    if code != 0:
-        print("[build_distrib.py] ERROR while running automate.py")
-        sys.exit(1)
-
-
-def pack_prebuilt_cef(arch):
-    prebuilt_basename = get_cef_binaries_libraries_basename(
-                get_os_postfix2_for_arch(arch))
-    print("[build_distrib.py] Pack directory: {dir}/ ..."
-          .format(dir=prebuilt_basename))
-    prebuilt_dir = os.path.join(BUILD_DIR, prebuilt_basename)
-    assert os.path.exists(prebuilt_dir), prebuilt_dir
-    archive = pack_directory(prebuilt_dir, base_path=BUILD_DIR)
-    shutil.move(archive, DISTRIB_DIR)
-    print("[build_distrib.py] Created archive in distrib dir: {archive}"
-          .format(archive=os.path.basename(archive)))
-
-
-def pack_directory(path, base_path):
-    if path.endswith(os.path.sep):
-        path = path[:-1]
-    # ext = ".zip" if WINDOWS or MAC else ".tar.gz"
-    ext = ".zip"
-    archive = path + ext
-    if os.path.exists(archive):
-        os.remove(archive)
-    if WINDOWS or MAC:
-        zip_directory(path, base_path=base_path, archive=archive)
-    else:
-        zip_directory(path, base_path=base_path, archive=archive)
-        # with tarfile.open(archive, "w:gz") as tar:
-        #     tar.add(path, arcname=os.path.basename(path))
-    assert os.path.isfile(archive), archive
-    return archive
-
-
-def zip_directory(path, base_path, archive):
-    original_dir = os.getcwd()
-    os.chdir(base_path)
-    path = path.replace(base_path, "")
-    if path[0] == os.path.sep:
-        path = path[1:]
-    zipf = zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED)
-    for root, dirs, files in os.walk(path):
-        for file_ in files:
-            zipf.write(os.path.join(root, file_))
-    zipf.close()
-    os.chdir(original_dir)
-
-
-def reduce_package_size_issue262(arch):
-    """Linux only: libcef.so is huge (500 MB) in Chrome v54+. Issue #262."""
-    print("[build_distrib.py] Reduce package size for {arch} (Issue #262)"
-          .format(arch=arch))
-    prebuilt_basename = get_cef_binaries_libraries_basename(
-                get_os_postfix2_for_arch(arch))
-    bin_dir = os.path.join(prebuilt_basename, "bin")
-
-    # Run `strip` command on `libcef.so`
-    libcef_so = os.path.join(bin_dir, "libcef.so")
-    print("[build_distrib.py] Strip {libcef_so}"
-          .format(libcef_so=os.path.basename(libcef_so)))
-    command = "strip {libcef_so}".format(libcef_so=libcef_so)
-    pcode = subprocess.call(command, shell=True)
-    assert pcode == 0, "strip command failed"
-
-
-def remove_unnecessary_package_files(arch):
-    """Do not ship sample applications (cefclient etc) with the package.
-    They increase size and also are an additional unnecessary factor
-    when dealing with false-positives in Anti-Virus software."""
-    print("[build_distrib.py] Reduce package size for {arch} (Issue #321)"
-          .format(arch=arch))
-    prebuilt_basename = get_cef_binaries_libraries_basename(
-                get_os_postfix2_for_arch(arch))
-    bin_dir = os.path.join(prebuilt_basename, "bin")
-    delete_cef_sample_apps(caller_script=__file__, bin_dir=bin_dir)
-
-
-def build_cefpython_modules(pythons, arch):
-    for python in pythons:
-        print("[build_distrib.py] Build cefpython module for {python_name}"
-              .format(python_name=python["name"]))
-        flags = ""
-        if UNITTESTS:
-            flags += " --unittests"
-        # On Linux/Mac Makefiles are used and must pass --clean flag
-        command = ("\"{python}\" {build_py} {version} --clean {flags}"
-                   .format(python=python["executable"],
-                           build_py=os.path.join(TOOLS_DIR, "build.py"),
-                           version=VERSION,
-                           flags=flags))
-        # build.py may require sudo if system python, so shell=True
-        pcode = subprocess.call(command, shell=True)
-        if pcode != 0:
-            print("[build_distrib.py] ERROR: failed to build cefpython"
-                  " module for {python_name}"
-                  .format(python_name=python["name"]))
-            sys.exit(1)
-        print("[build_distrib.py] Built successfully cefpython module for"
-              " {python_name}".format(python_name=python["name"]))
-        # Issue #342
-        backup_subprocess_executable_issue342(python)
-
-    # Issue #342
-    restore_subprocess_executable_issue342(arch)
-
-    print("[build_distrib.py] Successfully built cefpython modules for {arch}"
-          .format(arch=arch))
-
-
-def backup_subprocess_executable_issue342(python):
-    """Use subprocess executable built by Python 3.4 to have the least amount of
-    false-positives by AVs. Windows-only issue."""
-    if not WINDOWS:
+def _validate_macos_helpers(pkg_dir):
+    """Fail before packaging an incomplete or non-executable helper set."""
+    if sys.platform != "darwin":
         return
-    if python["version2"] == (2, 7):
-        print("[build_distrib.py] Backup subprocess executable built"
-              " with Python 3.4 (Issue #342)")
-        cefpython_binary_basename = get_cefpython_binary_basename(
-                get_os_postfix2_for_arch(python["arch"]))
-        cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary_basename)
-        assert os.path.isdir(cefpython_binary)
-        src = os.path.join(cefpython_binary, "subprocess.exe")
-        dst = os.path.join(BUILD_CEFPYTHON,
-                           "subprocess_py34_{arch}_issue342.exe"
-                           .format(arch=python["arch"]))
-        shutil.copy(src, dst)
+
+    expected = set(MAC_HELPER_APP_NAMES)
+    found = {
+        os.path.basename(path)
+        for path in glob.glob(os.path.join(pkg_dir, "cefpython Helper*.app"))
+        if os.path.isdir(path)
+    }
+    if found != expected:
+        missing = sorted(expected - found)
+        unexpected = sorted(found - expected)
+        details = []
+        if missing:
+            details.append("missing: " + ", ".join(missing))
+        if unexpected:
+            details.append("unexpected: " + ", ".join(unexpected))
+        raise RuntimeError("invalid macOS helper bundle set ({0})".format(
+            "; ".join(details)))
+
+    for name in MAC_HELPER_APP_NAMES:
+        app = os.path.join(pkg_dir, name)
+        executable = os.path.join(
+            app, "Contents", "MacOS", os.path.splitext(name)[0])
+        info_plist = os.path.join(app, "Contents", "Info.plist")
+        if not os.path.isfile(info_plist):
+            raise RuntimeError("missing helper Info.plist: " + info_plist)
+        if not os.path.isfile(executable):
+            raise RuntimeError("missing helper executable: " + executable)
+        if not os.stat(executable).st_mode & stat.S_IXUSR:
+            raise RuntimeError("helper is not executable: " + executable)
 
 
-def restore_subprocess_executable_issue342(arch):
-    """Use subprocess executable built by Python 3.4 to have the least amount of
-    false-positives by AVs. Windows-only issue."""
-    if not WINDOWS:
+def _read_project_metadata():
+    """Return the [project] table from pyproject.toml (CWD is the repo root)."""
+    with open("pyproject.toml", "rb") as f:
+        return tomllib.load(f).get("project", {})
+
+
+def _core_metadata(version, project):
+    """Build wheel core metadata (METADATA) from the [project] table.
+
+    Version is passed in (it is dynamic, computed from the CEF header / git);
+    everything else comes from pyproject.toml so there is a single source.
+    """
+    lines = [
+        "Metadata-Version: 2.1",
+        "Name: " + project.get("name", "cefpython3"),
+        "Version: " + version,
+    ]
+    if project.get("description"):
+        lines.append("Summary: " + project["description"])
+    for author in project.get("authors", []):
+        if author.get("name"):
+            lines.append("Author: " + author["name"])
+        if author.get("email"):
+            lines.append("Author-email: " + author["email"])
+    lic = project.get("license")
+    if isinstance(lic, dict) and lic.get("text"):
+        lines.append("License: " + lic["text"])
+    elif isinstance(lic, str):
+        lines.append("License: " + lic)
+    if project.get("requires-python"):
+        lines.append("Requires-Python: " + project["requires-python"])
+    if project.get("keywords"):
+        lines.append("Keywords: " + ",".join(project["keywords"]))
+    for label, url in project.get("urls", {}).items():
+        lines.append("Project-URL: {0}, {1}".format(label, url))
+    for classifier in project.get("classifiers", []):
+        lines.append("Classifier: " + classifier)
+
+    # Long description (Description body). PEP 621 readme: a table with an
+    # inline "text" (+ "content-type") or a "file", or a bare filename string.
+    body = ""
+    readme = project.get("readme")
+    if isinstance(readme, dict):
+        content_type = readme.get("content-type", "text/plain")
+        if readme.get("text"):
+            body = readme["text"]
+        elif readme.get("file"):
+            with open(readme["file"], encoding="utf-8") as f:
+                body = f.read()
+        if body:
+            lines.append("Description-Content-Type: " + content_type)
+    elif isinstance(readme, str):
+        with open(readme, encoding="utf-8") as f:
+            body = f.read()
+        lines.append("Description-Content-Type: text/markdown")
+
+    header = "\n".join(lines) + "\n"
+    # The description body follows the headers, separated by one blank line.
+    if body:
+        return (header + "\n" + body + "\n").encode("utf-8")
+    return header.encode("utf-8")
+
+
+def _reduce_package_size_issue262(pkg_dir):
+    """Linux only: strip DWARF debug info from libcef.so (Issue #262).
+
+    CEF ships libcef.so at ~1.3 GB, almost all of it DWARF debug info
+    (.debug_*), which would bloat the Linux wheel far beyond the other
+    platforms. `strip --strip-debug` removes the DWARF sections but KEEPS the
+    symbol table (.symtab), so CEF crash backtraces still symbolize to function
+    names when reporting issues upstream. A full `strip` would also drop
+    .symtab and leave crashes unsymbolized (only the ~1.6k exported .dynsym
+    names would resolve). Keeping .symtab costs ~25 MB compressed per wheel
+    (libcef.so ~252 MB -> ~428 MB uncompressed) but not the DWARF's ~1 GB.
+    """
+    if not sys.platform.startswith("linux"):
         return
-    print("[build_distrib.py] Restore subprocess executable built"
-          " with Python 3.4 (Issue #342)")
-    cefpython_binary_basename = get_cefpython_binary_basename(
-            get_os_postfix2_for_arch(arch))
-    cefpython_binary = os.path.join(BUILD_DIR, cefpython_binary_basename)
-    assert os.path.isdir(cefpython_binary)
-    src = os.path.join(BUILD_CEFPYTHON,
-                       "subprocess_py34_{arch}_issue342.exe"
-                       .format(arch=arch))
-    assert os.path.isfile(src)
-    dst = os.path.join(cefpython_binary, "subprocess.exe")
-    shutil.copy(src, dst)
-
-
-def make_packages(python, arch, all_pythons):
-    """Make setup and wheel packages."""
-    print("[build_distrib.py] Make setup package for {arch}..."
-          .format(arch=arch))
-
-    # Call make_installer.py
-    make_installer_py = os.path.join(TOOLS_DIR, "make_installer.py")
-    installer_command = ("\"{python}\" {make_installer_py} {version}"
-                         .format(python=python["executable"],
-                                 make_installer_py=make_installer_py,
-                                 version=VERSION))
-    pcode = subprocess.call(installer_command, cwd=BUILD_DIR, shell=True)
-    if pcode != 0:
-        print("[build_distrib.py] ERROR: failed to make setup package for"
-              " {arch}".format(arch=arch))
-        sys.exit(1)
-
-    # Pack setup package and move to distrib dir
-    print("[build_distrib.py] Pack setup package for {arch}..."
-          .format(arch=arch))
-    setup_basename = get_setup_installer_basename(
-            VERSION, get_os_postfix2_for_arch(arch))
-    setup_dir = os.path.join(BUILD_DIR, setup_basename)
-    check_cpp_extension_dependencies_issue359(setup_dir, all_pythons)
-    archive = pack_directory(setup_dir, BUILD_DIR)
-    shutil.move(archive, DISTRIB_DIR)
-
-    # Make wheel package
-    print("[build_distrib.py] Make wheel package for {arch}..."
-          .format(arch=arch))
-    wheel_args = "bdist_wheel --universal"
-    wheel_command = ("\"{python}\" setup.py {wheel_args}"
-                     .format(python=python["executable"],
-                             wheel_args=wheel_args))
-    pcode = subprocess.call(wheel_command, cwd=setup_dir, shell=True)
-    if pcode != 0:
-        print("[build_distrib.py] ERROR: failed to make wheel package for"
-              " {arch}".format(arch=arch))
-        sys.exit(1)
-
-    # Move wheel package
-    files = glob.glob(os.path.join(setup_dir, "dist", "*.whl"))
-    assert len(files) == 1, ".whl file not found"
-    shutil.move(files[0], DISTRIB_DIR)
-
-    # Delete setup directory
-    print("[build_distrib.py] Delete setup directory: {setup_dir}/"
-          .format(setup_dir=os.path.basename(setup_dir)))
-    shutil.rmtree(setup_dir)
-
-
-def check_cpp_extension_dependencies_issue359(setup_dir, all_pythons):
-    """Windows only: check if msvcpXX.dll exist for all Python versions.
-    Issue #359."""
-    if not WINDOWS:
+    libcef_so = os.path.join(pkg_dir, "libcef.so")
+    if not os.path.exists(libcef_so):
         return
-    checked_any = False
-    for python in all_pythons:
-        if python["version2"] in ((3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13)):
-            checked_any = True
-            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
-                                               "msvcp140.dll")):
-                raise Exception("C++ ext dependency missing: msvcp140.dll")
-        elif python["version2"] == (3, 4):
-            checked_any = True
-            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
-                                               "msvcp100.dll")):
-                raise Exception("C++ ext dependency missing: msvcp100.dll")
-        elif python["version2"] == (2, 7):
-            if not os.path.exists(os.path.join(setup_dir, "cefpython3",
-                                               "msvcp90.dll")):
-                raise Exception("C++ ext dependency missing: msvcp90.dll")
-            checked_any = True
-    assert checked_any
+    before = os.path.getsize(libcef_so)
+    print("[build_distrib.py] Strip {0} (Issue #262)".format(
+        os.path.basename(libcef_so)))
+    code = subprocess.call(["strip", "--strip-debug", libcef_so])
+    assert code == 0, "strip command failed"
+    print("[build_distrib.py] libcef.so: {0:.0f} MB -> {1:.0f} MB".format(
+        before / 1e6, os.path.getsize(libcef_so) / 1e6))
 
 
-def test_wheel_packages(pythons):
-    """Test wheel packages installation and run unit tests."""
-    uninstall_cefpython3_packages(pythons)
-    for python in pythons:
-        print("[build_distrib.py] Test wheel package (install, unittests) for"
-              " {python_name}".format(python_name=python["name"]))
-        platform_tag = get_pypi_postfix2_for_arch(python["arch"])
-        whl_pattern = (r"*{platform_tag}.whl"
-                       .format(platform_tag=platform_tag))
-        wheels = glob.glob(os.path.join(DISTRIB_DIR, whl_pattern))
-        assert len(wheels) == 1, ("No wheels found in distrib dir for %s"
-                                  % python["arch"])
+def _bundle_msvcp140_issue359(pkg_dir):
+    """CEF Python module is written in Cython and is a Python C++
+    extension and depends on msvcp140.dll. See Issue #359. These
+    dependencies are not included with Python binaries from Python.org.
 
-        # Install wheel
-        command = ("\"{python}\" -m pip install {wheel}"
-                   .format(python=python["executable"],
-                           wheel=os.path.basename(wheels[0])))
-        command = sudo_command(command, python=python["executable"])
-        pcode = subprocess.call(command, cwd=DISTRIB_DIR, shell=True)
-        if pcode != 0:
-            print("[build_distrib.py] Wheel package installation failed for"
-                  " {python_name}".format(python_name=python["name"]))
-            sys.exit(1)
-
-        # Run unittests using the installed wheel package
-        command = ("\"{python}\" {unittests}"
-                   .format(python=python["executable"],
-                           unittests=os.path.join(UNITTESTS_DIR,
-                                                  "_test_runner.py")))
-        pcode = subprocess.call(command, cwd=DISTRIB_DIR, shell=True)
-        if pcode != 0:
-            print("[build_distrib.py] ERROR: Unit tests failed for"
-                  " {python_name}".format(python_name=python["name"]))
-            sys.exit(1)
+    Ported from make_installer.py (copy_cpp_extension_dependencies_issue359):
+    copy msvcp140.dll from %SYSTEMROOT%\\System32 next to the extension.
+    Python does ship vcruntime140.dll / vcruntime140_1.dll, so msvcp140.dll
+    is the only gap.
+    """
+    if sys.platform != "win32":
+        return
+    system32 = os.path.join(os.environ.get("SYSTEMROOT", r"C:\Windows"),
+                            "System32")
+    src = os.path.join(system32, "msvcp140.dll")
+    if not os.path.exists(src):
+        raise Exception("C++ extension dll dependency not found: {0}"
+                        " (Issue #359)".format(src))
+    shutil.copy2(src, os.path.join(pkg_dir, "msvcp140.dll"))
+    print("[build_distrib.py] Bundle msvcp140.dll (Issue #359)")
 
 
-def show_summary(pythons_32bit, pythons_64bit):
-    print("[build_distrib.py] SUMMARY:")
-    print("  Pythons 32bit ({count})".format(count=len(pythons_32bit)))
-    for python in pythons_32bit:
-        print("    {python_name}".format(python_name=python["name"]))
-    print("  Pythons 64bit ({count})".format(count=len(pythons_64bit)))
-    for python in pythons_64bit:
-        print("    {python_name}".format(python_name=python["name"]))
-    files = glob.glob(os.path.join(DISTRIB_DIR, "*"))
-    print("  Files in the build/{distrib_basename}/ directory ({count})"
-          .format(distrib_basename=os.path.basename(DISTRIB_DIR),
-                  count=len(files)))
-    for file_ in files:
-        print("    {filename}".format(filename=os.path.basename(file_)))
-    print("[build_distrib.py] Everything OK. Distribution packages created.")
+def _dev_version(base):
+    """<base>.dev<commit-count>+g<short-hash> from git (PEP 440 dev version).
+
+    Gives every CI build a unique, commit-identifiable version, e.g.
+    147.0.dev5231+g98cd08e. Falls back to <base>.dev0 if git is unavailable.
+    """
+    try:
+        count = subprocess.check_output(
+            ["git", "rev-list", "--count", "HEAD"]).decode().strip()
+        short = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"]).decode().strip()
+        return "{base}.dev{count}+g{short}".format(
+            base=base, count=count, short=short)
+    except Exception as exc:
+        print("[build_distrib.py] WARNING: git version derivation failed"
+              " (%s); using %s.dev0" % (exc, base))
+        return base + ".dev0"
+
+
+def _read_version():
+    """Base wheel version <major>.0 from the CEF version header."""
+    return cef_version.read()["CHROME_VERSION_MAJOR"] + ".0"
 
 
 if __name__ == "__main__":
