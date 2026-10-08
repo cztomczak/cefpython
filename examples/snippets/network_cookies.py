@@ -9,7 +9,7 @@ from cefpython3 import cefpython as cef
 def main():
     cef.Initialize()
     browser = cef.CreateBrowserSync(
-        url="https://www.google.com/",
+        url="https://setcookie.net/foo",
         window_title="Network cookies")
     browser.SetClientHandler(RequestHandler())
     cef.MessageLoop()

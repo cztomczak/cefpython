@@ -9,7 +9,7 @@ from cefpython3 import cefpython as cef
 def main():
     cef.Initialize()
     browser = cef.CreateBrowserSync(
-        url="https://www.google.com/",
+        url="https://setcookie.net/foo",
         window_title="Cookies")
     browser.SetClientHandler(LoadHandler())
     cef.MessageLoop()
@@ -32,7 +32,7 @@ class LoadHandler(object):
             # To visit cookies only for a given url uncomment the
             # code below.
             """
-            url = "https://www.google.com/"
+            url = "https://setcookie.net/foo"
             http_only_cookies = False
             result = manager.VisitUrlCookies(url, http_only_cookies,
                                              self.cookie_visitor)

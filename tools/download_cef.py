@@ -87,7 +87,11 @@ def main():
     file_info = find_in_index(cef_version, cef_postfix2)
 
     filename = file_info["name"]
-    expected_sha1 = file_info.get("sha1", "")
+    expected_sha1 = file_info.get("sha1")
+    if not expected_sha1:
+        log("ERROR: No SHA1 checksum in the index for {}.".format(filename))
+        log("Refusing to download an archive that cannot be verified.")
+        sys.exit(1)
     file_size = int(file_info.get("size", 0))
     download_url = "{}/{}".format(SPOTIFY_CDN_BASE, filename)
     archive_path = os.path.join(build_dir, filename)
@@ -95,8 +99,7 @@ def main():
     log("File        : {}".format(filename))
     if file_size:
         log("Size        : {:.1f} MB".format(file_size / (1024 * 1024)))
-    if expected_sha1:
-        log("SHA1        : {}".format(expected_sha1))
+    log("SHA1        : {}".format(expected_sha1))
 
     if args.dry_run:
         log("Dry run — nothing downloaded.")
@@ -107,7 +110,7 @@ def main():
     # Download (skip if archive already present and valid)
     if os.path.isfile(archive_path):
         log("Archive already present, verifying checksum...")
-        if expected_sha1 and not verify_sha1(archive_path, expected_sha1):
+        if not verify_sha1(archive_path, expected_sha1):
             log("Checksum mismatch — re-downloading.")
             os.remove(archive_path)
             download(download_url, archive_path, file_size)
@@ -311,8 +314,6 @@ def verify_sha1(file_path, expected_sha1):
 
 def check_sha1(file_path, expected_sha1):
     """Verify SHA1; remove file and exit on mismatch."""
-    if not expected_sha1:
-        return
     log("Verifying SHA1...")
     if verify_sha1(file_path, expected_sha1):
         log("SHA1 OK.")
@@ -350,10 +351,13 @@ def _extract_tar(archive_path, dest_dir):
     with tarfile.open(archive_path, mode) as tf:
         members = tf.getmembers()
         total = len(members)
-        # filter= kwarg added in Python 3.12 to suppress deprecation warning
         extract_kwargs = {}
         if sys.version_info >= (3, 12):
             extract_kwargs["filter"] = "data"
+        else:
+            # Supported Python versions 3.10.12+ and 3.11.4+ provide
+            # tarfile.data_filter. Older 3.10/3.11 releases are not supported.
+            extract_kwargs["filter"] = tarfile.data_filter
         for i, member in enumerate(members, 1):
             tf.extract(member, dest_dir, **extract_kwargs)
             if i % 200 == 0 or i == total:

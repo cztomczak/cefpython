@@ -1,6 +1,6 @@
 """
 Execute custom Python code on a web page as soon as DOM is ready.
-Implements a custom "_OnDomReady" event using the OnContextCreated callback.
+Implements a custom "_OnDomReady" event in the LoadHandler object.
 """
 
 from cefpython3 import cefpython as cef
@@ -10,35 +10,32 @@ def main():
     cef.Initialize()
     browser = cef.CreateBrowserSync(url="https://example.com/",
                                     window_title="_OnDomReady event")
-    handler = DomReadyHandler(browser)
-    browser.SetClientHandler(handler)
+    load_handler = LoadHandler(browser)
+    browser.SetClientHandler(load_handler)
     bindings = cef.JavascriptBindings()
     bindings.SetFunction("LoadHandler_OnDomReady",
-                         handler["_OnDomReady"])
+                         load_handler["_OnDomReady"])
     browser.SetJavascriptBindings(bindings)
     cef.MessageLoop()
-    del handler
+    del load_handler
     del browser
     cef.Shutdown()
 
 
-class DomReadyHandler(object):
+class LoadHandler(object):
     def __init__(self, browser):
         self.browser = browser
 
     def __getitem__(self, key):
         return getattr(self, key)
 
-    def OnContextCreated(self, browser, frame, **_):
-        if not frame.IsMain():
-            return
+    def OnLoadStart(self, browser, **_):
         browser.ExecuteJavascript("""
-            if (document.readyState === "complete"
-                    || document.readyState === "interactive") {
-                setTimeout(function(){ LoadHandler_OnDomReady(); }, 0);
+            if (document.readyState === "complete") {
+                LoadHandler_OnDomReady();
             } else {
                 document.addEventListener("DOMContentLoaded", function() {
-                    setTimeout(function(){ LoadHandler_OnDomReady(); }, 0);
+                    LoadHandler_OnDomReady();
                 });
             }
         """)

@@ -129,9 +129,11 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(None)
         self.cef_widget = None
         self.navigation_bar = None
-        # True once CloseBrowser() has been requested; the window destruction
-        # is deferred until OnBeforeClose fires (see closeEvent / CloseHandler).
+        # _closing: CloseBrowser() was requested.
+        # _do_close_called: CEF called DoClose(), so the browser is
+        # committed to closing (see closeEvent / CloseHandler).
         self._closing = False
+        self._do_close_called = False
         if PYQT5:
             self.setWindowTitle("PyQt5 example")
         elif PYQT6:
@@ -186,20 +188,16 @@ class MainWindow(QMainWindow):
             self.container.installEventFilter(self.cef_widget)
 
     def closeEvent(self, event):
-        # Defer window destruction until the browser has fully closed.
-        #
-        # CloseBrowser() is asynchronous: CEF tears the browser down and then
-        # fires OnBeforeClose.  If we let Qt destroy this window now, the X11
-        # window that CEF is embedded into is destroyed out from under the
-        # still-live browser, which on a real GPU crashes the GPU process
-        # mid-eglSwapBuffers ("Failed to retrieve the size of the parent
-        # window") and leaves CEF's observer list non-empty at shutdown
-        # ("Check failed: observers_.empty()").  Instead ignore this close,
-        # ask CEF to close the browser, and let CloseHandler.OnBeforeClose
-        # re-trigger the close once the browser is gone.
-        if self.cef_widget.browser and not self._closing:
-            self._closing = True
-            self.cef_widget.browser.CloseBrowser(True)
+        # Don't destroy the window while the browser is still open.
+        # CloseBrowser() is asynchronous. CEF calls DoClose() and, if it
+        # returns False, sends a close event to this window. Only that
+        # event (or the one from OnBeforeClose) may be accepted. Close
+        # requests before that, e.g. a double click on the close button,
+        # are ignored.
+        if self.cef_widget.browser and not self._do_close_called:
+            if not self._closing:
+                self._closing = True
+                self.cef_widget.browser.CloseBrowser(True)
             event.ignore()
             return
         event.accept()
@@ -341,12 +339,16 @@ class CefApplication(QApplication):
 
 
 class CloseHandler(object):
-    # LifeSpanHandler: completes the deferred close started in
-    # MainWindow.closeEvent().  By the time OnBeforeClose fires the browser
-    # has been fully torn down by CEF, so it is now safe to destroy the Qt
-    # window (which owns the X11 window CEF was embedded into).
+    # LifespanHandler: completes the deferred close started in
+    # MainWindow.closeEvent().
     def __init__(self, main_window):
         self.main_window = main_window
+
+    def DoClose(self, browser, **_):
+        # Returning False makes CEF send a close event to the parent window,
+        # which closeEvent() now accepts.
+        self.main_window._do_close_called = True
+        return False
 
     def OnBeforeClose(self, browser, **_):
         self.main_window.clear_browser_references()

@@ -1,7 +1,6 @@
 """
-Execute custom Python code on a web page when all visible content is loaded.
-Implements a custom "_OnPageComplete" event that fires after window.load and
-a browser paint frame, ensuring content is fully rendered before notifying.
+Execute custom Python code on a web page when page loading is complete.
+Implements a custom "_OnPageComplete" event in the LoadHandler object.
 """
 
 from cefpython3 import cefpython as cef
@@ -11,43 +10,25 @@ def main():
     cef.Initialize()
     browser = cef.CreateBrowserSync(url="https://www.google.com/",
                                     window_title="_OnPageComplete event")
-    handler = PageCompleteHandler(browser)
-    browser.SetClientHandler(handler)
-    bindings = cef.JavascriptBindings()
-    bindings.SetFunction("LoadHandler_OnPageComplete",
-                         handler["_OnPageComplete"])
-    browser.SetJavascriptBindings(bindings)
+    browser.SetClientHandler(LoadHandler())
     cef.MessageLoop()
-    del handler
     del browser
     cef.Shutdown()
 
 
-class PageCompleteHandler(object):
-    def __init__(self, browser):
-        self.browser = browser
+class LoadHandler(object):
+    def OnLoadingStateChange(self, browser, is_loading, **_):
+        """For detecting if page loading has ended it is recommended
+        to use OnLoadingStateChange which is most reliable. The OnLoadEnd
+        callback also available in LoadHandler can sometimes fail in
+        some cases e.g. when image loading hangs."""
+        if not is_loading:
+            self._OnPageComplete(browser)
 
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def OnContextCreated(self, browser, frame, **_):
-        if not frame.IsMain():
-            return
-        browser.ExecuteJavascript("""
-            window.addEventListener("load", function() {
-                requestAnimationFrame(function() {
-                    LoadHandler_OnPageComplete();
-                });
-            });
-        """)
-
-    def _OnPageComplete(self):
+    def _OnPageComplete(self, browser):
         print("Page loading is complete!")
-        self.browser.ExecuteJavascript(
-            'setTimeout(function(){'
-            ' alert("Message from Python: Page loading is complete!");'
-            ' }, 0);'
-        )
+        browser.ExecuteFunction("alert", "Message from Python: Page loading"
+                                         " is complete!")
 
 
 if __name__ == '__main__':
