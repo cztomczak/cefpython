@@ -26,6 +26,7 @@ CEF_WOD_IGNORE_ACTION = cef_types.CEF_WOD_IGNORE_ACTION
 cdef public cpp_bool LifespanHandler_OnBeforePopup(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
+        int popupId,
         const CefString& targetUrl,
         const CefString& targetFrameName,
         cef_types.cef_window_open_disposition_t targetDisposition,
@@ -71,6 +72,7 @@ cdef public cpp_bool LifespanHandler_OnBeforePopup(
             returnValue = bool(callback(
                     browser=pyBrowser,
                     frame=pyFrame,
+                    popup_id=popupId,
                     target_url=pyTargetUrl,
                     target_frame_name=pyTargetFrameName,
                     target_disposition=targetDisposition,

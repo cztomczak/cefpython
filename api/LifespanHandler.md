@@ -74,6 +74,7 @@ additional usage information.
 | --- | --- |
 | browser | [Browser](Browser.md) |
 | frame | [Frame](Frame.md) |
+| popup_id | int |
 | target_url | string |
 | target_frame_name | string |
 | target_disposition | WindowOpenDisposition |

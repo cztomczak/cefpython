@@ -539,6 +539,7 @@ most important application-facing changes are:
 | `Browser.SetMouseCursorChangeDisabled()` / `IsMouseCursorChangeDisabled()` | Removed with no direct replacement. |
 | `Frame.LoadString(value, url)` | Use `Frame.LoadUrl()` with a `data:` URL. |
 | `Response.GetHeader(name)` | Renamed to `Response.GetHeaderByName(name)`. |
+| `LifespanHandler.OnBeforePopup(browser, frame, ...)` | A `popup_id` argument was added. |
 | `RequestHandler.GetAuthCredentials(browser, frame, ...)` | The `frame` argument was replaced by `origin_url`. |
 | `RequestHandler.CanGetCookies` / `CanSetCookie` | Replaced by `CanSendCookie(browser, frame, request, cookie)` and `CanSaveCookie(browser, frame, request, response, cookie)`. |
 | `RequestHandler.GetCookieManager`, `OnBeforePluginLoad`, and `OnPluginCrashed` | Removed. |
