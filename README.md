@@ -70,8 +70,8 @@ Mac | 2.7 | 3.4 / 3.5 / 3.6 / 3.7 | No | Yes | MacOS 10.9+
 
 ## Support
 
-- Ask questions and report problems on the
-  [Forum](https://groups.google.com/group/cefpython)
+- Ask questions and report problems on the [Discussions page](../../discussions).
+  You can also search the [Old Forum](https://groups.google.com/group/cefpython) for previous discussions.
 - Supported examples are listed in the
   [README-examples.md](examples/README-examples.md) file
 - Documentation is in the [docs/](docs) directory:
