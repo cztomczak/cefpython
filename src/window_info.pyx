@@ -131,7 +131,7 @@ cdef class WindowInfo:
                              list windowRect=None):
         # Allow parent window handle to be 0, in such case CEF will
         # create top window automatically as in hello_world.py example.
-        if sys.platform == "win32":
+        IF UNAME_SYSNAME == "Windows":
             # On Windows when parent window handle is 0 then SetAsPopup()
             # must be called instead.
             if parentWindowHandle == 0:
@@ -166,7 +166,7 @@ cdef class WindowInfo:
                         stacklevel=2,
                     )
         self.parentWindowHandle = parentWindowHandle
-        if sys.platform != "win32":
+        IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
             if not windowRect:
                 windowRect = [0,0,0,0]
         if windowRect:
