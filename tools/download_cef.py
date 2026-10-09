@@ -135,9 +135,10 @@ def main():
     if os.path.isdir(extract_dir):
         log("Done: {}".format(extract_dir))
     else:
-        log("WARNING: Expected directory not found after extraction:")
+        log("ERROR: Expected directory not found after extraction:")
         log("  {}".format(extract_dir))
         log("Check build/ for the extracted contents.")
+        sys.exit(1)
 
 
 def parse_args():
