@@ -845,7 +845,7 @@ def get_available_python_compilers():
     if not os.path.exists(VCVARS):
         print("[automate.py] ERROR: vcvarsall.bat not found: {}".format(VCVARS))
         return OrderedDict()
-    return OrderedDict([("2015", VCVARS)])
+    return OrderedDict([("2022", VCVARS)])
 
 
 def getenv():

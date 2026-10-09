@@ -480,11 +480,11 @@ def get_version_from_file(header_file):
 
 
 def get_msvs_for_python(vs_prefix=False):
-    """Return the VS lib subdirectory label used in CEF prebuilt binaries.
-    The label 'VS2015' is a historical artifact from the CEF binary layout;
-    it does not indicate the actual VS version used to compile."""
+    """Return the VS lib subdirectory label used by the prebuilt binaries
+    that tools/automate.py creates (build/cef*/lib/VS<label>/). It must
+    match the label in get_available_python_compilers() in automate.py."""
     if sys.version_info >= (3, 10):
-        return "VS2015" if vs_prefix else "2015"
+        return "VS2022" if vs_prefix else "2022"
     print("ERROR: Python 3.10 or later is required")
     sys.exit(1)
 

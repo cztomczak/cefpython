@@ -276,7 +276,7 @@ if(WIN32)
         client_handler
         cpp_utils
         "${CEF_ROOT}/lib/libcef.lib"
-        "${CEF_ROOT}/lib/VS2015/libcef_dll_wrapper_MD.lib"
+        "${CEF_ROOT}/lib/VS2022/libcef_dll_wrapper_MD.lib"
         User32
     )
     target_link_options(${MODULE_NAME} PRIVATE /ignore:4217)

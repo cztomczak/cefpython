@@ -150,7 +150,7 @@ if(WIN32)
     )
     target_link_libraries(cefpython_subprocess PRIVATE
         "${CEFPYTHON_CEF_ROOT}/lib/libcef.lib"
-        "${CEFPYTHON_CEF_ROOT}/lib/VS2015/libcef_dll_wrapper_MT.lib"
+        "${CEFPYTHON_CEF_ROOT}/lib/VS2022/libcef_dll_wrapper_MT.lib"
     )
     # Embed CEF's compatibility.manifest as RT_MANIFEST so Chromium's
     # ANGLE D3D11 GPU process init does not crash with STATUS_BREAKPOINT
