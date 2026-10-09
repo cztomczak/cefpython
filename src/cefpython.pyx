@@ -718,6 +718,8 @@ def CreateBrowserSync(windowInfo=None,
         raise Exception("Invalid argument: "+kwarg)
 
     Debug("CreateBrowserSync() called")
+    assert IsThread(TID_UI), (
+            "cefpython.CreateBrowserSync() may only be called on the UI thread")
 
     """
     # CEF views
