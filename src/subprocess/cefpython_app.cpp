@@ -237,10 +237,16 @@ void CefPythonApp::OnWebKitInitialized() {
 }
 
 void CefPythonApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDictionaryValue> extra_info) {
+    browserViewCount_[browser->GetIdentifier()]++;
 }
 
 void CefPythonApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser) {
     LOG(INFO) << "[Renderer process] OnBrowserDestroyed()";
+    int browserId = browser->GetIdentifier();
+    if (--browserViewCount_[browserId] > 0) {
+        return;
+    }
+    browserViewCount_.erase(browserId);
     RemoveJavascriptBindings(browser);
 }
 

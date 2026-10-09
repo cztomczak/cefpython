@@ -20,6 +20,7 @@ class CefPythonApp :
         public CefRenderProcessHandler {
  protected:
   std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;
+  std::map<int, int> browserViewCount_;
   CefRefPtr<CefPrintHandler> print_handler_;
 
  public:
