@@ -143,28 +143,11 @@ cdef class WindowInfo:
                     % parentWindowHandle)
         self.windowType = "child"
         IF UNAME_SYSNAME == "Linux":
-            if parentWindowHandle == 0:
-                import os as _os
-                import warnings
-                # Warn when the user is likely using an X11-incompatible toolkit
-                # backend in a Wayland session: winId()/GetHandle() returns 0
-                # and CEF opens a detached window instead of embedding.
-                if "WAYLAND_DISPLAY" in _os.environ:
-                    warnings.warn(
-                        "WindowInfo.SetAsChild: parentWindowHandle is 0 on Linux "
-                        "in a Wayland session. The GUI toolkit is likely using the "
-                        "native Wayland backend where winId()/GetHandle() returns 0 "
-                        "instead of an X11 window ID — CEF will open a detached "
-                        "window instead of embedding. Force X11 (XWayland) before "
-                        "initialising the toolkit:\n"
-                        "  Qt (PyQt5/PyQt6/PySide2/PySide6): "
-                        "os.environ[\"QT_QPA_PLATFORM\"] = \"xcb\"\n"
-                        "  GTK (wxPython/PyGTK): "
-                        "os.environ[\"GDK_BACKEND\"] = \"x11\"\n"
-                        "  SDL2 (pysdl2): "
-                        "os.environ[\"SDL_VIDEODRIVER\"] = \"x11\"",
-                        stacklevel=2,
-                    )
+            if parentWindowHandle == 0 and "WAYLAND_DISPLAY" in os.environ:
+                NonCriticalError("WindowInfo.SetAsChild: parentWindowHandle is 0"
+                                 " in a Wayland session, CEF will open a"
+                                 " detached window. Run the GUI toolkit under"
+                                 " X11/XWayland, see examples/qt.py")
         self.parentWindowHandle = parentWindowHandle
         IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
             if not windowRect:
