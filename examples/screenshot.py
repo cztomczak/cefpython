@@ -73,13 +73,11 @@ def main():
         # it using these Chromium switches (Issue #240 and #463)
         "disable-gpu": "",
         "disable-gpu-compositing": "",
+        # Tweaking OSR performance by setting the same Chromium flags
+        # as in upstream cefclient (Issue #240).
+        "enable-begin-frame-scheduling": "",
+        "disable-surfaces": "",  # This is required for PDF ext to work
     }
-    if not sys.platform.startswith("darwin"):
-        # Tweaking OSR performance (Issue #240). On macOS ARM the viz
-        # Surfaces API is required for OSR browser creation, so these
-        # switches must not be passed on macOS.
-        switches["enable-begin-frame-scheduling"] = ""
-        switches["disable-surfaces"] = ""  # This is required for PDF ext to work
     browser_settings = {
         # Tweaking OSR performance (Issue #240)
         "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
