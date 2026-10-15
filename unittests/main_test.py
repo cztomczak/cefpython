@@ -132,6 +132,16 @@ def main_test_async_completed(global_handler, objects, loading_progress):
                if "_True" in key)
 
 
+def _enable_and_trigger_auto_resize(browser):
+    browser.SetAutoResizeEnabled(enabled=True,
+                                 min_size=[800, 600],
+                                 max_size=[1024, 768])
+    subtest_message("browser.SetAutoResizeEnabled() ok")
+    browser.ExecuteJavascript(
+        "document.body.style.width = '900px';"
+        "document.body.style.height = '700px';")
+
+
 class MainTest_IsolatedTest(unittest.TestCase):
     def test_main(self):
         """Main entry point. All the code must run inside one
@@ -264,11 +274,9 @@ class MainTest_IsolatedTest(unittest.TestCase):
         browser.SetJavascriptBindings(bindings)
         subtest_message("browser.SetJavascriptBindings() ok")
 
-        # Set auto resize. Call it after js bindings were set.
-        browser.SetAutoResizeEnabled(enabled=True,
-                                     min_size=[800, 600],
-                                     max_size=[1024, 768])
-        subtest_message("browser.SetAutoResizeEnabled() ok")
+        if not LINUX:
+            # Match CEF DisplayTest.AutoResize: disabled on Linux (CEF #4038).
+            on_load_end(_enable_and_trigger_auto_resize, browser)
 
         # Test Request.SetPostData(list)
         # noinspection PyArgumentList
@@ -370,13 +378,15 @@ class DisplayHandler2(object):
         # Asserts for True/False will be checked just before shutdown.
         # Test whether asserts are working correctly.
         self.test_for_True = True
-        # CEF 146+: SetAutoResizeEnabled no longer triggers OnAutoResize for
-        # windowed (non-OSR) browsers. Removed OnAutoResize_True assertion.
+        if not LINUX:
+            self.OnAutoResizeContentResize_True = False
         self.OnLoadingProgressChange_True = False
         self.OnLoadingProgressChange_Progress = 0.0
 
-    def OnAutoResize(self, new_size, **_):
-        pass  # CEF 146+: no longer fires for windowed browsers
+    def OnAutoResize(self, browser, new_size, **_):
+        if new_size[0] >= 900 and new_size[1] >= 700:
+            browser.SetAutoResizeEnabled(False, [0, 0], [0, 0])
+            self.OnAutoResizeContentResize_True = True
 
     def OnLoadingProgressChange(self, browser, progress, **_):
         self.OnLoadingProgressChange_True = True
