@@ -37,7 +37,6 @@ target_include_directories(cefpython_app PRIVATE
     "${CEFPYTHON_SRC_DIR}/common"
     "${CEFPYTHON_PYX_STAGE_DIR}"
     ${Python_INCLUDE_DIRS}
-    # After src/: platform-generated CEF headers not vendored in src/include.
     "${CEFPYTHON_CEF_ROOT}"
 )
 
@@ -123,7 +122,6 @@ foreach(_target IN LISTS _cefpython_subprocess_targets)
         "${CEFPYTHON_SRC_DIR}/common"
         "${CEFPYTHON_PYX_STAGE_DIR}"
         ${Python_INCLUDE_DIRS}
-        # After src/: platform-generated CEF headers not vendored in src/include.
         "${CEFPYTHON_CEF_ROOT}"
     )
 endforeach()

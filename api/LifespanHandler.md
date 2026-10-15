@@ -37,8 +37,7 @@ close the window. This method will be called after the Javascript
 the associated OS window has been destroyed (for those browsers it is no
 longer possible to cancel the close).
 
-See complete description of this callback in [cef_life_span_handler.h]
-(..|src|include|cef_life_span_handler.h).
+See complete description of this callback in [cef_life_span_handler.h](https://github.com/chromiumembedded/cef/blob/7727/include/cef_life_span_handler.h).
 
 
 ### _OnAfterCreated

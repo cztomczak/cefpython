@@ -682,8 +682,7 @@ def create_prebuilt_binaries():
     if os.path.exists(dst):
         # Ensure the headers are present even for a pre-existing prebuilt dir
         # (e.g. one restored from a CI cache created before include/ was
-        # copied here). The build needs CEF_ROOT/include for the generated
-        # headers that are not vendored in src/include.
+        # copied here). The build compiles against CEF_ROOT/include.
         inc = os.path.join(dst, "include")
         if not os.path.exists(inc):
             cpdir(os.path.join(src, "include"), inc)
@@ -822,14 +821,7 @@ def create_prebuilt_binaries():
     shutil.copy(os.path.join(src, "README.txt"), dst)
     shutil.copy(os.path.join(src, "LICENSE.txt"), dst)
 
-    # Copy the CEF headers so the prebuilt directory is a complete SDK.
-    # cefpython compiles against its own vendored src/include for the stable
-    # public headers, but the platform-generated headers (cef_version.h,
-    # cef_api_versions.h, cef_pack_resources.h, cef_pack_strings.h,
-    # cef_color_ids.h, cef_command_ids.h, cef_config.h and
-    # base/internal/cef_net_error_list.h) are intentionally not vendored and are
-    # resolved from here at build time (CMake places CEF_ROOT after src/ on the
-    # include path, so the vendored source headers still take precedence).
+    # Copy the CEF headers, the build compiles against CEF_ROOT/include.
     cpdir(os.path.join(src, "include"), os.path.join(dst, "include"))
 
     # Copy cef_version.h

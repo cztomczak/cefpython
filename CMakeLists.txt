@@ -84,6 +84,12 @@ if(NOT CEF_ROOT)
     endif()
 endif()
 message(STATUS "CEF_ROOT: ${CEF_ROOT}")
+if(NOT EXISTS "${CEF_ROOT}/include/cef_version.h")
+    message(FATAL_ERROR
+        "CEF headers not found in ${CEF_ROOT}/include. "
+        "Prepare CEF_ROOT (python tools/automate.py --prebuilt-cef), "
+        "or pass -DCEF_ROOT=<path> to a CEF directory that contains include/.")
+endif()
 
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 set(PYX_STAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}/pyx_stage")
@@ -252,11 +258,6 @@ target_include_directories(${MODULE_NAME} PRIVATE
     "${SRC_DIR}/extern"
     "${SRC_DIR}/extern/cef"
     "${PYX_STAGE_DIR}"
-    # After src/: resolves the platform-generated CEF headers that are not
-    # vendored in src/include (cef_version.h, cef_api_versions.h, cef_pack_*.h,
-    # cef_color_ids.h, cef_command_ids.h, cef_config.h,
-    # base/internal/cef_net_error_list.h). Vendored source headers in
-    # src/include take precedence because SRC_DIR is listed first.
     "${CEF_ROOT}"
 )
 

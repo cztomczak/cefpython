@@ -42,7 +42,7 @@ Off-screen rendering examples:
 ## Notes
 
 Callbacks available in upstream CEF, but not yet exposed in CEF Python
-(see src/include/cef_render_handler.h):
+(see [cef_render_handler.h](https://github.com/chromiumembedded/cef/blob/7727/include/cef_render_handler.h)):
 * OnImeCompositionRangeChanged
 
 
