@@ -82,6 +82,6 @@ KeyEventFlags constants defined in the cefpython module:
 
 Called after the renderer and javascript in the page has had a chance to
 handle the event. |event| contains information about the keyboard event.
-|os_event| is the operating system event message, if any. Return true if
+|event_handle| is the operating system event message, if any. Return true if
 the keyboard event was handled or false otherwise. Description of the
 KeyEvent type is in the OnPreKeyEvent() callback.
