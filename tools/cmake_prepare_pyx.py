@@ -64,7 +64,6 @@ def main():
 
     # Read version metadata
     ver = cef_version.parse_header(args.cef_version_header)
-    version_str = "{major}.0".format(major=ver["CHROME_VERSION_MAJOR"])
     chrome_ver = "{major}.{minor}.{build}.{patch}".format(
         major=ver["CHROME_VERSION_MAJOR"],
         minor=ver["CHROME_VERSION_MINOR"],
@@ -72,7 +71,7 @@ def main():
         patch=ver["CHROME_VERSION_PATCH"],
     )
     module_vars = (
-        '__version__ = "{v}"\n'.format(v=version_str)
+        '__version__ = None\n'
         + '__chrome_version__ = "{v}"\n'.format(v=chrome_ver)
         + '__cef_version__ = "{v}"\n'.format(v=ver["CEF_VERSION"])
         + '__cef_commit_hash__ = "{v}"\n'.format(v=ver["CEF_COMMIT_HASH"])

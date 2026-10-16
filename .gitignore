@@ -15,6 +15,7 @@ cefpython3/*.dat
 cefpython3/*.bin
 cefpython3/*.json
 cefpython3/locales/
+cefpython3/_version.py
 _cmake_test/
 _skbuild/
 venv/

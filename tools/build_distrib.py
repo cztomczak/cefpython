@@ -4,46 +4,24 @@
 
 """Create a distributable wheel from the pre-built cefpython3/ package directory.
 
-Packaging workflow (current):
-    This script performs only the final packaging step. The full pipeline is
-    driven by the CI workflows (.github/workflows/ci-*.yml):
-      1. tools/download_cef.py            - fetch the CEF binary distribution.
-      2. tools/automate.py --prebuilt-cef - lay out CEF_ROOT for the build.
-      3. CMake build                      - compile cefpython_py<XY>.{so,pyd}
-                                            and the subprocess helper(s).
-      4. stage into cefpython3/           - copy the compiled module, the
-                                            platform subprocess artifact(s)
-                                            and CEF runtime files next to
-                                            __init__.py. macOS uses five
-                                            process-specific Helper.app bundles.
-      5. build_distrib.py (this script)   - zip cefpython3/ into a PEP 427 wheel
-                                            with a generated .dist-info
-                                            (METADATA, WHEEL, top_level.txt,
-                                            RECORD). No compilation happens here.
-                                            On Linux, libcef.so is stripped of
-                                            debug symbols first (Issue #262; it
-                                            ships ~1.3 GB with them). On Windows,
-                                            msvcp140.dll is bundled next to the
-                                            extension (Issue #359).
-      6. (CI) install the wheel and run the unit tests against it.
+Zips cefpython3/ into a PEP 427 wheel with a generated .dist-info (METADATA,
+WHEEL, top_level.txt, RECORD). No compilation happens here. On Linux,
+libcef.so is stripped of debug symbols first (Issue #262; it ships ~1.3 GB
+with them). On Windows, msvcp140.dll is bundled next to the extension
+(Issue #359).
 
 Usage:
-    build_distrib.py [--out-dir DIR] [--dev | --version VERSION]
+    build_distrib.py [--out-dir DIR]
 
 Options:
     --out-dir DIR       Output directory for the .whl file (default: build/dist).
-    --dev               Produce a unique PEP 440 development version derived from
-                        git: <major>.0.dev<commit-count>+g<short-hash>
-                        (e.g. 147.0.dev5231+g98cd08e). Used by CI so every build
-                        has a distinct, commit-identifiable version. Requires the
-                        full git history (checkout with fetch-depth: 0).
-    --version VERSION   Use VERSION verbatim (overrides --dev and the header).
 
 The cefpython3/ directory must already contain the compiled outputs and CEF
 runtime. Windows/Linux use a flat subprocess executable; macOS uses five
-sibling ``cefpython Helper*.app`` bundles.
+sibling ``cefpython Helper*.app`` bundles. Only the running interpreter's
+module is packaged.
 
-The base version is read automatically from src/version/cef_version_*.h.
+The wheel version is read from cefpython3/_version.py.
 Wheel metadata (name, summary, author, URLs, keywords, classifiers) is read
 from the [project] table in pyproject.toml, so the wheel and pyproject stay a
 single source of truth.
@@ -54,14 +32,13 @@ import glob
 import hashlib
 import os
 import platform
+import re
 import shutil
 import stat
 import subprocess
 import sys
 import sysconfig
 import zipfile
-
-import cef_version
 
 
 MAC_HELPER_APP_NAMES = [
@@ -87,12 +64,12 @@ def main():
     os.chdir(repo_root)
     os.makedirs(out_dir, exist_ok=True)
 
-    if "--version" in sys.argv:
-        version = sys.argv[sys.argv.index("--version") + 1]
-    elif "--dev" in sys.argv:
-        version = _dev_version(_read_version())
-    else:
-        version = _read_version()
+    pkg_dir = "cefpython3"
+    if not os.path.isdir(pkg_dir):
+        print("[build_distrib.py] ERROR: {pkg_dir}/ not found".format(
+            pkg_dir=pkg_dir))
+        sys.exit(1)
+    version = _read_version(pkg_dir)
     print("[build_distrib.py] Version:", version)
     vi = sys.version_info
     cp = "cp{0}{1}".format(vi.major, vi.minor)
@@ -103,15 +80,11 @@ def main():
     wheel_path = os.path.join(out_dir, wheel_name)
     dist_info = "cefpython3-{v}.dist-info".format(v=version)
 
-    pkg_dir = "cefpython3"
-    if not os.path.isdir(pkg_dir):
-        print("[build_distrib.py] ERROR: {pkg_dir}/ not found".format(
-            pkg_dir=pkg_dir))
-        sys.exit(1)
     ext = ".pyd" if sys.platform == "win32" else ".so"
-    if not glob.glob(os.path.join(pkg_dir, "cefpython_py*" + ext)):
-        print("[build_distrib.py] ERROR: no cefpython_py*{ext} in {pkg_dir}/,"
-              " run compile step first".format(ext=ext, pkg_dir=pkg_dir))
+    module = "cefpython_py{0}{1}{2}".format(vi.major, vi.minor, ext)
+    if not os.path.isfile(os.path.join(pkg_dir, module)):
+        print("[build_distrib.py] ERROR: no {module} in {pkg_dir}/,"
+              " run tools/build.py first".format(module=module, pkg_dir=pkg_dir))
         sys.exit(1)
 
     _validate_macos_helpers(pkg_dir)
@@ -134,6 +107,9 @@ def main():
             dirs[:] = sorted(d for d in dirs if d != "__pycache__")
             for filename in sorted(files):
                 if filename.endswith(".pyc"):
+                    continue
+                if (root == pkg_dir and filename != module
+                        and re.match(r"cefpython_py\d+\.(pyd|so)$", filename)):
                     continue
                 filepath = os.path.join(root, filename)
                 arcname = filepath.replace(os.sep, "/")
@@ -234,7 +210,7 @@ def _read_project_metadata():
 def _core_metadata(version, project):
     """Build wheel core metadata (METADATA) from the [project] table.
 
-    Version is passed in (it is dynamic, computed from the CEF header / git);
+    Version is passed in (it is dynamic, read from cefpython3/_version.py);
     everything else comes from pyproject.toml so there is a single source.
     """
     lines = [
@@ -336,28 +312,19 @@ def _bundle_msvcp140_issue359(pkg_dir):
     print("[build_distrib.py] Bundle msvcp140.dll (Issue #359)")
 
 
-def _dev_version(base):
-    """<base>.dev<commit-count>+g<short-hash> from git (PEP 440 dev version).
-
-    Gives every CI build a unique, commit-identifiable version, e.g.
-    147.0.dev5231+g98cd08e. Falls back to <base>.dev0 if git is unavailable.
-    """
-    try:
-        count = subprocess.check_output(
-            ["git", "rev-list", "--count", "HEAD"]).decode().strip()
-        short = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"]).decode().strip()
-        return "{base}.dev{count}+g{short}".format(
-            base=base, count=count, short=short)
-    except Exception as exc:
-        print("[build_distrib.py] WARNING: git version derivation failed"
-              " (%s); using %s.dev0" % (exc, base))
-        return base + ".dev0"
-
-
-def _read_version():
-    """Base wheel version <major>.0 from the CEF version header."""
-    return cef_version.read()["CHROME_VERSION_MAJOR"] + ".0"
+def _read_version(pkg_dir):
+    """Package version from cefpython3/_version.py (written by build.py)."""
+    path = os.path.join(pkg_dir, "_version.py")
+    if not os.path.isfile(path):
+        print("[build_distrib.py] ERROR: {0} not found,"
+              " run tools/build.py first".format(path))
+        sys.exit(1)
+    with open(path) as f:
+        match = re.search(r'^__version__ = "([^"]+)"$', f.read(), re.MULTILINE)
+    if not match:
+        print("[build_distrib.py] ERROR: no __version__ in", path)
+        sys.exit(1)
+    return match.group(1)
 
 
 if __name__ == "__main__":

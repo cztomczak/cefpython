@@ -99,7 +99,7 @@ def check_versions():
            ver=platform.python_version(),
            arch=platform.architecture()[0]))
     print("[screenshot.py] Pillow {ver}".format(ver=PILLOW_VERSION))
-    assert tuple(int(x) for x in cef.__version__.split(".")) >= (57, 0), "CEF Python v57.0+ required to run this"
+    assert int(cef.__version__.split(".")[0]) >= 57, "CEF Python v57.0+ required to run this"
 
 
 def command_line_arguments():

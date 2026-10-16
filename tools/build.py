@@ -5,28 +5,15 @@
 
 """Build cefpython3.
 
-Usage:
-    build.py [--clean] [--wheel] [--unittests]
-             [--enable-profiling] [--enable-line-tracing]
-
-Options:
-    --clean                Delete the CMake build directory before building (full rebuild).
-    --wheel                Build and install a wheel for local/release use.
-                           Default: build directly with CMake for fast dev iteration.
-    --unittests            Run unit tests after building.
-    --enable-profiling     Cython: enable cProfile instrumentation (profile=True).
-    --enable-line-tracing  Cython: enable line-level tracing/coverage (linetrace=True).
-
-Dev workflow (fast, shows compiler output):
+Dev workflow (no wheel; `import cefpython3` works from the repo):
     python tools/build.py
-    python tools/build.py --clean
     python tools/build.py --unittests
 
-Wheel / release workflow (builds a .whl):
+Wheel workflow (what CI runs; add --version for a release):
     python tools/build.py --wheel
-    python tools/build.py --wheel --unittests
+    python tools/build.py --wheel --version 147.1
 """
-import glob
+import argparse
 import os
 import site
 import shutil
@@ -35,8 +22,10 @@ import sys
 
 import cef_version
 
-BUILD_DIR = os.path.join("build", "_cmake_build")
+PYVERSION = "{0}{1}".format(*sys.version_info[:2])
+BUILD_DIR = os.path.join("build", "_cmake_build_py" + PYVERSION)
 PKG_DIR = "cefpython3"
+CEF_RUNTIME_STAMP = os.path.join("build", "cef_runtime_installed.txt")
 
 WINDOWS = sys.platform == "win32"
 LINUX = sys.platform.startswith("linux")
@@ -58,19 +47,14 @@ def run(cmd, **kwargs):
         sys.exit(ret.returncode)
 
 
-def _read_cef_version():
-    """Full CEF version string from the per-platform version header,
-    e.g. "147.0.10+gd58e84d+chromium-147.0.7727.118"."""
-    return cef_version.read()["CEF_VERSION"]
-
-
-def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
+def cmake_build(clean=False, profiling=False, line_tracing=False):
     if clean and os.path.exists(BUILD_DIR):
         print("[build.py] Removing", BUILD_DIR)
         shutil.rmtree(BUILD_DIR)
     cache = os.path.join(BUILD_DIR, "CMakeCache.txt")
     if not os.path.exists(cache):
-        cmake_args = ["cmake", "-S", ".", "-B", BUILD_DIR]
+        cmake_args = ["cmake", "-S", ".", "-B", BUILD_DIR,
+                      "-DPython_EXECUTABLE=" + sys.executable]
         if WINDOWS:
             cmake_args += ["-A", "x64"]
         else:
@@ -86,106 +70,43 @@ def cmake_dev_build(clean=False, profiling=False, line_tracing=False):
         build_args += ["--config", "Release"]
     run(build_args)
 
-    # Copy extension module to cefpython3/
-    os.makedirs(PKG_DIR, exist_ok=True)
-    if WINDOWS:
-        pattern = os.path.join(BUILD_DIR, "Release", "cefpython_py*.pyd")
-    else:
-        pattern = os.path.join(BUILD_DIR, "cefpython_py*.so")
-    modules = glob.glob(pattern)
-    if not modules:
-        print("[build.py] ERROR: no extension module found after build")
-        sys.exit(1)
-    for mod in modules:
-        dst = os.path.join(PKG_DIR, os.path.basename(mod))
-        shutil.copy2(mod, dst)
-        print("[build.py] ->", dst)
 
-    # Copy the subprocess executable (Windows/Linux) or the complete set of
-    # process-specific helper app bundles (macOS) to cefpython3/.
-    if MAC:
-        helper_dir = os.path.join(BUILD_DIR, "subprocess_build")
-        missing = [name for name in MAC_HELPER_APP_NAMES
-                   if not os.path.isdir(os.path.join(helper_dir, name))]
-        if missing:
-            print("[build.py] ERROR: missing macOS helper bundles:",
-                  ", ".join(missing))
-            sys.exit(1)
-        for name in MAC_HELPER_APP_NAMES:
-            src = os.path.join(helper_dir, name)
-            dst = os.path.join(PKG_DIR, name)
-            if os.path.exists(dst):
-                shutil.rmtree(dst)
-            shutil.copytree(src, dst, symlinks=True)
-            print("[build.py] ->", dst)
-    elif WINDOWS:
-        exe = os.path.join(BUILD_DIR, "subprocess_build", "Release", "subprocess.exe")
-    else:
-        exe = os.path.join(BUILD_DIR, "subprocess_build", "subprocess")
-    if not MAC:
-        if not os.path.exists(exe):
-            print("[build.py] ERROR: no subprocess executable found after build")
-            sys.exit(1)
-        dst = os.path.join(PKG_DIR, os.path.basename(exe))
-        shutil.copy2(exe, dst)
-        print("[build.py] ->", dst)
-
-    # One-time: copy CEF runtime files (DLLs/SOs, .pak, locales/) into cefpython3/
+def install_into_package():
+    """Install into cefpython3/ using the install() rules in CMakeLists.txt.
+    The CEF runtime is installed only once per CEF version."""
+    install_args = ["cmake", "--install", BUILD_DIR, "--prefix", "."]
     if WINDOWS:
-        already_copied = bool(glob.glob(os.path.join(PKG_DIR, "*.dll")))
-        cef_glob = os.path.join("build", "cef*_win64")
+        install_args += ["--config", "Release"]
+    run(install_args + ["--component", "cefpython"])
+
+    cef_ver = cef_version.read()["CEF_VERSION"]
+    if WINDOWS:
+        sentinel = os.path.join(PKG_DIR, "libcef.dll")
     elif MAC:
-        already_copied = os.path.isdir(
-            os.path.join(PKG_DIR, "Chromium Embedded Framework.framework"))
-        # Match only automate.py's prepared runtime directory. The unpacked
-        # cef_binary_*_macosarm64 distribution also matches a broad *mac* glob
-        # but has no bin/ directory.
-        cef_glob = os.path.join("build", "cef*_macarm64")
+        sentinel = os.path.join(PKG_DIR, "Chromium Embedded Framework.framework")
     else:
-        already_copied = os.path.exists(os.path.join(PKG_DIR, "libcef.so"))
-        cef_glob = os.path.join("build", "cef[0-9]*_linux64")
-    if not already_copied:
-        # Select the dir matching the exact CEF version from src/version/ so a
-        # leftover dir for a different CEF version in build/ is never picked up.
-        cef_version = _read_cef_version()
-        cef_dirs = [d for d in sorted(glob.glob(cef_glob))
-                    if cef_version in os.path.basename(d)]
-        if cef_dirs:
-            cef_bin = os.path.join(cef_dirs[-1], "bin")
-            print("[build.py] One-time: copying CEF runtime files to", PKG_DIR)
-            _copy_cef_runtime(cef_bin, PKG_DIR)
-        else:
-            print("[build.py] ERROR: no CEF %s runtime dir found matching %s"
-                  % (cef_version, cef_glob))
-            sys.exit(1)
-
-    # Ad-hoc sign compiled binaries so macOS allows them to run.
-    if MAC:
-        _codesign_macos(PKG_DIR)
-
-    # Write a .pth file so the repo root is on sys.path and
-    # `import cefpython3` works in any script without setting PYTHONPATH.
-    site_dir = site.getsitepackages()[0]
-    pth = os.path.join(site_dir, "cefpython3-dev.pth")
-    repo_root = os.getcwd()
-    if not os.path.exists(pth) or open(pth).read().strip() != repo_root:
-        with open(pth, "w") as f:
-            f.write(repo_root + "\n")
-        print("[build.py] Dev install: wrote", pth)
+        sentinel = os.path.join(PKG_DIR, "libcef.so")
+    installed_ver = None
+    if os.path.exists(CEF_RUNTIME_STAMP):
+        with open(CEF_RUNTIME_STAMP) as f:
+            installed_ver = f.read().strip()
+    if os.path.exists(sentinel) and installed_ver == cef_ver:
+        return
+    run(install_args + ["--component", "cef_runtime"])
+    with open(CEF_RUNTIME_STAMP, "w") as f:
+        f.write(cef_ver + "\n")
 
 
-def _copy_cef_runtime(src_bin, dst_dir):
-    exclude_prefixes = ("cefclient", "cefsimple", "ceftests", "chrome-sandbox")
-    for name in os.listdir(src_bin):
-        if any(name.startswith(p) for p in exclude_prefixes):
-            continue
-        src = os.path.join(src_bin, name)
-        dst = os.path.join(dst_dir, name)
-        if os.path.isdir(src):
-            if not os.path.exists(dst):
-                shutil.copytree(src, dst, symlinks=True)
-        else:
-            shutil.copy2(src, dst)
+def write_version_file(version):
+    path = os.path.join(PKG_DIR, "_version.py")
+    content = '__version__ = "{0}"\n'.format(version)
+    if os.path.exists(path):
+        with open(path) as f:
+            if f.read() == content:
+                return
+    with open(path, "w") as f:
+        f.write(content)
+    print("[build.py] Version {0} -> {1}".format(version, path))
 
 
 def _codesign_macos(pkg_dir):
@@ -196,14 +117,13 @@ def _codesign_macos(pkg_dir):
     if not os.path.isdir(framework):
         print("[build.py] ERROR: CEF framework is missing:", framework)
         sys.exit(1)
-    _codesign_and_verify(framework, deep=True)
+    _codesign_if_invalid(framework, deep=True)
 
-    modules = glob.glob(os.path.join(pkg_dir, "cefpython_py*.so"))
-    if not modules:
-        print("[build.py] ERROR: no extension module to codesign")
+    module = os.path.join(pkg_dir, "cefpython_py{0}.so".format(PYVERSION))
+    if not os.path.isfile(module):
+        print("[build.py] ERROR: extension module is missing:", module)
         sys.exit(1)
-    for module in modules:
-        _codesign_and_verify(module)
+    _codesign_if_invalid(module)
 
     for name in MAC_HELPER_APP_NAMES:
         app = os.path.join(pkg_dir, name)
@@ -213,56 +133,96 @@ def _codesign_macos(pkg_dir):
             print("[build.py] ERROR: helper executable is missing:", executable)
             sys.exit(1)
         os.chmod(executable, 0o755)
-        _codesign_and_verify(app, deep=True)
+        _codesign_if_invalid(app, deep=True)
 
 
-def _codesign_and_verify(target, deep=False):
+def _codesign_if_invalid(target, deep=False):
+    deep_flag = ["--deep"] if deep else []
+    verify_cmd = ["codesign", "--verify"] + deep_flag + ["--strict", target]
+    if subprocess.run(verify_cmd, capture_output=True).returncode == 0:
+        return
     print("[build.py] codesign:", os.path.basename(target))
-    sign_cmd = ["codesign", "--force"]
-    if deep:
-        sign_cmd.append("--deep")
-    sign_cmd += ["--sign", "-", target]
-    run(sign_cmd)
+    run(["codesign", "--force"] + deep_flag + ["--sign", "-", target])
+    run(verify_cmd[:-1] + ["--verbose=2", target])
 
-    verify_cmd = ["codesign", "--verify"]
-    if deep:
-        verify_cmd.append("--deep")
-    verify_cmd += ["--strict", "--verbose=2", target]
-    run(verify_cmd)
+
+def write_dev_pth():
+    # Put the repo root on sys.path so `import cefpython3` works in any script
+    # without setting PYTHONPATH.
+    pth = _dev_pth_path()
+    repo_root = os.getcwd()
+    if not os.path.exists(pth) or open(pth).read().strip() != repo_root:
+        with open(pth, "w") as f:
+            f.write(repo_root + "\n")
+        print("[build.py] Dev install: wrote", pth)
+
+
+def remove_dev_pth():
+    pth = _dev_pth_path()
+    if os.path.exists(pth):
+        os.remove(pth)
+        print("[build.py] Removed dev install", pth)
+
+
+def _dev_pth_path():
+    return os.path.join(site.getsitepackages()[0], "cefpython3-dev.pth")
 
 
 def wheel_build():
-    dist_dir = os.path.join("build", "dist")
-    os.makedirs(dist_dir, exist_ok=True)
     # Package the already staged (and, on macOS, signed) tree. Calling
     # ``pip wheel .`` here would rebuild in an isolated CMake tree and bypass
     # _codesign_macos(), producing helpers and a modified CEF framework with
     # invalid or missing signatures.
-    run([sys.executable, "tools/build_distrib.py", "--out-dir", dist_dir])
-    wheels = glob.glob(os.path.join(dist_dir, "cefpython3-*.whl"))
-    if not wheels:
-        print("[build.py] ERROR: no wheel found in", dist_dir)
-        sys.exit(1)
-    wheel = max(wheels, key=os.path.getmtime)
-    run([sys.executable, "-m", "pip", "install", "--force-reinstall", wheel])
+    run([sys.executable, "tools/build_distrib.py",
+         "--out-dir", os.path.join("build", "dist")])
 
 
 def main():
-    clean = "--clean" in sys.argv
-    wheel = "--wheel" in sys.argv
-    unittests = "--unittests" in sys.argv
-    profiling = "--enable-profiling" in sys.argv
-    line_tracing = "--enable-line-tracing" in sys.argv
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        "--clean", action="store_true",
+        help="delete the CMake build directory before building (full rebuild)")
+    parser.add_argument(
+        "--unittests", action="store_true",
+        help="run the unit tests after building")
+    parser.add_argument(
+        "--wheel", action="store_true",
+        help="also build a wheel in build/dist/ (it is not installed)")
+    parser.add_argument(
+        "--version",
+        help="release version, e.g. 147.0, 147.1 or 147.0.1"
+             " (default: a development version derived from git)")
+    parser.add_argument(
+        "--enable-profiling", action="store_true",
+        help="Cython: enable cProfile instrumentation (profile=True)")
+    parser.add_argument(
+        "--enable-line-tracing", action="store_true",
+        help="Cython: enable line-level tracing/coverage (linetrace=True)")
+    args = parser.parse_args()
 
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(repo_root)
 
-    cmake_dev_build(clean=clean, profiling=profiling,
-                    line_tracing=line_tracing)
-    if wheel:
-        wheel_build()
+    try:
+        version = cef_version.package_version(args.version)
+    except ValueError as exc:
+        parser.error(str(exc))
 
-    if unittests:
+    cmake_build(clean=args.clean, profiling=args.enable_profiling,
+                line_tracing=args.enable_line_tracing)
+    install_into_package()
+    write_version_file(version)
+    if MAC:
+        _codesign_macos(PKG_DIR)
+
+    if args.wheel:
+        remove_dev_pth()
+        wheel_build()
+    else:
+        write_dev_pth()
+
+    if args.unittests:
         env = os.environ.copy()
         env["PYTHONPATH"] = os.getcwd()
         run([sys.executable, "unittests/_test_runner.py"], env=env)

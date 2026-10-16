@@ -7,6 +7,10 @@ on:
     branches: ["master"]
   workflow_dispatch:
     inputs:
+      version:
+        description: "Release version, e.g. 147.1 or 147.0.1 (empty: dev version)"
+        type: string
+        default: ""
       bypass_cache:
         description: "Bypass all caches for a clean run"
         type: boolean
@@ -63,7 +67,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0  # full history for the --dev wheel version (git commit count)
+          fetch-depth: 0  # full history for the dev version (git commit count)
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -96,21 +100,8 @@ jobs:
       - name: Prepare prebuilt CEF
         run: python tools/automate.py --prebuilt-cef
 
-      - name: Configure CMake
-        run: cmake -S . -B build/_cmake_build -G Ninja -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        run: cmake --build build/_cmake_build --parallel
-
-      - name: Stage build outputs
-        run: |
-          mkdir -p build/artifacts
-          cp build/_cmake_build/cefpython_py*.so build/artifacts/
-          cp build/_cmake_build/subprocess_build/subprocess build/artifacts/
-          cef_dir=$(ls -d build/cef*_linux64 2>/dev/null | head -1)
-          find "$cef_dir/bin" -maxdepth 1 -mindepth 1 \
-            ! -name 'cefclient*' ! -name 'cefsimple*' ! -name 'ceftests*' ! -name 'chrome-sandbox' \
-            -exec cp -r {} build/artifacts/ \;
+      - name: Build wheel
+        run: python tools/build.py --wheel ${{ inputs.version && format('--version {0}', inputs.version) || '' }}
 
       - name: Install runtime dependencies
         run: |
@@ -119,14 +110,6 @@ jobs:
             libx11-6 libxcomposite1 libxdamage1 libxext6 \
             libxfixes3 libxrandr2 libxrender1 \
             libgtk2.0-0 libglib2.0-0 xvfb
-
-      - name: Set up cefpython3 package
-        run: |
-          cp -r build/artifacts/. cefpython3/
-          chmod +x cefpython3/subprocess
-
-      - name: Build wheel
-        run: python tools/build_distrib.py --dev
 
       - name: Unit-test the built wheel
         run: |

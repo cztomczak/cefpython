@@ -319,15 +319,15 @@ endif()
 # ---- Install ----------------------------------------------------------------
 # The extension module itself
 install(TARGETS ${MODULE_NAME}
-    LIBRARY DESTINATION "cefpython3"
-    RUNTIME DESTINATION "cefpython3"
+    LIBRARY DESTINATION "cefpython3" COMPONENT cefpython
+    RUNTIME DESTINATION "cefpython3" COMPONENT cefpython
 )
 
 # Flat subprocess executable on Windows/Linux; all five Helper.app bundles on
 # macOS. The target list is exported by src/subprocess/CMakeLists.txt.
 install(TARGETS ${CEFPYTHON_SUBPROCESS_TARGETS}
-    BUNDLE DESTINATION "cefpython3"
-    RUNTIME DESTINATION "cefpython3"
+    BUNDLE DESTINATION "cefpython3" COMPONENT cefpython
+    RUNTIME DESTINATION "cefpython3" COMPONENT cefpython
 )
 
 # CEF runtime files (DLLs, .pak, .dat, locales/, etc.)
@@ -335,6 +335,7 @@ install(TARGETS ${CEFPYTHON_SUBPROCESS_TARGETS}
 if(WIN32)
     install(DIRECTORY "${CEF_ROOT}/bin/"
         DESTINATION "cefpython3"
+        COMPONENT cef_runtime
         PATTERN "cefclient*"    EXCLUDE
         PATTERN "cefsimple*"    EXCLUDE
         PATTERN "ceftests*"     EXCLUDE
@@ -342,6 +343,7 @@ if(WIN32)
 elseif(APPLE)
     install(DIRECTORY "${CEF_ROOT}/bin/"
         DESTINATION "cefpython3"
+        COMPONENT cef_runtime
         PATTERN "cefclient*"   EXCLUDE
         PATTERN "cefsimple*"   EXCLUDE
         PATTERN "ceftests*"    EXCLUDE
@@ -349,6 +351,7 @@ elseif(APPLE)
 else()
     install(DIRECTORY "${CEF_ROOT}/bin/"
         DESTINATION "cefpython3"
+        COMPONENT cef_runtime
         PATTERN "cefclient*"   EXCLUDE
         PATTERN "cefsimple*"   EXCLUDE
         PATTERN "ceftests*"    EXCLUDE

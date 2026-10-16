@@ -33,7 +33,7 @@ def check_versions():
     print("[hello_world.py] Python {ver} {arch}".format(
            ver=platform.python_version(),
            arch=platform.architecture()[0]))
-    assert tuple(int(x) for x in cef.__version__.split(".")) >= (57, 0), \
+    assert int(cef.__version__.split(".")[0]) >= 57, \
         "CEF Python v57.0+ required to run this"
 
 

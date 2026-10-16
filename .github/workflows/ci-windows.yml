@@ -7,6 +7,10 @@ on:
     branches: ["master"]
   workflow_dispatch:
     inputs:
+      version:
+        description: "Release version, e.g. 147.1 or 147.0.1 (empty: dev version)"
+        type: string
+        default: ""
       bypass_cache:
         description: "Bypass all caches for a clean run"
         type: boolean
@@ -64,7 +68,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0  # full history for the --dev wheel version (git commit count)
+          fetch-depth: 0  # full history for the dev version (git commit count)
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -86,29 +90,8 @@ jobs:
       - name: Prepare prebuilt CEF
         run: python tools/automate.py --prebuilt-cef
 
-      - name: Configure CMake
-        run: cmake -S . -B build/_cmake_build -A x64
-
-      - name: Build
-        run: cmake --build build/_cmake_build --config Release --parallel
-
-      - name: Stage build outputs
-        run: |
-          New-Item -ItemType Directory -Force build/artifacts
-          Copy-Item build/_cmake_build/Release/cefpython_py*.pyd build/artifacts/
-          Copy-Item build/_cmake_build/subprocess_build/Release/subprocess.exe build/artifacts/
-          $cefBin = (Get-ChildItem build/cef*_win64 -Directory | Select-Object -First 1).FullName + "/bin"
-          Get-ChildItem $cefBin | Where-Object { $_.Name -notmatch '^(cefclient|cefsimple|ceftests)' } |
-            ForEach-Object { Copy-Item $_.FullName build/artifacts/ -Recurse -Force }
-
-      - name: Set up cefpython3 package
-        run: |
-          Get-ChildItem build/artifacts/ | ForEach-Object {
-            Copy-Item $_.FullName cefpython3/ -Recurse -Force
-          }
-
       - name: Build wheel
-        run: python tools/build_distrib.py --dev
+        run: python tools/build.py --wheel ${{ inputs.version && format('--version {0}', inputs.version) || '' }}
 
       - name: Unit-test the built wheel
         run: |
@@ -116,7 +99,7 @@ jobs:
           # package. No PYTHONPATH: _test_runner.py chdir's to unittests/, so
           # the repo's cefpython3/ build dir is never on sys.path and
           # import cefpython3 resolves to the installed wheel.
-          pip install (Get-ChildItem build/dist/*.whl | Select-Object -First 1).FullName
+          pip install (Get-ChildItem build/dist/*.whl).FullName
           python unittests/_test_runner.py
 
       - name: Smoke-test the built wheel

@@ -2,7 +2,6 @@
 
 Table of contents:
 
-* [Preface](#preface)
 * [Requirements](#requirements)
   * [Windows](#windows)
   * [Linux](#linux)
@@ -14,34 +13,14 @@ Table of contents:
   * [3. Build cefpython](#3-build-cefpython)
   * [4. Run unit tests](#4-run-unit-tests)
   * [5. Build a wheel package](#5-build-a-wheel-package)
-
-
-## Preface
-
-These instructions are for CEF Python v147+, which uses CMake for compilation
-and `tools/build_distrib.py` for wheel packaging. The workflow is driven by
-the helper scripts described below. For older releases (v50-v123) see the
-build instructions in that release's branch/tag - the build system was
-substantially rewritten for v147 and the old instructions no longer apply.
-
-Supported platforms, matching what CI builds and tests on every push (see
-[.github/workflows/](../.github/workflows/)):
-
-* Windows x64
-* Linux x64
-* macOS (Apple Silicon / arm64)
-
-Supported Python versions: 3.10 - 3.14.
-
-Before building you must satisfy the platform-specific [requirements](#requirements)
-listed below.
+* [Versions](#versions)
+* [Making a release](#making-a-release)
 
 
 ## Requirements
 
 ### Windows
 
-* Python 3.10+ (64-bit).
 * Visual Studio 2022 or later with the "Desktop development with C++"
   workload. See https://wiki.python.org/moin/WindowsCompilers for which
   VS version is required by your Python version.
@@ -50,7 +29,6 @@ listed below.
 
 ### Linux
 
-* Python 3.10+ (64-bit). Tested on Ubuntu 24.04.
 * Install the packages in the "Install system dependencies" step of
   [ci-linux.yml](../.github/workflows/ci-linux.yml) to compile cefpython.
 * To run cefpython on a minimal system or under Xvfb, also install the packages
@@ -59,7 +37,6 @@ listed below.
 
 ### macOS
 
-* Python 3.10+ (arm64/Apple Silicon) on macOS 12 or later. Tested on macOS 14.
 * Xcode with command line tools installed (`xcode-select --install`).
 * CMake and Ninja are installed into the active Python environment in
   step 1 below; no separate system installation is required.
@@ -147,17 +124,17 @@ download for a different platform than the one you're on, see
 python tools/build.py
 ```
 
-By default this runs a fast CMake dev build: it configures (first run
-only) and builds `build/_cmake_build/`, then copies the extension module,
-the subprocess executable, and the CEF runtime files into `cefpython3/` so
-that `import cefpython3` works directly from the repo.
+This builds the extension module and installs it, with the CEF runtime, into
+`cefpython3/`, so that `import cefpython3` works directly from the repo. No
+wheel is created.
 
-Useful flags (see `python tools/build.py` docstring for the full list):
+Useful flags (see `python tools/build.py --help` for the full list):
 
 * `--clean` - delete the CMake build directory first (full rebuild).
 * `--unittests` - run the unit test suite after building.
-* `--wheel` - additionally build an installable wheel and install it
+* `--wheel` - additionally build a wheel
   (see [Build a wheel package](#5-build-a-wheel-package)).
+* `--version VERSION` - set a release version (see [Versions](#versions)).
 * `--enable-profiling` / `--enable-line-tracing` - Cython cProfile /
   line-tracing instrumentation, for profiling or coverage.
 
@@ -181,18 +158,27 @@ On Linux this requires a display - either a real one or Xvfb:
 python tools/build.py --wheel
 ```
 
-This packages the already-built (and, on macOS, already-signed) tree in
-`cefpython3/` into a wheel under `build/dist/`, using
-[tools/build_distrib.py](../tools/build_distrib.py), and installs it with
-`python -m pip install --force-reinstall`.
+This creates a wheel in `build/dist/`. To test it the way CI does:
 
-CI currently executes the configure, build, staging, and packaging steps
-explicitly, invoking `tools/build_distrib.py --dev` for commit-identifiable
-wheels. Consolidating this workflow behind a standards-compliant Python build
-backend is deferred to a follow-up task.
-
-To smoke-test a built wheel the way CI does (install it, then launch and
-auto-close a couple of the example apps):
 ```
+pip install build/dist/cefpython3-<version>-<tags>.whl
+python unittests/_test_runner.py
 python tools/smoke_test.py
 ```
+
+Afterwards, run `pip uninstall cefpython3` and `python tools/build.py` to
+switch back to the dev tree.
+
+
+## Versions
+
+By default the version is a development version, e.g.
+`147.0.dev5231+g98cd08e`. For a release use `--version`, e.g.
+`--version 147.1` or `--version 147.0.1`.
+
+
+## Making a release
+
+Run the "CI Linux", "CI Windows" and "CI macOS ARM" workflows from the Actions
+tab ("Run workflow") with the `version` input set, e.g. `147.1`, then download
+the wheel artifacts.

@@ -679,16 +679,7 @@ def create_prebuilt_binaries():
     version_header = os.path.join(src, "include", "cef_version.h")
     dst = get_prebuilt_name(version_header)
     dst = os.path.join(Options.build_dir, dst)
-    if os.path.exists(dst):
-        # Ensure the headers are present even for a pre-existing prebuilt dir
-        # (e.g. one restored from a CI cache created before include/ was
-        # copied here). The build compiles against CEF_ROOT/include.
-        inc = os.path.join(dst, "include")
-        if not os.path.exists(inc):
-            cpdir(os.path.join(src, "include"), inc)
-            print("[automate.py] Added missing include/ to existing %s" % dst)
-        print("[automate.py] Already exists: %s" % dst)
-        return
+    rmdir(dst)
     os.makedirs(dst)
     bindir = os.path.join(dst, "bin")
     libdir = os.path.join(dst, "lib")

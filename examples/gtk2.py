@@ -54,7 +54,7 @@ def check_versions():
             ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[gtk2.py] GTK {ver}".format(ver='.'.join(
                                            map(str, list(gtk.gtk_version)))))
-    assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
+    assert int(cef.__version__.split(".")[0]) >= 55, "CEF Python v55.3+ required to run this"
     pygtk.require('2.0')
 
 

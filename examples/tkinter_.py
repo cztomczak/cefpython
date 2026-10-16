@@ -53,7 +53,7 @@ def main():
     logger.info("Python {ver} {arch}".format(
             ver=platform.python_version(), arch=platform.architecture()[0]))
     logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
-    assert tuple(int(x) for x in cef.__version__.split(".")) >= (55, 3), "CEF Python v55.3+ required to run this"
+    assert int(cef.__version__.split(".")[0]) >= 55, "CEF Python v55.3+ required to run this"
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
     # Tk must be initialized before CEF otherwise fatal error (Issue #306)
     root = tk.Tk()

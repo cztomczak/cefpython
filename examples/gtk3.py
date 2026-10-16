@@ -41,7 +41,7 @@ def main():
     print("[gkt3.py] GTK {major}.{minor}".format(
             major=Gtk.get_major_version(),
             minor=Gtk.get_minor_version()))
-    assert cef.__version__ >= "53.1", "CEF Python v53.1+ required to run this"
+    assert int(cef.__version__.split(".")[0]) >= 53, "CEF Python v53.1+ required to run this"
     if not MAC:
         # On Mac exception hook doesn't work and is causing a strange error:
         # > Python[57738:d07] _createMenuRef called with existing principal

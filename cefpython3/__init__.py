@@ -7,11 +7,7 @@ import sys
 __all__ = ["cefpython"]
 __author__ = "The CEF Python authors"
 
-try:
-    from importlib.metadata import version as _pkg_version
-    __version__ = _pkg_version("cefpython3")
-except Exception:
-    __version__ = "unknown"
+from ._version import __version__
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -32,3 +28,4 @@ if platform.system() == "Linux":
 
 _pyver = "{0}{1}".format(*sys.version_info[:2])
 cefpython = importlib.import_module(".cefpython_py{}".format(_pyver), package=__name__)
+cefpython.__version__ = __version__
