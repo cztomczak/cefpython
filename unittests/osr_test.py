@@ -124,6 +124,15 @@ class OsrTest_IsolatedTest(unittest.TestCase):
 
         # Initialize
         cef.Initialize(settings=settings, switches=switches)
+        cef_active = True
+
+        def shutdown_cef():
+            nonlocal cef_active
+            if cef_active:
+                cef_active = False
+                cef.Shutdown()
+
+        self.addCleanup(shutdown_cef)
         subtest_message("cef.Initialize() ok")
 
         # Accessibility handler
@@ -172,15 +181,17 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         on_load_end(_select_h1_after_load, browser)
 
         # Message loop.
-        # The test is event-driven: RenderHandler.OnTextSelectionChanged
-        # calls QuitMessageLoop() as soon as the <h1> selection is reported,
-        # so the loop ends exactly when the work is done rather than after a
-        # fixed delay (which raced the selection round-trip and made this
-        # test flaky on CI). The watchdog task quits the loop if that event
-        # never arrives, turning a would-be hang into a clean assert failure.
-        cef.PostDelayedTask(cef.TID_UI, 15000, cef.QuitMessageLoop)
-        cef.MessageLoop()
-        subtest_message("cef.MessageLoop() ok")
+        # Run until every result checked by check_auto_asserts() below has
+        # arrived. GetSource() issued in OnLoadEnd can complete after the
+        # selection when the renderer is busy.
+        async_objects = client_handlers + [global_handler,
+                                           accessibility_handler]
+        async_completed = run_message_loop_until(
+            lambda: not osr_test_pending_results(async_objects))
+        if not async_completed:
+            self.fail("Timed out waiting for "
+                      + ", ".join(osr_test_pending_results(async_objects)))
+        subtest_message("cef.MessageLoopWork() ok")
 
         # Close browser and clean reference
         browser.CloseBrowser(True)
@@ -193,17 +204,26 @@ class OsrTest_IsolatedTest(unittest.TestCase):
 
         # Asserts before shutdown
         # noinspection PyTypeChecker
-        check_auto_asserts(self, [] + client_handlers
-                                    + [global_handler,
-                                       accessibility_handler])
+        check_auto_asserts(self, async_objects)
 
         # Test shutdown of CEF
-        cef.Shutdown()
+        shutdown_cef()
         subtest_message("cef.Shutdown() ok")
 
         # Display summary
         show_test_summary(__file__)
         sys.stdout.flush()
+
+
+def osr_test_pending_results(objects):
+    """Return the asynchronous results that have not arrived yet."""
+    pending = [type(obj).__name__ + "." + key
+               for obj in objects
+               for key, value in obj.__dict__.items()
+               if "_True" in key and not value]
+    if not is_js_code_completed():
+        pending.append("js_code_completed")
+    return pending
 
 
 class AccessibilityHandler(object):
@@ -274,9 +294,7 @@ class RenderHandler(object):
         self.GetViewRect_True = False
         self.OnPaint_True = False
         self.OnTextSelectionChanged_True = False
-        # Set once the non-empty <h1> selection has been reported. Used as
-        # the message-loop termination condition so the test does not rely
-        # on a fixed-duration loop (which was the source of CI flakiness).
+        # Set once the non-empty <h1> selection has been reported.
         self.OnTextSelectionChanged_h1_True = False
 
     def GetViewRect(self, rect_out, **_):
@@ -306,10 +324,6 @@ class RenderHandler(object):
             self.test_case.assertEqual(selected_text,
                                        "Off-screen rendering test")
             self.OnTextSelectionChanged_h1_True = True
-            # Selection round-trip complete — stop the message loop. Safe to
-            # call from this callback (unlike closing the browser, which must
-            # be deferred out of OnPaint/OnLoadingStateChange).
-            cef.QuitMessageLoop()
 
 
 if __name__ == "__main__":
