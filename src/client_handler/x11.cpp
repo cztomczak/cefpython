@@ -37,9 +37,14 @@ void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
                         int x, int y, int width, int height) {
     REQUIRE_UI_THREAD();
     // xwindow is 0 for windowless (OSR) browsers - nothing to resize, and no
-    // need to touch X11 at all, so check this first.
+    // need to touch X11 at all, so check this first. Callers should not get
+    // here for OSR (use WasResized() instead), so warn.
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
-    if (!xwindow) return;
+    if (!xwindow) {
+        LOG(WARNING) << "[Browser process] SetX11WindowBounds: no X11 window "
+                        "handle (windowless browser?), skipping";
+        return;
+    }
     // cef_get_xdisplay() is NULL off the UI thread (cef_types_linux.h; the
     // assert above is compiled out in release builds) and on any thread when
     // the app selects a non-X11 Ozone backend with no X server.
@@ -62,9 +67,14 @@ void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
 
 void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
     REQUIRE_UI_THREAD();
-    // xwindow is 0 for windowless (OSR) browsers - no title bar to set.
+    // xwindow is 0 for windowless (OSR) browsers - no title bar to set. The
+    // only caller is for windowed browsers, so this indicates a bug.
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
-    if (!xwindow) return;
+    if (!xwindow) {
+        LOG(WARNING) << "[Browser process] SetX11WindowTitle: no X11 window "
+                        "handle (windowless browser?), skipping";
+        return;
+    }
     // See SetX11WindowBounds: NULL off the UI thread or on a non-X11 Ozone
     // backend; XStoreName(NULL, ...) would segfault.
     ::Display* xdisplay = cef_get_xdisplay();
