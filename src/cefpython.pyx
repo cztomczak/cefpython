@@ -587,8 +587,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
 
     IF UNAME_SYSNAME == "Linux":
-        # Apply Linux default command-line switches before the browser-process
-        # argv is built from g_commandLineSwitches below. setdefault lets an app
+        # Apply Linux default command-line switches. setdefault lets an app
         # override either by passing it explicitly to cef.Initialize(switches=).
         #
         # Force Chrome's Ozone backend to X11.  This is the *only* thing keeping
@@ -623,29 +622,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         cdef HINSTANCE hInstance = GetModuleHandle(NULL)
         cdef CefMainArgs cefMainArgs = CefMainArgs(hInstance)
     ELIF UNAME_SYSNAME == "Linux":
-        # Build a complete argv so the browser process sees all switches.
-        # OnBeforeChildProcessLaunch only reaches child processes; switches
-        # like --in-process-gpu and --single-process must be in the browser
-        # process's own command line to take effect.
-        _cefMainArgvPyList = [sys.executable.encode('utf-8')]
-        for _cefArgK, _cefArgV in g_commandLineSwitches.items():
-            if _cefArgV:
-                _cefMainArgvPyList.append(
-                    ("--{}={}".format(_cefArgK, _cefArgV)).encode('utf-8'))
-            else:
-                _cefMainArgvPyList.append(
-                    ("--{}".format(_cefArgK)).encode('utf-8'))
-        cdef int _cefMainArgc = len(_cefMainArgvPyList)
-        cdef char** _cefMainArgvC = \
-                <char**>malloc(_cefMainArgc * sizeof(char*))
-        cdef bytes _cefMainArgvItem
-        cdef int _cefMainArgvI
-        for _cefMainArgvI in range(_cefMainArgc):
-            _cefMainArgvItem = _cefMainArgvPyList[_cefMainArgvI]
-            _cefMainArgvC[_cefMainArgvI] = _cefMainArgvItem
-        cdef CefMainArgs cefMainArgs = CefMainArgs(_cefMainArgc, _cefMainArgvC)
-        # _cefMainArgvPyList keeps the bytes alive; freed below after
-        # CefInitialize() has processed the command line.
+        cdef list args = [arg.encode('utf-8') for arg in sys.argv]
+        cdef char** argv = <char**>malloc((len(args) + 1) * sizeof(char*))
+        cdef int i
+        for i in range(len(args)):
+            argv[i] = args[i]
+        argv[len(args)] = NULL
+        cdef CefMainArgs cefMainArgs = CefMainArgs(len(args), argv)
     ELIF UNAME_SYSNAME == "Darwin":
         # TODO: use the CefMainArgs(int argc, char** argv) constructor.
         cdef CefMainArgs cefMainArgs
@@ -682,7 +665,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     with nogil:
         ret = CefInitialize(cefMainArgs, cefApplicationSettings, cefApp, NULL)
     IF UNAME_SYSNAME == "Linux":
-        free(_cefMainArgvC)
+        free(argv)
 
     global g_cef_initialized
     g_cef_initialized = True
