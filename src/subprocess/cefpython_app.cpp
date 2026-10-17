@@ -505,6 +505,9 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
         if (!context.get() || !context->IsValid()) {
             // No valid context yet; OnContextCreated will register globals
             // directly once the context exists and bindings are set.
+            LOG(INFO) << "[Renderer process] DoJavascriptBindingsForBrowser():"
+                         " V8 context not available yet, deferring bindings"
+                         " to OnContextCreated";
             continue;
         }
         if (!CefV8Context::InContext()) {
