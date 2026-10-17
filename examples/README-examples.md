@@ -63,11 +63,8 @@ Examples of embedding CEF browser using various GUI frameworks:
   issues that are reported in Issue [#324](../../../issues/324).
 - [pywin32.py](pywin32.py): example for [pywin32](https://github.com/mhammond/pywin32)
   library
-- [qt.py](qt.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4),
-  [PyQt5](https://pypi.python.org/pypi/PyQt5)
-  and [PySide](https://wiki.qt.io/PySide) libraries.
-  PyQt4 and PySide examples are currently broken on Linux, see
-  [Issue #452](../../../issues/452).
+- [qt.py](qt.py): example for [PyQt6](https://pypi.org/project/PyQt6/) and
+  [PySide6](https://pypi.org/project/PySide6/) libraries.
 - [tkinter_.py](tkinter_.py): example for [Tkinter](https://wiki.python.org/moin/TkInter).
   Currently broken on Mac ([#309](../../../issues/309)).
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)

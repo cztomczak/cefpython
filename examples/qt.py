@@ -1,10 +1,9 @@
-# Example of embedding CEF browser using PyQt5, PyQt6 and PySide6 libraries.
+# Example of embedding CEF browser using PyQt6 and PySide6 libraries.
 # This example has two widgets: a navigation bar and a browser.
 #
 # Tested configurations:
-# - PyQt 5.8.2 (qt 5.8.0) on Windows/Linux/Mac
-# - PyQt6 on Linux
-# - PySide6 on Linux
+# - PyQt6 on Windows/Linux
+# - PySide6 on Windows/Linux
 # - CEF Python v55.4+
 
 from cefpython3 import cefpython as cef
@@ -12,29 +11,21 @@ import os
 import platform
 import sys
 
-# GLOBALS
-PYQT5 = False
-PYQT6 = False
-PYSIDE6 = False
+# Selected Qt6 binding.  The embedding code below is shared by both bindings.
+QT_BINDING = None
+QT_BINDING_VERSION = None
 
-if "pyqt5" in sys.argv:
-    PYQT5 = True
-    # noinspection PyUnresolvedReferences
-    from PyQt5.QtGui import *
-    # noinspection PyUnresolvedReferences
-    from PyQt5.QtCore import *
-    # noinspection PyUnresolvedReferences
-    from PyQt5.QtWidgets import *
-elif "pyqt6" in sys.argv:
-    PYQT6 = True
+if "pyqt6" in sys.argv:
+    QT_BINDING = "PyQt6"
     # noinspection PyUnresolvedReferences
     from PyQt6.QtGui import *
     # noinspection PyUnresolvedReferences
     from PyQt6.QtCore import *
     # noinspection PyUnresolvedReferences
     from PyQt6.QtWidgets import *
+    QT_BINDING_VERSION = PYQT_VERSION_STR
 elif "pyside6" in sys.argv:
-    PYSIDE6 = True
+    QT_BINDING = "PySide6"
     # noinspection PyUnresolvedReferences
     import PySide6
     # noinspection PyUnresolvedReferences
@@ -45,9 +36,9 @@ elif "pyside6" in sys.argv:
     from PySide6.QtCore import *
     # noinspection PyUnresolvedReferences
     from PySide6.QtWidgets import *
+    QT_BINDING_VERSION = PySide6.__version__
 else:
     print("USAGE:")
-    print("  qt.py pyqt5")
     print("  qt.py pyqt6")
     print("  qt.py pyside6")
     sys.exit(1)
@@ -98,11 +89,8 @@ def main():
     main_window.show()
     main_window.activateWindow()
     main_window.raise_()
-    if PYQT6 or PYSIDE6:
-        app.exec()
-    else:
-        app.exec_()
-    if not cef.GetAppSetting("external_message_pump") or LINUX:
+    app.exec()
+    if not cef.GetAppSetting("external_message_pump"):
         app.stopTimer()
     del main_window  # Just to be safe, similarly to "del app"
     del app  # Must destroy app object before calling Shutdown
@@ -113,12 +101,9 @@ def check_versions():
     print("[qt.py] CEF Python {ver}".format(ver=cef.__version__))
     print("[qt.py] Python {ver} {arch}".format(
             ver=platform.python_version(), arch=platform.architecture()[0]))
-    if PYQT5 or PYQT6:
-        print("[qt.py] PyQt {v1} (qt {v2})".format(
-              v1=PYQT_VERSION_STR, v2=qVersion()))
-    elif PYSIDE6:
-        print("[qt.py] PySide6 {v1} (qt {v2})".format(
-              v1=PySide6.__version__, v2=QtCore.__version__))
+    print("[qt.py] {binding} {version} (qt {qt_version})".format(
+          binding=QT_BINDING, version=QT_BINDING_VERSION,
+          qt_version=qVersion()))
     # CEF Python version requirement
     assert int(cef.__version__.split(".")[0]) >= 55, "CEF Python v55.4+ required to run this"
 
@@ -134,16 +119,8 @@ class MainWindow(QMainWindow):
         # committed to closing (see closeEvent / CloseHandler).
         self._closing = False
         self._do_close_called = False
-        if PYQT5:
-            self.setWindowTitle("PyQt5 example")
-        elif PYQT6:
-            self.setWindowTitle("PyQt6 example")
-        elif PYSIDE6:
-            self.setWindowTitle("PySide6 example")
-        if PYQT6 or PYSIDE6:
-            self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        else:
-            self.setFocusPolicy(Qt.StrongFocus)
+        self.setWindowTitle("{0} example".format(QT_BINDING))
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setupLayout()
 
     def setupLayout(self):
@@ -164,28 +141,8 @@ class MainWindow(QMainWindow):
         frame.setLayout(layout)
         self.setCentralWidget(frame)
 
-        if WINDOWS:
-            # On Windows with PyQt5 main window must be shown first
-            # before CEF browser is embedded, otherwise window is
-            # not resized and application hangs during resize.
-            self.show()
-
         # Browser can be embedded only after layout was set up
         self.cef_widget.embedBrowser()
-
-        if LINUX and PYQT5:
-            # On Linux with PyQt5 QX11EmbedContainer is no longer available.
-            # The equivalent is to embed CEF in a QWindow (hidden_window) and
-            # wrap it in a createWindowContainer widget.
-            # noinspection PyUnresolvedReferences, PyArgumentList
-            self.container = QWidget.createWindowContainer(
-                    self.cef_widget.hidden_window, parent=self)
-            # noinspection PyArgumentList
-            layout.addWidget(self.container, 1, 0)
-            # The container displaces cef_widget in the layout, so
-            # cef_widget.resizeEvent never fires.  Drive SetBounds from the
-            # container's resize events via this event filter.
-            self.container.installEventFilter(self.cef_widget)
 
     def closeEvent(self, event):
         # Don't destroy the window while the browser is still open.
@@ -214,18 +171,9 @@ class CefWidget(QWidget):
         super(CefWidget, self).__init__(parent)
         self.parent = parent
         self.browser = None
-        self.hidden_window = None  # Required for PyQt5 on Linux
         self.x = 0
         self.y = 0
         self.show()
-
-    def eventFilter(self, obj, event):
-        # Only installed on PyQt5/Linux where the container displaces cef_widget.
-        if event.type() == QEvent.Resize and self.browser:
-            size = event.size()
-            self.browser.SetBounds(self.x, self.y, size.width(), size.height())
-            self.browser.NotifyMoveOrResizeStarted()
-        return False
 
     def focusInEvent(self, event):
         # This event seems to never get called on Linux, as CEF is
@@ -246,17 +194,8 @@ class CefWidget(QWidget):
             self.browser.SetFocus(False)
 
     def embedBrowser(self):
-        if LINUX and PYQT5:
-            # On Linux with PyQt5, QX11EmbedContainer is gone; the Qt-native
-            # equivalent is to host CEF in a QWindow (hidden_window) wrapped in
-            # a createWindowContainer widget (see setupLayout).  Qt reparents
-            # the QWindow into the container itself.
-            # noinspection PyUnresolvedReferences
-            self.hidden_window = QWindow()
-        # On all bindings CEF is parented directly into the native X11 window
-        # via WindowInfo.SetAsChild(), exactly like upstream cefclient
-        # (browser_window_std_gtk.cc).  The Qt widget forces a real X11 native
-        # window (WA_PaintOnScreen / xcb backend); no deferred reparent needed.
+        # CEF is parented directly into the native Qt widget window via
+        # WindowInfo.SetAsChild().
         window_info = cef.WindowInfo()
         rect = [0, 0, self._phys(self.width()), self._phys(self.height())]
         window_info.SetAsChild(self.getHandle(), rect)
@@ -275,15 +214,12 @@ class CefWidget(QWidget):
     def _phys(self, n):
         # Qt6 enables AA_EnableHighDpiScaling by default, so width()/height()
         # return logical pixels.  CEF expects physical pixels.  Multiply by
-        # devicePixelRatio() for PyQt6/PySide6 on Linux; PyQt5 uses the
-        # hidden_window/XReparentWindow path where X11 geometry drives sizing.
-        if LINUX and (PYQT6 or PYSIDE6):
+        # devicePixelRatio() on Linux.
+        if LINUX:
             return int(n * self.devicePixelRatio())
         return n
 
     def getHandle(self):
-        if self.hidden_window:
-            return int(self.hidden_window.winId())
         return int(self.winId())
 
     def moveEvent(self, _):
@@ -313,7 +249,7 @@ class CefWidget(QWidget):
 class CefApplication(QApplication):
     def __init__(self, args):
         super(CefApplication, self).__init__(args)
-        if not cef.GetAppSetting("external_message_pump") or LINUX:
+        if not cef.GetAppSetting("external_message_pump"):
             self.timer = self.createTimer()
         self.setupIcon()
 
@@ -333,7 +269,7 @@ class CefApplication(QApplication):
 
     def setupIcon(self):
         icon_file = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                 "resources", "{0}.png".format(sys.argv[1]))
+                                 "resources", "qt.png")
         if os.path.exists(icon_file):
             self.setWindowIcon(QIcon(icon_file))
 

@@ -78,32 +78,19 @@ def main():
         print("[run_examples.py] PASS: gtk3.py (Gtk 3 not installed)")
         passed.append("gtk3.py")
 
-    # pyqt4
-    if LINUX:
-        print("[run_examples.py] PASS: qt.py pyqt4 (Issue #452)")
-        passed.append("qt.py pyqt4 (Issue #452)")
-    elif packages["PyQt4"]:
-        examples.append("qt.py pyqt4")
+    # pyqt6
+    if packages["PyQt6"]:
+        examples.append("qt.py pyqt6")
     else:
-        print("[run_examples.py] PASS: qt.py pyqt4 (PyQt4 not installed)")
-        passed.append("qt.py pyqt4")
+        print("[run_examples.py] PASS: qt.py pyqt6 (PyQt6 not installed)")
+        passed.append("qt.py pyqt6")
 
-    # pyqt5
-    if packages["PyQt5"]:
-        examples.append("qt.py pyqt5")
+    # pyside6
+    if packages["PySide6"]:
+        examples.append("qt.py pyside6")
     else:
-        print("[run_examples.py] PASS: qt.py pyqt5 (PyQt5 not installed)")
-        passed.append("qt.py pyqt5")
-
-    # pyside
-    if LINUX:
-        print("[run_examples.py] PASS: qt.py pyside (Issue #452)")
-        passed.append("qt.py pyside (Issue #452)")
-    elif packages["PySide"]:
-        examples.append("qt.py pyside")
-    else:
-        print("[run_examples.py] PASS: qt.py pyside (PySide not installed)")
-        passed.append("qt.py pyside")
+        print("[run_examples.py] PASS: qt.py pyside6 (PySide6 not installed)")
+        passed.append("qt.py pyside6")
 
     # tkinter
     if MAC:
@@ -180,21 +167,16 @@ def check_installed_packages():
     packages = {
         "gtk": False,
         "kivy": False,
-        "PyQt4": False,
-        "PyQt5": False,
-        "PySide": False,
+        "PyQt6": False,
+        "PySide6": False,
         "tkinter": False,
         "Tkinter": False,
         "wx": False,
     }
     for package in packages:
         try:
-            if package == "PyQt5":
-                # Strange issue on Mac, PyQt5 is an empty built-in module
-                from PyQt5 import QtGui
-            else:
-                importlib.import_module(package)
-                packages[package] = True
+            importlib.import_module(package)
+            packages[package] = True
         except ImportError:
             packages[package] = False
     packages["gi"] = check_gi_installed()
