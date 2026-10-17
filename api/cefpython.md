@@ -397,5 +397,3 @@ written to the "error.log" file, printed, and CEF is shut down cleanly.
 unraisable exceptions, including ones from other libraries, to ExceptHook,
 which logs the error and terminates the application. Install it only if that
 is your application-wide error policy.
-
-See also Tutorial: [Handling Python exceptions](../docs/Tutorial.md#handling-python-exceptions).

@@ -12,8 +12,8 @@
 #   sys.unraisablehook instead of unwinding into CEF's C++ code. Each such
 #   callback still wraps its body in try/except and forwards to
 #   sys.excepthook; sys.unraisablehook is only reached if an exception
-#   escapes that guard (a bug in the handler). See cef.UnraisableHook and
-#   the "Handling Python exceptions" section of docs/Tutorial.md.
+#   escapes that guard (a bug in the handler). See cef.UnraisableHook in
+#   api/cefpython.md.
 #   tools/cmake_prepare_pyx.py checks for cdef/cpdef functions that return a
 #   C type without any exception declaration.
 #
