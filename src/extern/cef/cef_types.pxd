@@ -192,6 +192,9 @@ cdef extern from "include/internal/cef_types.h":
         TS_ABNORMAL_TERMINATION,
         TS_PROCESS_WAS_KILLED,
         TS_PROCESS_CRASHED,
+        TS_PROCESS_OOM,
+        TS_LAUNCH_FAILED,
+        TS_INTEGRITY_FAILURE,
 
     ctypedef enum cef_errorcode_t:
         ERR_NONE = 0,

@@ -261,12 +261,23 @@ this on Linux.
 | --- | --- |
 | browser | [Browser](Browser.md) |
 | status | TerminationStatus |
+| error_code | int |
+| error_string | str |
 | __Return__ | void |
 
 Called when the render process terminates unexpectedly. |status| indicates
-how the process terminated.
+how the process terminated. |error_code| and |error_string| represent the
+error that would be displayed in Chrome's "Aw, Snap!" view. Possible
+|error_code| values include non-normal process exit codes and
+platform-specific crash values (for example, a Posix signal or Windows
+hardware exception).
 
 `TerminationStatus` constants in the cefpython module:
   * TS_ABNORMAL_TERMINATION - Non-zero exit status.
   * TS_PROCESS_WAS_KILLED - SIGKILL or task manager kill.
   * TS_PROCESS_CRASHED - Segmentation fault.
+  * TS_PROCESS_OOM - Out of memory. Some platforms may use TS_PROCESS_CRASHED
+    instead.
+  * TS_LAUNCH_FAILED - Child process never launched.
+  * TS_INTEGRITY_FAILURE - On Windows, the OS terminated the process due to
+    code integrity failure.

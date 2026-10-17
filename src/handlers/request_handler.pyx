@@ -11,6 +11,9 @@ cimport cef_types
 TS_ABNORMAL_TERMINATION = cef_types.TS_ABNORMAL_TERMINATION
 TS_PROCESS_WAS_KILLED = cef_types.TS_PROCESS_WAS_KILLED
 TS_PROCESS_CRASHED = cef_types.TS_PROCESS_CRASHED
+TS_PROCESS_OOM = cef_types.TS_PROCESS_OOM
+TS_LAUNCH_FAILED = cef_types.TS_LAUNCH_FAILED
+TS_INTEGRITY_FAILURE = cef_types.TS_INTEGRITY_FAILURE
 
 # -----------------------------------------------------------------------------
 # PyAuthCallback
@@ -356,7 +359,9 @@ cdef public cpp_bool RequestHandler_OnCertificateError(
 
 cdef public void RequestHandler_OnRendererProcessTerminated(
         CefRefPtr[CefBrowser] cefBrowser,
-        cef_types.cef_termination_status_t cefStatus
+        cef_types.cef_termination_status_t cefStatus,
+        int errorCode,
+        const CefString& cefErrorString
         ) noexcept with gil:
     # TODO: proccess may crash during browser creation. Let this callback 
     # to be set either through  cefpython.SetGlobalClientCallback() 
@@ -375,7 +380,9 @@ cdef public void RequestHandler_OnRendererProcessTerminated(
         clientCallback = pyBrowser.GetClientCallback(
                 "OnRendererProcessTerminated")
         if clientCallback:
-            clientCallback(browser=pyBrowser, status=cefStatus)
+            clientCallback(browser=pyBrowser, status=cefStatus,
+                           error_code=errorCode,
+                           error_string=CefToPyString(cefErrorString))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

@@ -529,6 +529,7 @@ most important application-facing changes are:
 | `RequestHandler.GetCookieManager`, `OnBeforePluginLoad`, and `OnPluginCrashed` | Removed. |
 | `RequestHandler.OnQuotaRequest` | Removed upstream. CEF now handles disk-quota permission prompts through `CefPermissionHandler.OnShowPermissionPrompt` with `CEF_PERMISSION_TYPE_DISK_QUOTA`. This API is not yet exposed by CEF Python and does not provide the requested quota size. |
 | `RequestHandler.OnProtocolExecution` | `allow_execution_out[0]` is now honored. Previously, OS execution was always allowed whenever the callback was invoked, regardless of this value. |
+| `RequestHandler.OnRendererProcessTerminated(browser, status)` | `error_code` and `error_string` arguments were added. New `status` values: `TS_PROCESS_OOM`, `TS_LAUNCH_FAILED` and `TS_INTEGRITY_FAILURE`. |
 | `CookieManager.GetBlockingManager`, `CreateManager`, `SetSupportedSchemes`, and `SetStoragePath` | Removed; use `CookieManager.GetGlobalManager()` and configure persistence through application settings. |
 | `RenderHandler.GetScreenRect(browser, rect_out)` | Removed upstream. Implement the new `RenderHandler.GetScreenInfo(browser, screen_info_out)` callback and set the `rect` (and optionally `available_rect`) key instead. If no rectangle is provided, CEF falls back to `GetViewRect`. |
 | `RenderHandler.OnScrollOffsetChanged(browser)` | `x` and `y` arguments were added. Existing callbacks must accept them, otherwise a `TypeError` is raised. |
