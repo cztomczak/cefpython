@@ -393,4 +393,9 @@ stderr and are easy to miss.
 This hook forwards the exception to [ExceptHook](#excepthook), so it is
 written to the "error.log" file, printed, and CEF is shut down cleanly.
 
+`sys.unraisablehook` is process-global. UnraisableHook forwards all
+unraisable exceptions, including ones from other libraries, to ExceptHook,
+which logs the error and terminates the application. Install it only if that
+is your application-wide error policy.
+
 See also Tutorial: [Handling Python exceptions](../docs/Tutorial.md#handling-python-exceptions).

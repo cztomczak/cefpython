@@ -23,10 +23,8 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t main_bundle_path
         int command_line_args_disabled
         cef_string_t cache_path
-        int enable_net_security_expiration
         int persist_session_cookies
         cef_string_t user_agent
-        cef_string_t product_version
         cef_string_t locale
         cef_string_t log_file
         int log_severity
@@ -36,8 +34,6 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t locales_dir_path
         int remote_debugging_port
         int uncaught_exception_stack_size
-        int context_safety_implementation # Not exposed.
-        int ignore_certificate_errors
         cef_color_t background_color
         int windowless_rendering_enabled
         int no_sandbox

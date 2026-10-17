@@ -285,12 +285,6 @@ compositor retries automatically; pages still render and
 Chromium's own classification — Chromium expects callers to retry, and
 they do.
 
-If a clean log is more important than hardware acceleration in your
-deployment, you can opt in to disabling the GPU process by passing
-`switches={"disable-gpu": ""}` to `cef.Initialize()`. Do not enable
-`in-process-gpu` to silence this line — it is not stable across
-multiple browser windows.
-
 
 ## Python crashes with "Segmentation fault" - how to debug?
 

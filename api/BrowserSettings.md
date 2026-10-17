@@ -73,7 +73,7 @@ in a known order. Equivalent to the `SkColor` type in Chromium.
 
 ### databases_disabled
 
-(bool) Controls whether databases can be used. Also configurable using the --disable-databases switch.
+(bool) Deprecated, has no effect. Chromium removed WebSQL and CEF no longer applies this setting. It is still accepted so that existing code does not raise an exception.
 
 
 ### default_encoding

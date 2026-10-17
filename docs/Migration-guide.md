@@ -52,7 +52,6 @@ Table of contents:
 * [v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loop-qt-wxpython)
 * [v66.1+ Navigation urls passed to CreateBrowserSync or LoadUrl methods need to be encoded by app code](#v661-navigation-urls-passed-to-createbrowsersync-or-loadurl-methods-need-to-be-encoded-by-app-code)
 * [v67+ Do not call the 'WindowUtils.OnSize' function](#v67-do-not-call-the-windowutilsonsize-function)
-* [v147+ Register sys.unraisablehook](#v147-register-sysunraisablehook)
 * [v147+ Removed and changed APIs](#v147-removed-and-changed-apis)
 
 
@@ -509,22 +508,6 @@ framework. Applications that handle `WM_SIZE` directly, such as
 `WindowUtils.OnSize`. See [Issue #464](../../../issues/464) for details.
 
 
-## v147+ Register sys.unraisablehook
-
-Register `cef.UnraisableHook` alongside `cef.ExceptHook` during application
-startup so that Python exceptions which cannot be raised normally receive the
-same logging and shutdown handling as other CEF Python errors:
-
-```python
-sys.excepthook = cef.ExceptHook
-sys.unraisablehook = cef.UnraisableHook
-```
-
-See cef.[UnraisableHook](../api/cefpython.md#unraisablehook) and
-[Tutorial > Handling Python exceptions](Tutorial.md#handling-python-exceptions)
-for details.
-
-
 ## v147+ Removed and changed APIs
 
 The CEF 66 to CEF 147 jump removed or changed a number of public APIs. The
@@ -538,20 +521,37 @@ most important application-facing changes are:
 | `Browser.SendFocusEvent(focus)` | Kept as a compatibility alias; new code should use `SetFocus(focus)`. |
 | `Browser.SetMouseCursorChangeDisabled()` / `IsMouseCursorChangeDisabled()` | Removed with no direct replacement. |
 | `Frame.LoadString(value, url)` | Use `Frame.LoadUrl()` with a `data:` URL. |
+| `Request.IsReadOnly()`, `GetResourceType()`, and `GetTransitionType()` | Removed from the documentation. They were never implemented, so calling them raised `AttributeError` in v66 too. |
 | `Response.GetHeader(name)` | Renamed to `Response.GetHeaderByName(name)`. |
 | `LifespanHandler.OnBeforePopup(browser, frame, ...)` | A `popup_id` argument was added. |
 | `RequestHandler.GetAuthCredentials(browser, frame, ...)` | The `frame` argument was replaced by `origin_url`. |
-| `RequestHandler.CanGetCookies` / `CanSetCookie` | Replaced by `CanSendCookie(browser, frame, request, cookie)` and `CanSaveCookie(browser, frame, request, response, cookie)`. |
+| `ResourceHandler.CanGetCookie` / `CanSetCookie` | Removed; these were never called. Use `RequestHandler.CanSendCookie(browser, frame, request, cookie)` and `RequestHandler.CanSaveCookie(browser, frame, request, response, cookie)` instead. Neither is called for requests with no associated browser (e.g. service workers, `CefURLRequest`); such cookies are allowed. |
 | `RequestHandler.GetCookieManager`, `OnBeforePluginLoad`, and `OnPluginCrashed` | Removed. |
 | `RequestHandler.OnQuotaRequest` | Removed upstream. CEF now handles disk-quota permission prompts through `CefPermissionHandler.OnShowPermissionPrompt` with `CEF_PERMISSION_TYPE_DISK_QUOTA`. This API is not yet exposed by CEF Python and does not provide the requested quota size. |
 | `RequestHandler.OnProtocolExecution` | `allow_execution_out[0]` is now honored. Previously, OS execution was always allowed whenever the callback was invoked, regardless of this value. |
 | `CookieManager.GetBlockingManager`, `CreateManager`, `SetSupportedSchemes`, and `SetStoragePath` | Removed; use `CookieManager.GetGlobalManager()` and configure persistence through application settings. |
-| `RenderHandler.GetScreenRect` | Removed. |
-| `pack_loading_disabled` application setting | Removed with no replacement; pack loading can no longer be disabled. |
-| `persist_user_preferences` application setting | Removed; persistent Chrome profiles save preferences automatically. |
+| `RenderHandler.GetScreenRect(browser, rect_out)` | Removed upstream. Implement the new `RenderHandler.GetScreenInfo(browser, screen_info_out)` callback and set the `rect` (and optionally `available_rect`) key instead. If no rectangle is provided, CEF falls back to `GetViewRect`. |
+| `RenderHandler.OnScrollOffsetChanged(browser)` | `x` and `y` arguments were added. Existing callbacks must accept them, otherwise a `TypeError` is raised. |
+| `cef.GetCommandLineSwitch(key)` | Removed from the documentation. It was never implemented, so calling it raised `AttributeError` in v66 too. |
 | `WebPluginInfo` and the legacy plugin APIs | Removed along with Chromium's legacy plugin support. |
 
-The following application settings were also removed:
-`ignore_certificate_errors` and `user_data_path`. The following browser
-settings were removed: `file_access_from_file_urls_allowed`, `plugins_disabled`,
-`universal_access_from_file_urls_allowed`, and `web_security_disabled`.
+The following application and browser settings were removed or changed.
+Passing a removed setting raises an "Invalid appSettings key" or
+"Invalid browserSettings key" exception.
+
+| v66 setting | Type | v147 replacement or status |
+| --- | --- | --- |
+| `accept_language_list` | Application and browser | Removed; not yet exposed by CEF Python for CEF 147. |
+| `ignore_certificate_errors` | Application | Removed. |
+| `net_security_expiration_enabled` | Application | Removed upstream. |
+| `pack_loading_disabled` | Application | Removed with no replacement; pack loading can no longer be disabled. |
+| `persist_user_preferences` | Application | Removed; persistent Chrome profiles save preferences automatically. |
+| `product_version` | Application | Renamed upstream to `user_agent_product`, which CEF Python does not expose. Use `switches={"user-agent-product": "..."}` in `cef.Initialize()` instead; it is ignored when `user_agent` is set. |
+| `single_process` | Application | Removed upstream. |
+| `user_data_path` | Application | Removed. |
+| `application_cache_disabled` | Browser | Removed along with Chromium's AppCache support. |
+| `databases_disabled` | Browser | Still accepted, but has no effect: Chromium removed WebSQL and CEF no longer applies this setting. |
+| `file_access_from_file_urls_allowed` | Browser | Removed. |
+| `plugins_disabled` | Browser | Removed. |
+| `universal_access_from_file_urls_allowed` | Browser | Removed. |
+| `web_security_disabled` | Browser | Removed. |

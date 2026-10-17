@@ -167,16 +167,17 @@ CEF Python may report an exception through
 [sys.unraisablehook](https://docs.python.org/3/library/sys.html#sys.unraisablehook)
 when it cannot propagate out of a native callback handler. Such exceptions do
 not reach `sys.excepthook`; by default they are printed only to stderr and are
-easy to miss. To give them the same treatment as other Python errors, examples
-also set:
+easy to miss. To give them the same treatment as other Python errors, you can
+optionally set:
 
 ```python
 sys.unraisablehook = cef.UnraisableHook
 ```
 
-cef.[UnraisableHook](../api/cefpython.md#unraisablehook) forwards to
-cef.[ExceptHook](../api/cefpython.md#excepthook), so the exception is written
-to "error.log", printed, and CEF is shut down cleanly.
+cef.[UnraisableHook](../api/cefpython.md#unraisablehook) forwards the
+exception to cef.[ExceptHook](../api/cefpython.md#excepthook). Because
+`sys.unraisablehook` is process-global, this also makes unraisable exceptions
+from other libraries terminate the application.
 
 
 ## Settings

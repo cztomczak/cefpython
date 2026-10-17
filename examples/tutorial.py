@@ -60,8 +60,6 @@ HTML_code = """
 def main():
     check_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-    sys.unraisablehook = cef.UnraisableHook  # Same, for errors Python would
-    #                                          otherwise just print and ignore
     # To change the user agent use the "user_agent" option.
     settings = {
         # "user_agent": "MyAgent/20.00 MyProduct/10.00",
