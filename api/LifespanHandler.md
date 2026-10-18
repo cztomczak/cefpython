@@ -28,7 +28,7 @@ Table of contents:
 | browser | [Browser](Browser.md) |
 | __Return__ | bool |
 
-Called when a browser has recieved a request to close. This may result
+Called when a browser has received a request to close. This may result
 directly from a call to [Browser](Browser.md).`CloseBrowser` or indirectly
 if the
 browser is a top-level OS window created by CEF and the user attempts to
@@ -47,8 +47,8 @@ See complete description of this callback in [cef_life_span_handler.h](https://g
 | browser | [Browser](Browser.md) |
 | __Return__ | void |
 
-Called after a new browser is created. This callback will be the first
-notification that references |browser|.
+Called after a new browser is created. It is now safe to begin performing
+actions with |browser|.
 
 This callback will be executed during browser creation, thus you must call [cefpython](cefpython.md).SetGlobalClientCallback() to use it. The callback name was prefixed with "`_`" to distinguish this special behavior.
 
