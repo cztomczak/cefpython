@@ -15,22 +15,26 @@ Usage:
     -r  specify hardware (default) or software rendering
     -h  display help info
 
+    Press Escape to quit.
+
 Tested configurations:
-- Windows 7: SDL 2.0.7 and PySDL2 0.9.6
-- Mac 10.9: SDL 2.0.7 and PySDL2 0.9.6
-- Fedora 26: SDL2 2.0.7 with PySDL2 0.9.6
-- Ubuntu 14.04: SDL2 with PySDL2 0.9.6
+- Ubuntu 26.04 (KDE Plasma 6.6, Wayland): SDL2 2.32.10 with PySDL2 0.9.17
+- Windows 11: SDL2 2.32.10 with PySDL2 0.9.17
 
 Install instructions:
-1. Install SDL libraries for your OS, e.g:
-   - Windows: Download SDL2.dll from http://www.libsdl.org/download-2.0.php
-              and put SDL2.dll in C:\\Python27\\ (where you've installed Python)
+1. Install PySDL2 using pip package manager:
+   pip install PySDL2
+2. Install SDL2 (not SDL3) libraries. The easiest way on Windows, Mac
+   and Linux is the pysdl2-dll package:
+   pip install pysdl2-dll
+   Or install SDL2 for your OS, e.g:
+   - Windows: Download SDL2.dll from
+              https://github.com/libsdl-org/SDL/releases
+              and put it next to python.exe
    - Mac: Install Homebrew from https://brew.sh/
           and then type "brew install sdl2"
    - Fedora: sudo dnf install SDL2 SDL2_ttf SDL2_image SDL2_gfx SDL2_mixer
    - Ubuntu: sudo apt-get install libsdl2-dev
-2. Install PySDL2 using pip package manager:
-   pip install PySDL2
 
 Known issues (pull requests are welcome):
 - There are issues when running on slow machine - key events are being
@@ -52,14 +56,12 @@ import argparse
 import ctypes
 import logging
 import os
-import subprocess
+import platform
 import sys
 
 
 def die(msg):
-    """
-    Helper function to exit application on failed imports etc.
-    """
+    """Print an error message and exit, e.g. on failed imports."""
     sys.stderr.write("%s\n" % msg)
     sys.exit(1)
 
@@ -88,14 +90,6 @@ except ImportError as exc:
     else:
         die(excstr)
 
-try:
-    # noinspection PyUnresolvedReferences
-    from PIL import Image
-except ImportError:
-    die("ERROR: PIL package not found\n"
-        "       To install type: pip install Pillow")
-
-
 if sys.platform == 'darwin':
     try:
         import AppKit
@@ -104,11 +98,41 @@ if sys.platform == 'darwin':
             "       To install type: pip install pyobjc")
 
 
+# Config
+URL = "https://www.google.com/"
+WINDOW_SIZE = (800, 600)
+FRAME_RATE = 100
+# Mouse wheel scroll amount per step
+SCROLL_STEP = 100
+
+
 def main():
-    """
-    Parses input, initializes everything and then runs the main loop of the
-    program, which handles input and draws the scene.
-    """
+    """Initialize CEF and SDL2 and run the event loop until exit."""
+    args = parse_args()
+    logging.basicConfig(
+        format='[%(filename)s %(levelname)s]: %(message)s',
+        level=logging.DEBUG if args.verbose else logging.INFO
+    )
+    log_versions()
+    sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
+    init_cef()
+    init_sdl()
+    logging.info("Using %s rendering", args.renderer)
+    if args.renderer == 'hardware':
+        renderer_flags = sdl2.SDL_RENDERER_ACCELERATED
+    else:
+        renderer_flags = sdl2.SDL_RENDERER_SOFTWARE
+    windows = create_browser(renderer_flags)
+    run_event_loop(windows)
+    # User exited. Shutdown CEF before SDL2, because it closes any
+    # remaining popup browsers, which destroys their SDL windows.
+    cef.Shutdown()
+    sdl2.SDL_Quit()
+    logging.info("Exited gracefully")
+
+
+def parse_args():
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description='PySDL2 / cefpython example',
         add_help=True
@@ -128,54 +152,33 @@ def main():
         dest='renderer',
         choices=['software', 'hardware']
     )
+    # The --debug flag is handled by cef.Initialize(), it only needs
+    # to be accepted here. See docs/Knowledge-Base.md.
     parser.add_argument(
         '--debug',
         help='debug app',
         action='store_true'
     )
-    args = parser.parse_args()
-    logLevel = logging.INFO
-    if args.verbose:
-        logLevel = logging.DEBUG
-    logging.basicConfig(
-        format='[%(filename)s %(levelname)s]: %(message)s',
-        level=logLevel
-    )
-    logging.info("Using PySDL2 %s", sdl2.__version__)
-    version = sdl2.SDL_version()
-    sdl2.SDL_GetVersion(version)
-    logging.info(
-        "Using SDL2 %s.%s.%s" % (version.major, version.minor, version.patch)
-    )
-    # The following variables control the dimensions of the window
-    # and browser display area
-    width = 800
-    height = 600
-    # headerHeight is useful for leaving space for controls
-    # at the top of the window (future implementation?)
-    headerHeight = 0
-    browserHeight = height - headerHeight
-    browserWidth = width
-    # CSS pixels per wheel unit. Used as a multiplier (not an adder) so that
-    # smooth-scroll sub-pixel events scale proportionally and y=0 events send
-    # nothing. Multiplied by deviceScaleFactor at event time so the perceived
-    # scroll distance matches a native browser at any DPI.
-    scrollEnhance = 40
-    # desired frame rate
-    frameRate = 100
-    # On Wayland sessions prefer the native SDL Wayland backend over XWayland.
-    # Must be done before cef.Initialize() because CEF clears WAYLAND_DISPLAY
-    # from the process environment during its own Wayland/X11 negotiation.
-    # With XWayland the compositor composites the SDL surface at 1/scale so
-    # an 800x600 SDL window appears as 400x300 logical pixels and text looks
-    # half the size of a native Wayland app.  The Wayland SDL backend exposes
-    # the true physical pixel count via SDL_GetRendererOutputSize (with
-    # SDL_WINDOW_ALLOW_HIGHDPI), so the CEF buffer maps 1:1 and matches Firefox.
-    if os.environ.get("WAYLAND_DISPLAY") and not os.environ.get("SDL_VIDEODRIVER"):
-        os.environ["SDL_VIDEODRIVER"] = "wayland"
-        logging.info("Wayland session detected: using SDL Wayland backend")
-    # Initialise CEF for offscreen rendering
-    sys.excepthook = cef.ExceptHook
+    return parser.parse_args()
+
+
+def log_versions():
+    """Log versions of CEF Python, Chromium, CEF, Python and SDL2."""
+    ver = cef.GetVersion()
+    logging.info("CEF Python %s", ver["version"])
+    logging.info("Chromium %s", ver["chrome_version"])
+    logging.info("CEF %s", ver["cef_version"])
+    logging.info("Python %s %s", platform.python_version(),
+                 platform.architecture()[0])
+    logging.info("PySDL2 %s", sdl2.__version__)
+    sdl_version = sdl2.SDL_version()
+    sdl2.SDL_GetVersion(sdl_version)
+    logging.info("SDL2 %s.%s.%s", sdl_version.major, sdl_version.minor,
+                 sdl_version.patch)
+
+
+def init_cef():
+    """Initialize CEF for off-screen rendering."""
     switches = {
         # Tweaking OSR performance by setting the same Chromium flags
         # as in upstream cefclient (Issue #240).
@@ -183,19 +186,9 @@ def main():
         "disable-gpu": "",
         "disable-gpu-compositing": "",
         "enable-begin-frame-scheduling": "",
-        # Ensure popup windows (window.open / target=_blank) are always
-        # allowed.  Real user clicks satisfy CEF's user-activation check
-        # on their own; this flag keeps popups working for any programmatic
-        # navigation that lacks a gesture token.
-        "disable-popup-blocking": "",
-    }
-    browser_settings = {
-        # Tweaking OSR performance (Issue #240)
-        "windowless_frame_rate": frameRate
     }
     cef.Initialize(settings={"windowless_rendering_enabled": True},
                    switches=switches)
-
     if sys.platform == 'darwin':
         # On MacOS, the NSApplication created in the cefpython initialization
         # will be hidden if windowless is specified. In order for SDL to receive
@@ -203,430 +196,200 @@ def main():
         # command-tab list, the application must be made "regular".
         AppKit.NSApplication.sharedApplication().setActivationPolicy_(
             AppKit.NSApplicationActivationPolicyRegular)
-    logging.debug("cef initialised")
+
+
+def init_sdl():
+    """Initialize SDL2 for video."""
+    # In Wayland sessions SDL2 uses XWayland by default, which doesn't
+    # report the real pixel density of HiDPI displays. Use SDL's native
+    # Wayland backend instead.
+    if (os.environ.get("WAYLAND_DISPLAY")
+            and not os.environ.get("SDL_VIDEODRIVER")):
+        os.environ["SDL_VIDEODRIVER"] = "wayland"
+    # On Windows SDL2 window sizes are in pixels by default, so the
+    # device scale factor would always be 1.0. Make SDL2 use scaled
+    # sizes, like on Mac and Wayland (requires SDL2 >= 2.24).
+    sdl2.SDL_SetHint(sdl2.SDL_HINT_WINDOWS_DPI_SCALING, b"1")
+    # Add other init constants if you require other SDL2
+    # functionality e.g. mixer, TTF, joystick etc.
+    check_sdl(sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO) == 0, "SDL_Init")
+
+
+def check_sdl(ok, function_name):
+    """Raise an error with SDL's error message if a call failed."""
+    if not ok:
+        raise RuntimeError("%s failed: %s" % (
+            function_name, sdl2.SDL_GetError().decode()))
+
+
+def create_browser(renderer_flags):
+    """Create the browser in an SDL window, return WindowManager."""
     window_info = cef.WindowInfo()
     window_info.SetAsOffscreen(0)
-    # Initialise SDL2 for video (add other init constants if you
-    # require other SDL2 functionality e.g. mixer,
-    # TTF, joystick etc.
-    sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO)
-    logging.debug("SDL2 initialised")
-    # Create the window
-    window = sdl2.video.SDL_CreateWindow(
-        b'cefpython3 SDL2 Demo',
-        sdl2.video.SDL_WINDOWPOS_UNDEFINED,
-        sdl2.video.SDL_WINDOWPOS_UNDEFINED,
-        width,
-        height,
-        sdl2.video.SDL_WINDOW_RESIZABLE | sdl2.video.SDL_WINDOW_ALLOW_HIGHDPI
-    )
-    # Define default background colour (black in this case)
-    backgroundColour = sdl2.SDL_Color(0, 0, 0)
-    renderer = None
-    if args.renderer == 'hardware':
-        # Create the renderer using hardware acceleration
-        logging.info("Using hardware rendering")
-        renderer = sdl2.SDL_CreateRenderer(
-            window,
-            -1,
-            sdl2.render.SDL_RENDERER_ACCELERATED
-        )
-    else:
-        # Create the renderer using software acceleration
-        logging.info("Using software rendering")
-        renderer = sdl2.SDL_CreateRenderer(
-            window,
-            -1,
-            sdl2.render.SDL_RENDERER_SOFTWARE
-        )
-    def _renderer_output_size(renderer):
-        """Return the SDL renderer output size in pixels."""
-        out_w, out_h = ctypes.c_int(0), ctypes.c_int(0)
-        sdl2.SDL_GetRendererOutputSize(renderer,
-                                       ctypes.byref(out_w), ctypes.byref(out_h))
-        return out_w.value, out_h.value
-
-    def _detect_device_scale_factor(window, renderer):
-        """
-        Detect the device pixel ratio using a fallback chain:
-          1. SDL renderer / window size ratio — works on Mac Retina and Wayland
-             when SDL uses the native Wayland backend with SDL_WINDOW_ALLOW_HIGHDPI.
-          2. GDK_SCALE env var — GNOME sets this for X11/XWayland sessions.
-          3. Xft.dpi from xrdb — GNOME writes 96*scale here for XWayland clients
-             even when GDK_SCALE is absent (e.g. Ubuntu with implicit scaling).
-          4. Fall back to 1.0.
-        """
-        win_w, _win_h = ctypes.c_int(0), ctypes.c_int(0)
-        sdl2.SDL_GetWindowSize(window, ctypes.byref(win_w), ctypes.byref(_win_h))
-        out_w, _out_h = ctypes.c_int(0), ctypes.c_int(0)
-        sdl2.SDL_GetRendererOutputSize(renderer,
-                                       ctypes.byref(out_w), ctypes.byref(_out_h))
-        if win_w.value > 0 and out_w.value != win_w.value:
-            return out_w.value / win_w.value
-
-        gdk = os.environ.get("GDK_SCALE", "")
-        if gdk:
-            try:
-                return float(gdk)
-            except ValueError:
-                pass
-
-        try:
-            xrdb_out = subprocess.check_output(
-                ["xrdb", "-query"], stderr=subprocess.DEVNULL, timeout=1
-            )
-            for line in xrdb_out.decode().splitlines():
-                if line.lower().startswith("xft.dpi:"):
-                    xft_dpi = float(line.split(":", 1)[1].strip())
-                    # Round to nearest 0.25 to match GNOME fractional scaling steps.
-                    return round(xft_dpi / 96.0 * 4) / 4
-        except Exception:
-            pass
-
-        return 1.0
-
-    deviceScaleFactor = _detect_device_scale_factor(window, renderer)
-    physWidth, physHeight = _renderer_output_size(renderer)
-    logging.info("Device scale factor: %.2f  physical: %dx%d",
-                 deviceScaleFactor, physWidth, physHeight)
-    rendererFlags = (sdl2.render.SDL_RENDERER_ACCELERATED
-                     if args.renderer == 'hardware'
-                     else sdl2.render.SDL_RENDERER_SOFTWARE)
-    # MetaRenderHandler dispatches CEF rendering callbacks to per-browser
-    # RenderHandler instances, creating SDL windows for popups lazily.
-    renderHandler = MetaRenderHandler(renderer, width, height - headerHeight,
-                                      deviceScaleFactor, rendererFlags)
-    # Create the browser instance
-    browser = cef.CreateBrowserSync(window_info,
-                                    url="https://www.google.com/",
-                                    settings=browser_settings)
-    lifeSpanHandler = LifeSpanHandler(renderHandler)
+    browser = cef.CreateBrowserSync(window_info, url=URL, settings={
+        # Tweaking OSR performance (Issue #240)
+        "windowless_frame_rate": FRAME_RATE,
+    })
+    main_window = BrowserWindow(browser, b'cefpython3 SDL2 Demo',
+                                renderer_flags)
+    logging.info("Device scale factor: %.2f",
+                 main_window.get_device_scale_factor())
+    windows = WindowManager(main_window, renderer_flags)
     browser.SetClientHandler(LoadHandler())
-    browser.SetClientHandler(lifeSpanHandler)
-    browser.SetClientHandler(renderHandler)
+    browser.SetClientHandler(LifespanHandler(windows))
+    browser.SetClientHandler(RenderHandler(windows))
     # Must call WasResized at least once to let know CEF that
     # viewport size is available and that OnPaint may be called.
     browser.SetFocus(True)
     browser.WasResized()
+    return windows
 
-    main_wid = sdl2.SDL_GetWindowID(window)
 
-    def _browser_for(wid):
-        """Return (cef_browser, header_px) for an SDL window ID."""
-        p = renderHandler.popups.get(wid)
-        if p:
-            return p["browser"], 0
-        return browser, headerHeight
+def run_event_loop(windows):
+    """
+    Run the event loop until the user quits.
 
-    # Begin the main rendering loop
-    running = True
-    # FPS debug variables
+    Each frame: send SDL2 input events to CEF, let CEF do its work
+    (this is when RenderHandler.OnPaint gets called) and draw all
+    windows.
+    """
     frames = 0
-    logging.debug("beginning rendering loop")
-    resetFpsTime = True
-    fpsTime = 0
-    while running:
+    fps_time = sdl2.SDL_GetTicks()
+    while True:
         # record when we started drawing this frame
-        startTime = sdl2.timer.SDL_GetTicks()
-        if resetFpsTime:
-            fpsTime = sdl2.timer.SDL_GetTicks()
-            resetFpsTime = False
-        # Convert SDL2 events into CEF events (where appropriate)
-        events = sdl2.ext.get_events()
-        for event in events:
-            if (event.type == sdl2.SDL_QUIT
-                or (event.type == sdl2.SDL_KEYDOWN
-                    and event.key.keysym.sym == sdl2.SDLK_ESCAPE)):
-                logging.debug("SDL2 QUIT event")
-                # Close all popup browsers so cef.Shutdown() is not blocked
-                # by live popup instances — mirrors real-browser behaviour
-                # where closing the main window closes all popups.
-                for _bid, (_ph, _wid) in list(
-                        renderHandler._popup_handlers.items()):
-                    _pb = renderHandler.popups.get(_wid, {}).get("browser")
-                    if _pb:
-                        _pb.CloseBrowser(True)
-                while renderHandler._popup_handlers:
-                    cef.MessageLoopWork()
-                    sdl2.SDL_Delay(10)
-                running = False
-                break
-            if event.type == sdl2.SDL_MOUSEBUTTONDOWN:
-                if event.button.button == sdl2.SDL_BUTTON_LEFT:
-                    b, hh = _browser_for(event.button.windowID)
-                    if event.button.y > hh:
-                        logging.debug(
-                            "SDL2 MOUSEBUTTONDOWN event (left button)"
-                        )
-                        b.SendMouseClickEvent(
-                            event.button.x,
-                            event.button.y - hh,
-                            cef.MOUSEBUTTON_LEFT,
-                            False,
-                            1
-                        )
-            elif event.type == sdl2.SDL_MOUSEBUTTONUP:
-                if event.button.button == sdl2.SDL_BUTTON_LEFT:
-                    b, hh = _browser_for(event.button.windowID)
-                    if event.button.y > hh:
-                        logging.debug("SDL2 MOUSEBUTTONUP event (left button)")
-                        b.SendMouseClickEvent(
-                            event.button.x,
-                            event.button.y - hh,
-                            cef.MOUSEBUTTON_LEFT,
-                            True,
-                            1
-                        )
-            elif event.type == sdl2.SDL_MOUSEMOTION:
-                b, hh = _browser_for(event.motion.windowID)
-                if event.motion.y > hh:
-                    modifiers = cef.EVENTFLAG_NONE
-                    state = event.motion.state
-                    if state & sdl2.SDL_BUTTON_LMASK:
-                        modifiers |= cef.EVENTFLAG_LEFT_MOUSE_BUTTON
-                    if state & sdl2.SDL_BUTTON_MMASK:
-                        modifiers |= cef.EVENTFLAG_MIDDLE_MOUSE_BUTTON
-                    if state & sdl2.SDL_BUTTON_RMASK:
-                        modifiers |= cef.EVENTFLAG_RIGHT_MOUSE_BUTTON
-                    b.SendMouseMoveEvent(event.motion.x,
-                                         event.motion.y - hh,
-                                         False,
-                                         modifiers)
-            elif event.type == sdl2.SDL_WINDOWEVENT:
-                wid = event.window.windowID
-                if wid == main_wid:
-                    if event.window.event == sdl2.SDL_WINDOWEVENT_SIZE_CHANGED:
-                        width = event.window.data1
-                        height = event.window.data2
-                        browserWidth = width
-                        browserHeight = height - headerHeight
-                        physWidth, physHeight = _renderer_output_size(renderer)
-                        renderHandler._set_size(browserWidth, browserHeight)
-                        browser.WasResized()
-                        logging.debug(
-                            "Main window resized to %dx%d (scale %.2f)",
-                            width, height, deviceScaleFactor)
-                    elif event.window.event == sdl2.SDL_WINDOWEVENT_CLOSE:
-                        # With multiple windows open SDL sends WINDOWEVENT_CLOSE
-                        # for the clicked window instead of SDL_QUIT.  Treat
-                        # closing the main window as a full quit request.
-                        logging.debug("Main window close button clicked")
-                        for _bid, (_ph, _wid) in list(
-                                renderHandler._popup_handlers.items()):
-                            _pb = renderHandler.popups.get(_wid, {}).get(
-                                "browser")
-                            if _pb:
-                                _pb.CloseBrowser(True)
-                        while renderHandler._popup_handlers:
-                            cef.MessageLoopWork()
-                            sdl2.SDL_Delay(10)
-                        running = False
-                        break
-                elif wid in renderHandler.popups:
-                    p = renderHandler.popups[wid]
-                    if event.window.event == sdl2.SDL_WINDOWEVENT_SIZE_CHANGED:
-                        p["render_handler"]._set_size(
-                            event.window.data1, event.window.data2)
-                        p["browser"].WasResized()
-                        logging.debug(
-                            "Popup window %d resized to %dx%d",
-                            wid, event.window.data1, event.window.data2)
-                    elif event.window.event == sdl2.SDL_WINDOWEVENT_CLOSE:
-                        p["browser"].CloseBrowser(True)
-            elif event.type == sdl2.SDL_MOUSEWHEEL:
-                logging.debug("SDL2 MOUSEWHEEL event")
-                # Use sub-pixel precision when available (SDL >= 2.0.18).
-                # Multiply by deviceScaleFactor: SendMouseWheelEvent takes
-                # physical pixels, so at 2x a logical-unit delta must be
-                # doubled to move the same apparent distance as in a native
-                # browser.
-                try:
-                    dx = event.wheel.preciseX
-                    dy = event.wheel.preciseY
-                except AttributeError:
-                    dx = float(event.wheel.x)
-                    dy = float(event.wheel.y)
-                scale = scrollEnhance * deviceScaleFactor
-                b, _ = _browser_for(event.wheel.windowID)
-                b.SendMouseWheelEvent(0, 0, int(dx * scale), int(dy * scale))
-            elif event.type == sdl2.SDL_TEXTINPUT:
-                # Handle text events to get actual characters typed rather
-                # than the key pressed.
-                logging.debug("SDL2 TEXTINPUT event: %s" % event.text.text)
-                b, _ = _browser_for(event.text.windowID)
-                keycode = ord(event.text.text)
-                key_event = {
-                    "type": cef.KEYEVENT_CHAR,
-                    "windows_key_code": keycode,
-                    "character": keycode,
-                    "unmodified_character": keycode,
-                    "modifiers": cef.EVENTFLAG_NONE
-                }
-                b.SendKeyEvent(key_event)
-                key_event = {
-                    "type": cef.KEYEVENT_KEYUP,
-                    "windows_key_code": keycode,
-                    "character": keycode,
-                    "unmodified_character": keycode,
-                    "modifiers": cef.EVENTFLAG_NONE
-                }
-                b.SendKeyEvent(key_event)
-            elif event.type == sdl2.SDL_KEYDOWN:
-                # Handle key down events for non-text keys
-                logging.debug("SDL2 KEYDOWN event")
-                b, _ = _browser_for(event.key.windowID)
-                if event.key.keysym.sym == sdl2.SDLK_RETURN:
-                    keycode = event.key.keysym.sym
-                    key_event = {
-                        "type": cef.KEYEVENT_CHAR,
-                        "windows_key_code": keycode,
-                        "character": keycode,
-                        "unmodified_character": keycode,
-                        "modifiers": cef.EVENTFLAG_NONE
-                    }
-                    b.SendKeyEvent(key_event)
-                elif event.key.keysym.sym in [
-                        sdl2.SDLK_BACKSPACE,
-                        sdl2.SDLK_DELETE,
-                        sdl2.SDLK_LEFT,
-                        sdl2.SDLK_RIGHT,
-                        sdl2.SDLK_UP,
-                        sdl2.SDLK_DOWN,
-                        sdl2.SDLK_HOME,
-                        sdl2.SDLK_END
-                ]:
-                    keycode = get_key_code(event.key.keysym.sym)
-                    if keycode is not None:
-                        key_event = {
-                            "type": cef.KEYEVENT_RAWKEYDOWN,
-                            "windows_key_code": keycode,
-                            "native_key_code": get_native_key(keycode),
-                            # For raw key events, the character and unmodified
-                            # character codes should be 0.
-                            "character": 0,
-                            "unmodified_character": 0,
-                            "modifiers": cef.EVENTFLAG_NONE
-                        }
-                        b.SendKeyEvent(key_event)
-            elif event.type == sdl2.SDL_KEYUP:
-                # Handle key up events for non-text keys
-                logging.debug("SDL2 KEYUP event")
-                b, _ = _browser_for(event.key.windowID)
-                if event.key.keysym.sym in [
-                        sdl2.SDLK_RETURN,
-                        sdl2.SDLK_BACKSPACE,
-                        sdl2.SDLK_DELETE,
-                        sdl2.SDLK_LEFT,
-                        sdl2.SDLK_RIGHT,
-                        sdl2.SDLK_UP,
-                        sdl2.SDLK_DOWN,
-                        sdl2.SDLK_HOME,
-                        sdl2.SDLK_END
-                ]:
-                    keycode = get_key_code(event.key.keysym.sym)
-                    if keycode is not None:
-                        key_event = {
-                            "type": cef.KEYEVENT_KEYUP,
-                            "windows_key_code": keycode,
-                            "native_key_code": get_native_key(keycode),
-                            # On raw key up events, the character and unmodified
-                            # character need to be defined, otherwise pressing
-                            # one of the above-listed keys will eat the next
-                            # normal keypress.
-                            "character": keycode,
-                            "unmodified_character": keycode,
-                            "modifiers": cef.EVENTFLAG_NONE
-                        }
-                        b.SendKeyEvent(key_event)
-        # Clear the renderer
-        sdl2.SDL_SetRenderDrawColor(
-            renderer,
-            backgroundColour.r,
-            backgroundColour.g,
-            backgroundColour.b,
-            255
-        )
-        sdl2.SDL_RenderClear(renderer)
-        # Tell CEF to update which will trigger the OnPaint
-        # method of the RenderHandler instance
+        start_time = sdl2.SDL_GetTicks()
+        for event in sdl2.ext.get_events():
+            if is_quit_event(event, windows.main_window):
+                return
+            handle_event(event, windows)
         cef.MessageLoopWork()
-        # Update display using physical pixel dimensions for the destination rect
-        # so the texture fills the renderer output correctly on HiDPI displays.
-        if renderHandler.texture:
-            physHeaderHeight = int(headerHeight * deviceScaleFactor)
-            sdl2.SDL_RenderCopy(
-                renderer,
-                renderHandler.texture,
-                None,
-                sdl2.SDL_Rect(0, physHeaderHeight,
-                              physWidth, physHeight - physHeaderHeight)
-            )
-        # Composite in-page popup widgets (e.g. <select> dropdowns) on top.
-        if (renderHandler._popup_visible
-                and renderHandler._popup_texture
-                and renderHandler._popup_rect):
-            sdl2.SDL_RenderCopy(
-                renderer,
-                renderHandler._popup_texture,
-                None,
-                renderHandler._popup_rect,
-            )
-        sdl2.SDL_RenderPresent(renderer)
-        # Render each popup window independently.
-        for p in renderHandler.popups.values():
-            out_w, out_h = ctypes.c_int(0), ctypes.c_int(0)
-            sdl2.SDL_GetRendererOutputSize(
-                p["renderer"], ctypes.byref(out_w), ctypes.byref(out_h))
-            sdl2.SDL_SetRenderDrawColor(p["renderer"], 0, 0, 0, 255)
-            sdl2.SDL_RenderClear(p["renderer"])
-            rh = p["render_handler"]
-            if rh.texture:
-                sdl2.SDL_RenderCopy(
-                    p["renderer"], rh.texture, None,
-                    sdl2.SDL_Rect(0, 0, out_w.value, out_h.value))
-            if rh._popup_visible and rh._popup_texture and rh._popup_rect:
-                sdl2.SDL_RenderCopy(
-                    p["renderer"], rh._popup_texture, None, rh._popup_rect)
-            sdl2.SDL_RenderPresent(p["renderer"])
+        for window in windows.all_windows():
+            window.update_available_rect()
+            window.render()
         # FPS debug code
         frames += 1
-        if sdl2.timer.SDL_GetTicks() - fpsTime > 1000:
-            logging.debug("FPS: %d" % frames)
+        if sdl2.SDL_GetTicks() - fps_time > 1000:
+            logging.debug("FPS: %d", frames)
             frames = 0
-            resetFpsTime = True
+            fps_time = sdl2.SDL_GetTicks()
         # regulate frame rate
-        if sdl2.timer.SDL_GetTicks() - startTime < 1000.0 / frameRate:
-            sdl2.timer.SDL_Delay(
-                (1000 // frameRate) - (sdl2.timer.SDL_GetTicks() - startTime)
-            )
-    # User exited
-    exit_app()
+        frame_time = sdl2.SDL_GetTicks() - start_time
+        if frame_time < 1000 // FRAME_RATE:
+            sdl2.SDL_Delay(1000 // FRAME_RATE - frame_time)
 
 
-def get_key_code(key):
-    """Helper function to convert SDL2 key codes to cef ones"""
-    key_map = {
-        sdl2.SDLK_RETURN: 13,
-        sdl2.SDLK_DELETE: 46,
-        sdl2.SDLK_BACKSPACE: 8,
-        sdl2.SDLK_LEFT: 37,
-        sdl2.SDLK_RIGHT: 39,
-        sdl2.SDLK_UP: 38,
-        sdl2.SDLK_DOWN: 40,
-        sdl2.SDLK_HOME: 36,
-        sdl2.SDLK_END: 35,
-    }
-    if key in key_map:
-        return key_map[key]
-    # Key not mapped, raise exception
-    logging.error(
-        """
-        Keyboard mapping incomplete: unsupported SDL key %d.
-        See https://wiki.libsdl.org/SDLKeycodeLookup for mapping.
-        """ % key
-    )
+def is_quit_event(event, main_window):
+    """Return True for Escape key or closing of the main window."""
+    if event.type == sdl2.SDL_QUIT:
+        return True
+    if event.type == sdl2.SDL_KEYDOWN:
+        return event.key.keysym.sym == sdl2.SDLK_ESCAPE
+    # While popup windows are open SDL sends WINDOWEVENT_CLOSE
+    # for the closed window instead of SDL_QUIT.
+    return (event.type == sdl2.SDL_WINDOWEVENT
+            and event.window.event == sdl2.SDL_WINDOWEVENT_CLOSE
+            and event.window.windowID == main_window.window_id)
+
+
+def get_window_id(event):
+    """Return the SDL window ID of an event, or None if it has none."""
+    if event.type == sdl2.SDL_WINDOWEVENT:
+        return event.window.windowID
+    if event.type in (sdl2.SDL_MOUSEBUTTONDOWN, sdl2.SDL_MOUSEBUTTONUP):
+        return event.button.windowID
+    if event.type == sdl2.SDL_MOUSEMOTION:
+        return event.motion.windowID
+    if event.type == sdl2.SDL_MOUSEWHEEL:
+        return event.wheel.windowID
+    if event.type == sdl2.SDL_TEXTINPUT:
+        return event.text.windowID
+    if event.type in (sdl2.SDL_KEYDOWN, sdl2.SDL_KEYUP):
+        return event.key.windowID
     return None
 
+
+def handle_event(event, windows):
+    """Convert an SDL2 event into a CEF event for the window's browser."""
+    window = windows.find_window(get_window_id(event))
+    if window is None:
+        # Not handled, or the window was already closed. SDL keeps
+        # queued events of a window after it was destroyed.
+        return
+    browser = window.browser
+    if event.type == sdl2.SDL_WINDOWEVENT:
+        if event.window.event == sdl2.SDL_WINDOWEVENT_SIZE_CHANGED:
+            window.resized()
+        elif event.window.event == sdl2.SDL_WINDOWEVENT_CLOSE:
+            # A popup window was closed
+            browser.CloseBrowser(True)
+    elif event.type in (sdl2.SDL_MOUSEBUTTONDOWN, sdl2.SDL_MOUSEBUTTONUP):
+        if event.button.button == sdl2.SDL_BUTTON_LEFT:
+            browser.SendMouseClickEvent(
+                event.button.x,
+                event.button.y,
+                cef.MOUSEBUTTON_LEFT,
+                event.type == sdl2.SDL_MOUSEBUTTONUP,
+                1
+            )
+    elif event.type == sdl2.SDL_MOUSEMOTION:
+        browser.SendMouseMoveEvent(event.motion.x,
+                                   event.motion.y,
+                                   False,
+                                   get_mouse_modifiers(event.motion.state))
+    elif event.type == sdl2.SDL_MOUSEWHEEL:
+        # preciseX/Y (SDL >= 2.0.18) are fractional for smooth scrolling
+        dx = getattr(event.wheel, "preciseX", event.wheel.x)
+        dy = getattr(event.wheel, "preciseY", event.wheel.y)
+        browser.SendMouseWheelEvent(0, 0, int(dx * SCROLL_STEP),
+                                    int(dy * SCROLL_STEP))
+    elif event.type == sdl2.SDL_TEXTINPUT:
+        # Handle text events to get actual characters typed rather
+        # than the key pressed.
+        text = event.text.text.decode("utf-8")
+        for keycode in get_utf16_code_units(text):
+            send_key_event(browser, cef.KEYEVENT_CHAR, keycode, keycode)
+            send_key_event(browser, cef.KEYEVENT_KEYUP, keycode, keycode)
+    elif event.type in (sdl2.SDL_KEYDOWN, sdl2.SDL_KEYUP):
+        handle_key_event(event.key, browser)
+
+
+def get_mouse_modifiers(button_state):
+    """Return CEF flags for the held mouse buttons, for dragging."""
+    modifiers = cef.EVENTFLAG_NONE
+    if button_state & sdl2.SDL_BUTTON_LMASK:
+        modifiers |= cef.EVENTFLAG_LEFT_MOUSE_BUTTON
+    if button_state & sdl2.SDL_BUTTON_MMASK:
+        modifiers |= cef.EVENTFLAG_MIDDLE_MOUSE_BUTTON
+    if button_state & sdl2.SDL_BUTTON_RMASK:
+        modifiers |= cef.EVENTFLAG_RIGHT_MOUSE_BUTTON
+    return modifiers
+
+
+def get_utf16_code_units(text):
+    """
+    Split text into UTF-16 code units.
+
+    CEF key events take a single UTF-16 code unit as character, so
+    e.g. an emoji is sent as two events.
+    """
+    data = text.encode("utf-16-le")
+    return [int.from_bytes(data[i:i + 2], "little")
+            for i in range(0, len(data), 2)]
+
+
+# Windows key codes for the non-text keys handled in handle_key_event.
+# See https://wiki.libsdl.org/SDLKeycodeLookup to map more keys.
+KEY_CODES = {
+    sdl2.SDLK_RETURN: 13,
+    sdl2.SDLK_DELETE: 46,
+    sdl2.SDLK_BACKSPACE: 8,
+    sdl2.SDLK_LEFT: 37,
+    sdl2.SDLK_RIGHT: 39,
+    sdl2.SDLK_UP: 38,
+    sdl2.SDLK_DOWN: 40,
+    sdl2.SDLK_HOME: 36,
+    sdl2.SDLK_END: 35,
+}
 
 # The key events on MacOS have different native keycode than on other operating
 # systems. This table is a translation from Windows-keycodes to MacOS ones.
@@ -645,6 +408,44 @@ MACOS_TRANSLATION_TABLE = {
 }
 
 
+def handle_key_event(key_event, browser):
+    """
+    Handle key down and key up events for non-text keys.
+
+    Text keys are handled with SDL_TEXTINPUT events in handle_event.
+    """
+    keycode = KEY_CODES.get(key_event.keysym.sym)
+    if keycode is None:
+        return
+    if key_event.type == sdl2.SDL_KEYUP:
+        # On raw key up events, the character and unmodified
+        # character need to be defined, otherwise pressing
+        # one of the above-listed keys will eat the next
+        # normal keypress.
+        send_key_event(browser, cef.KEYEVENT_KEYUP, keycode, keycode,
+                       get_native_key(keycode))
+    elif key_event.keysym.sym == sdl2.SDLK_RETURN:
+        send_key_event(browser, cef.KEYEVENT_CHAR, keycode, keycode)
+    else:
+        # For raw key events, the character and unmodified
+        # character codes should be 0.
+        send_key_event(browser, cef.KEYEVENT_RAWKEYDOWN, keycode, 0,
+                       get_native_key(keycode))
+
+
+def send_key_event(browser, event_type, keycode, character,
+                   native_keycode=0):
+    """Send a key event with no modifier keys to the browser."""
+    browser.SendKeyEvent({
+        "type": event_type,
+        "windows_key_code": keycode,
+        "native_key_code": native_keycode,
+        "character": character,
+        "unmodified_character": character,
+        "modifiers": cef.EVENTFLAG_NONE
+    })
+
+
 def get_native_key(key):
     """
     Helper function for returning the correct native key map for the operating
@@ -654,6 +455,195 @@ def get_native_key(key):
         return MACOS_TRANSLATION_TABLE.get(key, key)
 
     return key
+
+
+def destroy_texture(texture):
+    """Destroy an SDL texture, if there is one."""
+    if texture:
+        sdl2.SDL_DestroyTexture(texture)
+
+
+class BrowserWindow(object):
+    """
+    An SDL window showing one browser.
+
+    Its textures are painted by CEF in RenderHandler.OnPaint.
+    """
+
+    def __init__(self, browser, title, renderer_flags):
+        self.browser = browser
+        self.window = sdl2.SDL_CreateWindow(
+            title,
+            sdl2.SDL_WINDOWPOS_UNDEFINED,
+            sdl2.SDL_WINDOWPOS_UNDEFINED,
+            WINDOW_SIZE[0],
+            WINDOW_SIZE[1],
+            sdl2.SDL_WINDOW_RESIZABLE | sdl2.SDL_WINDOW_ALLOW_HIGHDPI
+        )
+        check_sdl(self.window, "SDL_CreateWindow")
+        self.renderer = sdl2.SDL_CreateRenderer(self.window, -1,
+                                                renderer_flags)
+        check_sdl(self.renderer, "SDL_CreateRenderer")
+        self.window_id = sdl2.SDL_GetWindowID(self.window)
+        # The web page
+        self.texture = None
+        # Popup widget drawn on top of the web page, e.g. a <select>
+        # dropdown. Not to be confused with popup browser windows.
+        self.popup_texture = None
+        self.popup_rect = None
+        # Screen area for popup widgets, see update_available_rect
+        width, height = self.get_size()
+        self.available_rect = [0, 0, width, height]
+        self.resize_time = None
+
+    def get_size(self):
+        """Return the window size in screen coordinates (CEF view size)."""
+        width, height = ctypes.c_int(), ctypes.c_int()
+        sdl2.SDL_GetWindowSize(self.window,
+                               ctypes.byref(width), ctypes.byref(height))
+        return width.value, height.value
+
+    def get_display_size(self):
+        """Return the size of the display that the window is on."""
+        bounds = sdl2.SDL_Rect()
+        sdl2.SDL_GetDisplayBounds(sdl2.SDL_GetWindowDisplayIndex(self.window),
+                                  ctypes.byref(bounds))
+        return bounds.w, bounds.h
+
+    def resized(self):
+        """Tell CEF that the window size changed."""
+        # RenderHandler.GetViewRect returns the new window size
+        self.browser.WasResized()
+        self.resize_time = sdl2.SDL_GetTicks()
+
+    def update_available_rect(self):
+        """
+        Update the screen area available to popup widgets.
+
+        Once resizing stopped for a moment, make the area match the window
+        again, so that e.g. a <select> dropdown at the bottom of the window
+        opens upwards. This is not done on every resize, because changing
+        the screen info on every resize makes resizing complex pages slow.
+        """
+        if (self.resize_time is None
+                or sdl2.SDL_GetTicks() - self.resize_time < 300):
+            return
+        self.resize_time = None
+        width, height = self.get_size()
+        self.available_rect = [0, 0, width, height]
+        self.browser.NotifyScreenInfoChanged()
+
+    def get_device_scale_factor(self):
+        """Return pixels per screen coordinate, e.g. 2.0 on Retina."""
+        pixel_width, pixel_height = ctypes.c_int(), ctypes.c_int()
+        sdl2.SDL_GetRendererOutputSize(self.renderer,
+                                       ctypes.byref(pixel_width),
+                                       ctypes.byref(pixel_height))
+        width, _ = self.get_size()
+        if not width:
+            return 1.0
+        # With fractional scaling, e.g. 125%, the pixel size is rounded,
+        # so the ratio varies a little with the window size. Round it to
+        # a multiple of 1/120 (the unit of Wayland fractional scales),
+        # because a scale factor that changes on every resize makes
+        # resizing complex pages slow. The rounding doesn't change common
+        # scales like 1.25, 1.5 or 2.0.
+        return round(pixel_width.value / width * 120) / 120
+
+    def paint(self, element_type, paint_buffer, width, height):
+        """Copy pixels painted by CEF to the page or the popup texture."""
+        # CEF paints in BGRA format, so pixels can be copied as they are
+        texture = sdl2.SDL_CreateTexture(
+            self.renderer,
+            sdl2.SDL_PIXELFORMAT_BGRA32,
+            sdl2.SDL_TEXTUREACCESS_STATIC,
+            width,
+            height
+        )
+        sdl2.SDL_UpdateTexture(texture, None, paint_buffer.GetPointer(),
+                               width * 4)
+        if element_type == cef.PET_VIEW:
+            destroy_texture(self.texture)
+            self.texture = texture
+        else:
+            destroy_texture(self.popup_texture)
+            self.popup_texture = texture
+
+    def hide_popup(self):
+        """Stop drawing the popup widget."""
+        destroy_texture(self.popup_texture)
+        self.popup_texture = None
+        self.popup_rect = None
+
+    def render(self):
+        """Draw the page and the popup widget to the window."""
+        sdl2.SDL_SetRenderDrawColor(self.renderer, 0, 0, 0, 255)
+        sdl2.SDL_RenderClear(self.renderer)
+        if self.texture:
+            # Stretch to the whole window
+            sdl2.SDL_RenderCopy(self.renderer, self.texture, None, None)
+        if self.popup_texture and self.popup_rect:
+            sdl2.SDL_RenderCopy(self.renderer, self.popup_texture, None,
+                                self.popup_rect)
+        sdl2.SDL_RenderPresent(self.renderer)
+
+    def close(self):
+        """Destroy the window and its textures."""
+        destroy_texture(self.texture)
+        destroy_texture(self.popup_texture)
+        sdl2.SDL_DestroyRenderer(self.renderer)
+        sdl2.SDL_DestroyWindow(self.window)
+
+
+class WindowManager(object):
+    """
+    Keep track of the main window and of popup windows.
+
+    Popup windows are opened with window.open() or target=_blank links.
+    """
+
+    def __init__(self, main_window, renderer_flags):
+        self.main_window = main_window
+        self.popup_windows = {}  # browser identifier -> BrowserWindow
+        self.renderer_flags = renderer_flags
+
+    def all_windows(self):
+        """Return the main window and all popup windows."""
+        return [self.main_window] + list(self.popup_windows.values())
+
+    def get_or_create_window(self, browser):
+        """
+        Return the window of a browser.
+
+        The window of a popup browser is created the first time this is
+        called for it, which happens when CEF first asks RenderHandler
+        about the popup's view size.
+        """
+        if not browser.IsPopup():
+            return self.main_window
+        browser_id = browser.GetIdentifier()
+        if browser_id not in self.popup_windows:
+            self.popup_windows[browser_id] = BrowserWindow(
+                browser, b'Popup', self.renderer_flags)
+        return self.popup_windows[browser_id]
+
+    def find_window(self, window_id):
+        """
+        Return the window with the given SDL window ID.
+
+        If there is none, e.g. for events of a window that was just
+        closed, return None.
+        """
+        for window in self.all_windows():
+            if window.window_id == window_id:
+                return window
+        return None
+
+    def close_popup(self, browser):
+        """Close the window of a popup browser."""
+        window = self.popup_windows.pop(browser.GetIdentifier(), None)
+        if window:
+            window.close()
 
 
 class LoadHandler(object):
@@ -666,261 +656,74 @@ class LoadHandler(object):
     def OnLoadError(self, frame, failed_url, **_):
         if not frame.IsMain():
             return
-        logging.error("Failed to load %s" % failed_url)
+        logging.error("Failed to load %s", failed_url)
 
 
-class LifeSpanHandler(object):
-    """Allow JS window.open() popup browsers and clean up on close.
+class LifespanHandler(object):
+    """Opens popup browsers in their own SDL windows."""
 
-    SDL window creation happens lazily inside MetaRenderHandler._handler_for
-    on the first GetViewRect call, so no OnAfterCreated hook is needed
-    (cefpython does not expose that callback).
-    """
+    def __init__(self, windows):
+        self.windows = windows
 
-    def __init__(self, meta_render_handler):
-        self._rh = meta_render_handler
-
-    def OnBeforePopup(self, browser, frame, target_url, window_info_out, **_):
-        # window_info_out is a list; append a WindowInfo to configure the popup.
-        wi = cef.WindowInfo()
-        wi.SetAsOffscreen(0)
-        window_info_out.append(wi)
-        logging.info("Popup requested: %s", target_url)
-        return False  # allow; MetaRenderHandler creates the SDL window lazily
+    def OnBeforePopup(self, target_url, window_info_out, **_):
+        # Popups use off-screen rendering too. Their SDL window
+        # is created by WindowManager.get_or_create_window.
+        window_info = cef.WindowInfo()
+        window_info.SetAsOffscreen(0)
+        window_info_out.append(window_info)
+        logging.info("Opening popup: %s", target_url)
+        return False  # Allow the popup
 
     def OnBeforeClose(self, browser, **_):
         if browser.IsPopup():
-            self._rh._close_popup(browser)
-
-
-class MetaRenderHandler(object):
-    """Dispatches CEF rendering callbacks across the main and any popup browsers.
-
-    cefpython routes all rendering callbacks (GetViewRect, OnPaint, …) through
-    the single handler instance registered on the parent browser.  When a popup
-    browser first contacts _handler_for(), its SDL window, renderer, and
-    per-browser RenderHandler are created right there — no OnAfterCreated needed.
-
-    self.popups is a dict of {SDL_window_id: popup_entry} where each entry is
-    {"window", "renderer", "browser", "render_handler"}.  The event loop uses
-    this dict to route input events and to render each popup window.
-    """
-
-    def __init__(self, main_renderer, width, height, device_scale_factor,
-                 renderer_flags):
-        self.__dsf = device_scale_factor
-        self.__renderer_flags = renderer_flags
-        self._main = RenderHandler(main_renderer, width, height, device_scale_factor)
-        self._popup_handlers = {}   # browser_id -> (RenderHandler, wid)
-        self.popups = {}            # SDL_window_id -> popup entry dict
-
-    # -- Proxy the main browser's render state for the main event loop --------
-
-    @property
-    def texture(self):
-        return self._main.texture
-
-    @property
-    def _popup_visible(self):
-        return self._main._popup_visible
-
-    @property
-    def _popup_texture(self):
-        return self._main._popup_texture
-
-    @property
-    def _popup_rect(self):
-        return self._main._popup_rect
-
-    def _set_size(self, width, height):
-        self._main._set_size(width, height)
-
-    # -- Per-browser dispatch --------------------------------------------------
-
-    def _handler_for(self, browser):
-        if not browser.IsPopup():
-            return self._main
-        bid = browser.GetIdentifier()
-        if bid not in self._popup_handlers:
-            popup_window = sdl2.video.SDL_CreateWindow(
-                b'Popup',
-                sdl2.video.SDL_WINDOWPOS_UNDEFINED,
-                sdl2.video.SDL_WINDOWPOS_UNDEFINED,
-                800, 600,
-                sdl2.video.SDL_WINDOW_RESIZABLE | sdl2.video.SDL_WINDOW_ALLOW_HIGHDPI,
-            )
-            popup_renderer = sdl2.SDL_CreateRenderer(
-                popup_window, -1, self.__renderer_flags)
-            win_w, win_h = ctypes.c_int(0), ctypes.c_int(0)
-            sdl2.SDL_GetWindowSize(
-                popup_window, ctypes.byref(win_w), ctypes.byref(win_h))
-            handler = RenderHandler(
-                popup_renderer, win_w.value, win_h.value, self.__dsf)
-            wid = sdl2.SDL_GetWindowID(popup_window)
-            self._popup_handlers[bid] = (handler, wid)
-            self.popups[wid] = {
-                "window": popup_window,
-                "renderer": popup_renderer,
-                "browser": browser,
-                "render_handler": handler,
-            }
-            logging.info("Popup SDL window %d created for browser %d", wid, bid)
-        return self._popup_handlers[bid][0]
-
-    def _close_popup(self, browser):
-        bid = browser.GetIdentifier()
-        entry = self._popup_handlers.pop(bid, None)
-        if entry is None:
-            return
-        handler, wid = entry
-        p = self.popups.pop(wid, {})
-        if handler.texture:
-            sdl2.SDL_DestroyTexture(handler.texture)
-        if handler._popup_texture:
-            sdl2.SDL_DestroyTexture(handler._popup_texture)
-        sdl2.SDL_DestroyRenderer(p.get("renderer"))
-        sdl2.SDL_DestroyWindow(p.get("window"))
-        logging.info("Popup SDL window %d destroyed", wid)
-
-    # -- CEF callbacks (dispatched to the right per-browser handler) ----------
-
-    def GetScreenInfo(self, browser, screen_info_out, **_):
-        return self._handler_for(browser).GetScreenInfo(browser, screen_info_out)
-
-    def GetViewRect(self, browser, rect_out, **_):
-        return self._handler_for(browser).GetViewRect(rect_out)
-
-    def OnPopupShow(self, browser, show, **_):
-        self._handler_for(browser).OnPopupShow(browser, show)
-
-    def OnPopupSize(self, browser, rect, **_):
-        self._handler_for(browser).OnPopupSize(browser, rect)
-
-    def OnPaint(self, browser, element_type, paint_buffer, width, height, **_):
-        self._handler_for(browser).OnPaint(element_type, paint_buffer, width, height)
+            self.windows.close_popup(browser)
 
 
 class RenderHandler(object):
     """
-    Handler for rendering web pages to the
-    screen via SDL2.
+    Handler for rendering web pages to the screen via SDL2.
 
-    The object's texture property is exposed
-    to allow the main rendering loop to access
-    the SDL2 texture.
+    Popup browsers inherit client handlers from the browser that opened
+    them, so this handler is called for all browsers. Each callback
+    looks up the SDL window of the browser it was called for.
     """
 
-    def __init__(self, renderer, width, height, device_scale_factor=1.0):
-        self.__width = width
-        self.__height = height
-        self.__renderer = renderer
-        self.__device_scale_factor = device_scale_factor
-        self.texture = None
-        self._popup_texture = None
-        self._popup_rect = None
-        self._popup_visible = False
-
-    def _set_size(self, width, height):
-        self.__width = width
-        self.__height = height
-
-    def _set_device_scale_factor(self, scale):
-        self.__device_scale_factor = scale
-
-    def OnPopupShow(self, browser, show, **_):
-        self._popup_visible = show
-        if not show and self._popup_texture:
-            sdl2.SDL_DestroyTexture(self._popup_texture)
-            self._popup_texture = None
-
-    def OnPopupSize(self, browser, rect, **_):
-        s = self.__device_scale_factor
-        self._popup_rect = sdl2.SDL_Rect(
-            int(rect.x * s), int(rect.y * s),
-            int(rect.width * s), int(rect.height * s),
-        )
+    def __init__(self, windows):
+        self.windows = windows
 
     def GetScreenInfo(self, browser, screen_info_out, **_):
-        screen_info_out["device_scale_factor"] = self.__device_scale_factor
+        window = self.windows.get_or_create_window(browser)
+        screen_info_out["device_scale_factor"] = \
+            window.get_device_scale_factor()
+        # Without a screen rect CEF would use the view rect, so the
+        # screen info would change on every resize. This example doesn't
+        # tell CEF where the window is, so the view is placed at the
+        # top-left corner of the screen.
+        width, height = window.get_display_size()
+        screen_info_out["rect"] = [0, 0, width, height]
+        screen_info_out["available_rect"] = window.available_rect
         return True
 
-    def GetViewRect(self, rect_out, **_):
-        rect_out.extend([0, 0, self.__width, self.__height])
+    def GetViewRect(self, browser, rect_out, **_):
+        width, height = self.windows.get_or_create_window(browser).get_size()
+        rect_out.extend([0, 0, width, height])
         return True
 
-    def _paint_buffer_to_texture(self, paint_buffer, width, height):
-        """Convert a CEF paint buffer to an SDL texture."""
-        image = Image.frombuffer(
-            'RGBA',
-            (width, height),
-            paint_buffer.GetString(mode="rgba", origin="top-left"),
-            'raw',
-            'BGRA'
-        )
-        mode = image.mode
-        rmask = gmask = bmask = amask = 0
-        if mode == "RGB":
-            if sdl2.endian.SDL_BYTEORDER == sdl2.endian.SDL_LIL_ENDIAN:
-                rmask = 0x0000FF
-                gmask = 0x00FF00
-                bmask = 0xFF0000
-            else:
-                rmask = 0xFF0000
-                gmask = 0x00FF00
-                bmask = 0x0000FF
-            depth = 24
-            pitch = width * 3
-        elif mode in ("RGBA", "RGBX"):
-            if sdl2.endian.SDL_BYTEORDER == sdl2.endian.SDL_LIL_ENDIAN:
-                rmask = 0x00000000
-                gmask = 0x0000FF00
-                bmask = 0x00FF0000
-                if mode == "RGBA":
-                    amask = 0xFF000000
-            else:
-                rmask = 0xFF000000
-                gmask = 0x00FF0000
-                bmask = 0x0000FF00
-                if mode == "RGBA":
-                    amask = 0x000000FF
-            depth = 32
-            pitch = width * 4
-        else:
-            logging.error("ERROR: Unsupported mode: %s" % mode)
-            exit_app()
-        pxbuf = image.tobytes()
-        surface = sdl2.SDL_CreateRGBSurfaceFrom(
-            pxbuf, width, height, depth, pitch, rmask, gmask, bmask, amask
-        )
-        texture = sdl2.SDL_CreateTextureFromSurface(self.__renderer, surface)
-        sdl2.SDL_FreeSurface(surface)
-        return texture
+    def OnPopupShow(self, browser, show, **_):
+        if not show:
+            self.windows.get_or_create_window(browser).hide_popup()
 
-    def OnPaint(self, element_type, paint_buffer, width, height, **_):
-        """
-        Using the pixel data from CEF's offscreen rendering
-        the data is converted by PIL into a SDL2 surface
-        which can then be rendered as a SDL2 texture.
-        """
-        if element_type == cef.PET_VIEW:
-            if self.texture:
-                sdl2.SDL_DestroyTexture(self.texture)
-            self.texture = self._paint_buffer_to_texture(
-                paint_buffer, width, height)
-        elif element_type == cef.PET_POPUP:
-            if self._popup_texture:
-                sdl2.SDL_DestroyTexture(self._popup_texture)
-            self._popup_texture = self._paint_buffer_to_texture(
-                paint_buffer, width, height)
-        else:
-            logging.warning("Unsupported element_type in OnPaint")
+    def OnPopupSize(self, browser, rect_out, **_):
+        # The rect is in screen coordinates, the renderer uses pixels
+        window = self.windows.get_or_create_window(browser)
+        scale = window.get_device_scale_factor()
+        x, y, width, height = [int(value * scale) for value in rect_out]
+        window.popup_rect = sdl2.SDL_Rect(x, y, width, height)
 
-
-def exit_app():
-    """Tidy up SDL2 and CEF before exiting."""
-    sdl2.SDL_Quit()
-    cef.Shutdown()
-    logging.info("Exited gracefully")
+    def OnPaint(self, browser, element_type, paint_buffer, width, height,
+                **_):
+        window = self.windows.get_or_create_window(browser)
+        window.paint(element_type, paint_buffer, width, height)
 
 
 if __name__ == "__main__":
