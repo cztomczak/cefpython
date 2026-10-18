@@ -13,7 +13,6 @@ Table of contents:
   * [3. Build cefpython](#3-build-cefpython)
   * [4. Run unit tests](#4-run-unit-tests)
   * [5. Build a wheel package](#5-build-a-wheel-package)
-* [Versions](#versions)
 * [Making a release](#making-a-release)
 
 
@@ -134,7 +133,8 @@ Useful flags (see `python tools/build.py --help` for the full list):
 * `--unittests` - run the unit test suite after building.
 * `--wheel` - additionally build a wheel
   (see [Build a wheel package](#5-build-a-wheel-package)).
-* `--version VERSION` - set a release version (see [Versions](#versions)).
+* `--version VERSION` - set the version (PEP 440, e.g. `147.1` or `147.0.1`).
+  Defaults to a development version like `147.0.dev5231+g98cd08e`.
 * `--enable-profiling` / `--enable-line-tracing` - Cython cProfile /
   line-tracing instrumentation, for profiling or coverage.
 
@@ -168,33 +168,6 @@ python tools/smoke_test.py
 
 Afterwards, run `pip uninstall cefpython3` and `python tools/build.py` to
 switch back to the dev tree.
-
-
-## Versions
-
-`tools/build.py` writes the version to `cefpython3/_version.py` on every run.
-The extension module and the wheel use that same version, so
-`cefpython3.__version__` and `cef.GetVersion()["version"]` always match the
-wheel's version.
-
-By default it is a development version, e.g. `147.0.dev5231+g98cd08e`:
-
-* `147` is the Chromium major version from `src/version/cef_version_*.h`.
-* `.0` is fixed, so a dev version sorts before every 147.x release
-  (`147.0.dev5231` < `147.0` < `147.1`).
-* `dev5231` is the number of commits in the checked-out history.
-* `+g98cd08e` is the short hash of the current commit.
-
-Without git history (e.g. a source ZIP download) the version is `147.0.dev0`.
-A shallow clone gives a wrong commit count, so CI checks out the full history.
-
-For a release, set the version explicitly:
-
-```
-python tools/build.py --wheel --version 147.1
-```
-
-`--version` takes any PEP 440 version, e.g. `147.1`, `147.0.1` or `147.1b1`.
 
 
 ## Making a release
