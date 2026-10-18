@@ -171,24 +171,30 @@ def get_cefpython3_datas():
     """
     ret = list()
 
-    if is_win:
+    if is_win or is_darwin:
         cefdatadir = "."
-    elif is_darwin or is_linux:
-        cefdatadir = "."
+    elif is_linux:
+        # PyInstaller collects libcef.so into the cefpython3/ package
+        # directory and CEF looks for its resources (icudtl.dat, .pak files,
+        # locales) next to libcef.so, so keep them all together there.
+        cefdatadir = "cefpython3"
     else:
         assert False, "Unsupported system {}".format(platform.system())
 
     # Binaries, licenses and readmes in the cefpython3/ directory
     for filename in os.listdir(CEFPYTHON3_DIR):
-        # Ignore Cython modules which are already handled by
-        # pyinstaller automatically.
+        # Ignore Cython modules, these are collected via hiddenimports.
         if filename[:-len(CYTHON_MODULE_EXT)] in get_cefpython_modules():
             continue
 
         # CEF binaries and datas
         extension = os.path.splitext(filename)[1]
+        # The .json and versioned .so files are required by SwiftShader
+        # (vk_swiftshader_icd.json and libvulkan.so.1).
         if extension in \
-            [".exe", ".dll", ".pak", ".dat", ".bin", ".txt", ".so", ".plist"] \
+            [".exe", ".dll", ".pak", ".dat", ".bin", ".txt", ".so", ".plist",
+             ".json"] \
+                or re.search(r"\.so\.\d+$", filename) \
                 or filename.lower().startswith("license"):
             logger.info("Include cefpython3 data: {}".format(filename))
             ret.append((os.path.join(CEFPYTHON3_DIR, filename), cefdatadir))
@@ -294,6 +300,9 @@ hiddenimports = [
     "urllib",
     "weakref",
 ]
+# cefpython3/__init__.py imports the Cython module using importlib,
+# which PyInstaller cannot detect.
+hiddenimports.append("cefpython3.cefpython_py%d%d" % sys.version_info[:2])
 if is_py2:
     hiddenimports += [
         "urlparse",
@@ -306,7 +315,7 @@ excludedimports = get_excluded_cefpython_modules()
 if is_darwin:
     binaries = get_macos_framework_binaries() + get_macos_helper_binaries()
 elif is_linux:
-    binaries = [(os.path.join(CEFPYTHON3_DIR, "subprocess"), ".")]
+    binaries = [(os.path.join(CEFPYTHON3_DIR, "subprocess"), "cefpython3")]
 elif is_win:
     binaries = [(os.path.join(CEFPYTHON3_DIR, "subprocess.exe"), ".")]
 else:

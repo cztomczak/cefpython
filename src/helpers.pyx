@@ -67,17 +67,20 @@ def UnraisableHook(unraisable):
 
 cpdef str GetModuleDirectory():
     """Get path to the cefpython module (so/pyd)."""
+    if platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):
+        # cefpython3 package __init__.py sets CEFPYTHON3_PATH.
+        # When cefpython3 is installed as debian package, this
+        # env variable is the only way of getting valid path.
+        # This must be checked before sys.frozen: CEF looks for its
+        # resources next to libcef.so, which PyInstaller collects into
+        # the cefpython3/ package directory, not into _MEIPASS.
+        return os.getenv("CEFPYTHON3_PATH")
     if hasattr(sys, "frozen"):
         # PyInstaller stores collected binaries/data under _MEIPASS (for
         # example Contents/Frameworks in a macOS app), which is not always the
         # directory containing the frozen executable. Other freezers that do
         # not expose _MEIPASS retain the legacy executable-directory layout.
         path = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
-    elif platform.system() == "Linux" and os.getenv("CEFPYTHON3_PATH"):
-        # cefpython3 package __init__.py sets CEFPYTHON3_PATH.
-        # When cefpython3 is installed as debian package, this
-        # env variable is the only way of getting valid path.
-        return os.getenv("CEFPYTHON3_PATH")
     elif "__file__" in globals():
         path = os.path.dirname(os.path.realpath(__file__))
     else:
