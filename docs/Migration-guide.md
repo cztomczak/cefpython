@@ -525,12 +525,12 @@ most important application-facing changes are:
 | `Response.GetHeader(name)` | Renamed to `Response.GetHeaderByName(name)`. |
 | `LifespanHandler.OnBeforePopup(browser, frame, ...)` | A `popup_id` argument was added. |
 | `RequestHandler.GetAuthCredentials(browser, frame, ...)` | The `frame` argument was replaced by `origin_url`. |
-| `RequestHandler.CanGetCookies(browser, frame, request)` / `CanSetCookie(browser, frame, request, cookie)` | Replaced by `RequestHandler.CanSendCookie(browser, frame, request, cookie)` and `RequestHandler.CanSaveCookie(browser, frame, request, response, cookie)`. `CanSendCookie` is called for each cookie, not once per request. Neither is called for requests with no associated browser (e.g. service workers, `CefURLRequest`); such cookies are allowed. |
+| `RequestHandler.CanGetCookies(browser, frame, request)` / `CanSetCookie(browser, frame, request, cookie)` | Replaced by `CanSendCookie(browser, frame, request, cookie)` and `CanSaveCookie(browser, frame, request, response, cookie)`. |
 | `RequestHandler.GetCookieManager`, `OnBeforePluginLoad`, and `OnPluginCrashed` | Removed. |
 | `RequestHandler.OnQuotaRequest` | Removed upstream. CEF now handles disk-quota permission prompts through `CefPermissionHandler.OnShowPermissionPrompt` with `CEF_PERMISSION_TYPE_DISK_QUOTA`. This API is not yet exposed by CEF Python and does not provide the requested quota size. |
 | `RequestHandler.OnProtocolExecution` | `allow_execution_out[0]` is now honored. Previously, OS execution was always allowed whenever the callback was invoked, regardless of this value. |
 | `RequestHandler.OnRendererProcessTerminated(browser, status)` | `error_code` and `error_string` arguments were added. New `status` values: `TS_PROCESS_OOM`, `TS_LAUNCH_FAILED` and `TS_INTEGRITY_FAILURE`. |
-| `ResourceHandler.CanGetCookie(cookie)` / `CanSetCookie(cookie)` | Removed upstream. Use `RequestHandler.CanSendCookie` / `CanSaveCookie` instead. Returning `False` from `CanSendCookie` blocks only that cookie, whereas returning `False` from `CanGetCookie` blocked all cookies for the request. |
+| `ResourceHandler.CanGetCookie(cookie)` / `CanSetCookie(cookie)` | Removed upstream. Use `RequestHandler.CanSendCookie` / `CanSaveCookie` instead. |
 | `CookieManager.GetBlockingManager`, `CreateManager`, `SetSupportedSchemes`, and `SetStoragePath` | Removed; use `CookieManager.GetGlobalManager()` and configure persistence through application settings. |
 | `RenderHandler.GetScreenRect(browser, rect_out)` | Removed upstream. Implement the new `RenderHandler.GetScreenInfo(browser, screen_info_out)` callback and set the `rect` (and optionally `available_rect`) key instead. If no rectangle is provided, CEF falls back to `GetViewRect`. |
 | `RenderHandler.OnScrollOffsetChanged(browser)` | `x` and `y` arguments were added. Existing callbacks must accept them, otherwise a `TypeError` is raised. |
