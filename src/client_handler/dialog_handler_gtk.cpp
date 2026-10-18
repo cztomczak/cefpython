@@ -1,5 +1,5 @@
-// COPIED from upstream "cef/tests/cefclient/browser/" directory
-// with minor modifications. See the .patch file in current directory.
+// Originally copied from upstream CEF
+// "tests/cefclient/browser/dialog_handler_gtk.cc" and modified since.
 
 // Copyright (c) 2015 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that

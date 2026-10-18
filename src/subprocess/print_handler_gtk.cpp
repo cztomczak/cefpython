@@ -1,5 +1,5 @@
-// COPIED from upstream "cef/tests/cefclient/browser/" directory
-// with minor modifications. See the .patch file in current directory.
+// Originally copied from upstream CEF
+// "tests/cefclient/browser/print_handler_gtk.cc" and modified since.
 
 // Copyright (c) 2014 The Chromium Embedded Framework Authors.
 // Portions Copyright (c) 2012 The Chromium Authors. All rights reserved.
