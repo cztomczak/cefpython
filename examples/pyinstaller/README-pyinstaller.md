@@ -13,7 +13,8 @@ Table of contents:
 This is an example of using [PyInstaller](http://www.pyinstaller.org/)
 packager to build executable from one of CEF Python's examples
 (wxpython.py). This pyinstaller example supports packaging
-on Windows, Linux and Darwin but was mainly tested on Windows platform.
+on Windows, Linux and macOS. It was tested on Windows and Linux,
+packaging on macOS was not tested.
 
 To install required packages type:
 ```

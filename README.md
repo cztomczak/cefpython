@@ -59,6 +59,10 @@ Windows | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | Windows 10+
 Linux | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | Ubuntu 20.04+, Debian 11+
 Mac | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | macOS 12+ (Apple Silicon/arm64 only)
 
+Mac wheels are tested in CI only (unit tests and a smoke test of the
+hello_world.py and tutorial.py examples). GUI examples and PyInstaller
+packaging were not tested on macOS, reports are welcome.
+
 
 ## Examples
 
