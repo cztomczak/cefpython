@@ -93,8 +93,7 @@ This hook does the following: in case of exception write it to
 the "error.log" file, display it to the console, shutdown CEF
 and exit application immediately by ignoring "finally" (_exit()).
 
-See also [UnraisableHook](#unraisablehook) for exceptions that escape a
-callback handler.
+See also [UnraisableHook](#unraisablehook).
 
 See also Tutorial: [Handling Python exceptions](../docs/Tutorial.md#handling-python-exceptions).
 

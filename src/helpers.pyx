@@ -49,17 +49,10 @@ def ExceptHook(exc_type, exc_value, exc_trace):
 
 def UnraisableHook(unraisable):
     """Global unraisable hook, companion to ExceptHook.
-
-    sys.unraisablehook is Python's global hook for exceptions that cannot be
-    propagated to a caller. cefpython's public callbacks are called from CEF's
-    C++ and declared "noexcept with gil", so an exception escaping one is
-    reported here instead of unwinding into C++; the same applies to Python's
-    own unraisable cases (e.g. errors in __del__ or during garbage collection).
-    Each callback normally forwards exceptions to sys.excepthook itself, so
-    this hook is the backstop for the ones that escape that guard. By default
-    sys.unraisablehook only prints to stderr and is easy to miss; assigning
-    this hook routes such exceptions through ExceptHook so they are written to
-    "error.log", printed, and CEF is shut down cleanly.
+    Forwards exceptions that Python reports through sys.unraisablehook
+    (printed only to stderr by default) to ExceptHook. The hook is
+    process-global, so it also applies to unraisable exceptions from
+    other libraries.
     """
     ExceptHook(unraisable.exc_type, unraisable.exc_value,
                unraisable.exc_traceback)
