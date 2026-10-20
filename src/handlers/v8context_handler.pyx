@@ -47,7 +47,7 @@ cdef public void V8ContextHandler_OnContextCreated(
         if pyFrame.IsMain():
             jsBindings = pyBrowser.GetJavascriptBindings()
             if jsBindings:
-                jsBindings.Rebind()
+                jsBindings.RebindBrowser(pyBrowser)
         # User defined callback
         clientCallback = pyBrowser.GetClientCallback("OnContextCreated")
         if clientCallback:

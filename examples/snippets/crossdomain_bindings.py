@@ -12,16 +12,18 @@ Simulates an SSO/auth redirect scenario:
 Key points demonstrated:
 - JS bindings (V8 globals) are registered for every page in the browser instance,
   including intermediate auth/login pages on other domains.
-- It is the user's responsibility to filter in OnContextCreated by URL/domain before
-  injecting JS so that callbacks only fire for the intended landing page.
+- It is the user's responsibility to filter in OnContextCreated by origin before
+  injecting JS so that callbacks only fire for the intended landing page, and to
+  check the origin again in the Python callback, as any page can call it directly.
 - Each domain's V8 context is isolated: globals registered for example.com are not
   accessible to python.org and vice versa.
 """
 
 import threading
+from urllib.parse import urlparse
 from cefpython3 import cefpython as cef
 
-TARGET_HOST = "example.com"
+TARGET_ORIGIN = "https://example.com"
 AUTH_URL = "https://www.python.org/"   # visually distinct: simulates Okta/login page
 TARGET_URL = "https://example.com/"
 NAV_DELAY_SEC = 3.0
@@ -51,6 +53,11 @@ def main():
     cef.Shutdown()
 
 
+def is_target(url):
+    parsed = urlparse(url)
+    return "%s://%s" % (parsed.scheme, parsed.netloc) == TARGET_ORIGIN
+
+
 class CrossDomainHandler(object):
     def __init__(self, browser):
         self.browser = browser
@@ -65,7 +72,7 @@ class CrossDomainHandler(object):
         url = frame.GetUrl()
         if not url or url == "about:blank":
             return
-        if TARGET_HOST in url:
+        if is_target(url):
             print("[OnContextCreated] Target domain — injecting JS binding: %s" % url)
             browser.ExecuteJavascript("""
                 if (document.readyState === "complete"
@@ -88,17 +95,17 @@ class CrossDomainHandler(object):
             return
         print("[OnLoadEnd] state=%s url=%s" % (self._state, url))
 
-        if self._state == STATE_INIT and TARGET_HOST in url:
+        if self._state == STATE_INIT and is_target(url):
             self._state = STATE_ON_TARGET_1
             print("[OnLoadEnd] Step 1 done. Redirecting to auth in %gs..." % NAV_DELAY_SEC)
             threading.Timer(NAV_DELAY_SEC, self._navigate_auth).start()
 
-        elif self._state == STATE_GOING_AUTH and TARGET_HOST not in url:
+        elif self._state == STATE_GOING_AUTH and not is_target(url):
             self._state = STATE_ON_AUTH
             print("[OnLoadEnd] Step 2 done (auth page). Returning to app in %gs..." % NAV_DELAY_SEC)
             threading.Timer(NAV_DELAY_SEC, self._navigate_target).start()
 
-        elif self._state == STATE_GOING_TARGET and TARGET_HOST in url:
+        elif self._state == STATE_GOING_TARGET and is_target(url):
             self._state = STATE_ON_TARGET_2
             print("[OnLoadEnd] Step 3 done. Close window to exit.")
 
@@ -114,6 +121,9 @@ class CrossDomainHandler(object):
 
     def _OnTargetPageReady(self):
         url = self.browser.GetMainFrame().GetUrl()
+        if not is_target(url):
+            print("[Python callback] Non-target origin — ignoring call: %s" % url)
+            return
         print("[Python callback] OnTargetPageReady fired! state=%s url=%s"
               % (self._state, url))
         self.browser.ExecuteJavascript(

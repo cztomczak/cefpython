@@ -312,7 +312,7 @@ cdef class PyBrowser:
 
     cpdef py_void SetJavascriptBindings(self, JavascriptBindings bindings):
         self.javascriptBindings = bindings
-        self.javascriptBindings.Rebind()
+        self.javascriptBindings.RebindBrowser(self)
 
     cpdef JavascriptBindings GetJavascriptBindings(self):
         return self.javascriptBindings

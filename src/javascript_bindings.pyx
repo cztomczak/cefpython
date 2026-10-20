@@ -83,36 +83,39 @@ cdef class JavascriptBindings:
             self.properties[name] = value
 
     cpdef py_void Rebind(self):
-        # Rebind() is called for both first-time binding and rebinding.
         cdef PyBrowser pyBrowser
+        for browserId, pyBrowser in g_pyBrowsers.items():
+            if pyBrowser.GetJavascriptBindings() != self:
+                continue
+            self.RebindBrowser(pyBrowser, True)
+
+    cdef py_void RebindBrowser(self, PyBrowser pyBrowser,
+                               py_bool force=False):
         cdef dict functions
         cdef dict properties
         cdef dict objects
         cdef dict methods
-        for browserId, pyBrowser in g_pyBrowsers.items():
-            if pyBrowser.GetJavascriptBindings() != self:
-                continue
-            # Send to the Renderer process: functions, properties,
-            # objects and its methods, bindToFrames.
-            functions = {}
-            for funcName in self.functions:
-                functions[funcName] = None
-            properties = self.properties
-            objects = {}
-            for objectName in self.objects:
-                methods = {}
-                for methodName in self.objects[objectName]:
-                    methods[methodName] = None
-                objects[objectName] = methods
-            mainFrame = pyBrowser.GetMainFrame()
-            if mainFrame.IsValid():
-                mainFrame.SendProcessMessage(cef_types.PID_RENDERER,
-                    mainFrame.frameId, "DoJavascriptBindings", [{
-                            "functions": functions,
-                            "properties": properties,
-                            "objects": objects,
-                            "bindToFrames": self.bindToFrames
-                            }])
+        # Send to the Renderer process: functions, properties,
+        # objects and its methods, bindToFrames.
+        functions = {}
+        for funcName in self.functions:
+            functions[funcName] = None
+        properties = self.properties
+        objects = {}
+        for objectName in self.objects:
+            methods = {}
+            for methodName in self.objects[objectName]:
+                methods[methodName] = None
+            objects[objectName] = methods
+        mainFrame = pyBrowser.GetMainFrame()
+        if mainFrame.IsValid():
+            mainFrame.SendProcessMessage(cef_types.PID_RENDERER,
+                mainFrame.frameId, "DoJavascriptBindings", [{
+                        "functions": functions,
+                        "properties": properties,
+                        "objects": objects,
+                        "bindToFrames": self.bindToFrames
+                        }, force])
 
     cpdef dict GetProperties(self):
         return self.properties

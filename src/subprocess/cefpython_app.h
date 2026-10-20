@@ -20,6 +20,10 @@ class CefPythonApp :
         public CefRenderProcessHandler {
  protected:
   std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;
+  typedef std::map<CefString, std::pair<CefRefPtr<CefV8Context>,
+                   CefRefPtr<CefDictionaryValue> > >
+                   AppliedJavascriptBindingsMap;
+  AppliedJavascriptBindingsMap appliedJavascriptBindings_;
   std::map<int, int> browserViewCount_;
   CefRefPtr<CefPrintHandler> print_handler_;
 
@@ -111,11 +115,13 @@ class CefPythonApp :
   bool BindedFunctionExists(CefRefPtr<CefBrowser> browser,
                                     const CefString& funcName);
 
-  void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser);
+  void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser,
+                                      bool force);
 
   void DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
-                                    CefRefPtr<CefV8Context> context);
+                                    CefRefPtr<CefV8Context> context,
+                                    bool force);
 
 private:
   IMPLEMENT_REFCOUNTING(CefPythonApp);

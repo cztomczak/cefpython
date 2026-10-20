@@ -91,7 +91,19 @@ jobs:
         run: python tools/automate.py --prebuilt-cef
 
       - name: Build wheel
-        run: python tools/build.py --wheel ${{ inputs.version && format('--version {0}', inputs.version) || '' }}
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$RELEASE_VERSION" ]; then
+            re='^[0-9]+\.[0-9]+(\.[0-9]+)?((a|b|rc)[0-9]+)?$'
+            if ! [[ "$RELEASE_VERSION" =~ $re ]]; then
+              echo "Invalid version: $RELEASE_VERSION"
+              exit 1
+            fi
+            python tools/build.py --wheel --version "$RELEASE_VERSION"
+          else
+            python tools/build.py --wheel
+          fi
 
       - name: Unit-test the built wheel
         run: |
