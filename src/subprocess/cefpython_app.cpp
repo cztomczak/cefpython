@@ -115,9 +115,9 @@ void CefPythonApp::OnBeforeCommandLineProcessing(
     //
     // When compiling under Python 2.7 (VS2008) using Visual C++ for
     // Python, it seems you can't use WINSDK 7 header files even though
-    // WINVER was specified in build_cpp_projects.py macros. Thus calling
-    // using proc address. Specifying full path to Shell32.dll is not
-    // required, in Chromium's source code full paths are not used.
+    // WINVER was specified. Thus calling using proc address. Specifying
+    // full path to Shell32.dll is not required, in Chromium's source code
+    // full paths are not used.
     //
     // Note:
     //   subprocess.exe is built with UNICODE defined, however the

@@ -35,7 +35,7 @@ installed around the world. There are numerous use cases for CEF:
 5. Use it for web scraping, as a web crawler or other kind of internet bots
 
 CEF Python also provides examples of embedding CEF for many Python GUI
-frameworks such as PyQt, wxPython, PyGTK, PyGObject, Tkinter, Kivy, Panda3D,
+frameworks such as PyQt, wxPython, GTK 3 (PyGObject), Tkinter, Kivy, Panda3D,
 PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 
 

@@ -882,7 +882,7 @@ Set whether the browser is focused.
 | bindings | [JavascriptBindings](JavascriptBindings.md) |
 | __Return__ | void |
 
-Set javascript bindings.
+Associates this browser with the specified JavascriptBindings object and sends its binding data to the renderer. If equivalent binding data have already been applied to an existing V8 context, they are not applied again. When the binding data change, the current bindings are applied, but JavaScript globals from the previous bindings that are absent from the new bindings are not removed. To force reapplication of unchanged bindings, call JavascriptBindings.Rebind(). That method affects all browsers assigned the same JavascriptBindings object.
 
 
 ### SetUserData

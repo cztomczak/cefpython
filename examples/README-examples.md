@@ -54,8 +54,6 @@ document.
 
 Examples of embedding CEF browser using various GUI frameworks:
 
-- [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
-  library (GTK 2)
 - [gtk3.py](gtk3.py): example for [PyGObject / PyGI](https://wiki.gnome.org/Projects/PyGObject)
   library (GTK 3). Currently broken on Mac ([#310](../../../issues/310)).
 - [pysdl2.py](pysdl2.py): off-screen rendering example for

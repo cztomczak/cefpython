@@ -4,8 +4,9 @@
 
 """Create a distributable wheel from the pre-built cefpython3/ package directory.
 
-Zips cefpython3/ into a PEP 427 wheel with a generated .dist-info (METADATA,
-WHEEL, top_level.txt, RECORD). No compilation happens here. On Linux,
+Zips cefpython3/ and the examples (as cefpython3/examples/) into a PEP 427
+wheel with a generated .dist-info (METADATA, WHEEL, top_level.txt, RECORD).
+No compilation happens here. On Linux,
 libcef.so is stripped of debug symbols first (Issue #262; it ships ~1.3 GB
 with them). On Windows, msvcp140.dll is bundled next to the extension
 (Issue #359).
@@ -48,6 +49,11 @@ MAC_HELPER_APP_NAMES = [
     "cefpython Helper (Plugin).app",
     "cefpython Helper (Renderer).app",
 ]
+
+# Files in examples/ to package, as glob patterns relative to examples/.
+EXAMPLE_PATTERNS = ["*.py", "*.md", "resources/*", "snippets/*.py",
+                    "snippets/*.md", "pyinstaller/*.py", "pyinstaller/*.md",
+                    "pyinstaller/*.spec", "pyinstaller/screenshots/*"]
 
 try:
     import tomllib  # Python 3.11+
@@ -99,6 +105,18 @@ def main():
         records.append((arcname, "sha256=" + digest, str(len(data))))
         zf.writestr(arcname, data)
 
+    def _add_file(filepath, arcname):
+        with open(filepath, "rb") as f:
+            data = f.read()
+        digest = base64.urlsafe_b64encode(
+            hashlib.sha256(data).digest()).rstrip(b"=").decode()
+        records.append((arcname, "sha256=" + digest, str(len(data))))
+        info = zipfile.ZipInfo.from_file(filepath, arcname)
+        # ZipInfo.from_file() defaults to ZIP_STORED; deflate so the
+        # wheel is actually compressed (matches the ZipFile mode).
+        info.compress_type = zipfile.ZIP_DEFLATED
+        zf.writestr(info, data)
+
     print("[build_distrib.py] Creating:", wheel_path)
 
     with zipfile.ZipFile(wheel_path, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -112,16 +130,11 @@ def main():
                         and re.match(r"cefpython_py\d+\.(pyd|so)$", filename)):
                     continue
                 filepath = os.path.join(root, filename)
-                arcname = filepath.replace(os.sep, "/")
-                data = open(filepath, "rb").read()
-                digest = base64.urlsafe_b64encode(
-                    hashlib.sha256(data).digest()).rstrip(b"=").decode()
-                records.append((arcname, "sha256=" + digest, str(len(data))))
-                info = zipfile.ZipInfo.from_file(filepath, arcname)
-                # ZipInfo.from_file() defaults to ZIP_STORED; deflate so the
-                # wheel is actually compressed (matches the ZipFile mode).
-                info.compress_type = zipfile.ZIP_DEFLATED
-                zf.writestr(info, data)
+                _add_file(filepath, filepath.replace(os.sep, "/"))
+
+        # Examples
+        for filepath in _example_files():
+            _add_file(filepath, pkg_dir + "/" + filepath)
 
         # dist-info/METADATA (all fields sourced from [project] in pyproject.toml
         # so the wheel and pyproject stay a single source of truth)
@@ -295,8 +308,7 @@ def _bundle_msvcp140_issue359(pkg_dir):
     extension and depends on msvcp140.dll. See Issue #359. These
     dependencies are not included with Python binaries from Python.org.
 
-    Ported from make_installer.py (copy_cpp_extension_dependencies_issue359):
-    copy msvcp140.dll from %SYSTEMROOT%\\System32 next to the extension.
+    Copy msvcp140.dll from %SYSTEMROOT%\\System32 next to the extension.
     Python does ship vcruntime140.dll / vcruntime140_1.dll, so msvcp140.dll
     is the only gap.
     """
@@ -310,6 +322,18 @@ def _bundle_msvcp140_issue359(pkg_dir):
                         " (Issue #359)".format(src))
     shutil.copy2(src, os.path.join(pkg_dir, "msvcp140.dll"))
     print("[build_distrib.py] Bundle msvcp140.dll (Issue #359)")
+
+
+def _example_files():
+    """Files in examples/ matching EXAMPLE_PATTERNS, so that files created
+    by running the examples (screenshot.png, GPUCache/, etc.) are not
+    packaged."""
+    files = set()
+    for pattern in EXAMPLE_PATTERNS:
+        files.update(path for path in
+                     glob.glob(os.path.join("examples", pattern))
+                     if os.path.isfile(path))
+    return sorted(path.replace(os.sep, "/") for path in files)
 
 
 def _read_version(pkg_dir):

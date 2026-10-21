@@ -166,14 +166,10 @@ SRC_DIR = os.path.join(ROOT_DIR, "src")
 # Subdirectories in src/
 CLIENT_HANDLER_DIR = os.path.join(SRC_DIR, "client_handler")
 CPP_UTILS_DIR = os.path.join(SRC_DIR, "cpp_utils")
-LINUX_DIR = os.path.join(SRC_DIR, "linux")
-MAC_DIR = os.path.join(SRC_DIR, "mac")
 SUBPROCESS_DIR = os.path.join(SRC_DIR, "subprocess")
-WINDOWS_DIR = os.path.abspath(os.path.join(SRC_DIR, "windows"))
 # -- end subdirectories in src/
 
 TOOLS_DIR = os.path.join(ROOT_DIR, "tools")
-INSTALLER_DIR = os.path.join(TOOLS_DIR, "installer")
 UNITTESTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, "unittests"))
 # ----------------------------------------------------------------------------
 
@@ -216,7 +212,7 @@ SUBPROCESS_EXE = os.path.join(BUILD_SUBPROCESS,
 
 # These Visual Studio constants are used by automate.py tool
 # to build upstream C++ projects. CEF Python C++ code is built
-# with setuptools/distutils in the build_cpp_projects.py tool.
+# with CMake (see CMakeLists.txt).
 # -----------------------------------------------------------------------------
 
 def _find_vcvars():
@@ -430,7 +426,7 @@ def _detect_distrib_dir():
     if version:
         # Will only be set when called from scripts that had version
         # number arg passed on command line: build.py, build_distrib.py,
-        # make_installer.py, etc.
+        # etc.
         if LINUX or MAC:
             # - On Linux buildig 32bit and 64bit separately, so don't
             # delete eg. 64bit distrib when building 32bit distrib.

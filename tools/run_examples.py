@@ -5,30 +5,17 @@
 """
 Run all examples that can be run on current configuration
 and display a summary at the end.
-
-Note on GTK 2 / GTK 3 on Windows:
-    Installing both PyGTK and PyGI on Windows will cause errors.
-    You can install only one of these packages.
 """
 
 from common import *
 
 import importlib
 import os
-import subprocess
 import sys
 
 
 def main():
     os.chdir(EXAMPLES_DIR)
-
-    # When importing Kivy package there can't be any flags unknown to Kivy,
-    # use sys.argv.remove to remove them.
-
-    kivy_flag = False
-    if "--kivy" in sys.argv:
-        sys.argv.remove("--kivy")
-        kivy_flag = True
 
     hello_world_flag = False
     if "--hello-world" in sys.argv:
@@ -50,15 +37,6 @@ def main():
     else:
         print("[run_examples.py] PASS: wxpython.py (wxPython not installed)")
         passed.append("wxpython.py")
-
-    # gtk2
-    if packages["gtk"]:
-        examples.append("gtk2.py")
-        if LINUX:
-            examples.append("gtk2.py --message-loop-cef")
-    else:
-        print("[run_examples.py] PASS: gtk2.py (Gtk 2 not installed")
-        passed.append("gtk2.py")
 
     # gtk3
     """
@@ -105,14 +83,6 @@ def main():
     else:
         print(["run_examples.py] PASS: tkinter_.py (tkinter not installed)"])
         passed.append("tkinter_.py")
-
-    if LINUX and packages["kivy"] and packages["gtk"]:
-        # When --kivy flag passed run only Kivy example
-        if kivy_flag:
-            examples = list()
-            passed = list()
-        examples.append("{linux_dir}/binaries_64bit/kivy_.py"
-                        .format(linux_dir=LINUX_DIR))
 
     # When --hello-world flag is passed run only hello_world.py example
     if hello_world_flag:
@@ -165,8 +135,7 @@ def main():
 
 def check_installed_packages():
     packages = {
-        "gtk": False,
-        "kivy": False,
+        "gi": False,
         "PyQt6": False,
         "PySide6": False,
         "tkinter": False,
@@ -179,18 +148,7 @@ def check_installed_packages():
             packages[package] = True
         except ImportError:
             packages[package] = False
-    packages["gi"] = check_gi_installed()
     return packages
-
-
-def check_gi_installed():
-    # Cannot import both gtk and gi in the same script, thus
-    # need another way of checking if gi package is installed.
-    code = subprocess.call([sys.executable, "-c", "import gi"])
-    if code != 0:
-        print("[run_examples.py] gi module not found (PyGI / GTK 3).")
-        print("                  Import error above can be safely ignored.")
-    return True if code == 0 else False
 
 
 if __name__ == "__main__":
