@@ -142,12 +142,6 @@ cdef class WindowInfo:
             raise Exception("Invalid parentWindowHandle: %s"\
                     % parentWindowHandle)
         self.windowType = "child"
-        IF UNAME_SYSNAME == "Linux":
-            if parentWindowHandle == 0 and "WAYLAND_DISPLAY" in os.environ:
-                NonCriticalError("WindowInfo.SetAsChild: parentWindowHandle is 0"
-                                 " in a Wayland session, CEF will open a"
-                                 " detached window. Run the GUI toolkit under"
-                                 " X11/XWayland, see examples/qt.py")
         self.parentWindowHandle = parentWindowHandle
         IF UNAME_SYSNAME == "Darwin" or UNAME_SYSNAME == "Linux":
             if not windowRect:
