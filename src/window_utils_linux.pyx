@@ -41,7 +41,7 @@ class WindowUtils:
 
     @classmethod
     def gtk_plug_new(cls, WindowHandle gdkNativeWindow):
-        return <WindowHandle>gtk_plug_new(<GdkNativeWindow>gdkNativeWindow)
+        return <WindowHandle>gtk_plug_new(<unsigned long>gdkNativeWindow)
 
     @classmethod
     def gtk_widget_show(cls, WindowHandle gtkWidgetPtr):

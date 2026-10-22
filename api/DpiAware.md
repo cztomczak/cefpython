@@ -3,7 +3,8 @@
 
 # DpiAware (class)
 
-Available only on Windows. All methods of this class are static, access them through [cefpython](cefpython.md).`WindowUtils`.
+Available only on Windows. All methods of this class are static, access them
+through [cefpython](cefpython.md).`DpiAware`.
 
 Example usage of High DPI support is in the wxpython.py example.
 
@@ -21,10 +22,10 @@ Table of contents:
 
 ## Introduction
 
-By default if DPI awareness is not enabled in application, then OS performs display scaling. That causes text to look blurry on high DPI displays. To resolve this you have to
- call `cef.DpiAware.EnableHighDpiSupport` method. High DPI support is available only on Windows.
-
-Enabling High DPI support in app can be done by embedding a DPI awareness xml manifest in both main executable and subprocess executable (see [Issue #112](../issues/112) comment #2), or by calling the `cef.DpiAware.EnableHighDpiSupport` method.
+By default, if DPI awareness is not enabled in an application, Windows
+performs display scaling and text may look blurry. Enable DPI awareness by
+embedding a DPI awareness XML manifest in both the main executable and the
+subprocess executable. See [Issue #112](../../../issues/112), comment 2.
 
 ## Static methods
 
@@ -72,10 +73,9 @@ ApplicationSettings.`auto_zooming` option.
 If DPI awareness wasn't yet enabled, then `GetSystemDpi` will always
 return a default 96 DPI.
 
-DPI settings should not be cached. When `SetProcessDpiAware`
-is not yet called, then OS returns 96 DPI, even though it
-is set to 144 DPI. After DPI Awareness is enabled for the
-running process it will return the correct 144 DPI.
+DPI settings should not be cached. Before DPI awareness is enabled, Windows
+returns 96 DPI even when another value is configured. After DPI awareness is
+enabled, it returns the configured value.
 
 
 ### IsProcessDpiAware
@@ -84,7 +84,9 @@ running process it will return the correct 144 DPI.
 | --- | --- |
 | __Return__ | bool |
 
-To check whether OS display scaling on high DPI settings was disabled. DPI awareness may be enabled by calling `SetProcessDpiAware`. It may also be enabled manually by user by changing options in .exe properties > Compatibility tab.
+Checks whether OS display scaling on high-DPI settings is disabled. DPI
+awareness may be enabled with an executable manifest or manually in the
+executable properties under Compatibility.
 
 On Win8 this will return True if DPI awareness is set to either "System DPI aware" or "Per monitor DPI aware".
 
@@ -95,11 +97,9 @@ On Win8 this will return True if DPI awareness is set to either "System DPI awar
 | --- | --- |
 | __Return__ | void |
 
-Calling this method is deprecated, call instead `EnableHighDpiSupport()`.
-See [Issue #358](../../../issues/358) for how the behavior changed in
-latest CEF. This method now internally calls `EnableHighDpiSupport()`.
-
-Enables DPI awareness for the running process. Embedding a DPI manifest in .exe is the prefered way, as it gives more reliable results, otherwise some display bugs may appear (discussed in the "Introduction" section on this page).
+Deprecated; do not use this method. Embed a DPI awareness manifest in both
+the main executable and the subprocess executable instead. See
+[Issue #358](../../../issues/358) for background.
 
 
 ### Scale

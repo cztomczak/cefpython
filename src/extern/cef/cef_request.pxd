@@ -25,7 +25,7 @@ cdef extern from "include/cef_request.h":
         void SetURL(CefString& url)
         CefString GetMethod()
         void SetMethod(CefString& method)
-        void SetReferrer(CefString& referrer_url, ReferrerPolicy& policy)
+        void SetReferrer(CefString& referrer_url, ReferrerPolicy policy)
         CefString GetReferrerURL()
         ReferrerPolicy GetReferrerPolicy()
         CefRefPtr[CefPostData] GetPostData()

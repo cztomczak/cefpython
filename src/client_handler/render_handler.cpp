@@ -74,7 +74,7 @@ void RenderHandler::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
                                           double y)
 {
     REQUIRE_UI_THREAD();
-    RenderHandler_OnScrollOffsetChanged(browser);
+    RenderHandler_OnScrollOffsetChanged(browser, x, y);
 }
 
 

@@ -61,7 +61,7 @@ def PostDelayedTask(int thread, int delay_ms, object func, *args):
         PostDelayedTaskWrapper(thread, delay_ms, cTaskId)
 
 
-cdef public void PyTaskRunnable(int taskId) except * with gil:
+cdef public void PyTaskRunnable(int taskId) noexcept with gil:
     cdef object func
     cdef list params
     cdef object task

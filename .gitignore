@@ -2,6 +2,7 @@
 build/
 dist/
 venv/
+.venv/
 *.log
 __pycache__/
 *.pyc
@@ -19,3 +20,4 @@ unittests/webrtc_event_logs/
 .DS_Store
 MediaDeviceSalts
 MediaDeviceSalts-journal
+.claude/

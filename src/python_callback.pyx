@@ -36,12 +36,12 @@ cdef CefRefPtr[CefBinaryValue] PutPythonCallback(
 
 cdef public void RemovePythonCallbacksForFrame(
         object frameId
-        ) except * with gil:
+        ) noexcept with gil:
     # Cannot remove elements from g_pythonCallbacks (dict) while iterating.
     cdef list toRemove = []
     try:
         global g_pythonCallbacks
-        for callbackId, value in g_pythonCallbacks.iteritems():
+        for callbackId, value in g_pythonCallbacks.items():
             if value[1] == frameId:
                 toRemove.append(callbackId)
         for callbackId in toRemove:
@@ -57,7 +57,7 @@ cdef void RemovePythonCallbacksForBrowser(
         int browserId) except *:
     cdef list toRemove = []
     global g_pythonCallbacks
-    for callbackId, value in g_pythonCallbacks.iteritems():
+    for callbackId, value in g_pythonCallbacks.items():
         if value[0] == browserId:
             toRemove.append(callbackId)
     for callbackId in toRemove:
@@ -70,7 +70,7 @@ cdef public cpp_bool ExecutePythonCallback(
         CefRefPtr[CefBrowser] cefBrowser,
         int callbackId, 
         CefRefPtr[CefListValue] cefFuncArgs,
-        ) except * with gil:
+        ) noexcept with gil:
     cdef object func
     cdef list funcArgs
     cdef object returnValue
