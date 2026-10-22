@@ -108,8 +108,8 @@ jobs:
       - name: Unit-test the built wheel
         run: |
           # Install the wheel and run the unit tests against the INSTALLED
-          # package. No PYTHONPATH: _test_runner.py chdir's to unittests/, so
-          # the repo's cefpython3/ build dir is never on sys.path and
+          # package. No PYTHONPATH and no dev .pth (build.py --wheel doesn't
+          # write one), so build/package/ is not on sys.path and
           # import cefpython3 resolves to the installed wheel.
           pip install build/dist/*.whl
           python unittests/_test_runner.py

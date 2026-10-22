@@ -2,11 +2,11 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
-"""Create a distributable wheel from the pre-built cefpython3/ package directory.
+"""Create a distributable wheel from the pre-built build/package/cefpython3/.
 
-Zips cefpython3/ and the examples (as cefpython3/examples/) into a PEP 427
-wheel with a generated .dist-info (METADATA, WHEEL, top_level.txt, RECORD).
-No compilation happens here. On Linux,
+Zips build/package/cefpython3/ and the examples (as cefpython3/examples/)
+into a PEP 427 wheel with a generated .dist-info (METADATA, WHEEL,
+top_level.txt, RECORD). No compilation happens here. On Linux,
 libcef.so is stripped of debug symbols first (Issue #262; it ships ~1.3 GB
 with them). On Windows, msvcp140.dll is bundled next to the extension
 (Issue #359).
@@ -17,12 +17,12 @@ Usage:
 Options:
     --out-dir DIR       Output directory for the .whl file (default: build/dist).
 
-The cefpython3/ directory must already contain the compiled outputs and CEF
+build/package/cefpython3/ must already contain the compiled outputs and CEF
 runtime. Windows/Linux use a flat subprocess executable; macOS uses five
 sibling ``cefpython Helper*.app`` bundles. Only the running interpreter's
 module is packaged.
 
-The wheel version is read from cefpython3/_version.py.
+The wheel version is read from build/package/cefpython3/_version.py.
 Wheel metadata (name, summary, author, URLs, keywords, classifiers) is read
 from the [project] table in pyproject.toml, so the wheel and pyproject stay a
 single source of truth.
@@ -70,7 +70,8 @@ def main():
     os.chdir(repo_root)
     os.makedirs(out_dir, exist_ok=True)
 
-    pkg_dir = "cefpython3"
+    package_root = os.path.join("build", "package")
+    pkg_dir = os.path.join(package_root, "cefpython3")
     if not os.path.isdir(pkg_dir):
         print("[build_distrib.py] ERROR: {pkg_dir}/ not found".format(
             pkg_dir=pkg_dir))
@@ -130,11 +131,12 @@ def main():
                         and re.match(r"cefpython_py\d+\.(pyd|so)$", filename)):
                     continue
                 filepath = os.path.join(root, filename)
-                _add_file(filepath, filepath.replace(os.sep, "/"))
+                arcname = os.path.relpath(filepath, package_root)
+                _add_file(filepath, arcname.replace(os.sep, "/"))
 
         # Examples
         for filepath in _example_files():
-            _add_file(filepath, pkg_dir + "/" + filepath)
+            _add_file(filepath, "cefpython3/" + filepath)
 
         # dist-info/METADATA (all fields sourced from [project] in pyproject.toml
         # so the wheel and pyproject stay a single source of truth)

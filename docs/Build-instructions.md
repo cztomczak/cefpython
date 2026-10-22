@@ -125,8 +125,10 @@ python tools/build.py
 ```
 
 This builds the extension module and installs it, with the CEF runtime, into
-`cefpython3/`, so that `import cefpython3` works directly from the repo. No
-wheel is created.
+`build/package/cefpython3/`, and adds a `.pth` file to the active Python
+environment that puts `build/package/` on `sys.path`, so that
+`import cefpython3` works from any directory. No wheel is created. All build
+output is kept under `build/`; deleting it removes every build artifact.
 
 Useful flags (see `python tools/build.py --help` for the full list):
 

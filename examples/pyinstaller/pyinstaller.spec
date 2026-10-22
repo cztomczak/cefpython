@@ -91,6 +91,23 @@ def _repair_and_sign_macos_cef_bundles(app_path):
     _codesign_and_verify(app_path)
 
 
+def _drop_duplicate_cef_dlls(binaries, datas):
+    """Drop CEF DLL copies that PyInstaller adds next to the Cython module.
+
+    For a cefpython3 installed in site-packages, PyInstaller 6 also collects
+    the module's DLL dependencies (libcef.dll, chrome_elf.dll, msvcp140.dll)
+    into cefpython3/. The module would then load that libcef.dll, and CEF
+    would not find icudtl.dat and the other files the hook collects into the
+    top-level directory.
+    """
+    top_level = {os.path.basename(dest).lower()
+                 for dest, _, _ in binaries + datas
+                 if not os.path.dirname(dest)}
+    return [(dest, src, typecode) for dest, src, typecode in binaries
+            if not (os.path.dirname(dest) == "cefpython3"
+                    and os.path.basename(dest).lower() in top_level)]
+
+
 a = Analysis(
     ["../wxpython.py"],
     pathex=[],
@@ -107,6 +124,9 @@ a = Analysis(
 
 if not os.environ.get("PYINSTALLER_CEFPYTHON3_HOOK_SUCCEEDED"):
     raise SystemExit("Error: hook-cefpython3.py was not executed or failed")
+
+if sys.platform == "win32":
+    a.binaries = _drop_duplicate_cef_dlls(a.binaries, a.datas)
 
 pyz = PYZ(a.pure)
 

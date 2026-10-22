@@ -5,7 +5,7 @@
 
 """Build cefpython3.
 
-Dev workflow (no wheel; `import cefpython3` works from the repo):
+Dev workflow (no wheel; `import cefpython3` loads build/package/cefpython3/):
     python tools/build.py
     python tools/build.py --unittests
 
@@ -24,7 +24,9 @@ import cef_version
 
 PYVERSION = "{0}{1}".format(*sys.version_info[:2])
 BUILD_DIR = os.path.join("build", "_cmake_build_py" + PYVERSION)
-PKG_DIR = "cefpython3"
+PACKAGE_ROOT = os.path.join("build", "package")
+PKG_DIR = os.path.join(PACKAGE_ROOT, "cefpython3")
+PKG_SRC_DIR = os.path.join("src", "cefpython3")
 CEF_RUNTIME_STAMP = os.path.join("build", "cef_runtime_installed.txt")
 
 WINDOWS = sys.platform == "win32"
@@ -72,9 +74,9 @@ def cmake_build(clean=False, profiling=False, line_tracing=False):
 
 
 def install_into_package():
-    """Install into cefpython3/ using the install() rules in CMakeLists.txt.
-    The CEF runtime is installed only once per CEF version."""
-    install_args = ["cmake", "--install", BUILD_DIR, "--prefix", "."]
+    """Install into build/package/cefpython3/ using the install() rules in
+    CMakeLists.txt. The CEF runtime is installed only once per CEF version."""
+    install_args = ["cmake", "--install", BUILD_DIR, "--prefix", PACKAGE_ROOT]
     if WINDOWS:
         install_args += ["--config", "Release"]
     run(install_args + ["--component", "cefpython"])
@@ -95,6 +97,12 @@ def install_into_package():
     run(install_args + ["--component", "cef_runtime"])
     with open(CEF_RUNTIME_STAMP, "w") as f:
         f.write(cef_ver + "\n")
+
+
+def copy_package_sources():
+    for name in os.listdir(PKG_SRC_DIR):
+        if name.endswith(".py"):
+            shutil.copy2(os.path.join(PKG_SRC_DIR, name), PKG_DIR)
 
 
 def write_version_file(version):
@@ -147,13 +155,13 @@ def _codesign_if_invalid(target, deep=False):
 
 
 def write_dev_pth():
-    # Put the repo root on sys.path so `import cefpython3` works in any script
+    # Put build/package/ on sys.path so `import cefpython3` works in any script
     # without setting PYTHONPATH.
     pth = _dev_pth_path()
-    repo_root = os.getcwd()
-    if not os.path.exists(pth) or open(pth).read().strip() != repo_root:
+    package_root = os.path.abspath(PACKAGE_ROOT)
+    if not os.path.exists(pth) or open(pth).read().strip() != package_root:
         with open(pth, "w") as f:
-            f.write(repo_root + "\n")
+            f.write(package_root + "\n")
         print("[build.py] Dev install: wrote", pth)
 
 
@@ -212,6 +220,7 @@ def main():
     cmake_build(clean=args.clean, profiling=args.enable_profiling,
                 line_tracing=args.enable_line_tracing)
     install_into_package()
+    copy_package_sources()
     write_version_file(version)
     if MAC:
         _codesign_macos(PKG_DIR)
@@ -224,7 +233,7 @@ def main():
 
     if args.unittests:
         env = os.environ.copy()
-        env["PYTHONPATH"] = os.getcwd()
+        env["PYTHONPATH"] = os.path.abspath(PACKAGE_ROOT)
         run([sys.executable, "unittests/_test_runner.py"], env=env)
 
 
