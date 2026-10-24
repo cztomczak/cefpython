@@ -416,7 +416,7 @@ image.save("image.png", "PNG")
 | --- | --- |
 | __Return__ | [JavascriptBindings](JavascriptBindings.md) |
 
-Returns the [JavascriptBindings](JavascriptBindings.md) object that was passed to [cefpython](cefpython.md).CreateBrowserSync().
+Returns the [JavascriptBindings](JavascriptBindings.md) object assigned with [SetJavascriptBindings](#setjavascriptbindings), or None.
 
 
 ### GetMainFrame

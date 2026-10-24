@@ -5,7 +5,6 @@ from cefpython3 import cefpython as cef
 import base64
 import platform
 import sys
-import threading
 
 # HTML code. Browser will navigate to a Data uri created
 # from this html code.
@@ -15,20 +14,29 @@ HTML_code = """
 <head>
     <style type="text/css">
     body,html { font-family: Arial; font-size: 11pt; }
-    div.msg { margin: 0.2em; line-height: 1.4em; }
-    b { background: #ccc; font-weight: bold; font-size: 10pt;
-        padding: 0.1em 0.2em; }
-    b.Python { background: #eee; }
-    i { font-family: Courier new; font-size: 10pt; border: #eee 1px solid;
-        padding: 0.1em 0.2em; }
+    div.msg { margin: 0.2em; line-height: 1.5em; }
+    b { font-weight: bold; padding: 0.2em 0.3em; padding-bottom: 0.25em; }
+    b.Python { background: #174a8b; color: white; }
+    b.Javascript { background: #175c2e; color: white; }
+    b.event { }
+    i { padding: 0.1em 0.2em; background: #8f1d1d; color: white; font-weight: bold; }
     </style>
-
+</head>
+<body>
+    <h1>Tutorial example</h1>
+    <div id="terminal"></div>
     <script>
     function js_print(lang, event, msg) {
-        msg = "<b class="+lang+">"+lang+": "+event+":</b> " + msg;
-        console = document.getElementById("console")
-        console.innerHTML += "<div class=msg>"+msg+"</div>";
+        if (event != "OnConsoleMessage") {
+            console.log(lang+": "+event+": "+msg);
+        }
+        event = event.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        msg = "<b class="+lang+">"+lang+":</b> <b class=event>"+event+":</b> "+msg;
+        var terminal = document.getElementById("terminal");
+        terminal.innerHTML += "<div class=msg>"+msg+"</div>";
     }
+
+    js_print("Javascript", "<script>", "Executing");
 
     function js_callback_1(ret) {
         js_print("Javascript", "html_to_data_uri", ret);
@@ -38,20 +46,16 @@ HTML_code = """
         js_print("Javascript", "js_callback", msg);
         py_callback("String sent from Javascript");
     }
-
-    window.onload = function(){
-        js_print("Javascript", "window.onload", "Called");
+    function run_html_tests() {
+        js_print("Javascript", "run_html_tests", "Executing");
         js_print("Javascript", "python_property", python_property);
         js_print("Javascript", "navigator.userAgent", navigator.userAgent);
         js_print("Javascript", "cefpython_version", cefpython_version.version);
         html_to_data_uri("test", js_callback_1);
         external.test_multiple_callbacks(js_callback_2);
-    };
+        setTimeout(function(){ throw_javascript_error_here(); }, 500);
+    }
     </script>
-</head>
-<body>
-    <h1>Tutorial example</h1>
-    <div id="console"></div>
 </body>
 </html>
 """
@@ -119,6 +123,7 @@ def set_client_handlers(browser):
 
 
 def set_javascript_bindings(browser):
+    js_print(browser, "Python", "set_javascript_bindings", "Setting javascript bindings at this moment")
     external = External(browser)
     bindings = cef.JavascriptBindings(
             bindToFrames=False, bindToPopups=False)
@@ -137,16 +142,10 @@ def js_print(browser, lang, event, msg):
 class GlobalHandler(object):
     def OnAfterCreated(self, browser, **_):
         """Called after a new browser is created."""
-        # DOM is not yet loaded. Using js_print at this moment will
-        # throw an error: "Uncaught ReferenceError: js_print is not defined".
-        # We make this error on purpose. This error will be intercepted
-        # in DisplayHandler.OnConsoleMessage.
-        js_print(browser, "Python", "OnAfterCreated",
-                 "This will probably never display as DOM is not yet loaded")
-        # Delay print by 0.5 sec, because js_print is not available yet
+        # Delay execution until the page's Javascript context is ready
         args = [browser, "Python", "OnAfterCreated",
                 "(Delayed) Browser id="+str(browser.GetIdentifier())]
-        threading.Timer(0.5, js_print, args).start()
+        cef.PostDelayedTask(cef.TID_UI, 500, js_print, *args)
 
 
 class LoadHandler(object):
@@ -155,28 +154,30 @@ class LoadHandler(object):
         if not is_loading:
             # Loading is complete. DOM is ready.
             js_print(browser, "Python", "OnLoadingStateChange",
-                     "Loading is complete")
+                     "Loading is complete, will execute run_html_tests")
+            browser.ExecuteFunction("run_html_tests")
 
 
 class DisplayHandler(object):
     def OnConsoleMessage(self, browser, message, **_):
         """Called to display a console message."""
-        # This will intercept js errors, see comments in OnAfterCreated
+        # This will intercept js errors, e.g. the intentional error
+        # thrown by run_html_tests() in the page.
         if "error" in message.lower() or "uncaught" in message.lower():
             # Prevent infinite recurrence in case something went wrong
             if "js_print is not defined" in message.lower():
                 if hasattr(self, "js_print_is_not_defined"):
-                    print("Python: OnConsoleMessage: "
-                          "Intercepted Javascript error: "+message)
+                    print("Javascript error: " + message)
                     return
                 else:
                     self.js_print_is_not_defined = True
-            # Delay print by 0.5 sec, because js_print may not be
-            # available yet due to DOM not ready.
+            # Delay execution until the page's Javascript context is ready
             args = [browser, "Python", "OnConsoleMessage",
                     "(Delayed) Intercepted Javascript error: <i>{error}</i>"
                     .format(error=message)]
-            threading.Timer(0.5, js_print, args).start()
+            cef.PostDelayedTask(cef.TID_UI, 500, js_print, *args)
+        else:
+            print("Javascript console: " + message)
 
 
 class External(object):

@@ -301,7 +301,8 @@ class LoadHandler(object):
         if not is_loading:
             # Loading is complete. DOM is ready.
             js_print(browser, "Python", "OnLoadingStateChange",
-                     "Loading is complete")
+                     "Loading is complete, will execute run_html_tests")
+            browser.ExecuteFunction("run_html_tests")
 ```
 
 
@@ -382,7 +383,9 @@ def html_to_data_uri(html, js_callback=None):
 function js_callback_1(ret) {
     js_print("Javascript", "html_to_data_uri", ret);
 }
-html_to_data_uri("test", js_callback_1);
+function run_html_tests() {
+    html_to_data_uri("test", js_callback_1);
+}
 </script>
 ```
 
