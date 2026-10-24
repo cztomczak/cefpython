@@ -424,13 +424,17 @@ def handle_key_event(key_event, browser):
         # normal keypress.
         send_key_event(browser, cef.KEYEVENT_KEYUP, keycode, keycode,
                        get_native_key(keycode))
-    elif key_event.keysym.sym == sdl2.SDLK_RETURN:
-        send_key_event(browser, cef.KEYEVENT_CHAR, keycode, keycode)
     else:
         # For raw key events, the character and unmodified
         # character codes should be 0.
         send_key_event(browser, cef.KEYEVENT_RAWKEYDOWN, keycode, 0,
                        get_native_key(keycode))
+        if key_event.keysym.sym == sdl2.SDLK_RETURN:
+            # SDL sends no SDL_TEXTINPUT event for Enter. The char
+            # event submits the form of a single-line input and
+            # inserts a newline in a text area, unless the page
+            # called preventDefault() on the key down event.
+            send_key_event(browser, cef.KEYEVENT_CHAR, keycode, keycode)
 
 
 def send_key_event(browser, event_type, keycode, character,
