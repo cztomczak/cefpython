@@ -66,7 +66,9 @@ Examples of embedding CEF browser using various GUI frameworks:
 - [tkinter_.py](tkinter_.py): example for [Tkinter](https://wiki.python.org/moin/TkInter).
   Currently broken on Mac ([#309](../../../issues/309)).
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)
-  toolkit. This example implements High DPI support on Windows.
+  toolkit. On Linux with wxPython GTK 3, it also requires
+  [PyGObject / PyGI](https://wiki.gnome.org/Projects/PyGObject). This example
+  implements High DPI support on Windows.
 
 
 ### Build executable with PyInstaller

@@ -426,3 +426,4 @@
   * [gtk_plug_new ](WindowUtils.md#gtk_plug_new-linux)
   * [gtk_widget_show ](WindowUtils.md#gtk_widget_show-linux)
   * [InstallX11ErrorHandlers ](WindowUtils.md#installx11errorhandlers-linux)
+  * [GetX11DefaultVisualId ](WindowUtils.md#getx11defaultvisualid-linux)

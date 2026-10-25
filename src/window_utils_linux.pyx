@@ -52,3 +52,7 @@ class WindowUtils:
     def InstallX11ErrorHandlers(cls):
         with nogil:
             x11.InstallX11ErrorHandlers()
+
+    @classmethod
+    def GetX11DefaultVisualId(cls, int screen_number):
+        return x11.GetX11DefaultVisualId(screen_number)

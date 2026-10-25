@@ -33,6 +33,24 @@ void InstallX11ErrorHandlers() {
     XSetIOErrorHandler(XIOErrorHandlerImpl);
 }
 
+unsigned long GetX11DefaultVisualId(int screen_number) {
+    REQUIRE_UI_THREAD();
+    // See SetX11WindowBounds: NULL off the UI thread or on a non-X11 Ozone
+    // backend.
+    ::Display* xdisplay = cef_get_xdisplay();
+    if (!xdisplay) {
+        LOG(WARNING) << "[Browser process] GetX11DefaultVisualId: no X11 "
+                        "display (wrong thread or non-X11 backend)";
+        return 0;
+    }
+    if (screen_number < 0 || screen_number >= ScreenCount(xdisplay)) {
+        LOG(WARNING) << "[Browser process] GetX11DefaultVisualId: invalid "
+                        "screen number " << screen_number;
+        return 0;
+    }
+    return XVisualIDFromVisual(DefaultVisual(xdisplay, screen_number));
+}
+
 void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
                         int x, int y, int width, int height) {
     REQUIRE_UI_THREAD();

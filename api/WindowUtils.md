@@ -18,6 +18,7 @@ Table of contents:
   * [gtk_plug_new (Linux)](#gtk_plug_new-linux)
   * [gtk_widget_show (Linux)](#gtk_widget_show-linux)
   * [InstallX11ErrorHandlers (Linux)](#installx11errorhandlers-linux)
+  * [GetX11DefaultVisualId (Linux)](#getx11defaultvisualid-linux)
 
 
 ## Methods
@@ -141,3 +142,27 @@ initializing GTK.
 CEF Python calls this function automatically during a call to
 Initialize, so there is no more need to call it manually in
 most cases.
+
+
+### GetX11DefaultVisualId (Linux)
+
+| Parameter | Type |
+| --- | --- |
+| screen_number | int |
+| __Return__ | int |
+
+Linux-only. Returns the ID of the X server's default visual for the
+given X screen, or 0 on failure. Must be called on the UI thread after
+[cefpython](cefpython.md).Initialize().
+
+With GTK 3 the browser may stay blank unless the window it is embedded
+into uses this visual (Issue #701, CEF issue
+[#3564](https://github.com/chromiumembedded/cef/issues/3564)). Set it
+before the window is realized, as the gtk3.py and wxpython.py examples do:
+
+```python
+screen = window.get_screen()
+window.set_visual(GdkX11.X11Screen.lookup_visual(
+        screen, cef.WindowUtils.GetX11DefaultVisualId(
+                screen.get_screen_number())))
+```

@@ -9,6 +9,7 @@ from linux cimport XImage
 
 cdef extern from "client_handler/x11.h" nogil:
     void InstallX11ErrorHandlers()
+    unsigned long GetX11DefaultVisualId(int screen_number)
     void SetX11WindowBounds(CefRefPtr[CefBrowser] browser,
                             int x, int y, int width, int height)
     void SetX11WindowTitle(CefRefPtr[CefBrowser] browser, char* title)

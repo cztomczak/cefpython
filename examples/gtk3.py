@@ -18,7 +18,7 @@ import sys
 
 gi.require_version("Gtk", "3.0")
 # noinspection PyUnresolvedReferences
-from gi.repository import Gtk, GObject, Gdk, GdkPixbuf  # noqa
+from gi.repository import Gtk, GLib, Gdk, GdkPixbuf  # noqa
 
 # Fix for PyCharm hints warnings when using static methods
 WindowUtils = cef.WindowUtils()
@@ -61,8 +61,7 @@ class Gtk3Example(Gtk.Application):
         self.win32_handle = None
 
     def run(self, argv):
-        GObject.threads_init()
-        GObject.timeout_add(10, self.on_timer)
+        GLib.timeout_add(10, self.on_timer)
         self.connect("startup", self.on_startup)
         self.connect("activate", self.on_activate)
         self.connect("shutdown", self.on_shutdown)
@@ -94,6 +93,13 @@ class Gtk3Example(Gtk.Application):
 
     def on_startup(self, *_):
         self.window = Gtk.ApplicationWindow.new(self)
+        if LINUX:
+            # Put the window on the X server's default visual before it is
+            # realized, otherwise the browser stays blank (Issue #701).
+            screen = self.window.get_screen()
+            self.window.set_visual(GdkX11.X11Screen.lookup_visual(
+                    screen, WindowUtils.GetX11DefaultVisualId(
+                            screen.get_screen_number())))
         self.window.set_title("GTK 3 example (PyGObject)")
         self.window.set_default_size(800, 600)
         self.window.connect("configure-event", self.on_configure)
@@ -117,6 +123,7 @@ class Gtk3Example(Gtk.Application):
         window_info.SetAsChild(self.get_handle())
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
+        self.browser.SetClientHandler(LifespanHandler(self))
 
     def on_configure(self, *_):
         if self.browser:
@@ -138,9 +145,13 @@ class Gtk3Example(Gtk.Application):
         return False
 
     def on_window_close(self, *_):
-        if self.browser:
-            self.browser.CloseBrowser(True)
-            self.clear_browser_references()
+        # Close the browser before the window, as CEF requires (see
+        # LifespanHandler.DoClose). TryCloseBrowser() starts closing it and
+        # returns False until it is closed. CEF then calls
+        # LifespanHandler.OnBeforeClose, which closes the window again.
+        if self.browser and not self.browser.TryCloseBrowser():
+            return True
+        return False
 
     def clear_browser_references(self):
         # Clear browser references that you keep anywhere in your
@@ -157,6 +168,19 @@ class Gtk3Example(Gtk.Application):
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(icon)
         transparent = pixbuf.add_alpha(True, 0xff, 0xff, 0xff)
         Gtk.Window.set_default_icon_list([transparent])
+
+
+class LifespanHandler(object):
+    def __init__(self, app):
+        self.app = app
+
+    def OnBeforeClose(self, browser, **_):
+        # Popups inherit this handler from the main browser
+        if browser.IsPopup():
+            return
+        self.app.clear_browser_references()
+        # See on_window_close()
+        self.app.window.close()
 
 
 if __name__ == '__main__':
