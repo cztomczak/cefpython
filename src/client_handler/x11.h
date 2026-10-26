@@ -17,6 +17,7 @@
 
 void InstallX11ErrorHandlers();
 unsigned long GetX11DefaultVisualId(int screen_number);
+bool SetX11DefaultVisualForGtkWidget(GtkWidget* widget);
 void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
                         int x, int y, int width, int height);
 void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title);

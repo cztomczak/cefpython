@@ -427,3 +427,4 @@
   * [gtk_widget_show ](WindowUtils.md#gtk_widget_show-linux)
   * [InstallX11ErrorHandlers ](WindowUtils.md#installx11errorhandlers-linux)
   * [GetX11DefaultVisualId ](WindowUtils.md#getx11defaultvisualid-linux)
+  * [SetX11DefaultVisualForGtkWidget ](WindowUtils.md#setx11defaultvisualforgtkwidget-linux)

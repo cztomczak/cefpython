@@ -51,6 +51,39 @@ unsigned long GetX11DefaultVisualId(int screen_number) {
     return XVisualIDFromVisual(DefaultVisual(xdisplay, screen_number));
 }
 
+bool SetX11DefaultVisualForGtkWidget(GtkWidget* widget) {
+    // Puts |widget| on the X server's default visual (Issue #701), for
+    // toolkits that have no API to set the visual, e.g. wxPython. Must be
+    // called before the widget is realized.
+    REQUIRE_UI_THREAD();
+    if (!widget || gtk_widget_get_realized(widget)) {
+        LOG(WARNING) << "[Browser process] SetX11DefaultVisualForGtkWidget: "
+                        "invalid or already realized widget";
+        return false;
+    }
+    GdkScreen* screen = gtk_widget_get_screen(widget);
+    if (!screen || !GDK_IS_X11_SCREEN(screen)) {
+        LOG(WARNING) << "[Browser process] SetX11DefaultVisualForGtkWidget: "
+                        "widget is not on an X11 screen";
+        return false;
+    }
+    unsigned long visual_id = GetX11DefaultVisualId(
+            gdk_x11_screen_get_screen_number(GDK_X11_SCREEN(screen)));
+    if (!visual_id) {
+        // GetX11DefaultVisualId logged why
+        return false;
+    }
+    GdkVisual* visual = gdk_x11_screen_lookup_visual(GDK_X11_SCREEN(screen),
+                                                     visual_id);
+    if (!visual) {
+        LOG(WARNING) << "[Browser process] SetX11DefaultVisualForGtkWidget: "
+                        "no GDK visual for X visual " << visual_id;
+        return false;
+    }
+    gtk_widget_set_visual(widget, visual);
+    return true;
+}
+
 void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
                         int x, int y, int width, int height) {
     REQUIRE_UI_THREAD();

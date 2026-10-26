@@ -6,8 +6,6 @@
 # - wxPython 3.0 on Windows/Mac
 # - wxPython 2.8 on Linux
 # - CEF Python v66.0+
-#
-# On Linux with wxPython GTK 3 this example also requires PyGObject.
 
 import wx
 from cefpython3 import cefpython as cef
@@ -29,17 +27,6 @@ if MAC:
               "cannot fix Issue #371")
         print("[wxpython.py] To install PyObjC type: "
               "pip install -U pyobjc")
-        sys.exit(1)
-
-if LINUX and "gtk3" in wx.PlatformInfo:
-    try:
-        # noinspection PyUnresolvedReferences
-        import gi
-    except ImportError:
-        print("[wxpython.py] Error: PyGObject package is missing, "
-              "cannot fix Issue #701")
-        print("[wxpython.py] To install PyGObject see "
-              "https://pygobject.gnome.org/getting_started.html")
         sys.exit(1)
 
 # Configuration
@@ -95,29 +82,6 @@ def scale_window_size_for_high_dpi(width, height):
     return width, height
 
 
-def set_x11_default_visual(frame):
-    """Put the frame on the X server's default visual before it is
-    shown. With GTK 3, wx windows may use another visual and the
-    browser then stays blank (Issue #701). wxPython has no API for
-    it, so use the frame's GtkWindow through PyGObject. Gtk is
-    imported here, after CEF and wx initialized GTK, as importing
-    it initializes GTK too."""
-    gi.require_version("Gtk", "3.0")
-    gi.require_version("GdkX11", "3.0")
-    from gi.repository import Gtk, GdkX11
-    found = False
-    for window in Gtk.Window.list_toplevels():
-        if window.get_title() == frame.GetTitle():
-            screen = window.get_screen()
-            window.set_visual(GdkX11.X11Screen.lookup_visual(
-                    screen, cef.WindowUtils.GetX11DefaultVisualId(
-                            screen.get_screen_number())))
-            found = True
-    if not found:
-        print("[wxpython.py] Warning: GTK window of the frame not found, "
-              "the browser may stay blank (Issue #701)")
-
-
 class MainFrame(wx.Frame):
 
     def __init__(self):
@@ -170,8 +134,15 @@ class MainFrame(wx.Frame):
             NSApp.windows()[0].contentView().setWantsLayer_(True)
 
         if LINUX:
+            # Put the frame on the X server's default visual before it is
+            # realized (shown), otherwise the browser stays blank with
+            # GTK 3 (Issue #701).
             if "gtk3" in wx.PlatformInfo:
-                set_x11_default_visual(self)
+                widget = self.GetGtkWidget()
+                set_visual = cef.WindowUtils.SetX11DefaultVisualForGtkWidget
+                if not widget or not set_visual(int(widget)):
+                    raise RuntimeError("Could not set the GTK window's"
+                                       " X11 visual")
             # On Linux must show before embedding browser, so that handle
             # is available (Issue #347).
             self.Show()
@@ -257,8 +228,9 @@ class MainFrame(wx.Frame):
             return
         # Close the browser before the window, as CEF requires (see
         # LifespanHandler.DoClose). TryCloseBrowser() starts closing it and
-        # returns False until the window may close. CEF then closes the
-        # window again (on Linux from LifespanHandler.OnBeforeClose).
+        # returns False until the window may close. CEF then sends another
+        # close request, except on Linux, where LifespanHandler.OnBeforeClose
+        # closes the window.
         if self.browser and not self.browser.TryCloseBrowser():
             event.Veto()
             return

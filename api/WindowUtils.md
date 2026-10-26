@@ -19,6 +19,7 @@ Table of contents:
   * [gtk_widget_show (Linux)](#gtk_widget_show-linux)
   * [InstallX11ErrorHandlers (Linux)](#installx11errorhandlers-linux)
   * [GetX11DefaultVisualId (Linux)](#getx11defaultvisualid-linux)
+  * [SetX11DefaultVisualForGtkWidget (Linux)](#setx11defaultvisualforgtkwidget-linux)
 
 
 ## Methods
@@ -158,7 +159,7 @@ given X screen, or 0 on failure. Must be called on the UI thread after
 With GTK 3 the browser may stay blank unless the window it is embedded
 into uses this visual (Issue #701, CEF issue
 [#3564](https://github.com/chromiumembedded/cef/issues/3564)). Set it
-before the window is realized, as the gtk3.py and wxpython.py examples do:
+before the window is realized, as the gtk3.py example does:
 
 ```python
 screen = window.get_screen()
@@ -166,3 +167,20 @@ window.set_visual(GdkX11.X11Screen.lookup_visual(
         screen, cef.WindowUtils.GetX11DefaultVisualId(
                 screen.get_screen_number())))
 ```
+
+For toolkits that have no API to set the visual, see
+SetX11DefaultVisualForGtkWidget().
+
+
+### SetX11DefaultVisualForGtkWidget (Linux)
+
+| Parameter | Type |
+| --- | --- |
+| gtkWidgetPtr | int |
+| __Return__ | bool |
+
+Linux-only. Puts a GTK 3 widget on the X server's default visual, see
+GetX11DefaultVisualId(). Returns False on failure. Call it on the UI
+thread after [cefpython](cefpython.md).Initialize() and before the widget
+is realized. It is meant for toolkits that have no API to set the visual,
+e.g. the wxpython.py example passes `int(frame.GetGtkWidget())`.

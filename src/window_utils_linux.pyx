@@ -56,3 +56,7 @@ class WindowUtils:
     @classmethod
     def GetX11DefaultVisualId(cls, int screen_number):
         return x11.GetX11DefaultVisualId(screen_number)
+
+    @classmethod
+    def SetX11DefaultVisualForGtkWidget(cls, WindowHandle gtkWidgetPtr):
+        return x11.SetX11DefaultVisualForGtkWidget(<GtkWidget*>gtkWidgetPtr)
