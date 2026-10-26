@@ -186,6 +186,7 @@ cdef extern from "include/internal/cef_types.h":
         EVENTFLAG_IS_KEY_PAD          = 1 << 9,
         EVENTFLAG_IS_LEFT             = 1 << 10,
         EVENTFLAG_IS_RIGHT            = 1 << 11,
+        EVENTFLAG_IS_REPEAT           = 1 << 13,
 
     # LoadHandler
     ctypedef enum cef_termination_status_t:

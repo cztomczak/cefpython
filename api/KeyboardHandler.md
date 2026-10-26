@@ -69,6 +69,7 @@ KeyEventFlags constants defined in the cefpython module:
 * EVENTFLAG_IS_KEY_PAD (Mac)
 * EVENTFLAG_IS_LEFT (Mac)
 * EVENTFLAG_IS_RIGHT (Mac)
+* EVENTFLAG_IS_REPEAT (auto-repeat)
 
 
 ### OnKeyEvent

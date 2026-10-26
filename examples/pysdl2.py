@@ -40,8 +40,6 @@ Known issues (pull requests are welcome):
 - There are issues when running on slow machine - key events are being
   lost (noticed on Mac only), see Issue #324 for more details
 - Performance is still not perfect, see Issue #324 for further details
-- Keyboard modifiers that are not yet handled in this example:
-  ctrl, marking text inputs with the shift key.
 
 GUI controls:
   Due to SDL2's lack of GUI widgets there are no GUI controls
@@ -346,11 +344,23 @@ def handle_event(event, windows):
         # Handle text events to get actual characters typed rather
         # than the key pressed.
         text = event.text.text.decode("utf-8")
+        # Text events have no modifier or repeat information. Use the
+        # preceding key event, even if SDL has already processed a
+        # later key release. Send committed text without shortcut
+        # modifiers so that it is inserted instead of being ignored.
+        modifiers = window.key_modifiers & ~(
+            cef.EVENTFLAG_CONTROL_DOWN | cef.EVENTFLAG_ALT_DOWN
+            | cef.EVENTFLAG_COMMAND_DOWN)
         for keycode in get_utf16_code_units(text):
-            send_key_event(browser, cef.KEYEVENT_CHAR, keycode, keycode)
-            send_key_event(browser, cef.KEYEVENT_KEYUP, keycode, keycode)
+            send_key_event(browser, cef.KEYEVENT_CHAR, keycode, keycode,
+                           modifiers=modifiers)
     elif event.type in (sdl2.SDL_KEYDOWN, sdl2.SDL_KEYUP):
-        handle_key_event(event.key, browser)
+        window.key_modifiers = get_key_modifiers(event.key.keysym.mod,
+                                                event.key.repeat)
+        if (event.key.keysym.sym in KEYPAD_KEYS
+                or event.key.keysym.sym == sdl2.SDLK_KP_ENTER):
+            window.key_modifiers |= cef.EVENTFLAG_IS_KEY_PAD
+        handle_key_event(event.key, browser, window.key_modifiers)
 
 
 def get_mouse_modifiers(button_state):
@@ -381,6 +391,7 @@ def get_utf16_code_units(text):
 # See https://wiki.libsdl.org/SDLKeycodeLookup to map more keys.
 KEY_CODES = {
     sdl2.SDLK_RETURN: 13,
+    sdl2.SDLK_KP_ENTER: 13,
     sdl2.SDLK_DELETE: 46,
     sdl2.SDLK_BACKSPACE: 8,
     sdl2.SDLK_LEFT: 37,
@@ -390,6 +401,39 @@ KEY_CODES = {
     sdl2.SDLK_HOME: 36,
     sdl2.SDLK_END: 35,
 }
+
+# CEF uses Windows virtual key codes, including on other platforms.
+# Letters and digits use the codes of the characters A-Z and 0-9.
+TEXT_KEY_CODES = {
+    sdl2.SDLK_SPACE: 32,
+    sdl2.SDLK_SEMICOLON: 186,
+    sdl2.SDLK_EQUALS: 187,
+    sdl2.SDLK_COMMA: 188,
+    sdl2.SDLK_MINUS: 189,
+    sdl2.SDLK_PERIOD: 190,
+    sdl2.SDLK_SLASH: 191,
+    sdl2.SDLK_BACKQUOTE: 192,
+    sdl2.SDLK_LEFTBRACKET: 219,
+    sdl2.SDLK_BACKSLASH: 220,
+    sdl2.SDLK_RIGHTBRACKET: 221,
+    sdl2.SDLK_QUOTE: 222,
+}
+TEXT_KEY_CODES.update({sdl2.SDLK_a + i: ord("A") + i for i in range(26)})
+TEXT_KEY_CODES.update({sdl2.SDLK_0 + i: ord("0") + i for i in range(10)})
+
+# Windows virtual key codes and characters for the numeric keypad.
+KEYPAD_KEYS = {
+    sdl2.SDLK_KP_0: (96, ord("0")),
+    sdl2.SDLK_KP_PERIOD: (110, ord(".")),
+    sdl2.SDLK_KP_DIVIDE: (111, ord("/")),
+    sdl2.SDLK_KP_MULTIPLY: (106, ord("*")),
+    sdl2.SDLK_KP_MINUS: (109, ord("-")),
+    sdl2.SDLK_KP_PLUS: (107, ord("+")),
+    sdl2.SDLK_KP_EQUALS: (187, ord("=")),
+    sdl2.SDLK_KP_COMMA: (188, ord(",")),
+}
+KEYPAD_KEYS.update({sdl2.SDLK_KP_1 + i: (97 + i, ord("1") + i)
+                    for i in range(9)})
 
 # The key events on MacOS have different native keycode than on other operating
 # systems. This table is a translation from Windows-keycodes to MacOS ones.
@@ -408,13 +452,41 @@ MACOS_TRANSLATION_TABLE = {
 }
 
 
-def handle_key_event(key_event, browser):
-    """
-    Handle key down and key up events for non-text keys.
+def get_text_key(sym):
+    """Return the Windows key code and character of a printable SDL key."""
+    if sym in KEYPAD_KEYS:
+        return KEYPAD_KEYS[sym]
+    if not (0 <= sym <= 0x10ffff and chr(sym).isprintable()):
+        return None
+    keycode = TEXT_KEY_CODES.get(sym, 0)
+    if sys.platform == "win32" and sym <= 0xffff:
+        # Ask Windows so keys on non-US layouts get the right key code.
+        mapped = ctypes.windll.user32.VkKeyScanW(ctypes.c_wchar(chr(sym)))
+        if (mapped & 0xffff) != 0xffff:
+            keycode = mapped & 0xff
+    # Some characters have no Windows key code. Use 0 for an unmapped
+    # key so pages still receive its press and release.
+    character = sym if sym <= 0xffff else 0
+    return keycode, character
 
-    Text keys are handled with SDL_TEXTINPUT events in handle_event.
+
+def handle_key_event(key_event, browser, modifiers):
     """
-    keycode = KEY_CODES.get(key_event.keysym.sym)
+    Handle key down and key up events.
+
+    SDL_TEXTINPUT supplies the text to insert, see handle_event.
+    """
+    sym = key_event.keysym.sym
+    text_key = get_text_key(sym)
+    if text_key is not None:
+        # Send key presses so web pages can handle keyboard shortcuts.
+        # SDL_TEXTINPUT supplies the text to insert.
+        event_type = (cef.KEYEVENT_KEYUP if key_event.type == sdl2.SDL_KEYUP
+                      else cef.KEYEVENT_RAWKEYDOWN)
+        send_key_event(browser, event_type, *text_key,
+                       modifiers=modifiers)
+        return
+    keycode = KEY_CODES.get(sym)
     if keycode is None:
         return
     if key_event.type == sdl2.SDL_KEYUP:
@@ -423,30 +495,51 @@ def handle_key_event(key_event, browser):
         # one of the above-listed keys will eat the next
         # normal keypress.
         send_key_event(browser, cef.KEYEVENT_KEYUP, keycode, keycode,
-                       get_native_key(keycode))
+                       get_native_key(keycode), modifiers)
     else:
         # For raw key events, the character and unmodified
         # character codes should be 0.
         send_key_event(browser, cef.KEYEVENT_RAWKEYDOWN, keycode, 0,
-                       get_native_key(keycode))
-        if key_event.keysym.sym == sdl2.SDLK_RETURN:
+                       get_native_key(keycode), modifiers)
+        if sym in (sdl2.SDLK_RETURN, sdl2.SDLK_KP_ENTER):
             # SDL sends no SDL_TEXTINPUT event for Enter. The char
             # event submits the form of a single-line input and
             # inserts a newline in a text area, unless the page
             # called preventDefault() on the key down event.
-            send_key_event(browser, cef.KEYEVENT_CHAR, keycode, keycode)
+            send_key_event(browser, cef.KEYEVENT_CHAR, keycode, keycode,
+                           modifiers=modifiers)
+
+
+def get_key_modifiers(key_mod, repeat=False):
+    """Return CEF modifier and repeat flags for an SDL key event."""
+    modifiers = cef.EVENTFLAG_NONE
+    if key_mod & sdl2.KMOD_SHIFT:
+        modifiers |= cef.EVENTFLAG_SHIFT_DOWN
+    if key_mod & sdl2.KMOD_CTRL:
+        modifiers |= cef.EVENTFLAG_CONTROL_DOWN
+    if key_mod & sdl2.KMOD_ALT:
+        modifiers |= cef.EVENTFLAG_ALT_DOWN
+    if key_mod & sdl2.KMOD_GUI:
+        modifiers |= cef.EVENTFLAG_COMMAND_DOWN
+    if key_mod & sdl2.KMOD_CAPS:
+        modifiers |= cef.EVENTFLAG_CAPS_LOCK_ON
+    if key_mod & sdl2.KMOD_NUM:
+        modifiers |= cef.EVENTFLAG_NUM_LOCK_ON
+    if repeat:
+        modifiers |= cef.EVENTFLAG_IS_REPEAT
+    return modifiers
 
 
 def send_key_event(browser, event_type, keycode, character,
-                   native_keycode=0):
-    """Send a key event with no modifier keys to the browser."""
+                   native_keycode=0, modifiers=cef.EVENTFLAG_NONE):
+    """Send a key event to the browser."""
     browser.SendKeyEvent({
         "type": event_type,
         "windows_key_code": keycode,
         "native_key_code": native_keycode,
         "character": character,
         "unmodified_character": character,
-        "modifiers": cef.EVENTFLAG_NONE
+        "modifiers": modifiers
     })
 
 
@@ -476,6 +569,7 @@ class BrowserWindow(object):
 
     def __init__(self, browser, title, renderer_flags):
         self.browser = browser
+        self.key_modifiers = cef.EVENTFLAG_NONE
         self.window = sdl2.SDL_CreateWindow(
             title,
             sdl2.SDL_WINDOWPOS_UNDEFINED,

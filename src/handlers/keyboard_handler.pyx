@@ -29,6 +29,7 @@ EVENTFLAG_NUM_LOCK_ON = cef_types.EVENTFLAG_NUM_LOCK_ON
 EVENTFLAG_IS_KEY_PAD = cef_types.EVENTFLAG_IS_KEY_PAD
 EVENTFLAG_IS_LEFT = cef_types.EVENTFLAG_IS_LEFT
 EVENTFLAG_IS_RIGHT = cef_types.EVENTFLAG_IS_RIGHT
+EVENTFLAG_IS_REPEAT = cef_types.EVENTFLAG_IS_REPEAT
 
 cdef dict CefToPyKeyEvent(const cef_types.CefKeyEvent& cefKeyEvent):
     pyKeyEvent = {
