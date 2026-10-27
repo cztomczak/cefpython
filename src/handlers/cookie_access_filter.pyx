@@ -20,7 +20,6 @@ cdef public cpp_bool CookieAccessFilter_CanSendCookie(
     cdef object callback
     cdef py_bool retval
     try:
-        Debug("CookieAccessFilter_CanSendCookie")
         # This callback runs on the IO thread, where CefFrame::GetBrowser()
         # may return NULL (observed for cross-origin subresource requests). CEF
         # also documents browser/frame as optional ("may be NULL for requests

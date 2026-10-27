@@ -464,8 +464,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     global g_debug
     if "--debug" in sys.argv:
         application_settings["debug"] = True
-        application_settings["log_file"] = os.path.join(os.getcwd(),
-                                                        "debug.log")
+        g_commandLineSwitches["enable-logging"] = "stderr"
         application_settings["log_severity"] = LOGSEVERITY_INFO
         sys.argv.remove("--debug")
     if "debug" in application_settings:
@@ -586,6 +585,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     if not application_settings["cache_path"]:
         g_commandLineSwitches["disable-gpu-shader-disk-cache"] = ""
 
+    application_settings["log_file"] = os.path.abspath(
+            application_settings.get("log_file") or "debug.log")
+
     IF UNAME_SYSNAME == "Linux":
         # Apply Linux default command-line switches. setdefault lets an app
         # override either by passing it explicitly to cef.Initialize(switches=).
@@ -615,6 +617,8 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         # cefpython disables the sandbox on Linux, as it always has.  setdefault
         # leaves an explicit caller-provided value untouched.
         g_commandLineSwitches.setdefault("no-sandbox", "")
+        g_commandLineSwitches.setdefault("log-file",
+                                         application_settings["log_file"])
 
     cdef CefRefPtr[CefApp] cefApp = <CefRefPtr[CefApp]?>new CefPythonApp()
 

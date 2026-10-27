@@ -264,12 +264,9 @@ In previous versions of cefpython, this option was set by overwriting module's g
 ### log_file
 
 (string)
-The directory and file name to use for the debug log. If empty a default
-log file name and location will be used. On Windows and Linux a "debug.log"
-file will be written in the main executable directory. On Mac OS X a
-"~/Library/Logs/<app name>_debug.log" file will be written where <app name>
-is the name of the main app executable. Also configurable using the
-"log-file" command-line switch.
+The directory and file name to use for the debug log. If empty, a
+"debug.log" file in the current working directory is used. Also
+configurable using the "log-file" command-line switch.
 
 
 ### log_severity

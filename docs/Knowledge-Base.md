@@ -50,14 +50,16 @@ following format if using e.g. cefpython v57.0: `cefpython3 == 57.0`.
 You can pass "--debug" command line flag to any of CEF Python
 examples and unit tests. It will also work with your app, as
 this feature is enabled in CEF Python's core. When this flag is
-passed the following settings will be set:
+passed the following settings and switches will be set:
 ```python
 settings = {
     "debug": True,
     "log_severity": cef.LOGSEVERITY_INFO,
-    "log_file": "debug.log",
 }
-cef.Initialize(settings=settings)
+switches = {
+    "enable-logging": "stderr",
+}
+cef.Initialize(settings=settings, switches=switches)
 ```
 
 Now you should see debug information displayed in console like this:
