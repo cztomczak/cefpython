@@ -365,9 +365,6 @@ def build_cef_projects():
     """Build cefclient, cefsimple, ceftests, libcef_dll_wrapper."""
     print("[automate.py] Build cef projects...")
 
-    if WINDOWS:
-        fix_cmake_variables_permanently_windows()
-
     # Find cef_binary directory.
     # Might already be set if --prebuilt-cef flag was passed.
     if not Options.cef_binary:
@@ -395,7 +392,7 @@ def build_cef_projects():
 
     # Set build directory
     build_cefclient_dir = os.path.join(Options.cef_binary,
-                                       "build_cefclient")
+                                       "build_tests")
     cefclient_exe = os.path.join(build_cefclient_dir, "tests", "cefclient",
                                  Options.build_type,
                                  "cefclient" + APP_EXT)
@@ -408,10 +405,10 @@ def build_cef_projects():
         # Last build failed, clean directory
         assert build_cefclient_dir
         shutil.rmtree(build_cefclient_dir)
-        print("[automate.py] Create build_cefclient/ dir in cef_binary*/ dir")
+        print("[automate.py] Create build_tests/ dir in cef_binary*/ dir")
         os.makedirs(build_cefclient_dir)
     else:
-        print("[automate.py] Create build_cefclient/ dir in cef_binary*/ dir")
+        print("[automate.py] Create build_tests/ dir in cef_binary*/ dir")
         os.makedirs(build_cefclient_dir)
 
     # Build cefclient, cefsimple, ceftests
@@ -423,8 +420,8 @@ def build_cef_projects():
         command = prepare_build_command()
         command.extend(["cmake", "-G", "Ninja"])
         command.append("-DCMAKE_BUILD_TYPE="+Options.build_type)
-        if MAC:
-            command.append("-DPROJECT_ARCH=x86_64")
+        if WINDOWS:
+            command.append("-DCMAKE_MSVC_RUNTIME_LIBRARY=")
         if LINUX:
             # GCC 13+ added -Wself-move; suppress it so the CEF binary
             # distribution (built for an older toolchain) compiles on Ubuntu 24.04.
@@ -481,13 +478,13 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
     # Command to build libcef_dll_wrapper
     cmake_wrapper = prepare_build_command()
     cmake_wrapper.extend(["cmake", "-G", "Ninja",
-                         "-DCMAKE_BUILD_TYPE="+Options.build_type, ".."])
+                         "-DCMAKE_BUILD_TYPE="+Options.build_type,
+                         "-DCMAKE_MSVC_RUNTIME_LIBRARY=", ".."])
 
     # Build directory and library path
     build_wrapper_dir = os.path.join(
             Options.cef_binary,
-            "build_wrapper_{runtime_library}_VS{msvs}"
-            .format(runtime_library=runtime_library, msvs=msvs))
+            "build_{runtime_library}".format(runtime_library=runtime_library))
     wrapper_lib = os.path.join(build_wrapper_dir, "libcef_dll_wrapper",
                                "libcef_dll_wrapper{ext}".format(ext=LIB_EXT))
 
@@ -531,35 +528,6 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
         run_command(ninja_wrapper, working_dir=build_wrapper_dir)
         print("[automate.py] ninja OK")
         assert os.path.exists(wrapper_lib)
-
-
-def fix_cmake_variables_permanently_windows():
-    """Changes to cef_variables.cmake are made permanently, there is no undo.
-    """
-    # To get rid of these warnings:
-    # > cl : Command line warning D9025 : overriding '/GR' with '/GR-'
-    # > cl : Command line warning D9025 : overriding '/W3' with '/W4'
-    # > cl : Command line warning D9025 : overriding '/MD' with '/MT'
-    cmake_variables = os.path.join(Options.cef_binary, "cmake",
-                                   "cef_variables.cmake")
-    with open(cmake_variables, "rb") as fp:
-        contents = fp.read().decode("utf-8")
-    set1 = 'set(CMAKE_CXX_FLAGS_RELEASE "")'
-    set2 = 'set(CMAKE_CXX_FLAGS "")'
-    if "if(OS_WINDOWS)" not in contents:
-        print("[automate.py] WARNING: failed to fix cmake variables"
-              " permanently on Windows")
-        return
-    if set1 not in contents or set2 not in contents:
-        contents = contents.replace("if(OS_WINDOWS)",
-                                    "if(OS_WINDOWS)\n  {set1}\n  {set2}"
-                                    .format(set1=set1, set2=set2))
-    else:
-        return
-    with open(cmake_variables, "wb") as fp:
-        print("[automate.py] Fix permanently: {filename}"
-              .format(filename=os.path.basename(cmake_variables)))
-        fp.write(contents.encode("utf-8"))
 
 
 def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
@@ -708,7 +676,7 @@ def create_prebuilt_binaries():
     # cefclient
     cefclient = os.path.join(
             src,
-            "build_cefclient", "tests", "cefclient",
+            "build_tests", "tests", "cefclient",
             Options.build_type,
             "cefclient" + APP_EXT)
     if not MAC:
@@ -717,7 +685,7 @@ def create_prebuilt_binaries():
         # On Windows resources/*.html files are embedded inside exe
         cefclient_files = os.path.join(
                 src,
-                "build_cefclient", "tests", "cefclient",
+                "build_tests", "tests", "cefclient",
                 Options.build_type,
                 "cefclient_files")
         cpdir(cefclient_files, os.path.join(bindir, "cefclient_files"))
@@ -725,7 +693,7 @@ def create_prebuilt_binaries():
     # cefsimple
     cefsimple = os.path.join(
             src,
-            "build_cefclient", "tests", "cefsimple",
+            "build_tests", "tests", "cefsimple",
             Options.build_type,
             "cefsimple" + APP_EXT)
     if not MAC:
@@ -734,7 +702,7 @@ def create_prebuilt_binaries():
     # ceftests
     ceftests = os.path.join(
             src,
-            "build_cefclient", "tests", "ceftests",
+            "build_tests", "tests", "ceftests",
             Options.build_type,
             "ceftests" + APP_EXT)
     if not MAC:
@@ -743,7 +711,7 @@ def create_prebuilt_binaries():
         # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
                 src,
-                "build_cefclient", "tests", "ceftests",
+                "build_tests", "tests", "ceftests",
                 Options.build_type,
                 "ceftests_files")
         cpdir(ceftests_files, os.path.join(bindir, "ceftests_files"))
@@ -776,13 +744,13 @@ def create_prebuilt_binaries():
             os.makedirs(vs_subdir)
             # MT library
             libsrc = os.path.join(
-                    src, "build_wrapper_MT_VS{msvs}".format(msvs=msvs),
+                    src, "build_MT",
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MT.lib")
             shutil.copy(libsrc, libdst)
             # MD library
             libsrc = os.path.join(
-                    src, "build_wrapper_MD_VS{msvs}".format(msvs=msvs),
+                    src, "build_MD",
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MD.lib")
             shutil.copy(libsrc, libdst)
@@ -794,7 +762,7 @@ def create_prebuilt_binaries():
         # cefclient builds libcef_dll_wrapper by default and this version
         # is good for cefpython on Linux. On Windows and Mac
         # libcef_dll_wrapper is built seprately.
-        shutil.copy(os.path.join(src, "build_cefclient", "libcef_dll_wrapper",
+        shutil.copy(os.path.join(src, "build_tests", "libcef_dll_wrapper",
                                  "libcef_dll_wrapper.a"),
                     libdir)
 
@@ -921,7 +889,7 @@ def run_git(command_line, working_dir):
 def run_automate_git():
     """Run CEF automate-git.py using Python 2.7."""
     script = os.path.join(Options.cefpython_dir, "tools", "automate-git.py")
-    """
+    r"""
     Example automate-git.py command:
         C:\chromium>call python automate-git.py --download-dir=./test/
         --branch=2526 --no-debug-build --verbose-build --with-pgo-profiles
