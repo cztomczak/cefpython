@@ -89,6 +89,7 @@ def main():
     main_window.show()
     main_window.activateWindow()
     main_window.raise_()
+    main_window.cef_widget.embedBrowser()
     app.exec()
     if not cef.GetAppSetting("external_message_pump"):
         app.stopTimer()
@@ -106,6 +107,13 @@ def check_versions():
           qt_version=qVersion()))
     # CEF Python version requirement
     assert int(cef.__version__.split(".")[0]) >= 55, "CEF Python v55.4+ required to run this"
+
+
+def round_half_up(value):
+    # Qt rounds halves up when it sizes a native window, e.g. 862.5 -> 863.
+    # Python's round() rounds halves to even (862.5 -> 862), so it can't be
+    # used to match the window size.
+    return int(value + 0.5)
 
 
 class MainWindow(QMainWindow):
@@ -141,9 +149,6 @@ class MainWindow(QMainWindow):
         frame.setLayout(layout)
         self.setCentralWidget(frame)
 
-        # Browser can be embedded only after layout was set up
-        self.cef_widget.embedBrowser()
-
     def closeEvent(self, event):
         # Don't destroy the window while the browser is still open.
         # CloseBrowser() is asynchronous. CEF calls DoClose() and, if it
@@ -171,8 +176,6 @@ class CefWidget(QWidget):
         super(CefWidget, self).__init__(parent)
         self.parent = parent
         self.browser = None
-        self.x = 0
-        self.y = 0
         self.show()
 
     def focusInEvent(self, event):
@@ -194,56 +197,51 @@ class CefWidget(QWidget):
             self.browser.SetFocus(False)
 
     def embedBrowser(self):
+        # Call this after the main window was shown, when the layout has
+        # sized this widget and its native window. Embedding earlier leaves
+        # the browser at its initial size on Windows (Issue #718).
         # CEF is parented directly into the native Qt widget window via
         # WindowInfo.SetAsChild().
+        width, height = self.browserSize()
         window_info = cef.WindowInfo()
-        rect = [0, 0, self._phys(self.width()), self._phys(self.height())]
-        window_info.SetAsChild(self.getHandle(), rect)
+        window_info.SetAsChild(self.getHandle(), [0, 0, width, height])
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         if self.browser:
             self.browser.SetClientHandler(LoadHandler(self.parent.navigation_bar))
             self.browser.SetClientHandler(FocusHandler(self))
             self.browser.SetClientHandler(CloseHandler(self.parent))
-        if WINDOWS:
-            # Sync browser size to actual HWND client rect using device pixels.
-            # PyQt6 high-DPI scaling means self.width()/height() may be smaller
-            # than the real client rect, leaving content in a smaller area.
-            WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
 
-    def _phys(self, n):
-        # Qt6 enables AA_EnableHighDpiScaling by default, so width()/height()
-        # return logical pixels.  CEF expects physical pixels.  Multiply by
-        # devicePixelRatio() on Linux.
-        if LINUX:
-            return int(n * self.devicePixelRatio())
-        return n
+    def browserSize(self):
+        # Size of this widget in the units CEF expects for the browser:
+        # points on Mac, physical pixels on Windows and Linux.
+        if MAC:
+            return self.width(), self.height()
+        ratio = self.devicePixelRatio()
+        return (round_half_up(self.width() * ratio),
+                round_half_up(self.height() * ratio))
 
     def getHandle(self):
         return int(self.winId())
 
     def moveEvent(self, _):
-        self.x = 0
-        self.y = 0
-        if self.browser:
-            if WINDOWS:
-                WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
-            elif LINUX:
-                self.browser.SetBounds(self.x, self.y,
-                                       self._phys(self.width()),
-                                       self._phys(self.height()))
-            self.browser.NotifyMoveOrResizeStarted()
+        self.updateBrowserSize()
 
-    def resizeEvent(self, event):
-        size = event.size()
-        if self.browser:
-            if WINDOWS:
-                WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
-            elif LINUX:
-                self.browser.SetBounds(self.x, self.y,
-                                       self._phys(size.width()),
-                                       self._phys(size.height()))
-            self.browser.NotifyMoveOrResizeStarted()
+    def resizeEvent(self, _):
+        self.updateBrowserSize()
+
+    def updateBrowserSize(self):
+        # Make the browser fill the native window of this widget
+        if not self.browser:
+            return
+        if WINDOWS:
+            # SetBounds() is Linux only. OnSize() resizes the browser to
+            # the client area of the native window.
+            WindowUtils.OnSize(self.getHandle(), 0, 0, 0)
+        elif LINUX:
+            width, height = self.browserSize()
+            self.browser.SetBounds(0, 0, width, height)
+        self.browser.NotifyMoveOrResizeStarted()
 
 
 class CefApplication(QApplication):
