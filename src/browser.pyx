@@ -578,9 +578,6 @@ cdef class PyBrowser:
 
     cpdef py_void ShowDevTools(self):
         cdef CefWindowInfo window_info
-        IF UNAME_SYSNAME == "Windows":
-            window_info.SetAsPopup(<CefWindowHandle>self.GetWindowHandle(),
-                                   PyToCefStringValue("DevTools"))
         cdef CefBrowserSettings settings
         cdef CefPoint inspect_element_at
         self.GetCefBrowserHost().get().ShowDevTools(
