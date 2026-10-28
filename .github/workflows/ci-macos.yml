@@ -18,7 +18,7 @@ on:
 
 jobs:
   download-cef:
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 15
     outputs:
       cef_version: ${{ steps.cef-version.outputs.value }}
@@ -57,7 +57,7 @@ jobs:
 
   build:
     needs: download-cef
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 90
     strategy:
       fail-fast: false
