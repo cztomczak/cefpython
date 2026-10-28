@@ -44,7 +44,7 @@ IMAGE_EXT = ".png" if tk.TkVersion > 8.5 else ".gif"
 
 
 def main():
-    logger.setLevel(_logging.DEBUG)
+    logger.setLevel(_logging.INFO)
     stream_handler = _logging.StreamHandler()
     formatter = _logging.Formatter("[%(filename)s] %(message)s")
     stream_handler.setFormatter(formatter)
