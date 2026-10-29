@@ -1,8 +1,10 @@
 # Example of embedding CEF Python browser using PyGObject/PyGI (GTK 3).
 #
 # Tested configurations:
-# - GTK 3.18 on Windows (cefpython v53.1+)
-# - GTK 3.10 on Linux (works with cefpython v53.1 and v57.0+)
+# - GTK 3.24 on Windows (cefpython v147, PyGObject 3.58, Python 3.11 and 3.14)
+# - GTK 3.24 on Linux (cefpython v147, PyGObject 3.56, Python 3.14)
+#
+# On Windows PyGObject 3.52+ is required (GIRepository 3.0).
 #
 # Mac crash: This example crashes on Mac with error message:
 #            > _createMenuRef called with existing principal MenuRef..
@@ -18,7 +20,7 @@ import sys
 
 gi.require_version("Gtk", "3.0")
 # noinspection PyUnresolvedReferences
-from gi.repository import Gtk, GLib, Gdk, GdkPixbuf  # noqa
+from gi.repository import Gtk, GLib, GdkPixbuf  # noqa
 
 # Fix for PyCharm hints warnings when using static methods
 WindowUtils = cef.WindowUtils()
@@ -27,6 +29,12 @@ WindowUtils = cef.WindowUtils()
 WINDOWS = (platform.system() == "Windows")
 LINUX = (platform.system() == "Linux")
 MAC = (platform.system() == "Darwin")
+
+# Windows imports
+if WINDOWS:
+    gi.require_version("GIRepository", "3.0")
+    # noinspection PyUnresolvedReferences
+    from gi.repository import GIRepository
 
 # Linux imports
 if LINUX:
@@ -41,7 +49,7 @@ def main():
     print("[gkt3.py] GTK {major}.{minor}".format(
             major=Gtk.get_major_version(),
             minor=Gtk.get_minor_version()))
-    assert int(cef.__version__.split(".")[0]) >= 53, "CEF Python v53.1+ required to run this"
+    assert int(cef.__version__.split(".")[0]) >= 147, "CEF Python v147+ required to run this"
     if not MAC:
         # On Mac exception hook doesn't work and is causing a strange error:
         # > Python[57738:d07] _createMenuRef called with existing principal
@@ -51,6 +59,45 @@ def main():
     app = Gtk3Example()
     SystemExit(app.run(sys.argv))
 
+def get_win32_handle(gdk_window):
+    if gdk_window is None:
+        raise ValueError("Realize the GTK widget before getting its window handle")
+
+    repo = GIRepository.Repository.new()
+    repo.require("Gdk", "3.0", 0)
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.GetModuleHandleW.argtypes = [ctypes.c_wchar_p]
+    kernel32.GetModuleHandleW.restype = ctypes.c_void_p
+    kernel32.GetProcAddress.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+    kernel32.GetProcAddress.restype = ctypes.c_void_p
+
+    address = None
+    for library in repo.get_shared_libraries("Gdk") or []:
+        module = kernel32.GetModuleHandleW(os.path.basename(library))
+        if module:
+            address = kernel32.GetProcAddress(module, b"gdk_win32_window_get_handle")
+            if address:
+                break
+    if not address:
+        raise RuntimeError("Could not find GDK's HWND function")
+
+    capsule = gdk_window.__gpointer__
+    get_name = ctypes.pythonapi.PyCapsule_GetName
+    get_name.argtypes = [ctypes.py_object]
+    get_name.restype = ctypes.c_char_p
+    get_pointer = ctypes.pythonapi.PyCapsule_GetPointer
+    get_pointer.argtypes = [ctypes.py_object, ctypes.c_char_p]
+    get_pointer.restype = ctypes.c_void_p
+
+    window_ptr = get_pointer(capsule, get_name(capsule))
+    if not window_ptr:
+        raise RuntimeError("Could not get the GdkWindow pointer")
+
+    get_handle = ctypes.CFUNCTYPE(ctypes.c_void_p, ctypes.c_void_p)(address)
+    hwnd = get_handle(window_ptr)
+    if not hwnd:
+        raise RuntimeError("GDK returned a null HWND")
+    return int(hwnd)
 
 class Gtk3Example(Gtk.Application):
 
@@ -58,7 +105,8 @@ class Gtk3Example(Gtk.Application):
         super(Gtk3Example, self).__init__(application_id='cefpython.gtk3')
         self.browser = None
         self.window = None
-        self.win32_handle = None
+        self.browser_area = None
+        self.browser_area_handle = None
 
     def run(self, argv):
         GLib.timeout_add(10, self.on_timer)
@@ -69,18 +117,9 @@ class Gtk3Example(Gtk.Application):
 
     def get_handle(self):
         if WINDOWS:
-            Gdk.threads_enter()
-            ctypes.pythonapi.PyCapsule_GetPointer.restype = ctypes.c_void_p
-            ctypes.pythonapi.PyCapsule_GetPointer.argtypes = \
-                [ctypes.py_object]
-            gpointer = ctypes.pythonapi.PyCapsule_GetPointer(
-                    self.window.get_property("window").__gpointer__, None)
-            libgdk = ctypes.CDLL("libgdk-3-0.dll")
-            self.win32_handle = libgdk.gdk_win32_window_get_handle(gpointer)
-            Gdk.threads_leave()
-            return self.win32_handle
+            return get_win32_handle(self.browser_area.get_window())
         elif LINUX:
-            return self.window.get_property("window").get_xid()
+            return self.browser_area.get_window().get_xid()
         elif MAC:
             # TODO: Must call libgdk.gdk_quartz_window_get_nsview(gpointer)
             #       similarly as on Windows.
@@ -103,24 +142,27 @@ class Gtk3Example(Gtk.Application):
         self.window.set_title("GTK 3 example (PyGObject)")
         self.window.set_default_size(800, 600)
         self.window.connect("configure-event", self.on_configure)
-        self.window.connect("size-allocate", self.on_size_allocate)
         self.window.connect("focus-in-event", self.on_focus_in)
         self.window.connect("delete-event", self.on_window_close)
+        # Embed the browser in a child widget, not in the window itself.
+        # GTK may draw the title bar inside the window, and the browser
+        # would cover it.
+        self.browser_area = Gtk.DrawingArea()
+        self.window.add(self.browser_area)
+        self.browser_area.connect("size-allocate", self.on_size_allocate)
         self.add_window(self.window)
         self.setup_icon()
 
     def on_activate(self, *_):
-        self.window.realize()
+        self.browser_area.realize()
         self.embed_browser()
         self.window.show_all()
-        # Must set size of the window again after it was shown,
-        # otherwise browser occupies only part of the window area.
-        self.window.resize(*self.window.get_default_size())
 
     def embed_browser(self):
+        self.browser_area_handle = self.get_handle()
         window_info = cef.WindowInfo()
         # TODO: on Mac pass rect[x, y, width, height] to SetAsChild
-        window_info.SetAsChild(self.get_handle())
+        window_info.SetAsChild(self.browser_area_handle)
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         self.browser.SetClientHandler(LifespanHandler(self))
@@ -133,7 +175,7 @@ class Gtk3Example(Gtk.Application):
     def on_size_allocate(self, _, data):
         if self.browser:
             if WINDOWS:
-                WindowUtils.OnSize(self.win32_handle, 0, 0, 0)
+                WindowUtils.OnSize(self.browser_area_handle, 0, 0, 0)
             elif LINUX:
                 self.browser.SetBounds(data.x, data.y,
                                        data.width, data.height)
