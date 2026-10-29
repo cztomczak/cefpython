@@ -15,7 +15,7 @@ Table of contents:
   * [SetStatusText](#setstatustext)
   * [GetMimeType](#getmimetype)
   * [SetMimeType](#setmimetype)
-  * [GetHeader](#getheader)
+  * [GetHeaderByName](#getheaderbyname)
   * [GetHeaderMap](#getheadermap)
   * [GetHeaderMultimap](#getheadermultimap)
   * [SetHeaderMap](#setheadermap)
@@ -91,7 +91,7 @@ Get the response mime type.
 Set the response mime type.
 
 
-### GetHeader
+### GetHeaderByName
 
 | Parameter | Type |
 | --- | --- |

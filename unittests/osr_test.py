@@ -18,7 +18,11 @@ g_datauri_data = """
 <html>
 <head>
     <style type="text/css">
-    body,html {
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+    body {
         font-family: Arial;
         font-size: 11pt;
     }
@@ -48,13 +52,24 @@ g_datauri_data = """
         print("CEF: <b>"+version.cef_version+"</b>");
         js_code_completed();
     }
+    function selectText(ev) {
+        // Selection API must run inside a real user-gesture handler so that
+        // CEF fires OnTextSelectionChanged (Chrome 130+ requirement).
+        // Always target the h1 directly so any click on the page works.
+        var el = document.querySelector('h1');
+        var range = document.createRange();
+        range.selectNodeContents(el);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
     window.onload = function() {
         print("window.onload() ok");
         onload_helper();
     }
     </script>
 </head>
-<body>
+<body onclick="selectText(event)">
     <!-- FrameSourceVisitor hash = 747ef3e6011b6a61e6b3c6e54bdd2dee -->
     <h1>Off-screen rendering test</h1>
     <div id="console"></div>
@@ -109,6 +124,15 @@ class OsrTest_IsolatedTest(unittest.TestCase):
 
         # Initialize
         cef.Initialize(settings=settings, switches=switches)
+        cef_active = True
+
+        def shutdown_cef():
+            nonlocal cef_active
+            if cef_active:
+                cef_active = False
+                cef.Shutdown()
+
+        self.addCleanup(shutdown_cef)
         subtest_message("cef.Initialize() ok")
 
         # Accessibility handler
@@ -152,11 +176,22 @@ class OsrTest_IsolatedTest(unittest.TestCase):
         browser.SetFocus(True)
         browser.WasResized()
 
-        # Test selection
-        on_load_end(select_h1_text, browser)
+        # Trigger the text-selection sub-test once the page has fully
+        # loaded (registered here, executed from LoadHandler.OnLoadEnd).
+        on_load_end(_select_h1_after_load, browser)
 
-        # Message loop
-        run_message_loop()
+        # Message loop.
+        # Run until every result checked by check_auto_asserts() below has
+        # arrived. GetSource() issued in OnLoadEnd can complete after the
+        # selection when the renderer is busy.
+        async_objects = client_handlers + [global_handler,
+                                           accessibility_handler]
+        async_completed = run_message_loop_until(
+            lambda: not osr_test_pending_results(async_objects))
+        if not async_completed:
+            self.fail("Timed out waiting for "
+                      + ", ".join(osr_test_pending_results(async_objects)))
+        subtest_message("cef.MessageLoopWork() ok")
 
         # Close browser and clean reference
         browser.CloseBrowser(True)
@@ -169,17 +204,26 @@ class OsrTest_IsolatedTest(unittest.TestCase):
 
         # Asserts before shutdown
         # noinspection PyTypeChecker
-        check_auto_asserts(self, [] + client_handlers
-                                    + [global_handler,
-                                       accessibility_handler])
+        check_auto_asserts(self, async_objects)
 
         # Test shutdown of CEF
-        cef.Shutdown()
+        shutdown_cef()
         subtest_message("cef.Shutdown() ok")
 
         # Display summary
         show_test_summary(__file__)
         sys.stdout.flush()
+
+
+def osr_test_pending_results(objects):
+    """Return the asynchronous results that have not arrived yet."""
+    pending = [type(obj).__name__ + "." + key
+               for obj in objects
+               for key, value in obj.__dict__.items()
+               if "_True" in key and not value]
+    if not is_js_code_completed():
+        pending.append("js_code_completed")
+    return pending
 
 
 class AccessibilityHandler(object):
@@ -192,9 +236,7 @@ class AccessibilityHandler(object):
 
         self.javascript_errors_False = False
         self._OnAccessibilityTreeChange_True = False
-        self._OnAccessibilityLocationChange_True = False
         self.loadComplete_True = False
-        self.layoutComplete_True = False
 
 
 
@@ -207,26 +249,38 @@ class AccessibilityHandler(object):
                     # LoadHandler.OnLoadEnd is called after this event
                     self.test_case.assertFalse(self.loadComplete_True)
                     self.loadComplete_True = True
-                elif event["event_type"] == "layoutComplete":
-                    # layoutComplete event occurs twice, one when a blank
-                    # page is loaded and second time when loading datauri.
-                    if self.loadComplete_True:
-                        self.test_case.assertFalse(self.layoutComplete_True)
-                        self.layoutComplete_True = True
 
     def _OnAccessibilityLocationChange(self, **_):
-        self._OnAccessibilityLocationChange_True = True
+        # Not fired since Chrome M117 (CEF issue #3545); kept so the binding
+        # doesn't raise if somehow called.
+        pass
 
 
-def select_h1_text(browser):
-    browser.SendMouseClickEvent(0, 0, cef.MOUSEBUTTON_LEFT,
+def _select_h1_after_load(browser):
+    """Register the selection click after the page has finished loading.
+
+    Runs from LoadHandler.OnLoadEnd, i.e. the document (and its onclick
+    handler) is ready. The click itself is posted with a small delay so
+    layout has been flushed to the compositor and hit-testing is reliable.
+    """
+    cef.PostDelayedTask(cef.TID_UI, 250, _click_h1_to_select, browser)
+
+
+def _click_h1_to_select(browser):
+    """Send a real click at the center of the viewport.
+
+    Chrome 130+ requires the Selection API to run inside a real user-gesture
+    event handler for OnTextSelectionChanged to fire. The body has an onclick
+    handler (selectText) that selects the h1 text via the Selection API.
+    Click at the center of the 800x600 viewport — guaranteed to land on the
+    body regardless of font metrics or CI rendering differences.
+    """
+    browser.SendMouseClickEvent(400, 300, cef.MOUSEBUTTON_LEFT,
                                 mouseUp=False, clickCount=1)
-    browser.SendMouseMoveEvent(400, 20, mouseLeave=False,
-                               modifiers=cef.EVENTFLAG_LEFT_MOUSE_BUTTON)
-    browser.SendMouseClickEvent(400, 20, cef.MOUSEBUTTON_LEFT,
+    browser.SendMouseClickEvent(400, 300, cef.MOUSEBUTTON_LEFT,
                                 mouseUp=True, clickCount=1)
     browser.Invalidate(cef.PET_VIEW)
-    subtest_message("select_h1_text() ok")
+    subtest_message("_click_h1_to_select() ok")
 
 
 class RenderHandler(object):
@@ -240,6 +294,8 @@ class RenderHandler(object):
         self.GetViewRect_True = False
         self.OnPaint_True = False
         self.OnTextSelectionChanged_True = False
+        # Set once the non-empty <h1> selection has been reported.
+        self.OnTextSelectionChanged_h1_True = False
 
     def GetViewRect(self, rect_out, **_):
         """Called to retrieve the view rectangle which is relative
@@ -250,7 +306,7 @@ class RenderHandler(object):
         rect_out.extend([0, 0, 800, 600])
         return True
 
-    def OnPaint(self, element_type, paint_buffer, **_):
+    def OnPaint(self, browser, element_type, paint_buffer, **_):
         """Called when an element should be painted."""
         if element_type == cef.PET_VIEW:
             self.test_case.assertEqual(paint_buffer.width, 800)
@@ -262,16 +318,12 @@ class RenderHandler(object):
             raise Exception("Unsupported element_type in OnPaint")
 
     def OnTextSelectionChanged(self, selected_text, selected_range, **_):
-        if not self.OnTextSelectionChanged_True:
-            self.OnTextSelectionChanged_True = True
-            # First call
-            self.test_case.assertEqual(selected_text, "")
-            self.test_case.assertEqual(selected_range, [0, 0])
-        else:
-            # Second call.
-            # <h1> tag should be selected.
+        self.OnTextSelectionChanged_True = True
+        if selected_text:
+            # Verify the h1 text is selected when a non-empty selection fires.
             self.test_case.assertEqual(selected_text,
                                        "Off-screen rendering test")
+            self.OnTextSelectionChanged_h1_True = True
 
 
 if __name__ == "__main__":

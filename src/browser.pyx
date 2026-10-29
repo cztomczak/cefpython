@@ -178,7 +178,7 @@ cpdef PyBrowser GetBrowserByIdentifier(int identifier):
     return None
 
 cdef public void PyBrowser_ShowDevTools(CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        ) noexcept with gil:
     # Called from ClientHandler::OnContextMenuCommand
     cdef PyBrowser pyBrowser
     try:
@@ -247,8 +247,8 @@ cdef class PyBrowser:
             #       cefpython.SetGlobalClientCallback().
             self.allowedClientCallbacks += ["OnBeforeResourceLoad",
                     "OnResourceRedirect", "GetAuthCredentials",
-                    "OnQuotaRequest", "OnProtocolExecution",
-                    "GetResourceHandler", "OnBeforeBrowse", 
+                    "OnProtocolExecution", "GetResourceHandler",
+                    "OnBeforeBrowse",
                     "OnRendererProcessTerminated",
                     "CanSendCookie", "CanSaveCookie"]
             # RequestContextHandler
@@ -264,7 +264,6 @@ cdef class PyBrowser:
             # RenderHandler
             self.allowedClientCallbacks += ["GetRootScreenRect",
                     "GetViewRect", "GetScreenPoint", "GetScreenInfo",
-                    "GetScreenRect",
                     "OnPopupShow", "OnPopupSize", "OnPaint", "OnCursorChange",
                     "OnScrollOffsetChanged",
                     "StartDragging", "UpdateDragCursor",
@@ -313,7 +312,7 @@ cdef class PyBrowser:
 
     cpdef py_void SetJavascriptBindings(self, JavascriptBindings bindings):
         self.javascriptBindings = bindings
-        self.javascriptBindings.Rebind()
+        self.javascriptBindings.RebindBrowser(self)
 
     cpdef JavascriptBindings GetJavascriptBindings(self):
         return self.javascriptBindings
@@ -579,9 +578,6 @@ cdef class PyBrowser:
 
     cpdef py_void ShowDevTools(self):
         cdef CefWindowInfo window_info
-        IF UNAME_SYSNAME == "Windows":
-            window_info.SetAsPopup(<CefWindowHandle>self.GetWindowHandle(),
-                                   PyToCefStringValue("DevTools"))
         cdef CefBrowserSettings settings
         cdef CefPoint inspect_element_at
         self.GetCefBrowserHost().get().ShowDevTools(

@@ -12,7 +12,6 @@ from cefpython3 import cefpython as cef
 import platform
 import sys
 import os
-from pkg_resources import parse_version
 
 # Platforms
 WINDOWS = (platform.system() == "Windows")
@@ -63,7 +62,7 @@ def check_versions():
             ver=platform.python_version(), arch=platform.architecture()[0]))
     print("[wxpython.py] wxPython {ver}".format(ver=wx.version()))
     # CEF Python version requirement
-    assert parse_version(cef.__version__) >= parse_version("66.0"), "CEF Python v66.0+ required to run this"
+    assert int(cef.__version__.split(".")[0]) >= 66, "CEF Python v66.0+ required to run this"
 
 
 def scale_window_size_for_high_dpi(width, height):
@@ -135,6 +134,15 @@ class MainFrame(wx.Frame):
             NSApp.windows()[0].contentView().setWantsLayer_(True)
 
         if LINUX:
+            # Put the frame on the X server's default visual before it is
+            # realized (shown), otherwise the browser stays blank with
+            # GTK 3 (Issue #701).
+            if "gtk3" in wx.PlatformInfo:
+                widget = self.GetGtkWidget()
+                set_visual = cef.WindowUtils.SetX11DefaultVisualForGtkWidget
+                if not widget or not set_visual(int(widget)):
+                    raise RuntimeError("Could not set the GTK window's"
+                                       " X11 visual")
             # On Linux must show before embedding browser, so that handle
             # is available (Issue #347).
             self.Show()
@@ -175,6 +183,7 @@ class MainFrame(wx.Frame):
         self.browser = cef.CreateBrowserSync(window_info,
                                              url="https://www.google.com/")
         self.browser.SetClientHandler(FocusHandler())
+        self.browser.SetClientHandler(LifespanHandler(self))
 
     def OnSetFocus(self, _):
         if not self.browser:
@@ -193,16 +202,17 @@ class MainFrame(wx.Frame):
         elif LINUX:
             (x, y) = (0, 0)
             (width, height) = self.browser_panel.GetSize().Get()
+            self.browser.NotifyMoveOrResizeStarted()
             self.browser.SetBounds(x, y, width, height)
+            return
         self.browser.NotifyMoveOrResizeStarted()
 
     def OnClose(self, event):
         print("[wxpython.py] OnClose called")
-        if not self.browser:
-            # May already be closing, may be called multiple times on Mac
-            return
-
         if MAC:
+            if not self.browser:
+                # May already be closing, may be called multiple times on Mac
+                return
             # On Mac things work differently, other steps are required
             self.browser.CloseBrowser()
             self.clear_browser_references()
@@ -215,13 +225,16 @@ class MainFrame(wx.Frame):
                 # Call _exit otherwise app exits with code 255 (Issue #162).
                 # noinspection PyProtectedMember
                 os._exit(0)
-        else:
-            # Calling browser.CloseBrowser() and/or self.Destroy()
-            # in OnClose may cause app crash on some paltforms in
-            # some use cases, details in Issue #107.
-            self.browser.ParentWindowWillClose()
-            event.Skip()
-            self.clear_browser_references()
+            return
+        # Close the browser before the window, as CEF requires (see
+        # LifespanHandler.DoClose). TryCloseBrowser() starts closing it and
+        # returns False until the window may close. CEF then sends another
+        # close request, except on Linux, where LifespanHandler.OnBeforeClose
+        # closes the window.
+        if self.browser and not self.browser.TryCloseBrowser():
+            event.Veto()
+            return
+        event.Skip()
 
     def clear_browser_references(self):
         # Clear browser references that you keep anywhere in your
@@ -236,6 +249,21 @@ class FocusHandler(object):
             print("[wxpython.py] FocusHandler.OnGotFocus:"
                   " keyboard focus fix (Issue #284)")
             browser.SetFocus(True)
+
+
+class LifespanHandler(object):
+    def __init__(self, frame):
+        self.frame = frame
+
+    def OnBeforeClose(self, browser, **_):
+        # Popups inherit this handler from the main browser
+        if browser.IsPopup():
+            return
+        self.frame.clear_browser_references()
+        if LINUX:
+            # CEF on Linux sends its close message to its own window, not
+            # to the frame, so close the frame here (see MainFrame.OnClose)
+            self.frame.Close()
 
 
 class CefApp(wx.App):

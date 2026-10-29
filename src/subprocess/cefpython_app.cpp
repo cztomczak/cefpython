@@ -115,9 +115,9 @@ void CefPythonApp::OnBeforeCommandLineProcessing(
     //
     // When compiling under Python 2.7 (VS2008) using Visual C++ for
     // Python, it seems you can't use WINSDK 7 header files even though
-    // WINVER was specified in build_cpp_projects.py macros. Thus calling
-    // using proc address. Specifying full path to Shell32.dll is not
-    // required, in Chromium's source code full paths are not used.
+    // WINVER was specified. Thus calling using proc address. Specifying
+    // full path to Shell32.dll is not required, in Chromium's source code
+    // full paths are not used.
     //
     // Note:
     //   subprocess.exe is built with UNICODE defined, however the
@@ -237,10 +237,16 @@ void CefPythonApp::OnWebKitInitialized() {
 }
 
 void CefPythonApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDictionaryValue> extra_info) {
+    browserViewCount_[browser->GetIdentifier()]++;
 }
 
 void CefPythonApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser) {
     LOG(INFO) << "[Renderer process] OnBrowserDestroyed()";
+    int browserId = browser->GetIdentifier();
+    if (--browserViewCount_[browserId] > 0) {
+        return;
+    }
+    browserViewCount_.erase(browserId);
     RemoveJavascriptBindings(browser);
 }
 
@@ -248,6 +254,12 @@ void CefPythonApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefV8Context> context) {
     LOG(INFO) << "[Renderer process] OnContextCreated()";
+    CefRefPtr<CefV8Context> frameContext = frame->GetV8Context();
+    if (!frameContext.get() || !frameContext->IsSame(context)) {
+        LOG(INFO) << "[Renderer process] OnContextCreated(): not the frame's"
+                     " V8 context (e.g. DevTools), skipping";
+        return;
+    }
     CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(
             "OnContextCreated");
     CefRefPtr<CefListValue> arguments = message->GetArgumentList();
@@ -261,12 +273,12 @@ void CefPythonApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
         // process messaging delay. The code seems to be executed
         // only for iframes.
         if (frame->IsMain()) {
-            DoJavascriptBindingsForFrame(browser, frame, context);
+            DoJavascriptBindingsForFrame(browser, frame, context, false);
         } else {
             if (jsBindings->HasKey("bindToFrames")
                     && jsBindings->GetType("bindToFrames") == VTYPE_BOOL
                     && jsBindings->GetBool("bindToFrames")) {
-                DoJavascriptBindingsForFrame(browser, frame, context);
+                DoJavascriptBindingsForFrame(browser, frame, context, false);
             }
         }
     }
@@ -289,6 +301,12 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
     // when this is not the main frame? It could fail, so
     // it is more reliable to always use the main browser.
     frame->SendProcessMessage(PID_BROWSER, message);
+    AppliedJavascriptBindingsMap::iterator applied =
+            appliedJavascriptBindings_.find(frame->GetIdentifier());
+    if (applied != appliedJavascriptBindings_.end()
+            && applied->second.first->IsSame(context)) {
+        appliedJavascriptBindings_.erase(applied);
+    }
     // ------------------------------------------------------------------------
     // 2. Remove python callbacks for a frame.
     // ------------------------------------------------------------------------
@@ -324,13 +342,14 @@ bool CefPythonApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
     LOG(INFO) << logMessage.c_str();
     CefRefPtr<CefListValue> args = message->GetArgumentList();
     if (messageName == "DoJavascriptBindings") {
-        if (args->GetSize() == 1
+        if (args->GetSize() == 2
                 && args->GetType(0) == VTYPE_DICTIONARY
-                && args->GetDictionary(0)->IsValid()) {
+                && args->GetDictionary(0)->IsValid()
+                && args->GetType(1) == VTYPE_BOOL) {
             // Is it necessary to make a copy? It won't harm.
             SetJavascriptBindings(browser,
                     args->GetDictionary(0)->Copy(false));
-            DoJavascriptBindingsForBrowser(browser);
+            DoJavascriptBindingsForBrowser(browser, args->GetBool(1));
         } else {
             LOG(ERROR) << "[Renderer process] OnProcessMessageReceived():"
                           " invalid arguments,"
@@ -428,7 +447,7 @@ bool CefPythonApp::BindedFunctionExists(CefRefPtr<CefBrowser> browser,
 }
 
 void CefPythonApp::DoJavascriptBindingsForBrowser(
-                        CefRefPtr<CefBrowser> browser) {
+                        CefRefPtr<CefBrowser> browser, bool force) {
     // get frame
     // get context
     // if bindToFrames is true loop through all frames,
@@ -496,18 +515,37 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
             continue;
         }
         CefRefPtr<CefV8Context> context = frame->GetV8Context();
-        CefRefPtr<CefTaskRunner> taskRunner = context->GetTaskRunner();
-        taskRunner->PostTask(
-            CefCreateClosureTask(
-                base::BindOnce(
-                    &CefPythonApp::DoJavascriptBindingsForFrame, this,
-                    browser, frame, context)));
+        if (!context.get() || !context->IsValid()) {
+            // No valid context yet; OnContextCreated will register globals
+            // directly once the context exists and bindings are set.
+            LOG(INFO) << "[Renderer process] DoJavascriptBindingsForBrowser():"
+                         " V8 context not available yet, deferring bindings"
+                         " to OnContextCreated";
+            continue;
+        }
+        if (!CefV8Context::InContext()) {
+            // We are on the renderer thread but outside any V8 execution.
+            // Register globals synchronously so they are available before
+            // any queued ExecuteJavascript IPC messages run their JS.
+            DoJavascriptBindingsForFrame(browser, frame, context, force);
+        } else {
+            // Already inside a V8 execution (nested pump); post a task.
+            CefRefPtr<CefTaskRunner> taskRunner = context->GetTaskRunner();
+            if (taskRunner.get()) {
+                taskRunner->PostTask(
+                    CefCreateClosureTask(
+                        base::BindOnce(
+                            &CefPythonApp::DoJavascriptBindingsForFrame, this,
+                            browser, frame, context, force)));
+            }
+        }
     }
 }
 
 void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                         CefRefPtr<CefFrame> frame,
-                        CefRefPtr<CefV8Context> context) {
+                        CefRefPtr<CefV8Context> context,
+                        bool force) {
     LOG(INFO) << "[Renderer process] in DoJavascriptBindingsForFrame()";
     CefRefPtr<CefDictionaryValue> jsBindings = GetJavascriptBindings(browser);
     if (!jsBindings.get()) {
@@ -528,6 +566,16 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
             && jsBindings->GetType("bindToFrames") == VTYPE_BOOL)) {
         LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
                       " invalid data [1]";
+        return;
+    }
+    CefString frameId = frame->GetIdentifier();
+    AppliedJavascriptBindingsMap::iterator applied =
+            appliedJavascriptBindings_.find(frameId);
+    if (!force && applied != appliedJavascriptBindings_.end()
+            && applied->second.first->IsSame(context)
+            && applied->second.second->IsEqual(jsBindings)) {
+        LOG(INFO) << "[Renderer process] DoJavascriptBindingsForFrame():"
+                     " same bindings already set for this context";
         return;
     }
 
@@ -650,6 +698,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         }
     }
     // END.
+    appliedJavascriptBindings_[frameId] = std::make_pair(context, jsBindings);
     if (didEnterContext)
         context->Exit();
 }

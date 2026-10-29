@@ -150,13 +150,22 @@ class TestRunner(object):
             for testcase in suite:
                 testcase_id = testcase.id()
                 break
-            # Run test using new instance of Python interpreter
+            # Run test using new instance of Python interpreter.
+            # Timeout guards against CEF shutdown hangs blocking CI forever.
+            ISOLATED_TEST_TIMEOUT = 120  # seconds
             try:
                 output = subprocess.check_output(
                         [sys.executable, "_test_runner.py", testcase_id,
                          CUSTOM_CMDLINE_ARG],
-                        stderr=subprocess.STDOUT)
+                        stderr=subprocess.STDOUT,
+                        timeout=ISOLATED_TEST_TIMEOUT)
                 exit_code = 0
+            except subprocess.TimeoutExpired as exc:
+                output = (exc.output or b"") + (
+                        "\n[_test_runner.py] ERROR: isolated test timed out"
+                        " after {sec}s\n".format(sec=ISOLATED_TEST_TIMEOUT)
+                        .encode("utf-8"))
+                exit_code = 1
             except subprocess.CalledProcessError as exc:
                 output = exc.output
                 exit_code = exc.returncode

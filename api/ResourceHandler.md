@@ -19,8 +19,6 @@ Table of contents:
   * [ProcessRequest](#processrequest)
   * [GetResponseHeaders](#getresponseheaders)
   * [ReadResponse](#readresponse)
-  * [CanGetCookie](#cangetcookie)
-  * [CanSetCookie](#cansetcookie)
   * [Cancel](#cancel)
 
 
@@ -77,29 +75,6 @@ Read response data. If data is available immediately copy up to
 bytes copied, and return true. To read the data at a later time set
 |bytes_read_out| to 0, return true and call `callback.Continue()` when the
 data is available. To indicate response completion return false.
-
-
-### CanGetCookie
-
-| Parameter | Type |
-| --- | --- |
-| cookie | [Cookie](Cookie.md) |
-| __Return__ | bool |
-
-Return true if the specified cookie can be sent with the request or false
-otherwise. If false is returned for any cookie then no cookies will be sent
-with the request.
-
-
-### CanSetCookie
-
-| Parameter | Type |
-| --- | --- |
-| cookie | [Cookie](Cookie.md) |
-| __Return__ | bool |
-
-Return true if the specified cookie returned with the response can be set
-or false otherwise.
 
 
 ### Cancel

@@ -4,6 +4,13 @@
 
 include "compile_time_constants.pxi"
 
+IF UNAME_SYSNAME == "Windows":
+    from cef_win cimport CefWindowHandle, CefWindowInfo
+ELIF UNAME_SYSNAME == "Linux":
+    from cef_linux cimport CefWindowHandle, CefWindowInfo
+ELIF UNAME_SYSNAME == "Darwin":
+    from cef_mac cimport CefWindowHandle, CefWindowInfo
+
 from cef_ptr cimport CefRefPtr
 from cef_string cimport CefString
 from cef_client cimport CefClient
@@ -19,13 +26,6 @@ from cef_types cimport CefMouseEvent
 from cef_request_context cimport CefRequestContext
 
 from cef_process_message cimport CefProcessMessage, CefProcessId
-
-IF UNAME_SYSNAME == "Windows":
-    from cef_win cimport CefWindowHandle, CefWindowInfo
-ELIF UNAME_SYSNAME == "Linux":
-    from cef_linux cimport CefWindowHandle, CefWindowInfo
-ELIF UNAME_SYSNAME == "Darwin":
-    from cef_mac cimport CefWindowHandle, CefWindowInfo
 
 cdef extern from "include/cef_browser.h":
 

@@ -25,7 +25,6 @@ Table of contents:
   * [ExecuteFunction](#executefunction)
   * [ExecuteJavascript](#executejavascript)
   * [GetBrowser](#getbrowser)
-  * [GetParent](#getparent)
   * [GetIdentifier](#getidentifier)
   * [GetBrowserIdentifier](#getbrowseridentifier)
   * [GetName](#getname)
@@ -36,7 +35,6 @@ Table of contents:
   * [IsFocused](#isfocused)
   * [IsMain](#ismain)
   * [IsValid](#isvalid)
-  * [LoadString](#loadstring)
   * [LoadUrl](#loadurl)
   * [Paste](#paste)
   * [Redo](#redo)
@@ -105,15 +103,6 @@ Execute a string of JavaScript code in this frame. The sciptUrl parameter is the
 | __Return__ | [Browser](Browser.md) |
 
 Returns the browser that this frame belongs to.
-
-
-### GetParent
-
-| | |
-| --- | --- |
-| __Return__ | [Frame](Frame.md) |
-
-Returns the parent of this frame or None if this is the main (top-level) frame.
 
 
 ### GetIdentifier
@@ -213,32 +202,6 @@ Returns true if this is the main (top-level) frame.
 True if this object is currently attached to a valid frame.
 
 
-### LoadString
-
-| Parameter | Type |
-| --- | --- |
-| value | string |
-| url | string |
-| __Return__ | void |
-
-NOTE: LoadString is problematic due to the multi-process model and the need
-to create a render process (which does not happen with LoadString). It is
-best to use instead LoadUrl with a data uri, e.g. `LoadUrl("data:text/html,some+html+code+here")`.
-Take also a look at a [custom resource handler](ResourceHandler.md).
-
-Load the contents of |value| with the specified dummy |url|. |url|
-should have a standard scheme (for example, http scheme) or behaviors like
-link clicks and web security restrictions may not behave as expected.
-LoadString() can be called only after the Renderer process has been created.
-
-If the url is a local path it needs to start with the `file://` prefix.
-If the url contains special characters it may need proper handling.
-Starting with v66.1+ it is required for the app code to encode the url
-properly. You can use the `pathlib.PurePath.as_uri` in Python 3
-or `urllib.pathname2url` in Python 2 (`urllib.request.pathname2url`
-in Python 3) depending on your case.
-
-
 ### LoadUrl
 
 | Parameter | Type |
@@ -246,7 +209,9 @@ in Python 3) depending on your case.
 | url | string |
 | __Return__ | void |
 
-Load the specified |url|.
+Load the specified |url|. To load HTML content directly use a data URI,
+e.g. `LoadUrl("data:text/html,some+html+code+here")`. See also
+[ResourceHandler](ResourceHandler.md) for a custom resource handler approach.
 
 
 ### Paste

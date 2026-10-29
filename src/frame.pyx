@@ -28,8 +28,25 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 
     cdef PyFrame pyFrame
     cdef CefString frameId = cefFrame.get().GetIdentifier()
-    cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
-    assert (not frameId.empty() and browserId), "frameId or browserId empty"
+    cdef CefRefPtr[CefBrowser] cefBrowser = cefFrame.get().GetBrowser()
+    if not cefBrowser.get():
+        # CefFrame::GetBrowser() may return NULL when called off the UI thread.
+        # CEF documents browser/frame as optional for the IO-thread request
+        # callbacks (cef_resource_request_handler.h: may be NULL for requests
+        # originating from service workers or CefURLRequest, or not associated
+        # with a live frame). Raising here prevents a SIGSEGV from the naked
+        # .get().GetIdentifier() chain that was previously here. Callers that
+        # can legitimately hit this (e.g. the cookie access filter) guard for
+        # it and fall back before calling GetPyFrame.
+        raise Exception("GetPyFrame(): CefBrowser is NULL"
+                        " (CefFrame.GetBrowser() unavailable off the UI thread?)")
+    cdef int browserId = cefBrowser.get().GetIdentifier()
+    if not browserId:
+        raise Exception("GetPyFrame(): browserId is 0 (browser not yet initialised)")
+    # frameId may be empty for internal frames that CEF creates before the
+    # underlying renderer frame is ready (e.g. the PDF-viewer internal frame
+    # on the first OnLoadStart).  The code below already creates an incomplete
+    # PyFrame for this case, so do not assert here.
     cdef str uniqueFrameId = GetUniqueFrameId(browserId, CefToPyString(frameId))
 
     if frameId.empty():
@@ -103,7 +120,7 @@ cdef void RemovePyFramesForBrowser(int browserId) except *:
     cdef object uniqueFrameId
     cdef PyFrame pyFrame
     global g_pyFrames
-    for uniqueFrameId, pyFrame in g_pyFrames.iteritems():
+    for uniqueFrameId, pyFrame in g_pyFrames.items():
         if pyFrame.GetBrowserIdentifier() == browserId:
             toRemove.append(uniqueFrameId)
     for uniqueFrameId in toRemove:

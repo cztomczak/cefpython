@@ -24,7 +24,7 @@ except ImportError:
 
 # Constants
 CEFPYTHON_MIN_VERSION = "57.0"
-PYINSTALLER_MIN_VERSION = "3.2.1"
+PYINSTALLER_MIN_VERSION = "6.0"
 
 # Makes assumption that using "python.exe" and not "pyinstaller.exe"
 # TODO: use this code to work cross-platform:
@@ -34,6 +34,14 @@ PYINSTALLER_MIN_VERSION = "3.2.1"
 CEFPYTHON3_DIR = get_package_paths("cefpython3")[1]
 
 CYTHON_MODULE_EXT = ".pyd" if is_win else ".so"
+
+MAC_HELPER_APP_NAMES = [
+    "cefpython Helper.app",
+    "cefpython Helper (Alerts).app",
+    "cefpython Helper (GPU).app",
+    "cefpython Helper (Plugin).app",
+    "cefpython Helper (Renderer).app",
+]
 
 # Globals
 logger = logging.getLogger(__name__)
@@ -54,7 +62,9 @@ def check_pyinstaller_version():
     # > 3.3.dev0+g5dc9557c
     version = PyInstaller.__version__
     match = re.search(r"^\d+\.\d+(\.\d+)?", version)
-    if not (match.group(0) >= PYINSTALLER_MIN_VERSION):
+    parsed = tuple(int(part) for part in match.group(0).split("."))
+    minimum = tuple(int(part) for part in PYINSTALLER_MIN_VERSION.split("."))
+    if parsed < minimum:
         raise SystemExit("Error: pyinstaller %s or higher is required"
                          % PYINSTALLER_MIN_VERSION)
 
@@ -71,7 +81,7 @@ def get_cefpython_modules():
     'cefpython_py27'. """
     pyds = glob.glob(os.path.join(CEFPYTHON3_DIR,
                                   "cefpython_py*" + CYTHON_MODULE_EXT))
-    assert len(pyds) > 1, "Missing cefpython3 Cython modules"
+    assert pyds, "Missing cefpython3 Cython module"
     modules = []
     for path in pyds:
         filename = os.path.basename(path)
@@ -98,6 +108,43 @@ def get_excluded_cefpython_modules():
     return excluded
 
 
+def get_macos_framework_binaries():
+    """Return the CEF framework Mach-O files with bundle-relative targets."""
+    framework_name = "Chromium Embedded Framework.framework"
+    framework_path = os.path.join(CEFPYTHON3_DIR, framework_name)
+    main_binary = os.path.join(
+        framework_path, "Chromium Embedded Framework")
+    assert os.path.isfile(main_binary), \
+        "CEF framework binary not found: {}".format(main_binary)
+
+    ret = [(main_binary, framework_name)]
+    libraries_path = os.path.join(framework_path, "Libraries")
+    assert os.path.isdir(libraries_path), \
+        "CEF framework Libraries directory not found: {}".format(
+            libraries_path)
+    for filename in sorted(os.listdir(libraries_path)):
+        if os.path.splitext(filename)[1] not in (".dylib", ".so"):
+            continue
+        source = os.path.join(libraries_path, filename)
+        if os.path.isfile(source):
+            ret.append((source, os.path.join(framework_name, "Libraries")))
+    return ret
+
+
+def get_macos_helper_binaries():
+    """Return all helper Mach-O files with their bundle-relative targets."""
+    ret = []
+    for app_name in MAC_HELPER_APP_NAMES:
+        executable_name = os.path.splitext(app_name)[0]
+        executable = os.path.join(
+            CEFPYTHON3_DIR, app_name, "Contents", "MacOS", executable_name)
+        assert os.path.isfile(executable), \
+            "Missing CEF helper executable: {}".format(executable)
+        destination = os.path.join(app_name, "Contents", "MacOS")
+        ret.append((executable, destination))
+    return ret
+
+
 def get_cefpython3_datas():
     """Returning almost all of cefpython binaries as DATAS (see exception
     below), because pyinstaller does strange things and fails if these are
@@ -116,51 +163,86 @@ def get_cefpython3_datas():
     as pyinstaller would fail to find binary depdendencies on
     these files.
 
-    One exception is subprocess (subprocess.exe on Windows) executable
-    file, which is passed to pyinstaller as BINARIES in order to collect
-    its dependecies.
+    The subprocess executable on Windows/Linux and the five helper executables
+    inside macOS app bundles are passed to PyInstaller as BINARIES so it can
+    collect dependencies and preserve executable handling.
 
     DATAS are in format: tuple(full_path, dest_subdir).
     """
     ret = list()
 
-    if is_win:
+    if is_win or is_darwin:
         cefdatadir = "."
-    elif is_darwin or is_linux:
-        cefdatadir = "."
+    elif is_linux:
+        # PyInstaller collects libcef.so into the cefpython3/ package
+        # directory and CEF looks for its resources (icudtl.dat, .pak files,
+        # locales) next to libcef.so, so keep them all together there.
+        cefdatadir = "cefpython3"
     else:
         assert False, "Unsupported system {}".format(platform.system())
 
     # Binaries, licenses and readmes in the cefpython3/ directory
     for filename in os.listdir(CEFPYTHON3_DIR):
-        # Ignore Cython modules which are already handled by
-        # pyinstaller automatically.
+        # Ignore Cython modules, these are collected via hiddenimports.
         if filename[:-len(CYTHON_MODULE_EXT)] in get_cefpython_modules():
             continue
 
         # CEF binaries and datas
         extension = os.path.splitext(filename)[1]
+        # The .json and versioned .so files are required by SwiftShader
+        # (vk_swiftshader_icd.json and libvulkan.so.1).
         if extension in \
-            [".exe", ".dll", ".pak", ".dat", ".bin", ".txt", ".so", ".plist"] \
+            [".exe", ".dll", ".pak", ".dat", ".bin", ".txt", ".so", ".plist",
+             ".json"] \
+                or re.search(r"\.so\.\d+$", filename) \
                 or filename.lower().startswith("license"):
             logger.info("Include cefpython3 data: {}".format(filename))
             ret.append((os.path.join(CEFPYTHON3_DIR, filename), cefdatadir))
 
     if is_darwin:
-        # "Chromium Embedded Framework.framework/Resources" with subdirectories
-        # is required. Contain .pak files and locales (each locale in separate
-        # subdirectory).
-        resources_subdir = \
-            os.path.join("Chromium Embedded Framework.framework", "Resources")
-        base_path = os.path.join(CEFPYTHON3_DIR, resources_subdir)
-        assert os.path.exists(base_path), \
-            "{} dir not found in cefpython3".format(resources_subdir)
-        for path, dirs, files in os.walk(base_path):
-            for file in files:
-                absolute_file_path = os.path.join(path, file)
+        # Preserve all non-Mach-O framework files. In addition to Resources,
+        # CEF 147 has runtime-loaded files under Libraries (for example the
+        # Vulkan ICD JSON), so dependency analysis of the main binary alone is
+        # insufficient. Framework Mach-O files are collected as BINARIES.
+        framework_name = "Chromium Embedded Framework.framework"
+        framework_path = os.path.join(CEFPYTHON3_DIR, framework_name)
+        framework_binaries = {
+            os.path.normpath(source)
+            for source, _ in get_macos_framework_binaries()
+        }
+        for path, dirs, files in os.walk(framework_path):
+            dirs[:] = [name for name in dirs if name != "_CodeSignature"]
+            for filename in files:
+                absolute_file_path = os.path.join(path, filename)
+                if os.path.normpath(absolute_file_path) in framework_binaries:
+                    continue
                 dest_path = os.path.relpath(path, CEFPYTHON3_DIR)
                 ret.append((absolute_file_path, dest_path))
-                logger.info("Include cefpython3 data: {}".format(dest_path))
+                logger.info("Include cefpython3 data: {}/{}".format(
+                    dest_path, filename))
+
+        # Preserve the complete helper bundle structure. The Mach-O in each
+        # Contents/MacOS directory is collected separately as a BINARY below;
+        # Info.plist and any other bundle resources remain DATA files at their
+        # original relative paths. Source signatures are omitted because
+        # PyInstaller mutates/re-signs collected Mach-O files.
+        for app_name in MAC_HELPER_APP_NAMES:
+            app_path = os.path.join(CEFPYTHON3_DIR, app_name)
+            assert os.path.isdir(app_path), \
+                "{} not found in cefpython3".format(app_name)
+            executable = os.path.join(
+                app_path, "Contents", "MacOS",
+                os.path.splitext(app_name)[0])
+            for path, dirs, files in os.walk(app_path):
+                dirs[:] = [name for name in dirs if name != "_CodeSignature"]
+                for filename in files:
+                    absolute_file_path = os.path.join(path, filename)
+                    if absolute_file_path == executable:
+                        continue
+                    dest_path = os.path.relpath(path, CEFPYTHON3_DIR)
+                    ret.append((absolute_file_path, dest_path))
+                    logger.info("Include cefpython3 data: {}/{}".format(
+                        dest_path, filename))
     elif is_win or is_linux:
         # The .pak files in cefpython3/locales/ directory
         locales_dir = os.path.join(CEFPYTHON3_DIR, "locales")
@@ -218,6 +300,9 @@ hiddenimports = [
     "urllib",
     "weakref",
 ]
+# cefpython3/__init__.py imports the Cython module using importlib,
+# which PyInstaller cannot detect.
+hiddenimports.append("cefpython3.cefpython_py%d%d" % sys.version_info[:2])
 if is_py2:
     hiddenimports += [
         "urlparse",
@@ -226,9 +311,11 @@ if is_py2:
 # Excluded modules
 excludedimports = get_excluded_cefpython_modules()
 
-# Include binaries requiring to collect its dependencies
-if is_darwin or is_linux:
-    binaries = [(os.path.join(CEFPYTHON3_DIR, "subprocess"), ".")]
+# Include binaries requiring PyInstaller dependency analysis.
+if is_darwin:
+    binaries = get_macos_framework_binaries() + get_macos_helper_binaries()
+elif is_linux:
+    binaries = [(os.path.join(CEFPYTHON3_DIR, "subprocess"), "cefpython3")]
 elif is_win:
     binaries = [(os.path.join(CEFPYTHON3_DIR, "subprocess.exe"), ".")]
 else:

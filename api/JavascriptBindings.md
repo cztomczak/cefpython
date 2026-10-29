@@ -77,11 +77,11 @@ If `long` value is outside of int32 limits (-2147483647..2147483647) then it wil
 | --- | --- |
 | __Return__ | void |
 
-Call this to rebind javascript bindings. This is useful when using reload() on python's module, you can make changes to application and see it instantly without having to re-launch application. After you reload() module set all the bindings again using SetFunction/SetObject/SetProperty methods, then call Rebind() to rebind it to javascript. See [Issue #12](../issues/12) ([reload_example.zip](http://cefpython.googlecode.com/issues/attachment?aid=120013000&name=reload_example.zip&token=lq-FNXxmXyjmXwFMvwYPLIEW1PY%3A1347648551040)) for an example.
+Call this to force the current JavaScript bindings to be applied again. This is useful after reloading a Python module and updating its bindings with SetFunction(), SetObject() or SetProperty().
 
-There is an another way of doing rebinding, you can call [Frame](Frame.md).SetProperty(), but this is not best performant way as it creates a C++ class V8FunctionHandler for each function, when doing Rebind() there is only one such class created. [Frame](Frame.md).SetProperty() is also more limited, you cannot bind objects using it, though it could be supported, I'm wondering whether there is a need for that, it would allow to pass objects as arguments to javascript callbacks so maybe it will be implemented in the future. Also Rebind() does bindings to frames and popups automatically according to bindToFrames and bindToPopups constructor options, while using [Frame](Frame.md).SetProperty() you would need to take care of that by yourself.
+Rebind() applies the bindings to every browser assigned this exact JavascriptBindings object. If multiple browsers share the object, all of them are affected. Browsers assigned a different JavascriptBindings object are not affected. There is no API to force reapplication to only one browser when the same object is shared by multiple browsers.
 
-Rebind does not solve all scenarios, take for example: what happens if you pass a python callback to javascript and then do rebindings? You still get old function referenced in javascript.
+Rebinding does not remove JavaScript globals that were exposed by an earlier binding set but are no longer present in the current set. It also does not update references to callbacks that JavaScript saved before the rebind; those references continue to point to the old functions.
 
 
 ### SetFunction

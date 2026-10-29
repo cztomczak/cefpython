@@ -41,7 +41,7 @@ class DpiAware:
         #   modern displays have equal horizontal and vertical resolution.
         default_dpix = 96
         scale = MulDiv(dpix, 100, default_dpix)
-        if isinstance(arg, (int, long)):
+        if isinstance(arg, int):
             v = arg
             new_value = MulDiv(v, scale, 100)
             return new_value

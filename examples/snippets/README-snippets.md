@@ -28,6 +28,8 @@ directory. If looking for non-trivial examples then see the
 
 - [cookies.py](cookies.py) - Shows how to fetch all cookies,
     all cookies for a given url and how to delete a specific cookie.
+- [crossdomain_bindings.py](crossdomain_bindings.py) - Javascript
+    bindings across a cross-domain redirect, e.g. an SSO login flow.
 - [javascript_bindings.py](javascript_bindings.py) - Communicate
     between Python and Javascript asynchronously using
     inter-process messaging with the use of Javascript Bindings.

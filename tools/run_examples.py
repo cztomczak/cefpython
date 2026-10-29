@@ -5,30 +5,17 @@
 """
 Run all examples that can be run on current configuration
 and display a summary at the end.
-
-Note on GTK 2 / GTK 3 on Windows:
-    Installing both PyGTK and PyGI on Windows will cause errors.
-    You can install only one of these packages.
 """
 
 from common import *
 
 import importlib
 import os
-import subprocess
 import sys
 
 
 def main():
     os.chdir(EXAMPLES_DIR)
-
-    # When importing Kivy package there can't be any flags unknown to Kivy,
-    # use sys.argv.remove to remove them.
-
-    kivy_flag = False
-    if "--kivy" in sys.argv:
-        sys.argv.remove("--kivy")
-        kivy_flag = True
 
     hello_world_flag = False
     if "--hello-world" in sys.argv:
@@ -51,15 +38,6 @@ def main():
         print("[run_examples.py] PASS: wxpython.py (wxPython not installed)")
         passed.append("wxpython.py")
 
-    # gtk2
-    if packages["gtk"]:
-        examples.append("gtk2.py")
-        if LINUX:
-            examples.append("gtk2.py --message-loop-cef")
-    else:
-        print("[run_examples.py] PASS: gtk2.py (Gtk 2 not installed")
-        passed.append("gtk2.py")
-
     # gtk3
     """
     if LINUX:
@@ -78,32 +56,19 @@ def main():
         print("[run_examples.py] PASS: gtk3.py (Gtk 3 not installed)")
         passed.append("gtk3.py")
 
-    # pyqt4
-    if LINUX:
-        print("[run_examples.py] PASS: qt.py pyqt4 (Issue #452)")
-        passed.append("qt.py pyqt4 (Issue #452)")
-    elif packages["PyQt4"]:
-        examples.append("qt.py pyqt4")
+    # pyqt6
+    if packages["PyQt6"]:
+        examples.append("qt.py pyqt6")
     else:
-        print("[run_examples.py] PASS: qt.py pyqt4 (PyQt4 not installed)")
-        passed.append("qt.py pyqt4")
+        print("[run_examples.py] PASS: qt.py pyqt6 (PyQt6 not installed)")
+        passed.append("qt.py pyqt6")
 
-    # pyqt5
-    if packages["PyQt5"]:
-        examples.append("qt.py pyqt5")
+    # pyside6
+    if packages["PySide6"]:
+        examples.append("qt.py pyside6")
     else:
-        print("[run_examples.py] PASS: qt.py pyqt5 (PyQt5 not installed)")
-        passed.append("qt.py pyqt5")
-
-    # pyside
-    if LINUX:
-        print("[run_examples.py] PASS: qt.py pyside (Issue #452)")
-        passed.append("qt.py pyside (Issue #452)")
-    elif packages["PySide"]:
-        examples.append("qt.py pyside")
-    else:
-        print("[run_examples.py] PASS: qt.py pyside (PySide not installed)")
-        passed.append("qt.py pyside")
+        print("[run_examples.py] PASS: qt.py pyside6 (PySide6 not installed)")
+        passed.append("qt.py pyside6")
 
     # tkinter
     if MAC:
@@ -118,14 +83,6 @@ def main():
     else:
         print(["run_examples.py] PASS: tkinter_.py (tkinter not installed)"])
         passed.append("tkinter_.py")
-
-    if LINUX and packages["kivy"] and packages["gtk"]:
-        # When --kivy flag passed run only Kivy example
-        if kivy_flag:
-            examples = list()
-            passed = list()
-        examples.append("{linux_dir}/binaries_64bit/kivy_.py"
-                        .format(linux_dir=LINUX_DIR))
 
     # When --hello-world flag is passed run only hello_world.py example
     if hello_world_flag:
@@ -178,37 +135,20 @@ def main():
 
 def check_installed_packages():
     packages = {
-        "gtk": False,
-        "kivy": False,
-        "PyQt4": False,
-        "PyQt5": False,
-        "PySide": False,
+        "gi": False,
+        "PyQt6": False,
+        "PySide6": False,
         "tkinter": False,
         "Tkinter": False,
         "wx": False,
     }
     for package in packages:
         try:
-            if package == "PyQt5":
-                # Strange issue on Mac, PyQt5 is an empty built-in module
-                from PyQt5 import QtGui
-            else:
-                importlib.import_module(package)
-                packages[package] = True
+            importlib.import_module(package)
+            packages[package] = True
         except ImportError:
             packages[package] = False
-    packages["gi"] = check_gi_installed()
     return packages
-
-
-def check_gi_installed():
-    # Cannot import both gtk and gi in the same script, thus
-    # need another way of checking if gi package is installed.
-    code = subprocess.call([sys.executable, "-c", "import gi"])
-    if code != 0:
-        print("[run_examples.py] gi module not found (PyGI / GTK 3).")
-        print("                  Import error above can be safely ignored.")
-    return True if code == 0 else False
 
 
 if __name__ == "__main__":
