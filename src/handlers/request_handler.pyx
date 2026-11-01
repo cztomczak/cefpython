@@ -107,18 +107,16 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
     cdef object clientCallback
     cdef py_bool returnValue
     try:
+        # CEF documents browser/frame as optional for the ResourceRequestHandler
+        # callbacks (cef_resource_request_handler.h). Without them, fall back to
+        # CEF's default (continue the request); see api/RequestHandler.md.
+        if not cefBrowser.get() or not cefFrame.get():
+            Debug("OnBeforeResourceLoad: no browser/frame for the request;"
+                  " continuing by default")
+            return False
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
-            return False
-        # CEF documents browser/frame as optional for the ResourceRequestHandler
-        # callbacks -- they may be NULL for requests originating from service
-        # workers or CefURLRequest (cef_resource_request_handler.h:
-        # optional_param=browser,frame). Without a frame we cannot build a
-        # PyFrame, so log and fall back to CEF's default (continue the request).
-        if not cefFrame.get():
-            Debug("OnBeforeResourceLoad: no frame for the request"
-                  " (service worker / CefURLRequest); continuing by default")
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeResourceLoad")
@@ -149,17 +147,15 @@ cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
     cdef object clientCallback
     cdef object returnValue
     try:
+        # See OnBeforeResourceLoad. Without browser/frame, fall back to CEF's
+        # default resource handling.
+        if not cefBrowser.get() or not cefFrame.get():
+            Debug("GetResourceHandler: no browser/frame for the request;"
+                  " using default handling")
+            return <CefRefPtr[CefResourceHandler]>nullptr
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
-            return <CefRefPtr[CefResourceHandler]>nullptr
-        # CEF documents browser/frame as optional for the ResourceRequestHandler
-        # callbacks (NULL for service-worker / CefURLRequest requests;
-        # cef_resource_request_handler.h). Without a frame, fall back to CEF's
-        # default resource handling.
-        if not cefFrame.get():
-            Debug("GetResourceHandler: no frame for the request"
-                  " (service worker / CefURLRequest); using default handling")
             return <CefRefPtr[CefResourceHandler]>nullptr
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetResourceHandler")
@@ -198,17 +194,15 @@ cdef public void RequestHandler_OnResourceRedirect(
     cdef PyResponse pyResponse
     cdef object clientCallback
     try:
+        # See OnBeforeResourceLoad. Without browser/frame, leave the redirect
+        # unchanged.
+        if not cefBrowser.get() or not cefFrame.get():
+            Debug("OnResourceRedirect: no browser/frame for the request;"
+                  " leaving redirect unchanged")
+            return
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
-            return
-        # CEF documents browser/frame as optional for the ResourceRequestHandler
-        # callbacks (NULL for service-worker / CefURLRequest requests;
-        # cef_resource_request_handler.h). Without a frame, leave the redirect
-        # unchanged.
-        if not cefFrame.get():
-            Debug("OnResourceRedirect: no frame for the request"
-                  " (service worker / CefURLRequest); leaving redirect unchanged")
             return
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnResourceRedirect")

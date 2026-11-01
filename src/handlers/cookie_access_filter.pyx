@@ -20,12 +20,12 @@ cdef public cpp_bool CookieAccessFilter_CanSendCookie(
     cdef object callback
     cdef py_bool retval
     try:
-        # CEF may pass no browser/frame for requests from service workers or
-        # CefURLRequest. Allow the cookie then, as CEF does by default; see
-        # the limitation in api/RequestHandler.md.
+        # CEF documents browser/frame as optional
+        # (cef_resource_request_handler.h). Without them, allow the cookie, as
+        # CEF does by default; see api/RequestHandler.md.
         if not cef_browser.get() or not cef_frame.get():
-            Debug("CanSendCookie: no browser/frame for the request"
-                  " (service worker / CefURLRequest); allowing by default")
+            Debug("CanSendCookie: no browser/frame for the request;"
+                  " allowing by default")
             return True
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
@@ -68,8 +68,8 @@ cdef public cpp_bool CookieAccessFilter_CanSaveCookie(
     try:
         # See CanSendCookie above.
         if not cef_browser.get() or not cef_frame.get():
-            Debug("CanSaveCookie: no browser/frame for the request"
-                  " (service worker / CefURLRequest); allowing by default")
+            Debug("CanSaveCookie: no browser/frame for the request;"
+                  " allowing by default")
             return True
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.

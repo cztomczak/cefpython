@@ -16,6 +16,8 @@ cdef public void DisplayHandler_OnAddressChange(
     cdef object callback
     try:
         if not cefFrame.get().GetBrowser().get():
+            Debug("OnAddressChange: frame has no browser (detached during"
+                  " lifecycle transition), skipping")
             return
         pyBrowser = GetPyBrowser(cefBrowser, "OnAddressChange")
         pyFrame = GetPyFrame(cefBrowser, cefFrame)

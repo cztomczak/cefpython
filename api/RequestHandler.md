@@ -15,6 +15,13 @@ and `IsValid()`, raise an exception once cefpython has released the frame,
 which it does when the frame's JavaScript context is released and which can
 happen during the callback.
 
+For requests without a browser or frame (e.g. from service workers or
+`CefURLRequest`), CefPython doesn't call `OnBeforeResourceLoad`,
+`GetResourceHandler`, `OnResourceRedirect`, `CanSendCookie` and
+`CanSaveCookie`. This is a limitation of CefPython's callback dispatch, not of
+CEF. The request then continues with default handling and an unchanged
+redirect, and CefPython doesn't block the cookie.
+
 Related code snippets:
 - [network_cookies.py](../examples/snippets/network_cookies.py)
 
@@ -54,9 +61,8 @@ Table of contents:
 Called on the IO thread before a cookie is sent with a network request.
 Return `True` to allow the cookie or `False` to block it.
 
-Limitation: requests with no associated browser/frame (e.g. service workers and
-`CefURLRequest`) cannot be filtered. The callback is not called for them and the
-cookie is allowed by default, matching CEF's own default.
+Not called for requests without a browser or frame, for which CefPython
+doesn't block the cookie; see the introduction above.
 
 
 ### CanSaveCookie
@@ -73,9 +79,8 @@ cookie is allowed by default, matching CEF's own default.
 Called on the IO thread before a cookie received from a network response is
 saved. Return `True` to allow the cookie or `False` to block it.
 
-Limitation: requests with no associated browser/frame (e.g. service workers and
-`CefURLRequest`) cannot be filtered. The callback is not called for them and the
-cookie is allowed by default, matching CEF's own default.
+Not called for requests without a browser or frame, for which CefPython
+doesn't block the cookie; see the introduction above.
 
 
 ### GetAuthCredentials
