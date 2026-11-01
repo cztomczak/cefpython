@@ -102,7 +102,8 @@ Execute a string of JavaScript code in this frame. The sciptUrl parameter is the
 | --- | --- |
 | __Return__ | [Browser](Browser.md) |
 
-Returns the browser that this frame belongs to.
+Returns the browser that this frame belongs to, also when the frame is no
+longer attached (see IsValid) but the browser was not closed yet.
 
 
 ### GetIdentifier
@@ -141,7 +142,7 @@ Returns the name for this frame. If the frame has an assigned name (for example,
 | --- | --- |
 | __Return__ | [Frame](Frame.md) |
 
-Returns the parent of this frame or None if this is the main (top-level) frame. This method should only be called on the UI thread.
+Returns the parent of this frame or None if this is the main (top-level) frame or the frame is no longer valid (see IsValid).
 
 
 ### GetSource

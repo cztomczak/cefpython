@@ -20,26 +20,18 @@ cdef PyFrame GetPyFrameById(int browserId, py_string frameId):
         return g_pyFrames[uniqueFrameId]
     return None
 
-cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
+cdef PyFrame GetPyFrame(CefRefPtr[CefBrowser] cefBrowser,
+                        CefRefPtr[CefFrame] cefFrame):
+    # cefBrowser must be the browser of cefFrame, which may already be detached.
     global g_pyFrames
 
     if not cefFrame or not cefFrame.get():
         raise Exception("GetPyFrame(): CefFrame reference is NULL")
+    if not cefBrowser or not cefBrowser.get():
+        raise Exception("GetPyFrame(): CefBrowser reference is NULL")
 
     cdef PyFrame pyFrame
     cdef CefString frameId = cefFrame.get().GetIdentifier()
-    cdef CefRefPtr[CefBrowser] cefBrowser = cefFrame.get().GetBrowser()
-    if not cefBrowser.get():
-        # CefFrame::GetBrowser() may return NULL when called off the UI thread.
-        # CEF documents browser/frame as optional for the IO-thread request
-        # callbacks (cef_resource_request_handler.h: may be NULL for requests
-        # originating from service workers or CefURLRequest, or not associated
-        # with a live frame). Raising here prevents a SIGSEGV from the naked
-        # .get().GetIdentifier() chain that was previously here. Callers that
-        # can legitimately hit this (e.g. the cookie access filter) guard for
-        # it and fall back before calling GetPyFrame.
-        raise Exception("GetPyFrame(): CefBrowser is NULL"
-                        " (CefFrame.GetBrowser() unavailable off the UI thread?)")
     cdef int browserId = cefBrowser.get().GetIdentifier()
     if not browserId:
         raise Exception("GetPyFrame(): browserId is 0 (browser not yet initialised)")
@@ -78,11 +70,12 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 
     if uniqueFrameId in g_unreferenced_frames \
             or frameId.empty() \
+            or not cefFrame.get().IsValid() \
             or browserId in g_unreferenced_browsers \
             or browserId in g_closed_browsers:
         # Browser was already globally unreferenced in OnBeforeClose,
         # thus all frames are globally unreferenced too, or frame
-        # was unreferenced in OnContextReleased. Create a new
+        # was unreferenced in OnContextReleased or detached. Create a new
         # incomplete instance of PyFrame object. Read comments in
         # browser.pyx > GetPyBrowser and in Browser.md for what
         # "incomplete" means.
@@ -194,10 +187,27 @@ cdef class PyFrame:
         return self.frameId
 
     cpdef PyFrame GetParent(self):
-        return GetPyFrame(self.GetCefFrame().get().GetParent())
+        cdef CefRefPtr[CefFrame] cefParent
+        if not self.cefFrame.get():
+            return None
+        cefParent = self.cefFrame.get().GetParent()
+        if not cefParent.get():
+            return None
+        return GetPyFrame(self.GetBrowser().GetCefBrowser(), cefParent)
 
     cpdef PyBrowser GetBrowser(self):
-        return GetPyBrowser(self.GetCefFrame().get().GetBrowser())
+        cdef CefRefPtr[CefBrowser] cefBrowser
+        cdef PyBrowser pyBrowser
+        if self.cefFrame.get():
+            cefBrowser = self.cefFrame.get().GetBrowser()
+            if cefBrowser.get():
+                return GetPyBrowser(cefBrowser)
+        # The frame was detached, or its reference was released when its
+        # V8 context was released.
+        pyBrowser = GetPyBrowserById(self.browserId)
+        if pyBrowser is None:
+            raise Exception("Frame.GetBrowser(): browser was closed")
+        return pyBrowser
 
     cpdef int GetBrowserIdentifier(self) except *:
         return self.browserId

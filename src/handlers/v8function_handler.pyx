@@ -24,7 +24,7 @@ cdef public void V8FunctionHandler_Execute(
         pyBrowser = GetPyBrowser(cefBrowser, "V8FunctionHandler_Execute")
         cefFrame = cefBrowser.get().GetFrameByName(frameId)
         if cefFrame.get():
-            pyFrame = GetPyFrame(cefFrame)
+            pyFrame = GetPyFrame(cefBrowser, cefFrame)
         else:
             pyFrame = None
         funcName = CefToPyString(cefFuncName)

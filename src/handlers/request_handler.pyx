@@ -78,7 +78,7 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeBrowse")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
         clientCallback = pyBrowser.GetClientCallback("OnBeforeBrowse")
         if clientCallback:
@@ -114,16 +114,15 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         # CEF documents browser/frame as optional for the ResourceRequestHandler
         # callbacks -- they may be NULL for requests originating from service
         # workers or CefURLRequest (cef_resource_request_handler.h:
-        # optional_param=browser,frame), and CefFrame::GetBrowser() may be NULL
-        # off the UI thread. Without a resolvable browser we cannot build a
+        # optional_param=browser,frame). Without a frame we cannot build a
         # PyFrame, so log and fall back to CEF's default (continue the request).
-        if not cefFrame.get() or not cefFrame.get().GetBrowser().get():
-            Debug("OnBeforeResourceLoad: no resolvable browser for the request"
-                  " (IO-thread / service-worker request); continuing by default")
+        if not cefFrame.get():
+            Debug("OnBeforeResourceLoad: no frame for the request"
+                  " (service worker / CefURLRequest); continuing by default")
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeResourceLoad")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
         clientCallback = pyBrowser.GetClientCallback("OnBeforeResourceLoad")
         if clientCallback:
@@ -156,15 +155,15 @@ cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
             return <CefRefPtr[CefResourceHandler]>nullptr
         # CEF documents browser/frame as optional for the ResourceRequestHandler
         # callbacks (NULL for service-worker / CefURLRequest requests;
-        # cef_resource_request_handler.h). Without a resolvable browser, fall
-        # back to CEF's default resource handling.
-        if not cefFrame.get() or not cefFrame.get().GetBrowser().get():
-            Debug("GetResourceHandler: no resolvable browser for the request"
-                  " (IO-thread / service-worker request); using default handling")
+        # cef_resource_request_handler.h). Without a frame, fall back to CEF's
+        # default resource handling.
+        if not cefFrame.get():
+            Debug("GetResourceHandler: no frame for the request"
+                  " (service worker / CefURLRequest); using default handling")
             return <CefRefPtr[CefResourceHandler]>nullptr
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetResourceHandler")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
         clientCallback = pyBrowser.GetClientCallback("GetResourceHandler")
         if clientCallback:
@@ -205,15 +204,15 @@ cdef public void RequestHandler_OnResourceRedirect(
             return
         # CEF documents browser/frame as optional for the ResourceRequestHandler
         # callbacks (NULL for service-worker / CefURLRequest requests;
-        # cef_resource_request_handler.h). Without a resolvable browser, leave
-        # the redirect unchanged.
-        if not cefFrame.get() or not cefFrame.get().GetBrowser().get():
-            Debug("OnResourceRedirect: no resolvable browser for the request"
-                  " (IO-thread / service-worker request); leaving redirect unchanged")
+        # cef_resource_request_handler.h). Without a frame, leave the redirect
+        # unchanged.
+        if not cefFrame.get():
+            Debug("OnResourceRedirect: no frame for the request"
+                  " (service worker / CefURLRequest); leaving redirect unchanged")
             return
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnResourceRedirect")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         pyOldUrl = CefToPyString(cefOldUrl)
         pyNewUrlOut = [CefToPyString(cefNewUrl)]
         pyRequest = CreatePyRequest(cefRequest)

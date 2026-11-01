@@ -26,16 +26,15 @@ cdef public void V8ContextHandler_OnContextCreated(
         # asynchronous IPC messages sent by the renderer (see note at the top
         # of this file), so a frame from a rapid create -> navigate -> destroy
         # sequence can already be detached by the time we run here, in which
-        # case CefFrame::GetBrowser() returns NULL. There is then no browser to
-        # bind to or dispatch a callback for, so skipping is the correct thing
-        # to do.
+        # case CefFrame::GetBrowser() can return NULL. The context then belongs
+        # to a frame that is no longer attached, so skip it.
         if not cefFrame.get().GetBrowser().get():
             Debug("OnContextCreated: frame has no browser (detached during"
                   " lifecycle transition), skipping")
             return
         pyBrowser = GetPyBrowser(cefBrowser, "OnContextCreated")
         pyBrowser.SetUserData("__v8ContextCreated", True)
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         # Re-send the JS bindings to the renderer. OnContextCreated fires for
         # each new V8 context (page load, navigation, cross-origin navigation
         # under site isolation); a fresh context has none of the previously

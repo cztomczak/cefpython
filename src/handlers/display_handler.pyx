@@ -18,7 +18,7 @@ cdef public void DisplayHandler_OnAddressChange(
         if not cefFrame.get().GetBrowser().get():
             return
         pyBrowser = GetPyBrowser(cefBrowser, "OnAddressChange")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         pyUrl = CefToPyString(cefUrl)
         callback = pyBrowser.GetClientCallback("OnAddressChange")
         if callback:

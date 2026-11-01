@@ -35,15 +35,14 @@ cdef public void LoadHandler_OnLoadStart(
     try:
         # A frame torn down mid-navigation (rapid create -> navigate -> destroy)
         # can already be detached by the time this UI-thread callback runs, in
-        # which case CefFrame::GetBrowser() returns NULL. There is then no
-        # browser to resolve a PyBrowser/PyFrame from and the load event refers
-        # to a frame that no longer exists, so skipping is correct.
+        # which case CefFrame::GetBrowser() can return NULL. The load event then
+        # refers to a frame that is no longer attached, so skip it.
         if not cefFrame.get().GetBrowser().get():
             Debug("OnLoadStart: frame has no browser (detached during"
                   " lifecycle transition), skipping")
             return
         pyBrowser = GetPyBrowser(cefBrowser, "OnLoadStart")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         clientCallback = pyBrowser.GetClientCallback("OnLoadStart")
         if clientCallback:
             clientCallback(browser=pyBrowser, frame=pyFrame)
@@ -60,14 +59,13 @@ cdef public void LoadHandler_OnLoadEnd(
     cdef PyFrame pyFrame
     cdef object clientCallback
     try:
-        # See OnLoadStart: a detached frame yields a NULL CefFrame::GetBrowser()
-        # on the UI thread; nothing to dispatch on, so skip.
+        # See OnLoadStart: skip events of an already detached frame.
         if not cefFrame.get().GetBrowser().get():
             Debug("OnLoadEnd: frame has no browser (detached during"
                   " lifecycle transition), skipping")
             return
         pyBrowser = GetPyBrowser(cefBrowser, "OnLoadEnd")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         clientCallback = pyBrowser.GetClientCallback("OnLoadEnd")
         if clientCallback:
             clientCallback(browser=pyBrowser,
@@ -93,14 +91,13 @@ cdef public void LoadHandler_OnLoadError(
         # the error code will be ERR_ABORTED. In such cases calls
         # to OnLoadError should be ignored and not handled by user
         # scripts. The wxpython example implements such behavior.
-        # See OnLoadStart: a detached frame yields a NULL CefFrame::GetBrowser()
-        # on the UI thread; nothing to dispatch on, so skip.
+        # See OnLoadStart: skip events of an already detached frame.
         if not cefFrame.get().GetBrowser().get():
             Debug("OnLoadError: frame has no browser (detached during"
                   " lifecycle transition), skipping")
             return
         pyBrowser = GetPyBrowser(cefBrowser, "OnLoadError")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         errorTextOut = [CefToPyString(cefErrorText)]
         clientCallback = pyBrowser.GetClientCallback("OnLoadError")
         if clientCallback:

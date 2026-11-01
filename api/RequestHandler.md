@@ -6,6 +6,15 @@
 Implement this interface to handle events related to browser requests.
 The methods of this class will be called on the thread indicated.
 
+The callbacks called on the IO thread may receive a `frame` that is already
+detached or gets detached while the callback runs, e.g. an iframe removed
+while its requests are in progress. `frame.IsValid()` may then return False.
+`frame.GetBrowser()` and `frame.GetParent()` keep working while the browser is
+open. Other frame methods, except `GetIdentifier()`, `GetBrowserIdentifier()`
+and `IsValid()`, raise an exception once cefpython has released the frame,
+which it does when the frame's JavaScript context is released and which can
+happen during the callback.
+
 Related code snippets:
 - [network_cookies.py](../examples/snippets/network_cookies.py)
 
@@ -45,10 +54,9 @@ Table of contents:
 Called on the IO thread before a cookie is sent with a network request.
 Return `True` to allow the cookie or `False` to block it.
 
-Limitation: requests with no associated browser/frame (e.g. service workers,
-`CefURLRequest`, and some cross-origin subresource requests on the IO thread)
-cannot be filtered. The callback is not called for them and the cookie is
-allowed by default, matching CEF's own default.
+Limitation: requests with no associated browser/frame (e.g. service workers and
+`CefURLRequest`) cannot be filtered. The callback is not called for them and the
+cookie is allowed by default, matching CEF's own default.
 
 
 ### CanSaveCookie
@@ -65,10 +73,9 @@ allowed by default, matching CEF's own default.
 Called on the IO thread before a cookie received from a network response is
 saved. Return `True` to allow the cookie or `False` to block it.
 
-Limitation: requests with no associated browser/frame (e.g. service workers,
-`CefURLRequest`, and some cross-origin subresource requests on the IO thread)
-cannot be filtered. The callback is not called for them and the cookie is
-allowed by default, matching CEF's own default.
+Limitation: requests with no associated browser/frame (e.g. service workers and
+`CefURLRequest`) cannot be filtered. The callback is not called for them and the
+cookie is allowed by default, matching CEF's own default.
 
 
 ### GetAuthCredentials
