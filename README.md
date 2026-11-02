@@ -35,31 +35,21 @@ installed around the world. There are numerous use cases for CEF:
 5. Use it for web scraping, as a web crawler or other kind of internet bots
 
 CEF Python also provides examples of embedding CEF for many Python GUI
-frameworks such as PyQt, wxPython, GTK 3 (PyGObject), Tkinter, Kivy, Panda3D,
+frameworks such as PyQt, wxPython, GTK 3, Tkinter, Kivy, Panda3D,
 PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 
 
 ## Install
 
-Command to install with pip:
+CEF Python 147 development wheels are available on [GitHub Releases](https://github.com/cztomczak/cefpython/releases).
 
-```
-pip install cefpython3==66.1
-```
+OS | Python | 64bit | Requirements
+--- | --- | --- | ---
+Windows | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | Windows 10+
+Linux | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | Ubuntu 20.04+, Debian 11+
+macOS | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | macOS 12+ (Apple Silicon/arm64 only)
 
-Hosted at [pypi/cefpython3](https://pypi.python.org/pypi/cefpython3). On Linux pip 8.1+ is required.
-
-You can also download packages for offline installation available on the [GitHub Releases](../../releases) pages.
-
-Below is a table with supported platforms, python versions and architectures.
-
-OS | Python | 32bit | 64bit | Requirements
---- | --- | --- | --- | ---
-Windows | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | Windows 10+
-Linux | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | Ubuntu 20.04+, Debian 11+
-Mac | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | No | Yes | macOS 12+ (Apple Silicon/arm64 only)
-
-Mac wheels are tested in CI only (unit tests and a smoke test of the
+macOS wheels are tested in CI only (unit tests and a smoke test of the
 hello_world.py and tutorial.py examples). GUI examples and PyInstaller
 packaging were not tested on macOS, reports are welcome.
 
