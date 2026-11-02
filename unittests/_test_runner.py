@@ -29,7 +29,9 @@ import platform
 import sys
 from os.path import dirname, realpath
 import re
+import shutil
 import subprocess
+import tempfile
 
 # Command line args
 CUSTOM_CMDLINE_ARG = ""
@@ -153,12 +155,19 @@ class TestRunner(object):
             # Run test using new instance of Python interpreter.
             # Timeout guards against CEF shutdown hangs blocking CI forever.
             ISOLATED_TEST_TIMEOUT = 120  # seconds
+            # Unique root_cache_path, removed after the test process exits,
+            # because on Windows CEF keeps some files in it open until then
+            # (Issue #685).
+            root_cache_path = tempfile.mkdtemp(prefix="cefpython_tests_")
+            env = os.environ.copy()
+            env["CEFPYTHON_TEST_ROOT_CACHE_PATH"] = root_cache_path
             try:
                 output = subprocess.check_output(
                         [sys.executable, "_test_runner.py", testcase_id,
                          CUSTOM_CMDLINE_ARG],
                         stderr=subprocess.STDOUT,
-                        timeout=ISOLATED_TEST_TIMEOUT)
+                        timeout=ISOLATED_TEST_TIMEOUT,
+                        env=env)
                 exit_code = 0
             except subprocess.TimeoutExpired as exc:
                 output = (exc.output or b"") + (
@@ -169,6 +178,8 @@ class TestRunner(object):
             except subprocess.CalledProcessError as exc:
                 output = exc.output
                 exit_code = exc.returncode
+            finally:
+                shutil.rmtree(root_cache_path, ignore_errors=True)
             if type(output) != str:
                 output = output.decode("utf-8", errors="replace")
             # Fetch number of sub-tests ran from output
@@ -183,6 +194,9 @@ class TestRunner(object):
                 self.cefpython_version = match.group(1)
             # Write original output
             sys.stdout.write(output)
+            if os.path.exists(root_cache_path):
+                print("[_test_runner.py] WARNING: could not remove "
+                      + root_cache_path)
             # If tests failed parse output for errors/failures
             if exit_code:
                 if output:

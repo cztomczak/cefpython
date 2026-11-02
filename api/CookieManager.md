@@ -33,10 +33,12 @@ Table of contents:
 | --- | --- |
 | __Return__ | [CookieManager](CookieManager.md) |
 
-Returns the global cookie manager. By default data will be stored at
-[ApplicationSettings](ApplicationSettings.md).cache_path if specified or in memory otherwise.
+Returns the global cookie manager. Cookies with an expiry date are stored
+on disk under
+[ApplicationSettings](ApplicationSettings.md).root_cache_path, see
+[cache_path](ApplicationSettings.md#cache_path).
 
-Description from upstream CEF:
+Description from upstream CEF (the storage description is outdated):
 > Returns the global cookie manager. By default data will be stored at
 > CefSettings.cache_path if specified or in memory otherwise. If |callback|
 > is non-NULL it will be executed asnychronously on the IO thread after the
