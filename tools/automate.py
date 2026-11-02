@@ -365,11 +365,6 @@ def build_cef_projects():
     """Build cefclient, cefsimple, ceftests, libcef_dll_wrapper."""
     print("[automate.py] Build cef projects...")
 
-    if WINDOWS:
-        fix_cmake_variables_permanently_windows()
-
-    fix_cef_include_files()
-
     # Find cef_binary directory.
     # Might already be set if --prebuilt-cef flag was passed.
     if not Options.cef_binary:
@@ -397,7 +392,7 @@ def build_cef_projects():
 
     # Set build directory
     build_cefclient_dir = os.path.join(Options.cef_binary,
-                                       "build_cefclient")
+                                       "build_tests")
     cefclient_exe = os.path.join(build_cefclient_dir, "tests", "cefclient",
                                  Options.build_type,
                                  "cefclient" + APP_EXT)
@@ -410,10 +405,10 @@ def build_cef_projects():
         # Last build failed, clean directory
         assert build_cefclient_dir
         shutil.rmtree(build_cefclient_dir)
-        print("[automate.py] Create build_cefclient/ dir in cef_binary*/ dir")
+        print("[automate.py] Create build_tests/ dir in cef_binary*/ dir")
         os.makedirs(build_cefclient_dir)
     else:
-        print("[automate.py] Create build_cefclient/ dir in cef_binary*/ dir")
+        print("[automate.py] Create build_tests/ dir in cef_binary*/ dir")
         os.makedirs(build_cefclient_dir)
 
     # Build cefclient, cefsimple, ceftests
@@ -425,8 +420,13 @@ def build_cef_projects():
         command = prepare_build_command()
         command.extend(["cmake", "-G", "Ninja"])
         command.append("-DCMAKE_BUILD_TYPE="+Options.build_type)
-        if MAC:
-            command.append("-DPROJECT_ARCH=x86_64")
+        if WINDOWS:
+            command.append("-DCMAKE_MSVC_RUNTIME_LIBRARY=")
+        if LINUX:
+            # GCC 13+ added -Wself-move; suppress it so the CEF binary
+            # distribution (built for an older toolchain) compiles on Ubuntu 24.04.
+            # Safe on older GCC: unrecognised -Wno-xxx flags are ignored.
+            command.append("-DCMAKE_CXX_FLAGS=-Wno-self-move")
         command.append("..")
         run_command(command, build_cefclient_dir)
         print("[automate.py] OK")
@@ -476,15 +476,15 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
     fix_cmake_variables_for_MD_library(try_undo=True)
 
     # Command to build libcef_dll_wrapper
-    cmake_wrapper = prepare_build_command(build_lib=True, vcvars=vcvars)
+    cmake_wrapper = prepare_build_command()
     cmake_wrapper.extend(["cmake", "-G", "Ninja",
-                         "-DCMAKE_BUILD_TYPE="+Options.build_type, ".."])
+                         "-DCMAKE_BUILD_TYPE="+Options.build_type,
+                         "-DCMAKE_MSVC_RUNTIME_LIBRARY=", ".."])
 
     # Build directory and library path
     build_wrapper_dir = os.path.join(
             Options.cef_binary,
-            "build_wrapper_{runtime_library}_VS{msvs}"
-            .format(runtime_library=runtime_library, msvs=msvs))
+            "build_{runtime_library}".format(runtime_library=runtime_library))
     wrapper_lib = os.path.join(build_wrapper_dir, "libcef_dll_wrapper",
                                "libcef_dll_wrapper{ext}".format(ext=LIB_EXT))
 
@@ -515,61 +515,19 @@ def build_wrapper_library_windows(runtime_library, msvs, vcvars):
         Options.gyp_msvs_version = msvs
         if runtime_library == RUNTIME_MD:
             fix_cmake_variables_for_MD_library()
-        env = getenv()
-        if msvs == "2010":
-            # When Using WinSDK 7.1 vcvarsall.bat doesn't work. Use
-            # setuptools.msvc.msvc9_query_vcvarsall to query env vars.
-            from setuptools.msvc import msvc9_query_vcvarsall
-            env.update(msvc9_query_vcvarsall(10.0, arch=VS_PLATFORM_ARG))
-            # On Python 2.7 env values returned by both distutils
-            # and setuptools are unicode, but Python expects env
-            # dict values as strings.
-            for env_key in env:
-                env_value = env[env_key]
-                if type(env_value) != str:
-                    env[env_key] = env_value.encode("utf-8")
-        run_command(cmake_wrapper, working_dir=build_wrapper_dir, env=env)
+        run_command(cmake_wrapper, working_dir=build_wrapper_dir)
         Options.gyp_msvs_version = old_gyp_msvs_version
         if runtime_library == RUNTIME_MD:
             fix_cmake_variables_for_MD_library(undo=True)
         print("[automate.py] cmake OK")
 
         # Run ninja
-        ninja_wrapper = prepare_build_command(build_lib=True, vcvars=vcvars)
+        ninja_wrapper = prepare_build_command()
         ninja_wrapper.extend(["ninja", "-j", Options.ninja_jobs,
                               "libcef_dll_wrapper"])
         run_command(ninja_wrapper, working_dir=build_wrapper_dir)
         print("[automate.py] ninja OK")
         assert os.path.exists(wrapper_lib)
-
-
-def fix_cmake_variables_permanently_windows():
-    """Changes to cef_variables.cmake are made permanently, there is no undo.
-    """
-    # To get rid of these warnings:
-    # > cl : Command line warning D9025 : overriding '/GR' with '/GR-'
-    # > cl : Command line warning D9025 : overriding '/W3' with '/W4'
-    # > cl : Command line warning D9025 : overriding '/MD' with '/MT'
-    cmake_variables = os.path.join(Options.cef_binary, "cmake",
-                                   "cef_variables.cmake")
-    with open(cmake_variables, "rb") as fp:
-        contents = fp.read().decode("utf-8")
-    set1 = 'set(CMAKE_CXX_FLAGS_RELEASE "")'
-    set2 = 'set(CMAKE_CXX_FLAGS "")'
-    if "if(OS_WINDOWS)" not in contents:
-        print("[automate.py] WARNING: failed to fix cmake variables"
-              " permanently on Windows")
-        return
-    if set1 not in contents or set2 not in contents:
-        contents = contents.replace("if(OS_WINDOWS)",
-                                    "if(OS_WINDOWS)\n  {set1}\n  {set2}"
-                                    .format(set1=set1, set2=set2))
-    else:
-        return
-    with open(cmake_variables, "wb") as fp:
-        print("[automate.py] Fix permanently: {filename}"
-              .format(filename=os.path.basename(cmake_variables)))
-        fp.write(contents.encode("utf-8"))
 
 
 def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
@@ -581,7 +539,6 @@ def fix_cmake_variables_for_MD_library(undo=False, try_undo=False):
     # Warnings are treated as errors so this needs to be ignored:
     # >> warning C4275: non dll-interface class 'stdext::exception'
     # >> used as base for dll-interface class 'std::bad_cast'
-    # This warning occurs only in VS2008, in VS2013 not.
     # This replacements must be unique for the undo operation
     # to be reliable.
 
@@ -632,9 +589,10 @@ def build_wrapper_library_mac():
     # On Mac it is required to link libcef_dll_wrapper against
     # libc++ library, so must build this library separately
     # from cefclient.
-    cmake_wrapper = prepare_build_command(build_lib=True)
+    mac_arch = platform.machine()  # "arm64" or "x86_64"
+    cmake_wrapper = prepare_build_command()
     cmake_wrapper.extend(["cmake", "-G", "Ninja",
-                          "-DPROJECT_ARCH=x86_64",
+                          "-DPROJECT_ARCH=" + mac_arch,
                           "-DCMAKE_CXX_FLAGS=-stdlib=libc++",
                           "-DCMAKE_BUILD_TYPE=" + Options.build_type,
                           ".."])
@@ -664,7 +622,7 @@ def build_wrapper_library_mac():
         run_command(cmake_wrapper, build_wrapper_dir)
         print("[automate.py] cmake OK")
         # Ninja
-        ninja_wrapper = prepare_build_command(build_lib=True)
+        ninja_wrapper = prepare_build_command()
         ninja_wrapper.extend(["ninja", "-j", Options.ninja_jobs,
                               "libcef_dll_wrapper"])
         run_command(ninja_wrapper, build_wrapper_dir)
@@ -672,40 +630,12 @@ def build_wrapper_library_mac():
         assert os.path.exists(wrapper_lib)
 
 
-def prepare_build_command(build_lib=False, vcvars=None):
-    """On Windows VS env variables must be set up by calling vcvarsall.bat"""
-    command = list()
+def prepare_build_command():
+    """On Windows VS env variables must be set up by calling vcvarsall.bat."""
+    command = []
     if platform.system() == "Windows":
-        if build_lib:
-            if vcvars:
-                command.append(vcvars)
-            else:
-                command.append(get_vcvars_for_python())
-            command.append(VS_PLATFORM_ARG)
-        else:
-            if int(Options.cef_branch) >= 2704:
-                command.append(VS2015_VCVARS)
-            command.append(VS_PLATFORM_ARG)
-        command.append("&&")
+        command.extend([VCVARS, VS_PLATFORM_ARG, "&&"])
     return command
-
-
-def fix_cef_include_files():
-    """Fixes to CEF include header files for eg. VS2008 on Windows."""
-    # TODO: This was fixed in upstream CEF, remove this code during
-    #       next CEF update on Windows.
-    if platform.system() == "Windows" and get_msvs_for_python() == "2008":
-        print("[automate.py] Fixing CEF include/ files")
-        # cef_types_wrappers.h
-        cef_types_wrappers = os.path.join(Options.cef_binary, "include",
-                                          "internal", "cef_types_wrappers.h")
-        with open(cef_types_wrappers, "rb") as fp:
-            contents = fp.read().decode("utf-8")
-        # error C2059: syntax error : '{'
-        contents = contents.replace("s->range = {0, 0};",
-                                    "s->range.from = 0; s->range.to = 0;")
-        with open(cef_types_wrappers, "wb") as fp:
-            fp.write(contents.encode("utf-8"))
 
 
 def create_prebuilt_binaries():
@@ -746,7 +676,7 @@ def create_prebuilt_binaries():
     # cefclient
     cefclient = os.path.join(
             src,
-            "build_cefclient", "tests", "cefclient",
+            "build_tests", "tests", "cefclient",
             Options.build_type,
             "cefclient" + APP_EXT)
     if not MAC:
@@ -755,7 +685,7 @@ def create_prebuilt_binaries():
         # On Windows resources/*.html files are embedded inside exe
         cefclient_files = os.path.join(
                 src,
-                "build_cefclient", "tests", "cefclient",
+                "build_tests", "tests", "cefclient",
                 Options.build_type,
                 "cefclient_files")
         cpdir(cefclient_files, os.path.join(bindir, "cefclient_files"))
@@ -763,7 +693,7 @@ def create_prebuilt_binaries():
     # cefsimple
     cefsimple = os.path.join(
             src,
-            "build_cefclient", "tests", "cefsimple",
+            "build_tests", "tests", "cefsimple",
             Options.build_type,
             "cefsimple" + APP_EXT)
     if not MAC:
@@ -772,7 +702,7 @@ def create_prebuilt_binaries():
     # ceftests
     ceftests = os.path.join(
             src,
-            "build_cefclient", "tests", "ceftests",
+            "build_tests", "tests", "ceftests",
             Options.build_type,
             "ceftests" + APP_EXT)
     if not MAC:
@@ -781,7 +711,7 @@ def create_prebuilt_binaries():
         # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
                 src,
-                "build_cefclient", "tests", "ceftests",
+                "build_tests", "tests", "ceftests",
                 Options.build_type,
                 "ceftests_files")
         cpdir(ceftests_files, os.path.join(bindir, "ceftests_files"))
@@ -814,13 +744,13 @@ def create_prebuilt_binaries():
             os.makedirs(vs_subdir)
             # MT library
             libsrc = os.path.join(
-                    src, "build_wrapper_MT_VS{msvs}".format(msvs=msvs),
+                    src, "build_MT",
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MT.lib")
             shutil.copy(libsrc, libdst)
             # MD library
             libsrc = os.path.join(
-                    src, "build_wrapper_MD_VS{msvs}".format(msvs=msvs),
+                    src, "build_MD",
                     "libcef_dll_wrapper", "libcef_dll_wrapper.lib")
             libdst = os.path.join(vs_subdir, "libcef_dll_wrapper_MD.lib")
             shutil.copy(libsrc, libdst)
@@ -832,7 +762,7 @@ def create_prebuilt_binaries():
         # cefclient builds libcef_dll_wrapper by default and this version
         # is good for cefpython on Linux. On Windows and Mac
         # libcef_dll_wrapper is built seprately.
-        shutil.copy(os.path.join(src, "build_cefclient", "libcef_dll_wrapper",
+        shutil.copy(os.path.join(src, "build_tests", "libcef_dll_wrapper",
                                  "libcef_dll_wrapper.a"),
                     libdir)
 
@@ -850,6 +780,9 @@ def create_prebuilt_binaries():
     shutil.copy(os.path.join(src, "README.txt"), dst)
     shutil.copy(os.path.join(src, "LICENSE.txt"), dst)
 
+    # Copy the CEF headers, the build compiles against CEF_ROOT/include.
+    cpdir(os.path.join(src, "include"), os.path.join(dst, "include"))
+
     # Copy cef_version.h
     cef_version_file = os.path.join(dst, "cef_version_{os_postfix}.h".format(
                                     os_postfix=OS_POSTFIX))
@@ -860,23 +793,10 @@ def create_prebuilt_binaries():
 
 
 def get_available_python_compilers():
-    all_python_compilers = OrderedDict([
-        ("2015", VS2015_VCVARS),
-    ])
-    ret_compilers = OrderedDict()
-    for msvs in all_python_compilers:
-        vcvars = all_python_compilers[msvs]
-        if os.path.exists(vcvars):
-            ret_compilers[msvs] = vcvars
-        else:
-            print("[automate.py] INFO: Visual Studio compiler not found:"
-                  " {vcvars}".format(vcvars=vcvars))
-    return ret_compilers
-
-
-def get_vcvars_for_python():
-    msvs = get_msvs_for_python()
-    return globals()["VS"+msvs+"_VCVARS"]
+    if not os.path.exists(VCVARS):
+        print("[automate.py] ERROR: vcvarsall.bat not found: {}".format(VCVARS))
+        return OrderedDict()
+    return OrderedDict([("2022", VCVARS)])
 
 
 def getenv():
@@ -969,7 +889,7 @@ def run_git(command_line, working_dir):
 def run_automate_git():
     """Run CEF automate-git.py using Python 2.7."""
     script = os.path.join(Options.cefpython_dir, "tools", "automate-git.py")
-    """
+    r"""
     Example automate-git.py command:
         C:\chromium>call python automate-git.py --download-dir=./test/
         --branch=2526 --no-debug-build --verbose-build --with-pgo-profiles

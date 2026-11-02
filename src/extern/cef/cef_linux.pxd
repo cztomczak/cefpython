@@ -12,7 +12,13 @@ cdef extern from "include/internal/cef_linux.h":
     ctypedef unsigned long CefWindowHandle
     ctypedef unsigned long CefCursorHandle
 
+    ctypedef enum cef_runtime_style_t:
+        CEF_RUNTIME_STYLE_DEFAULT
+        CEF_RUNTIME_STYLE_CHROME
+        CEF_RUNTIME_STYLE_ALLOY
+
     cdef cppclass CefWindowInfo:
+        cef_runtime_style_t runtime_style
         void SetAsChild(CefWindowHandle parent,
                         const CefRect& windowRect)
         void SetAsWindowless(CefWindowHandle parent)

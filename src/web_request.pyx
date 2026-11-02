@@ -125,7 +125,7 @@ cdef public void WebRequestClient_OnUploadProgress(
         CefRefPtr[CefURLRequest] cefWebRequest,
         int64_t current,
         int64_t total
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
     try:
@@ -146,7 +146,7 @@ cdef public void WebRequestClient_OnDownloadProgress(
         CefRefPtr[CefURLRequest] cefWebRequest,
         int64_t current,
         int64_t total
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
     try:
@@ -167,7 +167,7 @@ cdef public void WebRequestClient_OnDownloadData(
         CefRefPtr[CefURLRequest] cefWebRequest,
         const void* data,
         size_t dataLength
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
     try:
@@ -185,7 +185,7 @@ cdef public void WebRequestClient_OnDownloadData(
 cdef public void WebRequestClient_OnRequestComplete(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
     try:

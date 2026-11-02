@@ -8,7 +8,6 @@ Table of contents:
 * [Introduction](#introduction)
 * [Settings](#settings)
   * [Font settings](#font-settings)
-  * [application_cache_disabled](#application_cache_disabled)
   * [background_color](#background_color)
   * [databases_disabled](#databases_disabled)
   * [default_encoding](#default_encoding)
@@ -19,11 +18,10 @@ Table of contents:
   * [javascript_close_windows_disallowed](#javascript_close_windows_disallowed)
   * [javascript_access_clipboard_disallowed](#javascript_access_clipboard_disallowed)
   * [local_storage_disabled](#local_storage_disabled)
-  * [remote_fonts](#remote_fonts)
+  * [remote_fonts_disabled](#remote_fonts_disabled)
   * [shrink_standalone_images_to_fit](#shrink_standalone_images_to_fit)
   * [tab_to_links_disabled](#tab_to_links_disabled)
   * [text_area_resize_disabled](#text_area_resize_disabled)
-  * [universal_access_from_file_urls_allowed](#universal_access_from_file_urls_allowed)
   * [user_style_sheet_location](#user_style_sheet_location)
   * [webgl_disabled](#webgl_disabled)
   * [windowless_frame_rate](#windowless_frame_rate)
@@ -56,11 +54,6 @@ In some cases, the default values of settings that are suggested by its name may
 * minimum_logical_font_size (int)
 
 
-### application_cache_disabled
-
-(bool) Controls whether the application cache can be used. Also configurable using the --disable-application-cache switch.
-
-
 ### background_color
 
 (int)
@@ -80,7 +73,7 @@ in a known order. Equivalent to the `SkColor` type in Chromium.
 
 ### databases_disabled
 
-(bool) Controls whether databases can be used. Also configurable using the --disable-databases switch.
+(bool) Deprecated, has no effect. Chromium removed WebSQL and CEF no longer applies this setting. It is still accepted so that existing code does not raise an exception.
 
 
 ### default_encoding
@@ -137,9 +130,9 @@ switch.
 (bool) Controls whether local storage can be used. Also configurable using the --disable-local-storage switch.
 
 
-### remote_fonts
+### remote_fonts_disabled
 
-(bool) Controls the loading of fonts from remote sources. Also configurable using the --disable-remote-fonts switch.
+(bool) Set to true to disable loading fonts from remote sources. Also configurable using the --disable-remote-fonts switch.
 
 
 ### shrink_standalone_images_to_fit

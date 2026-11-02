@@ -15,6 +15,7 @@ Table of contents:
 * [GIL](#gil)
 * [Authors](#authors)
 * [Updating CEF version](#updating-cef-version)
+  * [Re-importing the CEF headers](#re-importing-the-cef-headers)
 
 
 ## Pull requests
@@ -149,5 +150,24 @@ to add your name and encoded email.
 
 ## Updating CEF version
 
-If you want to update CEF version then take a look at
-[Issue #264](../../../issues/264)("Workflow when updating CEF version").
+For the general workflow see
+[Issue #264](../../../issues/264) ("Workflow when updating CEF version").
+
+cefpython does not vendor the CEF headers. It compiles against the `include/`
+directory of the downloaded CEF binary distribution, which
+`tools/automate.py --prebuilt-cef` copies into the prebuilt `CEF_ROOT`
+directory.
+
+1. Bump the version fields in `src/version/cef_version_{win,linux,macarm64}.h`
+   (`CEF_VERSION`, `CEF_COMMIT_*`, `CHROME_VERSION_*`, `CEF_SANDBOX_COMPAT_HASH`).
+   The CEF API hash is not stored there, it comes from the CEF headers at
+   compile time.
+
+2. Download the new CEF binaries and prepare them:
+
+   ```bash
+   python tools/download_cef.py
+   python tools/automate.py --prebuilt-cef
+   ```
+
+3. Rebuild and run the unit tests (`unittests/_test_runner.py`).

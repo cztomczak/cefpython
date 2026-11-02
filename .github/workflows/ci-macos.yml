@@ -1,0 +1,125 @@
+name: CI macOS ARM
+
+on:
+  push:
+    branches: ["master", "cefpython147"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, e.g. 147.1 or 147.0.1 (empty: dev version)"
+        type: string
+        default: ""
+      bypass_cache:
+        description: "Bypass all caches for a clean run"
+        type: boolean
+        default: false
+
+jobs:
+  download-cef:
+    runs-on: macos-15
+    timeout-minutes: 15
+    outputs:
+      cef_version: ${{ steps.cef-version.outputs.value }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Read CEF version
+        id: cef-version
+        run: |
+          ver=$(sed -n 's/.*#define CEF_VERSION "\([^"]*\)".*/\1/p' \
+                src/version/cef_version_macarm64.h)
+          echo "value=$ver" >> $GITHUB_OUTPUT
+
+      - name: Cache CEF binaries
+        uses: actions/cache@v5
+        if: ${{ inputs.bypass_cache != true }}
+        with:
+          path: |
+            build/cef_binary_*
+            build/cef*_macarm64
+          # Keyed on the CEF version (each version gets its own cache) and on the
+          # download/prepare scripts (invalidate when they change).
+          key: cef-macosarm64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ steps.cef-version.outputs.value }}
+
+      - name: Install build tools
+        run: python tools/requirements.py
+
+      - name: Download CEF binaries
+        run: python tools/download_cef.py
+
+  build:
+    needs: download-cef
+    runs-on: macos-15
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # full history for the dev version (git commit count)
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Restore CEF cache
+        uses: actions/cache/restore@v5
+        if: ${{ inputs.bypass_cache != true }}
+        with:
+          path: |
+            build/cef_binary_*
+            build/cef*_macarm64
+          key: cef-macosarm64-${{ hashFiles('tools/download_cef.py', 'tools/automate.py') }}-${{ needs.download-cef.outputs.cef_version }}
+
+      - name: Install build tools
+        run: python tools/requirements.py
+
+      - name: Prepare prebuilt CEF
+        run: python tools/automate.py --prebuilt-cef
+
+      - name: Build wheel
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$RELEASE_VERSION" ]; then
+            re='^[0-9]+\.[0-9]+(\.[0-9]+)?((a|b|rc)[0-9]+)?$'
+            if ! [[ "$RELEASE_VERSION" =~ $re ]]; then
+              echo "Invalid version: $RELEASE_VERSION"
+              exit 1
+            fi
+            python tools/build.py --wheel --version "$RELEASE_VERSION"
+          else
+            python tools/build.py --wheel
+          fi
+
+      - name: Unit-test the built wheel
+        run: |
+          # Install the wheel and run the unit tests against the INSTALLED
+          # package. No PYTHONPATH and no dev .pth (build.py --wheel doesn't
+          # write one), so build/package/ is not on sys.path and
+          # import cefpython3 resolves to the installed wheel.
+          pip install build/dist/*.whl
+          python unittests/_test_runner.py
+
+      - name: Smoke-test the built wheel
+        timeout-minutes: 5
+        run: python tools/smoke_test.py
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/dist/*.whl
+          archive: false

@@ -6,7 +6,7 @@ include "cefpython.pyx"
 
 cdef public void App_OnBeforeCommandLineProcessing_BrowserProcess(
         CefRefPtr[CefCommandLine] cefCommandLine
-        ) except * with gil:
+        ) noexcept with gil:
     try:
         AppendSwitchesToCommandLine(cefCommandLine, g_commandLineSwitches)
         Debug("App_OnBeforeCommandLineProcessing_BrowserProcess()")

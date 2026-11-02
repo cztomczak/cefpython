@@ -12,7 +12,7 @@ cdef public cpp_bool CookieAccessFilter_CanSendCookie(
             CefRefPtr[CefFrame] cef_frame,
             CefRefPtr[CefRequest] cef_request,
             const CefCookie& cef_cookie
-            ) except * with gil:
+            ) noexcept with gil:
     cdef PyBrowser browser
     cdef PyFrame frame
     cdef PyRequest request
@@ -20,14 +20,20 @@ cdef public cpp_bool CookieAccessFilter_CanSendCookie(
     cdef object callback
     cdef py_bool retval
     try:
-        Debug("CookieAccessFilter_CanSendCookie")
+        # CEF documents browser/frame as optional
+        # (cef_resource_request_handler.h). Without them, allow the cookie, as
+        # CEF does by default; see api/RequestHandler.md.
+        if not cef_browser.get() or not cef_frame.get():
+            Debug("CanSendCookie: no browser/frame for the request;"
+                  " allowing by default")
+            return True
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cef_browser):
             return False
 
         browser = GetPyBrowser(cef_browser, "CanSendCookie")
-        frame = GetPyFrame(cef_frame)
+        frame = GetPyFrame(cef_browser, cef_frame)
         request = CreatePyRequest(cef_request)
         cookie = CreatePyCookie(cef_cookie)
         callback = browser.GetClientCallback("CanSendCookie")
@@ -51,7 +57,7 @@ cdef public cpp_bool CookieAccessFilter_CanSaveCookie(
             CefRefPtr[CefRequest] cef_request,
             CefRefPtr[CefResponse] cef_response,
             const CefCookie& cef_cookie
-            ) except * with gil:
+            ) noexcept with gil:
     cdef PyBrowser browser
     cdef PyFrame frame
     cdef PyRequest request
@@ -60,13 +66,18 @@ cdef public cpp_bool CookieAccessFilter_CanSaveCookie(
     cdef object callback
     cdef py_bool retval
     try:
+        # See CanSendCookie above.
+        if not cef_browser.get() or not cef_frame.get():
+            Debug("CanSaveCookie: no browser/frame for the request;"
+                  " allowing by default")
+            return True
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cef_browser):
             return False
 
         browser = GetPyBrowser(cef_browser, "CanSaveCookie")
-        frame = GetPyFrame(cef_frame)
+        frame = GetPyFrame(cef_browser, cef_frame)
         request = CreatePyRequest(cef_request)
         response = CreatePyResponse(cef_response)
         cookie = CreatePyCookie(cef_cookie)

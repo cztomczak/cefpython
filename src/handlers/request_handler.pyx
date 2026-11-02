@@ -8,10 +8,12 @@ include "../cookie.pyx"
 
 # cef_termination_status_t
 cimport cef_types
-from libc.stdint cimport int64_t
 TS_ABNORMAL_TERMINATION = cef_types.TS_ABNORMAL_TERMINATION
 TS_PROCESS_WAS_KILLED = cef_types.TS_PROCESS_WAS_KILLED
 TS_PROCESS_CRASHED = cef_types.TS_PROCESS_CRASHED
+TS_PROCESS_OOM = cef_types.TS_PROCESS_OOM
+TS_LAUNCH_FAILED = cef_types.TS_LAUNCH_FAILED
+TS_INTEGRITY_FAILURE = cef_types.TS_INTEGRITY_FAILURE
 
 # -----------------------------------------------------------------------------
 # PyAuthCallback
@@ -63,7 +65,7 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
         CefRefPtr[CefRequest] cefRequest,
         cpp_bool user_gesture,
         cpp_bool is_redirect
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef PyRequest pyRequest
@@ -76,7 +78,7 @@ cdef public cpp_bool RequestHandler_OnBeforeBrowse(
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeBrowse")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
         clientCallback = pyBrowser.GetClientCallback("OnBeforeBrowse")
         if clientCallback:
@@ -98,20 +100,27 @@ cdef public cpp_bool RequestHandler_OnBeforeResourceLoad(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         CefRefPtr[CefRequest] cefRequest
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef PyRequest pyRequest
     cdef object clientCallback
     cdef py_bool returnValue
     try:
+        # CEF documents browser/frame as optional for the ResourceRequestHandler
+        # callbacks (cef_resource_request_handler.h). Without them, fall back to
+        # CEF's default (continue the request); see api/RequestHandler.md.
+        if not cefBrowser.get() or not cefFrame.get():
+            Debug("OnBeforeResourceLoad: no browser/frame for the request;"
+                  " continuing by default")
+            return False
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnBeforeResourceLoad")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
         clientCallback = pyBrowser.GetClientCallback("OnBeforeResourceLoad")
         if clientCallback:
@@ -131,20 +140,26 @@ cdef public CefRefPtr[CefResourceHandler] RequestHandler_GetResourceHandler(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame,
         CefRefPtr[CefRequest] cefRequest
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef PyRequest pyRequest
     cdef object clientCallback
     cdef object returnValue
     try:
+        # See OnBeforeResourceLoad. Without browser/frame, fall back to CEF's
+        # default resource handling.
+        if not cefBrowser.get() or not cefFrame.get():
+            Debug("GetResourceHandler: no browser/frame for the request;"
+                  " using default handling")
+            return <CefRefPtr[CefResourceHandler]>nullptr
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
             return <CefRefPtr[CefResourceHandler]>nullptr
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetResourceHandler")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         pyRequest = CreatePyRequest(cefRequest)
         clientCallback = pyBrowser.GetClientCallback("GetResourceHandler")
         if clientCallback:
@@ -170,7 +185,7 @@ cdef public void RequestHandler_OnResourceRedirect(
         CefString& cefNewUrl,
         CefRefPtr[CefRequest] cefRequest,
         CefRefPtr[CefResponse] cefResponse
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef str pyOldUrl
@@ -179,13 +194,19 @@ cdef public void RequestHandler_OnResourceRedirect(
     cdef PyResponse pyResponse
     cdef object clientCallback
     try:
+        # See OnBeforeResourceLoad. Without browser/frame, leave the redirect
+        # unchanged.
+        if not cefBrowser.get() or not cefFrame.get():
+            Debug("OnResourceRedirect: no browser/frame for the request;"
+                  " leaving redirect unchanged")
+            return
         # Issue #455: CefRequestHandler callbacks still executed after
         # browser was closed.
         if IsBrowserClosed(cefBrowser):
             return
 
         pyBrowser = GetPyBrowser(cefBrowser, "OnResourceRedirect")
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
         pyOldUrl = CefToPyString(cefOldUrl)
         pyNewUrlOut = [CefToPyString(cefNewUrl)]
         pyRequest = CreatePyRequest(cefRequest)
@@ -208,16 +229,16 @@ cdef public void RequestHandler_OnResourceRedirect(
 
 cdef public cpp_bool RequestHandler_GetAuthCredentials(
         CefRefPtr[CefBrowser] cefBrowser,
-        CefRefPtr[CefFrame] cefFrame,
+        const CefString& cefOriginUrl,
         cpp_bool cefIsProxy,
         const CefString& cefHost,
         int cefPort,
         const CefString& cefRealm,
         const CefString& cefScheme,
         CefRefPtr[CefAuthCallback] cefAuthCallback
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
-    cdef PyFrame pyFrame
+    cdef str pyOriginUrl
     cdef py_bool pyIsProxy
     cdef str pyHost
     cdef int pyPort
@@ -235,7 +256,7 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
             return False
 
         pyBrowser = GetPyBrowser(cefBrowser, "GetAuthCredentials")
-        pyFrame = GetPyFrame(cefFrame)
+        pyOriginUrl = CefToPyString(cefOriginUrl)
         pyIsProxy = bool(cefIsProxy)
         pyHost = CefToPyString(cefHost)
         pyPort = int(cefPort)
@@ -248,7 +269,7 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
         if clientCallback:
             returnValue = clientCallback(
                     browser=pyBrowser,
-                    frame=pyFrame,
+                    origin_url=pyOriginUrl,
                     is_proxy=pyIsProxy,
                     host=pyHost,
                     port=pyPort,
@@ -277,44 +298,11 @@ cdef public cpp_bool RequestHandler_GetAuthCredentials(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 
-cdef public cpp_bool RequestHandler_OnQuotaRequest(
-        CefRefPtr[CefBrowser] cefBrowser,
-        const CefString& cefOriginUrl,
-        int64_t newSize,
-        CefRefPtr[CefCallback] cefCallback
-        ) except * with gil:
-    cdef PyBrowser pyBrowser
-    cdef py_string pyOriginUrl
-    cdef py_bool returnValue
-    cdef object clientCallback
-    try:
-        # Issue #455: CefRequestHandler callbacks still executed after
-        # browser was closed.
-        if IsBrowserClosed(cefBrowser):
-            return False
-
-        pyBrowser = GetPyBrowser(cefBrowser, "OnQuotaRequest")
-        pyOriginUrl = CefToPyString(cefOriginUrl)
-        clientCallback = pyBrowser.GetClientCallback("OnQuotaRequest")
-        if clientCallback:
-            returnValue = clientCallback(
-                    browser=pyBrowser,
-                    origin_url=pyOriginUrl,
-                    new_size=newSize,
-                    callback=CreatePyRequestCallback(cefCallback))
-            return bool(returnValue)
-        else:
-            return False
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-
 cdef public void RequestHandler_OnProtocolExecution(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefString& cefUrl,
         cpp_bool& cefAllowOSExecution
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef str pyUrl
     cdef list pyAllowOSExecutionOut
@@ -334,13 +322,7 @@ cdef public void RequestHandler_OnProtocolExecution(
                     browser=pyBrowser,
                     url=pyUrl,
                     allow_execution_out=pyAllowOSExecutionOut)
-            # Since Cython 0.17.4 assigning a value to an argument
-            # passed by reference will throw an error, the fix is to
-            # to use "(&arg)[0] =" instead of "arg =", see this topic:
-            # https://groups.google.com/forum/#!msg/cython-users/j58Sp3QMrD4/y9vJy9YBi_kJ
-            # For CefRefPtr you should use swap() method instead.
-            (&cefAllowOSExecution)[0] = 1
-            #(&cefAllowOSExecution)[0] = <cpp_bool>bool(pyAllowOSExecutionOut[0])
+            cefAllowOSExecution = <cpp_bool>bool(pyAllowOSExecutionOut[0])
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -350,7 +332,7 @@ cdef public cpp_bool RequestHandler_OnCertificateError(
         int certError,
         const CefString& cefRequestUrl,
         CefRefPtr[CefCallback] cefCertCallback
-        ) except * with gil:
+        ) noexcept with gil:
     cdef py_bool returnValue
     cdef object clientCallback
     try:
@@ -370,8 +352,10 @@ cdef public cpp_bool RequestHandler_OnCertificateError(
 
 cdef public void RequestHandler_OnRendererProcessTerminated(
         CefRefPtr[CefBrowser] cefBrowser,
-        cef_types.cef_termination_status_t cefStatus
-        ) except * with gil:
+        cef_types.cef_termination_status_t cefStatus,
+        int errorCode,
+        const CefString& cefErrorString
+        ) noexcept with gil:
     # TODO: proccess may crash during browser creation. Let this callback 
     # to be set either through  cefpython.SetGlobalClientCallback() 
     # or PyBrowser.SetClientCallback(). Modify the 
@@ -389,7 +373,9 @@ cdef public void RequestHandler_OnRendererProcessTerminated(
         clientCallback = pyBrowser.GetClientCallback(
                 "OnRendererProcessTerminated")
         if clientCallback:
-            clientCallback(browser=pyBrowser, status=cefStatus)
+            clientCallback(browser=pyBrowser, status=cefStatus,
+                           error_code=errorCode,
+                           error_string=CefToPyString(cefErrorString))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

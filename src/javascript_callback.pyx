@@ -27,19 +27,22 @@ cdef class JavascriptCallback:
 
     def Call(self, *args):
         # Send process message "ExecuteJavascriptCallback".
+        cdef CefRefPtr[CefBrowser] cefBrowser
         if self.frame:
-            browser = self.frame.GetBrowser()
-            if browser:
-                browser.GetMainFrame().SendProcessMessage(
-                        cef_types.PID_RENDERER,
-                        self.frame.GetIdentifier(),
-                        "ExecuteJavascriptCallback",
-                        [self.callbackId] + list(args))
-            else:
-                # This code probably ain't needed
-                raise Exception("JavascriptCallback.Call() FAILED: browser"
-                                " not found, callbackId = %s"
-                                % self.callbackId)
+            if self.frame.cefFrame.get():
+                cefBrowser = self.frame.cefFrame.get().GetBrowser()
+            if not cefBrowser.get():
+                # The frame reference was released or has no browser anymore.
+                # Sending the callback id to another renderer could run an
+                # unrelated callback.
+                Debug("JavascriptCallback.Call(): frame is no longer valid,"
+                      " callbackId = %s" % self.callbackId)
+                return
+            GetPyBrowser(cefBrowser).GetMainFrame().SendProcessMessage(
+                    cef_types.PID_RENDERER,
+                    self.frame.GetIdentifier(),
+                    "ExecuteJavascriptCallback",
+                    [self.callbackId] + list(args))
         else:
             # This code probably ain't needed
             raise Exception("JavascriptCallback.Call() FAILED: frame not found"

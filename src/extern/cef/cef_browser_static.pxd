@@ -4,13 +4,14 @@
 
 include "compile_time_constants.pxi"
 
-from cef_ptr cimport CefRefPtr
 IF UNAME_SYSNAME == "Windows":
     from cef_win cimport CefWindowInfo
 ELIF UNAME_SYSNAME == "Linux":
     from cef_linux cimport CefWindowInfo
 ELIF UNAME_SYSNAME == "Darwin":
     from cef_mac cimport CefWindowInfo
+
+from cef_ptr cimport CefRefPtr
 # noinspection PyUnresolvedReferences
 from cef_client cimport CefClient
 from cef_types cimport CefBrowserSettings

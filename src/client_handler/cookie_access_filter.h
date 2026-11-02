@@ -2,6 +2,7 @@
 // All rights reserved. Licensed under BSD 3-clause license.
 // Project website: https://github.com/cztomczak/cefpython
 
+#pragma once
 #include "common/cefpython_public_api.h"
 #include "include/cef_resource_request_handler.h"
 

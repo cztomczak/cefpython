@@ -3,9 +3,8 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 cdef extern from "gtk/gtk.h" nogil:
-    ctypedef void* GdkNativeWindow
     ctypedef void* GtkWidget
-    cdef GtkWidget* gtk_plug_new(GdkNativeWindow socket_id)
+    cdef GtkWidget* gtk_plug_new(unsigned long socket_id)
     cdef void gtk_widget_show(GtkWidget* widget)
 
     ctypedef char* XPointer

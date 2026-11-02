@@ -20,16 +20,25 @@ cdef PyFrame GetPyFrameById(int browserId, py_string frameId):
         return g_pyFrames[uniqueFrameId]
     return None
 
-cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
+cdef PyFrame GetPyFrame(CefRefPtr[CefBrowser] cefBrowser,
+                        CefRefPtr[CefFrame] cefFrame):
+    # cefBrowser must be the browser of cefFrame, which may already be detached.
     global g_pyFrames
 
     if not cefFrame or not cefFrame.get():
         raise Exception("GetPyFrame(): CefFrame reference is NULL")
+    if not cefBrowser or not cefBrowser.get():
+        raise Exception("GetPyFrame(): CefBrowser reference is NULL")
 
     cdef PyFrame pyFrame
     cdef CefString frameId = cefFrame.get().GetIdentifier()
-    cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
-    assert (not frameId.empty() and browserId), "frameId or browserId empty"
+    cdef int browserId = cefBrowser.get().GetIdentifier()
+    if not browserId:
+        raise Exception("GetPyFrame(): browserId is 0 (browser not yet initialised)")
+    # frameId may be empty for internal frames that CEF creates before the
+    # underlying renderer frame is ready (e.g. the PDF-viewer internal frame
+    # on the first OnLoadStart).  The code below already creates an incomplete
+    # PyFrame for this case, so do not assert here.
     cdef str uniqueFrameId = GetUniqueFrameId(browserId, CefToPyString(frameId))
 
     if frameId.empty():
@@ -61,11 +70,12 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
 
     if uniqueFrameId in g_unreferenced_frames \
             or frameId.empty() \
+            or not cefFrame.get().IsValid() \
             or browserId in g_unreferenced_browsers \
             or browserId in g_closed_browsers:
         # Browser was already globally unreferenced in OnBeforeClose,
         # thus all frames are globally unreferenced too, or frame
-        # was unreferenced in OnContextReleased. Create a new
+        # was unreferenced in OnContextReleased or detached. Create a new
         # incomplete instance of PyFrame object. Read comments in
         # browser.pyx > GetPyBrowser and in Browser.md for what
         # "incomplete" means.
@@ -103,7 +113,7 @@ cdef void RemovePyFramesForBrowser(int browserId) except *:
     cdef object uniqueFrameId
     cdef PyFrame pyFrame
     global g_pyFrames
-    for uniqueFrameId, pyFrame in g_pyFrames.iteritems():
+    for uniqueFrameId, pyFrame in g_pyFrames.items():
         if pyFrame.GetBrowserIdentifier() == browserId:
             toRemove.append(uniqueFrameId)
     for uniqueFrameId in toRemove:
@@ -177,10 +187,27 @@ cdef class PyFrame:
         return self.frameId
 
     cpdef PyFrame GetParent(self):
-        return GetPyFrame(self.GetCefFrame().get().GetParent())
+        cdef CefRefPtr[CefFrame] cefParent
+        if not self.cefFrame.get():
+            return None
+        cefParent = self.cefFrame.get().GetParent()
+        if not cefParent.get():
+            return None
+        return GetPyFrame(self.GetBrowser().GetCefBrowser(), cefParent)
 
     cpdef PyBrowser GetBrowser(self):
-        return GetPyBrowser(self.GetCefFrame().get().GetBrowser())
+        cdef CefRefPtr[CefBrowser] cefBrowser
+        cdef PyBrowser pyBrowser
+        if self.cefFrame.get():
+            cefBrowser = self.cefFrame.get().GetBrowser()
+            if cefBrowser.get():
+                return GetPyBrowser(cefBrowser)
+        # The frame was detached, or its reference was released when its
+        # V8 context was released.
+        pyBrowser = GetPyBrowserById(self.browserId)
+        if pyBrowser is None:
+            raise Exception("Frame.GetBrowser(): browser was closed")
+        return pyBrowser
 
     cpdef int GetBrowserIdentifier(self) except *:
         return self.browserId

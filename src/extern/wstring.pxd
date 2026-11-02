@@ -9,7 +9,7 @@ cdef extern from *:
 
 cdef extern from "<string>" namespace "std":
 
-    size_t npos = -1
+    const size_t npos
 
     cdef cppclass wstring:
         wstring() except + nogil

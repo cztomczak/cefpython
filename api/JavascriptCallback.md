@@ -30,7 +30,8 @@ Table of contents:
 | [params..] (optional) | mixed |
 | __Return__ | void |
 
-Call the javascript callback function. Pass arguments optionally.
+Call the javascript callback function. Pass arguments optionally. Does nothing
+if the callback's frame is no longer valid (see Frame.IsValid).
 
 For a list of allowed types for `mixed` see JavascriptBindings.[IsValueAllowed()](JavascriptBindings.md#isvalueallowed).
 

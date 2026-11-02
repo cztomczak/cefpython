@@ -1,5 +1,5 @@
-// COPIED from upstream "cef/tests/cefclient/browser/" directory
-// with minor modifications. See the .patch file in current directory.
+// Originally copied from upstream CEF
+// "tests/cefclient/browser/print_handler_gtk.h" and modified since.
 
 // Copyright (c) 2014 The Chromium Embedded Framework Authors.
 // Portions Copyright (c) 2012 The Chromium Authors. All rights reserved.
@@ -20,19 +20,20 @@ class ClientPrintHandlerGtk : public CefPrintHandler {
   virtual ~ClientPrintHandlerGtk();
 
   // CefPrintHandler methods.
-  void OnPrintStart(CefRefPtr<CefBrowser> browser) OVERRIDE;
+  void OnPrintStart(CefRefPtr<CefBrowser> browser) override;
   void OnPrintSettings(CefRefPtr<CefBrowser> browser,
                        CefRefPtr<CefPrintSettings> settings,
-                       bool get_defaults) OVERRIDE;
+                       bool get_defaults) override;
   bool OnPrintDialog(CefRefPtr<CefBrowser> browser,
                      bool has_selection,
-                     CefRefPtr<CefPrintDialogCallback> callback) OVERRIDE;
+                     CefRefPtr<CefPrintDialogCallback> callback) override;
   bool OnPrintJob(CefRefPtr<CefBrowser> browser,
                   const CefString& document_name,
                   const CefString& pdf_file_path,
-                  CefRefPtr<CefPrintJobCallback> callback) OVERRIDE;
-  void OnPrintReset(CefRefPtr<CefBrowser> browser) OVERRIDE;
-  CefSize GetPdfPaperSize(int device_units_per_inch) OVERRIDE;
+                  CefRefPtr<CefPrintJobCallback> callback) override;
+  void OnPrintReset(CefRefPtr<CefBrowser> browser) override;
+  CefSize GetPdfPaperSize(CefRefPtr<CefBrowser> browser,
+                          int device_units_per_inch) override;
 
  private:
   // Print handler.
