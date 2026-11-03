@@ -53,13 +53,14 @@ endif()
 
 # ---- CEF location -----------------------------------------------------------
 if(NOT CEF_ROOT)
-    # Auto-detect: build/cef*_win64 (versioned dir created by automate.py)
+    # Auto-detect: build/cef<major>_*_win64 (versioned dir created by
+    # automate.py, not the cef_binary_* dir created by download_cef.py)
     if(WIN32)
-        set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef*_win64")
+        set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef[0-9]*_win64")
     elseif(APPLE)
-        set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef*_macarm64")
+        set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef[0-9]*_macarm64")
     else()
-        set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef*_linux64")
+        set(_cef_glob_pat "${CMAKE_SOURCE_DIR}/build/cef[0-9]*_linux64")
     endif()
     file(GLOB _cef_candidates LIST_DIRECTORIES true "${_cef_glob_pat}")
     # Select the directory matching the exact CEF version from the header, so a
