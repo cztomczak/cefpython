@@ -53,8 +53,9 @@ def cmake_build(clean=False, profiling=False, line_tracing=False):
     if clean and os.path.exists(BUILD_DIR):
         print("[build.py] Removing", BUILD_DIR)
         shutil.rmtree(BUILD_DIR)
-    cache = os.path.join(BUILD_DIR, "CMakeCache.txt")
-    if not os.path.exists(cache):
+    # A failed configure also writes CMakeCache.txt, so check for a file that
+    # is only written after the build files are generated.
+    if not os.path.exists(os.path.join(BUILD_DIR, "cmake_install.cmake")):
         cmake_args = ["cmake", "-S", ".", "-B", BUILD_DIR,
                       "-DPython_EXECUTABLE=" + sys.executable]
         if WINDOWS:
