@@ -707,8 +707,6 @@ def create_prebuilt_binaries():
             "ceftests" + APP_EXT)
     if not MAC:
         assert os.path.exists(ceftests)
-    if LINUX:
-        # On Windows resources/*.html files are embedded inside exe
         ceftests_files = os.path.join(
                 src,
                 "build_tests", "tests", "ceftests",
@@ -724,6 +722,9 @@ def create_prebuilt_binaries():
                                              os.path.basename(app)))
             else:
                 shutil.copy(app, bindir)
+                if WINDOWS:
+                    # The exe is a copy of bootstrap.exe that loads app.dll
+                    shutil.copy(os.path.splitext(app)[0] + ".dll", bindir)
 
     if not MAC:
         # Currently do not copy apps on Mac, as they take lots of
