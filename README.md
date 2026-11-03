@@ -43,6 +43,14 @@ PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 
 CEF Python 147 development wheels are available on [GitHub Releases](https://github.com/cztomczak/cefpython/releases).
 
+Command to install with pip:
+
+```
+pip install --pre --upgrade "cefpython3>=147.0.dev0"
+```
+
+macOS wheel not yet available on PyPI - use GH Release to download.
+
 OS | Python | 64bit | Requirements
 --- | --- | --- | ---
 Windows | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | Windows 10+
