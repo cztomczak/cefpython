@@ -155,10 +155,14 @@ if(WIN32)
     # (exit_code=-2147483645). The linker merges /MANIFESTINPUT with its
     # auto-generated trustInfo block and embeds the result as resource
     # id 1, identical to a hand-written subprocess.rc but driven by CMake.
+    # /Brepro replaces the link-time timestamp with a content hash, so every
+    # per-Python build produces the same subprocess.exe and merge_wheels.py can
+    # share it between Python versions.
     target_link_options(cefpython_subprocess PRIVATE
         /MANIFEST:EMBED
         "/MANIFESTINPUT:${_cef_compat_manifest}"
         /LARGEADDRESSAWARE /SUBSYSTEM:WINDOWS
+        /Brepro
     )
 elseif(APPLE)
     # Match CEF 147's declared CEF_TARGET_SDK and official helper plist.

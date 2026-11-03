@@ -178,6 +178,22 @@ def _wheel_platform_tag():
                 "macOS CEF distribution requires native arm64 Python; "
                 "got {0} ({1})".format(machine, platform_tag))
         return "macosx_12_0_arm64"
+    if sys.platform.startswith("linux"):
+        # PyPI rejects linux_<arch> wheels and accepts only manylinux ones.
+        # This is a label for PyPI, not a claim of manylinux policy
+        # compliance: as in v66, the wheel relies on the system libstdc++,
+        # GTK and NSS (see README). The glibc of the build host sets the floor
+        # for a distribution new enough to ship them.
+        # platform.libc_ver() reads the runtime glibc via confstr, so the tag
+        # is the CI runner's glibc and moves with the runner image. Keep it in
+        # sync with the Linux requirements in the README.
+        libc, libc_version = platform.libc_ver()
+        if libc != "glibc":
+            raise RuntimeError(
+                "Linux CEF distribution requires glibc; got {0!r}".format(libc))
+        major, minor = libc_version.split(".")[:2]
+        return platform_tag.replace(
+            "linux_", "manylinux_{0}_{1}_".format(major, minor), 1)
     return platform_tag
 
 

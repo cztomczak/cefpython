@@ -41,13 +41,31 @@ PyGame, PyOpenGL, PyWin32, PySide and PySDL2.
 
 ## Install
 
-CEF Python 147 development wheels are available on [GitHub Releases](https://github.com/cztomczak/cefpython/releases).
+CEF Python 147 development wheels are available on
+[GitHub Releases](https://github.com/cztomczak/cefpython/releases). The Windows
+and Linux wheels are also published to PyPI.
+
+Install the latest development release from PyPI:
+
+```
+pip install --pre --upgrade "cefpython3>=147.0.dev0"
+```
+
+The `--pre` flag allows pip to install pre-release versions such as
+`147.0.devN`.
+
+**macOS wheel not yet available on PyPI** - use the GitHub Release to download
+it and install the downloaded `.whl` file.
 
 OS | Python | 64bit | Requirements
 --- | --- | --- | ---
 Windows | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | Windows 10+
-Linux | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | Ubuntu 20.04+, Debian 11+
+Linux | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | Ubuntu 24.04+, Debian 13+
 macOS | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | macOS 12+ (Apple Silicon/arm64 only)
+
+The Linux wheel uses the GTK 3, NSS and X11 libraries of the system. On a
+minimal system install the packages listed in the "Install runtime
+dependencies" step of [ci-linux.yml](.github/workflows/ci-linux.yml).
 
 macOS wheels are tested in CI only (unit tests and a smoke test of the
 hello_world.py and tutorial.py examples). GUI examples and PyInstaller
