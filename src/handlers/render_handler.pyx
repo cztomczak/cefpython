@@ -7,6 +7,7 @@ include "../browser.pyx"
 include "../string_utils.pyx"
 
 cimport cef_types
+from libc.stdint cimport uint32_t
 from cef_types cimport CefRange
 
 # cef_paint_element_type_t, PaintElementType
@@ -27,7 +28,7 @@ DRAG_OPERATION_EVERY   = cef_types.DRAG_OPERATION_EVERY
 cdef public cpp_bool RenderHandler_GetRootScreenRect(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRect& cefRect
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list pyRect = []
     cdef py_bool ret
@@ -54,7 +55,7 @@ cdef public cpp_bool RenderHandler_GetRootScreenRect(
 cdef public cpp_bool RenderHandler_GetViewRect(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRect& cefRect
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list pyRect = []
     cdef py_bool ret
@@ -73,35 +74,13 @@ cdef public cpp_bool RenderHandler_GetViewRect(
             else:
                 return False
         else:
-            return False
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
-cdef public cpp_bool RenderHandler_GetScreenRect(
-        CefRefPtr[CefBrowser] cefBrowser,
-        CefRect& cefRect
-        ) except * with gil:
-    cdef PyBrowser pyBrowser
-    cdef list pyRect = []
-    cdef py_bool ret
-    try:
-        pyBrowser = GetPyBrowser(cefBrowser, "GetScreenRect")
-        callback = pyBrowser.GetClientCallback("GetScreenRect")
-        if callback:
-            ret = callback(browser=pyBrowser, rect_out=pyRect)
-            if ret:
-                assert (pyRect and len(pyRect) == 4), (
-                        "rectangle not provided or invalid")
-                cefRect.x = pyRect[0]
-                cefRect.y = pyRect[1]
-                cefRect.width = pyRect[2]
-                cefRect.height = pyRect[3]
-                return True
-            else:
-                return False
-        else:
-            return False
+            # without a default cefRect, pysdl2 example will fail
+            # the value is inspired by https://github.com/obsproject/obs-browser/blob/master/browser-client.cpp#L280
+            cefRect.x = 0
+            cefRect.y = 0
+            cefRect.width = 16
+            cefRect.height = 16
+            return True
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -110,7 +89,7 @@ cdef public cpp_bool RenderHandler_GetScreenPoint(
         CefRefPtr[CefBrowser] cefBrowser,
         int viewX, int viewY,
         int& screenX, int& screenY
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list screenCoordinates = []
     cdef py_bool ret
@@ -139,14 +118,72 @@ cdef public cpp_bool RenderHandler_GetScreenPoint(
 cdef public cpp_bool RenderHandler_GetScreenInfo(
         CefRefPtr[CefBrowser] cefBrowser,
         CefScreenInfo& cefScreenInfo
-        ) except * with gil:
-    # Not yet implemented.
-    return False
+        ) noexcept with gil:
+    cdef PyBrowser pyBrowser
+    cdef dict pyScreenInfo = {}
+    cdef py_bool ret
+    cdef list pyRect
+    cdef double deviceScaleFactor
+    try:
+        pyBrowser = GetPyBrowser(cefBrowser, "GetScreenInfo")
+        callback = pyBrowser.GetClientCallback("GetScreenInfo")
+        if not callback:
+            return False
+        ret = callback(browser=pyBrowser, screen_info_out=pyScreenInfo)
+        if not ret:
+            return False
+        # device_scale_factor is the ratio between physical and logical
+        # pixels. On HiDPI displays this is typically 2.0 (1.25/1.5/1.75
+        # for fractional scaling). It MUST be > 0 -- a value of 0 will
+        # divide-by-zero inside Chromium's compositor. Setting this also
+        # scales the OnPaint buffer: a 800x600 view rect with
+        # device_scale_factor=2.0 yields a 1600x1200 BGRA buffer.
+        if "device_scale_factor" in pyScreenInfo:
+            deviceScaleFactor = float(pyScreenInfo["device_scale_factor"])
+            assert deviceScaleFactor > 0.0, (
+                    "device_scale_factor must be > 0")
+            cefScreenInfo.device_scale_factor = <float>deviceScaleFactor
+        else:
+            cefScreenInfo.device_scale_factor = 1.0
+        cefScreenInfo.depth = int(pyScreenInfo.get("depth", 24))
+        cefScreenInfo.depth_per_component = int(
+                pyScreenInfo.get("depth_per_component", 8))
+        cefScreenInfo.is_monochrome = <cpp_bool>bool(
+                pyScreenInfo.get("is_monochrome", False))
+        # rect/available_rect are in DIP (logical pixels). Leaving them
+        # zero-initialized tells CEF to fall back to GetViewRect (see
+        # cef_render_handler.h:107).
+        if "rect" in pyScreenInfo:
+            pyRect = list(pyScreenInfo["rect"])
+            assert len(pyRect) == 4, "rect must be [x, y, width, height]"
+            cefScreenInfo.rect.x = int(pyRect[0])
+            cefScreenInfo.rect.y = int(pyRect[1])
+            cefScreenInfo.rect.width = int(pyRect[2])
+            cefScreenInfo.rect.height = int(pyRect[3])
+        if "available_rect" in pyScreenInfo:
+            pyRect = list(pyScreenInfo["available_rect"])
+            assert len(pyRect) == 4, (
+                    "available_rect must be [x, y, width, height]")
+            cefScreenInfo.available_rect.x = int(pyRect[0])
+            cefScreenInfo.available_rect.y = int(pyRect[1])
+            cefScreenInfo.available_rect.width = int(pyRect[2])
+            cefScreenInfo.available_rect.height = int(pyRect[3])
+        elif "rect" in pyScreenInfo:
+            # Mirror rect into available_rect so popups place correctly
+            # when the caller only supplied one.
+            cefScreenInfo.available_rect.x = cefScreenInfo.rect.x
+            cefScreenInfo.available_rect.y = cefScreenInfo.rect.y
+            cefScreenInfo.available_rect.width = cefScreenInfo.rect.width
+            cefScreenInfo.available_rect.height = cefScreenInfo.rect.height
+        return True
+    except:
+        (exc_type, exc_value, exc_trace) = sys.exc_info()
+        sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void RenderHandler_OnPopupShow(
         CefRefPtr[CefBrowser] cefBrowser,
         cpp_bool show
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnPopupShow")
@@ -160,7 +197,7 @@ cdef public void RenderHandler_OnPopupShow(
 cdef public void RenderHandler_OnPopupSize(
         CefRefPtr[CefBrowser] cefBrowser,
         const CefRect& cefRect
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list pyRect
     try:
@@ -180,7 +217,7 @@ cdef public void RenderHandler_OnPaint(
         const void* cefBuffer,
         int width,
         int height
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef list pyDirtyRects = []
     cdef list pyRect
@@ -219,29 +256,17 @@ cdef public void RenderHandler_OnPaint(
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
 
-cdef public void RenderHandler_OnCursorChange(
-        CefRefPtr[CefBrowser] cefBrowser,
-        CefCursorHandle cursor
-        ) except * with gil:
-    cdef PyBrowser pyBrowser
-    try:
-        pyBrowser = GetPyBrowser(cefBrowser, "OnCursorChange")
-        callback = pyBrowser.GetClientCallback("OnCursorChange")
-        if callback:
-            callback(browser=pyBrowser, cursor=<uintptr_t>cursor)
-    except:
-        (exc_type, exc_value, exc_trace) = sys.exc_info()
-        sys.excepthook(exc_type, exc_value, exc_trace)
-
 cdef public void RenderHandler_OnScrollOffsetChanged(
-        CefRefPtr[CefBrowser] cefBrowser
-        ) except * with gil:
+        CefRefPtr[CefBrowser] cefBrowser,
+        double x,
+        double y
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "OnScrollOffsetChanged")
         callback = pyBrowser.GetClientCallback("OnScrollOffsetChanged")
         if callback:
-            callback(browser=pyBrowser)
+            callback(browser=pyBrowser, x=x, y=y)
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
@@ -249,9 +274,9 @@ cdef public void RenderHandler_OnScrollOffsetChanged(
 cdef public cpp_bool RenderHandler_StartDragging(
         CefRefPtr[CefBrowser] cef_browser,
         CefRefPtr[CefDragData] cef_drag_data,
-        uint32 allowed_ops,
+        uint32_t allowed_ops,
         int x, int y
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     cdef DragData drag_data
     cdef py_bool ret
@@ -278,8 +303,8 @@ cdef public cpp_bool RenderHandler_StartDragging(
 
 cdef public void RenderHandler_UpdateDragCursor(
         CefRefPtr[CefBrowser] cef_browser,
-        uint32 operation,
-        ) except * with gil:
+        uint32_t operation,
+        ) noexcept with gil:
     cdef PyBrowser browser
     try:
         browser = GetPyBrowser(cef_browser, "UpdateDragCursor")
@@ -294,7 +319,7 @@ cdef public void RenderHandler_OnTextSelectionChanged(
         CefRefPtr[CefBrowser] cef_browser,
         const CefString& selected_text,
         const CefRange& selected_range
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser browser
     try:
         browser = GetPyBrowser(cef_browser, "OnTextSelectionChanged")

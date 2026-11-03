@@ -9,11 +9,13 @@ Object of this class is used in [RequestHandler](RequestHandler.md).OnBeforeBrow
 Table of contents:
 * [Methods](#methods)
   * [CreateRequest](#createrequest)
-  * [IsReadOnly](#isreadonly)
   * [GetUrl](#geturl)
   * [SetUrl](#seturl)
   * [GetMethod](#getmethod)
   * [SetMethod](#setmethod)
+  * [SetReferrer](#setreferrer)
+  * [GetReferrerURL](#getreferrerurl)
+  * [GetReferrerPolicy](#getreferrerpolicy)
   * [GetPostData](#getpostdata)
   * [SetPostData](#setpostdata)
   * [GetHeaderMap](#getheadermap)
@@ -24,8 +26,6 @@ Table of contents:
   * [SetFlags](#setflags)
   * [GetFirstPartyForCookies](#getfirstpartyforcookies)
   * [SetFirstPartyForCookies](#setfirstpartyforcookies)
-  * [GetResourceType](#getresourcetype)
-  * [GetTransitionType](#gettransitiontype)
 
 
 ## Methods
@@ -39,15 +39,6 @@ Table of contents:
 
 You cannot instantiate `Request` class directly, use this static method
 instead by calling `cefpython.Request.CreateRequest()`.
-
-
-### IsReadOnly
-
-| | |
-| --- | --- |
-| __Return__ | bool |
-
-Returns true if this object is read-only.
 
 
 ### GetUrl
@@ -87,6 +78,49 @@ if post data is provided and GET otherwise.
 | __Return__ | void |
 
 Set the request method type.
+
+
+### SetReferrer
+
+| Parameter | Type |
+| --- | --- |
+| referrer_url | string |
+| policy | ReferrerPolicy |
+| __Return__ | void |
+
+Set the request referrer.
+
+`referrer` must be a fully qualified url.
+
+`ReferrerPolicy` constants in the cefpython module:
+* **REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_FROM_SECURE_TO_INSECURE**
+* **REFERRER_POLICY_DEFAULT** - equivalent to REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_FROM_SECURE_TO_INSECURE
+* **REFERRER_POLICY_REDUCE_REFERRER_GRANULARITY_ON_TRANSITION_CROSS_ORIGIN**
+* **REFERRER_POLICY_ORIGIN_ONLY_ON_TRANSITION_CROSS_ORIGIN**
+* **REFERRER_POLICY_NEVER_CLEAR_REFERRER**
+* **REFERRER_POLICY_ORIGIN**
+* **REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_CROSS_ORIGIN**
+* **REFERRER_POLICY_ORIGIN_CLEAR_ON_TRANSITION_FROM_SECURE_TO_INSECURE**
+* **REFERRER_POLICY_NO_REFERRER**
+* **REFERRER_POLICY_NUM_VALUES**
+
+
+### GetReferrerURL
+
+| | |
+| --- | --- |
+| __Return__ | string |
+
+Get the referrer url.
+
+
+### GetReferrerPolicy
+
+| | |
+| --- | --- |
+| __Return__ | ReferrerPolicy |
+
+Get the referrer policy for this request.
 
 
 ### GetPostData
@@ -169,7 +203,7 @@ Get the flags used in combination with WebRequest.
 
 Available flags below. Can be accessed via `cefpython.Request.Flags["xxx"]`.
 These flags are also defined as constants starting with "UR_FLAG_"
-in the cefpython module.requ
+in the cefpython module.
 
 * **None** - Default behavior.
 * **SkipCache** - If set the cache will be skipped when handling the request. Setting this value is equivalent to specifying the "Cache-Control: no-cache" request header. Setting this value in combination with UR_FLAG_ONLY_FROM_CACHE will cause the request to fail.
@@ -214,28 +248,4 @@ WebRequest.
 Set the url to the first party for cookies used in combination with
 WebRequest.
 
-
-### GetResourceType
-
-| | |
-| --- | --- |
-| __Return__ | int |
-
-Not yet implemented in CEF Python.
-
-Get the resource type for this request. Only available in the browser
-process.
-
-
-### GetTransitionType
-
-| | |
-| --- | --- |
-| __Return__ | int |
-
-Not yet implemented in CEF Python.
-
-Get the transition type for this request. Only available in the browser
-process and only applies to requests that represent a main frame or
-sub-frame navigation.
 

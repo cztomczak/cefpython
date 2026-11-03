@@ -21,7 +21,7 @@ public:
 
     virtual void Visit(
             const CefString& string
-            ) OVERRIDE;
+            ) override;
     
 protected:
   IMPLEMENT_REFCOUNTING(StringVisitor);

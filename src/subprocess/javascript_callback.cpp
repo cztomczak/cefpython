@@ -28,17 +28,17 @@ CefString PutJavascriptCallback(
         CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Value> jsCallback) {
     // Returns a "####cefpython####" string followed by json encoded data.
     // {"what":"javascript-callback","callbackId":123,
-    //  "frameId":123,"functionName":"xx"}
+    //  "frameId":"123","functionName":"xx"}
     int callbackId = ++g_jsCallbackMaxId;
-    int64 frameId = frame->GetIdentifier();
+    CefString frameId = frame->GetIdentifier();
     CefString functionName = jsCallback->GetFunctionName();
     std::string strCallbackId = "####cefpython####";
     strCallbackId.append("{");
     // JSON format allows only for double quotes.
     strCallbackId.append("\"what\":\"javascript-callback\"");
     strCallbackId.append(",\"callbackId\":").append(AnyToString(callbackId));
-    strCallbackId.append(",\"frameId\":").append(AnyToString(frameId));
-    strCallbackId.append(",\"functionName\":\"").append(functionName) \
+    strCallbackId.append(",\"frameId\":\"").append(AnyToString(frameId));
+    strCallbackId.append("\",\"functionName\":\"").append(functionName) \
             .append("\"");
     strCallbackId.append("}");
     g_jsCallbackMap.insert(std::make_pair(
@@ -69,7 +69,7 @@ bool ExecuteJavascriptCallback(int callbackId, CefRefPtr<CefListValue> args) {
     context->Enter();
     CefV8ValueList v8Arguments = CefListValueToCefV8ValueList(args);
     CefRefPtr<CefV8Value> v8ReturnValue = callback->ExecuteFunction(
-            NULL, v8Arguments);
+            nullptr, v8Arguments);
     if (v8ReturnValue.get()) {
         context->Exit();
         return true;
@@ -86,7 +86,7 @@ void RemoveJavascriptCallbacksForFrame(CefRefPtr<CefFrame> frame) {
         return;
     }
     JavascriptCallbackMap::iterator it = g_jsCallbackMap.begin();
-    int64 frameId = frame->GetIdentifier();
+    CefString frameId = frame->GetIdentifier();
     while (it != g_jsCallbackMap.end()) {
         if (it->second.first->GetIdentifier() == frameId) {
             // Pass current iterator and increment it after passing

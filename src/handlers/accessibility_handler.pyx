@@ -9,7 +9,7 @@ include "../process_message_utils.pyx"
 
 cdef public void AccessibilityHandler_OnAccessibilityTreeChange(
             CefRefPtr[CefValue] cefValue
-            ) except * with gil:
+            ) noexcept with gil:
     cdef object value = CefValueToPyValue(cefValue)
     cdef object callback
     try:
@@ -22,7 +22,7 @@ cdef public void AccessibilityHandler_OnAccessibilityTreeChange(
 
 cdef public void AccessibilityHandler_OnAccessibilityLocationChange(
             CefRefPtr[CefValue] cefValue
-            ) except * with gil:
+            ) noexcept with gil:
     cdef object value = CefValueToPyValue(cefValue)
     cdef object callback
     try:

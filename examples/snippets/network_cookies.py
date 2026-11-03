@@ -1,5 +1,5 @@
 """
-Implement RequestHandler.CanGetCookies and CanSetCookie
+Implement RequestHandler.CanSendCookie and CanSaveCookie
 to block or allow cookies over network requests.
 """
 
@@ -9,7 +9,7 @@ from cefpython3 import cefpython as cef
 def main():
     cef.Initialize()
     browser = cef.CreateBrowserSync(
-        url="http://www.html-kit.com/tools/cookietester/",
+        url="https://setcookie.net/foo",
         window_title="Network cookies")
     browser.SetClientHandler(RequestHandler())
     cef.MessageLoop()
@@ -22,23 +22,23 @@ class RequestHandler(object):
         self.getcount = 0
         self.setcount = 0
 
-    def CanGetCookies(self, frame, request, **_):
+    def CanSendCookie(self, browser, frame, request, cookie):
         # There are multiple iframes on that website, let's log
         # cookies only for the main frame.
         if frame.IsMain():
             self.getcount += 1
-            print("-- CanGetCookies #"+str(self.getcount))
+            print("-- CanSendCookie #"+str(self.getcount))
             print("url="+request.GetUrl()[0:80])
             print("")
         # Return True to allow reading cookies or False to block
         return True
 
-    def CanSetCookie(self, frame, request, cookie, **_):
+    def CanSaveCookie(self, browser, frame, request, response, cookie):
         # There are multiple iframes on that website, let's log
         # cookies only for the main frame.
         if frame.IsMain():
             self.setcount += 1
-            print("-- CanSetCookie @"+str(self.setcount))
+            print("-- CanSaveCookie @"+str(self.setcount))
             print("url="+request.GetUrl()[0:80])
             print("Name="+cookie.GetName())
             print("Value="+cookie.GetValue())

@@ -6,16 +6,16 @@ include "cefpython.pyx"
 include "browser.pyx"
 
 cdef JavascriptCallback CreateJavascriptCallback(int callbackId,
-        CefRefPtr[CefBrowser] cefBrowser, object frameId,
+        CefRefPtr[CefBrowser] cefBrowser, py_string frameId,
         py_string functionName):
-    # frameId is int64
+    Debug("Created javascript callback, callbackId=%s, functionName=%s" % \
+            (callbackId, functionName))
     cdef JavascriptCallback jsCallback = JavascriptCallback()
     jsCallback.callbackId = callbackId
     cdef PyBrowser browser = GetPyBrowser(cefBrowser)
     jsCallback.frame = browser.GetFrameByIdentifier(frameId)
     jsCallback.functionName = functionName
-    Debug("Created javascript callback, callbackId=%s, functionName=%s" % \
-            (callbackId, functionName))
+
     return jsCallback
 
 cdef class JavascriptCallback:
@@ -27,19 +27,22 @@ cdef class JavascriptCallback:
 
     def Call(self, *args):
         # Send process message "ExecuteJavascriptCallback".
+        cdef CefRefPtr[CefBrowser] cefBrowser
         if self.frame:
-            browser = self.frame.GetBrowser()
-            if browser:
-                browser.SendProcessMessage(
-                        cef_types.PID_RENDERER,
-                        self.frame.GetIdentifier(),
-                        "ExecuteJavascriptCallback",
-                        [self.callbackId] + list(args))
-            else:
-                # This code probably ain't needed
-                raise Exception("JavascriptCallback.Call() FAILED: browser"
-                                " not found, callbackId = %s"
-                                % self.callbackId)
+            if self.frame.cefFrame.get():
+                cefBrowser = self.frame.cefFrame.get().GetBrowser()
+            if not cefBrowser.get():
+                # The frame reference was released or has no browser anymore.
+                # Sending the callback id to another renderer could run an
+                # unrelated callback.
+                Debug("JavascriptCallback.Call(): frame is no longer valid,"
+                      " callbackId = %s" % self.callbackId)
+                return
+            GetPyBrowser(cefBrowser).GetMainFrame().SendProcessMessage(
+                    cef_types.PID_RENDERER,
+                    self.frame.GetIdentifier(),
+                    "ExecuteJavascriptCallback",
+                    [self.callbackId] + list(args))
         else:
             # This code probably ain't needed
             raise Exception("JavascriptCallback.Call() FAILED: frame not found"

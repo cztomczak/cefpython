@@ -3,6 +3,7 @@
 // Project website: https://github.com/cztomczak/cefpython
 
 #include "cefpython_app.h"
+#include "include/base/cef_compiler_specific.h"
 
 #if defined(OS_WIN)
 
@@ -21,14 +22,17 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 	CefRefPtr<CefCommandLine> command_line = \
 	        CefCommandLine::CreateCommandLine();
     command_line->InitFromString(GetCommandLineW());
-    if (command_line->HasSwitch("enable-high-dpi-support")) {
-	    CefEnableHighDPISupport();
-	}
 
 	CefMainArgs mainArgs(hInstance);
 
 #else // defined(OS_WIN)
 
+#if defined(OS_LINUX)
+// Fixes "stack smashing detected" crash when a process forked
+// from the zygote returns from main(), see CEF Issue 3912:
+// https://github.com/chromiumembedded/cef/issues/3912
+NO_STACK_PROTECTOR
+#endif
 int main(int argc, char **argv)
 {
 	CefMainArgs mainArgs(argc, argv);

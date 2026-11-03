@@ -54,8 +54,6 @@ document.
 
 Examples of embedding CEF browser using various GUI frameworks:
 
-- [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
-  library (GTK 2)
 - [gtk3.py](gtk3.py): example for [PyGObject / PyGI](https://wiki.gnome.org/Projects/PyGObject)
   library (GTK 3). Currently broken on Mac ([#310](../../../issues/310)).
 - [pysdl2.py](pysdl2.py): off-screen rendering example for
@@ -63,11 +61,8 @@ Examples of embedding CEF browser using various GUI frameworks:
   issues that are reported in Issue [#324](../../../issues/324).
 - [pywin32.py](pywin32.py): example for [pywin32](https://github.com/mhammond/pywin32)
   library
-- [qt.py](qt.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4),
-  [PyQt5](https://pypi.python.org/pypi/PyQt5)
-  and [PySide](https://wiki.qt.io/PySide) libraries.
-  PyQt4 and PySide examples are currently broken on Linux, see
-  [Issue #452](../../../issues/452).
+- [qt.py](qt.py): example for [PyQt6](https://pypi.org/project/PyQt6/) and
+  [PySide6](https://pypi.org/project/PySide6/) libraries.
 - [tkinter_.py](tkinter_.py): example for [Tkinter](https://wiki.python.org/moin/TkInter).
   Currently broken on Mac ([#309](../../../issues/309)).
 - [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)

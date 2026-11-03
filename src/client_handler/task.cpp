@@ -5,21 +5,22 @@
 #include "task.h"
 #include "include/wrapper/cef_closure_task.h"
 #include "include/base/cef_bind.h"
+#include "include/base/cef_callback.h"
 
 void PostTaskWrapper(int threadId, int taskId) {
     CefPostTask(
             static_cast<CefThreadId>(threadId),
-            CefCreateClosureTask(base::Bind(
+            CefCreateClosureTask(base::BindOnce(
                     &PyTaskRunnable,
                     taskId
             ))
     );
 }
 
-void PostDelayedTaskWrapper(int threadId, int64 delay_ms, int taskId) {
+void PostDelayedTaskWrapper(int threadId, int64_t delay_ms, int taskId) {
     CefPostDelayedTask(
             static_cast<CefThreadId>(threadId),
-            CefCreateClosureTask(base::Bind(
+            CefCreateClosureTask(base::BindOnce(
                     &PyTaskRunnable,
                     taskId
             )),
@@ -33,7 +34,7 @@ CefRefPtr<CefTask> CreateTask_SetCookie(
         const CefCookie& cookie,
         CefRefPtr<CefSetCookieCallback> callback)
 {
-    return CefCreateClosureTask(base::Bind(
+    return CefCreateClosureTask(base::BindOnce(
             base::IgnoreResult(&CefCookieManager::SetCookie), obj,
             url,
             cookie,
@@ -47,7 +48,7 @@ CefRefPtr<CefTask> CreateTask_DeleteCookies(
         const CefString& cookie_name,
         CefRefPtr<CefDeleteCookiesCallback> callback)
 {
-    return CefCreateClosureTask(base::Bind(
+    return CefCreateClosureTask(base::BindOnce(
             base::IgnoreResult(&CefCookieManager::DeleteCookies), obj,
             url,
             cookie_name,

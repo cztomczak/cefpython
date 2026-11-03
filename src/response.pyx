@@ -14,7 +14,7 @@ cdef class PyResponse:
 
     cdef CefRefPtr[CefResponse] GetCefResponse(self
             ) except *:
-        if <void*>self.cefResponse != NULL and self.cefResponse.get():
+        if self.cefResponse and self.cefResponse.get():
             return self.cefResponse
         raise Exception("CefResponse was destroyed, you cannot use this object anymore")
 
@@ -48,12 +48,12 @@ cdef class PyResponse:
         PyToCefString(mimeType, cefMimeType)
         self.GetCefResponse().get().SetMimeType(cefMimeType)
 
-    cpdef str GetHeader(self, py_string name):
+    cpdef str GetHeaderByName(self, py_string name):
         assert type(name) in (str, unicode, bytes), (
-                "Response.GetHeader() failed: name param is not a string")
+                "Response.GetHeaderByName() failed: name param is not a string")
         cdef CefString cefName
         PyToCefString(name, cefName)
-        return CefToPyString(self.GetCefResponse().get().GetHeader(cefName))
+        return CefToPyString(self.GetCefResponse().get().GetHeaderByName(cefName))
 
     cpdef dict GetHeaderMap(self):
         cdef list headerMultimap = self.GetHeaderMultimap()
@@ -86,7 +86,7 @@ cdef class PyResponse:
 
     cpdef py_void SetHeaderMap(self, dict headerMap):
         assert len(headerMap) > 0, "headerMap param is empty"
-        cpdef list headerMultimap = []
+        cdef list headerMultimap = []
         cdef object key
         for key in headerMap:
             headerMultimap.append((str(key), str(headerMap[key])))

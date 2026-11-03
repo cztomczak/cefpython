@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "cefpython.pyx"
+from libc.stdint cimport int64_t
 import weakref
 
 cdef object g_pyWebRequests = weakref.WeakValueDictionary()
@@ -83,7 +84,7 @@ cdef class PyWebRequest:
         self.cefWebRequest = <CefRefPtr[CefURLRequest]?>(CefURLRequest_Create(
                 pyRequest.cefRequest,
                 <CefRefPtr[CefURLRequestClient]?>cppWebRequestClient,
-                <CefRefPtr[CefRequestContext]?>NULL))
+                <CefRefPtr[CefRequestContext]?>nullptr))
 
     cdef object GetCallback(self, str funcName):
         if hasattr(self.pyWebRequestClient, funcName) and (
@@ -122,9 +123,9 @@ cdef class PyWebRequest:
 cdef public void WebRequestClient_OnUploadProgress(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
-        int64 current,
-        int64 total
-        ) except * with gil:
+        int64_t current,
+        int64_t total
+        ) noexcept with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
     try:
@@ -143,9 +144,9 @@ cdef public void WebRequestClient_OnUploadProgress(
 cdef public void WebRequestClient_OnDownloadProgress(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
-        int64 current,
-        int64 total
-        ) except * with gil:
+        int64_t current,
+        int64_t total
+        ) noexcept with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
     try:
@@ -166,7 +167,7 @@ cdef public void WebRequestClient_OnDownloadData(
         CefRefPtr[CefURLRequest] cefWebRequest,
         const void* data,
         size_t dataLength
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
     try:
@@ -184,7 +185,7 @@ cdef public void WebRequestClient_OnDownloadData(
 cdef public void WebRequestClient_OnRequestComplete(
         int webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyWebRequest webRequest
     cdef object userCallback
     try:

@@ -41,7 +41,7 @@ class WindowUtils:
 
     @classmethod
     def gtk_plug_new(cls, WindowHandle gdkNativeWindow):
-        return <WindowHandle>gtk_plug_new(<GdkNativeWindow>gdkNativeWindow)
+        return <WindowHandle>gtk_plug_new(<unsigned long>gdkNativeWindow)
 
     @classmethod
     def gtk_widget_show(cls, WindowHandle gtkWidgetPtr):
@@ -52,3 +52,11 @@ class WindowUtils:
     def InstallX11ErrorHandlers(cls):
         with nogil:
             x11.InstallX11ErrorHandlers()
+
+    @classmethod
+    def GetX11DefaultVisualId(cls, int screen_number):
+        return x11.GetX11DefaultVisualId(screen_number)
+
+    @classmethod
+    def SetX11DefaultVisualForGtkWidget(cls, WindowHandle gtkWidgetPtr):
+        return x11.SetX11DefaultVisualForGtkWidget(<GtkWidget*>gtkWidgetPtr)

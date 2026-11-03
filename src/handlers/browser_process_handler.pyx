@@ -6,7 +6,7 @@ include "../cefpython.pyx"
 
 cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
         CefRefPtr[CefListValue] extra_info
-        ) except * with gil:
+        ) noexcept with gil:
     try:
         pass
     except:
@@ -15,7 +15,7 @@ cdef public void BrowserProcessHandler_OnRenderProcessThreadCreated(
 
 cdef public void BrowserProcessHandler_OnBeforeChildProcessLaunch(
         CefRefPtr[CefCommandLine] cefCommandLine
-        ) except * with gil:
+        ) noexcept with gil:
     try:
         AppendSwitchesToCommandLine(cefCommandLine, g_commandLineSwitches)
     except:

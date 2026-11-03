@@ -8,10 +8,10 @@ include "../frame.pyx"
 
 cdef public void V8FunctionHandler_Execute(
         CefRefPtr[CefBrowser] cefBrowser,
-        int64 frameId,
+        CefString& frameId,
         CefString& cefFuncName,
         CefRefPtr[CefListValue] cefFuncArgs
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef CefRefPtr[CefFrame] cefFrame
     cdef PyFrame pyFrame  # may be None
@@ -22,9 +22,9 @@ cdef public void V8FunctionHandler_Execute(
     cdef py_string errorMessage
     try:
         pyBrowser = GetPyBrowser(cefBrowser, "V8FunctionHandler_Execute")
-        cefFrame = cefBrowser.get().GetFrame(frameId)
+        cefFrame = cefBrowser.get().GetFrameByName(frameId)
         if cefFrame.get():
-            pyFrame = GetPyFrame(cefFrame)
+            pyFrame = GetPyFrame(cefBrowser, cefFrame)
         else:
             pyFrame = None
         funcName = CefToPyString(cefFuncName)

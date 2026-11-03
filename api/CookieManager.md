@@ -6,8 +6,7 @@
 Class used for managing cookies. The methods of this class may be called on
 any thread unless otherwise indicated.
 
-Use the `CookieManager.CreateManager` static method to instantiate
-this class.
+Use the `CookieManager.GetGlobalManager` static method to obtain an instance.
 
 TODO: in upstream CEF some methods here have a callback parameter
 that when non-NULL will execute asynchronously on the IO thread
@@ -18,14 +17,10 @@ also have an OnComplete callback.
 Table of contents:
 * [Methods](#methods)
   * [GetGlobalManager](#getglobalmanager)
-  * [GetBlockingManager](#getblockingmanager)
-  * [CreateManager](#createmanager)
-  * [SetSupportedSchemes](#setsupportedschemes)
   * [VisitAllCookies](#visitallcookies)
   * [VisitUrlCookies](#visiturlcookies)
   * [SetCookie](#setcookie)
   * [DeleteCookies](#deletecookies)
-  * [SetStoragePath](#setstoragepath)
   * [FlushStore](#flushstore)
 
 
@@ -47,52 +42,6 @@ Description from upstream CEF:
 > is non-NULL it will be executed asnychronously on the IO thread after the
 > manager's storage has been initialized. Using this method is equivalent to
 > calling CefRequestContext::GetGlobalContext()->GetDefaultCookieManager()
-
-
-### GetBlockingManager
-
-| | |
-| --- | --- |
-| __Return__ | [CookieManager](CookieManager.md) |
-
-Description from upstream CEF:
-> Returns a cookie manager that neither stores nor retrieves cookies. All
-> usage of cookies will be blocked including cookies accessed via the network
-> (request/response headers), via JavaScript (document.cookie), and via
-> CefCookieManager methods. No cookies will be displayed in DevTools. If you
-> wish to only block cookies sent via the network use the CefRequestHandler
-> CanGetCookies and CanSetCookie methods instead.
-
-
-### CreateManager
-
-| Parameter | Type |
-| --- | --- |
-| path | string |
-| persistSessionCookies=False | bool |
-| __Return__ | [CookieManager](CookieManager.md) |
-
-Creates a new cookie manager. Otherwise, data will be stored at the
-specified |path|. To persist session cookies (cookies without an expiry
-date or validity interval) set |persistSessionCookies|
-to true. If using global manager then see the [ApplicationSettings](ApplicationSettings.md).`persist_session_cookies`
-option. Session cookies are generally intended to be transient and most
-Web browsers do not persist them. Returns None if creation fails.
-
-You can have a separate cookie manager for each browser,
-see [RequestHandler](RequestHandler.md).GetCookieManager().
-
-
-### SetSupportedSchemes
-
-| Parameter | Type |
-| --- | --- |
-| schemes | list |
-| __Return__ | void |
-
-Set the schemes supported by this manager. The default schemes ("http",
-"https", "ws" and "wss") will always be supported. Must be called before
-any cookies are accessed.
 
 
 ### VisitAllCookies
@@ -176,22 +125,6 @@ will not yet be deleted.
 
 TODO: the CEF C++ function returns false if a non-empty invalid URL is
 specified or if cookies cannot be accessed.
-
-
-### SetStoragePath
-
-| Parameter | Type |
-| --- | --- |
-| path | string |
-| persist_session_cookies=False | bool |
-| __Return__ | bool |
-
-Sets the directory path that will be used for storing cookie data. If
-|path| is empty data will be stored in memory only. Otherwise, data will be
-stored at the specified |path|. To persist session cookies (cookies without
-an expiry date or validity interval) set |persist_session_cookies| to true.
-Session cookies are generally intended to be transient and most Web
-browsers do not persist them. Returns false if cookies cannot be accessed.
 
 
 ### FlushStore

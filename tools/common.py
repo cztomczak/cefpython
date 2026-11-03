@@ -14,6 +14,8 @@ import struct
 import sys
 import tempfile
 
+import cef_version
+
 # These sample apps will be deleted when creating setup/wheel packages
 CEF_SAMPLE_APPS = ["cefclient", "cefsimple", "ceftests", "chrome-sandbox"]
 
@@ -51,8 +53,8 @@ if OS_POSTFIX == "win":
     OS_POSTFIX2 = "win32" if ARCH32 else "win64"
     CEF_POSTFIX2 = "windows32" if ARCH32 else "windows64"
 elif OS_POSTFIX == "mac":
-    OS_POSTFIX2 = "mac32" if ARCH32 else "mac64"
-    CEF_POSTFIX2 = "macosx32" if ARCH32 else "macosx64"
+    OS_POSTFIX2 = "macarm64"
+    CEF_POSTFIX2 = "macosarm64"
 elif OS_POSTFIX == "linux":
     OS_POSTFIX2 = "linux32" if ARCH32 else "linux64"
     CEF_POSTFIX2 = "linux32" if ARCH32 else "linux64"
@@ -164,14 +166,10 @@ SRC_DIR = os.path.join(ROOT_DIR, "src")
 # Subdirectories in src/
 CLIENT_HANDLER_DIR = os.path.join(SRC_DIR, "client_handler")
 CPP_UTILS_DIR = os.path.join(SRC_DIR, "cpp_utils")
-LINUX_DIR = os.path.join(SRC_DIR, "linux")
-MAC_DIR = os.path.join(SRC_DIR, "mac")
 SUBPROCESS_DIR = os.path.join(SRC_DIR, "subprocess")
-WINDOWS_DIR = os.path.abspath(os.path.join(SRC_DIR, "windows"))
 # -- end subdirectories in src/
 
 TOOLS_DIR = os.path.join(ROOT_DIR, "tools")
-INSTALLER_DIR = os.path.join(TOOLS_DIR, "installer")
 UNITTESTS_DIR = os.path.abspath(os.path.join(ROOT_DIR, "unittests"))
 # ----------------------------------------------------------------------------
 
@@ -214,30 +212,45 @@ SUBPROCESS_EXE = os.path.join(BUILD_SUBPROCESS,
 
 # These Visual Studio constants are used by automate.py tool
 # to build upstream C++ projects. CEF Python C++ code is built
-# with setuptools/distutils in the build_cpp_projects.py tool.
+# with CMake (see CMakeLists.txt).
 # -----------------------------------------------------------------------------
+
+def _find_vcvars():
+    """Locate vcvarsall.bat for VS2022+ using vswhere.exe,
+    falling back to known Community/Professional/Enterprise paths."""
+    import subprocess as _sp
+    vswhere = (r"C:\Program Files (x86)\Microsoft Visual Studio"
+               r"\Installer\vswhere.exe")
+    if os.path.isfile(vswhere):
+        try:
+            out = _sp.check_output(
+                [vswhere, "-latest",
+                 "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+                 "-property", "installationPath"],
+                stderr=_sp.DEVNULL).decode().strip()
+            if out:
+                candidate = os.path.join(
+                    out, r"VC\Auxiliary\Build\vcvarsall.bat")
+                if os.path.isfile(candidate):
+                    return candidate
+        except Exception:
+            pass
+    # Fallback: try known editions in preference order
+    for edition in ("Community", "Professional", "Enterprise", "BuildTools"):
+        for year in ("2022", "2019", "2017"):
+            candidate = (r"C:\Program Files\Microsoft Visual Studio"
+                         r"\{year}\{ed}\VC\Auxiliary\Build\vcvarsall.bat"
+                         .format(year=year, ed=edition))
+            if os.path.isfile(candidate):
+                return candidate
+    # Last resort: a guessed path so the string is never empty
+    return (r"C:\Program Files\Microsoft Visual Studio\2022\Community"
+            r"\VC\Auxiliary\Build\vcvarsall.bat")
+
 
 VS_PLATFORM_ARG = "x86" if ARCH32 else "amd64"
 
-# Python 3.5 / 3.6 / 3.7 / 3.8 / 3.9
-VS2015_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 14.0"
-                 "\\VC\\vcvarsall.bat")
-
-# Required for building old CEF branches < 2704
-VS2013_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 12.0"
-                 "\\VC\\vcvarsall.bat")
-
-# Python 3.4
-VS2010_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 10.0"
-                 "\\VC\\vcvarsall.bat")
-
-# Python 2.7
-VS2008_VCVARS = ("C:\\Program Files (x86)\\Microsoft Visual Studio 9.0"
-                 "\\VC\\vcvarsall.bat")
-
-if WINDOWS and not os.path.exists(VS2008_VCVARS):
-    VS2008_VCVARS = (os.environ["LOCALAPPDATA"]+"\\Programs\\Common\\Microsoft"
-                     "\\Visual C++ for Python\\9.0\\vcvarsall.bat")
+VCVARS = _find_vcvars()
 
 # -----------------------------------------------------------------------------
 
@@ -273,7 +286,7 @@ def get_python_include_path():
     #    ~/.pyenv/versions/2.7.13/include/python2.7
     # 3) ~/.pyenv/versions/3.4.6/include/python2.7m
     # 4) /usr/include/python2.7
-    base_dir = os.path.dirname(sys.executable)
+    base_dir = sys.base_prefix
     try_dirs = ["{base_dir}/include",
                 "{base_dir}/../include/python{ver}",
                 "{base_dir}/../include/python{ver}*",
@@ -389,13 +402,17 @@ def get_setup_installer_basename(version, postfix2):
 def _detect_cefpython_binary_dir():
     """Detect cefpython binary directory where cefpython modules
     will be put. Eg. build/cefpython_56.0_win32/."""
-    # Check cef version from header file and check cefpython version
-    # that was passed as command line argument to either build.py
-    # or make-installer.py. The CEFPYTHON_BINARY constant should
-    # only be used in those two scripts, so version number in sys.argv
-    # is expected. If not found then keep the default
-    # "CEFPYTHON_BINARY_NOTSET" value intact.
     dirname = get_cefpython_binary_basename(OS_POSTFIX2, ignore_error=True)
+    if not dirname:
+        # sys.argv has no version yet (e.g. build.py injects the default
+        # version after importing common). Fall back to the version from
+        # the CEF header file so CEFPYTHON_BINARY is set correctly even
+        # when no explicit version argument was supplied on the command line.
+        cef_ver = get_cefpython_version()
+        if cef_ver:
+            version = "{major}.0".format(major=cef_ver["CHROME_VERSION_MAJOR"])
+            dirname = "cefpython_binary_{version}_{os}".format(
+                    version=version, os=OS_POSTFIX2)
     if not dirname:
         return
     binary_dir = os.path.join(BUILD_DIR, dirname)
@@ -409,7 +426,7 @@ def _detect_distrib_dir():
     if version:
         # Will only be set when called from scripts that had version
         # number arg passed on command line: build.py, build_distrib.py,
-        # make_installer.py, etc.
+        # etc.
         if LINUX or MAC:
             # - On Linux buildig 32bit and 64bit separately, so don't
             # delete eg. 64bit distrib when building 32bit distrib.
@@ -431,6 +448,8 @@ def _detect_distrib_dir():
 
 
 def get_version_from_command_line_args(caller_script, ignore_error=False):
+    """Parse version number from sys.argv. Returns None (or "" when
+    ignore_error=True) if not found; callers may supply a default."""
     args = " ".join(sys.argv)
     match = re.search(r"\b(\d+)\.\d+\b", args)
     if match:
@@ -449,41 +468,21 @@ def get_version_from_command_line_args(caller_script, ignore_error=False):
 
 def get_cefpython_version():
     """Get CEF version from the 'src/version/' directory."""
-    header_file = os.path.join(SRC_DIR, "version",
-                               "cef_version_"+OS_POSTFIX+".h")
-    return get_version_from_file(header_file)
+    return cef_version.read()
 
 
 def get_version_from_file(header_file):
-    with open(header_file, "rU") as fp:
-        contents = fp.read()  # no need to decode() as "rU" specified
-    ret = dict()
-    matches = re.findall(r'^#define (\w+) "?([^\s"]+)"?', contents,
-                         re.MULTILINE)
-    for match in matches:
-        ret[match[0]] = match[1]
-    return ret
+    return cef_version.parse_header(header_file)
 
 
 def get_msvs_for_python(vs_prefix=False):
-    """Get MSVS version (eg 2008) for current python running."""
-    if sys.version_info[:2] == (2, 7):
-        return "VS2008" if vs_prefix else "2008"
-    elif sys.version_info[:2] == (3, 4):
-        return "VS2010" if vs_prefix else "2010"
-    elif sys.version_info[:2] == (3, 5):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 6):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 7):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 8):
-        return "VS2015" if vs_prefix else "2015"
-    elif sys.version_info[:2] == (3, 9):
-        return "VS2015" if vs_prefix else "2015"
-    else:
-        print("ERROR: This version of Python is not supported")
-        sys.exit(1)
+    """Return the VS lib subdirectory label used by the prebuilt binaries
+    that tools/automate.py creates (build/cef*/lib/VS<label>/). It must
+    match the label in get_available_python_compilers() in automate.py."""
+    if sys.version_info >= (3, 10):
+        return "VS2022" if vs_prefix else "2022"
+    print("ERROR: Python 3.10 or later is required")
+    sys.exit(1)
 
 
 _detect_cef_binaries_libraries_dir()

@@ -13,11 +13,11 @@ bool RenderHandler::GetRootScreenRect(CefRefPtr<CefBrowser> browser,
 }
 
 
-bool RenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser,
+void RenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser,
                                 CefRect& rect)
 {
     REQUIRE_UI_THREAD();
-    return RenderHandler_GetViewRect(browser, rect);
+    RenderHandler_GetViewRect(browser, rect);
 }
 
 
@@ -69,22 +69,12 @@ void RenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
 }
 
 
-void RenderHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
-                                   CefCursorHandle cursor,
-                                   CursorType type,
-                                   const CefCursorInfo& custom_cursor_info)
-{
-    REQUIRE_UI_THREAD();
-    RenderHandler_OnCursorChange(browser, cursor);
-}
-
-
 void RenderHandler::OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
                                           double x,
                                           double y)
 {
     REQUIRE_UI_THREAD();
-    RenderHandler_OnScrollOffsetChanged(browser);
+    RenderHandler_OnScrollOffsetChanged(browser, x, y);
 }
 
 

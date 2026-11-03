@@ -19,7 +19,8 @@ bool DialogHandler::OnFileDialog(CefRefPtr<CefBrowser> browser,
                                  const CefString& title,
                                  const CefString& default_file_path,
                                  const std::vector<CefString>& accept_filters,
-                                 int selected_accept_filter,
+                                 const std::vector<CefString>& accept_extensions,
+                                 const std::vector<CefString>& accept_descriptions,
                                  CefRefPtr<CefFileDialogCallback> callback)
 {
 #if defined(OS_LINUX)
@@ -28,7 +29,8 @@ bool DialogHandler::OnFileDialog(CefRefPtr<CefBrowser> browser,
                                          title,
                                          default_file_path,
                                          accept_filters,
-                                         selected_accept_filter,
+                                         accept_extensions,
+                                         accept_descriptions,
                                          callback);
 #else
     return false;

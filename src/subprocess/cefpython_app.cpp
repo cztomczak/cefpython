@@ -31,6 +31,7 @@
 #include "include/wrapper/cef_closure_task.h"
 #include "include/base/cef_bind.h"
 #include "include/base/cef_logging.h"
+#include "include/base/cef_callback.h"
 #include <vector>
 #include <algorithm>
 #include "v8utils.h"
@@ -114,9 +115,9 @@ void CefPythonApp::OnBeforeCommandLineProcessing(
     //
     // When compiling under Python 2.7 (VS2008) using Visual C++ for
     // Python, it seems you can't use WINSDK 7 header files even though
-    // WINVER was specified in build_cpp_projects.py macros. Thus calling
-    // using proc address. Specifying full path to Shell32.dll is not
-    // required, in Chromium's source code full paths are not used.
+    // WINVER was specified. Thus calling using proc address. Specifying
+    // full path to Shell32.dll is not required, in Chromium's source code
+    // full paths are not used.
     //
     // Note:
     //   subprocess.exe is built with UNICODE defined, however the
@@ -149,7 +150,7 @@ void CefPythonApp::OnRegisterCustomSchemes(
 }
 
 CefRefPtr<CefResourceBundleHandler> CefPythonApp::GetResourceBundleHandler() {
-    return NULL;
+    return nullptr;
 }
 
 CefRefPtr<CefBrowserProcessHandler> CefPythonApp::GetBrowserProcessHandler() {
@@ -199,24 +200,6 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
     LOG(INFO) << logMessage.c_str();
 }
 
-void CefPythonApp::OnRenderProcessThreadCreated(
-        CefRefPtr<CefListValue> extra_info) {
-#ifdef BROWSER_PROCESS
-    // If you have an existing CefListValue that you would like
-    // to provide, do this:
-    // | extra_info = mylist.get()
-    // The equivalent in Cython is:
-    // | extra_info.Assign(mylist.get())
-    REQUIRE_IO_THREAD();
-    // Eg.:
-    // | extra_info->SetBool(0, false);
-    // | extra_info->SetString(1, "test");
-    // This is included only in the Browser process, when building
-    // the libcefpythonapp library.
-    BrowserProcessHandler_OnRenderProcessThreadCreated(extra_info);
-#endif // BROWSER_PROCESS
-}
-
 CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
 #ifdef BROWSER_PROCESS
 #if defined(OS_LINUX)
@@ -236,7 +219,7 @@ CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
     return print_handler_;
 }
 
-void CefPythonApp::OnScheduleMessagePumpWork(int64 delay_ms) {
+void CefPythonApp::OnScheduleMessagePumpWork(int64_t delay_ms) {
 #ifdef BROWSER_PROCESS
     MainMessageLoopExternalPump* message_pump =\
             MainMessageLoopExternalPump::Get();
@@ -250,17 +233,20 @@ void CefPythonApp::OnScheduleMessagePumpWork(int64 delay_ms) {
 // CefRenderProcessHandler
 // -----------------------------------------------------------------------------
 
-void CefPythonApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) {
-}
-
 void CefPythonApp::OnWebKitInitialized() {
 }
 
-void CefPythonApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser) {
+void CefPythonApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDictionaryValue> extra_info) {
+    browserViewCount_[browser->GetIdentifier()]++;
 }
 
 void CefPythonApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser) {
     LOG(INFO) << "[Renderer process] OnBrowserDestroyed()";
+    int browserId = browser->GetIdentifier();
+    if (--browserViewCount_[browserId] > 0) {
+        return;
+    }
+    browserViewCount_.erase(browserId);
     RemoveJavascriptBindings(browser);
 }
 
@@ -268,45 +254,31 @@ void CefPythonApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
                                     CefRefPtr<CefV8Context> context) {
     LOG(INFO) << "[Renderer process] OnContextCreated()";
+    CefRefPtr<CefV8Context> frameContext = frame->GetV8Context();
+    if (!frameContext.get() || !frameContext->IsSame(context)) {
+        LOG(INFO) << "[Renderer process] OnContextCreated(): not the frame's"
+                     " V8 context (e.g. DevTools), skipping";
+        return;
+    }
     CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(
             "OnContextCreated");
     CefRefPtr<CefListValue> arguments = message->GetArgumentList();
-    /*
-    Sending int64 type using process messaging would require
-    converting it to a string or a binary, or you could send
-    two ints, see this topic:
-    http://www.magpcss.org/ceforum/viewtopic.php?f=6&t=10869
-    */
-    /*
-    // Example of converting int64 to string. Still need an
-    // example of converting it back from string.
-    std::string logMessage = "[Renderer process] OnContextCreated(): frameId=";
-    stringstream stream;
-    int64 value = frame->GetIdentifier();
-    stream << value;
-    logMessage.append(stream.str());
-    LOG(INFO) << logMessage.c_str();
-    */
-    // TODO: losing int64 precision, the solution is to convert
-    //       it to string and then in the Browser process back
-    //       from string to int64. But it is rather unlikely
-    //       that number of frames will exceed int range, so
-    //       casting it to int for now.
-    arguments->SetInt(0, (int)(frame->GetIdentifier()));
-    browser->SendProcessMessage(PID_BROWSER, message);
+    arguments->SetString(0, frame->GetIdentifier());
+    frame->SendProcessMessage(PID_BROWSER, message);
     CefRefPtr<CefDictionaryValue> jsBindings = GetJavascriptBindings(browser);
+
     if (jsBindings.get()) {
         // Javascript bindings are most probably not yet set for
         // the main frame, they will be set a moment later due to
         // process messaging delay. The code seems to be executed
         // only for iframes.
         if (frame->IsMain()) {
-            DoJavascriptBindingsForFrame(browser, frame, context);
+            DoJavascriptBindingsForFrame(browser, frame, context, false);
         } else {
             if (jsBindings->HasKey("bindToFrames")
                     && jsBindings->GetType("bindToFrames") == VTYPE_BOOL
                     && jsBindings->GetBool("bindToFrames")) {
-                DoJavascriptBindingsForFrame(browser, frame, context);
+                DoJavascriptBindingsForFrame(browser, frame, context, false);
             }
         }
     }
@@ -324,16 +296,17 @@ void CefPythonApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
     message = CefProcessMessage::Create("OnContextReleased");
     arguments = message->GetArgumentList();
     arguments->SetInt(0, browser->GetIdentifier());
-    // TODO: losing int64 precision, the solution is to convert
-    //       it to string and then in the Browser process back
-    //       from string to int64. But it is rather unlikely
-    //       that number of frames will exceed int range, so
-    //       casting it to int for now.
-    arguments->SetInt(1, (int)(frame->GetIdentifier()));
+    arguments->SetString(1, frame->GetIdentifier());
     // Should we send the message using current "browser"
     // when this is not the main frame? It could fail, so
     // it is more reliable to always use the main browser.
-    browser->SendProcessMessage(PID_BROWSER, message);
+    frame->SendProcessMessage(PID_BROWSER, message);
+    AppliedJavascriptBindingsMap::iterator applied =
+            appliedJavascriptBindings_.find(frame->GetIdentifier());
+    if (applied != appliedJavascriptBindings_.end()
+            && applied->second.first->IsSame(context)) {
+        appliedJavascriptBindings_.erase(applied);
+    }
     // ------------------------------------------------------------------------
     // 2. Remove python callbacks for a frame.
     // ------------------------------------------------------------------------
@@ -360,21 +333,23 @@ void CefPythonApp::OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser,
 }
 
 bool CefPythonApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                        CefRefPtr<CefFrame> frame,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message) {
-    std::string messageName = message->GetName().ToString();
+    const std::string& messageName = message->GetName();
     std::string logMessage = "[Renderer process] OnProcessMessageReceived(): ";
     logMessage.append(messageName.c_str());
     LOG(INFO) << logMessage.c_str();
     CefRefPtr<CefListValue> args = message->GetArgumentList();
     if (messageName == "DoJavascriptBindings") {
-        if (args->GetSize() == 1
+        if (args->GetSize() == 2
                 && args->GetType(0) == VTYPE_DICTIONARY
-                && args->GetDictionary(0)->IsValid()) {
+                && args->GetDictionary(0)->IsValid()
+                && args->GetType(1) == VTYPE_BOOL) {
             // Is it necessary to make a copy? It won't harm.
             SetJavascriptBindings(browser,
                     args->GetDictionary(0)->Copy(false));
-            DoJavascriptBindingsForBrowser(browser);
+            DoJavascriptBindingsForBrowser(browser, args->GetBool(1));
         } else {
             LOG(ERROR) << "[Renderer process] OnProcessMessageReceived():"
                           " invalid arguments,"
@@ -414,7 +389,7 @@ CefRefPtr<CefDictionaryValue> CefPythonApp::GetJavascriptBindings(
     if (javascriptBindings_.find(browserId) != javascriptBindings_.end()) {
         return javascriptBindings_[browserId];
     }
-    return NULL;
+    return nullptr;
 }
 
 void CefPythonApp::RemoveJavascriptBindings(CefRefPtr<CefBrowser> browser) {
@@ -472,7 +447,7 @@ bool CefPythonApp::BindedFunctionExists(CefRefPtr<CefBrowser> browser,
 }
 
 void CefPythonApp::DoJavascriptBindingsForBrowser(
-                        CefRefPtr<CefBrowser> browser) {
+                        CefRefPtr<CefBrowser> browser, bool force) {
     // get frame
     // get context
     // if bindToFrames is true loop through all frames,
@@ -485,7 +460,7 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
                       " bindings not set";
         return;
     }
-    std::vector<int64> frameIds;
+    std::vector<CefString> frameIds;
     std::vector<CefString> frameNames;
     if (jsBindings->HasKey("bindToFrames")
             && jsBindings->GetType("bindToFrames") == VTYPE_BOOL
@@ -496,7 +471,7 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
         browser->GetFrameNames(frameNames);
         for (std::vector<CefString>::iterator it = frameNames.begin(); \
                 it != frameNames.end(); ++it) {
-            CefRefPtr<CefFrame> frame = browser->GetFrame(*it);
+            CefRefPtr<CefFrame> frame = browser->GetFrameByName(*it);
             if (frame.get()) {
                 frameIds.push_back(frame->GetIdentifier());
                 // | printf("GetFrameNames(): frameId = %lu\n",
@@ -507,7 +482,7 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
     // BUG in CEF:
     //   GetFrameNames() does not return the main frame (as of revision 1448).
     //   Make it work for the future when this bug gets fixed.
-    std::vector<int64>::iterator find_it = std::find(
+    std::vector<CefString>::iterator find_it = std::find(
             frameIds.begin(), frameIds.end(),
             browser->GetMainFrame()->GetIdentifier());
     if (find_it == frameIds.end()) {
@@ -521,36 +496,57 @@ void CefPythonApp::DoJavascriptBindingsForBrowser(
                       " frameIds.size() == 0";
         return;
     }
-    for (std::vector<int64>::iterator it = frameIds.begin(); \
+    for (std::vector<CefString>::iterator it = frameIds.begin(); \
             it != frameIds.end(); ++it) {
-        if (*it <= 0) {
+        if (it->empty()) {
             // GetFrameIdentifiers() bug that returned a vector
             // filled with zeros. This problem was fixed by using'
             // GetFrameNames() so this block of code should not
             // be executed anymore.
             LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForBrowser():"
-                          " frameId <= 0";
+                          " frameId empty";
             // printf("[CEF Python] Renderer: frameId = %lli\n", *it);
             continue;
         }
-        CefRefPtr<CefFrame> frame = browser->GetFrame(*it);
+        CefRefPtr<CefFrame> frame = browser->GetFrameByIdentifier(*it);
         if (!frame.get()) {
             LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForBrowser():"
-                          " GetFrame() failed";
+                          " GetFrameByIdentifier() failed";
             continue;
         }
         CefRefPtr<CefV8Context> context = frame->GetV8Context();
-        CefRefPtr<CefTaskRunner> taskRunner = context->GetTaskRunner();
-        taskRunner->PostTask(CefCreateClosureTask(base::Bind(
-                &CefPythonApp::DoJavascriptBindingsForFrame, this,
-                browser, frame, context
-        )));
+        if (!context.get() || !context->IsValid()) {
+            // No valid context yet; OnContextCreated will register globals
+            // directly once the context exists and bindings are set.
+            LOG(INFO) << "[Renderer process] DoJavascriptBindingsForBrowser():"
+                         " V8 context not available yet, deferring bindings"
+                         " to OnContextCreated";
+            continue;
+        }
+        if (!CefV8Context::InContext()) {
+            // We are on the renderer thread but outside any V8 execution.
+            // Register globals synchronously so they are available before
+            // any queued ExecuteJavascript IPC messages run their JS.
+            DoJavascriptBindingsForFrame(browser, frame, context, force);
+        } else {
+            // Already inside a V8 execution (nested pump); post a task.
+            CefRefPtr<CefTaskRunner> taskRunner = context->GetTaskRunner();
+            if (taskRunner.get()) {
+                taskRunner->PostTask(
+                    CefCreateClosureTask(
+                        base::BindOnce(
+                            &CefPythonApp::DoJavascriptBindingsForFrame, this,
+                            browser, frame, context, force)));
+            }
+        }
     }
 }
 
 void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                         CefRefPtr<CefFrame> frame,
-                        CefRefPtr<CefV8Context> context) {
+                        CefRefPtr<CefV8Context> context,
+                        bool force) {
+    LOG(INFO) << "[Renderer process] in DoJavascriptBindingsForFrame()";
     CefRefPtr<CefDictionaryValue> jsBindings = GetJavascriptBindings(browser);
     if (!jsBindings.get()) {
         // Bindings may not yet be set, it's okay.
@@ -570,6 +566,16 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
             && jsBindings->GetType("bindToFrames") == VTYPE_BOOL)) {
         LOG(ERROR) << "[Renderer process] DoJavascriptBindingsForFrame():"
                       " invalid data [1]";
+        return;
+    }
+    CefString frameId = frame->GetIdentifier();
+    AppliedJavascriptBindingsMap::iterator applied =
+            appliedJavascriptBindings_.find(frameId);
+    if (!force && applied != appliedJavascriptBindings_.end()
+            && applied->second.first->IsSame(context)
+            && applied->second.second->IsEqual(jsBindings)) {
+        LOG(INFO) << "[Renderer process] DoJavascriptBindingsForFrame():"
+                     " same bindings already set for this context";
         return;
     }
 
@@ -659,7 +665,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
     for (std::vector<CefString>::iterator it = objectsVector.begin(); \
             it != objectsVector.end(); ++it) {
         CefString objectName = *it;
-        CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(NULL, NULL);
+        CefRefPtr<CefV8Value> v8Object = CefV8Value::CreateObject(nullptr, nullptr);
         v8Window->SetValue(objectName, v8Object, V8_PROPERTY_ATTRIBUTE_NONE);
         // METHODS.
         if (!(objects->GetType(objectName) == VTYPE_DICTIONARY)) {
@@ -692,6 +698,7 @@ void CefPythonApp::DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
         }
     }
     // END.
+    appliedJavascriptBindings_[frameId] = std::make_pair(context, jsBindings);
     if (didEnterContext)
         context->Exit();
 }

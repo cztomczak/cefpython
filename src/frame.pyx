@@ -11,35 +11,44 @@ cdef dict g_pyFrames = {}
 # it shouldn't be kept global anymore.
 cdef list g_unreferenced_frames = []  # [str unique identifier, ..]
 
-cdef object GetUniqueFrameId(int browserId, object frameId):
-    return str(browserId) +"#"+ str(frameId)
+cdef str GetUniqueFrameId(int browserId, py_string frameId):
+    return str(browserId) +"#"+ frameId
 
-cdef PyFrame GetPyFrameById(int browserId, object frameId):
-    cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
+cdef PyFrame GetPyFrameById(int browserId, py_string frameId):
+    cdef str uniqueFrameId = GetUniqueFrameId(browserId, frameId)
     if uniqueFrameId in g_pyFrames:
         return g_pyFrames[uniqueFrameId]
     return None
 
-cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
+cdef PyFrame GetPyFrame(CefRefPtr[CefBrowser] cefBrowser,
+                        CefRefPtr[CefFrame] cefFrame):
+    # cefBrowser must be the browser of cefFrame, which may already be detached.
     global g_pyFrames
 
-    if <void*>cefFrame == NULL or not cefFrame.get():
+    if not cefFrame or not cefFrame.get():
         raise Exception("GetPyFrame(): CefFrame reference is NULL")
+    if not cefBrowser or not cefBrowser.get():
+        raise Exception("GetPyFrame(): CefBrowser reference is NULL")
 
     cdef PyFrame pyFrame
-    cdef object frameId = cefFrame.get().GetIdentifier()  # int64
-    cdef int browserId = cefFrame.get().GetBrowser().get().GetIdentifier()
-    assert (frameId and browserId), "frameId or browserId empty"
-    cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
+    cdef CefString frameId = cefFrame.get().GetIdentifier()
+    cdef int browserId = cefBrowser.get().GetIdentifier()
+    if not browserId:
+        raise Exception("GetPyFrame(): browserId is 0 (browser not yet initialised)")
+    # frameId may be empty for internal frames that CEF creates before the
+    # underlying renderer frame is ready (e.g. the PDF-viewer internal frame
+    # on the first OnLoadStart).  The code below already creates an incomplete
+    # PyFrame for this case, so do not assert here.
+    cdef str uniqueFrameId = GetUniqueFrameId(browserId, CefToPyString(frameId))
 
-    if frameId < 0:
+    if frameId.empty():
         # Underlying frame does not yet exist. In such case PyFrame
         # is not stored in g_pyFrames since frameId is invalid.
         # However even though frame is not supposed to exist, you
         # can still call CefFrame.ExecuteFunction and it works fine
         # in tutorial.py example.
         Debug("GetPyFrame(): underlying frame does not yet exist:"
-              " browserId = {0}, frameId = {1}".format(browserId, frameId))
+              " browserId = {0}, frameId = {1}".format(browserId, CefToPyString(frameId)))
     else:
         if uniqueFrameId in g_pyFrames:
             return g_pyFrames[uniqueFrameId]
@@ -56,16 +65,17 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
         del g_pyFrames[uFid]
     # ----
 
-    pyFrame = PyFrame(browserId, frameId)
+    pyFrame = PyFrame(browserId, CefToPyString(frameId))
     pyFrame.cefFrame = cefFrame
 
     if uniqueFrameId in g_unreferenced_frames \
-            or frameId < 0 \
+            or frameId.empty() \
+            or not cefFrame.get().IsValid() \
             or browserId in g_unreferenced_browsers \
             or browserId in g_closed_browsers:
         # Browser was already globally unreferenced in OnBeforeClose,
         # thus all frames are globally unreferenced too, or frame
-        # was unreferenced in OnContextReleased. Create a new
+        # was unreferenced in OnContextReleased or detached. Create a new
         # incomplete instance of PyFrame object. Read comments in
         # browser.pyx > GetPyBrowser and in Browser.md for what
         # "incomplete" means.
@@ -77,19 +87,19 @@ cdef PyFrame GetPyFrame(CefRefPtr[CefFrame] cefFrame):
         # SIDE EFFECT: two calls to GetPyFrame for the same frame object
         #              may return two different PyFrame objects. Compare
         #              frame objects always using GetIdentifier().
-        Debug("GetPyFrame(): create new PyFrame, frameId=%s" % frameId)
+        Debug("GetPyFrame(): create new PyFrame, frameId=%s" % CefToPyString(frameId))
         g_pyFrames[uniqueFrameId] = pyFrame
     return pyFrame
 
-cdef void RemovePyFrame(int browserId, object frameId) except *:
+cdef void RemovePyFrame(int browserId, str frameId) except *:
     # Called from V8ContextHandler_OnContextReleased().
     global g_pyFrames
     cdef PyFrame pyFrame
-    cdef object uniqueFrameId = GetUniqueFrameId(browserId, frameId)
+    cdef str uniqueFrameId = GetUniqueFrameId(browserId, frameId)
     if uniqueFrameId in g_pyFrames:
         Debug("del g_pyFrames[%s]" % uniqueFrameId)
         pyFrame = g_pyFrames[uniqueFrameId]
-        pyFrame.cefFrame.Assign(NULL)
+        pyFrame.cefFrame.Assign(nullptr)
         del pyFrame
         del g_pyFrames[uniqueFrameId]
         g_unreferenced_frames.append(uniqueFrameId)
@@ -103,13 +113,13 @@ cdef void RemovePyFramesForBrowser(int browserId) except *:
     cdef object uniqueFrameId
     cdef PyFrame pyFrame
     global g_pyFrames
-    for uniqueFrameId, pyFrame in g_pyFrames.iteritems():
+    for uniqueFrameId, pyFrame in g_pyFrames.items():
         if pyFrame.GetBrowserIdentifier() == browserId:
             toRemove.append(uniqueFrameId)
     for uniqueFrameId in toRemove:
         Debug("del g_pyFrames[%s]" % uniqueFrameId)
         pyFrame = g_pyFrames[uniqueFrameId]
-        pyFrame.cefFrame.Assign(NULL)
+        pyFrame.cefFrame.Assign(nullptr)
         del pyFrame
         del g_pyFrames[uniqueFrameId]
         g_unreferenced_frames.append(uniqueFrameId)
@@ -119,22 +129,22 @@ cdef void RemovePyFramesForBrowser(int browserId) except *:
 cdef class PyFrame:
     cdef CefRefPtr[CefFrame] cefFrame
     cdef int browserId
-    cdef object frameId
+    cdef str frameId
 
     cdef CefRefPtr[CefFrame] GetCefFrame(self) except *:
         # Do not call IsValid() here, if the frame does not exist
         # then no big deal, no reason to crash the application.
         # The CEF calls will fail, but they also won't cause crash.
-        if <void*>self.cefFrame != NULL and self.cefFrame.get():
+        if self.cefFrame and self.cefFrame.get():
             return self.cefFrame
         raise Exception("PyFrame.GetCefFrame() failed: CefFrame was destroyed")
 
-    def __init__(self, int browserId, int frameId):
+    def __init__(self, int browserId, py_string frameId):
         self.browserId = browserId
         self.frameId = frameId
 
     cpdef py_bool IsValid(self):
-        if <void*>self.cefFrame != NULL and self.cefFrame.get() \
+        if self.cefFrame and self.cefFrame.get() \
                 and self.cefFrame.get().IsValid():
             return True
         return False
@@ -168,7 +178,7 @@ cdef class PyFrame:
         self.GetCefFrame().get().ExecuteJavaScript(PyToCefStringValue(jsCode),
                 PyToCefStringValue(scriptUrl), startLine)
 
-    cpdef object GetIdentifier(self):
+    cpdef str GetIdentifier(self):
         # It is better to save browser and frame identifiers during
         # browser instantiation. When freeing PyBrowser and PyFrame
         # we need these identifiers. CefFrame and CefBrowser may already
@@ -177,10 +187,27 @@ cdef class PyFrame:
         return self.frameId
 
     cpdef PyFrame GetParent(self):
-        return GetPyFrame(self.GetCefFrame().get().GetParent())
+        cdef CefRefPtr[CefFrame] cefParent
+        if not self.cefFrame.get():
+            return None
+        cefParent = self.cefFrame.get().GetParent()
+        if not cefParent.get():
+            return None
+        return GetPyFrame(self.GetBrowser().GetCefBrowser(), cefParent)
 
     cpdef PyBrowser GetBrowser(self):
-        return GetPyBrowser(self.GetCefFrame().get().GetBrowser())
+        cdef CefRefPtr[CefBrowser] cefBrowser
+        cdef PyBrowser pyBrowser
+        if self.cefFrame.get():
+            cefBrowser = self.cefFrame.get().GetBrowser()
+            if cefBrowser.get():
+                return GetPyBrowser(cefBrowser)
+        # The frame was detached, or its reference was released when its
+        # V8 context was released.
+        pyBrowser = GetPyBrowserById(self.browserId)
+        if pyBrowser is None:
+            raise Exception("Frame.GetBrowser(): browser was closed")
+        return pyBrowser
 
     cpdef int GetBrowserIdentifier(self) except *:
         return self.browserId
@@ -203,13 +230,6 @@ cdef class PyFrame:
     cpdef py_bool IsMain(self):
         return self.GetCefFrame().get().IsMain()
 
-    cpdef py_void LoadString(self, py_string value, py_string url):
-        cdef CefString cefValue
-        cdef CefString cefUrl
-        PyToCefString(value, cefValue)
-        PyToCefString(url, cefUrl)
-        self.GetCefFrame().get().LoadString(cefValue, cefUrl)
-
     cpdef py_void LoadUrl(self, py_string url):
         cdef CefString cefUrl
         PyToCefString(url, cefUrl)
@@ -229,3 +249,25 @@ cdef class PyFrame:
 
     cpdef py_void ViewSource(self):
         self.GetCefFrame().get().ViewSource()
+
+    cpdef py_void SendProcessMessage(self, cef_process_id_t targetProcess,
+            py_string frameId, py_string messageName, list pyArguments
+            ) :
+        cdef CefRefPtr[CefProcessMessage] message = \
+                CefProcessMessage_Create(PyToCefStringValue(messageName))
+        # This does not work, no idea why, the CEF implementation
+        # seems not to allow it, both Assign() and swap() do not work:
+        # | message.get().GetArgumentList().Assign(arguments.get())
+        # | message.get().GetArgumentList().swap(arguments)
+        cdef CefRefPtr[CefListValue] messageArguments = \
+                message.get().GetArgumentList()
+        PyListToExistingCefListValue(self.GetBrowserIdentifier(), 
+                frameId,
+                pyArguments, messageArguments)
+        Debug("SendProcessMessage(): message=%s, arguments size=%d" % (
+                messageName,
+                message.get().GetArgumentList().get().GetSize()))
+
+        self.GetCefFrame().get().SendProcessMessage(targetProcess, message)
+
+

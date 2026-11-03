@@ -22,7 +22,7 @@ public:
     bool GetRootScreenRect(CefRefPtr<CefBrowser> browser,
                            CefRect& rect) override;
 
-    bool GetViewRect(CefRefPtr<CefBrowser> browser,
+    void GetViewRect(CefRefPtr<CefBrowser> browser,
                      CefRect& rect) override;
 
     bool GetScreenPoint(CefRefPtr<CefBrowser> browser,
@@ -45,12 +45,6 @@ public:
                  const RectList& dirtyRects,
                  const void* buffer,
                  int width, int height) override;
-
-    void OnCursorChange(CefRefPtr<CefBrowser> browser,
-                        CefCursorHandle cursor,
-                        CursorType type,
-                        const CefCursorInfo& custom_cursor_info
-                        ) override;
 
     void OnScrollOffsetChanged(CefRefPtr<CefBrowser> browser,
                                double x,

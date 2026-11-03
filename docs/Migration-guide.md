@@ -52,6 +52,7 @@ Table of contents:
 * [v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loop-qt-wxpython)
 * [v66.1+ Navigation urls passed to CreateBrowserSync or LoadUrl methods need to be encoded by app code](#v661-navigation-urls-passed-to-createbrowsersync-or-loadurl-methods-need-to-be-encoded-by-app-code)
 * [v67+ Do not call the 'WindowUtils.OnSize' function](#v67-do-not-call-the-windowutilsonsize-function)
+* [v147+ Removed and changed APIs](#v147-removed-and-changed-apis)
 
 
 ## v49+ Distribution packages
@@ -178,11 +179,11 @@ its implementation in `src/dpi_aware_win.pyx`.
 
 ## v49 (Win) Do not call the 'WindowUtils.OnSize' function
 
-This function can sometimes cause app hanging during window resize.
-Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#updatebrowsersize)
-function. Except when you use the `pywin32.py` example, in such case
-`WindowUtils.OnSize` must be called.
-See [Issue #464](../../../issues/464) for more details.
+This function was reported to cause hangs during window resize in some GUI
+integrations. Follow the resize handling in the current example for your GUI
+framework. Applications that handle `WM_SIZE` directly, such as
+`pywin32.py`, should continue forwarding that message to
+`WindowUtils.OnSize`. See [Issue #464](../../../issues/464) for details.
 
 
 ## v49+ Notify CEF on move or resize events
@@ -376,9 +377,9 @@ CEF v55 was the last version to support MacOS 10.7.
 
 ## v57.1+ High DPI support on Windows
 
-The `cef.DpiAware.SetProcessDpiAware` function is now deprecated.
-Use cef.DpiAware.[EnableHighDpiSupport](../api/DpiAware.md#enablehighdpisupport)
-function instead.
+The `cef.DpiAware.SetProcessDpiAware` function is deprecated. Embed a DPI
+awareness manifest in both the main executable and the subprocess executable
+instead.
 
 The ApplicationSettings.[auto_zooming](../api/ApplicationSettings.md#auto_zooming)
 option should have its value set to an empty string (a default now)
@@ -459,7 +460,7 @@ cef.Request.[GetFlags](../api/Request.md#getflags) method.
 
 ## v66+ RequestHandler.GetCookieManager not getting called in some cases
 
-In some cases the RequestHandler.[GetCookieManager](../api/RequestHandler.md#getcookiemanager)
+In some cases the `RequestHandler.GetCookieManager`
 callback is not getting called due to a race condition.
 This bug is to be fixed in Issue [#429](../../../issues/429).
 
@@ -493,16 +494,66 @@ See Issue [#442](../../../issues/442) for more details on the issues.
 [Issue #384](../../../issues/384) fixes problems with browser failing to load
 urls containing certain characters by not encoding the url anymore. From now
 on it is required for the app code to encode the url properly. You can use
-the `pathlib.PurePath.as_uri` in Python 3 or `urllib.pathname2url` in
-Python 2 (`urllib.request.pathname2url` in Python 3) depending on your case.
+`pathlib.PurePath.as_uri` or `urllib.request.pathname2url` depending on your case.
 
 The `cef.GetNavigateUrl` function was removed from the cefpython3 module.
 
 
 ## v67+ Do not call the 'WindowUtils.OnSize' function
 
-This function can sometimes cause app hanging during window resize.
-Call instead the new `WindowUtils`.[UpdateBrowserSize](../api/WindowUtils.md#updatebrowsersize)
-function. Except when you use the `pywin32.py` example, in such case
-`WindowUtils.OnSize` must be called.
-See [Issue #464](../../../issues/464) for more details.
+This function was reported to cause hangs during window resize in some GUI
+integrations. Follow the resize handling in the current example for your GUI
+framework. Applications that handle `WM_SIZE` directly, such as
+`pywin32.py`, should continue forwarding that message to
+`WindowUtils.OnSize`. See [Issue #464](../../../issues/464) for details.
+
+
+## v147+ Removed and changed APIs
+
+The CEF 66 to CEF 147 jump removed or changed a number of public APIs. The
+most important application-facing changes are:
+
+| v66 API | v147 replacement or status |
+| --- | --- |
+| `Browser.GetFrame(name)` | Renamed to `Browser.GetFrameByName(name)`. |
+| `Browser.GetFrameByIdentifier(int)` | Frame identifiers are now strings. |
+| `Browser.Find(search_id, search_text, ...)` | The `search_id` argument was removed. |
+| `Browser.SendFocusEvent(focus)` | Kept as a compatibility alias; new code should use `SetFocus(focus)`. |
+| `Browser.SetMouseCursorChangeDisabled()` / `IsMouseCursorChangeDisabled()` | Removed with no direct replacement. |
+| `Frame.LoadString(value, url)` | Use `Frame.LoadUrl()` with a `data:` URL. |
+| `Request.IsReadOnly()`, `GetResourceType()`, and `GetTransitionType()` | Removed from the documentation. They were never implemented, so calling them raised `AttributeError` in v66 too. |
+| `Response.GetHeader(name)` | Renamed to `Response.GetHeaderByName(name)`. |
+| `LifespanHandler.OnBeforePopup(browser, frame, ...)` | A `popup_id` argument was added. |
+| `RequestHandler.GetAuthCredentials(browser, frame, ...)` | The `frame` argument was replaced by `origin_url`. |
+| `RequestHandler.CanGetCookies(browser, frame, request)` / `CanSetCookie(browser, frame, request, cookie)` | Replaced by `CanSendCookie(browser, frame, request, cookie)` and `CanSaveCookie(browser, frame, request, response, cookie)`. |
+| `RequestHandler.GetCookieManager`, `OnBeforePluginLoad`, and `OnPluginCrashed` | Removed. |
+| `RequestHandler.OnQuotaRequest` | Removed upstream. CEF now handles disk-quota permission prompts through `CefPermissionHandler.OnShowPermissionPrompt` with `CEF_PERMISSION_TYPE_DISK_QUOTA`. This API is not yet exposed by CEF Python and does not provide the requested quota size. |
+| `RequestHandler.OnProtocolExecution` | `allow_execution_out[0]` is now honored. Previously, OS execution was always allowed whenever the callback was invoked, regardless of this value. |
+| `RequestHandler.OnRendererProcessTerminated(browser, status)` | `error_code` and `error_string` arguments were added. New `status` values: `TS_PROCESS_OOM`, `TS_LAUNCH_FAILED` and `TS_INTEGRITY_FAILURE`. |
+| `ResourceHandler.CanGetCookie(cookie)` / `CanSetCookie(cookie)` | Removed upstream. Use `RequestHandler.CanSendCookie` / `CanSaveCookie` instead. |
+| `CookieManager.GetBlockingManager`, `CreateManager`, `SetSupportedSchemes`, and `SetStoragePath` | Removed; use `CookieManager.GetGlobalManager()` and configure persistence through application settings. |
+| `RenderHandler.GetScreenRect(browser, rect_out)` | Removed upstream. Implement the new `RenderHandler.GetScreenInfo(browser, screen_info_out)` callback and set the `rect` (and optionally `available_rect`) key instead. If no rectangle is provided, CEF falls back to `GetViewRect`. |
+| `RenderHandler.OnScrollOffsetChanged(browser)` | `x` and `y` arguments were added. Existing callbacks must accept them, otherwise a `TypeError` is raised. |
+| `cef.GetCommandLineSwitch(key)` | Removed from the documentation. It was never implemented, so calling it raised `AttributeError` in v66 too. |
+| `WebPluginInfo` and the legacy plugin APIs | Removed along with Chromium's legacy plugin support. |
+
+The following application and browser settings were removed or changed.
+Passing a removed setting raises an "Invalid appSettings key" or
+"Invalid browserSettings key" exception.
+
+| v66 setting | Type | v147 replacement or status |
+| --- | --- | --- |
+| `accept_language_list` | Application and browser | Removed; not yet exposed by CEF Python for CEF 147. |
+| `ignore_certificate_errors` | Application | Removed. |
+| `net_security_expiration_enabled` | Application | Removed upstream. |
+| `pack_loading_disabled` | Application | Removed with no replacement; pack loading can no longer be disabled. |
+| `persist_user_preferences` | Application | Removed; persistent Chrome profiles save preferences automatically. |
+| `product_version` | Application | Renamed upstream to `user_agent_product`, which CEF Python does not expose. Use `switches={"user-agent-product": "..."}` in `cef.Initialize()` instead; it is ignored when `user_agent` is set. |
+| `single_process` | Application | Removed upstream. |
+| `user_data_path` | Application | Removed. |
+| `application_cache_disabled` | Browser | Removed along with Chromium's AppCache support. |
+| `databases_disabled` | Browser | Still accepted, but has no effect: Chromium removed WebSQL and CEF no longer applies this setting. |
+| `file_access_from_file_urls_allowed` | Browser | Removed. |
+| `plugins_disabled` | Browser | Removed. |
+| `universal_access_from_file_urls_allowed` | Browser | Removed. |
+| `web_security_disabled` | Browser | Removed. |

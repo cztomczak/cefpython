@@ -3,9 +3,9 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 from libcpp cimport bool as cpp_bool
+from libc.stdint cimport int64_t
 # noinspection PyUnresolvedReferences
 cimport cef_types
-from cef_types cimport int64
 from cef_ptr cimport CefRefPtr
 
 cdef extern from "include/cef_task.h":
@@ -16,7 +16,7 @@ cdef extern from "include/cef_task.h":
                               CefRefPtr[CefTask] task)
     cdef cpp_bool CefPostDelayedTask(CefThreadId threadId,
                                      CefRefPtr[CefTask] task,
-                                     int64 delay_ms)
+                                     int64_t delay_ms)
     
     cdef cppclass CefTask:
         pass

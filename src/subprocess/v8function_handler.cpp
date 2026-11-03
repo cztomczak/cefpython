@@ -32,7 +32,7 @@ bool V8FunctionHandler::Execute(const CefString& functionName,
                 processMessage->GetArgumentList();
         messageArguments->SetInt(0, pythonCallbackId_);
         messageArguments->SetList(1, functionArguments);
-        browser->SendProcessMessage(PID_BROWSER, processMessage);
+        frame->SendProcessMessage(PID_BROWSER, processMessage);
         returnValue = CefV8Value::CreateNull();
         return true;
     } else {
@@ -50,16 +50,15 @@ bool V8FunctionHandler::Execute(const CefString& functionName,
         }
         CefRefPtr<CefListValue> functionArguments = V8ValueListToCefListValue(
                 v8Arguments);
-        // TODO: losing int64 precision here.
-        int frameId = (int)frame->GetIdentifier();
+        CefString frameId = frame->GetIdentifier();
         CefRefPtr<CefProcessMessage> processMessage = \
                 CefProcessMessage::Create("V8FunctionHandler::Execute");
         CefRefPtr<CefListValue> messageArguments = \
                 processMessage->GetArgumentList();
-        messageArguments->SetInt(0, frameId);
+        messageArguments->SetString(0, frameId);
         messageArguments->SetString(1, functionName);
         messageArguments->SetList(2, functionArguments);
-        browser->SendProcessMessage(PID_BROWSER, processMessage);
+        frame->SendProcessMessage(PID_BROWSER, processMessage);
         returnValue = CefV8Value::CreateNull();
         return true;
     }

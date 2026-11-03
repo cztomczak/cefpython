@@ -20,6 +20,11 @@ class CefPythonApp :
         public CefRenderProcessHandler {
  protected:
   std::map<int, CefRefPtr<CefDictionaryValue> > javascriptBindings_;
+  typedef std::map<CefString, std::pair<CefRefPtr<CefV8Context>,
+                   CefRefPtr<CefDictionaryValue> > >
+                   AppliedJavascriptBindingsMap;
+  AppliedJavascriptBindingsMap appliedJavascriptBindings_;
+  std::map<int, int> browserViewCount_;
   CefRefPtr<CefPrintHandler> print_handler_;
 
  public:
@@ -50,25 +55,19 @@ class CefPythonApp :
   void OnBeforeChildProcessLaunch(
       CefRefPtr<CefCommandLine> command_line) override;
 
-  void OnRenderProcessThreadCreated(
-      CefRefPtr<CefListValue> extra_info) override;
+  CefRefPtr<CefPrintHandler> GetPrintHandler();
 
-  CefRefPtr<CefPrintHandler> GetPrintHandler() override;
-
-  void OnScheduleMessagePumpWork(int64 delay_ms) override;
+  void OnScheduleMessagePumpWork(int64_t delay_ms) override;
 
 
   // ---------------------------------------------------------------------------
   // CefRenderProcessHandler
   // ---------------------------------------------------------------------------
 
-  void OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info)
-        override;
-
   void OnWebKitInitialized()
         override;
 
-  void OnBrowserCreated(CefRefPtr<CefBrowser> browser)
+  void OnBrowserCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDictionaryValue> extra_info)
         override;
 
   void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
@@ -97,6 +96,7 @@ class CefPythonApp :
         override;
 
   bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                        CefRefPtr<CefFrame> frame,
                                         CefProcessId source_process,
                                         CefRefPtr<CefProcessMessage> message)
         override;
@@ -115,11 +115,13 @@ class CefPythonApp :
   bool BindedFunctionExists(CefRefPtr<CefBrowser> browser,
                                     const CefString& funcName);
 
-  void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser);
+  void DoJavascriptBindingsForBrowser(CefRefPtr<CefBrowser> browser,
+                                      bool force);
 
   void DoJavascriptBindingsForFrame(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
-                                    CefRefPtr<CefV8Context> context);
+                                    CefRefPtr<CefV8Context> context,
+                                    bool force);
 
 private:
   IMPLEMENT_REFCOUNTING(CefPythonApp);

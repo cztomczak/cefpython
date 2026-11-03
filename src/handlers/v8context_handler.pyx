@@ -11,19 +11,42 @@
 include "../cefpython.pyx"
 include "../browser.pyx"
 include "../frame.pyx"
+from libc.stdint cimport int64_t
 
 cdef public void V8ContextHandler_OnContextCreated(
         CefRefPtr[CefBrowser] cefBrowser,
         CefRefPtr[CefFrame] cefFrame
-        ) except * with gil:
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
+    cdef JavascriptBindings jsBindings
     try:
-        Debug("V8ContextHandler_OnContextCreated()")
+        # These V8 events are reconstructed in the browser process from
+        # asynchronous IPC messages sent by the renderer (see note at the top
+        # of this file), so a frame from a rapid create -> navigate -> destroy
+        # sequence can already be detached by the time we run here, in which
+        # case CefFrame::GetBrowser() can return NULL. The context then belongs
+        # to a frame that is no longer attached, so skip it.
+        if not cefFrame.get().GetBrowser().get():
+            Debug("OnContextCreated: frame has no browser (detached during"
+                  " lifecycle transition), skipping")
+            return
         pyBrowser = GetPyBrowser(cefBrowser, "OnContextCreated")
         pyBrowser.SetUserData("__v8ContextCreated", True)
-        pyFrame = GetPyFrame(cefFrame)
+        pyFrame = GetPyFrame(cefBrowser, cefFrame)
+        # Re-send the JS bindings to the renderer. OnContextCreated fires for
+        # each new V8 context (page load, navigation, cross-origin navigation
+        # under site isolation); a fresh context has none of the previously
+        # injected globals, so they must be resent or bindings would be lost
+        # after navigation. Do this before the user callback so that any
+        # ExecuteJavascript the user issues from OnContextCreated finds its
+        # globals already registered when it reaches the renderer (both travel
+        # the same IPC channel).
+        if pyFrame.IsMain():
+            jsBindings = pyBrowser.GetJavascriptBindings()
+            if jsBindings:
+                jsBindings.RebindBrowser(pyBrowser)
         # User defined callback
         clientCallback = pyBrowser.GetClientCallback("OnContextCreated")
         if clientCallback:
@@ -34,8 +57,8 @@ cdef public void V8ContextHandler_OnContextCreated(
 
 cdef public void V8ContextHandler_OnContextReleased(
         int browserId,
-        int64 frameId
-        ) except * with gil:
+        CefString frameId
+        ) noexcept with gil:
     cdef PyBrowser pyBrowser
     cdef PyFrame pyFrame
     cdef object clientCallback
@@ -53,16 +76,16 @@ cdef public void V8ContextHandler_OnContextReleased(
         if not pyBrowser:
             Debug("OnContextReleased: Browser doesn't exist anymore, id={id}"
                   .format(id=str(browserId)))
-            RemovePyFrame(browserId, frameId)
+            RemovePyFrame(browserId, CefToPyString(frameId))
             return
-        pyFrame = GetPyFrameById(browserId, frameId)
+        pyFrame = GetPyFrameById(browserId, CefToPyString(frameId))
         # Frame may already be destroyed while IPC messaging was executing
         # (Issue #431).
         if pyFrame:
             clientCallback = pyBrowser.GetClientCallback("OnContextReleased")
             if clientCallback:
                 clientCallback(browser=pyBrowser, frame=pyFrame)
-        RemovePyFrame(browserId, frameId)
+        RemovePyFrame(browserId, CefToPyString(frameId))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)

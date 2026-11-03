@@ -4,15 +4,25 @@
 
 #include "common/cefpython_public_api.h"
 #include "include/cef_request_handler.h"
+#include "include/base/cef_callback.h"
+#include "cookie_access_filter.h"
+#include "resource_request_handler.h"
 
-typedef cef_return_value_t ReturnValue;
-
-
-class RequestHandler : public CefRequestHandler
+class RequestHandler : public CefRequestHandler,
+                       public CookieAccessFilter
 {
 public:
     RequestHandler(){}
     virtual ~RequestHandler(){}
+
+    CefRefPtr<CefResourceRequestHandler> GetResourceRequestHandler(
+                        CefRefPtr<CefBrowser> browser,
+                        CefRefPtr<CefFrame> frame,
+                        CefRefPtr<CefRequest> request,
+                        bool is_navigation,
+                        bool is_download,
+                        const CefString& request_initiator,
+                        bool& disable_default_handling) override;
 
     bool OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
                         CefRefPtr<CefFrame> frame,
@@ -20,25 +30,8 @@ public:
                         bool user_gesture,
                         bool is_redirect) override;
 
-    ReturnValue OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
-                                     CefRefPtr<CefFrame> frame,
-                                     CefRefPtr<CefRequest> request,
-                                     CefRefPtr<CefRequestCallback> callback
-                                     ) override;
-
-    CefRefPtr<CefResourceHandler> GetResourceHandler(
-                                      CefRefPtr<CefBrowser> browser,
-                                      CefRefPtr<CefFrame> frame,
-                                      CefRefPtr<CefRequest> request) override;
-
-    void OnResourceRedirect(CefRefPtr<CefBrowser> browser,
-                            CefRefPtr<CefFrame> frame,
-                            CefRefPtr<CefRequest> request,
-                            CefRefPtr<CefResponse> response,
-                            CefString& new_url) override;
-
     bool GetAuthCredentials(CefRefPtr<CefBrowser> browser,
-                            CefRefPtr<CefFrame> frame,
+                            const CefString& origin_url,
                             bool isProxy,
                             const CefString& host,
                             int port,
@@ -46,35 +39,16 @@ public:
                             const CefString& scheme,
                             CefRefPtr<CefAuthCallback> callback) override;
 
-    bool OnQuotaRequest(CefRefPtr<CefBrowser> browser,
-                        const CefString& origin_url,
-                        int64 new_size,
-                        CefRefPtr<CefRequestCallback> callback) override;
-
-    void OnProtocolExecution(CefRefPtr<CefBrowser> browser,
-                             const CefString& url,
-                             bool& allow_os_execution) override;
-
     bool OnCertificateError(CefRefPtr<CefBrowser> browser,
                             cef_errorcode_t cert_error,
                             const CefString& request_url,
                             CefRefPtr<CefSSLInfo> ssl_info,
-                            CefRefPtr<CefRequestCallback> callback) override;
+                            CefRefPtr<CefCallback> callback) override;
 
     void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
-                                   cef_termination_status_t status) override;
-
-    void OnPluginCrashed(CefRefPtr<CefBrowser> browser,
-                         const CefString& plugin_path) override;
-
-    bool CanGetCookies(CefRefPtr<CefBrowser> browser,
-                       CefRefPtr<CefFrame> frame,
-                       CefRefPtr<CefRequest> request) override;
-
-    bool CanSetCookie(CefRefPtr<CefBrowser> browser,
-                      CefRefPtr<CefFrame> frame,
-                      CefRefPtr<CefRequest> request,
-                      const CefCookie& cookie) override;
+                                   cef_termination_status_t status,
+                                   int error_code,
+                                   const CefString& error_string) override;
 
 private:
     IMPLEMENT_REFCOUNTING(RequestHandler);

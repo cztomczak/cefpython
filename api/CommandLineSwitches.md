@@ -24,7 +24,7 @@ There are two types of switches, Chromium switches and CEF switches:
 
 Some of the switches in Chromium are experimental, and may crash application if used inappropriately.
 
-When debbugging is On, the whole command line string will be displayed in console, with both CEF switches set internally, and the ones appended by cefpython. On Linux you will also see in console the command line string for subprocesses. On Windows, command line strings for subprocesses won't be seen in console, you can view them by opening the debug.log file. Example command line strings from debug logs, for the main process and the renderer process:
+When debbugging is On, the whole command line string will be displayed in console, with both CEF switches set internally, and the ones appended by cefpython. You will also see in console the command line strings for subprocesses. Example command line strings from debug logs, for the main process and the renderer process:
 
 ```text
 # Main process

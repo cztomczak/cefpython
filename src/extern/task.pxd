@@ -11,13 +11,13 @@ from cef_cookie cimport CefCookie, CefCookieManager
 from cef_cookie cimport CefSetCookieCallback, CefDeleteCookiesCallback
 # noinspection PyUnresolvedReferences
 from libcpp cimport bool as cpp_bool
-from cef_types cimport int64
+from libc.stdint cimport int64_t
 
 
 cdef extern from "client_handler/task.h":
 
     void PostTaskWrapper(int threadId, int taskId) nogil
-    void PostDelayedTaskWrapper(int threadId, int64 delay_ms, int taskId) nogil
+    void PostDelayedTaskWrapper(int threadId, int64_t delay_ms, int taskId) nogil
 
     cdef CefRefPtr[CefTask] CreateTask_SetCookie(
             CefCookieManager* obj,

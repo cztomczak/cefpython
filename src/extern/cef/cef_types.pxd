@@ -2,8 +2,6 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
-include "compile_time_constants.pxi"
-
 from libcpp cimport bool as cpp_bool
 # noinspection PyUnresolvedReferences
 from libc.stddef cimport wchar_t
@@ -13,35 +11,20 @@ from cef_string cimport cef_string_t
 # noinspection PyUnresolvedReferences
 from libc.limits cimport UINT_MAX
 
+cdef extern from *:
+    ctypedef unsigned short char16_t
+
 cdef extern from "include/internal/cef_types.h":
 
-    # noinspection PyUnresolvedReferences
-    ctypedef int32_t int32
-    # noinspection PyUnresolvedReferences
-    ctypedef uint32_t uint32
-    # noinspection PyUnresolvedReferences
-    ctypedef int64_t int64
-    # noinspection PyUnresolvedReferences
-    ctypedef uint64_t uint64
-
-    IF UNAME_SYSNAME == "Windows":
-        # noinspection PyUnresolvedReferences
-        ctypedef wchar_t char16
-    ELSE:
-        ctypedef unsigned short char16
-
-    ctypedef uint32 cef_color_t
+    ctypedef uint32_t cef_color_t
 
     ctypedef struct CefSettings:
-        cef_string_t accept_language_list
-        int single_process
         cef_string_t browser_subprocess_path
+        cef_string_t main_bundle_path
         int command_line_args_disabled
         cef_string_t cache_path
-        int enable_net_security_expiration
         int persist_session_cookies
         cef_string_t user_agent
-        cef_string_t product_version
         cef_string_t locale
         cef_string_t log_file
         int log_severity
@@ -49,21 +32,15 @@ cdef extern from "include/internal/cef_types.h":
         cef_string_t javascript_flags
         cef_string_t resources_dir_path
         cef_string_t locales_dir_path
-        int pack_loading_disabled
         int remote_debugging_port
         int uncaught_exception_stack_size
-        int context_safety_implementation # Not exposed.
-        int ignore_certificate_errors
         cef_color_t background_color
-        int persist_user_preferences
-        cef_string_t user_data_path
         int windowless_rendering_enabled
         int no_sandbox
         int external_message_pump
         cef_string_t framework_dir_path
 
     ctypedef struct CefBrowserSettings:
-        cef_string_t accept_language_list
         cef_color_t background_color
         cef_string_t standard_font_family
         cef_string_t fixed_font_family
@@ -81,17 +58,12 @@ cdef extern from "include/internal/cef_types.h":
         cef_state_t javascript_close_windows
         cef_state_t javascript_access_clipboard
         cef_state_t javascript_dom_paste
-        cef_state_t plugins
-        cef_state_t universal_access_from_file_urls
-        cef_state_t file_access_from_file_urls
-        cef_state_t web_security
         cef_state_t image_loading
         cef_state_t image_shrink_standalone_to_fit
         cef_state_t text_area_resize
         cef_state_t tab_to_links
         cef_state_t local_storage
-        cef_state_t databases
-        cef_state_t application_cache
+        cef_state_t databases_deprecated
         cef_state_t webgl
         int windowless_frame_rate
 
@@ -191,12 +163,12 @@ cdef extern from "include/internal/cef_types.h":
         KEYEVENT_CHAR
     ctypedef struct _cef_key_event_t:
         cef_key_event_type_t type
-        uint32 modifiers
+        uint32_t modifiers
         int windows_key_code
         int native_key_code
         int is_system_key
-        char16 character
-        char16 unmodified_character
+        char16_t character
+        char16_t unmodified_character
         cpp_bool focus_on_editable_field
     ctypedef _cef_key_event_t CefKeyEvent
     ctypedef enum cef_event_flags_t:
@@ -214,12 +186,16 @@ cdef extern from "include/internal/cef_types.h":
         EVENTFLAG_IS_KEY_PAD          = 1 << 9,
         EVENTFLAG_IS_LEFT             = 1 << 10,
         EVENTFLAG_IS_RIGHT            = 1 << 11,
+        EVENTFLAG_IS_REPEAT           = 1 << 13,
 
     # LoadHandler
     ctypedef enum cef_termination_status_t:
         TS_ABNORMAL_TERMINATION,
         TS_PROCESS_WAS_KILLED,
         TS_PROCESS_CRASHED,
+        TS_PROCESS_OOM,
+        TS_LAUNCH_FAILED,
+        TS_INTEGRITY_FAILURE,
 
     ctypedef enum cef_errorcode_t:
         ERR_NONE = 0,
@@ -245,7 +221,6 @@ cdef extern from "include/internal/cef_types.h":
         ERR_ADDRESS_UNREACHABLE = -109,
         ERR_SSL_CLIENT_AUTH_CERT_NEEDED = -110,
         ERR_TUNNEL_CONNECTION_FAILED = -111,
-        ERR_NO_SSL_VERSIONS_ENABLED = -112,
         ERR_SSL_VERSION_OR_CIPHER_MISMATCH = -113,
         ERR_SSL_RENEGOTIATION_REQUESTED = -114,
         ERR_CERT_COMMON_NAME_INVALID = -200,
@@ -287,7 +262,7 @@ cdef extern from "include/internal/cef_types.h":
     ctypedef struct cef_mouse_event_t:
         int x
         int y
-        uint32 modifiers
+        uint32_t modifiers
     ctypedef cef_mouse_event_t CefMouseEvent
 
     # RenderHandler > GetScreenInfo():
@@ -323,16 +298,18 @@ cdef extern from "include/internal/cef_types.h":
     # LifespanHandler and RequestHandler
 
     ctypedef enum cef_window_open_disposition_t:
-        WOD_UNKNOWN,
-        WOD_CURRENT_TAB,
-        WOD_SINGLETON_TAB,
-        WOD_NEW_FOREGROUND_TAB,
-        WOD_NEW_BACKGROUND_TAB,
-        WOD_NEW_POPUP,
-        WOD_NEW_WINDOW,
-        WOD_SAVE_TO_DISK,
-        WOD_OFF_THE_RECORD,
-        WOD_IGNORE_ACTION
+        CEF_WOD_UNKNOWN,
+        CEF_WOD_CURRENT_TAB,
+        CEF_WOD_SINGLETON_TAB,
+        CEF_WOD_NEW_FOREGROUND_TAB,
+        CEF_WOD_NEW_BACKGROUND_TAB,
+        CEF_WOD_NEW_POPUP,
+        CEF_WOD_NEW_WINDOW,
+        CEF_WOD_SAVE_TO_DISK,
+        CEF_WOD_OFF_THE_RECORD,
+        CEF_WOD_IGNORE_ACTION,
+        CEF_WOD_SWITCH_TO_TAB,
+        CEF_WOD_NEW_PICTURE_IN_PICTURE
     ctypedef cef_window_open_disposition_t WindowOpenDisposition
 
     ctypedef enum cef_path_key_t:
@@ -347,11 +324,18 @@ cdef extern from "include/internal/cef_types.h":
         PK_DIR_RESOURCES,
     ctypedef cef_path_key_t PathKey
 
-    ctypedef enum cef_plugin_policy_t:
-        PLUGIN_POLICY_ALLOW,
-        PLUGIN_POLICY_DETECT_IMPORTANT,
-        PLUGIN_POLICY_BLOCK,
-        PLUGIN_POLICY_DISABLE,
+    ctypedef enum cef_referrer_policy_t:
+        REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_FROM_SECURE_TO_INSECURE
+        REFERRER_POLICY_DEFAULT = REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_FROM_SECURE_TO_INSECURE,
+        REFERRER_POLICY_REDUCE_REFERRER_GRANULARITY_ON_TRANSITION_CROSS_ORIGIN,
+        REFERRER_POLICY_ORIGIN_ONLY_ON_TRANSITION_CROSS_ORIGIN,
+        REFERRER_POLICY_NEVER_CLEAR_REFERRER,
+        REFERRER_POLICY_ORIGIN,
+        REFERRER_POLICY_CLEAR_REFERRER_ON_TRANSITION_CROSS_ORIGIN,
+        REFERRER_POLICY_ORIGIN_CLEAR_ON_TRANSITION_FROM_SECURE_TO_INSECURE,
+        REFERRER_POLICY_NO_REFERRER,
+        REFERRER_POLICY_NUM_VALUES
+    ctypedef cef_referrer_policy_t ReferrerPolicy
 
     # Drag & drop
 

@@ -11,6 +11,7 @@
 
 bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
                                     CefRefPtr<CefFrame> frame,
+                                    int popup_id,
                                     const CefString& target_url,
                                     const CefString& target_frame_name,
                                     WindowOpenDisposition target_disposition,
@@ -19,15 +20,16 @@ bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
                                     CefWindowInfo& windowInfo,
                                     CefRefPtr<CefClient>& client,
                                     CefBrowserSettings& settings,
+                                    CefRefPtr<CefDictionaryValue>& extra_info,
                                     bool* no_javascript_access)
 {
     REQUIRE_UI_THREAD();
     // Note: passing popupFeatures is not yet supported.
     const int popupFeaturesNotImpl = 0;
-    return LifespanHandler_OnBeforePopup(browser, frame, target_url,
-                        target_frame_name, target_disposition, user_gesture,
+    return LifespanHandler_OnBeforePopup(browser, frame, popup_id,
+                        target_url, target_frame_name, target_disposition, user_gesture,
                         popupFeaturesNotImpl, windowInfo, client, settings,
-                        no_javascript_access);
+                        extra_info, no_javascript_access);
 }
 
 

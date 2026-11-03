@@ -21,6 +21,6 @@ cdef extern from "include/cef_response.h":
         void SetStatusText(CefString& statusText)
         CefString GetMimeType()
         void SetMimeType(CefString& mimeType)
-        CefString GetHeader(CefString& name)
+        CefString GetHeaderByName(CefString& name)
         void GetHeaderMap(CefResponseHeaderMap& headerMap)
         void SetHeaderMap(CefResponseHeaderMap& headerMap)

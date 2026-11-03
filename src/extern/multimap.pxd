@@ -15,7 +15,7 @@ cdef extern from "<map>" namespace "std":
             iterator operator--() nogil
             bint operator==(iterator) nogil
             bint operator!=(iterator) nogil
-        multimap() nogil except +
+        multimap() except + nogil
         # noinspection PyUnresolvedReferences
         U& operator[](T&) nogil
         # noinspection PyUnresolvedReferences
