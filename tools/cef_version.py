@@ -52,8 +52,9 @@ def package_version(release=None):
     (e.g. 147.1-beta -> 147.1b0), else a dev version. Raises ValueError if
     `release` is not a valid PEP 440 version.
 
-    The dev version is <major>.0.dev<commit-count>+g<short-hash> from git
-    (e.g. 147.0.dev5231+g98cd08e), or <major>.0.dev0 if git is unavailable.
+    The dev version is <major>.0.dev<commit-count> from git
+    (e.g. 147.0.dev5231), or <major>.0.dev0 if git is unavailable. It has no
+    local version identifier (+g<short-hash>) because PyPI rejects those.
     """
     if release is not None:
         from packaging.version import InvalidVersion, Version
@@ -65,10 +66,7 @@ def package_version(release=None):
     try:
         count = subprocess.check_output(
             ["git", "rev-list", "--count", "HEAD"], cwd=_ROOT).decode().strip()
-        short = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"], cwd=_ROOT).decode().strip()
-        return "{base}.dev{count}+g{short}".format(
-            base=base, count=count, short=short)
+        return "{base}.dev{count}".format(base=base, count=count)
     except Exception as exc:
         print("[cef_version.py] WARNING: git version derivation failed"
               " (%s); using %s.dev0" % (exc, base))

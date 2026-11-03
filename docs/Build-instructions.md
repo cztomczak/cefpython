@@ -160,7 +160,8 @@ On Linux this requires a display - either a real one or Xvfb:
 python tools/build.py --wheel
 ```
 
-This creates a wheel in `build/dist/`. To test it the way CI does:
+This creates a wheel for the running Python version in `build/dist/`. To test
+it the way CI does:
 
 ```
 pip install build/dist/cefpython3-<version>-<tags>.whl
@@ -171,17 +172,42 @@ python tools/smoke_test.py
 Afterwards, run `pip uninstall cefpython3` and `python tools/build.py` to
 switch back to the dev tree.
 
+#### Merged wheel for all Python versions
+
+Every per-Python wheel contains the same CEF runtime (150-170 MB), so CI
+merges the wheels of a platform into one that supports all Python versions,
+e.g. `cefpython3-147.0.dev5231-cp310.cp311.cp312.cp313.cp314-cp310.cp311.cp312.cp313.cp314-win_amd64.whl`.
+It holds one `cefpython_pyXY` module per Python version and a single copy of the
+runtime. Each CI workflow builds a wheel per Python version, merges them
+with `tools/merge_wheels.py`, and runs the unit tests and the smoke test with
+the merged wheel on every Python version. Only if all of them pass is the merged
+wheel provided as the workflow's artifact. CI merges with `--require-all-pythons`,
+which fails unless there is a wheel for every Python version in the classifiers
+of `pyproject.toml`. pip refuses the merged wheel on Python versions outside
+its tag set.
+
+To build one locally, run `python tools/build.py --wheel` with each Python
+version, then merge the wheels:
+
+```
+python tools/merge_wheels.py --out-dir build/merged build/dist/*.whl
+```
+
+The merge fails unless the wheels have the same version and platform and all
+files other than the extension module are byte-for-byte identical.
+
 
 ## Versions
 
-By default the version is a development version, e.g.
-`147.0.dev5231+g98cd08e`:
+By default the version is a development version, e.g. `147.0.dev5231`:
 
 * `147` is the Chromium major version from `src/version/cef_version_*.h`.
 * `.0` is fixed, so a dev version sorts before every 147.x release
   (`147.0.dev5231` < `147.0` < `147.1`).
 * `dev5231` is the number of commits in the checked-out history.
-* `+g98cd08e` is the short hash of the current commit.
+
+The version has no local version identifier (such as `+g98cd08e`), because
+PyPI rejects those.
 
 Without git history (e.g. a source ZIP download) the version is `147.0.dev0`.
 A shallow clone gives a wrong commit count, so CI checks out the full history.
@@ -199,4 +225,4 @@ python tools/build.py --wheel --version 147.1
 
 Run the "CI Linux", "CI Windows" and "CI macOS ARM" workflows from the Actions
 tab ("Run workflow") with the `version` input set, e.g. `147.1`, then download
-the wheel artifacts.
+the wheel artifact of each workflow (one merged wheel per platform).
