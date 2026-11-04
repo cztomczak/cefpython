@@ -57,7 +57,7 @@ jobs:
 
   build:
     needs: download-cef
-    runs-on: windows-latest
+    runs-on: windows-2022
     timeout-minutes: 75
     strategy:
       fail-fast: false
