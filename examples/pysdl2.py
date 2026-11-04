@@ -122,8 +122,8 @@ def main():
         renderer_flags = sdl2.SDL_RENDERER_SOFTWARE
     windows = create_browser(renderer_flags)
     run_event_loop(windows)
-    # User exited. Shutdown CEF before SDL2, because it closes any
-    # remaining popup browsers, which destroys their SDL windows.
+    # Close the remaining browsers before shutting down CEF.
+    close_browsers(windows)
     cef.Shutdown()
     sdl2.SDL_Quit()
     logging.info("Exited gracefully")
@@ -245,7 +245,8 @@ def create_browser(renderer_flags):
 
 def run_event_loop(windows):
     """
-    Run the event loop until the user quits.
+    Run the event loop until the user quits or the main browser was
+    closed, e.g. by the page calling window.close().
 
     Each frame: send SDL2 input events to CEF, let CEF do its work
     (this is when RenderHandler.OnPaint gets called) and draw all
@@ -253,7 +254,7 @@ def run_event_loop(windows):
     """
     frames = 0
     fps_time = sdl2.SDL_GetTicks()
-    while True:
+    while windows.main_window:
         # record when we started drawing this frame
         start_time = sdl2.SDL_GetTicks()
         for event in sdl2.ext.get_events():
@@ -274,6 +275,22 @@ def run_event_loop(windows):
         frame_time = sdl2.SDL_GetTicks() - start_time
         if frame_time < 1000 // FRAME_RATE:
             sdl2.SDL_Delay(1000 // FRAME_RATE - frame_time)
+
+
+def close_browsers(windows):
+    """Close all browsers and wait until CEF has closed them."""
+    closing = []
+    while windows.all_windows():
+        # A popup that was still opening may get its window while
+        # waiting, so close new windows too.
+        for window in windows.all_windows():
+            if window not in closing:
+                window.browser.CloseBrowser(True)
+                closing.append(window)
+        # Closing is asynchronous. LifespanHandler.OnBeforeClose closes
+        # the window of each browser once CEF has closed it.
+        cef.MessageLoopWork()
+        sdl2.SDL_Delay(10)
 
 
 def is_quit_event(event, main_window):
@@ -707,7 +724,8 @@ class WindowManager(object):
 
     def all_windows(self):
         """Return the main window and all popup windows."""
-        return [self.main_window] + list(self.popup_windows.values())
+        main_window = [self.main_window] if self.main_window else []
+        return main_window + list(self.popup_windows.values())
 
     def get_or_create_window(self, browser):
         """
@@ -737,9 +755,12 @@ class WindowManager(object):
                 return window
         return None
 
-    def close_popup(self, browser):
-        """Close the window of a popup browser."""
-        window = self.popup_windows.pop(browser.GetIdentifier(), None)
+    def close_window(self, browser):
+        """Close the window of a browser."""
+        if browser.IsPopup():
+            window = self.popup_windows.pop(browser.GetIdentifier(), None)
+        else:
+            window, self.main_window = self.main_window, None
         if window:
             window.close()
 
@@ -758,7 +779,7 @@ class LoadHandler(object):
 
 
 class LifespanHandler(object):
-    """Opens popup browsers in their own SDL windows."""
+    """Opens and closes the SDL windows of browsers."""
 
     def __init__(self, windows):
         self.windows = windows
@@ -773,8 +794,7 @@ class LifespanHandler(object):
         return False  # Allow the popup
 
     def OnBeforeClose(self, browser, **_):
-        if browser.IsPopup():
-            self.windows.close_popup(browser)
+        self.windows.close_window(browser)
 
 
 class RenderHandler(object):
