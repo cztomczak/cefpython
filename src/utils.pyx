@@ -47,10 +47,24 @@ cpdef object Debug(py_string msg):
     # Convert to str in case other kind of object was passed
     msg = str(msg)
     msg = "[Browser process] " + msg
-    # CEF logging is initialized only after CEF was initialized.
-    # Otherwise the default is LOGSEVERITY_INFO and log_file is
-    # none.
-    if g_cef_initialized or g_debug:
+    if g_cef_initialized_successfully:
+        cef_log_info(PyStringToChar(msg))
+    elif g_applicationSettings.get("log_severity", LOGSEVERITY_ERROR) \
+            <= LOGSEVERITY_INFO:
+        # CEF logging is not available until CefInitialize() succeeds, and
+        # before that Chromium sends messages to its own default destination
+        # (a debug.log next to python.exe on Windows). Write to stderr
+        # directly so that these messages are not lost (Issue #709).
+        if sys.stderr:  # None when run with pythonw.exe
+            try:
+                sys.stderr.write("[cefpython] " + msg + "\n")
+                sys.stderr.flush()
+                return
+            except (OSError, ValueError):
+                # Closed or broken stderr must not break the application.
+                pass
+        # No usable stderr: fall back to Chromium's default destination,
+        # which on Windows is a debug.log next to the executable.
         cef_log_info(PyStringToChar(msg))
 
 cdef void NonCriticalError(py_string msg) except *:

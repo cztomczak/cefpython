@@ -64,12 +64,16 @@ cef.Initialize(settings=settings, switches=switches)
 
 Now you should see debug information displayed in console like this:
 ```
-[CEF Python] Initialize() called
-[CEF Python] CefExecuteProcess(): exitCode = -1
-[CEF Python] CefInitialize()
-[CEF Python] App_OnBeforeCommandLineProcessing_BrowserProcess()
-[CEF Python] Command line string for the browser process:  ...
+[cefpython] [Browser process] Initialize() called
+[cefpython] [Browser process] CefInitialize()
+[cefpython] [Browser process] App_OnBeforeCommandLineProcessing_BrowserProcess()
+[cefpython] [Browser process] Command line string for the browser process: ...
 ```
+
+The logs of all CEF processes are printed to the console instead of being
+written to "log_file". On Windows, early CEF/Chromium startup messages may
+still be written to a "debug.log" beside the Python executable, see
+ApplicationSettings.[log_file](../api/ApplicationSettings.md#log_file).
 
 
 ## Remote debugging with Google Chrome instance
