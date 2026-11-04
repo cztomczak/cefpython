@@ -40,9 +40,10 @@ import os
 import platform
 import subprocess
 import sys
+import webbrowser
 
 try:
-    from PIL import Image, __version__ as PILLOW_VERSION
+    from PIL import Image, ImageDraw, ImageFont, __version__ as PILLOW_VERSION
 except ImportError:
     print("[screenshot.py] Error: PIL module not available. To install"
           " type: pip install Pillow")
@@ -86,8 +87,8 @@ def main():
     create_browser(browser_settings)
     cef.MessageLoop()
     cef.Shutdown()
-    print("[screenshot.py] Opening screenshot with default application")
-    open_with_default_application(SCREENSHOT_PATH)
+    print("[screenshot.py] Opening screenshot.png in default browser")
+    webbrowser.open("file://" + os.path.abspath(SCREENSHOT_PATH))
 
 
 def check_versions():
@@ -157,20 +158,22 @@ def save_screenshot(browser):
         raise Exception("buffer_string is empty, OnPaint never called?")
     image = Image.frombytes("RGBA", VIEWPORT_SIZE, buffer_string,
                             "raw", "RGBA", 0, 1)
+
+    # Draw footer bar so the cut-off at viewport boundary looks intentional
+    draw = ImageDraw.Draw(image)
+    draw.rectangle([0, image.height - 42, image.width, image.height],
+                    fill="#fff8c5", outline="#d4a72c", width=2)
+    draw.text((20, image.height - 21),
+              "screenshot.py: Viewport size is %s x %s px, so the page might be cut-off"
+              % (image.width, image.height),
+              fill="#24292f", font=ImageFont.load_default(size=16), anchor="lm")
+
+    # Save image
     image.save(SCREENSHOT_PATH, "PNG")
-    print("[screenshot.py] Saved image: {path}".format(path=SCREENSHOT_PATH))
+    print("\n[screenshot.py] Saved image: {path}".format(path=SCREENSHOT_PATH))
+
     # See comments in exit_app() why PostTask must be used
     cef.PostTask(cef.TID_UI, exit_app, browser)
-
-
-def open_with_default_application(path):
-    if sys.platform.startswith("darwin"):
-        subprocess.call(("open", path))
-    elif os.name == "nt":
-        # noinspection PyUnresolvedReferences
-        os.startfile(path)
-    elif os.name == "posix":
-        subprocess.call(("xdg-open", path))
 
 
 def exit_app(browser):
