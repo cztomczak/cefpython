@@ -174,14 +174,12 @@ switch back to the dev tree.
 
 ## Versions
 
-By default the version is a development version, e.g.
-`147.0.dev5231+g98cd08e`:
+By default the version is a development version, e.g. `147.0.dev5231`:
 
 * `147` is the Chromium major version from `src/version/cef_version_*.h`.
 * `.0` is fixed, so a dev version sorts before every 147.x release
   (`147.0.dev5231` < `147.0` < `147.1`).
 * `dev5231` is the number of commits in the checked-out history.
-* `+g98cd08e` is the short hash of the current commit.
 
 Without git history (e.g. a source ZIP download) the version is `147.0.dev0`.
 A shallow clone gives a wrong commit count, so CI checks out the full history.
