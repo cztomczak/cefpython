@@ -50,6 +50,10 @@ cdef void SetApplicationSettings(
             cefString = new CefString(&cefAppSettings.cache_path)
             PyToCefStringPointer(appSettings[key], cefString)
             del cefString
+        elif key == "root_cache_path":
+            cefString = new CefString(&cefAppSettings.root_cache_path)
+            PyToCefStringPointer(appSettings[key], cefString)
+            del cefString
         elif key == "persist_session_cookies":
             cefAppSettings.persist_session_cookies = int(appSettings[key])
         elif key == "user_agent":

@@ -18,6 +18,11 @@ WINDOWS = SYSTEM if SYSTEM == "WINDOWS" else False
 LINUX = SYSTEM if SYSTEM == "LINUX" else False
 MAC = SYSTEM if SYSTEM == "MAC" else False
 
+# Issue #685: ApplicationSettings.root_cache_path for this test run.
+# _test_runner.py creates a unique directory for each isolated test and
+# removes it after the test process exits.
+ROOT_CACHE_PATH = os.environ.get("CEFPYTHON_TEST_ROOT_CACHE_PATH", "")
+
 # MessageLoopWork() performs one non-blocking iteration for applications that
 # integrate CEF into an external message loop. Exercise that API until the
 # expected browser work completes, without assuming a fixed iteration count.

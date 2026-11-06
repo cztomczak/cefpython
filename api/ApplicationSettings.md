@@ -28,6 +28,7 @@ Table of contents:
   * [persist_session_cookies](#persist_session_cookies)
   * [remote_debugging_port](#remote_debugging_port)
   * [resources_dir_path](#resources_dir_path)
+  * [root_cache_path](#root_cache_path)
   * [string_encoding](#string_encoding)
   * [uncaught_exception_stack_size](#uncaught_exception_stack_size)
   * [unique_request_context_per_browser](#unique_request_context_per_browser)
@@ -117,18 +118,22 @@ switch.
 ### cache_path
 
 (string)
-The location where cache data will be stored on disk. If empty then
-browsers will be created in "incognito mode" where in-memory caches are
-used for storage and no data is persisted to disk. HTML5 databases such as
-localStorage will only persist across sessions if a cache path is
-specified. Can be overridden for individual CefRequestContext instances via
-the CefRequestContextSettings.cache_path value.
+Browsers store profile data such as cookies with an expiry date, HTML5
+databases (localStorage etc.) and the web cache on disk, in the "Default"
+directory under [root_cache_path](#root_cache_path). CEF Python creates
+all browsers with request contexts that share storage with the global
+request context, which since v147 uses this persistent profile also when
+this value is empty, so there is no "incognito mode" with in-memory
+storage.
+
+If `root_cache_path` is empty and this value is non-empty then
+`root_cache_path` will default to this value. Any non-empty value must be
+an absolute path that is either equal to or a child directory of
+`root_cache_path`. A child directory value is ignored and the "Default"
+directory is used instead.
 
 CEF flushes cookies or other cache data to disk every 30 seconds,
 or immediately when [cefpython](cefpython.md).Shutdown() is called.
-
-When this option is not set (empty string), a unique cache directory
-will be created in the user's temp directory for each run of the application.
 
 
 ### command_line_args_disabled
@@ -348,6 +353,33 @@ The fully qualified path for the resources directory. If this value is
 empty the cef.pak and/or devtools_resources.pak files must be located in  
 the module directory on Windows/Linux or the app bundle Resources directory  
 on Mac OS X. Also configurable using the --resources-dir-path switch.
+
+
+### root_cache_path
+
+(string)
+The root directory for installation-specific data and the parent directory
+for profile-specific data. All `cache_path` values must have this parent
+directory in common. If this value is empty and `cache_path` is non-empty
+then it will default to the `cache_path` value. Any non-empty value must be
+an absolute path.
+
+If both `root_cache_path` and `cache_path` are empty then a default
+platform-specific directory will be used ("~/.config/cef_user_data" on
+Linux, "~/Library/Application Support/CEF/User Data" on Mac, and
+"AppData\Local\CEF\User Data" on Windows). Use of the default directory is
+not recommended in production applications: recent CEF/Chromium versions use
+a process singleton lock based on the `root_cache_path` value to guard
+against multiple application instances writing to the same directory, and
+relying on the default value may lead to unintended process singleton
+behavior (CEF logs a warning in this case). You should customize
+`root_cache_path` for your application.
+
+When an application instance starts with the same `root_cache_path` as an
+instance that is already running, its cef.Initialize() returns False and
+the launch is forwarded to the running instance, where CEF opens a new
+window by default. Check the return value of cef.Initialize() and exit
+when it is False.
 
 
 ### string_encoding

@@ -180,14 +180,18 @@ implemented. See below for details on each of these settings.
 A dict of [application settings](../api/ApplicationSettings.md#application-settings)
 can be passed to cef.[Initialize](../api/cefpython.md#initialize).
 Here are some settings worth noting:
-- [cache_path](../api/ApplicationSettings.md#cache_path) - set
-  a directory path so that web cache data is persisted, otherwise
-  an in-memory cache is used. Cookies and HTML 5 databases such
-  as local storage will only persist if this option is set.
 - [context_menu](../api/ApplicationSettings.md#context_menu) -
   customize context menu
 - [locale](../api/ApplicationSettings.md#locale) - set language
   for localized resources
+- [root_cache_path](../api/ApplicationSettings.md#root_cache_path) -
+  set a directory for your application's data. Cookies with an
+  expiry date, HTML 5 databases such as local storage and the web
+  cache are stored there. Only one instance of an application can
+  run per directory.
+  If neither this option nor cache_path is set, CEF uses a default
+  directory that is shared with other applications that set neither
+  option.
 - [user_agent](../api/ApplicationSettings.md#user_agent) - set
   value that will be returned as the User-Agent HTTP header
   and js navigator.userAgent
