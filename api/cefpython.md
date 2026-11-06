@@ -200,6 +200,10 @@ Return CEF Python and CEF versions dictionary with keys:
 
 This function should be called on the main application thread (UI thread) to initialize CEF when the application is started. A call to Initialize() must have a corresponding call to Shutdown() so that CEF exits cleanly. Otherwise when application closes data (eg. storage, cookies) might not be saved to disk or the process might freeze (experienced on Windows XP).
 
+CefPython messages emitted before a successful CefInitialize() are written
+directly to stderr. On Windows, early CEF/Chromium startup messages may go to
+a "debug.log" beside the Python executable, see ApplicationSettings.[log_file](ApplicationSettings.md#log_file).
+
 
 ### IsThread
 

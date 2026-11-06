@@ -10,6 +10,8 @@ cdef public void App_OnBeforeCommandLineProcessing_BrowserProcess(
     try:
         AppendSwitchesToCommandLine(cefCommandLine, g_commandLineSwitches)
         Debug("App_OnBeforeCommandLineProcessing_BrowserProcess()")
+        Debug("Command line string for the browser process: "
+              + CefToPyString(cefCommandLine.get().GetCommandLineString()))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()
         sys.excepthook(exc_type, exc_value, exc_trace)
