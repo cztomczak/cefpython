@@ -329,7 +329,7 @@
   * [ERR_UNSAFE_PORT](NetworkError.md#err_unsafe_port)
   * [ERR_UNSAFE_REDIRECT](NetworkError.md#err_unsafe_redirect)
 * [PaintBuffer (object)](PaintBuffer.md#paintbuffer-object)
-  * [GetIntPointer](PaintBuffer.md#getintpointer)
+  * [GetPointer](PaintBuffer.md#getpointer)
   * [GetBytes](PaintBuffer.md#getbytes)
 * [RenderHandler (interface)](RenderHandler.md#renderhandler-interface)
   * [GetRootScreenRect](RenderHandler.md#getrootscreenrect)

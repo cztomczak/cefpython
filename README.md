@@ -487,7 +487,7 @@ at this moment.
   * [ERR_UNSAFE_PORT](api/NetworkError.md#err_unsafe_port)
   * [ERR_UNSAFE_REDIRECT](api/NetworkError.md#err_unsafe_redirect)
 * [PaintBuffer (object)](api/PaintBuffer.md#paintbuffer-object)
-  * [GetIntPointer](api/PaintBuffer.md#getintpointer)
+  * [GetPointer](api/PaintBuffer.md#getpointer)
   * [GetBytes](api/PaintBuffer.md#getbytes)
 * [RenderHandler (interface)](api/RenderHandler.md#renderhandler-interface)
   * [GetRootScreenRect](api/RenderHandler.md#getrootscreenrect)

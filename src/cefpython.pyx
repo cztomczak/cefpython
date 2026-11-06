@@ -162,6 +162,10 @@ ctypedef object py_void
 # noinspection PyUnresolvedReferences
 from cpython cimport PyLong_FromVoidPtr
 # noinspection PyUnresolvedReferences
+from cpython.bytes cimport PyBytes_FromStringAndSize, PyBytes_AS_STRING
+# noinspection PyUnresolvedReferences
+from cpython.pyport cimport PY_SSIZE_T_MAX
+# noinspection PyUnresolvedReferences
 from cpython cimport bool as py_bool
 # noinspection PyUnresolvedReferences
 from libcpp cimport bool as cpp_bool
