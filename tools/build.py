@@ -14,11 +14,12 @@ Wheel workflow (what CI runs; add --version for a release):
     python tools/build.py --wheel --version 147.1
 """
 import argparse
+import importlib.metadata
 import os
-import site
 import shutil
 import subprocess
 import sys
+import sysconfig
 
 import cef_version
 
@@ -155,6 +156,15 @@ def _codesign_if_invalid(target, deep=False):
     run(verify_cmd[:-1] + ["--verbose=2", target])
 
 
+def remove_installed_wheel():
+    try:
+        version = importlib.metadata.version("cefpython3")
+    except importlib.metadata.PackageNotFoundError:
+        return
+    print("[build.py] Uninstalling cefpython3", version)
+    run([sys.executable, "-m", "pip", "uninstall", "-y", "cefpython3"])
+
+
 def write_dev_pth():
     # Put build/package/ on sys.path so `import cefpython3` works in any script
     # without setting PYTHONPATH.
@@ -173,8 +183,30 @@ def remove_dev_pth():
         print("[build.py] Removed dev install", pth)
 
 
+def verify_dev_import():
+    # Locate the package as an example script would, without loading CEF.
+    code = ("import importlib.util as u, sys; sys.path[0] = sys.argv[1]; "
+            "s = u.find_spec('cefpython3'); print(s.origin if s else '')")
+    ret = subprocess.run([sys.executable, "-c", code, os.path.abspath("examples")],
+                         capture_output=True, text=True)
+    origin = ret.stdout.strip()
+    expected = os.path.join(PKG_DIR, "__init__.py")
+    try:
+        matches = ret.returncode == 0 and origin and os.path.samefile(origin, expected)
+    except OSError:
+        matches = False
+    if not matches:
+        print("[build.py] ERROR: import cefpython3 resolves to",
+              origin or ret.stderr.strip() or "nothing", "instead of",
+              os.path.abspath(expected))
+        print("[build.py] Remove the conflicting copy or adjust PYTHONPATH"
+              " and run build.py again")
+        sys.exit(1)
+    print("[build.py] import cefpython3 ->", origin)
+
+
 def _dev_pth_path():
-    return os.path.join(site.getsitepackages()[0], "cefpython3-dev.pth")
+    return os.path.join(sysconfig.get_paths()["purelib"], "cefpython3-dev.pth")
 
 
 def wheel_build():
@@ -230,7 +262,9 @@ def main():
         remove_dev_pth()
         wheel_build()
     else:
+        remove_installed_wheel()
         write_dev_pth()
+        verify_dev_import()
 
     if args.unittests:
         env = os.environ.copy()

@@ -127,8 +127,10 @@ python tools/build.py
 This builds the extension module and installs it, with the CEF runtime, into
 `build/package/cefpython3/`, and adds a `.pth` file to the active Python
 environment that puts `build/package/` on `sys.path`, so that
-`import cefpython3` works from any directory. No wheel is created. All build
-output is kept under `build/`; deleting it removes every build artifact.
+`import cefpython3` works from any directory. The build uninstalls any existing
+`cefpython3` installation and verifies that imports use the dev build. No wheel
+is created. All build output is kept under `build/`; deleting it removes every
+build artifact.
 
 Useful flags (see `python tools/build.py --help` for the full list):
 
@@ -168,8 +170,8 @@ python unittests/_test_runner.py
 python tools/smoke_test.py
 ```
 
-Afterwards, run `pip uninstall cefpython3` and `python tools/build.py` to
-switch back to the dev tree.
+Afterwards, run `python tools/build.py` to uninstall the wheel and switch back
+to the dev tree.
 
 
 ## Versions
