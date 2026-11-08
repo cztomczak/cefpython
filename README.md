@@ -46,12 +46,10 @@ CEF Python 147 development wheels are available on [GitHub Releases](https://git
 OS | Python | 64bit | Requirements
 --- | --- | --- | ---
 Windows | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | Windows 10+
-Linux | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | Ubuntu 20.04+, Debian 11+
+Linux | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | Ubuntu 22.04+, Debian 12+
 macOS | 3.10 / 3.11 / 3.12 / 3.13 / 3.14 | Yes | macOS 12+ (Apple Silicon/arm64 only)
 
-macOS wheels are tested in CI only (unit tests and a smoke test of the
-hello_world.py and tutorial.py examples). GUI examples and PyInstaller
-packaging were not tested on macOS, reports are welcome.
+macOS testing was limited to CI only. We are looking for macOS testers - please report your results.
 
 
 ## Examples
