@@ -80,12 +80,6 @@ def main():
     print("[build_distrib.py] Version:", version)
     vi = sys.version_info
     cp = "cp{0}{1}".format(vi.major, vi.minor)
-    platform = _wheel_platform_tag()
-
-    wheel_name = "cefpython3-{v}-{cp}-{cp}-{p}.whl".format(
-        v=version, cp=cp, p=platform)
-    wheel_path = os.path.join(out_dir, wheel_name)
-    dist_info = "cefpython3-{v}.dist-info".format(v=version)
 
     ext = ".pyd" if sys.platform == "win32" else ".so"
     module = "cefpython_py{0}{1}{2}".format(vi.major, vi.minor, ext)
@@ -97,6 +91,13 @@ def main():
     _validate_macos_helpers(pkg_dir)
     _reduce_package_size_issue262(pkg_dir)
     _bundle_msvcp140_issue359(pkg_dir)
+    package_files = _package_files(pkg_dir, module)
+    platform = _wheel_platform_tag(package_files)
+
+    wheel_name = "cefpython3-{v}-{cp}-{cp}-{p}.whl".format(
+        v=version, cp=cp, p=platform)
+    wheel_path = os.path.join(out_dir, wheel_name)
+    dist_info = "cefpython3-{v}.dist-info".format(v=version)
 
     records = []
 
@@ -122,17 +123,9 @@ def main():
 
     with zipfile.ZipFile(wheel_path, "w", zipfile.ZIP_DEFLATED) as zf:
         # Package files
-        for root, dirs, files in os.walk(pkg_dir):
-            dirs[:] = sorted(d for d in dirs if d != "__pycache__")
-            for filename in sorted(files):
-                if filename.endswith(".pyc"):
-                    continue
-                if (root == pkg_dir and filename != module
-                        and re.match(r"cefpython_py\d+\.(pyd|so)$", filename)):
-                    continue
-                filepath = os.path.join(root, filename)
-                arcname = os.path.relpath(filepath, package_root)
-                _add_file(filepath, arcname.replace(os.sep, "/"))
+        for filepath in package_files:
+            arcname = os.path.relpath(filepath, package_root)
+            _add_file(filepath, arcname.replace(os.sep, "/"))
 
         # Examples
         for filepath in _example_files():
@@ -164,7 +157,24 @@ def main():
     print("[build_distrib.py] Done:", wheel_path)
 
 
-def _wheel_platform_tag():
+def _package_files(pkg_dir, module):
+    """Paths of the files in pkg_dir that go into the wheel: all but
+    __pycache__/, *.pyc and the cefpython_pyXY modules of other Python
+    versions."""
+    paths = []
+    for root, dirs, files in os.walk(pkg_dir):
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__")
+        for filename in sorted(files):
+            if filename.endswith(".pyc"):
+                continue
+            if (root == pkg_dir and filename != module
+                    and re.match(r"cefpython_py\d+\.(pyd|so)$", filename)):
+                continue
+            paths.append(os.path.join(root, filename))
+    return paths
+
+
+def _wheel_platform_tag(package_files):
     platform_tag = (sysconfig.get_platform()
                     .replace("-", "_").replace(".", "_"))
     if sys.platform == "darwin":
@@ -178,7 +188,42 @@ def _wheel_platform_tag():
                 "macOS CEF distribution requires native arm64 Python; "
                 "got {0} ({1})".format(machine, platform_tag))
         return "macosx_12_0_arm64"
+    if sys.platform.startswith("linux"):
+        return _manylinux_platform_tag(platform_tag, package_files)
     return platform_tag
+
+
+def _manylinux_platform_tag(platform_tag, package_files):
+    """linux_<arch> -> manylinux_<X>_<Y>_<arch>, where X.Y is the highest
+    GLIBC_X.Y symbol version that the packaged ELF files require.
+
+    PyPI rejects linux_<arch> wheels. The glibc of the build host
+    (platform.libc_ver()) is often newer than what the binaries need, so the
+    versions are read from the binaries themselves: "objdump -p" lists them
+    under "Version References", its last section (objdump is in binutils,
+    like strip).
+    """
+    highest, source = None, None
+    for path in package_files:
+        with open(path, "rb") as f:
+            if f.read(4) != b"\x7fELF":
+                continue
+        output = subprocess.check_output(["objdump", "-p", path]).decode(
+            "utf-8", "replace").partition("Version References:")[2]
+        versions = re.findall(r"\bGLIBC_(\d+)\.(\d+)", output)
+        if "GLIBC_ABI_DT_RELR" in output:  # packed relocations, glibc 2.36
+            versions.append(("2", "36"))
+        for major, minor in versions:
+            version = (int(major), int(minor))
+            if highest is None or version > highest:
+                highest, source = version, os.path.basename(path)
+    if highest is None:
+        raise RuntimeError("no GLIBC_X.Y symbol versions found in the"
+                           " packaged ELF files")
+    print("[build_distrib.py] Highest glibc symbol version: GLIBC_{0}.{1}"
+          " ({2})".format(highest[0], highest[1], source))
+    return platform_tag.replace(
+        "linux_", "manylinux_{0}_{1}_".format(*highest), 1)
 
 
 def _validate_macos_helpers(pkg_dir):

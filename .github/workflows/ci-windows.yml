@@ -104,18 +104,102 @@ jobs:
             python tools/build.py --wheel
           }
 
-      - name: Unit-test the built wheel
+      - name: Upload per-Python wheel
+        uses: actions/upload-artifact@v7
+        with:
+          name: wheel-py${{ matrix.python-version }}
+          path: build/dist/*.whl
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  merge:
+    needs: build
+    # Merging is plain zip handling, so it runs on Linux.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      pythons: ${{ steps.merge.outputs.pythons }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Download per-Python wheels
+        uses: actions/download-artifact@v8
+        with:
+          pattern: wheel-py*
+          merge-multiple: true
+          path: build/py_wheels
+
+      - name: Merge wheels
+        id: merge
         run: |
-          # Install the wheel and run the unit tests against the INSTALLED
-          # package. No PYTHONPATH and no dev .pth (build.py --wheel doesn't
-          # write one), so build/package/ is not on sys.path and
+          python tools/merge_wheels.py --out-dir build/dist build/py_wheels/*.whl
+          # The test jobs run exactly the Python versions in the merged wheel
+          tags=$(basename build/dist/*.whl | cut -d- -f3)
+          python -c 'import json, sys; print("pythons=" + json.dumps([t[2] + "." + t[3:] for t in sys.argv[1].split(".")]))' "$tags" >> "$GITHUB_OUTPUT"
+
+      - name: Upload merged wheel for the test jobs
+        uses: actions/upload-artifact@v7
+        with:
+          name: merged-wheel
+          path: build/dist/*.whl
+          retention-days: 1
+          compression-level: 0
+
+  test:
+    needs: merge
+    runs-on: windows-2022
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ${{ fromJSON(needs.merge.outputs.pythons) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download merged wheel
+        uses: actions/download-artifact@v8
+        with:
+          name: merged-wheel
+          path: build/dist
+
+      - name: Unit-test the merged wheel
+        run: |
+          # Install the merged wheel and run the unit tests against the
+          # INSTALLED package. No PYTHONPATH and no dev .pth, so
           # import cefpython3 resolves to the installed wheel.
           pip install (Get-ChildItem build/dist/*.whl).FullName
           python unittests/_test_runner.py
 
-      - name: Smoke-test the built wheel
+      - name: Smoke-test the merged wheel
         timeout-minutes: 5
         run: python tools/smoke_test.py
+
+  publish:
+    # The wheel artifact exists only if the merged wheel passed on every
+    # Python version.
+    needs: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Download merged wheel
+        uses: actions/download-artifact@v8
+        with:
+          name: merged-wheel
+          path: build/dist
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v7
