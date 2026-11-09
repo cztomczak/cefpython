@@ -4,8 +4,6 @@
 
 cdef extern from "cpp_utils/PaintBuffer.h":
 
-    cdef void FlipBufferUpsideDown(
-            void* dest, void* src, int width, int height)
-
-    cdef void SwapBufferFromBgraToRgba(
-            void* dest, void* src, int width, int height)
+    cdef void CopyPaintBuffer(
+            void* dest, const void* src, int width, int height,
+            bint rgba, bint flip)

@@ -25,10 +25,8 @@ cdef class PaintBuffer:
         return <uintptr_t>self.buffer
 
     cpdef object GetBytes(self, str mode="bgra", str origin="top-left"):
-        # BEFORE MODIFYING CODE:
-        # There is an exact copy of this method named "GetString" (deprecated).
-        cdef void* dest
-        cdef py_bool dest_alloced = False
+        cdef int width = self.width
+        cdef int height = self.height
         cdef object ret
 
         origin = origin.lower()
@@ -36,29 +34,14 @@ cdef class PaintBuffer:
         assert origin in ("top-left", "bottom-left"), "Invalid origin"
         assert mode in ("bgra", "rgba"), "Invalid mode"
 
-        # To get rid of a Cython warning:
-        # | '__pyx_v_dest' may be used uninitialized in this function
-        dest = <void*>malloc(0)
-
-        if mode == "rgba":
-            if not dest_alloced:
-                dest = <void*>malloc(self.length)
-                dest_alloced = True
-            SwapBufferFromBgraToRgba(dest, self.buffer, self.width,
-                    self.height)
-
-        if origin == "bottom-left":
-            if not dest_alloced:
-                dest = <void*>malloc(self.length)
-                dest_alloced = True
-            FlipBufferUpsideDown(dest, self.buffer, self.width, self.height)
-
-        if dest_alloced:
-            ret = (<char*>dest)[:self.length]
-            free(dest)
-            return ret
-        else:
-            return (<char*>self.buffer)[:self.length]
+        if width <= 0 or height <= 0:
+            return b""
+        if width > PY_SSIZE_T_MAX // 4 // height:
+            raise OverflowError("Paint buffer is too large")
+        ret = PyBytes_FromStringAndSize(NULL, <Py_ssize_t>width * height * 4)
+        CopyPaintBuffer(PyBytes_AS_STRING(ret), self.buffer, width, height,
+                        mode == "rgba", origin == "bottom-left")
+        return ret
 
     # ---- DEPRECATED ---------------------------------------------------------
     # TODO: remove deprecated methods from API reference during next release.
@@ -67,38 +50,3 @@ cdef class PaintBuffer:
     cpdef uintptr_t GetIntPointer(self) except *:
         """@deprecated."""
         return <uintptr_t>self.buffer
-
-    cpdef object GetString(self, str mode="bgra", str origin="top-left"):
-        """@deprecated."""
-        cdef void* dest
-        cdef py_bool dest_alloced = False
-        cdef object ret
-
-        origin = origin.lower()
-        mode = mode.lower()
-        assert origin in ("top-left", "bottom-left"), "Invalid origin"
-        assert mode in ("bgra", "rgba"), "Invalid mode"
-
-        # To get rid of a Cython warning:
-        # | '__pyx_v_dest' may be used uninitialized in this function
-        dest = <void*>malloc(0)
-
-        if mode == "rgba":
-            if not dest_alloced:
-                dest = <void*>malloc(self.length)
-                dest_alloced = True
-            SwapBufferFromBgraToRgba(dest, self.buffer, self.width,
-                    self.height)
-
-        if origin == "bottom-left":
-            if not dest_alloced:
-                dest = <void*>malloc(self.length)
-                dest_alloced = True
-            FlipBufferUpsideDown(dest, self.buffer, self.width, self.height)
-
-        if dest_alloced:
-            ret = (<char*>dest)[:self.length]
-            free(dest)
-            return ret
-        else:
-            return (<char*>self.buffer)[:self.length]

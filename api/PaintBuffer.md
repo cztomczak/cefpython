@@ -8,18 +8,18 @@ This object used in: [RenderHandler](RenderHandler.md).OnPaint().
 
 Table of contents:
 * [Methods](#methods)
-  * [GetIntPointer](#getintpointer)
+  * [GetPointer](#getpointer)
   * [GetBytes](#getbytes)
 
 
 ## Methods
 
 
-### GetIntPointer
+### GetPointer
 
 | | |
 | --- | --- |
-| __Return__ | long |
+| __Return__ | int |
 
 Get int pointer to the `void*` buffer.
 
