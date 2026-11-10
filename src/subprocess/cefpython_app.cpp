@@ -58,18 +58,7 @@ CefPythonApp::CefPythonApp() {
 void CefPythonApp::OnBeforeCommandLineProcessing(
       const CefString& process_type,
       CefRefPtr<CefCommandLine> command_line) {
-    // IMPORTANT NOTES
-    // ---------------
-    // NOTE 1: Currently CEF logging is limited and you cannot log
-    //         info messages during execution of this function. The
-    //         default log severity in Chromium is LOG_ERROR, thus
-    //         you can will only see log messages when using LOG(ERROR)
-    //         here. You won't see LOG(WARNING) nor LOG(INFO) messages
-    //         here.
-    // NOTE 2: The "g_debug" variable is never set at this moment
-    //         due to IPC messaging delay. There is some code here
-    //         that depends on this variable, but it is currently
-    //         never executed.
+    // CEF logging is not initialized yet when this is called (Issue #709).
 
 #ifdef BROWSER_PROCESS
     // This is included only in the Browser process, when building
@@ -79,32 +68,6 @@ void CefPythonApp::OnBeforeCommandLineProcessing(
         App_OnBeforeCommandLineProcessing_BrowserProcess(command_line);
     }
 #endif  // BROWSER_PROCESS
-
-    // IMPORTANT: This code is currently dead due to g_debug and
-    //            LOG(INFO) issues described at the top of this
-    //            function. Command line string for subprocesses are
-    //            are currently logged in OnBeforeChildProcess().
-    //            Command line string for the main browser process
-    //            is currently never logged.
-    std::string process_name = process_type.ToString();
-    if (process_name.empty()) {
-        process_name = "browser";
-    }
-#ifdef BROWSER_PROCESS
-    std::string logMessage = "[Browser process] ";
-#else  // BROWSER_PROCESS
-    std::string logMessage = "[Non-browser process] ";
-#endif  // BROWSER_PROCESS
-    logMessage.append("Command line string for the ");
-    logMessage.append(process_name);
-    logMessage.append(" process: ");
-    std::string clString = command_line->GetCommandLineString().ToString();
-    logMessage.append(clString.c_str());
-    if (g_debug) {
-        // This code is currently never executed, see the "IMPORTANT"
-        // comment above and comments at the top of this function.
-        LOG(INFO) << logMessage.c_str();
-    }
 
 #ifdef OS_WIN
     // Set AppUserModelID (AppID) when "--app-user-model-id" switch
@@ -134,8 +97,6 @@ void CefPythonApp::OnBeforeCommandLineProcessing(
         HRESULT hr = (*SetAppUserModelID)(app_id.ToWString().c_str());
         if (hr == S_OK) {
             if (g_debug) {
-                // This code is currently never executed, see comments
-                // at the top of this function.
                 LOG(INFO) << "SetCurrentProcessExplicitAppUserModelID ok";
             }
         } else {

@@ -595,16 +595,15 @@ a True value is returned by function to notify CEF that rectangle
 was provided.
 
 In the OnPaint callback CEF provides a [PaintBuffer](../api/PaintBuffer.md#paintbuffer-object) object, which is a pixel buffer of the
-browser view. This object has [GetIntPointer](../api/PaintBuffer.md#getintpointer)
-and [GetString](../api/PaintBuffer.md#getstring) methods. In the
-example the latter method is used which returns bytes. The method
-name is a bit confusing since it returns bytes, not a string. Here is the code:
+browser view. This object has [GetPointer](../api/PaintBuffer.md#getpointer)
+and [GetBytes](../api/PaintBuffer.md#getbytes) methods. In the
+example the latter method is used which returns bytes. Here is the code:
 
 ```Python
 def OnPaint(self, browser, element_type, paint_buffer, **_):
     if element_type == cef.PET_VIEW:
-        buffer_string = paint_buffer.GetString(mode="rgba",
-                                               origin="top-left")
+        buffer_string = paint_buffer.GetBytes(mode="rgba",
+                                              origin="top-left")
         browser.SetUserData("OnPaint.buffer_string", buffer_string)
 ```
 

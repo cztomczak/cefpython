@@ -14,11 +14,13 @@ Wheel workflow (what CI runs; add --version for a release):
     python tools/build.py --wheel --version 147.1
 """
 import argparse
+import importlib.metadata
 import os
-import site
+import re
 import shutil
 import subprocess
 import sys
+import sysconfig
 
 import cef_version
 
@@ -53,8 +55,9 @@ def cmake_build(clean=False, profiling=False, line_tracing=False):
     if clean and os.path.exists(BUILD_DIR):
         print("[build.py] Removing", BUILD_DIR)
         shutil.rmtree(BUILD_DIR)
-    cache = os.path.join(BUILD_DIR, "CMakeCache.txt")
-    if not os.path.exists(cache):
+    # A failed configure also writes CMakeCache.txt, so check for a file that
+    # is only written after the build files are generated.
+    if not os.path.exists(os.path.join(BUILD_DIR, "cmake_install.cmake")):
         cmake_args = ["cmake", "-S", ".", "-B", BUILD_DIR,
                       "-DPython_EXECUTABLE=" + sys.executable]
         if WINDOWS:
@@ -114,7 +117,7 @@ def write_version_file(version):
                 return
     with open(path, "w") as f:
         f.write(content)
-    print("[build.py] Version {0} -> {1}".format(version, path))
+    print("[build.py] Wrote version file:", path)
 
 
 def _codesign_macos(pkg_dir):
@@ -154,6 +157,15 @@ def _codesign_if_invalid(target, deep=False):
     run(verify_cmd[:-1] + ["--verbose=2", target])
 
 
+def remove_installed_wheel():
+    try:
+        version = importlib.metadata.version("cefpython3")
+    except importlib.metadata.PackageNotFoundError:
+        return
+    print("[build.py] Uninstalling cefpython3", version)
+    run([sys.executable, "-m", "pip", "uninstall", "-y", "cefpython3"])
+
+
 def write_dev_pth():
     # Put build/package/ on sys.path so `import cefpython3` works in any script
     # without setting PYTHONPATH.
@@ -172,8 +184,37 @@ def remove_dev_pth():
         print("[build.py] Removed dev install", pth)
 
 
+def verify_dev_import():
+    # Locate the package as an example script would, without loading CEF.
+    code = ("import importlib.util as u, sys; sys.path[0] = sys.argv[1]; "
+            "s = u.find_spec('cefpython3'); print(s.origin if s else '')")
+    ret = subprocess.run([sys.executable, "-c", code, os.path.abspath("examples")],
+                         capture_output=True, text=True)
+    origin = ret.stdout.strip()
+    expected = os.path.join(PKG_DIR, "__init__.py")
+    try:
+        matches = ret.returncode == 0 and origin and os.path.samefile(origin, expected)
+    except OSError:
+        matches = False
+    if not matches:
+        print("[build.py] ERROR: import cefpython3 resolves to",
+              origin or ret.stderr.strip() or "nothing", "instead of",
+              os.path.abspath(expected))
+        print("[build.py] Remove the conflicting copy or adjust PYTHONPATH"
+              " and run build.py again")
+        sys.exit(1)
+
+    # Read package version.
+    version_file = os.path.join(os.path.dirname(origin), "_version.py")
+    with open(version_file) as f:
+        version = re.search(r'^__version__\s*=\s*"([^"]+)"$', f.read(), re.MULTILINE).group(1)
+
+    print("[build.py] import cefpython3 ->", origin)
+    print("[build.py] Version", version)
+
+
 def _dev_pth_path():
-    return os.path.join(site.getsitepackages()[0], "cefpython3-dev.pth")
+    return os.path.join(sysconfig.get_paths()["purelib"], "cefpython3-dev.pth")
 
 
 def wheel_build():
@@ -229,7 +270,9 @@ def main():
         remove_dev_pth()
         wheel_build()
     else:
+        remove_installed_wheel()
         write_dev_pth()
+        verify_dev_import()
 
     if args.unittests:
         env = os.environ.copy()

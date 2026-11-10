@@ -534,6 +534,7 @@ most important application-facing changes are:
 | `CookieManager.GetBlockingManager`, `CreateManager`, `SetSupportedSchemes`, and `SetStoragePath` | Removed; use `CookieManager.GetGlobalManager()` and configure persistence through application settings. |
 | `RenderHandler.GetScreenRect(browser, rect_out)` | Removed upstream. Implement the new `RenderHandler.GetScreenInfo(browser, screen_info_out)` callback and set the `rect` (and optionally `available_rect`) key instead. If no rectangle is provided, CEF falls back to `GetViewRect`. |
 | `RenderHandler.OnScrollOffsetChanged(browser)` | `x` and `y` arguments were added. Existing callbacks must accept them, otherwise a `TypeError` is raised. |
+| `PaintBuffer.GetString(mode, origin)` | Removed; it was deprecated. Use `PaintBuffer.GetBytes(mode, origin)`, which takes the same arguments. |
 | `cef.GetCommandLineSwitch(key)` | Removed from the documentation. It was never implemented, so calling it raised `AttributeError` in v66 too. |
 | `WebPluginInfo` and the legacy plugin APIs | Removed along with Chromium's legacy plugin support. |
 
