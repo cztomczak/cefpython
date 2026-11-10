@@ -124,10 +124,8 @@ def merge(paths, out_dir):
             lines = [line for line in
                      base_zf.read(wheel_member).decode().splitlines()
                      if not line.startswith("Tag:")]
-            lines += ["Tag: {0}-{1}-{2}".format(
-                          python_tag, abi_tag, base["platform"])
-                      for python_tag in python_tags
-                      for abi_tag in python_tags]
+            lines += ["Tag: {0}-{0}-{1}".format(python_tag, base["platform"])
+                      for python_tag in python_tags]
             wheel_member_data = ("\n".join(lines) + "\n").encode()
 
             rows = [row for row in csv.reader(
