@@ -16,6 +16,7 @@ Wheel workflow (what CI runs; add --version for a release):
 import argparse
 import importlib.metadata
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -116,7 +117,7 @@ def write_version_file(version):
                 return
     with open(path, "w") as f:
         f.write(content)
-    print("[build.py] Version {0} -> {1}".format(version, path))
+    print("[build.py] Wrote version file:", path)
 
 
 def _codesign_macos(pkg_dir):
@@ -202,7 +203,14 @@ def verify_dev_import():
         print("[build.py] Remove the conflicting copy or adjust PYTHONPATH"
               " and run build.py again")
         sys.exit(1)
+
+    # Read package version.
+    version_file = os.path.join(os.path.dirname(origin), "_version.py")
+    with open(version_file) as f:
+        version = re.search(r'^__version__\s*=\s*"([^"]+)"$', f.read(), re.MULTILINE).group(1)
+
     print("[build.py] import cefpython3 ->", origin)
+    print("[build.py] Version", version)
 
 
 def _dev_pth_path():
