@@ -55,6 +55,10 @@ class CefPythonApp :
   void OnBeforeChildProcessLaunch(
       CefRefPtr<CefCommandLine> command_line) override;
 
+  bool OnAlreadyRunningAppRelaunch(
+      CefRefPtr<CefCommandLine> command_line,
+      const CefString& current_directory) override;
+
   CefRefPtr<CefPrintHandler> GetPrintHandler();
 
   void OnScheduleMessagePumpWork(int64_t delay_ms) override;

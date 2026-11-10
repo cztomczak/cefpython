@@ -59,6 +59,8 @@ All parameters are optional.
 
 This function can only be called on the UI thread.
 
+Returns None if cef.Initialize() was not called or returned False.
+
 If the url is a local path it needs to start with the `file://` prefix.
 If the url contains special characters it may need proper handling.
 Starting with v66.1+ it is required for the app code to encode the url
@@ -198,7 +200,14 @@ Return CEF Python and CEF versions dictionary with keys:
 | switches (optional) | [CommandLineSwitches](CommandLineSwitches.md) |
 | __Return__ | bool |
 
-This function should be called on the main application thread (UI thread) to initialize CEF when the application is started. A call to Initialize() must have a corresponding call to Shutdown() so that CEF exits cleanly. Otherwise when application closes data (eg. storage, cookies) might not be saved to disk or the process might freeze (experienced on Windows XP).
+This function should be called on the main application thread (UI thread) to initialize CEF when the application is started. A successful call to Initialize() must have a corresponding call to Shutdown() so that CEF exits cleanly. Otherwise when application closes data (eg. storage, cookies) might not be saved to disk or the process might freeze (experienced on Windows XP).
+
+Returns False if CEF could not be initialized, for example when another
+instance of the application is already running with the same
+ApplicationSettings.[root_cache_path](ApplicationSettings.md#root_cache_path).
+An error is logged in that case. Check the return value and, when it is
+False, exit the application immediately without calling Shutdown() or
+other CEF Python functions.
 
 CefPython messages emitted before a successful CefInitialize() are written
 directly to stderr. On Windows, early CEF/Chromium startup messages may go to

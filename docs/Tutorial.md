@@ -186,9 +186,8 @@ Here are some settings worth noting:
   for localized resources
 - [root_cache_path](../api/ApplicationSettings.md#root_cache_path) -
   set a directory for your application's data. Cookies with an
-  expiry date, HTML 5 databases such as local storage and the web
-  cache are stored there. Only one instance of an application can
-  run per directory.
+  expiry date and HTML 5 databases such as local storage are stored
+  there. Only one instance of an application can run per directory.
   If neither this option nor cache_path is set, CEF uses a default
   directory that is shared with other applications that set neither
   option.

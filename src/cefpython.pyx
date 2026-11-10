@@ -685,7 +685,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     g_cef_initialized_successfully = bool(ret)
 
     if not ret:
-        Debug("CefInitialize() failed")
+        NonCriticalError("CEF initialization failed (another instance may"
+                         " be running with the same root_cache_path, or"
+                         " settings are invalid)")
 
     IF UNAME_SYSNAME == "Windows":
         # Chromium logs the messages emitted before its logging is set up
@@ -726,6 +728,8 @@ def CreateBrowserSync(windowInfo=None,
         raise Exception("Invalid argument: "+kwarg)
 
     Debug("CreateBrowserSync() called")
+    if not g_cef_initialized_successfully:
+        return None
     assert IsThread(TID_UI), (
             "cefpython.CreateBrowserSync() may only be called on the UI thread")
 
