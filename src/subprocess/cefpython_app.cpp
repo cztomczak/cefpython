@@ -161,6 +161,18 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
     LOG(INFO) << logMessage.c_str();
 }
 
+bool CefPythonApp::OnAlreadyRunningAppRelaunch(
+        CefRefPtr<CefCommandLine> command_line,
+        const CefString& current_directory) {
+    // Another instance was started with the same root_cache_path. Returning
+    // true stops CEF from opening its default Chrome-style window
+    // (Issue #685).
+    LOG(ERROR) << "[Browser process] Another application instance attempted"
+                  " to launch with the same root_cache_path. Process"
+                  " singleton prevented duplicate execution.";
+    return true;
+}
+
 CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
 #ifdef BROWSER_PROCESS
 #if defined(OS_LINUX)

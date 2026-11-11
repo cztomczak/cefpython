@@ -27,6 +27,7 @@
   * [persist_session_cookies](ApplicationSettings.md#persist_session_cookies)
   * [remote_debugging_port](ApplicationSettings.md#remote_debugging_port)
   * [resources_dir_path](ApplicationSettings.md#resources_dir_path)
+  * [root_cache_path](ApplicationSettings.md#root_cache_path)
   * [string_encoding](ApplicationSettings.md#string_encoding)
   * [uncaught_exception_stack_size](ApplicationSettings.md#uncaught_exception_stack_size)
   * [unique_request_context_per_browser](ApplicationSettings.md#unique_request_context_per_browser)

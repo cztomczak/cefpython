@@ -551,7 +551,7 @@ Passing a removed setting raises an "Invalid appSettings key" or
 | `persist_user_preferences` | Application | Removed; persistent Chrome profiles save preferences automatically. |
 | `product_version` | Application | Renamed upstream to `user_agent_product`, which CEF Python does not expose. Use `switches={"user-agent-product": "..."}` in `cef.Initialize()` instead; it is ignored when `user_agent` is set. |
 | `single_process` | Application | Removed upstream. |
-| `user_data_path` | Application | Removed. |
+| `user_data_path` | Application | Removed upstream; CEF now stores this data in `root_cache_path`. |
 | `application_cache_disabled` | Browser | Removed along with Chromium's AppCache support. |
 | `databases_disabled` | Browser | Still accepted, but has no effect: Chromium removed WebSQL and CEF no longer applies this setting. |
 | `file_access_from_file_urls_allowed` | Browser | Removed. |
