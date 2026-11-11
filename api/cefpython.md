@@ -165,10 +165,13 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
 
 Returns the exit code of the Initialize() call. It is 0 when Initialize()
 returned True. Otherwise it is a result code, usually one of the
-cef_resultcode_t values in upstream CEF's include/internal/cef_types.h (this
-is not a comprehensive list). For example 24
-(CEF_RESULT_CODE_NORMAL_EXIT_PROCESS_NOTIFIED) when another instance of the
-application is already running with the same
+`cef.CEF_RESULT_CODE_*` constants listed below. This is not a comprehensive
+list, the code can also be a platform-specific crash value. See
+cef_resultcode_t in upstream CEF's include/internal/cef_types.h for the
+description of each constant.
+
+CEF_RESULT_CODE_NORMAL_EXIT_PROCESS_NOTIFIED is returned when another
+instance of the application is already running with the same
 ApplicationSettings.[root_cache_path](ApplicationSettings.md#root_cache_path)
 and the command line was passed to it.
 
@@ -178,8 +181,40 @@ exit with that code, like upstream CEF's cefsimple example does:
 
 ```python
 if not cef.Initialize():
+    if cef.GetExitCode() == cef.CEF_RESULT_CODE_NORMAL_EXIT_PROCESS_NOTIFIED:
+        print("The application is already running")
     sys.exit(cef.GetExitCode())
 ```
+
+Constants:
+* CEF_RESULT_CODE_NORMAL_EXIT
+* CEF_RESULT_CODE_KILLED
+* CEF_RESULT_CODE_HUNG
+* CEF_RESULT_CODE_KILLED_BAD_MESSAGE
+* CEF_RESULT_CODE_GPU_DEAD_ON_ARRIVAL
+* CEF_RESULT_CODE_BAD_PROCESS_TYPE
+* CEF_RESULT_CODE_MISSING_DATA
+* CEF_RESULT_CODE_UNSUPPORTED_PARAM
+* CEF_RESULT_CODE_PROFILE_IN_USE
+* CEF_RESULT_CODE_PACK_EXTENSION_ERROR
+* CEF_RESULT_CODE_NORMAL_EXIT_PROCESS_NOTIFIED
+* CEF_RESULT_CODE_INVALID_SANDBOX_STATE
+* CEF_RESULT_CODE_CLOUD_POLICY_ENROLLMENT_FAILED
+* CEF_RESULT_CODE_GPU_EXIT_ON_CONTEXT_LOST
+* CEF_RESULT_CODE_NORMAL_EXIT_PACK_EXTENSION_SUCCESS
+* CEF_RESULT_CODE_SYSTEM_RESOURCE_EXHAUSTED
+* CEF_RESULT_CODE_NORMAL_EXIT_AUTO_DE_ELEVATED
+* CEF_RESULT_CODE_TERMINATED_BY_OTHER_PROCESS_ON_COMMIT_FAILURE
+* CEF_RESULT_CODE_INVALID_ISOLATED_BROWSER_PROCESS
+* CEF_RESULT_CODE_SANDBOX_FATAL_INTEGRITY
+* CEF_RESULT_CODE_SANDBOX_FATAL_DROPTOKEN
+* CEF_RESULT_CODE_SANDBOX_FATAL_FLUSHANDLES
+* CEF_RESULT_CODE_SANDBOX_FATAL_CACHEDISABLE
+* CEF_RESULT_CODE_SANDBOX_FATAL_CLOSEHANDLES
+* CEF_RESULT_CODE_SANDBOX_FATAL_MITIGATION
+* CEF_RESULT_CODE_SANDBOX_FATAL_MEMORY_EXCEEDED
+* CEF_RESULT_CODE_SANDBOX_FATAL_WARMUP
+* CEF_RESULT_CODE_SANDBOX_FATAL_BROKER_SHUTDOWN_HUNG
 
 
 ### GetGlobalClientCallback

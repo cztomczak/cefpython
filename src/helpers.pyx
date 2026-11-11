@@ -12,51 +12,6 @@ import time
 import codecs
 
 
-# cef_resultcode_t from include/internal/cef_types.h, the values that
-# CefGetExitCode() reports.
-g_cef_result_code_names = {
-    0: "CEF_RESULT_CODE_NORMAL_EXIT",
-    1: "CEF_RESULT_CODE_KILLED",
-    2: "CEF_RESULT_CODE_HUNG",
-    3: "CEF_RESULT_CODE_KILLED_BAD_MESSAGE",
-    4: "CEF_RESULT_CODE_GPU_DEAD_ON_ARRIVAL",
-    6: "CEF_RESULT_CODE_BAD_PROCESS_TYPE",
-    7: "CEF_RESULT_CODE_MISSING_DATA",
-    13: "CEF_RESULT_CODE_UNSUPPORTED_PARAM",
-    21: "CEF_RESULT_CODE_PROFILE_IN_USE",
-    22: "CEF_RESULT_CODE_PACK_EXTENSION_ERROR",
-    24: "CEF_RESULT_CODE_NORMAL_EXIT_PROCESS_NOTIFIED",
-    31: "CEF_RESULT_CODE_INVALID_SANDBOX_STATE",
-    32: "CEF_RESULT_CODE_CLOUD_POLICY_ENROLLMENT_FAILED",
-    34: "CEF_RESULT_CODE_GPU_EXIT_ON_CONTEXT_LOST",
-    36: "CEF_RESULT_CODE_NORMAL_EXIT_PACK_EXTENSION_SUCCESS",
-    37: "CEF_RESULT_CODE_SYSTEM_RESOURCE_EXHAUSTED",
-    38: "CEF_RESULT_CODE_NORMAL_EXIT_AUTO_DE_ELEVATED",
-    39: "CEF_RESULT_CODE_TERMINATED_BY_OTHER_PROCESS_ON_COMMIT_FAILURE",
-    40: "CEF_RESULT_CODE_INVALID_ISOLATED_BROWSER_PROCESS",
-    7006: "CEF_RESULT_CODE_SANDBOX_FATAL_INTEGRITY",
-    7007: "CEF_RESULT_CODE_SANDBOX_FATAL_DROPTOKEN",
-    7008: "CEF_RESULT_CODE_SANDBOX_FATAL_FLUSHANDLES",
-    7009: "CEF_RESULT_CODE_SANDBOX_FATAL_CACHEDISABLE",
-    7010: "CEF_RESULT_CODE_SANDBOX_FATAL_CLOSEHANDLES",
-    7011: "CEF_RESULT_CODE_SANDBOX_FATAL_MITIGATION",
-    7012: "CEF_RESULT_CODE_SANDBOX_FATAL_MEMORY_EXCEEDED",
-    7013: "CEF_RESULT_CODE_SANDBOX_FATAL_WARMUP",
-    7014: "CEF_RESULT_CODE_SANDBOX_FATAL_BROKER_SHUTDOWN_HUNG",
-}
-
-
-def _InitializeFailedMessage(exit_code):
-    message = "CEF initialization failed (exit code=" + str(exit_code)
-    if exit_code in g_cef_result_code_names:
-        message += ", " + g_cef_result_code_names[exit_code]
-    message += ")"
-    if exit_code == 24:
-        message += (": another instance is already running with the same"
-                    " root_cache_path")
-    return message
-
-
 def ExceptHook(exc_type, exc_value, exc_trace):
     """Global except hook to exit app cleanly on error.
     This hook does the following: in case of exception write it to

@@ -33,7 +33,7 @@ cdef extern from "include/cef_app.h":
                                 void* windows_sandbox_info
                                 ) nogil
 
-    cdef int CefGetExitCode()
+    cdef int CefGetExitCode() nogil
 
     cdef void CefRunMessageLoop() nogil
     cdef void CefDoMessageLoopWork() nogil
