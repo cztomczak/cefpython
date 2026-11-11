@@ -520,6 +520,13 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     # ------------------------------------------------------------------------
     # Paths
     # ------------------------------------------------------------------------
+    if "root_cache_path" in application_settings and application_settings["root_cache_path"]:
+        application_settings["root_cache_path"] = \
+            os.path.abspath(application_settings["root_cache_path"])
+        Debug("root_cache_path: " + application_settings["root_cache_path"])
+    else:
+        Debug("root_cache_path: <empty>")
+
     cdef str module_dir = GetModuleDirectory()
     if platform.system() == "Darwin":
         if  "framework_dir_path" not in application_settings:
