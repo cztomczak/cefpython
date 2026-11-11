@@ -76,7 +76,7 @@ cdef object CefValueToPyValue(CefRefPtr[CefValue] cefValue):
                     &int64_value, sizeof(int64_value), 0)
             return int64_value
         else:
-            NonCriticalError("Unknown binary value, size=%s" % \
+            Error("Unknown binary value, size=%s" % \
                     binaryValue.get().GetSize())
             return None
     else:
@@ -139,7 +139,7 @@ cdef list CefListValueToPyList(
                         &int64_value, sizeof(int64_value), 0)
                 ret.append(int64_value)
             else:
-                NonCriticalError("Unknown binary value, size=%s" % \
+                Error("Unknown binary value, size=%s" % \
                     binaryValue.get().GetSize())
                 ret.append(None)
         else:
@@ -209,7 +209,7 @@ cdef dict CefDictionaryValueToPyDict(
                         &int64_value, sizeof(int64_value), 0)
                 ret[pyKey] = int64_value
             else:
-                NonCriticalError("Unknown binary value, size=%s" % \
+                Error("Unknown binary value, size=%s" % \
                     binaryValue.get().GetSize())
                 ret[pyKey] = None
         else:

@@ -151,7 +151,7 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
 #endif // BROWSER_PROCESS
 
 #ifdef BROWSER_PROCESS
-    std::string logMessage = "[Browser process] ";
+    std::string logMessage = "";
 #else
     std::string logMessage = "[Non-browser process] ";
 #endif // BROWSER_PROCESS
@@ -171,7 +171,7 @@ CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
     // make changes there as well.
     GdkDisplay* gdk_display = gdk_display_get_default();
     if (!gdk_display) {
-        LOG(INFO) << "[Browser process] Initialize GTK";
+        LOG(INFO) << "Initialize GTK";
         gtk_init(0, NULL);
         InstallX11ErrorHandlers();
     }

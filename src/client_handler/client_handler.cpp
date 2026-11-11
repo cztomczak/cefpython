@@ -36,7 +36,7 @@ bool ClientHandler::OnProcessMessageReceived(
         return false;
     }
     const std::string& messageName = message->GetName();
-    std::string logMessage = "[Browser process] OnProcessMessageReceived(): ";
+    std::string logMessage = "OnProcessMessageReceived(): ";
     logMessage.append(messageName.c_str());
     LOG(INFO) << logMessage.c_str();
     if (messageName == "OnContextCreated") {
@@ -51,7 +51,7 @@ bool ClientHandler::OnProcessMessageReceived(
             V8ContextHandler_OnContextCreated(browser, frame);
             return true;
         } else {
-            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
+            LOG(ERROR) << "OnProcessMessageReceived():"
                           " invalid arguments, messageName=OnContextCreated";
             return false;
         }
@@ -70,7 +70,7 @@ bool ClientHandler::OnProcessMessageReceived(
             V8ContextHandler_OnContextReleased(browserId, frameId);
             return true;
         } else {
-            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
+            LOG(ERROR) << "OnProcessMessageReceived():"
                           " invalid arguments, messageName=OnContextReleased";
             return false;
         }
@@ -96,7 +96,7 @@ bool ClientHandler::OnProcessMessageReceived(
                                       functionArguments);
             return true;
         } else {
-            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
+            LOG(ERROR) << "OnProcessMessageReceived():"
                           " invalid arguments,"
                           " messageName=V8FunctionHandler::Execute";
             return false;
@@ -111,7 +111,7 @@ bool ClientHandler::OnProcessMessageReceived(
             ExecutePythonCallback(browser, callbackId, functionArguments);
             return true;
         } else {
-            LOG(ERROR) << "[Browser process] OnProcessMessageReceived():"
+            LOG(ERROR) << "OnProcessMessageReceived():"
                           " invalid arguments,"
                           " messageName=ExecutePythonCallback";
             return false;

@@ -39,7 +39,7 @@ cdef public void V8FunctionHandler_Execute(
             # bindings to be out of sync due to delay in process messaging.
             errorMessage = "V8FunctionHandler_Execute() FAILED: " \
                            "python function not found: %s" % funcName
-            NonCriticalError(errorMessage)
+            Error(errorMessage)
             # Raise a javascript exception in that frame if it still exists
             if pyFrame:
                 pyFrame.ExecuteJavascript("throw '%s';" % errorMessage)

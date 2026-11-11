@@ -4,6 +4,6 @@
 
 #pragma once
 
-void cef_log_info(char* msg);
-void cef_log_warning(char* msg);
-void cef_log_error(char* msg);
+void cef_log_info(const char* tag, const char* msg);
+void cef_log_warning(const char* tag, const char* msg);
+void cef_log_error(const char* tag, const char* msg);

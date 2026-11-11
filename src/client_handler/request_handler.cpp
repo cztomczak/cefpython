@@ -66,7 +66,7 @@ void RequestHandler::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                                const CefString& error_string)
 {
     REQUIRE_UI_THREAD();
-    LOG(ERROR) << "[Browser process] OnRenderProcessTerminated()";
+    LOG(ERROR) << "OnRenderProcessTerminated()";
     RequestHandler_OnRendererProcessTerminated(browser, status, error_code,
                                                error_string);
 }

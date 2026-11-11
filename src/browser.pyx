@@ -343,7 +343,7 @@ cdef class PyBrowser:
             XDestroyImage(image)
             return b''.join(pixels), width, height
         ELSE:
-            NonCriticalError("GetImage not implemented on this platform")
+            Error("GetImage not implemented on this platform")
             return None
 
     cpdef object GetSetting(self, py_string key):
@@ -566,7 +566,7 @@ cdef class PyBrowser:
         IF UNAME_SYSNAME == "Linux":
             x11.SetX11WindowBounds(self.GetCefBrowser(), x, y, width, height)
         ELSE:
-            NonCriticalError("SetBounds() not implemented on this platform")
+            Error("SetBounds() not implemented on this platform")
 
     cpdef py_void SetAccessibilityState(self, cef_state_t state):
         self.GetCefBrowserHost().get().SetAccessibilityState(state)

@@ -40,7 +40,7 @@ void LifespanHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
     // High DPI support.
     CefString auto_zooming = ApplicationSettings_GetString("auto_zooming");
     if (!auto_zooming.empty()) {
-        LOG(INFO) << "[Browser process] OnAfterCreated(): auto_zooming = "
+        LOG(INFO) << "OnAfterCreated(): auto_zooming = "
                   << auto_zooming.ToString();
         SetBrowserDpiSettings(browser, auto_zooming);
     }
