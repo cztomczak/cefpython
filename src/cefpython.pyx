@@ -694,9 +694,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     g_cef_initialized_successfully = bool(ret)
 
     if not ret:
-        NonCriticalError("CEF initialization failed (another instance may"
-                         " be running with the same root_cache_path, or"
-                         " settings are invalid)")
+        Error("CEF initialization failed (another instance may"
+              " be running with the same root_cache_path, or"
+              " settings are invalid)")
 
     IF UNAME_SYSNAME == "Windows":
         # Chromium logs the messages emitted before its logging is set up

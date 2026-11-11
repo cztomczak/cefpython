@@ -14,7 +14,7 @@ bool V8FunctionHandler::Execute(const CefString& functionName,
     if (!CefV8Context::InContext()) {
         // CefV8Context::GetCurrentContext may not be called when
         // not in a V8 context.
-        LOG(ERROR) << "[Renderer process] V8FunctionHandler::Execute():"
+        LOG(ERROR) << "[renderer] V8FunctionHandler::Execute():"
                       " not inside a V8 context";
         return false;
     }
@@ -22,7 +22,7 @@ bool V8FunctionHandler::Execute(const CefString& functionName,
     CefRefPtr<CefBrowser> browser = context.get()->GetBrowser();
     CefRefPtr<CefFrame> frame = context.get()->GetFrame();
     if (pythonCallbackId_) {
-        LOG(INFO) << "[Renderer process] V8FunctionHandler::Execute():"
+        LOG(INFO) << "[renderer] V8FunctionHandler::Execute():"
                      " python callback";
         CefRefPtr<CefListValue> functionArguments = V8ValueListToCefListValue(
                 v8Arguments);
@@ -36,7 +36,7 @@ bool V8FunctionHandler::Execute(const CefString& functionName,
         returnValue = CefV8Value::CreateNull();
         return true;
     } else {
-        LOG(INFO) << "[Renderer process] V8FunctionHandler::Execute():"
+        LOG(INFO) << "[renderer] V8FunctionHandler::Execute():"
                      " js binding";
         if (!(cefPythonApp_.get() \
                 && cefPythonApp_->BindedFunctionExists( \
