@@ -16,6 +16,7 @@ Table of contents:
   * [GetBrowserByIdentifier](#getbrowserbyidentifier)
   * [GetBrowserByWindowHandle](#getbrowserbywindowhandle)
   * [GetDataUrl](#getdataurl)
+  * [GetExitCode](#getexitcode)
   * [GetGlobalClientCallback](#getglobalclientcallback)
   * [GetModuleDirectory](#getmoduledirectory)
   * [GetVersion](#getversion)
@@ -156,6 +157,31 @@ See:
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
 
 
+### GetExitCode
+
+| | |
+| --- | --- |
+| __Return__ | int |
+
+Returns the exit code of the Initialize() call. It is 0 when Initialize()
+returned True. Otherwise it is a result code, usually one of the
+cef_resultcode_t values in upstream CEF's include/internal/cef_types.h (this
+is not a comprehensive list). For example 24
+(CEF_RESULT_CODE_NORMAL_EXIT_PROCESS_NOTIFIED) when another instance of the
+application is already running with the same
+ApplicationSettings.[root_cache_path](ApplicationSettings.md#root_cache_path)
+and the command line was passed to it.
+
+Call this function on the main application thread after Initialize(). It can
+also be called when Initialize() returned False, so that the application can
+exit with that code, like upstream CEF's cefsimple example does:
+
+```python
+if not cef.Initialize():
+    sys.exit(cef.GetExitCode())
+```
+
+
 ### GetGlobalClientCallback
 
 | Parameter | Type |
@@ -205,9 +231,9 @@ This function should be called on the main application thread (UI thread) to ini
 Returns False if CEF could not be initialized, for example when another
 instance of the application is already running with the same
 ApplicationSettings.[root_cache_path](ApplicationSettings.md#root_cache_path).
-An error is logged in that case. Check the return value and, when it is
-False, exit the application immediately without calling Shutdown() or
-other CEF Python functions.
+An error with the exit code is logged in that case. Check the return value
+and, when it is False, exit the application immediately without calling
+Shutdown() or other CEF Python functions, except GetExitCode().
 
 CefPython messages emitted before a successful CefInitialize() are written
 directly to stderr. On Windows, early CEF/Chromium startup messages may go to

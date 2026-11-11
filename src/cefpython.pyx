@@ -692,9 +692,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     g_cef_initialized_successfully = bool(ret)
 
     if not ret:
-        NonCriticalError("CEF initialization failed (another instance may"
-                         " be running with the same root_cache_path, or"
-                         " settings are invalid)")
+        NonCriticalError(_InitializeFailedMessage(CefGetExitCode()))
 
     IF UNAME_SYSNAME == "Windows":
         # Chromium logs the messages emitted before its logging is set up
@@ -711,6 +709,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         WindowUtils.InstallX11ErrorHandlers()
 
     return ret
+
+def GetExitCode():
+    return CefGetExitCode()
 
 def CreateBrowser(**kwargs):
     """Create browser asynchronously. TODO. """
