@@ -39,7 +39,8 @@ STATE_ON_TARGET_2 = "on_target_2"    # final example.com load complete
 
 def main():
     print(__doc__)
-    cef.Initialize()
+    if not cef.Initialize():
+        return
     browser = cef.CreateBrowserSync(url=TARGET_URL,
                                     window_title="Cross-domain JS binding test")
     handler = CrossDomainHandler(browser)

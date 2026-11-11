@@ -83,7 +83,8 @@ def main():
         # Tweaking OSR performance (Issue #240)
         "windowless_frame_rate": 30,  # Default frame rate in CEF is 30
     }
-    cef.Initialize(settings=settings, switches=switches)
+    if not cef.Initialize(settings=settings, switches=switches):
+        return
     create_browser(browser_settings)
     cef.MessageLoop()
     cef.Shutdown()

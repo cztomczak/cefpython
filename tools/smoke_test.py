@@ -68,6 +68,7 @@ _switches = json.loads(sys.argv[1])
 _example = sys.argv[2]
 _auto_close_ms = int(sys.argv[3])
 
+_initialized = []
 _orig_initialize = cef.Initialize
 def _initialize(*args, **kwargs):
     user = kwargs.pop("switches", None)
@@ -75,7 +76,9 @@ def _initialize(*args, **kwargs):
         user = kwargs.pop("commandLineSwitches", None)
     merged = dict(user or {})
     merged.update(_switches)
-    return _orig_initialize(*args, switches=merged, **kwargs)
+    _initialized.append(
+        _orig_initialize(*args, switches=merged, **kwargs))
+    return _initialized[-1]
 cef.Initialize = _initialize
 
 _orig_message_loop = cef.MessageLoop
@@ -86,6 +89,8 @@ cef.MessageLoop = _message_loop
 
 sys.argv = [_example]
 runpy.run_path(_example, run_name="__main__")
+if not (_initialized and all(_initialized)):
+    sys.exit("cef.Initialize() failed or was not called")
 """
 
 

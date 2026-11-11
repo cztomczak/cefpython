@@ -7,7 +7,8 @@ from cefpython3 import cefpython as cef
 
 
 def main():
-    cef.Initialize()
+    if not cef.Initialize():
+        return
     browser = cef.CreateBrowserSync(url="https://www.google.com/",
                                     window_title="OnBeforeClose")
     browser.SetClientHandler(LifespanHandler())

@@ -47,7 +47,8 @@ def main():
         # the same time. This is an incorrect approach
         # and only a temporary fix.
         settings["external_message_pump"] = True
-    cef.Initialize(settings=settings)
+    if not cef.Initialize(settings=settings):
+        return
     app = CefApp(False)
     app.MainLoop()
     del app  # Must destroy before calling Shutdown
