@@ -48,7 +48,6 @@ Table of contents:
 * [v66+ BrowserSettings.javascript_open_windows_disallowed option was removed](#v66-browsersettingsjavascript_open_windows_disallowed-option-was-removed)
 * [v66+ Threads removed: TID_DB, TID_PROCESS_LAUNCHER, TID_CACHE](#v66-threads-removed-tid_db-tid_process_launcher-tid_cache)
 * [v66+ cef.Request.Flags changed](#v66-cefrequestflags-changed)
-* [v66+ RequestHandler.GetCookieManager not getting called in some cases](#v66-requesthandlergetcookiemanager-not-getting-called-in-some-cases)
 * [v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)](#v66-changes-to-mac-apps-that-integrate-into-existing-message-loop-qt-wxpython)
 * [v66.1+ Navigation urls passed to CreateBrowserSync or LoadUrl methods need to be encoded by app code](#v661-navigation-urls-passed-to-createbrowsersync-or-loadurl-methods-need-to-be-encoded-by-app-code)
 * [v67+ Do not call the 'WindowUtils.OnSize' function](#v67-do-not-call-the-windowutilsonsize-function)
@@ -458,13 +457,6 @@ See a complete list of flags in the description of
 cef.Request.[GetFlags](../api/Request.md#getflags) method.
 
 
-## v66+ RequestHandler.GetCookieManager not getting called in some cases
-
-In some cases the `RequestHandler.GetCookieManager`
-callback is not getting called due to a race condition.
-This bug is to be fixed in Issue [#429](../../../issues/429).
-
-
 ## v66+ Changes to Mac apps that integrate into existing message loop (Qt, wxPython)
 
 These changes are required only on Mac platform.
@@ -526,7 +518,8 @@ most important application-facing changes are:
 | `LifespanHandler.OnBeforePopup(browser, frame, ...)` | A `popup_id` argument was added. |
 | `RequestHandler.GetAuthCredentials(browser, frame, ...)` | The `frame` argument was replaced by `origin_url`. |
 | `RequestHandler.CanGetCookies(browser, frame, request)` / `CanSetCookie(browser, frame, request, cookie)` | Replaced by `CanSendCookie(browser, frame, request, cookie)` and `CanSaveCookie(browser, frame, request, response, cookie)`. |
-| `RequestHandler.GetCookieManager`, `OnBeforePluginLoad`, and `OnPluginCrashed` | Removed. |
+| `RequestHandler.GetCookieManager` | Removed upstream, custom cookie managers are not supported. Use `CookieManager.GetGlobalManager()`. |
+| `RequestHandler.OnBeforePluginLoad` and `OnPluginCrashed` | Removed. |
 | `RequestHandler.OnQuotaRequest` | Removed upstream. CEF now handles disk-quota permission prompts through `CefPermissionHandler.OnShowPermissionPrompt` with `CEF_PERMISSION_TYPE_DISK_QUOTA`. This API is not yet exposed by CEF Python and does not provide the requested quota size. |
 | `RequestHandler.OnProtocolExecution` | `allow_execution_out[0]` is now honored. Previously, OS execution was always allowed whenever the callback was invoked, regardless of this value. |
 | `RequestHandler.OnRendererProcessTerminated(browser, status)` | `error_code` and `error_string` arguments were added. New `status` values: `TS_PROCESS_OOM`, `TS_LAUNCH_FAILED` and `TS_INTEGRITY_FAILURE`. |

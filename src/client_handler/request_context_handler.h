@@ -22,7 +22,6 @@ private:
 public:
     // Browser may be NULL when instantiated from cefpython.CreateBrowserSync.
     // In such case SetBrowser will be called after browser creation.
-    // GetCookieManager must handle a case when browser is NULL.
     explicit RequestContextHandler(CefRefPtr<CefBrowser> browser)
             : browser_(browser) {
     }
