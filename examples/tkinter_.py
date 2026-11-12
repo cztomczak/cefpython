@@ -61,7 +61,8 @@ def main():
     settings = {}
     if MAC:
         settings["external_message_pump"] = True
-    cef.Initialize(settings=settings)
+    if not cef.Initialize(settings=settings):
+        return
     app.mainloop()
     logger.debug("Main loop exited")
     cef.Shutdown()

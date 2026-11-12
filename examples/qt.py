@@ -83,7 +83,8 @@ def main():
         "devtools": True,
     }
 
-    cef.Initialize(settings)
+    if not cef.Initialize(settings):
+        return
     app = CefApplication(sys.argv)
     main_window = MainWindow()
     main_window.show()

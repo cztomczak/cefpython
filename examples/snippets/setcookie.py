@@ -51,7 +51,8 @@ class CookieVisitor(object):
 
 
 def main():
-    cef.Initialize()
+    if not cef.Initialize():
+        return
     browser = cef.CreateBrowserSync(
         url="https://www.google.com/",
         window_title="Set a cookie")

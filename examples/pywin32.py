@@ -38,7 +38,8 @@ def main():
     settings = {
         "multi_threaded_message_loop": g_multi_threaded,
     }
-    cef.Initialize(settings=settings)
+    if not cef.Initialize(settings=settings):
+        return
     
     window_proc = {
         win32con.WM_CLOSE: close_window,

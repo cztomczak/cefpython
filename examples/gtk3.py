@@ -55,7 +55,8 @@ def main():
         # > Python[57738:d07] _createMenuRef called with existing principal
         # > MenuRef already associated with menu
         sys.excepthook = cef.ExceptHook  # To shutdown CEF processes on error
-    cef.Initialize()
+    if not cef.Initialize():
+        return
     app = Gtk3Example()
     SystemExit(app.run(sys.argv))
 
