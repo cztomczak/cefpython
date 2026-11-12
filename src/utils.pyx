@@ -39,25 +39,54 @@ cpdef py_bool IsThread(int threadID):
 #       unicode strings and writing them to file (codecs.open).
 #       This change is required to work with Cython 0.20.
 
-cpdef object Debug(py_string msg):
-    """Print debug message. Will be shown only when settings.debug=True."""
+
+cdef str GetLogPrefix(int severity):
+    pid = os.getpid()
+    if hasattr(threading, "get_native_id"):
+        tid = threading.get_native_id()
+    else:
+        tid = threading.get_ident()
+    timestamp = datetime.datetime.now().strftime("%m%d/%H%M%S.%f")
+    severity_string = ""
+    if severity == LOGSEVERITY_INFO:
+        severity_string = "INFO"
+    elif severity == LOGSEVERITY_WARNING:
+        severity_string = "WARNING"
+    elif severity == LOGSEVERITY_ERROR:
+        severity_string = "ERROR"
+    global g_commandLineSwitches
+    if "log-items" in g_commandLineSwitches and g_commandLineSwitches["log-items"] == "none":
+        return f"{severity_string}"
+    else:
+        return f"{pid}:{tid}:{timestamp}:{severity_string}"
+
+cdef bytes GetLogTag():
+    if len(sys.argv) and sys.argv[0]:
+        return ("cefpython:" + os.path.basename(sys.argv[0])).encode("utf-8")
+    return b"cefpython"
+
+cdef object LogMessage(py_string msg, int severity):
     # In Python 3 str or bytes may be passed
     if type(msg) != str and type(msg) == bytes:
         msg = msg.decode("utf-8", "replace")
     # Convert to str in case other kind of object was passed
     msg = str(msg)
-    msg = "[Browser process] " + msg
     if g_cef_initialized_successfully:
-        cef_log_info(PyStringToChar(msg))
-    elif g_applicationSettings.get("log_severity", LOGSEVERITY_ERROR) \
-            <= LOGSEVERITY_INFO:
+        if (severity == LOGSEVERITY_INFO):
+            cef_log_info(GetLogTag(), PyStringToChar(msg))
+        elif (severity == LOGSEVERITY_WARNING):
+            cef_log_warning(GetLogTag(), PyStringToChar(msg))
+        elif (severity == LOGSEVERITY_ERROR):
+            cef_log_error(GetLogTag(), PyStringToChar(msg))
+    elif g_applicationSettings.get("log_severity", LOGSEVERITY_ERROR) <= severity:
         # CEF logging is not available until CefInitialize() succeeds, and
         # before that Chromium sends messages to its own default destination
         # (a debug.log next to python.exe on Windows). Write to stderr
         # directly so that these messages are not lost (Issue #709).
         if sys.stderr:  # None when run with pythonw.exe
             try:
-                sys.stderr.write("[cefpython] " + msg + "\n")
+                tag = GetLogTag().decode("utf-8", "replace")
+                sys.stderr.write("[" + GetLogPrefix(severity) + ":" + tag + ":0] " + msg + "\n")
                 sys.stderr.flush()
                 return
             except (OSError, ValueError):
@@ -65,17 +94,21 @@ cpdef object Debug(py_string msg):
                 pass
         # No usable stderr: fall back to Chromium's default destination,
         # which on Windows is a debug.log next to the executable.
-        cef_log_info(PyStringToChar(msg))
+        if (severity == LOGSEVERITY_INFO):
+            cef_log_info(GetLogTag(), PyStringToChar(msg))
+        elif (severity == LOGSEVERITY_WARNING):
+            cef_log_warning(GetLogTag(), PyStringToChar(msg))
+        elif (severity == LOGSEVERITY_ERROR):
+            cef_log_error(GetLogTag(), PyStringToChar(msg))
 
-cdef void NonCriticalError(py_string msg) except *:
-    """Notify about error gently. Does not terminate application."""
-    # In Python 3 str or bytes may be passed
-    if type(msg) != str and type(msg) == bytes:
-        msg = msg.decode("utf-8", "replace")
-    # Convert to str in case other kind of object was passed
-    msg = str(msg)
-    msg = "[Browser process] " + msg
-    cef_log_error(PyStringToChar(msg))
+cpdef object Debug(py_string msg):
+    LogMessage(msg, LOGSEVERITY_INFO)
+
+cpdef object Warning(py_string msg):
+    LogMessage(msg, LOGSEVERITY_WARNING)
+
+cpdef object Error(py_string msg):
+    LogMessage(msg, LOGSEVERITY_ERROR)
 
 cpdef str GetSystemError():
     IF UNAME_SYSNAME == "Windows":

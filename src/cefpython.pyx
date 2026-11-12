@@ -107,6 +107,7 @@ import sys
 import cython
 # noinspection PyUnresolvedReferences
 import platform
+import threading
 # noinspection PyUnresolvedReferences
 import traceback
 # noinspection PyUnresolvedReferences
@@ -299,7 +300,7 @@ g_debug = False
 # https://groups.google.com/d/topic/cython-users/0dw3UASh7HY/discussion
 # The string_encoding key must be set early here and also in Initialize.
 g_applicationSettings = {"string_encoding": "utf-8"}
-g_commandLineSwitches = {}
+g_commandLineSwitches = {"log-items": "none"}
 g_browser_settings = {}
 
 # If ApplicationSettings.unique_request_context_per_browser is False
@@ -447,13 +448,14 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     for kwarg in kwargs:
         raise Exception("Invalid argument: "+kwarg)
 
+    global g_commandLineSwitches
     if command_line_switches:
         # Make a copy as commandLineSwitches is a reference only
         # that might get destroyed later.
-        global g_commandLineSwitches
         for key in command_line_switches:
             g_commandLineSwitches[key] = copy.deepcopy(
                     command_line_switches[key])
+
     # Use g_commandLineSwitches if you need to modify or access
     # command line switches inside this function.
     del command_line_switches
@@ -692,9 +694,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     g_cef_initialized_successfully = bool(ret)
 
     if not ret:
-        NonCriticalError("CEF initialization failed (another instance may"
-                         " be running with the same root_cache_path, or"
-                         " settings are invalid)")
+        Error("CEF initialization failed (another instance may"
+              " be running with the same root_cache_path, or"
+              " settings are invalid)")
 
     IF UNAME_SYSNAME == "Windows":
         # Chromium logs the messages emitted before its logging is set up
@@ -1005,8 +1007,8 @@ def Shutdown():
     # If the the two code blocks above, that tried to close browsers
     # and free CEF references, failed, then display an error about it!
     if len(g_pyBrowsers):
-        NonCriticalError("Shutdown called, but there are still browser"
-                         " references alive")
+        Error("Shutdown called, but there are still browser"
+              " references alive")
 
     # Release shared request context. In the past this was sometimes
     # causing segmentation fault. See Issue #333:

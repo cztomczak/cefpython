@@ -64,10 +64,10 @@ cef.Initialize(settings=settings, switches=switches)
 
 Now you should see debug information displayed in console like this:
 ```
-[cefpython] [Browser process] Initialize() called
-[cefpython] [Browser process] CefInitialize()
-[cefpython] [Browser process] App_OnBeforeCommandLineProcessing_BrowserProcess()
-[cefpython] [Browser process] Command line string for the browser process: ...
+[cefpython] Initialize() called
+[cefpython] CefInitialize()
+[cefpython] App_OnBeforeCommandLineProcessing_BrowserProcess()
+[cefpython] Command line string for the browser process: ...
 ```
 
 The logs of all CEF processes are printed to the console instead of being

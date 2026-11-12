@@ -9,8 +9,7 @@ cdef public void App_OnBeforeCommandLineProcessing_BrowserProcess(
         ) noexcept with gil:
     try:
         AppendSwitchesToCommandLine(cefCommandLine, g_commandLineSwitches)
-        Debug("App_OnBeforeCommandLineProcessing_BrowserProcess()")
-        Debug("Command line string for the browser process: "
+        Debug("Browser process command line: "
               + CefToPyString(cefCommandLine.get().GetCommandLineString()))
     except:
         (exc_type, exc_value, exc_trace) = sys.exc_info()

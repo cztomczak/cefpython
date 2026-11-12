@@ -49,14 +49,14 @@ CefString PutJavascriptCallback(
 
 bool ExecuteJavascriptCallback(int callbackId, CefRefPtr<CefListValue> args) {
     if (g_jsCallbackMap.empty()) {
-        LOG(ERROR) << "[Renderer process] ExecuteJavascriptCallback():"
+        LOG(ERROR) << "[renderer] ExecuteJavascriptCallback():"
                       " callback map is empty";
         return false;
     }
     JavascriptCallbackMap::const_iterator it = g_jsCallbackMap.find(
             callbackId);
     if (it == g_jsCallbackMap.end()) {
-        std::string logMessage = "[Renderer process]"
+        std::string logMessage = "[renderer]"
                                  " ExecuteJavascriptCallback():"
                                  " callback not found, id=";
         logMessage.append(AnyToString(callbackId));
@@ -75,7 +75,7 @@ bool ExecuteJavascriptCallback(int callbackId, CefRefPtr<CefListValue> args) {
         return true;
     } else {
         context->Exit();
-        LOG(ERROR) << "[Renderer process] ExecuteJavascriptCallback():"
+        LOG(ERROR) << "[renderer] ExecuteJavascriptCallback():"
                       " callback->ExecuteFunction() failed";
         return false;
     }
@@ -96,7 +96,7 @@ void RemoveJavascriptCallbacksForFrame(CefRefPtr<CefFrame> frame) {
             // | ++it;
             // This would cause an infinite loop.
             g_jsCallbackMap.erase(it++);
-            LOG(INFO) << "[Renderer process]"
+            LOG(INFO) << "[renderer]"
                          " RemoveJavascriptCallbacksForFrame():"
                          " removed js callback from the map";
         } else {
