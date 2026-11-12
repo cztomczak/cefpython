@@ -426,6 +426,18 @@ cdef public int CommandLineSwitches_GetInt(const char* key) noexcept with gil:
 
 # -----------------------------------------------------------------------------
 
+cdef str _InitializeFailedMessage(int exit_code):
+    message = "CEF initialization failed (exit code=" + str(exit_code)
+    if exit_code in g_cef_result_code_names:
+        message += ", " + g_cef_result_code_names[exit_code]
+    message += ")"
+    if exit_code == CEF_RESULT_CODE_NORMAL_EXIT_PROCESS_NOTIFIED:
+        message += (": another instance is already running with the same"
+                    " root_cache_path")
+    else:
+        message += ": check settings and command line switches"
+    return message
+
 # If you've built custom binaries with tcmalloc hook enabled on
 # Linux, then do not to run any of the CEF code until Initialize()
 # is called. See Issue #73 in the CEF Python Issue Tracker.
@@ -694,9 +706,7 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
     g_cef_initialized_successfully = bool(ret)
 
     if not ret:
-        Error("CEF initialization failed (another instance may"
-              " be running with the same root_cache_path, or"
-              " settings are invalid)")
+        Error(_InitializeFailedMessage(CefGetExitCode()))
 
     IF UNAME_SYSNAME == "Windows":
         # Chromium logs the messages emitted before its logging is set up
@@ -713,6 +723,9 @@ def Initialize(applicationSettings=None, commandLineSwitches=None, **kwargs):
         WindowUtils.InstallX11ErrorHandlers()
 
     return ret
+
+cpdef int GetExitCode():
+    return CefGetExitCode()
 
 def CreateBrowser(**kwargs):
     """Create browser asynchronously. TODO. """
