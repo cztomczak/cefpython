@@ -7,6 +7,7 @@
 Table of contents:
 * [Preface](#preface)
 * [Example switches](#example-switches)
+  * [log-items](#log-items)
   * [enable-media-stream](#enable-media-stream)
   * [proxy-server](#proxy-server)
   * [no-proxy-server](#no-proxy-server)
@@ -43,6 +44,10 @@ cef3\windows\binaries\debug.log" --log-severity=info --enable-release-dcheck
 
 ## Example switches
 
+
+### log-items
+
+Customize items prepended to each log line. By default CEF Python sets it to `none` for clean logs. To restore standard Chromium logging with PID, TID and timestamp, set it to `pid,tid,timestamp`.
 
 ### enable-media-stream
 

@@ -127,11 +127,11 @@ void OpenInExternalBrowser(const std::string& url)
     // Linux equivalent of ShellExecute
 
     if (url.empty()) {
-        LOG(ERROR) << "[Browser process] OpenInExternalBrowser():"
+        LOG(ERROR) << "OpenInExternalBrowser():"
                       " url is empty";
         return;
     }
-    std::string msg = "[Browser process] OpenInExternalBrowser(): url=";
+    std::string msg = "OpenInExternalBrowser(): url=";
     msg.append(url.c_str());
     LOG(INFO) << msg.c_str();
 

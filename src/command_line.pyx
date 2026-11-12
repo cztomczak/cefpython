@@ -21,14 +21,14 @@ cdef void AppendSwitchesToCommandLine(
         if value:
             if pyCommandLine.HasSwitch(switch)\
                     and value == pyCommandLine.GetSwitchValue(switch):
-                Debug("Switch already set, ignoring: %s" % switch)
+                pass
             else:
-              pyCommandLine.AppendSwitchWithValue(switch, value)
+                pyCommandLine.AppendSwitchWithValue(switch, value)
         else:
             if pyCommandLine.HasSwitch(switch):
-                Debug("Switch already set, ignoring: %s" % switch)
+                pass
             else:
-              pyCommandLine.AppendSwitch(switch)
+                pyCommandLine.AppendSwitch(switch)
 
 cdef PyCommandLine CreatePyCommandLine(
         CefRefPtr[CefCommandLine] cefCommandLine):

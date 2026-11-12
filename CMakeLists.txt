@@ -28,6 +28,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Strip absolute source directory paths from __FILE__ macro in log messages
+if(MSVC)
+    add_compile_options("/pathmap:${CMAKE_SOURCE_DIR}=cefpython")
+else()
+    add_compile_options("-ffile-prefix-map=${CMAKE_SOURCE_DIR}/=cefpython/")
+endif()
+
 # ---- Python -----------------------------------------------------------------
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 

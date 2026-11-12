@@ -10,7 +10,7 @@
 #include "include/base/cef_logging.h"
 
 int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
-    LOG(INFO) << "[Browser process] "
+    LOG(INFO) << ""
         << "X error received: "
         << "type " << event->type << ", "
         << "serial " << event->serial << ", "
@@ -28,7 +28,7 @@ void InstallX11ErrorHandlers() {
     // Copied from upstream cefclient.
     // Install xlib error handlers so that the application won't be terminated
     // on non-fatal errors. Must be done after initializing GTK.
-    LOG(INFO) << "[Browser process] Install X11 error handlers";
+    LOG(INFO) << "Install X11 error handlers";
     XSetErrorHandler(XErrorHandlerImpl);
     XSetIOErrorHandler(XIOErrorHandlerImpl);
 }
@@ -39,12 +39,12 @@ unsigned long GetX11DefaultVisualId(int screen_number) {
     // backend.
     ::Display* xdisplay = cef_get_xdisplay();
     if (!xdisplay) {
-        LOG(WARNING) << "[Browser process] GetX11DefaultVisualId: no X11 "
+        LOG(WARNING) << "GetX11DefaultVisualId: no X11 "
                         "display (wrong thread or non-X11 backend)";
         return 0;
     }
     if (screen_number < 0 || screen_number >= ScreenCount(xdisplay)) {
-        LOG(WARNING) << "[Browser process] GetX11DefaultVisualId: invalid "
+        LOG(WARNING) << "GetX11DefaultVisualId: invalid "
                         "screen number " << screen_number;
         return 0;
     }
@@ -57,13 +57,13 @@ bool SetX11DefaultVisualForGtkWidget(GtkWidget* widget) {
     // called before the widget is realized.
     REQUIRE_UI_THREAD();
     if (!widget || gtk_widget_get_realized(widget)) {
-        LOG(WARNING) << "[Browser process] SetX11DefaultVisualForGtkWidget: "
+        LOG(WARNING) << "SetX11DefaultVisualForGtkWidget: "
                         "invalid or already realized widget";
         return false;
     }
     GdkScreen* screen = gtk_widget_get_screen(widget);
     if (!screen || !GDK_IS_X11_SCREEN(screen)) {
-        LOG(WARNING) << "[Browser process] SetX11DefaultVisualForGtkWidget: "
+        LOG(WARNING) << "SetX11DefaultVisualForGtkWidget: "
                         "widget is not on an X11 screen";
         return false;
     }
@@ -76,7 +76,7 @@ bool SetX11DefaultVisualForGtkWidget(GtkWidget* widget) {
     GdkVisual* visual = gdk_x11_screen_lookup_visual(GDK_X11_SCREEN(screen),
                                                      visual_id);
     if (!visual) {
-        LOG(WARNING) << "[Browser process] SetX11DefaultVisualForGtkWidget: "
+        LOG(WARNING) << "SetX11DefaultVisualForGtkWidget: "
                         "no GDK visual for X visual " << visual_id;
         return false;
     }
@@ -92,7 +92,7 @@ void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
     // here for OSR (use WasResized() instead), so warn.
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
     if (!xwindow) {
-        LOG(WARNING) << "[Browser process] SetX11WindowBounds: no X11 window "
+        LOG(WARNING) << "SetX11WindowBounds: no X11 window "
                         "handle (windowless browser?), skipping";
         return;
     }
@@ -102,7 +102,7 @@ void SetX11WindowBounds(CefRefPtr<CefBrowser> browser,
     // XConfigureWindow(NULL, ...) segfaults (verified), so no-op instead.
     ::Display* xdisplay = cef_get_xdisplay();
     if (!xdisplay) {
-        LOG(INFO) << "[Browser process] SetX11WindowBounds: no X11 display "
+        LOG(INFO) << "SetX11WindowBounds: no X11 display "
                      "(wrong thread or non-X11 backend), skipping";
         return;
     }
@@ -122,7 +122,7 @@ void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
     // only caller is for windowed browsers, so this indicates a bug.
     ::Window xwindow = browser->GetHost()->GetWindowHandle();
     if (!xwindow) {
-        LOG(WARNING) << "[Browser process] SetX11WindowTitle: no X11 window "
+        LOG(WARNING) << "SetX11WindowTitle: no X11 window "
                         "handle (windowless browser?), skipping";
         return;
     }
@@ -130,7 +130,7 @@ void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
     // backend; XStoreName(NULL, ...) would segfault.
     ::Display* xdisplay = cef_get_xdisplay();
     if (!xdisplay) {
-        LOG(INFO) << "[Browser process] SetX11WindowTitle: no X11 display "
+        LOG(INFO) << "SetX11WindowTitle: no X11 display "
                      "(wrong thread or non-X11 backend), skipping";
         return;
     }
@@ -180,7 +180,7 @@ GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser) {
     // A similar code is in cefpython_app.cpp and it might already
     // been executed. If making changes here, make changes there
     // as well.
-    LOG(INFO) << "[Browser process] Initialize GTK";
+    LOG(INFO) << "Initialize GTK";
     gtk_init(0, NULL);
     InstallX11ErrorHandlers();
     // Now the display is available
