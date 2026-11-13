@@ -9,6 +9,7 @@
 
 import wx
 from cefpython3 import cefpython as cef
+import ctypes
 import platform
 import sys
 import os
@@ -17,6 +18,12 @@ import os
 WINDOWS = (platform.system() == "Windows")
 LINUX = (platform.system() == "Linux")
 MAC = (platform.system() == "Darwin")
+
+# CEF only supports X11 on Linux, so put GTK on its X11 backend (XWayland
+# in Wayland sessions), where GetHandle() returns an X11 window ID that the
+# browser can be embedded into. Must be set before wx.App is created.
+if LINUX:
+    os.environ["GDK_BACKEND"] = "x11"
 
 if MAC:
     try:
@@ -82,6 +89,62 @@ def scale_window_size_for_high_dpi(width, height):
     return width, height
 
 
+def set_default_x11_visual(widget):
+    """Put a GTK 3 widget on the X server's default visual. GTK 3 may use a
+    visual chosen for OpenGL instead, and CEF can't create its window inside
+    a window with another visual (Issue #701). wxPython has no API for this,
+    so call GTK through the libraries that wxPython itself is linked against,
+    as wxWidgets' own wxWebViewChromium does. Must be called before the
+    widget is realized. Prints an error and returns False if the visual
+    could not be set."""
+    ptr = ctypes.c_void_p
+    try:
+        lib = ctypes.CDLL(wx._core.__file__)
+        for name, restype, argtypes in [
+                ("gtk_widget_get_realized", ctypes.c_int, [ptr]),
+                ("gtk_widget_get_screen", ptr, [ptr]),
+                ("gtk_widget_set_visual", None, [ptr, ptr]),
+                ("g_type_check_instance_is_a", ctypes.c_int,
+                 [ptr, ctypes.c_size_t]),
+                ("gdk_x11_screen_get_type", ctypes.c_size_t, []),
+                ("gdk_screen_get_display", ptr, [ptr]),
+                ("gdk_x11_display_get_xdisplay", ptr, [ptr]),
+                ("gdk_x11_screen_get_screen_number", ctypes.c_int, [ptr]),
+                ("gdk_x11_screen_lookup_visual", ptr,
+                 [ptr, ctypes.c_ulong]),
+                ("XDefaultVisual", ptr, [ptr, ctypes.c_int]),
+                ("XVisualIDFromVisual", ctypes.c_ulong, [ptr])]:
+            func = getattr(lib, name)
+            func.restype = restype
+            func.argtypes = argtypes
+    except (AttributeError, OSError) as exc:
+        print("[wxpython.py] Error: cannot call GTK through wxPython: %s"
+              % exc)
+        return False
+    widget = int(widget) if widget else 0
+    if not widget or lib.gtk_widget_get_realized(widget):
+        print("[wxpython.py] Error: the GTK widget is missing or already"
+              " realized")
+        return False
+    screen = lib.gtk_widget_get_screen(widget)
+    if not lib.g_type_check_instance_is_a(screen,
+                                          lib.gdk_x11_screen_get_type()):
+        print("[wxpython.py] Error: the GTK widget is not on an X11 screen")
+        return False
+    xdisplay = lib.gdk_x11_display_get_xdisplay(
+            lib.gdk_screen_get_display(screen))
+    xvisual = lib.XDefaultVisual(xdisplay,
+                                 lib.gdk_x11_screen_get_screen_number(screen))
+    visual = lib.gdk_x11_screen_lookup_visual(
+            screen, lib.XVisualIDFromVisual(xvisual))
+    if not visual:
+        print("[wxpython.py] Error: GDK has no visual for the X server's"
+              " default visual")
+        return False
+    lib.gtk_widget_set_visual(widget, visual)
+    return True
+
+
 class MainFrame(wx.Frame):
 
     def __init__(self):
@@ -134,29 +197,30 @@ class MainFrame(wx.Frame):
             NSApp.windows()[0].contentView().setWantsLayer_(True)
 
         if LINUX:
-            # Put the frame on the X server's default visual before it is
-            # realized (shown), otherwise the browser stays blank with
-            # GTK 3 (Issue #701).
-            if "gtk3" in wx.PlatformInfo:
-                widget = self.GetGtkWidget()
-                set_visual = cef.WindowUtils.SetX11DefaultVisualForGtkWidget
-                if not widget or not set_visual(int(widget)):
-                    raise RuntimeError("Could not set the GTK window's"
-                                       " X11 visual")
-            # On Linux must show before embedding browser, so that handle
-            # is available (Issue #347).
-            self.Show()
-            # In wxPython 3.0 and wxPython 4.0 on Linux handle is
-            # still not yet available, so must delay embedding browser
-            # (Issue #349).
-            if wx.version().startswith("3.") or wx.version().startswith("4."):
-                wx.CallLater(100, self.embed_browser)
+            # Put the browser panel on the X server's default visual before
+            # it is realized (shown), otherwise CEF can't create its window
+            # with GTK 3 (Issue #701). Without that window the browser stays
+            # blank and the frame can't be closed (see OnClose), so leave the
+            # panel empty then.
+            if "gtk3" in wx.PlatformInfo and not set_default_x11_visual(
+                    self.browser_panel.GetGtkWidget()):
+                print("[wxpython.py] Error: the browser is not embedded")
             else:
-                # This works fine in wxPython 2.8 on Linux
-                self.embed_browser()
+                # The browser can only be embedded once GTK has realized the
+                # panel and its X11 window exists (Issues #347, #349). wxGTK
+                # sends EVT_WINDOW_CREATE at that point, possibly during
+                # Show().
+                self.browser_panel.Bind(wx.EVT_WINDOW_CREATE,
+                                        self.OnBrowserPanelCreate)
+            self.Show()
         else:
             self.embed_browser()
             self.Show()
+
+    def OnBrowserPanelCreate(self, event):
+        event.Skip()
+        if event.GetWindow() is self.browser_panel and not self.browser:
+            self.embed_browser()
 
     def setup_icon(self):
         icon_file = os.path.join(os.path.abspath(os.path.dirname(__file__)),
