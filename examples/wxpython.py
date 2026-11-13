@@ -19,6 +19,12 @@ WINDOWS = (platform.system() == "Windows")
 LINUX = (platform.system() == "Linux")
 MAC = (platform.system() == "Darwin")
 
+# CEF only supports X11 on Linux, so put GTK on its X11 backend (XWayland
+# in Wayland sessions), where GetHandle() returns an X11 window ID that the
+# browser can be embedded into. Must be set before wx.App is created.
+if LINUX:
+    os.environ["GDK_BACKEND"] = "x11"
+
 if MAC:
     try:
         # noinspection PyUnresolvedReferences
@@ -84,37 +90,47 @@ def scale_window_size_for_high_dpi(width, height):
 
 
 def set_default_x11_visual(widget):
-    """Put a GTK 3 widget on the X server's default visual. GTK 3 uses a
+    """Put a GTK 3 widget on the X server's default visual. GTK 3 may use a
     visual chosen for OpenGL instead, and CEF can't create its window inside
     a window with another visual (Issue #701). wxPython has no API for this,
     so call GTK through the libraries that wxPython itself is linked against,
     as wxWidgets' own wxWebViewChromium does. Must be called before the
-    widget is realized."""
-    lib = ctypes.CDLL(wx._core.__file__)
+    widget is realized. Prints an error and returns False if the visual
+    could not be set."""
     ptr = ctypes.c_void_p
-    for name, restype, argtypes in [
-            ("gtk_widget_get_realized", ctypes.c_int, [ptr]),
-            ("gtk_widget_get_screen", ptr, [ptr]),
-            ("gtk_widget_set_visual", None, [ptr, ptr]),
-            ("g_type_check_instance_is_a", ctypes.c_int,
-             [ptr, ctypes.c_size_t]),
-            ("gdk_x11_screen_get_type", ctypes.c_size_t, []),
-            ("gdk_screen_get_display", ptr, [ptr]),
-            ("gdk_x11_display_get_xdisplay", ptr, [ptr]),
-            ("gdk_x11_screen_get_screen_number", ctypes.c_int, [ptr]),
-            ("gdk_x11_screen_lookup_visual", ptr, [ptr, ctypes.c_ulong]),
-            ("XDefaultVisual", ptr, [ptr, ctypes.c_int]),
-            ("XVisualIDFromVisual", ctypes.c_ulong, [ptr])]:
-        func = getattr(lib, name)
-        func.restype = restype
-        func.argtypes = argtypes
-    widget = int(widget)
+    try:
+        lib = ctypes.CDLL(wx._core.__file__)
+        for name, restype, argtypes in [
+                ("gtk_widget_get_realized", ctypes.c_int, [ptr]),
+                ("gtk_widget_get_screen", ptr, [ptr]),
+                ("gtk_widget_set_visual", None, [ptr, ptr]),
+                ("g_type_check_instance_is_a", ctypes.c_int,
+                 [ptr, ctypes.c_size_t]),
+                ("gdk_x11_screen_get_type", ctypes.c_size_t, []),
+                ("gdk_screen_get_display", ptr, [ptr]),
+                ("gdk_x11_display_get_xdisplay", ptr, [ptr]),
+                ("gdk_x11_screen_get_screen_number", ctypes.c_int, [ptr]),
+                ("gdk_x11_screen_lookup_visual", ptr,
+                 [ptr, ctypes.c_ulong]),
+                ("XDefaultVisual", ptr, [ptr, ctypes.c_int]),
+                ("XVisualIDFromVisual", ctypes.c_ulong, [ptr])]:
+            func = getattr(lib, name)
+            func.restype = restype
+            func.argtypes = argtypes
+    except (AttributeError, OSError) as exc:
+        print("[wxpython.py] Error: cannot call GTK through wxPython: %s"
+              % exc)
+        return False
+    widget = int(widget) if widget else 0
     if not widget or lib.gtk_widget_get_realized(widget):
-        raise RuntimeError("The GTK widget is missing or already realized")
+        print("[wxpython.py] Error: the GTK widget is missing or already"
+              " realized")
+        return False
     screen = lib.gtk_widget_get_screen(widget)
     if not lib.g_type_check_instance_is_a(screen,
                                           lib.gdk_x11_screen_get_type()):
-        raise RuntimeError("The GTK widget is not on an X11 screen")
+        print("[wxpython.py] Error: the GTK widget is not on an X11 screen")
+        return False
     xdisplay = lib.gdk_x11_display_get_xdisplay(
             lib.gdk_screen_get_display(screen))
     xvisual = lib.XDefaultVisual(xdisplay,
@@ -122,9 +138,11 @@ def set_default_x11_visual(widget):
     visual = lib.gdk_x11_screen_lookup_visual(
             screen, lib.XVisualIDFromVisual(xvisual))
     if not visual:
-        raise RuntimeError("GDK has no visual for the X server's default"
-                           " visual")
+        print("[wxpython.py] Error: GDK has no visual for the X server's"
+              " default visual")
+        return False
     lib.gtk_widget_set_visual(widget, visual)
+    return True
 
 
 class MainFrame(wx.Frame):
@@ -180,21 +198,27 @@ class MainFrame(wx.Frame):
 
         if LINUX:
             # Put the browser panel on the X server's default visual before
-            # it is realized (shown), otherwise the browser stays blank with
-            # GTK 3 (Issue #701).
-            if "gtk3" in wx.PlatformInfo:
-                set_default_x11_visual(self.browser_panel.GetGtkWidget())
-            # The browser can only be embedded once GTK has realized the
-            # panel and its X11 window exists (Issues #347, #349). wxGTK
-            # sends EVT_WINDOW_CREATE at that point, possibly during Show().
-            self.browser_panel.Bind(wx.EVT_WINDOW_CREATE,
-                                    self.OnBrowserPanelCreate)
+            # it is realized (shown), otherwise CEF can't create its window
+            # with GTK 3 (Issue #701). Without that window the browser stays
+            # blank and the frame can't be closed (see OnClose), so leave the
+            # panel empty then.
+            if "gtk3" in wx.PlatformInfo and not set_default_x11_visual(
+                    self.browser_panel.GetGtkWidget()):
+                print("[wxpython.py] Error: the browser is not embedded")
+            else:
+                # The browser can only be embedded once GTK has realized the
+                # panel and its X11 window exists (Issues #347, #349). wxGTK
+                # sends EVT_WINDOW_CREATE at that point, possibly during
+                # Show().
+                self.browser_panel.Bind(wx.EVT_WINDOW_CREATE,
+                                        self.OnBrowserPanelCreate)
             self.Show()
         else:
             self.embed_browser()
             self.Show()
 
     def OnBrowserPanelCreate(self, event):
+        event.Skip()
         if event.GetWindow() is self.browser_panel and not self.browser:
             self.embed_browser()
 
