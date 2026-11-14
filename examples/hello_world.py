@@ -19,7 +19,7 @@ def main():
     sys.excepthook = cef.ExceptHook  # shut down all CEF processes on error
     settings = {}
     if not cef.Initialize(settings=settings):
-        return
+        return 1
     cef.CreateBrowserSync(url="https://www.google.com/",
                           window_title="Hello World!")
     cef.MessageLoop()
@@ -39,4 +39,4 @@ def check_versions():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

@@ -69,7 +69,7 @@ def main():
         # "user_agent": "MyAgent/20.00 MyProduct/10.00",
     }
     if not cef.Initialize(settings=settings):
-        return
+        return 1
     set_global_handler()
     browser = cef.CreateBrowserSync(url=html_to_data_uri(HTML_code),
                                     window_title="Tutorial")
@@ -197,4 +197,4 @@ class External(object):
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
