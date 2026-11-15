@@ -113,7 +113,8 @@ def main():
     )
     log_versions()
     sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-    init_cef()
+    if not init_cef():
+        return
     init_sdl()
     logging.info("Using %s rendering", args.renderer)
     if args.renderer == 'hardware':
@@ -185,8 +186,9 @@ def init_cef():
         "disable-gpu-compositing": "",
         "enable-begin-frame-scheduling": "",
     }
-    cef.Initialize(settings={"windowless_rendering_enabled": True},
-                   switches=switches)
+    if not cef.Initialize(settings={"windowless_rendering_enabled": True},
+                          switches=switches):
+        return False
     if sys.platform == 'darwin':
         # On MacOS, the NSApplication created in the cefpython initialization
         # will be hidden if windowless is specified. In order for SDL to receive
@@ -194,6 +196,7 @@ def init_cef():
         # command-tab list, the application must be made "regular".
         AppKit.NSApplication.sharedApplication().setActivationPolicy_(
             AppKit.NSApplicationActivationPolicyRegular)
+    return True
 
 
 def init_sdl():

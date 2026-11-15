@@ -55,9 +55,10 @@ def main():
         # > Python[57738:d07] _createMenuRef called with existing principal
         # > MenuRef already associated with menu
         sys.excepthook = cef.ExceptHook  # To shutdown CEF processes on error
-    cef.Initialize()
+    if not cef.Initialize():
+        return 1
     app = Gtk3Example()
-    SystemExit(app.run(sys.argv))
+    return app.run(sys.argv)
 
 def get_win32_handle(gdk_window):
     if gdk_window is None:
@@ -226,4 +227,4 @@ class LifespanHandler(object):
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

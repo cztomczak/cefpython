@@ -40,7 +40,8 @@ g_htmlcode = """
 
 
 def main():
-    cef.Initialize()
+    if not cef.Initialize():
+        return
     browser = cef.CreateBrowserSync(url=cef.GetDataUrl(g_htmlcode),
                                     window_title="Javascript Errors")
     browser.SetClientHandler(DisplayHandler())

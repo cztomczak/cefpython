@@ -4,7 +4,8 @@ from cefpython3 import cefpython as cef
 
 
 def main():
-    cef.Initialize()
+    if not cef.Initialize():
+        return
     browser = cef.CreateBrowserSync(
         url="data:text/html,<h1>Mouse clicks snippet</h1>"
             "This text will be selected after one second.<br>"

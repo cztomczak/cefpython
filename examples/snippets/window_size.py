@@ -12,7 +12,8 @@ import platform
 
 
 def main():
-    cef.Initialize()
+    if not cef.Initialize():
+        return
     window_info = cef.WindowInfo()
     parent_handle = 0
     # This call has effect only on Mac and Linux.

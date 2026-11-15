@@ -76,8 +76,11 @@ Google website. Let's analyze the code from that example:
 3. `cef.Initialize()` - Initialize CEF. This function must be called
    somewhere in the beginning of your code. It must be called before
    any application window is created. It must be called only once
-   during app's lifetime and must have a corresponding Shutdown()
-   call.
+   during app's lifetime and, when it succeeds, must have a corresponding
+   Shutdown() call. It returns False when CEF could not be initialized,
+   for example when another instance of the application is already running
+   with the same root_cache_path, in which case the application should
+   exit without calling Shutdown().
 4. `cef.CreateBrowserSync(url="https://www.google.com/", ...)` - Create
    a browser synchronously, this function returns a Browser object.
 5. `cef.MessageLoop()` - Run CEF message loop. All desktop GUI programs
