@@ -2,6 +2,10 @@
 
 from cefpython3 import cefpython as cef
 
+# Set in OnBeforeClose. A delayed task that was already posted can still
+# run after the browser is closed, and the browser can't be used then.
+browser_closed = False
+
 
 def main():
     if not cef.Initialize():
@@ -18,6 +22,8 @@ def main():
 
 
 def click_after_1_second(browser):
+    if browser_closed:
+        return
     print("Click after 1 second")
     # Mouse move to the top-left corner of the text
     browser.SendMouseMoveEvent(0, 70, False, 0)
@@ -32,6 +38,8 @@ def click_after_1_second(browser):
 
 
 def click_after_2_seconds(browser):
+    if browser_closed:
+        return
     print("Click after 2 seconds")
     browser.SendMouseMoveEvent(0, 90, False, 0)
     browser.SendMouseClickEvent(0, 90, cef.MOUSEBUTTON_LEFT, False, 1)
@@ -46,6 +54,10 @@ class LifespanHandler(object):
         # has completed loading.
         print("Page loading is complete")
         cef.PostDelayedTask(cef.TID_UI, 1000, click_after_1_second, browser)
+
+    def OnBeforeClose(self, browser, **_):
+        global browser_closed
+        browser_closed = True
 
 
 if __name__ == '__main__':
