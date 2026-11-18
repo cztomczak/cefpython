@@ -142,9 +142,7 @@ cdef public void LifespanHandler_OnBeforeClose(
             callback(browser=pyBrowser)
 
         # Flush cookies to disk. Temporary solution for Issue #365.
-        # A similar call is made in Browser.CloseBrowser. If using
-        # GetCookieManager to implement custom cookie managers then
-        # flushing of cookies would need to be handled manually.
+        # A similar call is made in Browser.CloseBrowser.
         cefBrowser.get().GetHost().get().GetRequestContext().get() \
                 .GetCookieManager(
                         <CefRefPtr[CefCompletionCallback]?>nullptr) \

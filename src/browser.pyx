@@ -41,7 +41,7 @@ cdef PyBrowser GetPyBrowserById(int browserId):
 cdef py_bool IsBrowserClosed(CefRefPtr[CefBrowser] cefBrowser):
     """Possibly fix Issue #455 by using this helper function to detect
     if browser is closing/closed."""
-    # CefBrowser may sometimes be NULL e.g. Issue #429, Issue #454.
+    # CefBrowser may sometimes be NULL e.g. Issue #454.
     if not cefBrowser.get():
         return True
     if not cefBrowser.get().GetHost().get():
@@ -251,8 +251,6 @@ cdef class PyBrowser:
                     "OnBeforeBrowse",
                     "OnRendererProcessTerminated",
                     "CanSendCookie", "CanSaveCookie"]
-            # RequestContextHandler
-            self.allowedClientCallbacks += ["GetCookieManager"]
             # LoadHandler
             self.allowedClientCallbacks += ["OnLoadingStateChange",
                     "OnLoadStart", "OnLoadEnd", "OnLoadError"]
@@ -392,8 +390,6 @@ cdef class PyBrowser:
 
         # Flush cookies to disk. Temporary solution for Issue #365.
         # A similar call is made in LifespanHandler_OnBeforeClose.
-        # If using GetCookieManager to implement custom cookie managers
-        # then flushing of cookies would need to be handled manually.
         self.GetCefBrowserHost().get().GetRequestContext().get() \
                 .GetCookieManager(
                         <CefRefPtr[CefCompletionCallback]?>nullptr) \
