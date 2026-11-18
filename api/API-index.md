@@ -136,6 +136,7 @@
   * [GetBrowserByIdentifier](cefpython.md#getbrowserbyidentifier)
   * [GetBrowserByWindowHandle](cefpython.md#getbrowserbywindowhandle)
   * [GetDataUrl](cefpython.md#getdataurl)
+  * [GetExitCode](cefpython.md#getexitcode)
   * [GetGlobalClientCallback](cefpython.md#getglobalclientcallback)
   * [GetModuleDirectory](cefpython.md#getmoduledirectory)
   * [GetVersion](cefpython.md#getversion)

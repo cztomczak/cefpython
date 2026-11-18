@@ -293,6 +293,7 @@ at this moment.
   * [GetBrowserByIdentifier](api/cefpython.md#getbrowserbyidentifier)
   * [GetBrowserByWindowHandle](api/cefpython.md#getbrowserbywindowhandle)
   * [GetDataUrl](api/cefpython.md#getdataurl)
+  * [GetExitCode](api/cefpython.md#getexitcode)
   * [GetGlobalClientCallback](api/cefpython.md#getglobalclientcallback)
   * [GetModuleDirectory](api/cefpython.md#getmoduledirectory)
   * [GetVersion](api/cefpython.md#getversion)
