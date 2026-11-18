@@ -99,6 +99,7 @@ def set_default_x11_visual(widget):
     could not be set."""
     ptr = ctypes.c_void_p
     try:
+        widget = int(widget) if widget else 0
         lib = ctypes.CDLL(wx._core.__file__)
         for name, restype, argtypes in [
                 ("gtk_widget_get_realized", ctypes.c_int, [ptr]),
@@ -117,24 +118,28 @@ def set_default_x11_visual(widget):
             func = getattr(lib, name)
             func.restype = restype
             func.argtypes = argtypes
-    except (AttributeError, OSError) as exc:
-        print("[wxpython.py] Error: cannot call GTK through wxPython: %s"
-              % exc)
+    except Exception as exc:
+        print("[wxpython.py] Error: cannot set the X11 visual: %s" % exc)
         return False
-    widget = int(widget) if widget else 0
     if not widget or lib.gtk_widget_get_realized(widget):
         print("[wxpython.py] Error: the GTK widget is missing or already"
               " realized")
         return False
     screen = lib.gtk_widget_get_screen(widget)
-    if not lib.g_type_check_instance_is_a(screen,
-                                          lib.gdk_x11_screen_get_type()):
+    if not screen or not lib.g_type_check_instance_is_a(
+            screen, lib.gdk_x11_screen_get_type()):
         print("[wxpython.py] Error: the GTK widget is not on an X11 screen")
         return False
-    xdisplay = lib.gdk_x11_display_get_xdisplay(
-            lib.gdk_screen_get_display(screen))
-    xvisual = lib.XDefaultVisual(xdisplay,
-                                 lib.gdk_x11_screen_get_screen_number(screen))
+    display = lib.gdk_screen_get_display(screen)
+    xdisplay = lib.gdk_x11_display_get_xdisplay(display) if display else None
+    if not xdisplay:
+        print("[wxpython.py] Error: cannot get the X11 display")
+        return False
+    xvisual = lib.XDefaultVisual(
+            xdisplay, lib.gdk_x11_screen_get_screen_number(screen))
+    if not xvisual:
+        print("[wxpython.py] Error: cannot get the X server's default visual")
+        return False
     visual = lib.gdk_x11_screen_lookup_visual(
             screen, lib.XVisualIDFromVisual(xvisual))
     if not visual:
