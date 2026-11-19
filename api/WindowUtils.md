@@ -15,8 +15,6 @@ Table of contents:
   * [SetIcon (Win)](#seticon-win)
   * [GetParentHandle](#getparenthandle)
   * [IsWindowHandle](#iswindowhandle)
-  * [gtk_plug_new (Linux)](#gtk_plug_new-linux)
-  * [gtk_widget_show (Linux)](#gtk_widget_show-linux)
   * [InstallX11ErrorHandlers (Linux)](#installx11errorhandlers-linux)
   * [GetX11DefaultVisualId (Linux)](#getx11defaultvisualid-linux)
 
@@ -107,26 +105,6 @@ On Linux and Mac this method always returns 0. @TODO.
 Check whether this is a valid window handle.
 
 On Linux and Mac this method always returns True. @TODO.
-
-
-### gtk_plug_new (Linux)
-
-| Parameter | Type |
-| --- | --- |
-| long GdkNativeWindow | long |
-| __Return__ | void |
-
-Linux-only.
-
-
-### gtk_widget_show (Linux)
-
-| Parameter | Type |
-| --- | --- |
-| long GtkWidget* | long |
-| __Return__ | void |
-
-Linux-only.
 
 
 ### InstallX11ErrorHandlers (Linux)

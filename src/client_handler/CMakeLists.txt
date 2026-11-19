@@ -8,11 +8,6 @@ endif()
 # subprocess CMakeLists so the platform skip rules live in one place.
 filter_sources(_all_cpp _sources)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-endif()
-
 add_library(client_handler STATIC ${_sources})
 add_dependencies(client_handler cefpython_headers)
 
@@ -23,10 +18,6 @@ target_include_directories(client_handler PRIVATE
     ${Python_INCLUDE_DIRS}
     "${CEFPYTHON_CEF_ROOT}"
 )
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_include_directories(client_handler PRIVATE ${GTK3_INCLUDE_DIRS})
-endif()
 
 # Common browser-process flags (Windows def block, -DNDEBUG -O3, API header
 # define, etc.) come from cefpython_common_flags defined in the top-level

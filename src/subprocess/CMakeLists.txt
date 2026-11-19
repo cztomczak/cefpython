@@ -25,8 +25,7 @@ list(APPEND _app_sources ${_filtered_mml})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-    pkg_check_modules(GTK3_UNIXPRINT REQUIRED gtk+-unix-print-3.0)
+    pkg_check_modules(GLIB2 REQUIRED IMPORTED_TARGET glib-2.0)
 endif()
 
 add_library(cefpython_app STATIC ${_app_sources})
@@ -41,10 +40,8 @@ target_include_directories(cefpython_app PRIVATE
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_include_directories(cefpython_app PRIVATE
-        ${GTK3_INCLUDE_DIRS}
-        ${GTK3_UNIXPRINT_INCLUDE_DIRS}
-    )
+    # main_message_loop_external_pump_linux.cpp uses GLib.
+    target_link_libraries(cefpython_app PRIVATE PkgConfig::GLIB2)
 endif()
 
 # Common browser-process flags (matches the other browser-process targets)
@@ -52,15 +49,9 @@ endif()
 target_link_libraries(cefpython_app PRIVATE cefpython_common_flags)
 
 # ---- subprocess executable (renderer-process) -------------------------------
-# All subprocess/*.cpp except print_handler_gtk.cpp (already filtered above on non-Linux).
+# All subprocess/*.cpp (already filtered above for the platform).
 # Note: does NOT include main_message_loop sources — that is browser-process only.
-set(_exe_sources "")
-foreach(_f IN LISTS _filtered_all)
-    get_filename_component(_name "${_f}" NAME)
-    if(NOT _name MATCHES "print_handler_gtk")
-        list(APPEND _exe_sources "${_f}")
-    endif()
-endforeach()
+set(_exe_sources ${_filtered_all})
 
 if(WIN32)
     # Locate CEF's stock compatibility.manifest from the unpacked binary

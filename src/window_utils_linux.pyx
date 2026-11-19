@@ -40,15 +40,6 @@ class WindowUtils:
         return True
 
     @classmethod
-    def gtk_plug_new(cls, WindowHandle gdkNativeWindow):
-        return <WindowHandle>gtk_plug_new(<unsigned long>gdkNativeWindow)
-
-    @classmethod
-    def gtk_widget_show(cls, WindowHandle gtkWidgetPtr):
-        with nogil:
-            gtk_widget_show(<GtkWidget*>gtkWidgetPtr)
-
-    @classmethod
     def InstallX11ErrorHandlers(cls):
         with nogil:
             x11.InstallX11ErrorHandlers()

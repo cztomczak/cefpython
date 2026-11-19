@@ -529,6 +529,7 @@ most important application-facing changes are:
 | `RenderHandler.OnScrollOffsetChanged(browser)` | `x` and `y` arguments were added. Existing callbacks must accept them, otherwise a `TypeError` is raised. |
 | `PaintBuffer.GetString(mode, origin)` | Removed; it was deprecated. Use `PaintBuffer.GetBytes(mode, origin)`, which takes the same arguments. |
 | `cef.GetCommandLineSwitch(key)` | Removed from the documentation. It was never implemented, so calling it raised `AttributeError` in v66 too. |
+| `WindowUtils.gtk_plug_new()` and `gtk_widget_show()` (Linux) | Removed; CEF Python no longer links GTK. |
 | `WebPluginInfo` and the legacy plugin APIs | Removed along with Chromium's legacy plugin support. |
 
 The following application and browser settings were removed or changed.
