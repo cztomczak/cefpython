@@ -30,7 +30,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Strip absolute source directory paths from __FILE__ macro in log messages
 if(MSVC)
-    add_compile_options("/pathmap:${CMAKE_SOURCE_DIR}=cefpython")
+    add_compile_options("/experimental:deterministic" "/pathmap:${CMAKE_SOURCE_DIR}=cefpython")
 else()
     add_compile_options("-ffile-prefix-map=${CMAKE_SOURCE_DIR}/=cefpython/")
 endif()
