@@ -578,6 +578,4 @@ at this moment.
   * [SetIcon ](api/WindowUtils.md#seticon-win)
   * [GetParentHandle](api/WindowUtils.md#getparenthandle)
   * [IsWindowHandle](api/WindowUtils.md#iswindowhandle)
-  * [gtk_plug_new ](api/WindowUtils.md#gtk_plug_new-linux)
-  * [gtk_widget_show ](api/WindowUtils.md#gtk_widget_show-linux)
   * [InstallX11ErrorHandlers ](api/WindowUtils.md#installx11errorhandlers-linux)

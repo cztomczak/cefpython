@@ -213,7 +213,7 @@ else()
 endif()
 
 # Filter a list of source files for the current platform: drop *_win.cpp,
-# *_linux.cpp, *_mac.cpp/.mm, x11.cpp and gtk* files that don't belong on the
+# *_linux.cpp, *_mac.cpp/.mm and x11.cpp files that don't belong on the
 # OS being built. Shared by the client_handler and subprocess CMakeLists so the
 # rules live in one place. IN_LIST is the *name* of the input list variable;
 # the result is written to the variable named by OUT_VAR in the caller's scope.
@@ -234,9 +234,6 @@ function(filter_sources IN_LIST OUT_VAR)
         if(_name MATCHES "^x11\\.cpp$"   AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
             set(_skip TRUE)
         endif()
-        if(_name MATCHES "gtk"           AND NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
-            set(_skip TRUE)
-        endif()
         if(NOT _skip)
             list(APPEND _result "${_f}")
         endif()
@@ -250,11 +247,6 @@ add_subdirectory("${SRC_DIR}/subprocess"
                  "${CMAKE_CURRENT_BINARY_DIR}/subprocess_build")
 add_subdirectory("${SRC_DIR}/cpp_utils"
                  "${CMAKE_CURRENT_BINARY_DIR}/cpp_utils")
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-endif()
 
 # ---- Python extension -------------------------------------------------------
 Python_add_library(${MODULE_NAME} MODULE "${CEFPYTHON_CPP}")
@@ -311,14 +303,11 @@ else()
     target_compile_options(${MODULE_NAME} PRIVATE
         -flto -fdata-sections -ffunction-sections
     )
-    target_include_directories(${MODULE_NAME} PRIVATE
-        ${GTK3_INCLUDE_DIRS}
-    )
     target_link_options(${MODULE_NAME} PRIVATE
         -flto=auto -Wl,--gc-sections
     )
     target_link_libraries(${MODULE_NAME} PRIVATE
-        X11 ${GTK3_LIBRARIES}
+        X11
         cefpython_app client_handler cpp_utils
         "${CEF_ROOT}/lib/libcef_dll_wrapper.a"
     )

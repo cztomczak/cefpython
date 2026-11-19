@@ -4,7 +4,6 @@
 
 #pragma once
 #include "include/cef_app.h"
-#include "include/cef_print_handler.h"
 
 #include <map>
 
@@ -25,7 +24,6 @@ class CefPythonApp :
                    AppliedJavascriptBindingsMap;
   AppliedJavascriptBindingsMap appliedJavascriptBindings_;
   std::map<int, int> browserViewCount_;
-  CefRefPtr<CefPrintHandler> print_handler_;
 
  public:
   CefPythonApp();
@@ -50,16 +48,12 @@ class CefPythonApp :
   // CefBrowserProcessHandler
   // ---------------------------------------------------------------------------
 
-  void OnContextInitialized() override;
-
   void OnBeforeChildProcessLaunch(
       CefRefPtr<CefCommandLine> command_line) override;
 
   bool OnAlreadyRunningAppRelaunch(
       CefRefPtr<CefCommandLine> command_line,
       const CefString& current_directory) override;
-
-  CefRefPtr<CefPrintHandler> GetPrintHandler();
 
   void OnScheduleMessagePumpWork(int64_t delay_ms) override;
 
