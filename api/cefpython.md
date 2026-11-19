@@ -274,6 +274,11 @@ CefPython messages emitted before a successful CefInitialize() are written
 directly to stderr. On Windows, early CEF/Chromium startup messages may go to
 a "debug.log" beside the Python executable, see ApplicationSettings.[log_file](ApplicationSettings.md#log_file).
 
+On Linux, embedding the browser into a window of your GUI toolkit requires
+X11 or XWayland. In a Wayland session set the environment variable
+`GDK_BACKEND="x11"` (GTK, wxPython) or `QT_QPA_PLATFORM="xcb"` (Qt) before
+the toolkit opens its display, see [WindowInfo](WindowInfo.md#setaschild).SetAsChild().
+
 
 ### IsThread
 
