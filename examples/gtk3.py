@@ -18,17 +18,23 @@ import os
 import platform
 import sys
 
+# Platforms
+WINDOWS = (platform.system() == "Windows")
+LINUX = (platform.system() == "Linux")
+MAC = (platform.system() == "Darwin")
+
+# CEF can only embed the browser into an X11 window on Linux, so put GTK on
+# its X11 backend (XWayland in Wayland sessions), where get_xid() returns an
+# X11 window ID. Must be set before importing Gtk, which opens the display.
+if LINUX:
+    os.environ["GDK_BACKEND"] = "x11"
+
 gi.require_version("Gtk", "3.0")
 # noinspection PyUnresolvedReferences
 from gi.repository import Gtk, GLib, GdkPixbuf  # noqa
 
 # Fix for PyCharm hints warnings when using static methods
 WindowUtils = cef.WindowUtils()
-
-# Platforms
-WINDOWS = (platform.system() == "Windows")
-LINUX = (platform.system() == "Linux")
-MAC = (platform.system() == "Darwin")
 
 # Windows imports
 if WINDOWS:

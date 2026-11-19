@@ -31,6 +31,22 @@ Create the browser as a child window/view.
 
 `windowRect` example value: [left, top, right, bottom].
 
+On Linux a nonzero `parentWindowHandle` must be an X11 window ID. CEF can
+embed the browser only into X11 windows, not Wayland windows, so in a
+Wayland session the GUI toolkit must run on XWayland. Select its X11
+backend before it opens its display:
+
+- GTK and wxPython: `os.environ["GDK_BACKEND"] = "x11"`, with PyGObject
+  before `from gi.repository import Gtk`, with wxPython before creating
+  `wx.App`
+- Qt: `os.environ["QT_QPA_PLATFORM"] = "xcb"`, before creating
+  `QApplication`
+
+See the [gtk3.py](../examples/gtk3.py), [wxpython.py](../examples/wxpython.py)
+and [qt.py](../examples/qt.py) examples. Off-screen rendering
+([SetAsOffscreen](#setasoffscreen)) has no parent window, so there the
+toolkit can stay on Wayland.
+
 
 ### SetAsPopup
 
