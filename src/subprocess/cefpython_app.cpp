@@ -17,13 +17,7 @@
 #ifdef BROWSER_PROCESS
 #ifdef OS_WIN
 #include "client_handler/dpi_aware.h"
-#elif OS_LINUX  // OS_WIN
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkx.h>
-#include "client_handler/x11.h"
-#include "print_handler_gtk.h"
-#endif  // OS_LINUX
+#endif  // OS_WIN
 #endif  // BROWSER_PROCESS
 
 #include "cefpython_app.h"
@@ -126,15 +120,6 @@ CefRefPtr<CefRenderProcessHandler> CefPythonApp::GetRenderProcessHandler() {
 // CefBrowserProcessHandler
 // ----------------------------------------------------------------------------
 
-void CefPythonApp::OnContextInitialized() {
-#ifdef BROWSER_PROCESS
-    REQUIRE_UI_THREAD();
-#if defined(OS_LINUX)
-    print_handler_ = new ClientPrintHandlerGtk();
-#endif // OS_LINUX
-#endif // BROWSER_PROCESS
-}
-
 void CefPythonApp::OnBeforeChildProcessLaunch(
         CefRefPtr<CefCommandLine> command_line) {
 #ifdef BROWSER_PROCESS
@@ -170,25 +155,6 @@ bool CefPythonApp::OnAlreadyRunningAppRelaunch(
                   " to launch with the same root_cache_path. Process"
                   " singleton prevented duplicate execution.";
     return true;
-}
-
-CefRefPtr<CefPrintHandler> CefPythonApp::GetPrintHandler() {
-#ifdef BROWSER_PROCESS
-#if defined(OS_LINUX)
-    // For print handler to work GTK must be initialized. This is
-    // required for some of the examples.
-    // --
-    // A similar code is in client_handler/x11.cpp. If making changes here,
-    // make changes there as well.
-    GdkDisplay* gdk_display = gdk_display_get_default();
-    if (!gdk_display) {
-        LOG(INFO) << "Initialize GTK";
-        gtk_init(0, NULL);
-        InstallX11ErrorHandlers();
-    }
-#endif
-#endif
-    return print_handler_;
 }
 
 void CefPythonApp::OnScheduleMessagePumpWork(int64_t delay_ms) {

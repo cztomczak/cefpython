@@ -104,68 +104,6 @@ void SetX11WindowTitle(CefRefPtr<CefBrowser> browser, char* title) {
     XStoreName(xdisplay, xwindow, title);
 }
 
-GtkWindow* CefBrowser_GetGtkWindow(CefRefPtr<CefBrowser> browser) {
-  // TODO: Should return NULL when using the Views framework
-  // -- REWRITTEN FOR CEF PYTHON USE CASE --
-  //
-  // Returns a GtkWindow* to use as the transient parent for GTK dialogs (the
-  // file-chooser and print handlers); it is never used for browser embedding.
-  //
-  // Upstream cefclient gets this parent from its own top-level GtkWindow, via
-  // RootWindow::GetForBrowser(id)->GetWindowHandle() - see GetWindow() in CEF's
-  // tests/cefclient/browser/dialog_handler_gtk.cc. cefpython has no such
-  // GtkWindow: the browser is embedded with CefWindowInfo::SetAsChild() into a
-  // foreign toolkit's X11 window (Qt/GTK/wx/tk), not a cefclient RootWindow.
-  // So instead we wrap the browser's own X11 window - CefBrowserHost::
-  // GetWindowHandle(), which is the XID on Linux (include/cef_browser.h) - as a
-  // GtkWindow using gtk_plug_new_for_display().
-  //
-  // The browser window is not a real GtkSocket, so GTK may log
-  // "Can't create GtkPlug as child of non-GtkSocket" (harmless; the dialog
-  // still works - see the note further down).
-  //
-  // X11 window handle
-  ::Window xwindow = browser->GetHost()->GetWindowHandle();
-  // X11 display
-  ::Display* xdisplay = cef_get_xdisplay();
-  // GDK display
-  GdkDisplay* gdk_display = NULL;
-  if (xdisplay) {
-    // See if we can find GDK display using X11 display
-    gdk_display = gdk_x11_lookup_xdisplay(xdisplay);
-  }
-  if (!gdk_display) {
-    // If not then get the default display
-    gdk_display = gdk_display_get_default();
-  }
-  if (!gdk_display) {
-    // The tkinter_.py and hello_world.py examples do not use GTK
-    // internally, so GTK wasn't yet initialized and must do it
-    // now, so that display is available. Also must install X11
-    // error handlers to avoid 'BadWindow' errors.
-    // --
-    // A similar code is in cefpython_app.cpp and it might already
-    // been executed. If making changes here, make changes there
-    // as well.
-    LOG(INFO) << "Initialize GTK";
-    gtk_init(0, NULL);
-    InstallX11ErrorHandlers();
-    // Now the display is available
-    gdk_display = gdk_display_get_default();
-  }
-  // In kivy_.py example getting error message:
-  // > Can't create GtkPlug as child of non-GtkSocket
-  // However dialog handler works just fine.
-  GtkWidget* widget = gtk_plug_new_for_display(gdk_display, xwindow);
-  // Getting top level widget doesn't seem to be required.
-  // OFF: GtkWidget* toplevel = gtk_widget_get_toplevel(widget);
-  GtkWindow* window = GTK_WINDOW(widget);
-  if (!window) {
-    LOG(ERROR) << "No GtkWindow for browser";
-  }
-  return window;
-}
-
 XImage* CefBrowser_GetImage(CefRefPtr<CefBrowser> browser) {
     REQUIRE_UI_THREAD();
     // See SetX11WindowBounds: NULL off the UI thread or on a non-X11 Ozone
