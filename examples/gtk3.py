@@ -64,7 +64,7 @@ def main():
     if not cef.Initialize():
         return 1
     app = Gtk3Example()
-    return app.run(sys.argv)
+    return app.run(sys.argv[:1])
 
 def get_win32_handle(gdk_window):
     if gdk_window is None:
