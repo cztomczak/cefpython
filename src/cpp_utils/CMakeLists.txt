@@ -1,4 +1,4 @@
-file(GLOB _sources "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+file(GLOB _sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 add_library(cpp_utils STATIC ${_sources})
 add_dependencies(cpp_utils cefpython_headers)

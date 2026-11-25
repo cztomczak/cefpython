@@ -1,9 +1,9 @@
-file(GLOB _all_cpp "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
-file(GLOB _mml_cpp "${CMAKE_CURRENT_SOURCE_DIR}/main_message_loop/*.cpp")
+file(GLOB _all_cpp CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+file(GLOB _mml_cpp CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/main_message_loop/*.cpp")
 if(APPLE)
-    file(GLOB _mm_files "${CMAKE_CURRENT_SOURCE_DIR}/*.mm")
+    file(GLOB _mm_files CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.mm")
     list(APPEND _all_cpp ${_mm_files})
-    file(GLOB _mml_mm "${CMAKE_CURRENT_SOURCE_DIR}/main_message_loop/*.mm")
+    file(GLOB _mml_mm CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/main_message_loop/*.mm")
     list(APPEND _mml_cpp ${_mml_mm})
 endif()
 

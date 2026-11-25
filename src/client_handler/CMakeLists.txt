@@ -1,6 +1,6 @@
-file(GLOB _all_cpp "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+file(GLOB _all_cpp CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 if(APPLE)
-    file(GLOB _mm_files "${CMAKE_CURRENT_SOURCE_DIR}/*.mm")
+    file(GLOB _mm_files CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.mm")
     list(APPEND _all_cpp ${_mm_files})
 endif()
 
