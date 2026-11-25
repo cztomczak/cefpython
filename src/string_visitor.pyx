@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "cefpython.pyx"
+from libc.stdint cimport int64_t
 
 import weakref
 
@@ -11,16 +12,16 @@ import weakref
 # -----------------------------------------------------------------------------
 
 cdef object g_userStringVisitors = weakref.WeakValueDictionary()
-cdef int g_userStringVisitorMaxId = 0
+cdef int64_t g_userStringVisitorMaxId = 0
 
-cdef int StoreUserStringVisitor(object userStringVisitor) except *:
+cdef int64_t StoreUserStringVisitor(object userStringVisitor) except *:
     global g_userStringVisitorMaxId
     global g_userStringVisitors
     g_userStringVisitorMaxId += 1
     g_userStringVisitors[g_userStringVisitorMaxId] = userStringVisitor
     return g_userStringVisitorMaxId
 
-cdef PyStringVisitor GetUserStringVisitor(int stringVisitorId):
+cdef PyStringVisitor GetUserStringVisitor(int64_t stringVisitorId):
     global g_userStringVisitors
     cdef object userStringVisitor
     cdef PyStringVisitor pyStringVisitor
@@ -51,13 +52,13 @@ cdef CefRefPtr[CefStringVisitor] CreateStringVisitor(
         raise Exception("userStringVisitor object missing")
     if not hasattr(userStringVisitor, "Visit"):
         raise Exception("userStringVisitor object is missing Visit() method")
-    cdef int stringVisitorId = StoreUserStringVisitor(userStringVisitor)
+    cdef int64_t stringVisitorId = StoreUserStringVisitor(userStringVisitor)
     cdef CefRefPtr[CefStringVisitor] cefStringVisitor = (
             <CefRefPtr[CefStringVisitor]?>new StringVisitor(stringVisitorId))
     return cefStringVisitor
 
 cdef public void StringVisitor_Visit(
-        int stringVisitorId,
+        int64_t stringVisitorId,
         const CefString& string
         ) noexcept with gil:
     cdef str pyString

@@ -12,7 +12,7 @@ import weakref
 
 # See StoreUserCookieVisitor().
 cdef object g_userResourceHandler = weakref.WeakValueDictionary()
-cdef int g_userResourceHandlerMaxId = 0
+cdef int64_t g_userResourceHandlerMaxId = 0
 
 
 # -----------------------------------------------------------------------------
@@ -34,20 +34,20 @@ cdef py_void ValidateUserResourceHandler(object userResourceHandler):
 cdef CefRefPtr[CefResourceHandler] CreateResourceHandler(
         object userResourceHandler) except *:
     ValidateUserResourceHandler(userResourceHandler)
-    cdef int resourceHandlerId = StoreUserResourceHandler(userResourceHandler)
+    cdef int64_t resourceHandlerId = StoreUserResourceHandler(userResourceHandler)
     cdef CefRefPtr[CefResourceHandler] resourceHandler =\
             <CefRefPtr[CefResourceHandler]?>new ResourceHandler(
                 resourceHandlerId)
     return resourceHandler
 
-cdef int StoreUserResourceHandler(object userResourceHandler) except *:
+cdef int64_t StoreUserResourceHandler(object userResourceHandler) except *:
     global g_userResourceHandlerMaxId
     global g_userResourceHandler
     g_userResourceHandlerMaxId += 1
     g_userResourceHandler[g_userResourceHandlerMaxId] = userResourceHandler
     return g_userResourceHandlerMaxId
 
-cdef PyResourceHandler GetPyResourceHandler(int resourceHandlerId):
+cdef PyResourceHandler GetPyResourceHandler(int64_t resourceHandlerId):
     global g_userResourceHandler
     cdef object userResourceHandler
     cdef PyResourceHandler pyResourceHandler
@@ -73,7 +73,7 @@ cdef class PyResourceHandler:
 # ------------------------------------------------------------------------------
 
 cdef public cpp_bool ResourceHandler_ProcessRequest(
-        int resourceHandlerId,
+        int64_t resourceHandlerId,
         CefRefPtr[CefRequest] cefRequest,
         CefRefPtr[CefCallback] cefCallback
         ) noexcept with gil:
@@ -100,7 +100,7 @@ cdef public cpp_bool ResourceHandler_ProcessRequest(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void ResourceHandler_GetResponseHeaders(
-        int resourceHandlerId,
+        int64_t resourceHandlerId,
         CefRefPtr[CefResponse] cefResponse,
         int64_t& cefResponseLength,
         CefString& cefRedirectUrl
@@ -132,7 +132,7 @@ cdef public void ResourceHandler_GetResponseHeaders(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public cpp_bool ResourceHandler_ReadResponse(
-        int resourceHandlerId,
+        int64_t resourceHandlerId,
         void* cefDataOut,
         int bytesToRead,
         int& cefBytesRead,
@@ -183,7 +183,7 @@ cdef public cpp_bool ResourceHandler_ReadResponse(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void ResourceHandler_Cancel(
-        int resourceHandlerId
+        int64_t resourceHandlerId
         ) noexcept with gil:
     cdef PyResourceHandler pyResourceHandler
     cdef object userCallback

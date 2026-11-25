@@ -7,7 +7,7 @@ from libc.stdint cimport int64_t
 import weakref
 
 cdef object g_pyWebRequests = weakref.WeakValueDictionary()
-cdef int g_webRequestMaxId = 0
+cdef int64_t g_webRequestMaxId = 0
 
 # -----------------------------------------------------------------------------
 # WebRequest
@@ -61,7 +61,7 @@ cdef PyWebRequest CreatePyWebRequest(PyRequest request,
     g_pyWebRequests[webRequest.webRequestId] = webRequest
     return webRequest
 
-cdef PyWebRequest GetPyWebRequest(int webRequestId):
+cdef PyWebRequest GetPyWebRequest(int64_t webRequestId):
     global g_pyWebRequests
     if webRequestId in g_pyWebRequests:
         return g_pyWebRequests[webRequestId]
@@ -69,7 +69,7 @@ cdef PyWebRequest GetPyWebRequest(int webRequestId):
 
 cdef class PyWebRequest:
     cdef object __weakref__ # see g_pyWebRequests
-    cdef int webRequestId
+    cdef int64_t webRequestId
     cdef CefRefPtr[CefURLRequest] cefWebRequest
     cdef object pyWebRequestClient
 
@@ -121,7 +121,7 @@ cdef class PyWebRequest:
 # -----------------------------------------------------------------------------
 
 cdef public void WebRequestClient_OnUploadProgress(
-        int webRequestId,
+        int64_t webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
         int64_t current,
         int64_t total
@@ -142,7 +142,7 @@ cdef public void WebRequestClient_OnUploadProgress(
         sys.excepthook(exc_type, exc_value, exc_trace) 
 
 cdef public void WebRequestClient_OnDownloadProgress(
-        int webRequestId,
+        int64_t webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
         int64_t current,
         int64_t total
@@ -163,7 +163,7 @@ cdef public void WebRequestClient_OnDownloadProgress(
         sys.excepthook(exc_type, exc_value, exc_trace) 
 
 cdef public void WebRequestClient_OnDownloadData(
-        int webRequestId,
+        int64_t webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest,
         const void* data,
         size_t dataLength
@@ -183,7 +183,7 @@ cdef public void WebRequestClient_OnDownloadData(
         sys.excepthook(exc_type, exc_value, exc_trace)
 
 cdef public void WebRequestClient_OnRequestComplete(
-        int webRequestId,
+        int64_t webRequestId,
         CefRefPtr[CefURLRequest] cefWebRequest
         ) noexcept with gil:
     cdef PyWebRequest webRequest

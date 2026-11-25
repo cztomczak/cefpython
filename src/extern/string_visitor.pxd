@@ -2,7 +2,9 @@
 # All rights reserved. Licensed under BSD 3-clause license.
 # Project website: https://github.com/cztomczak/cefpython
 
+from libc.stdint cimport int64_t
+
 cdef extern from "client_handler/string_visitor.h":
 
     cdef cppclass StringVisitor:
-        StringVisitor(int stringVisitorId)
+        StringVisitor(int64_t stringVisitorId)

@@ -13,9 +13,9 @@
 class WebRequestClient : public CefURLRequestClient
 {
 public:
-    int webRequestId_;
+    int64_t webRequestId_;
 public:
-    WebRequestClient(int webRequestId) :
+    WebRequestClient(int64_t webRequestId) :
             webRequestId_(webRequestId) {
     }    
     virtual ~WebRequestClient(){}

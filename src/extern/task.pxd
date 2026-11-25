@@ -16,8 +16,8 @@ from libc.stdint cimport int64_t
 
 cdef extern from "client_handler/task.h":
 
-    void PostTaskWrapper(int threadId, int taskId) nogil
-    void PostDelayedTaskWrapper(int threadId, int64_t delay_ms, int taskId) nogil
+    void PostTaskWrapper(int threadId, int64_t taskId) nogil
+    void PostDelayedTaskWrapper(int threadId, int64_t delay_ms, int64_t taskId) nogil
 
     cdef CefRefPtr[CefTask] CreateTask_SetCookie(
             CefCookieManager* obj,

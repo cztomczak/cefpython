@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "cefpython.pyx"
+from libc.stdint cimport int64_t
 
 from task cimport *
 
@@ -28,7 +29,7 @@ cdef PyCookieManager g_globalCookieManager = None
 # See StoreUserCookieVisitor().
 import weakref
 cdef object g_userCookieVisitors = weakref.WeakValueDictionary()
-cdef int g_userCookieVisitorMaxId = 0
+cdef int64_t g_userCookieVisitorMaxId = 0
 
 # ------------------------------------------------------------------------------
 # Cookie
@@ -232,7 +233,7 @@ cdef class PyCookieManager:
 
     cpdef py_bool VisitAllCookies(self, object userCookieVisitor):
         self.ValidateUserCookieVisitor(userCookieVisitor)
-        cdef int cookieVisitorId = StoreUserCookieVisitor(userCookieVisitor)
+        cdef int64_t cookieVisitorId = StoreUserCookieVisitor(userCookieVisitor)
         cdef CefRefPtr[CefCookieVisitor] cefCookieVisitor = (
                 <CefRefPtr[CefCookieVisitor]?>new CookieVisitor(
                         cookieVisitorId))
@@ -242,7 +243,7 @@ cdef class PyCookieManager:
     cpdef py_bool VisitUrlCookies(self, py_string url,
             py_bool includeHttpOnly, object userCookieVisitor):
         self.ValidateUserCookieVisitor(userCookieVisitor)
-        cdef int cookieVisitorId = StoreUserCookieVisitor(userCookieVisitor)
+        cdef int64_t cookieVisitorId = StoreUserCookieVisitor(userCookieVisitor)
         cdef CefRefPtr[CefCookieVisitor] cefCookieVisitor = (
                 <CefRefPtr[CefCookieVisitor]?>new CookieVisitor(
                         cookieVisitorId))
@@ -272,14 +273,14 @@ cdef class PyCookieManager:
 # PyCookieVisitor
 # ------------------------------------------------------------------------------
 
-cdef int StoreUserCookieVisitor(object userCookieVisitor) except *:
+cdef int64_t StoreUserCookieVisitor(object userCookieVisitor) except *:
     global g_userCookieVisitorMaxId
     global g_userCookieVisitors
     g_userCookieVisitorMaxId += 1
     g_userCookieVisitors[g_userCookieVisitorMaxId] = userCookieVisitor
     return g_userCookieVisitorMaxId
 
-cdef PyCookieVisitor GetPyCookieVisitor(int cookieVisitorId):
+cdef PyCookieVisitor GetPyCookieVisitor(int64_t cookieVisitorId):
     global g_userCookieVisitors
     cdef object userCookieVisitor
     cdef PyCookieVisitor pyCookieVisitor
@@ -305,7 +306,7 @@ cdef class PyCookieVisitor:
 # ------------------------------------------------------------------------------
 
 cdef public cpp_bool CookieVisitor_Visit(
-        int cookieVisitorId,
+        int64_t cookieVisitorId,
         const CefCookie& cookie,
         int count,
         int total,

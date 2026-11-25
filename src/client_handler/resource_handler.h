@@ -13,9 +13,9 @@
 class ResourceHandler : public CefResourceHandler
 {
 public:
-    int resourceHandlerId_;
+    int64_t resourceHandlerId_;
 public:
-    ResourceHandler(int resourceHandlerId)
+    ResourceHandler(int64_t resourceHandlerId)
         : resourceHandlerId_(resourceHandlerId) {
     }    
 

@@ -7,7 +7,7 @@
 #include "include/base/cef_bind.h"
 #include "include/base/cef_callback.h"
 
-void PostTaskWrapper(int threadId, int taskId) {
+void PostTaskWrapper(int threadId, int64_t taskId) {
     CefPostTask(
             static_cast<CefThreadId>(threadId),
             CefCreateClosureTask(base::BindOnce(
@@ -17,7 +17,7 @@ void PostTaskWrapper(int threadId, int taskId) {
     );
 }
 
-void PostDelayedTaskWrapper(int threadId, int64_t delay_ms, int taskId) {
+void PostDelayedTaskWrapper(int threadId, int64_t delay_ms, int64_t taskId) {
     CefPostDelayedTask(
             static_cast<CefThreadId>(threadId),
             CefCreateClosureTask(base::BindOnce(
