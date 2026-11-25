@@ -13,9 +13,9 @@
 class StringVisitor : public CefStringVisitor
 {
 public:
-    int stringVisitorId_;
+    int64_t stringVisitorId_;
 public:
-    StringVisitor(int stringVisitorId)
+    StringVisitor(int64_t stringVisitorId)
         : stringVisitorId_(stringVisitorId) {
     }
 

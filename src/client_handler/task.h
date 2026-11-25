@@ -8,8 +8,8 @@
 #include "include/cef_cookie.h"
 #include "include/cef_task.h"
 
-void PostTaskWrapper(int threadId, int taskId);
-void PostDelayedTaskWrapper(int threadId, int64_t delay_ms, int taskId);
+void PostTaskWrapper(int threadId, int64_t taskId);
+void PostDelayedTaskWrapper(int threadId, int64_t delay_ms, int64_t taskId);
 
 CefRefPtr<CefTask> CreateTask_SetCookie(
         CefCookieManager* obj,

@@ -13,9 +13,9 @@
 class CookieVisitor : public CefCookieVisitor
 {
 public:
-    int cookieVisitorId_;
+    int64_t cookieVisitorId_;
 public:
-    CookieVisitor(int cookieVisitorId)
+    CookieVisitor(int64_t cookieVisitorId)
         : cookieVisitorId_(cookieVisitorId) {
     }    
 

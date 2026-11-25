@@ -3,6 +3,7 @@
 # Project website: https://github.com/cztomczak/cefpython
 
 include "cefpython.pyx"
+from libc.stdint cimport int64_t
 
 g_taskMaxId = 0
 g_tasks = {}
@@ -29,7 +30,7 @@ def PostTask(int thread, object func, *args):
     }
 
     # Call C++ wrapper.
-    cdef int cTaskId = int(g_taskMaxId)
+    cdef int64_t cTaskId = int(g_taskMaxId)
     with nogil:
         PostTaskWrapper(thread, cTaskId)
 
@@ -56,12 +57,12 @@ def PostDelayedTask(int thread, int delay_ms, object func, *args):
     }
 
     # Call C++ wrapper.
-    cdef int cTaskId = int(g_taskMaxId)
+    cdef int64_t cTaskId = int(g_taskMaxId)
     with nogil:
         PostDelayedTaskWrapper(thread, delay_ms, cTaskId)
 
 
-cdef public void PyTaskRunnable(int taskId) noexcept with gil:
+cdef public void PyTaskRunnable(int64_t taskId) noexcept with gil:
     cdef object func
     cdef list params
     cdef object task
