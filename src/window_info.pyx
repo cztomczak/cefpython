@@ -4,6 +4,19 @@
 
 include "cefpython.pyx"
 
+cdef CefRect PyToCefRect(list windowRect) except *:
+    # [left, top, right, bottom] -> CefRect(x, y, width, height)
+    return CefRect(int(windowRect[0]), int(windowRect[1]),
+                   int(windowRect[2] - windowRect[0]),
+                   int(windowRect[3] - windowRect[1]))
+
+cdef py_bool HasWindowSize(list windowRect):
+    # A top-level window rect must have a positive width and height. On
+    # Windows a size of 0 is not CW_USEDEFAULT and makes a window with no
+    # content area, and on Linux CEF replaces only a size of 0 with 800x600.
+    return bool(windowRect and windowRect[2] > windowRect[0]
+                and windowRect[3] > windowRect[1])
+
 cdef void SetCefWindowInfo(
         CefWindowInfo& cefWindowInfo,
         WindowInfo windowInfo
@@ -52,10 +65,6 @@ cdef void SetCefWindowInfo(
         cdef CefRect windowRect
         cdef CefString windowName
         cdef RECT rect
-    ELIF UNAME_SYSNAME == "Darwin":
-        cdef CefRect windowRect
-    ELIF UNAME_SYSNAME == "Linux":
-        cdef CefRect windowRect
 
     # CHILD WINDOW
     if windowInfo.windowType == "child":
@@ -73,34 +82,17 @@ cdef void SetCefWindowInfo(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowRect)
             cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
-        ELIF UNAME_SYSNAME == "Darwin":
-            x = int(windowInfo.windowRect[0])
-            y = int(windowInfo.windowRect[1])
-            width = int(windowInfo.windowRect[2] - windowInfo.windowRect[0])
-            height = int(windowInfo.windowRect[3] - windowInfo.windowRect[1])
-            windowRect = CefRect(x, y, width, height)
-            cefWindowInfo.SetAsChild(
-                    <CefWindowHandle>windowInfo.parentWindowHandle,
-                    windowRect)
-            cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
-        ELIF UNAME_SYSNAME == "Linux":
+        ELSE:
             if windowInfo.parentWindowHandle:
-                # Embed into the host toolkit window (Qt/wx/GTK/tkinter):
-                # parent CEF directly into the caller's X11 window, exactly
-                # like upstream cefclient (browser_window_std_gtk.cc:
-                # window_info.SetAsChild(GDK_WINDOW_XID(...), rect)).
-                x = int(windowInfo.windowRect[0])
-                y = int(windowInfo.windowRect[1])
-                width = int(windowInfo.windowRect[2] - windowInfo.windowRect[0])
-                height = int(windowInfo.windowRect[3] - windowInfo.windowRect[1])
-                windowRect = CefRect(x, y, width, height)
+                # Embed into the host toolkit window, like upstream cefclient
+                # (browser_window_std_gtk.cc, browser_window_std_mac.mm).
                 cefWindowInfo.SetAsChild(
                         <CefWindowHandle>windowInfo.parentWindowHandle,
-                        windowRect)
-            # else: no parent handle — leave cefWindowInfo as a default
-            # windowed info so CEF creates and owns its own top-level window
-            # (upstream cefsimple --use-native behaviour).  CEF handles the
-            # window frame, resize and close button itself.
+                        PyToCefRect(windowInfo.windowRect))
+            elif HasWindowSize(windowInfo.windowRect):
+                # Without a size, keep the bounds CEF already set: for a
+                # popup, the size from its window.open() features.
+                cefWindowInfo.bounds = PyToCefRect(windowInfo.windowRect)
             cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
 
     # POPUP WINDOW - Windows only
@@ -110,6 +102,10 @@ cdef void SetCefWindowInfo(
             cefWindowInfo.SetAsPopup(
                     <CefWindowHandle>windowInfo.parentWindowHandle,
                     windowName)
+            # SetAsPopup() sets the bounds to CW_USEDEFAULT (chosen by
+            # Windows), so set the rect after it.
+            if HasWindowSize(windowInfo.windowRect):
+                cefWindowInfo.bounds = PyToCefRect(windowInfo.windowRect)
             cefWindowInfo.runtime_style = CEF_RUNTIME_STYLE_ALLOY
 
     if windowInfo.windowType == "offscreen":
@@ -131,12 +127,6 @@ cdef class WindowInfo:
                              list windowRect=None):
         # Allow parent window handle to be 0, in such case CEF will
         # create top window automatically as in hello_world.py example.
-        IF UNAME_SYSNAME == "Windows":
-            # On Windows when parent window handle is 0 then SetAsPopup()
-            # must be called instead.
-            if parentWindowHandle == 0:
-                self.SetAsPopup(parentWindowHandle, "")
-                return
         if parentWindowHandle != 0\
                 and not WindowUtils.IsWindowHandle(parentWindowHandle):
             raise Exception("Invalid parentWindowHandle: %s"\
@@ -153,6 +143,16 @@ cdef class WindowInfo:
             else:
                 raise Exception("WindowInfo.SetAsChild() failed: "
                         "windowRect: invalid value")
+        else:
+            self.windowRect = None
+        IF UNAME_SYSNAME == "Windows":
+            # On Windows when parent window handle is 0 then SetAsPopup()
+            # must be called instead. windowRect then sets the window
+            # bounds, so keep it.
+            if parentWindowHandle == 0:
+                windowRect = self.windowRect
+                self.SetAsPopup(parentWindowHandle, "")
+                self.windowRect = windowRect
 
     cpdef py_void SetAsPopup(self, WindowHandle parentWindowHandle,
                              py_string windowName):
@@ -164,6 +164,7 @@ cdef class WindowInfo:
                     % parentWindowHandle)
         self.parentWindowHandle = parentWindowHandle
         self.windowType = "popup"
+        self.windowRect = None
         if windowName:
             self.windowName = str(windowName)
 
