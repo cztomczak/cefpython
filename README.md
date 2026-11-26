@@ -120,7 +120,6 @@ at this moment.
  * [Callback](api/Callback.md#callback-object) object
  * [Cookie](api/Cookie.md#cookie-class) class
  * [CookieManager](api/CookieManager.md#cookiemanager-class) class
- * [DpiAware](api/DpiAware.md#dpiaware-class) class (Win)
  * [DragData](api/DragData.md#dragdata-object) object
  * [Frame](api/Frame.md#frame-object) object
  * [Image](api/Image.md#image-object) object
@@ -164,7 +163,6 @@ at this moment.
   * [_OnAccessibilityLocationChange](api/AccessibilityHandler.md#_onaccessibilitylocationchange)
 * [Application settings](api/ApplicationSettings.md#application-settings)
   * [app_user_model_id](api/ApplicationSettings.md#app_user_model_id)
-  * [auto_zooming](api/ApplicationSettings.md#auto_zooming)
   * [background_color](api/ApplicationSettings.md#background_color)
   * [browser_subprocess_path](api/ApplicationSettings.md#browser_subprocess_path)
   * [cache_path](api/ApplicationSettings.md#cache_path)
@@ -355,12 +353,6 @@ at this moment.
   * [OnTitleChange](api/DisplayHandler.md#ontitlechange)
   * [OnTooltip](api/DisplayHandler.md#ontooltip)
 * [DownloadHandler](api/DownloadHandler.md#downloadhandler)
-* [DpiAware (class)](api/DpiAware.md#dpiaware-class)
-  * [CalculateWindowSize](api/DpiAware.md#calculatewindowsize)
-  * [GetSystemDpi](api/DpiAware.md#getsystemdpi)
-  * [IsProcessDpiAware](api/DpiAware.md#isprocessdpiaware)
-  * [SetProcessDpiAware](api/DpiAware.md#setprocessdpiaware)
-  * [Scale](api/DpiAware.md#scale)
 * [DragData (object)](api/DragData.md#dragdata-object)
   * [IsLink](api/DragData.md#islink)
   * [IsFragment](api/DragData.md#isfragment)

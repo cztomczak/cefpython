@@ -13,7 +13,6 @@
 #if defined(OS_WIN)
 #include <Shellapi.h>
 #pragma comment(lib, "Shell32.lib")
-#include "dpi_aware.h"
 #elif defined(OS_LINUX)
 #include <unistd.h>
 #include <stdlib.h>

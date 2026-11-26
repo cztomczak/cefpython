@@ -209,25 +209,19 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.LoadCrlSetsFile(crlset)
             subtest_message("cef.LoadCrlSetsFile ok")
 
-        # High DPI on Windows.
-        # Setting DPI awareness from Python is usually too late and should be done
-        # via manifest file. Alternatively change python.exe properties > Compatibility
-        # > High DPI scaling override > Application.
-        # Using cef.DpiAware.EnableHighDpiSupport is problematic, it can cause
-        # display glitches.
+        # High DPI on Windows. cef.Initialize() makes the browser process
+        # per-monitor DPI aware, so apps need no DPI awareness manifest.
+        # If awareness was already set (by a manifest, the python.exe
+        # Compatibility settings or a GUI toolkit), CEF keeps that setting.
         if WINDOWS:
-            self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
-            window_size = cef.DpiAware.CalculateWindowSize(800, 600)
-            self.assertIsInstance(window_size, tuple)
-            self.assertGreater(window_size[0], 0)
-            self.assertGreater(cef.DpiAware.Scale((800, 600))[0], 0)
-
-            # Make some calls again after DPI Aware was set
-            self.assertIsInstance(cef.DpiAware.GetSystemDpi(), tuple)
-            self.assertGreater(cef.DpiAware.Scale([800, 600])[0], 0)
-            self.assertIsInstance(cef.DpiAware.Scale(800), int)
-            self.assertGreater(cef.DpiAware.Scale(800), 0)
-            subtest_message("cef.DpiAware ok")
+            import ctypes
+            awareness = ctypes.c_int(-1)
+            hr = ctypes.windll.shcore.GetProcessDpiAwareness(
+                None, ctypes.byref(awareness))
+            self.assertEqual(hr, 0)
+            # 0 is PROCESS_DPI_UNAWARE
+            self.assertNotEqual(awareness.value, 0)
+            subtest_message("DPI aware after cef.Initialize() ok")
 
         # Global handler
         global_handler = GlobalHandler(self)

@@ -20,7 +20,6 @@ Table of contents:
 * [v49+ Build instructions and build tools](#v49-build-instructions-and-build-tools)
 * [v49: GPU acceleration should be disabled on Windows XP](#v49-gpu-acceleration-should-be-disabled-on-windows-xp)
 * [v49 (Win) Handlers' callbacks and other interfaces](#v49-win-handlers-callbacks-and-other-interfaces)
-* [v49+ High DPI support on Windows](#v49-high-dpi-support-on-windows)
 * [v49 (Win) Do not call the 'WindowUtils.OnSize' function](#v49-win-do-not-call-the-windowutilsonsize-function)
 * [v49+ Notify CEF on move or resize events](#v49-notify-cef-on-move-or-resize-events)
 * [v49+ Flash support](#v49-flash-support)
@@ -39,7 +38,6 @@ Table of contents:
 * [v54+ libcef.so library is stripped from symbols on Linux](#v54-libcefso-library-is-stripped-from-symbols-on-linux)
 * [v55.3+ Handlers' callbacks and other interfaces](#v553-handlers-callbacks-and-other-interfaces)
 * [v56+ MacOS 10.9+ required to run](#v56-macos-109-required-to-run)
-* [v57.1+ High DPI support on Windows](#v571-high-dpi-support-on-windows)
 * [v66+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled](#v66-linux-patch-that-fixed-https-cache-problems-on-pages-with-certificate-errors-was-disabled)
 * [v66+ DisplayHandler.OnConsoleMessage has a new param 'level'](#v66-displayhandleronconsolemessage-has-a-new-param-level)
 * [v66+ LifespanHandler.OnBeforePopup is now called on UI thread](#v66-lifespanhandleronbeforepopup-is-now-called-on-ui-thread)
@@ -155,25 +153,6 @@ to underscores. For example the OnLoadEnd callback has renamed
 the `httpStatusCode` argument to `http_code`. So in this case
 your code will definitely break, unless you've also used
 "http_code" for argument name.
-
-
-## v49+ High DPI support on Windows
-
-It is recommended to embed a DPI awareness manifest in both the main
-process and the subprocesses (the subprocess.exe executable) instead
-of calling `DpiAware`.[SetProcessDpiAware](../api/DpiAware.md#setprocessdpiaware)
-which sets DPI awareness only for the main process.
-
-The `ApplicationSettings`.[auto_zooming](../api/ApplicationSettings.md#auto_zooming)
-option has a default value of an empty string now. Previously the
-default was "system_dpi". When enabling High DPI support you should
-set it to "system_dpi" explicitilly.
-
-Note that `DpiAware`.[CalculateWindowSize](../api/DpiAware.md#calculatewindowsize)
-does not handle all DPI settings (e.g. 132% on Windows 10).
-In newer CEF Python there is available `DpiAware`[Scale](../api/DpiAware.md#scale)
-which is more reliable and can handle all DPI resolutions. You can copy see
-its implementation in `src/dpi_aware_win.pyx`.
 
 
 ## v49 (Win) Do not call the 'WindowUtils.OnSize' function
@@ -374,19 +353,6 @@ your code will definitely break, unless you've also used
 CEF v55 was the last version to support MacOS 10.7.
 
 
-## v57.1+ High DPI support on Windows
-
-The `cef.DpiAware.SetProcessDpiAware` function is deprecated. Embed a DPI
-awareness manifest in both the main executable and the subprocess executable
-instead.
-
-The ApplicationSettings.[auto_zooming](../api/ApplicationSettings.md#auto_zooming)
-option should have its value set to an empty string (a default now)
-for High DPI support. In previous versions the default value was
-"system_dpi" and if you have set it explicitilly in your application,
-then you should change it to an empty string now.
-
-
 ## v66+ Linux patch that fixed HTTPS cache problems on pages with certificate errors was disabled
 
 That patch allowed for HTTPS caching to work when using self-signed
@@ -530,6 +496,7 @@ most important application-facing changes are:
 | `PaintBuffer.GetString(mode, origin)` | Removed; it was deprecated. Use `PaintBuffer.GetBytes(mode, origin)`, which takes the same arguments. |
 | `cef.GetCommandLineSwitch(key)` | Removed from the documentation. It was never implemented, so calling it raised `AttributeError` in v66 too. |
 | `WindowUtils.gtk_plug_new()` and `gtk_widget_show()` (Linux) | Removed; CEF Python no longer links GTK. |
+| `DpiAware` class (Windows) | Removed. Delete calls to `EnableHighDpiSupport()` and `SetProcessDpiAware()`: `cef.Initialize()` makes the browser process DPI aware unless its DPI awareness was already set, so no manifest is needed. Instead of `GetSystemDpi()`, `Scale()` and `CalculateWindowSize()`, use your GUI toolkit's DPI API (such as `wx.Window.FromDIP()`) or Win32 `GetDpiForWindow()`; instead of `IsProcessDpiAware()`, use Win32 `GetProcessDpiAwareness()`. |
 | `WebPluginInfo` and the legacy plugin APIs | Removed along with Chromium's legacy plugin support. |
 
 The following application and browser settings were removed or changed.
@@ -539,6 +506,7 @@ Passing a removed setting raises an "Invalid appSettings key" or
 | v66 setting | Type | v147 replacement or status |
 | --- | --- | --- |
 | `accept_language_list` | Application and browser | Removed; not yet exposed by CEF Python for CEF 147. |
+| `auto_zooming` | Application | Removed. Chromium already scales pages for the display DPI. For a fixed zoom level, call [Browser.SetZoomLevel()](../api/Browser.md#setzoomlevel), for example from [LoadHandler.OnLoadingStateChange](../api/LoadHandler.md#onloadingstatechange). |
 | `ignore_certificate_errors` | Application | Removed. |
 | `net_security_expiration_enabled` | Application | Removed upstream. |
 | `pack_loading_disabled` | Application | Removed with no replacement; pack loading can no longer be disabled. |
