@@ -113,7 +113,7 @@ else()
     set(_cef_ver_header "${SRC_DIR}/version/cef_version_linux.h")
 endif()
 
-file(GLOB _pyx_src_files
+file(GLOB _pyx_src_files CONFIGURE_DEPENDS
     "${SRC_DIR}/*.pyx"
     "${SRC_DIR}/handlers/*.pyx"
 )
