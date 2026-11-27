@@ -15,6 +15,7 @@ Table of contents:
 * [Black or white browser screen](#black-or-white-browser-screen)
 * ["kTransientFailure: Failed to send GpuControl.CreateCommandBuffer" on Linux](#ktransientfailure-failed-to-send-gpucontrolcreatecommandbuffer-on-linux)
 * [Python crashes with "Segmentation fault" - how to debug?](#python-crashes-with-segmentation-fault---how-to-debug)
+* [High DPI support on Windows](#high-dpi-support-on-windows)
 * [Windows XP support](#windows-xp-support)
 * [Mac 32-bit support](#mac-32-bit-support)
 * [Security](#security)
@@ -321,6 +322,26 @@ lldb python
 run tkinter_.py
 bt
 ```
+
+
+## High DPI support on Windows
+
+`cef.Initialize()` sets the process to Per-Monitor V2 DPI awareness and
+Chromium scales pages for each display, so no extra code is needed.
+Windows lets a process set its DPI awareness only once. If it was already
+set, by an application manifest, the python.exe Compatibility settings or
+a GUI toolkit, CEF keeps that setting.
+[WindowUtils.IsProcessDpiAware()](../api/WindowUtils.md#isprocessdpiaware-win)
+tells whether the process is DPI aware.
+
+A GUI toolkit initialized before `cef.Initialize()` may read the display
+DPI while the process is still DPI unaware and size its UI for 96 DPI
+(Tk does this). To avoid that, call `cef.Initialize()` before initializing
+the toolkit, or embed a DPI awareness manifest in your application's
+executable.
+
+Size your windows with your toolkit's DPI API, for example
+`wx.Window.FromDIP()` in the wxpython.py example.
 
 
 ## Windows XP support

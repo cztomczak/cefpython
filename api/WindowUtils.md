@@ -13,6 +13,7 @@ Table of contents:
   * [OnEraseBackground (Win)](#onerasebackground-win)
   * [SetTitle (Win)](#settitle-win)
   * [SetIcon (Win)](#seticon-win)
+  * [IsProcessDpiAware (Win)](#isprocessdpiaware-win)
   * [GetParentHandle](#getparenthandle)
   * [IsWindowHandle](#iswindowhandle)
   * [InstallX11ErrorHandlers (Linux)](#installx11errorhandlers-linux)
@@ -81,6 +82,17 @@ Windows-only. Set the title for the main window or popup window. The default imp
 | __Return__ | void |
 
 Windows-only. Set the icon for the popup window. The default implementation of [DisplayHandler](DisplayHandler.md).OnTitleChange() calls this method to set the icon for a window that wasn't created explicitily (for example a popup window), the icon is inherited from the parent window. Icon parameter accepts only "inherit", you cannot pass here a path to an icon (currently not implemented).
+
+
+### IsProcessDpiAware (Win)
+
+| | |
+| --- | --- |
+| __Return__ | bool |
+
+Windows-only. Returns True if the current process is DPI aware (system or
+per-monitor), False if it is DPI unaware. See
+[High DPI support on Windows](../docs/Knowledge-Base.md#high-dpi-support-on-windows).
 
 
 ### GetParentHandle

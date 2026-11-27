@@ -416,6 +416,7 @@
   * [OnEraseBackground ](WindowUtils.md#onerasebackground-win)
   * [SetTitle ](WindowUtils.md#settitle-win)
   * [SetIcon ](WindowUtils.md#seticon-win)
+  * [IsProcessDpiAware ](WindowUtils.md#isprocessdpiaware-win)
   * [GetParentHandle](WindowUtils.md#getparenthandle)
   * [IsWindowHandle](WindowUtils.md#iswindowhandle)
   * [InstallX11ErrorHandlers ](WindowUtils.md#installx11errorhandlers-linux)

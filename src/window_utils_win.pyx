@@ -149,5 +149,12 @@ class WindowUtils(object):
             return False
 
     @classmethod
+    def IsProcessDpiAware(cls):
+        cdef PROCESS_DPI_AWARENESS awareness = PROCESS_DPI_UNAWARE
+        if GetProcessDpiAwareness(NULL, &awareness) != S_OK:
+            return False
+        return awareness != PROCESS_DPI_UNAWARE
+
+    @classmethod
     def InstallX11ErrorHandlers(cls):
         pass

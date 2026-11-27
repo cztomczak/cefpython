@@ -209,19 +209,11 @@ class MainTest_IsolatedTest(unittest.TestCase):
             cef.LoadCrlSetsFile(crlset)
             subtest_message("cef.LoadCrlSetsFile ok")
 
-        # High DPI on Windows. cef.Initialize() makes the browser process
-        # per-monitor DPI aware, so apps need no DPI awareness manifest.
-        # If awareness was already set (by a manifest, the python.exe
-        # Compatibility settings or a GUI toolkit), CEF keeps that setting.
+        # High DPI on Windows. cef.Initialize() makes the process DPI aware
+        # unless its DPI awareness was already set.
         if WINDOWS:
-            import ctypes
-            awareness = ctypes.c_int(-1)
-            hr = ctypes.windll.shcore.GetProcessDpiAwareness(
-                None, ctypes.byref(awareness))
-            self.assertEqual(hr, 0)
-            # 0 is PROCESS_DPI_UNAWARE
-            self.assertNotEqual(awareness.value, 0)
-            subtest_message("DPI aware after cef.Initialize() ok")
+            self.assertTrue(cef.WindowUtils.IsProcessDpiAware())
+            subtest_message("cef.WindowUtils.IsProcessDpiAware() ok")
 
         # Global handler
         global_handler = GlobalHandler(self)

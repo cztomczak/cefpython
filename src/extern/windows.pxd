@@ -130,3 +130,14 @@ cdef extern from "Windows.h" nogil:
 
     cdef int MulDiv(int number, int numerator, int denominator)
 
+    ctypedef long HRESULT
+    cdef HRESULT S_OK
+
+cdef extern from "ShellScalingApi.h" nogil:
+    ctypedef enum PROCESS_DPI_AWARENESS:
+        PROCESS_DPI_UNAWARE
+        PROCESS_SYSTEM_DPI_AWARE
+        PROCESS_PER_MONITOR_DPI_AWARE
+    cdef HRESULT GetProcessDpiAwareness(HANDLE hprocess,
+                                        PROCESS_DPI_AWARENESS* value)
+

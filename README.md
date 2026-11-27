@@ -568,6 +568,7 @@ at this moment.
   * [OnEraseBackground ](api/WindowUtils.md#onerasebackground-win)
   * [SetTitle ](api/WindowUtils.md#settitle-win)
   * [SetIcon ](api/WindowUtils.md#seticon-win)
+  * [IsProcessDpiAware ](api/WindowUtils.md#isprocessdpiaware-win)
   * [GetParentHandle](api/WindowUtils.md#getparenthandle)
   * [IsWindowHandle](api/WindowUtils.md#iswindowhandle)
   * [InstallX11ErrorHandlers ](api/WindowUtils.md#installx11errorhandlers-linux)
