@@ -31,6 +31,14 @@ Create the browser as a child window/view.
 
 `windowRect` example value: [left, top, right, bottom].
 
+With `parentWindowHandle` 0, CEF creates a top-level window for the
+browser (on Windows this calls [SetAsPopup](#setaspopup)). `windowRect`
+then sets the position of the window and the size of its content area,
+in pixels on Windows and Linux and in points on Mac. CEF or the window
+manager can still move the window, for example to keep it on screen.
+A `windowRect` without a positive width and height is ignored. See the
+[window_size.py](../examples/snippets/window_size.py) snippet.
+
 On Linux a nonzero `parentWindowHandle` must be an X11 window ID. CEF can
 embed the browser only into X11 windows, not Wayland windows, so in a
 Wayland session the GUI toolkit must run on XWayland. Select its X11
@@ -56,7 +64,8 @@ toolkit can stay on Wayland.
 | windowName | string |
 | __Return__ | void |
 
-Available only on Windows.
+Available only on Windows. To set the size of a window without a parent,
+call `SetAsChild(0, windowRect)` instead.
 
 
 ### SetAsOffscreen

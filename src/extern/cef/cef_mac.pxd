@@ -19,6 +19,7 @@ cdef extern from "include/internal/cef_mac.h":
 
     cdef cppclass CefWindowInfo:
         cef_runtime_style_t runtime_style
+        CefRect bounds
         void SetAsChild(CefWindowHandle parent,
                         const CefRect& windowRect)
         void SetAsWindowless(CefWindowHandle parent)
