@@ -161,17 +161,17 @@ your code will definitely break, unless you've also used
 
 It is recommended to embed a DPI awareness manifest in both the main
 process and the subprocesses (the subprocess.exe executable) instead
-of calling `DpiAware`.[SetProcessDpiAware](../api/DpiAware.md#setprocessdpiaware)
+of calling `DpiAware.SetProcessDpiAware`
 which sets DPI awareness only for the main process.
 
-The `ApplicationSettings`.[auto_zooming](../api/ApplicationSettings.md#auto_zooming)
+The `ApplicationSettings.auto_zooming`
 option has a default value of an empty string now. Previously the
 default was "system_dpi". When enabling High DPI support you should
 set it to "system_dpi" explicitilly.
 
-Note that `DpiAware`.[CalculateWindowSize](../api/DpiAware.md#calculatewindowsize)
+Note that `DpiAware.CalculateWindowSize`
 does not handle all DPI settings (e.g. 132% on Windows 10).
-In newer CEF Python there is available `DpiAware`[Scale](../api/DpiAware.md#scale)
+In newer CEF Python there is available `DpiAware.Scale`
 which is more reliable and can handle all DPI resolutions. You can copy see
 its implementation in `src/dpi_aware_win.pyx`.
 
@@ -380,7 +380,7 @@ The `cef.DpiAware.SetProcessDpiAware` function is deprecated. Embed a DPI
 awareness manifest in both the main executable and the subprocess executable
 instead.
 
-The ApplicationSettings.[auto_zooming](../api/ApplicationSettings.md#auto_zooming)
+The `ApplicationSettings.auto_zooming`
 option should have its value set to an empty string (a default now)
 for High DPI support. In previous versions the default value was
 "system_dpi" and if you have set it explicitilly in your application,
@@ -530,6 +530,7 @@ most important application-facing changes are:
 | `PaintBuffer.GetString(mode, origin)` | Removed; it was deprecated. Use `PaintBuffer.GetBytes(mode, origin)`, which takes the same arguments. |
 | `cef.GetCommandLineSwitch(key)` | Removed from the documentation. It was never implemented, so calling it raised `AttributeError` in v66 too. |
 | `WindowUtils.gtk_plug_new()` and `gtk_widget_show()` (Linux) | Removed; CEF Python no longer links GTK. |
+| `DpiAware` class (Windows) | Removed. Delete calls to `EnableHighDpiSupport()` and `SetProcessDpiAware()`: `cef.Initialize()` sets Per-Monitor V2 DPI awareness unless it was already set. A GUI toolkit initialized earlier may size its UI for 96 DPI; then declare DPI awareness in a manifest or call `cef.Initialize()` first. For `GetSystemDpi()`, `Scale()` and `CalculateWindowSize()`, use your toolkit's DPI API or Win32 `GetDpiForWindow()`; for `IsProcessDpiAware()`, use [WindowUtils.IsProcessDpiAware()](../api/WindowUtils.md#isprocessdpiaware-win). |
 | `WebPluginInfo` and the legacy plugin APIs | Removed along with Chromium's legacy plugin support. |
 
 The following application and browser settings were removed or changed.
@@ -539,6 +540,7 @@ Passing a removed setting raises an "Invalid appSettings key" or
 | v66 setting | Type | v147 replacement or status |
 | --- | --- | --- |
 | `accept_language_list` | Application and browser | Removed; not yet exposed by CEF Python for CEF 147. |
+| `auto_zooming` | Application | Removed. Chromium already scales pages for the display DPI. For a fixed zoom level, call [Browser.SetZoomLevel()](../api/Browser.md#setzoomlevel), for example from [LoadHandler.OnLoadingStateChange](../api/LoadHandler.md#onloadingstatechange). |
 | `ignore_certificate_errors` | Application | Removed. |
 | `net_security_expiration_enabled` | Application | Removed upstream. |
 | `pack_loading_disabled` | Application | Removed with no replacement; pack loading can no longer be disabled. |

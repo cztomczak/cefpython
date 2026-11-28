@@ -2,10 +2,10 @@
 # This example has a top menu and a browser widget without navigation bar.
 
 # Tested configurations:
-# - wxPython 4.0 on Windows/Mac/Linux
-# - wxPython 3.0 on Windows/Mac
-# - wxPython 2.8 on Linux
-# - CEF Python v66.0+
+# - wxPython 4.3.2 on Windows (cefpython v147, Python 3.14)
+# - wxPython 4.3.2 on Linux (cefpython v147, Python 3.14)
+#
+# On Windows wxPython 4.1+ is required (wx.Window.FromDIP).
 
 import wx
 from cefpython3 import cefpython as cef
@@ -81,8 +81,9 @@ def scale_window_size_for_high_dpi(width, height):
     if not WINDOWS:
         return width, height
     (_, _, max_width, max_height) = wx.GetClientDisplayRect().Get()
-    # noinspection PyUnresolvedReferences
-    (width, height) = cef.DpiAware.Scale((width, height))
+    # cef.Initialize() made the process DPI aware, so convert the size
+    # from DPI-independent pixels to physical pixels.
+    (width, height) = wx.Window.FromDIP(wx.Size(width, height), None).Get()
     if width > max_width:
         width = max_width
     if height > max_height:
@@ -165,10 +166,6 @@ class MainFrame(wx.Frame):
         global g_count_windows
         g_count_windows += 1
 
-        if WINDOWS:
-            # noinspection PyUnresolvedReferences, PyArgumentList
-            print("[wxpython.py] System DPI settings: %s"
-                  % str(cef.DpiAware.GetSystemDpi()))
         if hasattr(wx, "GetDisplayPPI"):
             print("[wxpython.py] wx.GetDisplayPPI = %s" % wx.GetDisplayPPI())
         print("[wxpython.py] wx.GetDisplaySize = %s" % wx.GetDisplaySize())

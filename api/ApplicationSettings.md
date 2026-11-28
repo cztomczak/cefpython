@@ -8,7 +8,6 @@ Table of contents:
 * [Introduction](#introduction)
 * [Settings](#settings)
   * [app_user_model_id](#app_user_model_id)
-  * [auto_zooming](#auto_zooming)
   * [background_color](#background_color)
   * [browser_subprocess_path](#browser_subprocess_path)
   * [cache_path](#cache_path)
@@ -61,29 +60,6 @@ pinning app to Taskbar. More details can be found in [Issue #395](https://github
 
 Internally this setting will append "--app-user-model-id" switch to
 all processes.
-
-
-### auto_zooming
-
-(string)
-Windows only. Perform automatic zooming of browser contents. Example
-values for auto_zooming (numeric value means a zoom level):
-
-  * "" - default is empty string
-  * "0.0" (96 DPI)
-  * "1.0" (120 DPI)
-  * "2.0" (144 DPI)
-  * "-1.0" (72 DPI)
-  * "system_dpi" - Deprecated. Use system DPI settings. This value is
-    deprecated, as it is no more required to set auto_zooming to this
-    value after High DPI support was enabled.
-
-Example values that can be set in Win7 DPI settings (Control Panel Appearance and Personalization Display):
-
-  * Smaller 100% (Default) = 96 DPI = 0.0 zoom level
-  * Medium 125% = 120 DPI = 1.0 zoom level
-  * Larger 150% = 144 DPI = 2.0 zoom level
-  * Custom 75% = 72 DPI = -1.0 zoom level
 
 
 ### background_color

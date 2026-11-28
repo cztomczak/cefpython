@@ -21,7 +21,6 @@
  * [Callback](Callback.md#callback-object) object
  * [Cookie](Cookie.md#cookie-class) class
  * [CookieManager](CookieManager.md#cookiemanager-class) class
- * [DpiAware](DpiAware.md#dpiaware-class) class (Win)
  * [DragData](DragData.md#dragdata-object) object
  * [Frame](Frame.md#frame-object) object
  * [Image](Image.md#image-object) object

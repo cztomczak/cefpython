@@ -3,9 +3,6 @@
 // Project website: https://github.com/cztomczak/cefpython
 
 #include "lifespan_handler.h"
-#if defined(OS_WIN)
-#include "dpi_aware.h"
-#endif
 #include "include/base/cef_logging.h"
 
 
@@ -36,15 +33,6 @@ bool LifespanHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
 void LifespanHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 {
     REQUIRE_UI_THREAD();
-    #if defined(OS_WIN)
-    // High DPI support.
-    CefString auto_zooming = ApplicationSettings_GetString("auto_zooming");
-    if (!auto_zooming.empty()) {
-        LOG(INFO) << "OnAfterCreated(): auto_zooming = "
-                  << auto_zooming.ToString();
-        SetBrowserDpiSettings(browser, auto_zooming);
-    }
-    #endif // OS_WIN
     LifespanHandler_OnAfterCreated(browser);
 }
 

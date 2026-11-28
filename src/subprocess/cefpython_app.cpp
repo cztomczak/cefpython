@@ -14,12 +14,6 @@
 #pragma comment(lib, "Shell32.lib")
 #endif  // OS_WIN
 
-#ifdef BROWSER_PROCESS
-#ifdef OS_WIN
-#include "client_handler/dpi_aware.h"
-#endif  // OS_WIN
-#endif  // BROWSER_PROCESS
-
 #include "cefpython_app.h"
 #include "util.h"
 #include "include/wrapper/cef_closure_task.h"
@@ -125,13 +119,6 @@ void CefPythonApp::OnBeforeChildProcessLaunch(
 #ifdef BROWSER_PROCESS
     // This is included only in the Browser process, when building
     // the libcefpythonapp library.
-#if defined(OS_WINDOWS)
-    if (IsProcessDpiAware()) {
-        // It is required to set DPI awareness in subprocesses
-        // as well, see Issue #358.
-        command_line->AppendSwitch("enable-high-dpi-support");
-    }
-#endif // OS_WINDOWS
     BrowserProcessHandler_OnBeforeChildProcessLaunch(command_line);
 #endif // BROWSER_PROCESS
 

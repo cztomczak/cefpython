@@ -279,6 +279,10 @@ X11 or XWayland. In a Wayland session set the environment variable
 `GDK_BACKEND="x11"` (GTK, wxPython) or `QT_QPA_PLATFORM="xcb"` (Qt) before
 the toolkit opens its display, see [WindowInfo](WindowInfo.md#setaschild).SetAsChild().
 
+On Windows, Initialize() sets the process to Per-Monitor V2 DPI awareness
+unless its DPI awareness was already set, see
+[High DPI support on Windows](../docs/Knowledge-Base.md#high-dpi-support-on-windows).
+
 
 ### IsThread
 
